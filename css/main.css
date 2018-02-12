@@ -226,10 +226,12 @@ img.bordered {
 img.image-left {
 	float: left;
 	margin-right: 10px;
+	margin-bottom: 10px;
 }
 img.image-right {
 	float: right;
 	margin-left: 10px;
+	margin-bottom: 10px;
 }
 .caption {
 	font-size: 18px;
@@ -655,7 +657,6 @@ ul.square-bullets {
 	padding-left: 0;
 }
 .main-navigation li {
-	float: left;
 	position: relative;
 	margin-bottom: 0;
 }
@@ -781,7 +782,8 @@ button.menu-toggle {
 		display: none;
 	}
 	.main-navigation ul {
-		display: block;
+		display: flex;
+		flex-wrap: wrap;
 	}
 
 }
@@ -936,41 +938,37 @@ button.menu-toggle {
 .footer {
 	max-width: 1100px;
 	margin: 0 auto;
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
 }
 .footer a {
 	color: white !important;
 }
 .footer-left {
 	width: 66%;
-	float: left;
+	display: flex;
+	flex-wrap: wrap;
 }
 .footer-right {
 	width: 34%;
-	float: left;
 }
-.footer-logos {
-	margin-right: 20px;
-	float: left;
-	width: 310px;
+.footer-left .col1 {
+	margin-right: 10px;
 }
-.footer-logos img {
+.footer-left .col2 {
+	margin-right: 10px;
+}
+.footer-left .col1 img {
 	display: block;
-	margin-bottom: 18px;
-}
-.footer-left img {
-	display: block;
-	float: left;
-	padding: 10px;
-	background: white;
-	margin-right: 20px;
-}
-.footer-left p {
-	float: left;
-	overflow: hidden;
+	margin-bottom: 20px;
 }
 .copyright {
-	clear: both;
 	font-size: 14px;
+	margin-top: 10px;
+}
+.copyright a {
+	color: #ffffff;
 }
 .footer-right form {
 	padding-top: 20px;
@@ -998,6 +996,75 @@ button.menu-toggle {
 .full-width-btn {
 	width: 100%;
 	text-align: center;
+}
+
+
+@media screen and (max-width: 800px) {
+	.home-box {
+		flex: 0 1 calc(50% - 15px);
+	}
+}
+@media screen and (max-width: 700px) {
+	.home-box {
+		flex: 0 1 calc(50% - 15px);
+	}
+	.welcome-wrapper .col1, .welcome-wrapper .col2 {
+		width: 100%;
+		padding: 0;
+	}
+	.whois-wrapper .col1, .whois-wrapper .col2 {
+		width: 100%;
+		padding-right: 0;
+		padding-left: 0;
+	}
+	.garden-wrapper {
+		display: block;
+	}
+	.garden-wrapper .col1 {
+		background: url("../images/layout/garden-with-natives-bg.jpg") no-repeat;
+		background-size: cover;
+		height: 200px;
+	}
+	.news-wrapper .inner-content {
+		display: block;
+	}
+	.news-wrapper .col1, .news-wrapper .col2 {
+		width: 100%;
+		padding: 0;
+	}
+	.books-wrapper .col-wrapper {
+		display: block;
+	}
+	.books-wrapper .our-books {
+		width: 100%;
+		padding-right: 0px;
+		border-right: none;
+	}
+	.books-wrapper .our-app {
+		 width: 100%;
+		 padding-left: 0;
+	 }
+	.our-app div {
+		clear: both;
+		overflow: visible;
+	}
+	.footer-left {
+		width: 100%;
+	}
+	.footer-right {
+		width: 100%;
+	}
+}
+
+
+@media screen and (max-width: 500px) {
+	.image-left, .image-right {
+		margin: 0;
+		width: 100%;
+	}
+	.home-box {
+		flex: 0 1 100%;
+	}
 }
 
 
