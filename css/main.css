@@ -579,19 +579,27 @@ ul.square-bullets {
 	padding: 20px 20px 0 20px;
 	text-align: right;
 }
-.search-wrapper form {
+.search-wrapper #quicksearch {
+	background: url("../images/layout/quicksearch-bg.jpg") top right no-repeat;
+	background-size: cover;
+	padding: 10px;
 	display: inline-block;
 }
-#quicksearch input {
+.search-wrapper #quicksearch input {
 	border: 1px solid #531D94;
 	width: 200px;
 	padding: 5px;
 }
-#quicksearch button {
+.search-wrapper #quicksearch button {
 	border: none;
-	background: #A711B0;
-	padding: 7px 9px;
+	background: #3C641E;
+	padding: 6px 8px;
 	color: white;
+	border: 1px solid white;
+}
+.search-wrapper #quicksearchtext {
+	text-align: left;
+	color: #ffffff;
 }
 
 /*--------------------------------------------------------------

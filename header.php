@@ -38,9 +38,9 @@
 		        <?php
 		        //---------------------------QUICK SEARCH SETTINGS---------------------------------------
 		        //Title text that will appear.
-		        $searchText = '';
+		        $searchText = 'Plant Taxon Search';
 		        //Placeholder text that will appear.
-		        $placeholderText = 'Search Taxonomy';
+		        $placeholderText = "Enter plant's taxon name";
 
 		        //Text that will appear on search button.
 		        $buttonText = '<i class="fa fa-search"></i>';
@@ -65,7 +65,7 @@
                             <li><a href="#">Plant Inventories</a></li>
                         </ul>
                     </li>
-                    <li class="menu-item-has-children"><a href="#">Sitemap</a>
+                    <li class="menu-item-has-children"><a href="#">Resources</a>
                         <ul>
                             <li><a href="#">Links</a></li>
                             <li><a href="#">Newsletter</a></li>
