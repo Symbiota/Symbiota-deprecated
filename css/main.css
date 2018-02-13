@@ -649,6 +649,7 @@ ul.square-bullets {
 }
 /* main menu */
 .main-navigation {
+	margin-top: -40px;
 }
 .main-navigation.at-top {
 	width: 100%;
@@ -1016,7 +1017,12 @@ button.menu-toggle {
 	width: 100%;
 	text-align: center;
 }
-
+@media screen and (max-width: 880px) {
+	.main-navigation {
+		margin-top: -20px;
+		clear: both;
+	}
+}
 
 @media screen and (max-width: 800px) {
 	.home-box {
