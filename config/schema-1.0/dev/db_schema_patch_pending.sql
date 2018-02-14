@@ -17,6 +17,9 @@ ALTER TABLE `omoccurrences`
 
 ALTER TABLE `users` ADD COLUMN `middleinitial` varchar(2) AFTER `firstname`;
 
+ALTER TABLE `kmcharacters`
+  ADD COLUMN `display` varchar(45) AFTER `notes`;
+
 REPLACE omoccurrencesfulltext(occid,locality,recordedby) 
   SELECT occid, CONCAT_WS("; ", municipality, locality), recordedby
   FROM omoccurrences;

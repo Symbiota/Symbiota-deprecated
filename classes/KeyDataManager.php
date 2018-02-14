@@ -1,11 +1,11 @@
 <?php
 include_once($SERVER_ROOT.'/config/dbconnection.php');
+include_once($SERVER_ROOT.'/classes/Manager.php');
 
-class KeyDataManager {
+class KeyDataManager extends Manager{
 
-	private $sql;
-	private $relevanceValue;		//Percent (as a decimal) of Taxa that must be coded for a CID to be displayed
-	private $keyCon;
+	private $sql = "";
+	private $relevanceValue = .9;		//Percent (as a decimal) of Taxa that must be coded for a CID to be displayed
 	private $taxonFilter;
 	private $uid;
 	private $clid;
@@ -21,15 +21,13 @@ class KeyDataManager {
 	private $pid;
 	private $dynClid;
 	
-	function __construct() {
-		$this->relevanceValue = .9;
-		$this->keyCon = MySQLiConnectionFactory::getCon("readonly");
-		$this->sql = "";
-	}
+	function __construct(){
+        parent::__construct(null,'readonly');
+    }
 
-	public function __destruct(){
-		if(!($this->keyCon === false)) $this->keyCon->close();
-	}
+    function __destruct(){
+        parent::__destruct();
+    }
 
 	public function setProject($projValue){
 		if(is_numeric($projValue)){
@@ -37,7 +35,7 @@ class KeyDataManager {
 		}
 		else{
 			$sql = "SELECT p.pid FROM fmprojects p WHERE (p.projname = '".$projValue."')";
-			$result = $this->keyCon->query($sql);
+			$result = $this->conn->query($sql);
 			if($row = $result->fetch_object()){
 				$this->pid = $row->pid;
 			}
@@ -74,7 +72,7 @@ class KeyDataManager {
 		}
 		$sql .= 'AND (ts.taxauthid = 1)';
 		//echo $sql.'<br/>'; exit;
-		$result = $this->keyCon->query($sql);
+		$result = $this->conn->query($sql);
 		while($row = $result->fetch_object()){
 			$genus = $row->UnitName1;
 			$family = $row->Family;
@@ -99,7 +97,7 @@ class KeyDataManager {
 		if($this->dynClid){
 			$sql = 'SELECT d.name, d.details, d.type '.
 				'FROM fmdynamicchecklists d WHERE (dynclid = '.$this->dynClid.')';
-			$result = $this->keyCon->query($sql);
+			$result = $this->conn->query($sql);
 			if($row = $result->fetch_object()){
 				$this->clName = $row->name;
 				$this->clType = $row->type;
@@ -115,7 +113,7 @@ class KeyDataManager {
 				$sql = "SELECT cl.CLID, cl.Name, cl.Authors, cl.Type, cl.dynamicsql ".
 					"FROM fmchecklists cl WHERE (cl.Name = '".$clv."') OR (cl.Title = '".$clv."')";
 			}
-			$result = $this->keyCon->query($sql);
+			$result = $this->conn->query($sql);
 			if($row = $result->fetch_object()){
 				$this->clid = $row->CLID;
 				$this->clName = $row->Name;
@@ -139,10 +137,12 @@ class KeyDataManager {
 	public function setAttrs($attrs){
 		if(is_array($attrs)){
 			foreach($attrs as $attr){
-				$fragments = explode("-",$attr);
-				$cid = $fragments[0];
-				$cs = $fragments[1];
-				$this->charArr[$cid][] = $cs;
+				if(strpos($attr,'-') !== false) {
+                    $fragments = explode("-",$attr);
+                    $cid = $fragments[0];
+                    $cs = $fragments[1];
+                    $this->charArr[$cid][] = $cs;
+                }
 			}
 		}
 	}
@@ -207,7 +207,7 @@ class KeyDataManager {
 			$sqlRev = "SELECT tc.CID, Count(tc.TID) AS c FROM ".
 				"(SELECT DISTINCT tList.TID, d.CID FROM ($this->sql) AS tList INNER JOIN kmdescr d ON tList.TID = d.TID WHERE (d.CS <> '-')) AS tc ".
 				"GROUP BY tc.CID HAVING ((Count(tc.TID)) > $countMin)";
-			$rs = $this->keyCon->query($sqlRev);
+			$rs = $this->conn->query($sqlRev);
 			//echo $sqlRev.'<br/>';
 			while($row = $rs->fetch_object()){
 				$charList[] = $row->CID;
@@ -226,60 +226,84 @@ class KeyDataManager {
 				"GROUP BY cs.CID, cs.CS, cs.CharStateName, charnames.CharName, charnames.Heading, charnames.URL, characters.DifficultyRank, charnames.Language, characters.Type ".
 				"HAVING (((cs.CID) In (".implode(",",$charList).")) AND ((cs.CS)<>'-') AND ((characters.Type)='UM' Or (characters.Type)='OM') AND characters.DifficultyRank < 3) ".
 				"ORDER BY charnames.Heading, characters.SortSequence, cs.SortSequence";*/
-			$sqlChar = "SELECT DISTINCT cs.CID, cs.CS, cs.CharStateName, cs.Description AS csdescr, chars.CharName, 
-				chars.description AS chardescr, chars.hid, chead.headingname, chars.helpurl, Count(cs.CS) AS Ct, chars.DifficultyRank, 
-				chars.defaultlang FROM (((($this->sql) AS tList INNER JOIN kmdescr d ON tList.TID = d.TID) 
-				INNER JOIN kmcs cs ON (d.CS = cs.CS)	AND (d.CID = cs.CID)) INNER JOIN kmcharacters chars ON chars.cid = cs.CID) 
-				INNER JOIN kmcharheading chead ON chars.hid = chead.hid 
-				GROUP BY chead.language, cs.CID, cs.CS, cs.CharStateName, chars.CharName, chead.headingname, chars.helpurl, 
-				chars.DifficultyRank, chars.defaultlang, chars.chartype HAVING (chead.language = 'English' AND ((cs.CID) In (".implode(",",$charList).")) AND ((cs.CS)<>'-') AND 
-				((chars.chartype)='UM' Or (chars.chartype)='OM') AND chars.DifficultyRank < 3) 
-				ORDER BY chead.hid,	chars.SortSequence, cs.SortSequence ";
+			$sqlChar = "SELECT DISTINCT cs.CID, cs.CS, cs.CharStateName, cs.Description AS csdescr, chars.CharName,".
+				"chars.description AS chardescr, chars.hid, chead.headingname, chars.helpurl, Count(cs.CS) AS Ct, chars.DifficultyRank,".
+				(Manager::checkFieldExists('kmcharacters','display')?'chars.display, ':'')."chars.defaultlang ".
+                "FROM ((((".$this->sql.") AS tList INNER JOIN kmdescr d ON tList.TID = d.TID)".
+				"INNER JOIN kmcs cs ON (d.CS = cs.CS)	AND (d.CID = cs.CID)) INNER JOIN kmcharacters chars ON chars.cid = cs.CID) ".
+				"INNER JOIN kmcharheading chead ON chars.hid = chead.hid ".
+				"GROUP BY chead.language, cs.CID, cs.CS, cs.CharStateName, chars.CharName, chead.headingname, chars.helpurl, ".
+				"chars.DifficultyRank, chars.defaultlang, chars.chartype HAVING (chead.language = 'English' AND ((cs.CID) In (".implode(",",$charList).")) AND ((cs.CS)<>'-') AND ".
+				"((chars.chartype)='UM' Or (chars.chartype)='OM') AND chars.DifficultyRank < 3) ".
+				"ORDER BY chead.hid,	chars.SortSequence, cs.SortSequence ";
 			//echo $sqlChar.'<br/>';
-			$result = $this->keyCon->query($sqlChar);
+			$result = $this->conn->query($sqlChar);
 	
 			//Process recordset
 			$langList = Array();
 			$headingArray = Array();
 			$statesArray = Array();
 			if(!$result) return null;
+            $currentCID = '';
 			while($row = $result->fetch_object()){
 				$ct = $row->Ct;			//count of how many times the CS was used in this species list
 				$charCID = $row->CID;
 				if($ct < $this->taxaCount || array_key_exists($charCID,$this->charArr)){		//add to return if stateUseCount is less than taxaCount (ie: state is useless if all taxa code true) or is an attribute selected by user
-					$language = $row->defaultlang;
-					if(!in_array($language, $langList)) $langList[] = $language;
-					$headingName = $row->headingname;
-					$headingID = $row->hid;
-					$charName = $row->CharName;
-					$charDescr = $row->chardescr;
-					if($charDescr) $charName = "<span class='charHeading' title='".$charDescr."'>".$charName."</span>";
-					$url = $row->helpurl;
-					if($url) $charName .= " <a href='$url' border='0' target='_blank'><img src='../images/info.png' width='12' border='0'></a>";
-					$cs = $row->CS;
-					$charStateName = $row->CharStateName;
-					$csDescr = $row->csdescr;
-					if($csDescr) $charStateName = "<span class='characterStateName' title='".$csDescr."'>".$charStateName."</span>";
-					$diffRank = false;
-					if($row->DifficultyRank && $row->DifficultyRank > 1 && !array_key_exists($charCID,$this->charArr)) $diffRank = true;
-	
-					//Set HeadingName within the $charArray, if not yet set
-					$headingArray[$headingID]["HeadingNames"][$language] = $headingName;
-	
-					//Set CharName within the $stateArray, if not yet set
-					if(!array_key_exists($headingID, $headingArray) || !array_key_exists($charCID, $headingArray[$headingID]) || !array_key_exists("CharNames", $headingArray[$headingID][$charCID]) || !array_key_exists($language, $headingArray[$headingID][$charCID]["CharNames"])){
-						$headingArray[$headingID][$charCID]["CharNames"][$language] = "<div class='dynam'".($diffRank?" style='display:none;' ":" style='display:;'")."><span class='dynamlang' lang='".$language."'".
-							($language==$this->lang?" style='display:;'":" style='display:none;'").">&nbsp;&nbsp;".$charName."</span></div>";
-					}
-	
-					$checked = "";
-					if($this->charArr && array_key_exists($charCID,$this->charArr) && in_array($cs,$this->charArr[$charCID])) $checked = "checked";
-					if(!array_key_exists($headingID,$headingArray) || !array_key_exists($charCID,$headingArray[$headingID]) || !array_key_exists($cs,$headingArray[$headingID][$charCID]) || !$headingArray[$headingID][$charCID][$cs]["ROOT"]){
-						$headingArray[$headingID][$charCID][$cs]["ROOT"] = "<div class='dynamopt'".//($diffRank?" style='display:none;' class='dynam'":" style='display:;'").
-							">&nbsp;&nbsp;<input type='checkbox' name='attr[]' id='cb".$charCID."-".$cs."' value='".$charCID."-".$cs."' $checked onclick='javascript: document.keyform.submit();'>";
-					}
-	
-					$headingArray[$headingID][$charCID][$cs][$language] = $charStateName;
+                    $language = $row->defaultlang;
+                    $display = 'checkbox';
+                    if($row->display) $display = $row->display;
+                    if(!in_array($language, $langList)) $langList[] = $language;
+                    $headingName = $row->headingname;
+                    $headingID = $row->hid;
+                    $charName = $row->CharName;
+                    $charDescr = $row->chardescr;
+                    if($charDescr) $charName = "<span class='charHeading' title='".$charDescr."'>".$charName."</span>";
+                    $url = $row->helpurl;
+                    if($url) $charName .= " <a href='$url' border='0' target='_blank'><img src='../images/info.png' width='12' border='0'></a>";
+                    $cs = $row->CS;
+                    $charStateName = $row->CharStateName;
+                    $csDescr = $row->csdescr;
+                    if($csDescr) $charStateName = "<span class='characterStateName' title='".$csDescr."'>".$charStateName."</span>";
+                    $diffRank = false;
+                    if($row->DifficultyRank && $row->DifficultyRank > 1 && !array_key_exists($charCID,$this->charArr)) $diffRank = true;
+
+                    //Set HeadingName within the $charArray, if not yet set
+                    $headingArray[$headingID]["HeadingNames"][$language] = $headingName;
+
+                    //Set CharName within the $stateArray, if not yet set
+                    if(!array_key_exists($headingID, $headingArray) || !array_key_exists($charCID, $headingArray[$headingID]) || !array_key_exists("CharNames", $headingArray[$headingID][$charCID]) || !array_key_exists($language, $headingArray[$headingID][$charCID]["CharNames"])){
+                        $headingArray[$headingID][$charCID]["display"] = $display;
+                        $headingArray[$headingID][$charCID]["CharNames"][$language] = "<div class='dynam'".($diffRank?" style='display:none;' ":" ")."><span class='dynamlang' lang='".$language."'".
+                            ($language==$this->lang?" ":" style='display:none;'").">&nbsp;&nbsp;".$charName."</span></div>";
+                    }
+
+                    if($display == 'checkbox'){
+                        $checked = "";
+                        if($this->charArr && array_key_exists($charCID,$this->charArr) && in_array($cs,$this->charArr[$charCID])) $checked = "checked";
+                        if(!array_key_exists($headingID,$headingArray) || !array_key_exists($charCID,$headingArray[$headingID]) || !array_key_exists($cs,$headingArray[$headingID][$charCID]) || !$headingArray[$headingID][$charCID][$cs]["ROOT"]){
+                            $headingArray[$headingID][$charCID][$cs]["ROOT"] = "<div class='dynamopt'".//($diffRank?" style='display:none;' class='dynam'":" style='display:;'").
+                                ">&nbsp;&nbsp;<input type='checkbox' name='attr[]' id='cb".$charCID."-".$cs."' value='".$charCID."-".$cs."' $checked onclick='javascript: document.keyform.submit();'>";
+                        }
+                    }
+                    elseif($display == 'slider'){
+                        if(!$currentCID || ($currentCID && ($currentCID != $charCID))){
+                            $csArr = array();
+                            $csArr[0]['name'] = 'Any';
+                            $csArr[0]['id'] = 0;
+                            $csNumValue = 1;
+                            $currentCID = $charCID;
+                        }
+                        $selected = '';
+                        if($this->charArr && array_key_exists($charCID,$this->charArr)) $selected = $this->charArr[$charCID];
+                        $headingArray[$headingID][$charCID]["selected"] = $selected;
+                        $csArr[$csNumValue]['name'] = $charStateName;
+                        $csArr[$csNumValue]['id'] = $cs;
+                        $headingArray[$headingID][$charCID]["csarr"] = $csArr;
+                        $headingArray[$headingID][$charCID]["language"] = $language;
+                        $csNumValue++;
+                    }
+
+                    $headingArray[$headingID][$charCID][$cs][$language] = $charStateName;
 				}
 			}
 			$result->free();
@@ -295,7 +319,7 @@ class KeyDataManager {
 						if($displayHeading){
 							$returnArray[] = "<div class='headingname' id='headingname".$HID."' style='font-weight:bold;margin-top:1em;font-size:125%;'>\n";
 							foreach($headNameArray as $langValue => $headValue){
-								$returnArray[] .= "<span lang='".$langValue."' style='".($langValue==$this->lang?"display:;":"display:none;")."'>$headValue</span>\n";
+								$returnArray[] .= "<span lang='".$langValue."' style='".($langValue==$this->lang?"":"display:none;")."'>$headValue</span>\n";
 							}
 							$returnArray[] = "</div>\n";
 							$returnArray[] = "<div class='heading' id='heading".$HID."' style=''>";
@@ -303,22 +327,76 @@ class KeyDataManager {
 						}
 						$displayHeading = false;
 		//				ksort($csArray);
+                        $displayType = $csArray["display"];
+                        unset($csArray["display"]);
 						$chars = $csArray["CharNames"];
 						unset($csArray["CharNames"]);
-						$returnArray[] = "<div id='char".$charCID."'>";
+						$returnArray[] = "<div id='char".$cid."'>";
 						foreach($chars as $names){
 							$returnArray[] = $names;
 						}
-						foreach($csArray as $csKey => $stateNames){
-							if(array_key_exists("ROOT",$stateNames)) $returnArray[] = $stateNames["ROOT"];
-							unset($stateNames["ROOT"]);
-							foreach($stateNames as $csLang => $csValue){
-								$returnArray[] = "<span lang='".$csLang."' ".
-									($csLang==$this->lang?" style='display:;'":" style='display:none;'").">$csValue</span>";
-							}
-							$returnArray[] = "</div>";
-						}
-						$returnArray[] = "</div>";
+						if($displayType == 'checkbox'){
+                            foreach($csArray as $csKey => $stateNames){
+                                if(array_key_exists("ROOT",$stateNames)) $returnArray[] = $stateNames["ROOT"];
+                                unset($stateNames["ROOT"]);
+                                foreach($stateNames as $csLang => $csValue){
+                                    $returnArray[] = "<span lang='".$csLang."' ".
+                                        ($csLang==$this->lang?"":" style='display:none;'").">$csValue</span>";
+                                }
+                                $returnArray[] = "</div>";
+                            }
+                            $returnArray[] = "</div>";
+                        }
+                        elseif($displayType == 'slider'){
+                            if(array_key_exists("csarr",$csArray)){
+                                $sliderArr = $csArray["csarr"];
+                                unset($csArray["csarr"]);
+                                if($csArray["selected"]){
+                                    foreach($sliderArr as $k => $selCS){
+                                        if($csArray["selected"][0] == $selCS['id']){
+                                            $cSelected = $k;
+                                        }
+                                    }
+                                }
+                                else{
+                                    $cSelected = 0;
+                                }
+                                unset($csArray["selected"]);
+                                $cLanguage = $csArray["language"];
+                                unset($csArray["language"]);
+
+                                if($cLanguage==$this->lang){
+                                    $sliderMax = count($sliderArr) - 1;
+                                    $returnArray[] = '<script type="text/javascript">';
+                                    $returnArray[] = "var sliderValues".$cid." = JSON.parse('".json_encode($sliderArr)."');";
+                                    $returnArray[] = '$( function() {';
+                                    $returnArray[] = '$( "#slider'.$cid.'" ).slider({';
+                                    $returnArray[] = 'value: '.$cSelected.',';
+                                    $returnArray[] = 'min: 0,';
+                                    $returnArray[] = 'max: '.$sliderMax.',';
+                                    $returnArray[] = 'step: 1,';
+                                    $returnArray[] = 'slide: function( event, ui ) {';
+                                    $returnArray[] = '$( "#csdispvalue'.$cid.'" ).html( sliderValues'.$cid.'[ui.value]["name"] );';
+                                    $returnArray[] = 'if(ui.value > 0){$( "#cshidvalue'.$cid.'" ).val( "'.$cid.'-"+sliderValues'.$cid.'[ui.value]["id"] );}';
+                                    $returnArray[] = 'else{$( "#cshidvalue'.$cid.'" ).val( "" );}';
+                                    $returnArray[] = '},';
+                                    $returnArray[] = 'stop: function( event, ui ) {';
+                                    $returnArray[] = 'document.keyform.submit();';
+                                    $returnArray[] = '}';
+                                    $returnArray[] = '});';
+                                    $returnArray[] = '$( "#csdispvalue'.$cid.'" ).html( sliderValues'.$cid.'[$( "#slider'.$cid.'" ).slider( "value" )]["name"] );';
+                                    $returnArray[] = 'if($( "#slider'.$cid.'" ).slider( "value" ) > 0){$( "#cshidvalue'.$cid.'" ).val( "'.$cid.'-"+sliderValues'.$cid.'[$( "#slider'.$cid.'" ).slider( "value" )]["id"] );}';
+                                    $returnArray[] = '} );';
+                                    $returnArray[] = '</script>';
+                                    $returnArray[] = '<div id="slider'.$cid.'"></div>';
+                                    $returnArray[] = '<div class="dynam">';
+                                    $returnArray[] = '<div id="csdispvalue'.$cid.'"></div>';
+                                    $returnArray[] = '<input type="hidden" name="attr[]" id="cshidvalue'.$cid.'" readonly style="border:0; font-weight:bold;">';
+                                    $returnArray[] = '</div>';
+                                }
+                                $returnArray[] = "</div>";
+                            }
+                        }
 					}
 				}
 				if($endStr) $returnArray[] = $endStr;
@@ -340,7 +418,7 @@ class KeyDataManager {
 			$sqlTaxa = $this->sql;
 		}
 		//echo $sqlTaxa.'<br/>';
-		$result = $this->keyCon->query($sqlTaxa);
+		$result = $this->conn->query($sqlTaxa);
  		$returnArray = array();
  		$sppArr = array();
  		$count = 0;

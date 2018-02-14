@@ -14,8 +14,8 @@ $isEditor = 0;
 
 $clArray = $clManager->getMetaData();
 $defaultArr = array();
-if(isset($clArray["defaultSettings"]) && $clArray["defaultSettings"]){
-	$defaultArr = json_decode($clArray["defaultSettings"], true);
+if(isset($clArray["defaultsettings"]) && $clArray["defaultsettings"]){
+	$defaultArr = json_decode($clArray["defaultsettings"], true);
 }
 ?>
 <script type="text/javascript">
@@ -65,25 +65,17 @@ if(isset($clArray["defaultSettings"]) && $clArray["defaultSettings"]){
 		return true;
 	}
 
-	function deletePolygon(){
-		document.getElementById("footprintWKT").value = "";
-		document.getElementById("polyDefDiv").style.display = "none";
-		document.getElementById("polySaveDiv").style.display = "block";
-		document.getElementById("delpolygon").style.display = "none";
-	}
-
 	function openMappingAid() {
-		mapWindow=open("../tools/mappointaid.php?formname=editclmatadata&latname=latcentroid&longname=longcentroid","mapaid","resizable=0,width=800,height=700,left=20,top=20");
+		mapWindow=open("<?php echo $CLIENT_ROOT; ?>/checklists/tools/mappointaid.php?clid=<?php echo $clid; ?>&formname=editclmatadata&latname=latcentroid&longname=longcentroid","mapaid","resizable=0,width=800,height=700,left=20,top=20");
 	    if(mapWindow.opener == null) mapWindow.opener = self;
 	}
 
 	function openMappingPolyAid() {
 		var latDec = document.getElementById("latdec").value;
 		var lngDec = document.getElementById("lngdec").value;
-		mapWindow=open("../tools/mappolyaid.php?formname=editclmatadata&latname=latcentroid&longname=longcentroid&latdef="+latDec+"&lngdef="+lngDec,"mapaid","resizable=0,width=850,height=700,left=20,top=20");
+		mapWindow=open("<?php echo $CLIENT_ROOT; ?>/checklists/tools/mappolyaid.php?clid=<?php echo $clid; ?>&formname=editclmatadata&latname=latcentroid&longname=longcentroid&latdef="+latDec+"&lngdef="+lngDec,"mapaid","resizable=0,width=850,height=700,left=20,top=20");
 	    if(mapWindow.opener == null) mapWindow.opener = self;
 	}
-
 </script>
 <?php
 if(!$clid){
@@ -170,28 +162,13 @@ if(!$clid){
 						<div style="float:right;margin:10px;">
 							<a href="#" onclick="openMappingPolyAid();return false;" title="Create/Edit Polygon"><img src="../images/world.png" style="width:14px;" /></a>
 						</div>
-						<?php
-						if($clArray&&$clArray["footprintWKT"]){
-							?>
-							<div id="delpolygon" style="float:right;margin:10px;">
-								<button onclick="deletePolygon();return false;" title="Delete Polygon"><img src="../images/del.png" style="width:14px;" /></button>
-							</div>
-							<div id="polyDefDiv" style="display:block;">
-								<?php echo isset($LANG['POLYGON_DEFINED'])?$LANG['POLYGON_DEFINED']:'Polygon footprint defined<br/>Click globe to view/edit'; ?>
-							</div>
-						<?php
-						}
-						else{
-							?>
-							<div id="polyNotDefDiv" style="display:block;">
-								<?php echo isset($LANG['POLYGON_NOT_DEFINED'])?$LANG['POLYGON_NOT_DEFINED']:'Polygon footprint not defined<br/>Click globe to create polygon';?>
-							</div>
-						<?php
-						}
-						?>
-						<div id="polySaveDiv" style="display:none;">
-							<?php echo isset($LANG['POLYGON_READY'])?$LANG['POLYGON_READY']:'Polygon changed or deleted<br/>and ready to be saved'; ?>
+						<div id="polyDefDiv" style="display:<?php echo ($clArray && $clArray["hasfootprintwkt"]?'block':'none'); ?>;">
+							<?php echo isset($LANG['POLYGON_DEFINED'])?$LANG['POLYGON_DEFINED']:'Polygon footprint defined<br/>Click globe to view/edit'; ?>
 						</div>
+						<div id="polyNotDefDiv" style="display:<?php echo ($clArray && $clArray["hasfootprintwkt"]?'none':'block'); ?>;">
+							<?php echo isset($LANG['POLYGON_NOT_DEFINED'])?$LANG['POLYGON_NOT_DEFINED']:'Polygon footprint not defined<br/>Click globe to create polygon';?>
+						</div>
+						<input type="hidden" id="footprintwkt" name="footprintwkt" value="" />
 					</fieldset>
 				</div>
 			</div>
@@ -265,7 +242,6 @@ if(!$clid){
 				}
 				?>
 			</div>
-			<input type="hidden" id="footprintWKT" name="footprintWKT" value='<?php echo ($clArray?$clArray["footprintWKT"]:''); ?>' />
 			<input type="hidden" name="tabindex" value="1" />
 			<input type='hidden' name='clid' value='<?php echo $clid; ?>' />
 			<input type="hidden" name="pid" value="<?php echo $pid; ?>" />
