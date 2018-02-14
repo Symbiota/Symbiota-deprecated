@@ -50,6 +50,21 @@ class Manager  {
 		}
 	}
 
+    public function checkFieldExists($table, $field){
+        $exists = false;
+        $this->__construct(null,'readonly');
+
+        $sql = 'SELECT COLUMN_NAME '.
+            'FROM information_schema.COLUMNS '.
+            'WHERE TABLE_NAME = "'.$table.'" AND COLUMN_NAME = "'.$field.'" ';
+        //echo "<div>SQL: ".$sql."</div>";
+        $result = $this->conn->query($sql);
+        while($r = $result->fetch_object()){
+            if($r->COLUMN_NAME) $exists = true;
+        }
+        return $exists;
+    }
+
 	public function setVerboseMode($c){
 		$this->verboseMode = $c;
 	}

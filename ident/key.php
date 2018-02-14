@@ -50,13 +50,17 @@ if($chars){
 <html>
 <head>
 	<title><?php echo $DEFAULT_TITLE; ?><?php echo $LANG['WEBKEY'];?>
-        <?php echo preg_replace('/\<[^\>]+\>/','',$dataManager->getClName()); ?></title>
-	<link href="../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
-	<link href="../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
+        <?php echo preg_replace('/\<[^\>]+\>/','',$dataManager->getClName()); ?>
+    </title>
+    <link href="<?php echo $CLIENT_ROOT; ?>/css/jquery-ui.css" type="text/css" rel="stylesheet" />
+	<link href="<?php echo $CLIENT_ROOT; ?>/css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+	<link href="<?php echo $CLIENT_ROOT; ?>/css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 	<script type="text/javascript">
 		<?php include_once($SERVER_ROOT.'/config/googleanalytics.php'); ?>
 	</script>
-	<script type="text/javascript" src="../js/symb/ident.key.js"></script>
+    <script src="<?php echo $CLIENT_ROOT; ?>/js/jquery.js" type="text/javascript"></script>
+    <script src="<?php echo $CLIENT_ROOT; ?>/js/jquery-ui.js" type="text/javascript"></script>
+    <script src="<?php echo $CLIENT_ROOT; ?>/js/symb/ident.key.js" type="text/javascript"></script>
 </head>
 <body>
 	<?php 
