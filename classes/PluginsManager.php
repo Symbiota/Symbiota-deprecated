@@ -315,7 +315,7 @@ class PluginsManager {
 		return $html;
 	}
 
-	public function createQuickSearch($buttonText,$searchText=''){
+	public function createQuickSearch($buttonText,$searchText='',$placeholderText=''){
 		global $CLIENT_ROOT;
 		$html = '';
 		$html .= '<link href="'.$CLIENT_ROOT.'/css/jquery-ui.css" type="text/css" rel="Stylesheet" />';
@@ -392,7 +392,7 @@ class PluginsManager {
 		if($searchText){
 			$html .= '<div id="quicksearchtext" ><b>'.$searchText.'</b></div>';
 		}
-		$html .= '<input type="text" name="taxon" id="quicksearchtaxon" title="Enter taxon name here." />';
+		$html .= '<input type="text" name="taxon" placeholder="'.$placeholderText.'" id="quicksearchtaxon" title="Enter taxon name here." />';
 		$html .= '<button name="formsubmit"  id="quicksearchbutton" type="submit" value="Search Terms">'.$buttonText.'</button>';
 		$html .= '</form>';
 
