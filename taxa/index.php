@@ -256,7 +256,7 @@ if($taxonManager->getSciName() != "unknown"){
 				if($taxonRank > 140){
 					$parentLink = "index.php?tid=".$taxonManager->getParentTid()."&clid=".$clid."&pid=".$pid."&taxauthid=".$taxAuthId;
 					$displayName .= ' <a href="'.$parentLink.'">';
-					$displayName .= '<img border="0" height="10px" src="../images/toparent.png" title="'.(isset($LANG['GO_TO_PARENT'])?$LANG['GO_TO_PARENT']:'Go to Parent').'" />';
+					$displayName .= '<img border="0" height="10px" src="../images/toparent.png" title="'.(isset($LANG['GO_TO_PARENT'])?$LANG['GO_TO_PARENT']:'Go to Parent Taxon').'" />';
 					$displayName .= '</a>';
 				}
 				echo "<div style='font-size:16px;margin-top:15px;margin-left:10px;font-weight:bold;'>$displayName</div>\n";
@@ -298,10 +298,10 @@ if($taxonManager->getSciName() != "unknown"){
 						$legendStr = '';
 						if($clid){
 							if($checklistName = $taxonManager->getClName($clid)){
-								$legendStr .= (isset($LANG['SPECIES_CHECKLIST'])?$LANG['SPECIES_CHECKLIST']:'Species within checklist').' <b>'.$checklistName.'</b>';
+								$legendStr .= (isset($LANG['SPECIES_CHECKLIST'])?$LANG['SPECIES_CHECKLIST']:'Species within checklist').': <b>'.$checklistName.'</b>';
 							}
 							if($parentChecklistArr = $taxonManager->getParentChecklist($clid)){
-								$titleStr = (isset($LANG['GO_TO'])?$LANG['GO_TO']:'Include species within checklist').': '.current($parentChecklistArr);
+								$titleStr = (isset($LANG['GO_TO_PARENT_CHECKLIST'])?$LANG['GO_TO_PARENT_CHECKLIST']:'Include species within checklist').': '.current($parentChecklistArr);
 								$legendStr .= ' <a href="index.php?tid='.$tid.'&clid='.key($parentChecklistArr).'&pid='.$pid.'&taxauthid='.$taxAuthId.'" title="'.$titleStr.'">';
 								$legendStr .= '<img style="border:0px;width:10px;" src="../images/toparent.png"/>';
 								$legendStr .= '</a>';

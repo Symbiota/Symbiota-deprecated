@@ -81,7 +81,7 @@ class DwcArchiverCore extends Manager{
 		$this->applyConditions();
 		if(!$this->occurrenceFieldArr) $this->occurrenceFieldArr = DwcArchiverOccurrence::getOccurrenceArr($this->schemaType, $this->extended);
 		$sql = DwcArchiverOccurrence::getSqlOccurrences($this->occurrenceFieldArr['fields'],$this->conditionSql,$this->getTableJoins(),false);
-		if($this->schemaType != 'backup') $sql .= ' LIMIT 1000000';
+		//if($this->schemaType != 'backup') $sql .= ' LIMIT 1000000';
 		if($sql){
 			$sql = 'SELECT COUNT(o.occid) as cnt '.$sql;
 			//echo $sql; exit;
