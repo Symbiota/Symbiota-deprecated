@@ -179,7 +179,7 @@ class OccurrenceIndividualManager extends Manager{
 					if($tnUrl && substr($tnUrl,0,1)=="/") $tnUrl = $imageDomain.$tnUrl;
 				}
 				if((!$url || $url == 'empty') && $lgUrl) $url = $lgUrl;
-				if(!$tnUrl && $url) $tnUrl = $url;
+				//if(!$tnUrl && $url) $tnUrl = $url;
 				$this->occArr['imgs'][$imgId]['url'] = $url;
 				$this->occArr['imgs'][$imgId]['tnurl'] = $tnUrl;
 				$this->occArr['imgs'][$imgId]['lgurl'] = $lgUrl;
