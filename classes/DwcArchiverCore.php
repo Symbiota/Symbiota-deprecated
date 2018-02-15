@@ -50,7 +50,7 @@ class DwcArchiverCore extends Manager{
 		}
 		$this->ts = time();
 		if($this->verboseMode){
-			$logFile = $GLOBALS['SERVER_ROOT'].(substr($GLOBALS['SERVER_ROOT'],-1)=='/'?'':'/')."temp/logs/DWCA_".date('Y-m-d').".log";
+			$logFile = $GLOBALS['SERVER_ROOT'].(substr($GLOBALS['SERVER_ROOT'],-1)=='/'?'':'/')."content/logs/DWCA_".date('Y-m-d').".log";
 			$this->setLogFH($logPath);
 		}
 

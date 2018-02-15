@@ -448,7 +448,7 @@ class SpecUpload{
 				//Create log File
 				$logPath = $GLOBALS['SERVER_ROOT'];
 				if(substr($logPath,-1) != '/') $logPath .= '/';
-				$logPath .= 'temp/logs/';
+				$logPath .= 'content/logs/';
 				if($logTitle){
 					$logPath .= $logTitle;
 				}

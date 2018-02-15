@@ -22,7 +22,7 @@ class SpecProcNlpHandler {
 
 	function __construct() {
 		$this->conn = MySQLiConnectionFactory::getCon("write");
-		$this->outFilePath = $GLOBALS['serverRoot'].(substr($GLOBALS['serverRoot'],-1)=='/'?'':'/')."temp/logs/LbccParser_".date('Y-m-d_his');
+		$this->outFilePath = $GLOBALS['serverRoot'].(substr($GLOBALS['serverRoot'],-1)=='/'?'':'/')."content/logs/LbccParser_".date('Y-m-d_his');
 		set_time_limit(7200);
 	}
 
@@ -198,7 +198,7 @@ class SpecProcNlpHandler {
 		}
 		$this->totalStats['collmeta']['totalcnt'] = $totalCnt;
 	}
-	
+
 	private function getRawOcr($prlid){
 		$retArr = array();
 		//Get raw OCR string
@@ -217,7 +217,7 @@ class SpecProcNlpHandler {
 		$rs->free();
 		return $retArr;
 	}
-	
+
 	public function convertDwcArrToJson($dwcArr){
 		//Convert to UTF-8, json_encode call requires UTF-8
 		foreach($dwcArr as $k => $v){

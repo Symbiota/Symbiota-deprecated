@@ -23,7 +23,7 @@ class TaxonomyCleaner extends Manager{
 	}
 
 	public function initiateLog(){
-		$logFile = '../../temp/logs/taxonomyVerification_'.date('Y-m-d').'.log';
+		$logFile = '../../content/logs/taxonomyVerification_'.date('Y-m-d').'.log';
 		$this->setLogFH($logFile);
 		$this->logOrEcho("Taxa Verification process starts (".date('Y-m-d h:i:s A').")");
 		$this->logOrEcho("-----------------------------------------------------\n");
