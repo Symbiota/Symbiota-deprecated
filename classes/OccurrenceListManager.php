@@ -34,6 +34,8 @@ class OccurrenceListManager extends OccurrenceManager{
 			'o.habitat, o.minimumelevationinmeters, o.maximumelevationinmeters, o.observeruid, c.sortseq '.
 			'FROM omoccurrences o LEFT JOIN omcollections c ON o.collid = c.collid ';
 		$sql .= $this->getTableJoins($sqlWhere).$sqlWhere;
+		//Don't allow someone to query all occurrences
+		if(!$sqlWhere) $sql .= 'WHERE occid IS NULL ';
 
 		if($this->sortArr){
 			$sql .= 'ORDER BY ';

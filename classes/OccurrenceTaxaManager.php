@@ -297,7 +297,7 @@ class OccurrenceTaxaManager {
 	}
 
 	protected function cleanInputStr($str){
-		$newStr = strip_tags($str);
+		$newStr = strip_tags(trim($str));
 		return $newStr;
 	}
 

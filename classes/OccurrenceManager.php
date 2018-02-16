@@ -588,7 +588,7 @@ class OccurrenceManager extends OccurrenceTaxaManager {
 			}
 		}
 		if(array_key_exists("elevlow",$_REQUEST)){
-			$elevLow = filter_var($_REQUEST["elevlow"], FILTER_SANITIZE_NUMBER_INT);
+			$elevLow = filter_var(trim($_REQUEST["elevlow"]), FILTER_SANITIZE_NUMBER_INT);
 			if(is_numeric($elevLow)){
 				$this->searchTermArr["elevlow"] = $elevLow;
 			}
@@ -597,7 +597,7 @@ class OccurrenceManager extends OccurrenceTaxaManager {
 			}
 		}
 		if(array_key_exists("elevhigh",$_REQUEST)){
-			$elevHigh = filter_var($_REQUEST["elevhigh"], FILTER_SANITIZE_NUMBER_INT);
+			$elevHigh = filter_var(trim($_REQUEST["elevhigh"]), FILTER_SANITIZE_NUMBER_INT);
 			if(is_numeric($elevHigh)){
 				$this->searchTermArr["elevhigh"] = $elevHigh;
 			}
@@ -682,25 +682,25 @@ class OccurrenceManager extends OccurrenceTaxaManager {
 		$llPattern = '-?\d+\.{0,1}\d*';
 		if(array_key_exists("upperlat",$_REQUEST)){
 			$upperLat = ''; $bottomlat = ''; $leftLong = ''; $rightlong = '';
-			if(preg_match('/('.$llPattern.')/', $_REQUEST["upperlat"], $m1)){
+			if(preg_match('/('.$llPattern.')/', trim($_REQUEST["upperlat"]), $m1)){
 				$upperLat = round($m1[1],5);
 				$uLatDir = (isset($_REQUEST['upperlat_NS'])?strtoupper($_REQUEST['upperlat_NS']):'');
 				if(($uLatDir == 'N' && $upperLat < 0) || ($uLatDir == 'S' && $upperLat > 0)) $upperLat *= -1;
 			}
 
-			if(preg_match('/('.$llPattern.')/', $_REQUEST["bottomlat"], $m2)){
+			if(preg_match('/('.$llPattern.')/', trim($_REQUEST["bottomlat"]), $m2)){
 				$bottomlat = round($m2[1],5);
 				$bLatDir = (isset($_REQUEST['bottomlat_NS'])?strtoupper($_REQUEST['bottomlat_NS']):'');
 				if(($bLatDir == 'N' && $bottomlat < 0) || ($bLatDir == 'S' && $bottomlat > 0)) $bottomlat *= -1;
 			}
 
-			if(preg_match('/('.$llPattern.')/', $_REQUEST['leftlong'], $m3)){
+			if(preg_match('/('.$llPattern.')/', trim($_REQUEST['leftlong']), $m3)){
 				$leftLong = round($m3[1],5);
 				$lLngDir = (isset($_REQUEST['leftlong_EW'])?strtoupper($_REQUEST['leftlong_EW']):'');
 				if(($lLngDir == 'E' && $leftLong < 0) || ($lLngDir == 'W' && $leftLong > 0)) $leftLong *= -1;
 			}
 
-			if(preg_match('/('.$llPattern.')/', $_REQUEST['rightlong'], $m4)){
+			if(preg_match('/('.$llPattern.')/', trim($_REQUEST['rightlong']), $m4)){
 				$rightlong = round($m4[1],5);
 				$rLngDir = (isset($_REQUEST['rightlong_EW'])?strtoupper($_REQUEST['rightlong_EW']):'');
 				if(($rLngDir == 'E' && $rightlong < 0) || ($rLngDir == 'W' && $rightlong > 0)) $rightlong *= -1;
@@ -719,14 +719,14 @@ class OccurrenceManager extends OccurrenceTaxaManager {
 		}
 		if(array_key_exists("pointlat",$_REQUEST)){
 			$pointLat = ''; $pointLong = ''; $radius = '';
-			if(preg_match('/('.$llPattern.')/', $_REQUEST['pointlat'], $m1)){
+			if(preg_match('/('.$llPattern.')/', trim($_REQUEST['pointlat']), $m1)){
 				$pointLat = $m1[1];
 				if(isset($_REQUEST['pointlat_NS'])){
 					if($_REQUEST['pointlat_NS'] == 'S' && $pointLat > 0) $pointLat *= -1;
 					elseif($_REQUEST['pointlat_NS'] == 'N' && $pointLat < 0) $pointLat *= -1;
 				}
 			}
-			if(preg_match('/('.$llPattern.')/', $_REQUEST['pointlong'], $m2)){
+			if(preg_match('/('.$llPattern.')/', trim($_REQUEST['pointlong']), $m2)){
 				$pointLong = $m2[1];
 				if(isset($_REQUEST['pointlong_EW'])){
 					if($_REQUEST['pointlong_EW'] == 'W' && $pointLong > 0) $pointLong *= -1;
