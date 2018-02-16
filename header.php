@@ -57,10 +57,10 @@
                 <ul class="nav-menu">
                     <li class="menu-item-has-children"><a href="#">Explore Our Site</a>
                         <ul>
-                            <li><a href="#">Mapping</a></li>
-                            <li><a href="#">Interactive Key</a></li>
-                            <li><a href="#">Image Search</a></li>
-                            <li><a href="#">OSU Herbarium</a></li>
+                            <li><a href="<?php echo $clientRoot; ?>/spatial/index.php" target="_blank">Mapping</a></li>
+                            <li><a href="<?php echo $clientRoot; ?>/checklists/dynamicmap.php?interface=key">Interactive Key</a></li>
+                            <li><a href="<?php echo $clientRoot; ?>/imagelib/search.php">Image Search</a></li>
+                            <li><a href="<?php echo $clientRoot; ?>/collections/index.php">OSU Herbarium</a></li>
                             <li><a href="#">Garden with Natives</a></li>
                             <li><a href="#">Plant Inventories</a></li>
                         </ul>

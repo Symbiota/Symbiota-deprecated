@@ -32,14 +32,14 @@ $(document).ready(function () {
 </script>
 <div class="inner-content">
     <div class="home-boxes">
-        <a href="#" class="home-box mapping-box">
+        <a href="<?php echo $clientRoot; ?>/spatial/index.php" class="home-box mapping-box" target="_blank">
             <img src="images/layout/mapping-box.jpg" alt="Mapping">
             <h3>Mapping</h3>
             <div class="box-overlay">
                 <div class="centered">Mapping box overlay content here</div>
             </div>
         </a>
-        <a href="#" class="home-box key-box">
+        <a href="<?php echo $clientRoot; ?>/checklists/dynamicmap.php?interface=key" class="home-box key-box">
             <img src="images/layout/interactive-key-box.jpg" alt="Interactive Key">
             <h3>Interactive Key</h3>
             <div class="box-overlay">
@@ -53,7 +53,7 @@ $(document).ready(function () {
                 <div class="centered">Plant Inventories box overlay content here</div>
             </div>
         </a>
-        <a href="#" class="home-box herbarium-box">
+        <a href="<?php echo $clientRoot; ?>/collections/index.php" class="home-box herbarium-box">
             <img src="images/layout/herbarium-box.jpg" alt="OSU Herbarium">
             <h3>OSU Herbarium</h3>
             <div class="box-overlay">
@@ -67,7 +67,7 @@ $(document).ready(function () {
                 <div class="centered">Garden with Natives box overlay content here</div>
             </div>
         </a>
-        <a href="#" class="home-box image-box">
+        <a href="<?php echo $clientRoot; ?>/imagelib/search.php" class="home-box image-box">
             <img src="images/layout/image-search-box.jpg" alt="Image Search">
             <h3>Image Search</h3>
             <div class="box-overlay">
