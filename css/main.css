@@ -10,13 +10,11 @@ html {
 }
 body{
 	margin : 0;
-	margin-left : 0;
-	margin-right : 0;
 	width : auto;
 	background-color : transparent;
 	color : black;
 	font-size: 16px;
-	font-family: 'Source Sans Pro';
+	font-family: 'Source Sans Pro', sans-serif;
 }
 article, aside, details, figcaption, figure, footer, header, main, menu, nav, section, summary {
 	display: block;
@@ -270,7 +268,7 @@ img.image-right {
 ul.square-bullets {
 	padding: 0 10px 0 40px;
 	overflow:hidden;
-	margin-left: 0px;
+	margin-left: 0;
 }
 .square-bullets li {
 	list-style: none;
@@ -279,7 +277,7 @@ ul.square-bullets {
 .square-bullets li::before {
 	color: #74B147;
 	content: "\f04d";
-	font-family: FontAwesome;
+	font-family: FontAwesome, sans-serif;
 	float: left;
 	font-size: 14px;
 	margin: 5px -20px;
@@ -556,7 +554,7 @@ ul.square-bullets {
 }
 .content-wrapper:before{
 	content: ' ';
-	box-shadow: inset 0px 40px 40px -40px rgba(0,0,0,0.9);
+	box-shadow: inset 0 40px 40px -40px rgba(0,0,0,0.9);
 	position: absolute;
 	z-index: 10;
 	height: 40px;
@@ -591,7 +589,6 @@ ul.square-bullets {
 	padding: 5px;
 }
 .search-wrapper #quicksearch button {
-	border: none;
 	background: #3C641E;
 	padding: 6px 8px;
 	color: white;
@@ -705,14 +702,14 @@ ul.square-bullets {
 }
 .main-navigation ul ul a {
 	padding: 5px 20px;
-	margin: 0px;
+	margin: 0;
 	color: white;
 	font-size: 14px;
 }
 .main-navigation ul ul ul a {
 	width: 250px;
 	padding: 5px 20px;
-	margin: 0px;
+	margin: 0;
 	font-size: 14px;
 }
 .main-navigation ul ul li:last-child a {
@@ -757,7 +754,6 @@ ul.square-bullets {
 }
 button.menu-toggle {
 	background: #A711B0;
-	margin-left: 10px;
 	border: 1px solid white;
 	color: white;
 	margin: 10px;
@@ -770,7 +766,7 @@ button.menu-toggle {
 	content: "\f0d7";
 	color: #A711B0;
 	font-size: 14px;
-	font-family: FontAwesome;
+	font-family: FontAwesome, sans-serif;
 	font-style: normal;
 	font-weight: normal;
 	text-decoration: inherit;
@@ -781,7 +777,7 @@ button.menu-toggle {
 }
 .main-navigation ul.sub-menu li.menu-item-has-children:before {
 	content: "\f0da";
-	font-family: FontAwesome;
+	font-family: FontAwesome, sans-serif;
 	font-style: normal;
 	font-weight: normal;
 	text-decoration: inherit;
@@ -829,7 +825,7 @@ button.menu-toggle {
 		top: 20px;
 		left: 8px;
 	}
-	navigation ul :hover > a, .main-navigation ul ul .focus > a {
+	.main-navigation ul :hover > a, .main-navigation ul ul .focus > a {
 	}
 	.main-navigation a {
 	}
@@ -1046,7 +1042,7 @@ button.menu-toggle {
 		display: block;
 	}
 	.garden-wrapper .col1 {
-		background: url("../images/layout/garden-with-natives-bg.jpg") no-repeat;
+		background: url("/images/layout/garden-with-natives-bg.jpg") no-repeat;
 		background-size: cover;
 		height: 200px;
 	}
@@ -1062,7 +1058,7 @@ button.menu-toggle {
 	}
 	.books-wrapper .our-books {
 		width: 100%;
-		padding-right: 0px;
+		padding-right: 0;
 		border-right: none;
 	}
 	.books-wrapper .our-app {
@@ -1090,7 +1086,15 @@ button.menu-toggle {
 	.home-box {
 		flex: 0 1 100%;
 	}
+	.header-logo {
+		height: 112px;
+	}
+	.header-logo img {
+		border: 2px solid white;
+	}
+	.search-wrapper {
+		padding: 20px 0 0 0;
+	}
 }
-
 
 
