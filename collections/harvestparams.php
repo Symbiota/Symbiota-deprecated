@@ -15,7 +15,7 @@ $searchVar = $collManager->getQueryTermStr();
 	<link href="../js/jquery-ui-1.12.1/jquery-ui.min.css?ver=3" type="text/css" rel="Stylesheet" />
 	<script src="../js/jquery-3.2.1.min.js?ver=3" type="text/javascript"></script>
 	<script src="../js/jquery-ui-1.12.1/jquery-ui.min.js?ver=3" type="text/javascript"></script>
-	<script src="../js/symb/collections.harvestparams.js?ver=3" type="text/javascript"></script>
+	<script src="../js/symb/collections.harvestparams.js?ver=4" type="text/javascript"></script>
 	<script type="text/javascript">
 		$(document).ready(function() {
 			<?php
