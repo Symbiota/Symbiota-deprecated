@@ -3,7 +3,7 @@
     <ul class="footer-nav">
         <li><a href="<?php echo $clientRoot; ?>/contact.php">Contact</a></li>
         <li><a href="<?php echo $clientRoot; ?>/disclaimer.php">Disclaimer</a></li>
-        <li><a href="<?php echo $clientRoot; ?>/portal/sitemap.php">Sitemap</a></li>
+        <li><a href="<?php echo $clientRoot; ?>/sitemap.php">Sitemap</a></li>
         <li><a href="<?php echo $clientRoot; ?>/site-feedback.php">Site Feedback</a></li>
     </ul>
 </div>

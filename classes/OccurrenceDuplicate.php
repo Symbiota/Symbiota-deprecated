@@ -9,7 +9,7 @@ class OccurrenceDuplicate {
 	private $relevantFields = array();
 
 	private $errorStr;
-	
+
 	public function __construct(){
 		$this->conn = MySQLiConnectionFactory::getCon("write");
 	}
@@ -18,7 +18,7 @@ class OccurrenceDuplicate {
 		if(!($this->conn === null)) $this->conn->close();
 	}
 
-	//Duplicate editing functions used occurrenceeditor.php  
+	//Duplicate editing functions used occurrenceeditor.php
 	public function getClusterArr($occid){
 		$retArr = array();
 		$sql1 = 'SELECT DISTINCT d.duplicateid, d.title, d.description, d.notes '.
@@ -47,10 +47,10 @@ class OccurrenceDuplicate {
 				'WHERE (d.duplicateid IN('.implode(',',array_keys($retArr)).'))';
 			if($rs = $this->conn->query($sql)){
 				while($r = $rs->fetch_object()){
-					$retArr[$r->duplicateid]['o'][$r->occid] = array('instcode' => $r->institutioncode, 'collcode' => $r->collectioncode, 
+					$retArr[$r->duplicateid]['o'][$r->occid] = array('instcode' => $r->institutioncode, 'collcode' => $r->collectioncode,
 					'collname' => $r->collectionname, 'catnum' => $r->catalognumber, 'occurrenceid' => $r->occurrenceid, 'sciname' => $r->sciname,
 					'identifiedby' => $r->identifiedby, 'dateidentified' => $r->dateidentified, 'recordedby' => $r->recordedby,
-					'recordnumber' => $r->recordnumber, 'eventdate' => $r->eventdate, 'notes' => $r->notes, 'tnurl' => $r->thumbnailurl, 
+					'recordnumber' => $r->recordnumber, 'eventdate' => $r->eventdate, 'notes' => $r->notes, 'tnurl' => $r->thumbnailurl,
 					'url' => $r->url);
 				}
 				$rs->free();
@@ -68,7 +68,7 @@ class OccurrenceDuplicate {
 		if($occid1 && $occidStr){
 			$targetDupID = 0;
 			//Look for an existing duplicate cluster id
-			$dupArr = array(); 
+			$dupArr = array();
 			$sql = 'SELECT occid, duplicateid FROM omoccurduplicatelink WHERE occid IN('.$occid1.','.$occidStr.')';
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
@@ -96,18 +96,18 @@ class OccurrenceDuplicate {
 			}
 			else{
 				$status = false;
-			}						
+			}
 		}
 		return $status;
 	}
-	
+
 	private function createCluster($occid,$title=''){
 		$retId = 0;
 		if(!$title){
 			//Create a duplicate cluster title
 			$sqlTitle = 'SELECT recordedby, recordnumber, eventdate '.
 				'FROM omoccurrences '.
-				'WHERE occid = '.$occid; 
+				'WHERE occid = '.$occid;
 			$rsTitle = $this->conn->query($sqlTitle);
 			while($r = $rsTitle->fetch_object()){
 				$title = $this->parseLastName($r->recordedby).' '.$r->recordnumber.' '.$r->eventdate;
@@ -160,8 +160,8 @@ class OccurrenceDuplicate {
 		}
 		return $status;
 	}
-	
-	public function deleteOccurFromCluster($dupId, $occid, $permissionsArr){
+
+	public function deleteOccurFromCluster($dupId, $occid){
 		$status = true;
 		//If duplicate cluster only consists of two occurrences, remove whole cluster
 		$rs = $this->conn->query('SELECT duplicateid FROM omoccurduplicatelink WHERE duplicateid = '.$dupId);
@@ -209,7 +209,7 @@ class OccurrenceDuplicate {
 				$retStr = 'exsic:'.implode(',',$occArr);
 			}
 		}
-		
+
 		//Check for exact dupes
 		if(!$retStr){
 			$occArr = $this->getDupesCollector($collName, $collNum, $currentOccid);
@@ -218,7 +218,7 @@ class OccurrenceDuplicate {
 				$retStr = 'exact:'.implode(',',$occArr);
 			}
 		}
-		
+
 		//Check for duplicate events
 		if(!$retStr){
 			$occArr = $this->getDupesCollectorEvent($collName, $collNum, $collDate, $currentOccid);
@@ -313,7 +313,7 @@ class OccurrenceDuplicate {
 					'WHERE (MATCH(f.recordedby) AGAINST("'.$lastName.'")) ';
 			}
 			$sql .= 'AND (o.processingstatus IS NULL OR o.processingstatus != "unprocessed" OR o.locality IS NOT NULL) AND (o.occid != '.$skipOccid.') ';
-				
+
 			$runQry = true;
 			if($collNum){
 				if(is_numeric($collNum)){
@@ -360,7 +360,7 @@ class OccurrenceDuplicate {
 				if($collDate) $sql .= 'AND (o.eventdate = "'.$collDate.'") ';
 			}
 			elseif($collDate){
-				$sql .= 'AND (o.eventdate = "'.$collDate.'") LIMIT 10'; 
+				$sql .= 'AND (o.eventdate = "'.$collDate.'") LIMIT 10';
 			}
 			else{
 				$runQry = false;
@@ -380,14 +380,14 @@ class OccurrenceDuplicate {
 	public function getDupesOccid($occidQuery){
 		$retArr = array();
 		if($occidQuery){
-			$targetFields = array('family', 'sciname', 'scientificNameAuthorship', 
-				'identifiedBy', 'dateIdentified', 'identificationReferences', 'identificationRemarks', 'taxonRemarks', 'identificationQualifier', 
+			$targetFields = array('family', 'sciname', 'scientificNameAuthorship',
+				'identifiedBy', 'dateIdentified', 'identificationReferences', 'identificationRemarks', 'taxonRemarks', 'identificationQualifier',
 				'recordedBy', 'recordNumber', 'associatedCollectors', 'eventDate', 'verbatimEventDate',
 				'country', 'stateProvince', 'county', 'locality', 'decimalLatitude', 'decimalLongitude', 'geodeticDatum',
-				'coordinateUncertaintyInMeters', 'verbatimCoordinates', 'georeferencedBy', 'georeferenceProtocol', 
-				'georeferenceSources', 'georeferenceVerificationStatus', 'georeferenceRemarks', 
+				'coordinateUncertaintyInMeters', 'verbatimCoordinates', 'georeferencedBy', 'georeferenceProtocol',
+				'georeferenceSources', 'georeferenceVerificationStatus', 'georeferenceRemarks',
 				'minimumElevationInMeters', 'maximumElevationInMeters', 'verbatimElevation',
-				'habitat', 'substrate', 'occurrenceRemarks', 'associatedTaxa', 'dynamicProperties', 
+				'habitat', 'substrate', 'occurrenceRemarks', 'associatedTaxa', 'dynamicProperties',
 				'verbatimAttributes','reproductiveCondition', 'cultivationStatus', 'establishmentMeans', 'typeStatus');
 			$relArr = array();
 			$sql = 'SELECT c.collectionName, c.institutionCode, c.collectionCode, o.occid, o.collid, o.tidinterpreted, '.
@@ -406,7 +406,7 @@ class OccurrenceDuplicate {
 				}
 			}
 			$result->free();
-			//Adjust sort of relevant fields according to 
+			//Adjust sort of relevant fields according to
 			foreach($targetFields as $tfVal){
 				if(array_key_exists($tfVal,$relArr)) $this->relevantFields[] = $tfVal;
 			}
@@ -460,8 +460,8 @@ class OccurrenceDuplicate {
 		}
 		return $retArr;
 	}
-	
-	//Used in getLocality.php to obtain autocomplete locality data  
+
+	//Used in getLocality.php to obtain autocomplete locality data
 	public function getDupeLocality($recordedBy, $collDate, $localFrag){
 		$retArr = array();
 		if($recordedBy && $collDate && $localFrag){
@@ -479,7 +479,7 @@ class OccurrenceDuplicate {
 				$sql .= 'INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid WHERE (MATCH(f.recordedby) AGAINST("'.$collStr.'")) ';
 			}
 			$sql .= 'AND (o.eventdate = "'.$this->cleanInStr($collDate).'") AND (o.locality LIKE "'.$this->cleanInStr($localFrag).'%") ';
-				
+
 			//echo $sql;
 			$rs = $this->conn->query($sql);
 			$cnt = 0;
@@ -499,29 +499,29 @@ class OccurrenceDuplicate {
 
 	//Ranking functions
 	private function addConsensusRecord($occArr){
-		
+
 		return $occArr;
 	}
 
 	private function rankGeneric($occArr){
 		//
-		
+
 		return $occArr;
 	}
 
 	private function rankOcr($occArr){
-		//Number of fields with match 
-		//recordNumber, verbatimEventDate, associatedCollectors, 
-		//stateProvince, county, locality, verbatimCoordinates, verbatimElevation, 
+		//Number of fields with match
+		//recordNumber, verbatimEventDate, associatedCollectors,
+		//stateProvince, county, locality, verbatimCoordinates, verbatimElevation,
 		//habitat, substrate, verbatimAttributes, occurrenceRemarks
-		
+
 		return $occArr;
 	}
 
-	//Smith-Waterman code... 
-	
-	
-	
+	//Smith-Waterman code...
+
+
+
 	//Action functions
 	public function mergeRecords($targetOccid,$sourceOccid){
 		$status = true;
@@ -536,7 +536,7 @@ class OccurrenceDuplicate {
 			$status = false;
 		}
 		return $status;
-	} 
+	}
 
 	//Batch functions
 	public function getDuplicateClusterList($collid, $dupeDepth, $start, $limit){
@@ -546,7 +546,7 @@ class OccurrenceDuplicate {
 			$sqlPrefix = 'SELECT DISTINCT d.duplicateid, d.title, d.description, d.notes ';
 			$sqlSuffix = '';
 			if($dupeDepth == 1){
-				//Any duplicate where the scinames are different (even they are synonyms) 
+				//Any duplicate where the scinames are different (even they are synonyms)
 				$sqlSuffix = 'FROM omoccurduplicates d INNER JOIN omoccurduplicatelink dl1 ON d.duplicateid = dl1.duplicateid '.
 					'INNER JOIN omoccurrences o ON dl1.occid = o.occid '.
 					'INNER JOIN omoccurduplicatelink dl2 ON d.duplicateid = dl2.duplicateid '.
@@ -554,7 +554,7 @@ class OccurrenceDuplicate {
 					'WHERE o.collid = '.$collid.($this->obsUid?' AND o.observeruid = '.$this->obsUid:'').' AND o.tidinterpreted <> o2.tidinterpreted ';
 			}
 			elseif($dupeDepth == 2){
-				//Any duplicate where the scinames are different and other record has info in dateIdentified field 
+				//Any duplicate where the scinames are different and other record has info in dateIdentified field
 				$sqlSuffix = 'FROM omoccurduplicates d INNER JOIN omoccurduplicatelink dl1 ON d.duplicateid = dl1.duplicateid '.
 					'INNER JOIN omoccurrences o ON dl1.occid = o.occid '.
 					'INNER JOIN omoccurduplicatelink dl2 ON d.duplicateid = dl2.duplicateid '.
@@ -563,7 +563,7 @@ class OccurrenceDuplicate {
 					'AND (o2.dateidentified IS NOT NULL OR o2.identifiedBy IS NOT NULL) ';
 			}
 			elseif($dupeDepth == 3){
-				//Any duplicate where the scinames are different, other record has info in dateIdentified field, and someone entered a record in the determination table 
+				//Any duplicate where the scinames are different, other record has info in dateIdentified field, and someone entered a record in the determination table
 				$sqlSuffix = 'FROM omoccurduplicates d INNER JOIN omoccurduplicatelink dl1 ON d.duplicateid = dl1.duplicateid '.
 					'INNER JOIN omoccurrences o ON dl1.occid = o.occid '.
 					'INNER JOIN omoccurduplicatelink dl2 ON d.duplicateid = dl2.duplicateid '.
@@ -587,7 +587,7 @@ class OccurrenceDuplicate {
 				$totalCnt = $rCnt->cnt;
 			}
 			$rsCnt->free();
-			
+
 			$sql = $sqlPrefix.$sqlSuffix.' ORDER BY o.recordedby,o.recordnumber LIMIT '.$start.','.$limit;
 			//echo 'sql: '.$sql; exit;
 			$rs = $this->conn->query($sql);
@@ -650,7 +650,7 @@ class OccurrenceDuplicate {
 				//Grab all recs with matching date
 				$sql2 = 'SELECT o.recordedby, o.recordnumber, o.occid, IFNULL(d.duplicateid,0) as dupid, o.collid, o.observeruid '.
 					'FROM omoccurrences o LEFT JOIN omoccurduplicatelink d ON o.occid = d.occid '.
-					'WHERE o.eventdate = "'.$r->eventdate.'" AND o.recordedby IS NOT NULL AND o.recordnumber IS NOT NULL '; 
+					'WHERE o.eventdate = "'.$r->eventdate.'" AND o.recordedby IS NOT NULL AND o.recordnumber IS NOT NULL ';
 				$rs2 = $this->conn->query($sql2);
 				$rArr = array();
 				$keepArr = array();
@@ -722,14 +722,14 @@ class OccurrenceDuplicate {
 								}
 								ob_flush();
 								flush();
-							}							
+							}
 						}
 						//Check to see if two duplicate projects exists; if so, they should maybe be merged
 						if(count($mArr) > 1){
 							if($verbose) echo '<li style="margin-left:10px;">Two matching duplicate projects located</li>';
 							ob_flush();
 							flush();
-							
+
 						}
 					}
 				}
