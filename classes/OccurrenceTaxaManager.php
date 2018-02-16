@@ -243,8 +243,11 @@ class OccurrenceTaxaManager {
 							if($rankid == 180) $sqlWhereTaxa .= "OR (o.sciname LIKE '".$this->cleanInStr($searchTaxon)."%') ";
 						}
 						else{
+							$term = $this->cleanInStr(trim($searchTaxon,'%'));
+							//Protect against someone trying to download big pieces of the occurrence table through the user interface
+							if(strlen($term) < 4) $term .= ' ';
 							//Return matches for "Pinus a"
-							$sqlWhereTaxa .= "OR (o.sciname LIKE '".$this->cleanInStr($searchTaxon)."%') ";
+							$sqlWhereTaxa .= "OR (o.sciname LIKE '".$term."%') ";
 						}
 					}
 					if(array_key_exists("synonyms",$searchArr)){

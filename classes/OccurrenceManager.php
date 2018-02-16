@@ -104,7 +104,9 @@ class OccurrenceManager extends OccurrenceTaxaManager {
 					$countyArr[$k] = 'County IS NULL';
 				}
 				else{
-					$tempArr[] = '(o.county LIKE "'.$this->cleanInStr(str_ireplace(' county',' ',$value)).'%")';
+					$term = $this->cleanInStr(trim(str_ireplace(' county',' ',$value),'%'));
+					if(strlen($term) < 4) $term .= ' ';
+					$tempArr[] = '(o.county LIKE "'.$term.'%")';
 				}
 			}
 			$sqlWhere .= 'AND ('.implode(' OR ',$tempArr).') ';
@@ -120,7 +122,7 @@ class OccurrenceManager extends OccurrenceTaxaManager {
 					$localArr[$k] = 'Locality IS NULL';
 				}
 				else{
-					if(strlen($value) < 4 || strtolower($value) == 'best'){
+					if(strtolower($value) == 'best'){
 						$tempArr[] = '(o.municipality LIKE "'.$this->cleanInStr($value).'%" OR o.Locality LIKE "%'.$this->cleanInStr($value).'%")';
 					}
 					else{
@@ -185,7 +187,7 @@ class OccurrenceManager extends OccurrenceTaxaManager {
 					$tempInnerArr = array();
 					$collValueArr = explode(" ",trim($collectorArr[0]));
 					foreach($collValueArr as $collV){
-						if(strlen($collV) < 4 || strtolower($collV) == 'best'){
+						if(strlen($collV) == 2 || strlen($collV) == 3 || strtolower($collV) == 'best'){
 							//Need to avoid FULLTEXT stopwords interfering with return
 							$tempInnerArr[] = '(o.recordedBy LIKE "%'.$this->cleanInStr($collV).'%")';
 						}
@@ -607,6 +609,7 @@ class OccurrenceManager extends OccurrenceTaxaManager {
 		}
 		if(array_key_exists("collector",$_REQUEST)){
 			$collector = $this->cleanInputStr($_REQUEST["collector"]);
+			$collector = str_replace('%', '', $collector);
 			if($collector){
 				$str = str_replace(",",";",$collector);
 				$this->searchTermArr["collector"] = $str;
