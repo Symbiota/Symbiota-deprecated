@@ -1101,25 +1101,45 @@ class ImageShared{
 	public function uriExists($uri) {
 		$exists = false;
 
-		//First test, won't download file body
-		if(function_exists('curl_init')){
-			// Version 4.x supported
-			$handle = curl_init($uri);
-			if(false === $handle){
-				$exists = false;
+		//And next try
+		if(substr($uri,0,1) == '/'){
+			if($GLOBALS['IMAGE_ROOT_URL'] && strpos($uri,$GLOBALS['IMAGE_ROOT_URL']) === 0){
+				$fileName = str_replace($GLOBALS['IMAGE_ROOT_URL'],$GLOBALS['IMAGE_ROOT_PATH'],$uri);
+				if(file_exists($fileName)) $exists = true;
 			}
-			curl_setopt($handle, CURLOPT_HEADER, true);
-			curl_setopt($handle, CURLOPT_NOBODY, true);
-			curl_setopt($handle, CURLOPT_FAILONERROR, true);
-			curl_setopt($handle, CURLOPT_FOLLOWLOCATION, true );
-			curl_setopt($handle, CURLOPT_SSL_VERIFYPEER, false);
-			//curl_setopt($handle, CURLOPT_USERAGENT, get_user_agent_string() );
-			curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
-			$exists = curl_exec($handle);
-			$retCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-			// $retcode >= 400 -> not found, $retcode = 200, found.
-			if($retCode < 400) $exists = true;
-			curl_close($handle);
+			if(isset($GLOBALS['imageDomain']) && $GLOBALS['imageDomain']){
+				$uri = $GLOBALS['imageDomain'].$uri;
+			}
+			else{
+				$urlPrefix = "http://";
+				if((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || $_SERVER['SERVER_PORT'] == 443) $urlPrefix = "https://";
+				$urlPrefix .= $_SERVER["SERVER_NAME"];
+				if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $urlPrefix .= ':'.$_SERVER["SERVER_PORT"];
+				$uri = $urlPrefix.$uri;
+			}
+		}
+
+		if(!$exists){
+			//First test, won't download file body
+			if(function_exists('curl_init')){
+				// Version 4.x supported
+				$handle = curl_init($uri);
+				if(false === $handle){
+					$exists = false;
+				}
+				curl_setopt($handle, CURLOPT_HEADER, true);
+				curl_setopt($handle, CURLOPT_NOBODY, true);
+				curl_setopt($handle, CURLOPT_FAILONERROR, true);
+				curl_setopt($handle, CURLOPT_FOLLOWLOCATION, true );
+				curl_setopt($handle, CURLOPT_SSL_VERIFYPEER, false);
+				//curl_setopt($handle, CURLOPT_USERAGENT, get_user_agent_string() );
+				curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
+				$exists = curl_exec($handle);
+				$retCode = curl_getinfo($handle, CURLINFO_HTTP_CODE);
+				// $retcode >= 400 -> not found, $retcode = 200, found.
+				if($retCode < 400) $exists = true;
+				curl_close($handle);
+			}
 		}
 
 		//Next try
@@ -1129,35 +1149,12 @@ class ImageShared{
 			}
 		}
 
-		//And next try
-		if(!$exists){
-			if(substr($uri,0,1) == '/'){
-				$secondaryUrl = '';
-				if(isset($GLOBALS['imageDomain']) && $GLOBALS['imageDomain']){
-					$secondaryUrl = $GLOBALS['imageDomain'].$uri;
-				}
-				elseif($GLOBALS['IMAGE_ROOT_URL'] && strpos($uri,$GLOBALS['IMAGE_ROOT_URL']) === 0){
-					$secondaryUrl = str_replace($GLOBALS['IMAGE_ROOT_URL'],$GLOBALS['IMAGE_ROOT_PATH'],$uri);
-				}
-				else{
-					$urlPrefix = "http://";
-					if((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || $_SERVER['SERVER_PORT'] == 443) $urlPrefix = "https://";
-					$urlPrefix .= $_SERVER["SERVER_NAME"];
-					if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $urlPrefix .= ':'.$_SERVER["SERVER_PORT"];
-					$secondaryUrl = $urlPrefix.$uri;
-				}
-				if($secondaryUrl && file_exists($secondaryUrl)){
-					return true;
-				}
-			}
-		}
-
 		//One last check
 		if(!$exists){
 			$exists = (@fclose(@fopen($uri,"r")));
 		}
 		//Test to see if file is an image
-		if(!@exif_imagetype($uri)) $exists = false;
+		//if(!@exif_imagetype($uri)) $exists = false;
 		return $exists;
 	}
 
