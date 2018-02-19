@@ -68,8 +68,19 @@ if(isset($_REQUEST['db'])){
                     (frm.locality.value == '') && (frm.upperlat.value == '') && (frm.pointlat.value == '') && (frm.catnum.value == '') &&
                     (frm.elevhigh.value == '') && (frm.eventdate2.value == '') && (frm.typestatus.checked == false) && (frm.hasimages.checked == false) && (frm.hasgenetic.checked == false) &&
                     (frm.collector.value == '') && (frm.collnum.value == '') && (frm.eventdate1.value == '') && (frm.elevlow.value == '')) {
-                    alert("Please fill in at least one search parameter!");
-                    return false;
+                    if(sessionStorage.jsoncollstarr){
+                        var jsonArr = JSON.parse(sessionStorage.jsoncollstarr);
+                        for(i in jsonArr){
+                            if(jsonArr[i] == 'all'){
+                                alert("Please fill in at least one search parameter!");
+                                return false;
+                            }
+                        }
+                    }
+                    else{
+                        alert("Please fill in at least one search parameter!");
+                        return false;
+                    }
                 }
                 <?php
             }
