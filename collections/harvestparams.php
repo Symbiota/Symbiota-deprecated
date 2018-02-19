@@ -316,7 +316,7 @@ if(isset($_REQUEST['db'])){
 			<div>
 				<input type='checkbox' name='hasimages' value='1' /> <?php echo $LANG['HAS_IMAGE']; ?>
 			</div>
-            <div>
+            <div id="searchGeneticCheckbox">
                 <input type='checkbox' name='hasgenetic' value='1' /> <?php echo $LANG['HAS_GENETIC']; ?>
             </div>
 			<input type="hidden" name="reset" value="1" />

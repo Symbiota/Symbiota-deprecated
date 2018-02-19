@@ -1555,7 +1555,7 @@ elseif($stArr || ($mapType && $mapType == 'occquery') || $clid){
                                 <div style="margin-top:5px;">
                                     <input data-role="none" type='checkbox' name='hasimages' value='1' <?php if(array_key_exists("hasimages",$previousCriteria) && $previousCriteria["hasimages"]) echo "CHECKED"; ?> > Limit to Specimens with Images Only
                                 </div>
-                                <div style="margin-top:5px;">
+                                <div id="searchGeneticCheckbox" style="margin-top:5px;">
                                     <input data-role="none" type='checkbox' name='hasgenetic' value='1' <?php if(array_key_exists("hasgenetic",$previousCriteria) && $previousCriteria["hasgenetic"]) echo "CHECKED"; ?> > Limit to Specimens with Genetic Data Only
                                 </div>
                                 <div><hr></div>
