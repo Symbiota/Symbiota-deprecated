@@ -1,7 +1,7 @@
 <?php
 /*
 ------------------
-Language: Español (Spanish)
+Language: Espanol (Spanish)
 ------------------
 */
 
@@ -47,6 +47,11 @@ $LANG['COLLECTION_TYPE'] = 'Tipo de Colecci&oacute;n';
 $LANG['MANAGEMENT'] = 'Administraci&oacute;n';
 $LANG['LAST_UPDATE'] = '&uacute;ltima Actualizaci&oacute;n';
 $LANG['GLOBAL_UNIQUE_ID'] = 'Identificador &uacute;nico Global';
+$LANG['DWCA_PUB'] = 'DwC-Archive Publishing';
+$LANG['LIVE_DOWNLOAD'] = 'Live Data Download';
+$LANG['FULL_DATA'] = 'DwC-Archive File';
+$LANG['IPT_SOURCE'] = 'IPT / DwC-A Source';
+$LANG['DIGITAL_METADATA'] = 'Digital Metadata';
 $LANG['USAGE_RIGHTS'] = 'Derechos de Uso';
 $LANG['RIGHTS_HOLDER'] = 'Propietario de Derechos';
 $LANG['ACCESS_RIGHTS'] = 'Derechos de Acceso';
