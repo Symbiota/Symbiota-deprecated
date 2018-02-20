@@ -50,6 +50,7 @@ $LANG['GLOBAL_UNIQUE_ID'] = 'Global Unique Identifier';
 $LANG['DWCA_PUB'] = 'DwC-Archive Publishing';
 $LANG['LIVE_DOWNLOAD'] = 'Live Data Download';
 $LANG['FULL_DATA'] = 'DwC-Archive File';
+$LANG['LOGIN_TO_ACCESS'] = 'Login for access';
 $LANG['IPT_SOURCE'] = 'IPT / DwC-A Source';
 $LANG['DIGITAL_METADATA'] = 'Digital Metadata';
 $LANG['USAGE_RIGHTS'] = 'Usage Rights';
