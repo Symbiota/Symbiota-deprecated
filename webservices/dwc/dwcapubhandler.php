@@ -45,7 +45,7 @@ $dwcaHandler->setIncludeDets($includeDets);
 $dwcaHandler->setIncludeImgs($includeImgs);
 $dwcaHandler->setIncludeAttributes($includeAttributes);
 
-$archiveFile = $dwcaHandler->createDwcArchive('webreq');
+$archiveFile = $dwcaHandler->createDwcArchive();
 if($archiveFile){
 	//ob_start();
 	header('Content-Description: DwC-A File Transfer');
