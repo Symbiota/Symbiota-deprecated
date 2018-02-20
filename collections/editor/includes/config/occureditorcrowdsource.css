@@ -460,7 +460,12 @@ body{
 }
 
 #verbatimAttributesDiv{
-	display:none;
+	float: left;
+	margin-top:2px;
+}
+
+#verbatimAttributesDiv input{
+	width: 550px;
 }
 
 #occurrenceRemarksDiv{
@@ -518,7 +523,8 @@ body{
 }
 
 #cultivationStatusDiv{
-	display:none;
+	float: left;
+	margin-top:2px;
 }
 
 #typeStatusDiv{
