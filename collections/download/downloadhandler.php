@@ -186,7 +186,7 @@ else{
 			$includeAttributes = (array_key_exists('attributes',$_POST)?1:0);
 			$dwcaHandler->setIncludeAttributes($includeAttributes);
 
-			$outputFile = $dwcaHandler->createDwcArchive('webreq');
+			$outputFile = $dwcaHandler->createDwcArchive();
 
 		}
 		else{
