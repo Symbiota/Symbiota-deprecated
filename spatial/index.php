@@ -1,11 +1,16 @@
 <?php
 include_once('../config/symbini.php');
+include_once($SERVER_ROOT.'/config/includes/searchVarDefault.php');
 include_once($SERVER_ROOT.'/classes/SpatialModuleManager.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 header('Cache-Control: no-cache, no-store, must-revalidate'); // HTTP 1.1.
 header('Pragma: no-cache'); // HTTP 1.0.
 header('Expires: 0'); // Proxies.
 ini_set('max_execution_time', 180); //180 seconds = 3 minutes
+
+if(file_exists($SERVER_ROOT.'/config/includes/searchVarCustom.php')){
+    include($SERVER_ROOT.'/config/includes/searchVarCustom.php');
+}
 
 $mapCenter = '[-110.90713, 32.21976]';
 if(isset($SPATIAL_INITIAL_CENTER)) $mapCenter = $SPATIAL_INITIAL_CENTER;
@@ -178,36 +183,36 @@ $dbArr = Array();
                                 </div>
                                 <div style="margin:5 0 5 0;"><hr /></div>
                                 <div>
-                                    <span style=""><input data-role="none" type='checkbox' name='thes' id='thes' onchange="buildQueryStrings();" value='1' CHECKED>Include Synonyms</span>
+                                    <span style=""><input data-role="none" type='checkbox' name='thes' id='thes' onchange="buildQueryStrings();" value='1' CHECKED><?php echo $SEARCHTEXT['GENERAL_TEXT_2_MAP']; ?></span>
                                 </div>
                                 <div id="taxonSearch0">
                                     <div id="taxa_autocomplete" >
                                         <div style="margin-top:5px;">
                                             <select data-role="none" id="taxontype" name="type" onchange="buildQueryStrings();">
-                                                <option id='familysciname' value='1'>Family or Scientific Name</option>
-                                                <option id='family' value='2'>Family only</option>
-                                                <option id='sciname' value='3'>Scientific Name only</option>
-                                                <option id='highertaxon' value='4'>Higher Taxonomy</option>
-                                                <option id='commonname' value='5'>Common Name</option>
+                                                <option id='familysciname' value='1'><?php echo $SEARCHTEXT['SELECT_1-1']; ?></option>
+                                                <option id='family' value='2'><?php echo $SEARCHTEXT['SELECT_1-2']; ?></option>
+                                                <option id='sciname' value='3'><?php echo $SEARCHTEXT['SELECT_1-3']; ?></option>
+                                                <option id='highertaxon' value='4'><?php echo $SEARCHTEXT['SELECT_1-4']; ?></option>
+                                                <option id='commonname' value='5'><?php echo $SEARCHTEXT['SELECT_1-5']; ?></option>
                                             </select>
                                         </div>
                                         <div style="margin-top:5px;">
-                                            Taxa: <input data-role="none" id="taxa" type="text" style="width:275px;" name="taxa" value="" onchange="buildQueryStrings();" title="Separate multiple taxa w/ commas" />
+                                            <?php echo $SEARCHTEXT['TAXON_INPUT']; ?> <input data-role="none" id="taxa" type="text" style="width:275px;" name="taxa" value="" onchange="buildQueryStrings();" title="<?php echo $SEARCHTEXT['TITLE_TEXT_1']; ?>" />
                                         </div>
                                     </div>
                                 </div>
                                 <div style="margin:5 0 5 0;"><hr /></div>
                                 <div>
-                                    Country: <input data-role="none" type="text" id="country" style="width:225px;" name="country" value="" onchange="buildQueryStrings();" title="Separate multiple terms w/ commas" />
+                                    <?php echo $SEARCHTEXT['COUNTRY_INPUT']; ?> <input data-role="none" type="text" id="country" style="width:225px;" name="country" value="" onchange="buildQueryStrings();" title="<?php echo $SEARCHTEXT['TITLE_TEXT_1']; ?>" />
                                 </div>
                                 <div style="margin-top:5px;">
-                                    State/Province: <input data-role="none" type="text" id="state" style="width:150px;" name="state" value="" onchange="buildQueryStrings();" title="Separate multiple terms w/ commas" />
+                                    <?php echo $SEARCHTEXT['STATE_INPUT']; ?> <input data-role="none" type="text" id="state" style="width:150px;" name="state" value="" onchange="buildQueryStrings();" title="<?php echo $SEARCHTEXT['TITLE_TEXT_1']; ?>" />
                                 </div>
                                 <div style="margin-top:5px;">
-                                    County: <input data-role="none" type="text" id="county" style="width:225px;"  name="county" value="" onchange="buildQueryStrings();" title="Separate multiple terms w/ commas" />
+                                    <?php echo $SEARCHTEXT['COUNTY_INPUT']; ?> <input data-role="none" type="text" id="county" style="width:225px;"  name="county" value="" onchange="buildQueryStrings();" title="<?php echo $SEARCHTEXT['TITLE_TEXT_1']; ?>" />
                                 </div>
                                 <div style="margin-top:5px;">
-                                    Locality: <input data-role="none" type="text" id="locality" style="width:225px;" name="local" onchange="buildQueryStrings();" value="" />
+                                    <?php echo $SEARCHTEXT['LOCALITY_INPUT']; ?> <input data-role="none" type="text" id="locality" style="width:225px;" name="local" onchange="buildQueryStrings();" value="" />
                                 </div>
                                 <div style="margin:5 0 5 0;"><hr /></div>
                                 <div id="shapecriteriabox">
@@ -220,35 +225,35 @@ $dbArr = Array();
                                 </div>
                                 <div style="margin:5 0 5 0;"><hr /></div>
                                 <div>
-                                    Collector's Last Name:
+                                    <?php echo $SEARCHTEXT['COLLECTOR_LASTNAME']; ?>
                                     <input data-role="none" type="text" id="collector" style="width:125px;" name="collector" value="" onchange="buildQueryStrings();" title="" />
                                 </div>
                                 <div style="margin-top:5px;">
-                                    Collector's Number:
-                                    <input data-role="none" type="text" id="collnum" style="width:125px;" name="collnum" value="" onchange="buildQueryStrings();" title="Separate multiple terms by commas and ranges by ' - ' (space before and after dash required), e.g.: 3542,3602,3700 - 3750" />
+                                    <?php echo $SEARCHTEXT['COLLECTOR_NUMBER']; ?>
+                                    <input data-role="none" type="text" id="collnum" style="width:125px;" name="collnum" value="" onchange="buildQueryStrings();" title="<?php echo $SEARCHTEXT['TITLE_TEXT_2']; ?>" />
                                 </div>
                                 <div style="margin-top:5px;">
-                                    Collection Date:
-                                    <input data-role="none" type="text" id="eventdate1" style="width:100px;" name="eventdate1" value="" onchange="buildQueryStrings();" title="Single date or start date of range" /> -
-                                    <input data-role="none" type="text" id="eventdate2" style="width:100px;" name="eventdate2" value="" onchange="buildQueryStrings();" title="End date of range; leave blank if searching for single date" />
+                                    <?php echo $SEARCHTEXT['COLLECTOR_DATE']; ?>
+                                    <input data-role="none" type="text" id="eventdate1" style="width:100px;" name="eventdate1" value="" onchange="buildQueryStrings();" title="<?php echo $SEARCHTEXT['TITLE_TEXT_3']; ?>" /> -
+                                    <input data-role="none" type="text" id="eventdate2" style="width:100px;" name="eventdate2" value="" onchange="buildQueryStrings();" title="<?php echo $SEARCHTEXT['TITLE_TEXT_4']; ?>" />
                                 </div>
                                 <div style="margin:10 0 10 0;"><hr></div>
                                 <div>
-                                    Catalog Number:
+                                    <?php echo $SEARCHTEXT['CATALOG_NUMBER']; ?>
                                     <input data-role="none" type="text" id="catnum" style="width:150px;" name="catnum" value="" onchange="buildQueryStrings();" title="" />
                                 </div>
                                 <div style="margin-top:5px;">
-                                    Other Catalog Number:
+                                    <?php echo $SEARCHTEXT['OTHER_CATNUM']; ?>
                                     <input data-role="none" type="text" id="othercatnum" style="width:150px;" name="othercatnum" value="" onchange="buildQueryStrings();" title="" />
                                 </div>
                                 <div style="margin-top:5px;">
-                                    <input data-role="none" type='checkbox' name='typestatus' id='typestatus' value='1' onchange="buildQueryStrings();"> Limit to Type Specimens Only
+                                    <input data-role="none" type='checkbox' name='typestatus' id='typestatus' value='1' onchange="buildQueryStrings();"> <?php echo $SEARCHTEXT['TYPE']; ?>
                                 </div>
                                 <div style="margin-top:5px;">
-                                    <input data-role="none" type='checkbox' name='hasimages' id='hasimages' value='1' onchange="buildQueryStrings();"> Limit to Specimens with Images Only
+                                    <input data-role="none" type='checkbox' name='hasimages' id='hasimages' value='1' onchange="buildQueryStrings();"> <?php echo $SEARCHTEXT['HAS_IMAGE']; ?>
                                 </div>
                                 <div id="searchGeneticCheckbox" style="margin-top:5px;">
-                                    <input data-role="none" type='checkbox' name='hasgenetic' id='hasgenetic' value='1' onchange="buildQueryStrings();"> Limit to Specimens with Genetic Data Only
+                                    <input data-role="none" type='checkbox' name='hasgenetic' id='hasgenetic' value='1' onchange="buildQueryStrings();"> <?php echo $SEARCHTEXT['HAS_GENETIC']; ?>
                                 </div>
                                 <div><hr></div>
                             </div>
