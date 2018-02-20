@@ -301,8 +301,8 @@ class OccurrenceTaxaManager {
 	}
 
 	protected function cleanInputStr($str){
-		$newStr = strip_tags(trim($str));
-		return $newStr;
+		if(stripos($str, 'sleep(') !== false) return '';
+		return strip_tags(trim($str));
 	}
 
 	protected function cleanInStr($str){
