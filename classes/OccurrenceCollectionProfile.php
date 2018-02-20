@@ -161,7 +161,12 @@ class OccurrenceCollectionProfile {
 		$outStr .= '<div style="margin-top:5px;">';
 		if($collArr['managementtype'] == 'Live Data'){
 			$outStr .= '<b>'.(isset($LANG['LIVE_DOWNLOAD'])?$LANG['LIVE_DOWNLOAD']:'Live Data Download').':</b> ';
-			$outStr .= '<a href="../../webservices/dwc/dwcapubhandler.php?collid='.$collArr['collid'].'">'.(isset($LANG['FULL_DATA'])?$LANG['FULL_DATA']:'DwC-Archive File').'</a>';
+			if($GLOBALS['SYMB_UID']){
+				$outStr .= '<a href="../../webservices/dwc/dwcapubhandler.php?collid='.$collArr['collid'].'">'.(isset($LANG['FULL_DATA'])?$LANG['FULL_DATA']:'DwC-Archive File').'</a>';
+			}
+			else{
+				$outStr .= '<a href="../../profile/index.php?refurl=../collections/misc/collprofiles.php?collid='.$collArr['collid'].'">'.(isset($LANG['LOGIN_TO_ACCESS'])?$LANG['LOGIN_TO_ACCESS']:'Login for access').'</a>';
+			}
 		}
 		elseif($collArr['managementtype'] == 'Snapshot'){
 			$pathArr = $this->getDwcaPath($collArr['collid']);
