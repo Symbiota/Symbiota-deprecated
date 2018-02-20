@@ -34,19 +34,54 @@ else{
 		<title><?php echo $DEFAULT_TITLE; ?> Occurrence Taxon Cleaner</title>
 		<link href="../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 		<link href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
-		<script src="../../js/jquery-3.2.1.min.js" type="text/javascript"></script>
+		<link href="../../js/jquery-ui-1.12.1/jquery-ui.min.css?ver=3" type="text/css" rel="Stylesheet" />
+		<script src="../../js/jquery-3.2.1.min.js?ver=3" type="text/javascript"></script>
+		<script src="../../js/jquery-ui-1.12.1/jquery-ui.min.js?ver=3" type="text/javascript"></script>
 		<script>
+
+			var cache = {};
 			$( document ).ready(function() {
 				$(".displayOnLoad").show();
 				$(".hideOnLoad").hide();
+
+				$(".taxon").each(function(){
+					$( this ).autocomplete({
+						minLength: 2,
+						autoFocus: true,
+						source: function( request, response ) {
+							var term = request.term;
+							if ( term in cache ) {
+								response( cache[ term ] );
+								return;
+							}
+							$.getJSON( "rpc/taxasuggest.php", request, function( data, status, xhr ) {
+								cache[ term ] = data;
+								response( data );
+							});
+						},
+						change: function(event,ui) {
+							if(ui.item == null && this.value.trim() != ""){
+								alert("Scientific name not found in Thesaurus.");
+								this.focus();
+								this.form.tid.value = "";
+							}
+						},
+						focus: function( event, ui ) {
+							this.form.tid.value = ui.item.id;
+						},
+						select: function( event, ui ) {
+							this.form.tid.value = ui.item.id;
+						}
+					});
+				});
 			});
 
-			function remappTaxon(oldName,targetTid,newName,author,idQualifier,msgCode){
+			function remappTaxon(oldName,targetTid,idQualifier,msgCode){
 				$.ajax({
 					type: "POST",
 					url: "rpc/remaptaxon.php",
 					dataType: "json",
-					data: { collid: <?php echo $collid; ?>, oldsciname: oldName, tid: targetTid, newsciname: newName, author: author, idq: idQualifier }
+					data: { collid: <?php echo $collid; ?>, oldsciname: oldName, tid: targetTid, idq: idQualifier }
 				}).done(function( res ) {
 					if(res == "1"){
 						$("#remapSpan-"+msgCode).text(" >>> Taxon remapped successfully!");
@@ -58,6 +93,16 @@ else{
 					}
 				});
 				return false;
+			}
+
+			function batchUpdate(f, oldName, itemCnt){
+				if(f.tid.value == ""){
+					alert("Taxon not found within taxonomic thesaurus");
+					return false;
+				}
+				else{
+					remappTaxon(oldName, f.tid.value, '', itemCnt+"-c");
+				}
 			}
 
 			function checkSelectCollidForm(f){
@@ -109,7 +154,7 @@ else{
 		</div>
 		<!-- inner text block -->
 		<div id="innertext">
-			<?php 
+			<?php
 			if($isEditor){
 				if($collid){
 					?>
@@ -169,7 +214,7 @@ else{
 										<div style="margin-bottom:5px;">
 											<fieldset style="padding:15px;margin:10px 0px">
 												<legend><b>Taxonomic Resource</b></legend>
-												<?php 
+												<?php
 												$taxResourceList = $cleanManager->getTaxonomicResourceList();
 												foreach($taxResourceList as $taKey => $taValue){
 													echo '<input name="taxresource[]" type="checkbox" value="'.$taKey.'" '.(in_array($taKey,$taxResource)?'checked':'').' /> '.$taValue.'<br/>';
@@ -184,7 +229,7 @@ else{
 											Start Index: <input name="startindex" type="text" value="<?php echo $startIndex; ?>" title="Enter a taxon name or letter of the alphabet to indicate where the processing should start" />
 										</div>
 										<div style="height:50px;">
-											<div style="">Clean and Mapping Function:</div> 
+											<div style="">Clean and Mapping Function:</div>
 											<div style="float:left;margin-left:15px;"><input name="autoclean" type="radio" value="0" <?php echo (!$autoClean?'checked':''); ?> /> Semi-Manual</div>
 											<div style="float:left;margin-left:10px;"><input name="autoclean" type="radio" value="1" <?php echo ($autoClean==1?'checked':''); ?> /> Fully Automatic</div>
 										</div>
@@ -199,13 +244,13 @@ else{
 							<form name="deepindexform" action="taxonomycleaner.php" method="post">
 								<div style="margin:20px 10px">
 									<div style="margin:10px 0px">
-										Following tool will run a set of algorithms that will run names through several filters to improve linkages to taxonomic thesaurus 
+										Following tool will run a set of algorithms that will run names through several filters to improve linkages to taxonomic thesaurus
 									</div>
 									<div style="margin:10px">
 										<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
 										<button name="submitaction" type="submit" value="deepindex">Deep Index Specimen Taxa</button>
 									</div>
-								</div>								
+								</div>
 							</form>
 						</fieldset>
 					</div>
@@ -218,7 +263,7 @@ else{
 						<legend><b>Collection Selector</b></legend>
 						<form name="selectcollidform" action="taxonomycleaner.php" method="post" onsubmit="return checkSelectCollidForm(this)">
 							<div><input name="selectall" type="checkbox" onclick="selectAllCollections(this);" /> Select / Unselect All</div>
-							<?php 
+							<?php
 							foreach($collMap as $id => $collArr){
 								echo '<div>';
 								echo '<input name="collid[]" type="checkbox" value="'.$id.'" /> ';
@@ -239,7 +284,7 @@ else{
 				<div style="margin:20px;font-weight:bold;font-size:120%;">
 					ERROR: You don't have the necessary permissions to access this data cleaning module.
 				</div>
-				<?php 
+				<?php
 			}
 			?>
 		</div>
