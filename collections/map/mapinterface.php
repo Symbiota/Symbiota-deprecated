@@ -1,5 +1,6 @@
 <?php
 include_once('../../config/symbini.php');
+include_once($SERVER_ROOT.'/config/includes/searchVarDefault.php');
 include_once($SERVER_ROOT.'/classes/TaxonProfileMap.php');
 include_once($SERVER_ROOT.'/classes/MapInterfaceManager.php');
 include_once($SERVER_ROOT.'/classes/SOLRManager.php');
@@ -8,6 +9,10 @@ header('Cache-Control: no-cache, no-store, must-revalidate'); // HTTP 1.1.
 header('Pragma: no-cache'); // HTTP 1.0.
 header('Expires: 0'); // Proxies.
 ini_set('max_execution_time', 180); //180 seconds = 3 minutes
+
+if(file_exists($SERVER_ROOT.'/config/includes/searchVarCustom.php')){
+    include($SERVER_ROOT.'/config/includes/searchVarCustom.php');
+}
 
 $taxonValue = array_key_exists('taxon',$_REQUEST)?$_REQUEST['taxon']:0;
 $clid = array_key_exists('clid',$_REQUEST)?$_REQUEST['clid']:0;
@@ -1453,21 +1458,21 @@ elseif($stArr || ($mapType && $mapType == 'occquery') || $clid){
                                 </div>
                                 <div style="margin:5 0 5 0;"><hr /></div>
                                 <div>
-                                    <span style=""><input data-role="none" type='checkbox' name='thes' value='1' <?php echo (array_key_exists("thes",$previousCriteria) && !$previousCriteria["thes"]?'':'CHECKED'); ?> >Include Synonyms</span>
+                                    <span style=""><input data-role="none" type='checkbox' name='thes' value='1' <?php echo (array_key_exists("thes",$previousCriteria) && !$previousCriteria["thes"]?'':'CHECKED'); ?> ><?php echo $SEARCHTEXT['GENERAL_TEXT_2_MAP']; ?></span>
                                 </div>
                                 <div id="taxonSearch0">
                                     <div id="taxa_autocomplete" >
                                         <div style="margin-top:5px;">
                                             <select data-role="none" id="taxontype" name="type">
-                                                <option id='familysciname' value='1' <?php if(array_key_exists("type",$previousCriteria) && $previousCriteria["type"] == "1") echo "SELECTED"; ?> >Family or Scientific Name</option>
-                                                <option id='family' value='2' <?php if(array_key_exists("type",$previousCriteria) && $previousCriteria["type"] == "2") echo "SELECTED"; ?> >Family only</option>
-                                                <option id='sciname' value='3' <?php if(array_key_exists("type",$previousCriteria) && $previousCriteria["type"] == "3") echo "SELECTED"; ?> >Scientific Name only</option>
-                                                <option id='highertaxon' value='4' <?php if(array_key_exists("type",$previousCriteria) && $previousCriteria["type"] == "4") echo "SELECTED"; ?> >Higher Taxonomy</option>
-                                                <option id='commonname' value='5' <?php if(array_key_exists("type",$previousCriteria) && $previousCriteria["type"] == "5") echo "SELECTED"; ?> >Common Name</option>
+                                                <option id='familysciname' value='1' <?php if(array_key_exists("type",$previousCriteria) && $previousCriteria["type"] == "1") echo "SELECTED"; ?> ><?php echo $SEARCHTEXT['SELECT_1-1']; ?></option>
+                                                <option id='family' value='2' <?php if(array_key_exists("type",$previousCriteria) && $previousCriteria["type"] == "2") echo "SELECTED"; ?> ><?php echo $SEARCHTEXT['SELECT_1-2']; ?></option>
+                                                <option id='sciname' value='3' <?php if(array_key_exists("type",$previousCriteria) && $previousCriteria["type"] == "3") echo "SELECTED"; ?> ><?php echo $SEARCHTEXT['SELECT_1-3']; ?></option>
+                                                <option id='highertaxon' value='4' <?php if(array_key_exists("type",$previousCriteria) && $previousCriteria["type"] == "4") echo "SELECTED"; ?> ><?php echo $SEARCHTEXT['SELECT_1-4']; ?></option>
+                                                <option id='commonname' value='5' <?php if(array_key_exists("type",$previousCriteria) && $previousCriteria["type"] == "5") echo "SELECTED"; ?> ><?php echo $SEARCHTEXT['SELECT_1-5']; ?></option>
                                             </select>
                                         </div>
                                         <div style="margin-top:5px;">
-                                            Taxa: <input data-role="none" id="taxa" type="text" style="width:275px;" name="taxa" value="<?php if(array_key_exists("taxa",$previousCriteria)) echo $previousCriteria["taxa"]; ?>" title="Separate multiple taxa w/ commas" />
+                                            <?php echo $SEARCHTEXT['TAXON_INPUT']; ?> <input data-role="none" id="taxa" type="text" style="width:275px;" name="taxa" value="<?php if(array_key_exists("taxa",$previousCriteria)) echo $previousCriteria["taxa"]; ?>" title="<?php echo $SEARCHTEXT['TITLE_TEXT_1']; ?>" />
                                         </div>
                                     </div>
                                 </div>
@@ -1481,16 +1486,16 @@ elseif($stArr || ($mapType && $mapType == 'occquery') || $clid){
 									</div>
 									<div><hr></div> -->
                                 <div>
-                                    Country: <input data-role="none" type="text" id="country" style="width:225px;" name="country" value="<?php if(array_key_exists("country",$previousCriteria)) echo $previousCriteria["country"]; ?>" title="Separate multiple terms w/ commas" />
+                                    <?php echo $SEARCHTEXT['COUNTRY_INPUT']; ?> <input data-role="none" type="text" id="country" style="width:225px;" name="country" value="<?php if(array_key_exists("country",$previousCriteria)) echo $previousCriteria["country"]; ?>" title="<?php echo $SEARCHTEXT['TITLE_TEXT_1']; ?>" />
                                 </div>
                                 <div style="margin-top:5px;">
-                                    State/Province: <input data-role="none" type="text" id="state" style="width:150px;" name="state" value="<?php if(array_key_exists("state",$previousCriteria)) echo $previousCriteria["state"]; ?>" title="Separate multiple terms w/ commas" />
+                                    <?php echo $SEARCHTEXT['STATE_INPUT']; ?> <input data-role="none" type="text" id="state" style="width:150px;" name="state" value="<?php if(array_key_exists("state",$previousCriteria)) echo $previousCriteria["state"]; ?>" title="<?php echo $SEARCHTEXT['TITLE_TEXT_1']; ?>" />
                                 </div>
                                 <div style="margin-top:5px;">
-                                    County: <input data-role="none" type="text" id="county" style="width:225px;"  name="county" value="<?php if(array_key_exists("county",$previousCriteria)) echo $previousCriteria["county"]; ?>" title="Separate multiple terms w/ commas" />
+                                    <?php echo $SEARCHTEXT['COUNTY_INPUT']; ?> <input data-role="none" type="text" id="county" style="width:225px;"  name="county" value="<?php if(array_key_exists("county",$previousCriteria)) echo $previousCriteria["county"]; ?>" title="<?php echo $SEARCHTEXT['TITLE_TEXT_1']; ?>" />
                                 </div>
                                 <div style="margin-top:5px;">
-                                    Locality: <input data-role="none" type="text" id="locality" style="width:225px;" name="local" value="<?php if(array_key_exists("local",$previousCriteria)) echo $previousCriteria["local"]; ?>" />
+                                    <?php echo $SEARCHTEXT['LOCALITY_INPUT']; ?> <input data-role="none" type="text" id="locality" style="width:225px;" name="local" value="<?php if(array_key_exists("local",$previousCriteria)) echo $previousCriteria["local"]; ?>" />
                                 </div>
                                 <div style="margin:5 0 5 0;"><hr /></div>
                                 <div id="shapecriteria">
@@ -1528,35 +1533,35 @@ elseif($stArr || ($mapType && $mapType == 'occquery') || $clid){
                                 </div>
                                 <div style="margin:5 0 5 0;"><hr /></div>
                                 <div>
-                                    Collector's Last Name:
+                                    <?php echo $SEARCHTEXT['COLLECTOR_LASTNAME']; ?>
                                     <input data-role="none" type="text" id="collector" style="width:125px;" name="collector" value="<?php if(array_key_exists("collector",$previousCriteria)) echo $previousCriteria["collector"]; ?>" title="" />
                                 </div>
                                 <div style="margin-top:5px;">
-                                    Collector's Number:
-                                    <input data-role="none" type="text" id="collnum" style="width:125px;" name="collnum" value="<?php if(array_key_exists("collnum",$previousCriteria)) echo $previousCriteria["collnum"]; ?>" title="Separate multiple terms by commas and ranges by ' - ' (space before and after dash required), e.g.: 3542,3602,3700 - 3750" />
+                                    <?php echo $SEARCHTEXT['COLLECTOR_NUMBER']; ?>
+                                    <input data-role="none" type="text" id="collnum" style="width:125px;" name="collnum" value="<?php if(array_key_exists("collnum",$previousCriteria)) echo $previousCriteria["collnum"]; ?>" title="<?php echo $SEARCHTEXT['TITLE_TEXT_2']; ?>" />
                                 </div>
                                 <div style="margin-top:5px;">
-                                    Collection Date:
-                                    <input data-role="none" type="text" id="eventdate1" style="width:80px;" name="eventdate1" style="width:100px;" value="<?php if(array_key_exists("eventdate1",$previousCriteria)) echo $previousCriteria["eventdate1"]; ?>" title="Single date or start date of range" /> -
-                                    <input data-role="none" type="text" id="eventdate2" style="width:80px;" name="eventdate2" style="width:100px;" value="<?php if(array_key_exists("eventdate2",$previousCriteria)) echo $previousCriteria["eventdate2"]; ?>" title="End date of range; leave blank if searching for single date" />
+                                    <?php echo $SEARCHTEXT['COLLECTOR_DATE']; ?>
+                                    <input data-role="none" type="text" id="eventdate1" style="width:80px;" name="eventdate1" style="width:100px;" value="<?php if(array_key_exists("eventdate1",$previousCriteria)) echo $previousCriteria["eventdate1"]; ?>" title="<?php echo $SEARCHTEXT['TITLE_TEXT_3']; ?>" /> -
+                                    <input data-role="none" type="text" id="eventdate2" style="width:80px;" name="eventdate2" style="width:100px;" value="<?php if(array_key_exists("eventdate2",$previousCriteria)) echo $previousCriteria["eventdate2"]; ?>" title="<?php echo $SEARCHTEXT['TITLE_TEXT_4']; ?>" />
                                 </div>
                                 <div style="margin:10 0 10 0;"><hr></div>
                                 <div>
-                                    Catalog Number:
+                                    <?php echo $SEARCHTEXT['CATALOG_NUMBER']; ?>
                                     <input data-role="none" type="text" id="catnum" style="width:150px;" name="catnum" value="<?php if(array_key_exists("catnum",$previousCriteria)) echo $previousCriteria["catnum"]; ?>" title="" />
                                 </div>
                                 <div style="margin-top:5px;">
-                                    Other Catalog Number:
+                                    <?php echo $SEARCHTEXT['OTHER_CATNUM']; ?>
                                     <input data-role="none" type="text" id="othercatnum" style="width:150px;" name="othercatnum" value="<?php if(array_key_exists("othercatnum",$previousCriteria)) echo $previousCriteria["othercatnum"]; ?>" title="" />
                                 </div>
                                 <div style="margin-top:5px;">
-                                    <input data-role="none" type='checkbox' name='typestatus' value='1' <?php if(array_key_exists("typestatus",$previousCriteria) && $previousCriteria["typestatus"]) echo "CHECKED"; ?> > Limit to Type Specimens Only
+                                    <input data-role="none" type='checkbox' name='typestatus' value='1' <?php if(array_key_exists("typestatus",$previousCriteria) && $previousCriteria["typestatus"]) echo "CHECKED"; ?> > <?php echo $SEARCHTEXT['TYPE']; ?>
                                 </div>
                                 <div style="margin-top:5px;">
-                                    <input data-role="none" type='checkbox' name='hasimages' value='1' <?php if(array_key_exists("hasimages",$previousCriteria) && $previousCriteria["hasimages"]) echo "CHECKED"; ?> > Limit to Specimens with Images Only
+                                    <input data-role="none" type='checkbox' name='hasimages' value='1' <?php if(array_key_exists("hasimages",$previousCriteria) && $previousCriteria["hasimages"]) echo "CHECKED"; ?> > <?php echo $SEARCHTEXT['HAS_IMAGE']; ?>
                                 </div>
-                                <div style="margin-top:5px;">
-                                    <input data-role="none" type='checkbox' name='hasgenetic' value='1' <?php if(array_key_exists("hasgenetic",$previousCriteria) && $previousCriteria["hasgenetic"]) echo "CHECKED"; ?> > Limit to Specimens with Genetic Data Only
+                                <div id="searchGeneticCheckbox" style="margin-top:5px;">
+                                    <input data-role="none" type='checkbox' name='hasgenetic' value='1' <?php if(array_key_exists("hasgenetic",$previousCriteria) && $previousCriteria["hasgenetic"]) echo "CHECKED"; ?> > <?php echo $SEARCHTEXT['HAS_GENETIC']; ?>
                                 </div>
                                 <div><hr></div>
                                 <input type="hidden" name="reset" value="1" />
