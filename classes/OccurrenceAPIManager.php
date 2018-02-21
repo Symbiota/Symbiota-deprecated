@@ -273,7 +273,7 @@ class OccurrenceAPIManager{
                 'Pragma: no-cache',
                 'Content-Length: '.strlen(http_build_query($pArr))
             );
-            /*$ch = curl_init();
+            $ch = curl_init();
             $options = array(
                 CURLOPT_URL => 'http://staging.fieldguide.net/api2/symbiota/submit_cv_job',
                 CURLOPT_POST => true,
@@ -284,7 +284,7 @@ class OccurrenceAPIManager{
             );
             curl_setopt_array($ch, $options);
             $result = curl_exec($ch);
-            curl_close($ch);*/
+            curl_close($ch);
             unset($processDataArr["images"]);
             $this->logFGBatchFile($collid,$jsonFileName,$processDataArr);
             $status = 'Batch process initiated';
@@ -336,7 +336,7 @@ class OccurrenceAPIManager{
             'Pragma: no-cache',
             'Content-Length: '.strlen(http_build_query($pArr))
         );
-        /*$ch = curl_init();
+        $ch = curl_init();
         $options = array(
             CURLOPT_URL => 'http://staging.fieldguide.net/api2/symbiota/remove_cv_job',
             CURLOPT_POST => true,
@@ -347,7 +347,7 @@ class OccurrenceAPIManager{
         );
         curl_setopt_array($ch, $options);
         $result = curl_exec($ch);
-        curl_close($ch);*/
+        curl_close($ch);
         $status = 'Batch process cancelled';
         return $status;
     }
