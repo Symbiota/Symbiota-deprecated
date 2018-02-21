@@ -72,7 +72,6 @@ $searchVar = $collManager->getQueryTermStr();
 					<?php
 					$taxonType = 1;
 					if(isset($DEFAULT_TAXON_SEARCH) && $DEFAULT_TAXON_SEARCH) $taxonType = $DEFAULT_TAXON_SEARCH;
-					if(array_key_exists('taxontype',$previousCriteria)) $taxonType = $previousCriteria['taxontype'];
 					for($h=1;$h<6;$h++){
 						echo '<option value="'.$h.'" '.($taxonType==$h?'SELECTED':'').'>'.$LANG['SELECT_1-'.$h].'</option>';
 					}

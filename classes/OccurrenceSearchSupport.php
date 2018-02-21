@@ -262,13 +262,13 @@ class OccurrenceSearchSupport {
 
 	public static function getDbRequestVariable($reqArr){
 		$dbStr = $reqArr['db'];
-		if(!preg_match('/^[0-9,]+$/', $dbStr)) $dbStr = 'all';
 		if(is_array($dbStr)){
 			$dbStr = implode(',',array_unique($dbStr)).';';
 		}
 		else{
 			$dbStr = $dbStr;
 		}
+		if(!preg_match('/^[0-9,;]+$/', $dbStr)) $dbStr = 'all';
 		if(strpos($dbStr,'allspec') !== false){
 			$dbStr = 'allspec';
 		}
