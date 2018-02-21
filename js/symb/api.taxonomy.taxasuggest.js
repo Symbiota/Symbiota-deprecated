@@ -6,8 +6,8 @@ $(document).ready(function() {
 	var loopCnt = 0;
 	while(!urlExists(acUrl) && dirArr.length > loopCnt){
 		var newUrl = '';
-		for(i = loopCnt; i >= 0; i--){
-			newUrl = "/" + dirArr[i] + newUrl;
+		for(i = 0; i <= loopCnt; i++){
+			newUrl = newUrl + "/" + dirArr[i];
 		}
 		acUrl = newUrl + acUrlBase;
 		loopCnt = loopCnt + 1;
