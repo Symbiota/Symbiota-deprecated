@@ -3,8 +3,14 @@ $(document).ready(function() {
 	var acUrl = acUrlBase;
 	var dirArr = window.location.pathname.split('/');
 	dirArr.shift(); dirArr.pop();
-	while(!urlExists(acUrl) && dirArr.length > 0){
-		acUrl = "/" + dirArr.shift() + acUrlBase;
+	var loopCnt = 0;
+	while(!urlExists(acUrl) && dirArr.length > loopCnt){
+		var newUrl = '';
+		for(i = loopCnt; i >= 0; i--){
+			newUrl = "/" + dirArr[i] + newUrl;
+		}
+		acUrl = newUrl + acUrlBase;
+		loopCnt = loopCnt + 1;
 	}
 	
 	function split( val ) {
