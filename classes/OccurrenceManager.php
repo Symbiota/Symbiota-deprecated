@@ -955,7 +955,7 @@ class OccurrenceManager{
 			else{
 				$dbStr = $this->cleanInputStr(implode(',',array_unique($dbs))).';';
 			}
-			if(!preg_match('/^[0-9,]+$/', $dbStr)) $dbStr = 'all';
+			if(!preg_match('/^[0-9,;]+$/', $dbStr)) $dbStr = 'all';
 			if(strpos($dbStr,'allspec') !== false){
 				$dbStr = 'allspec';
 			}
