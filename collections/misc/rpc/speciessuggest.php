@@ -6,7 +6,7 @@
 	
 	$sql = 'SELECT tid, sciname '. 
 		'FROM taxa '.
-		'WHERE rankid > 219 AND sciname LIKE "'.$queryString.'%" ';
+		'WHERE sciname LIKE "'.$queryString.'%" ';
 	//echo $sql;
 	$rs = $con->query($sql);
 	while ($row = $rs->fetch_object()) {

@@ -227,9 +227,6 @@ if($action != "Update Statistics"){
 			<script type="text/javascript" src="../../js/symb/collections.index.js"></script>
 			<script type="text/javascript">
 				$(document).ready(function() {
-					if(!navigator.cookieEnabled){
-						alert("Your browser cookies are disabled. To be able to login and access your profile, they must be enabled for this domain.");
-					}
 					$("#tabs").tabs({<?php echo ($action == "Run Statistics"?'active: 1':''); ?>});
 
                     function split( val ) {

@@ -227,9 +227,9 @@ class OccurrenceAPIManager{
         return $occId;
     }
 
-    public function checkFGBatchProcess($collid){
+    public function checkFGLog($collid){
         $retArr = Array();
-        $jsonFileName = $collid.'-FGBatch.json';
+        $jsonFileName = $collid.'-FGLog.json';
         $jsonFile = $GLOBALS['SERVER_ROOT'].(substr($GLOBALS['SERVER_ROOT'],-1)=='/'?'':'/').'temp/data/fieldguide/'.$jsonFileName;
         if(file_exists($jsonFile)){
             $jsonStr = file_get_contents($jsonFile);
@@ -238,24 +238,14 @@ class OccurrenceAPIManager{
         return $retArr;
     }
 
-    public function checkFGBatchResults($collid){
-        $results = false;
-        $jsonFileName = $collid.'-FGResults.json';
-        $jsonFile = $GLOBALS['SERVER_ROOT'].(substr($GLOBALS['SERVER_ROOT'],-1)=='/'?'':'/').'temp/data/fieldguide/'.$jsonFileName;
-        if(file_exists($jsonFile)){
-            $results = true;
-        }
-        return $results;
-    }
-
-    public function initiateFGBatchProcess($collid){
+    public function initiateFGBatchProcess($collid,$taxon){
         global $SERVER_ROOT, $CLIENT_ROOT;
+        $status = '';
         $this->setServerDomain();
-        $imgArr = $this->getFGBatchImgArr($collid);
+        $imgArr = $this->getFGBatchImgArr($collid,$taxon);
         if($imgArr){
             $processDataArr = array();
             $pArr = array();
-            $jsonFileName = $collid.'-FGBatch.json';
             $token = sprintf( '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
                 mt_rand( 0, 0xffff ), mt_rand( 0, 0xffff ),
                 mt_rand( 0, 0xffff ),
@@ -263,7 +253,11 @@ class OccurrenceAPIManager{
                 mt_rand( 0, 0x3fff ) | 0x8000,
                 mt_rand( 0, 0xffff ), mt_rand( 0, 0xffff ), mt_rand( 0, 0xffff )
             );
-            $processDataArr["job_id"] = $collid.'_'.$token;
+            $jsonFileName = $collid.'-i-'.$token.'.json';
+            $jobID = $collid.'_'.$token;
+            $processDataArr["job_id"] = $jobID;
+            $processDataArr["parenttaxon"] = $taxon;
+            $processDataArr["dateinitiated"] = date("Y-m-d");
             $processDataArr["images"] = $imgArr;
             $fp = fopen($SERVER_ROOT.'/temp/data/fieldguide/'.$jsonFileName, 'w');
             fwrite($fp, json_encode($processDataArr));
@@ -279,7 +273,7 @@ class OccurrenceAPIManager{
                 'Pragma: no-cache',
                 'Content-Length: '.strlen(http_build_query($pArr))
             );
-            $ch = curl_init();
+            /*$ch = curl_init();
             $options = array(
                 CURLOPT_URL => 'http://staging.fieldguide.net/api2/symbiota/submit_cv_job',
                 CURLOPT_POST => true,
@@ -290,48 +284,86 @@ class OccurrenceAPIManager{
             );
             curl_setopt_array($ch, $options);
             $result = curl_exec($ch);
-            curl_close($ch);
+            curl_close($ch);*/
+            unset($processDataArr["images"]);
+            $this->logFGBatchFile($collid,$jsonFileName,$processDataArr);
+            $status = 'Batch process initiated';
         }
+        else{
+            $status = 'No images found for that parent taxon';
+        }
+        return $status;
     }
 
-    public function cancelFGBatchProcess($collid){
+    public function logFGBatchFile($collid,$jsonFileName,$infoArr){
         global $SERVER_ROOT;
-        $jsonFileName = $collid.'-FGBatch.json';
-        if(file_exists($SERVER_ROOT.'/temp/data/fieldguide/'.$jsonFileName)){
-            $dataArr = json_decode(file_get_contents($SERVER_ROOT.'/temp/data/fieldguide/'.$jsonFileName), true);
-            $jobID = $dataArr['job_id'];
-            if($jobID){
-                $pArr["job_id"] = $jobID;
-                $headers = array(
-                    'authorization: Token 7044979d9ec245768dd7561d85865004',
-                    'Content-Type: application/x-www-form-urlencoded',
-                    'Accept: application/json',
-                    'Cache-Control: no-cache',
-                    'Pragma: no-cache',
-                    'Content-Length: '.strlen(http_build_query($pArr))
-                );
-                $ch = curl_init();
-                $options = array(
-                    CURLOPT_URL => 'http://staging.fieldguide.net/api2/symbiota/remove_cv_job',
-                    CURLOPT_POST => true,
-                    CURLOPT_HTTPHEADER => $headers,
-                    CURLOPT_TIMEOUT => 90,
-                    CURLOPT_POSTFIELDS => http_build_query($pArr),
-                    CURLOPT_RETURNTRANSFER => true
-                );
-                curl_setopt_array($ch, $options);
-                $result = curl_exec($ch);
-                curl_close($ch);
-            }
+        $jobID = $infoArr["job_id"];
+	    $fileArr = array();
+        if(file_exists($SERVER_ROOT.'/temp/data/fieldguide/'.$collid.'-FGLog.json')){
+            $fileArr = json_decode(file_get_contents($SERVER_ROOT.'/temp/data/fieldguide/'.$collid.'-FGLog.json'), true);
+            unlink($SERVER_ROOT.'/temp/data/fieldguide/'.$collid.'-FGLog.json');
         }
-        unlink($SERVER_ROOT.'/temp/data/fieldguide/'.$jsonFileName);
+        $fileArr['jobs'][$jobID]['file'] = $jsonFileName;
+        $fileArr['jobs'][$jobID]['taxon'] = $infoArr["parenttaxon"];
+        $fileArr['jobs'][$jobID]['date'] = $infoArr["dateinitiated"];
+        $fp = fopen($SERVER_ROOT.'/temp/data/fieldguide/'.$collid.'-FGLog.json', 'w');
+        fwrite($fp, json_encode($fileArr));
+        fclose($fp);
     }
 
-    public function getFGBatchImgArr($collid){
+    public function cancelFGBatchProcess($collid,$jobId){
+        global $SERVER_ROOT;
+        $status = '';
+        $resultsCnt = 0;
+        $fileArr = json_decode(file_get_contents($SERVER_ROOT.'/temp/data/fieldguide/'.$collid.'-FGLog.json'), true);
+        unlink($SERVER_ROOT.'/temp/data/fieldguide/'.$collid.'-FGLog.json');
+        $fileName = $fileArr['jobs'][$jobId]['file'];
+        unlink($SERVER_ROOT.'/temp/data/fieldguide/'.$fileName);
+        unset($fileArr['jobs'][$jobId]);
+        $jobsCnt = count($fileArr['jobs']);
+        if(isset($fileArr['results'])) $resultsCnt = count($fileArr['results']);
+        if(($jobsCnt + $resultsCnt) > 0){
+            $fp = fopen($SERVER_ROOT.'/temp/data/fieldguide/'.$collid.'-FGLog.json', 'w');
+            fwrite($fp, json_encode($fileArr));
+            fclose($fp);
+        }
+        $pArr["job_id"] = $jobID;
+        $headers = array(
+            'authorization: Token 7044979d9ec245768dd7561d85865004',
+            'Content-Type: application/x-www-form-urlencoded',
+            'Accept: application/json',
+            'Cache-Control: no-cache',
+            'Pragma: no-cache',
+            'Content-Length: '.strlen(http_build_query($pArr))
+        );
+        /*$ch = curl_init();
+        $options = array(
+            CURLOPT_URL => 'http://staging.fieldguide.net/api2/symbiota/remove_cv_job',
+            CURLOPT_POST => true,
+            CURLOPT_HTTPHEADER => $headers,
+            CURLOPT_TIMEOUT => 90,
+            CURLOPT_POSTFIELDS => http_build_query($pArr),
+            CURLOPT_RETURNTRANSFER => true
+        );
+        curl_setopt_array($ch, $options);
+        $result = curl_exec($ch);
+        curl_close($ch);*/
+        $status = 'Batch process cancelled';
+        return $status;
+    }
+
+    public function getFGBatchImgArr($collid,$taxon){
         $returnArr = Array();
-        $sql = 'SELECT i.imgid, o.occid, o.sciname, i.url '.
+        $tId = '';
+        if($taxon) $tId = $this->getFGBatchTaxonTid($taxon);
+        $sql = 'SELECT i.imgid, o.occid, o.sciname, t.SciName AS taxonorder, i.url '.
             'FROM images AS i LEFT JOIN omoccurrences AS o ON i.occid = o.occid '.
-            'WHERE o.collid = '.$collid.' ';
+            'LEFT JOIN taxstatus AS ts ON o.tidinterpreted = ts.tid '.
+            'LEFT JOIN taxaenumtree AS te ON ts.tidaccepted = te.tid '.
+            'LEFT JOIN taxa AS t ON te.parenttid = t.TID '.
+            'WHERE o.collid = '.$collid.' AND ((ts.taxauthid = 1 AND te.taxauthid = 1 AND t.RankId = 100) '.
+            'OR ISNULL(o.tidinterpreted)) ';
+        if($tId) $sql .= 'AND o.tidinterpreted IN(SELECT tid FROM taxaenumtree WHERE parenttid = '.$tId.') ';
         //echo "<div>Sql: ".$sql."</div>";
         $result = $this->conn->query($sql);
         while($row = $result->fetch_object()){
@@ -347,11 +379,27 @@ class OccurrenceAPIManager{
             if(substr($imgUrl,0,1) == '/') $imgUrl = $localDomain.$imgUrl;
             $returnArr[$imgId]["occid"] = $row->occid;
             $returnArr[$imgId]["sciname"] = $row->sciname;
+            $returnArr[$imgId]["order"] = $row->taxonorder;
             $returnArr[$imgId]["url"] = $imgUrl;
         }
         $result->free();
 
         return $returnArr;
+    }
+
+    public function getFGBatchTaxonTid($taxon){
+        $tId = 0;
+        $sql = 'SELECT TID '.
+            'FROM taxa '.
+            'WHERE SciName = "'.$taxon.'" ';
+        //echo "<div>Sql: ".$sql."</div>";
+        $result = $this->conn->query($sql);
+        while($row = $result->fetch_object()){
+            $tId = $row->TID;
+        }
+        $result->free();
+
+        return $tId;
     }
 
     public function checkImages($collid){
@@ -369,39 +417,73 @@ class OccurrenceAPIManager{
         return $images;
     }
 
-    public function validateFGResults($jobId){
+    public function validateFGResults($collid,$jobId){
         global $SERVER_ROOT;
         $valid = false;
-        $collId = substr($jobId, 0, strpos($jobId, '_'));
-        $jsonFileName = $collId.'-FGBatch.json';
-        if(file_exists($SERVER_ROOT.'/temp/data/fieldguide/'.$jsonFileName)){
-            $dataArr = json_decode(file_get_contents($SERVER_ROOT.'/temp/data/fieldguide/'.$jsonFileName), true);
-            $fileJobID = $dataArr['job_id'];
-            if($fileJobID == $jobId) $valid = true;
+        if(file_exists($SERVER_ROOT.'/temp/data/fieldguide/'.$collid.'-FGLog.json')){
+            $dataArr = json_decode(file_get_contents($SERVER_ROOT.'/temp/data/fieldguide/'.$collid.'-FGLog.json'),true);
+            if(isset($dataArr['jobs'][$jobId])) $valid = true;
         }
         return $valid;
     }
 
-    public function processFGResults($jobId,$resultUrl){
+    public function logFGResults($collid,$token,$resultUrl){
         global $SERVER_ROOT;
-        $collId = substr($jobId, 0, strpos($jobId, '_'));
-        $jsonResFileName = $collId.'-FGResults.json';
-        $jsonBatFileName = $collId.'-FGBatch.json';
-        if(file_get_contents($resultUrl)){
-            $resultsData = file_get_contents($resultUrl);
-            $fp = fopen($SERVER_ROOT.'/temp/data/fieldguide/'.$jsonResFileName, 'w');
-            fwrite($fp, $resultsData);
-            fclose($fp);
-            unlink($SERVER_ROOT.'/temp/data/fieldguide/'.$jsonBatFileName);
+        $jobArr = array();
+        $jobID = $collid.'_'.$token;
+        $fileArr = json_decode(file_get_contents($SERVER_ROOT.'/temp/data/fieldguide/'.$collid.'-FGLog.json'), true);
+        unlink($SERVER_ROOT.'/temp/data/fieldguide/'.$collid.'-FGLog.json');
+        foreach($fileArr['jobs'] as $job => $jArr){
+            if($job == $jobID){
+                $fileName = $jArr['file'];
+                $taxon = $jArr['taxon'];
+                $startDate = $jArr['date'];
+            }
+            else{
+                $jobArr[$job] = $jArr;
+            }
         }
+        $dateReceived = date("Y-m-d");
+        unlink($SERVER_ROOT.'/temp/data/fieldguide/'.$fileName);
+        //unset($fileArr['jobs'][$jobId]);
+        $fileArr['jobs'] = $jobArr;
+        $resArr = json_decode(file_get_contents($resultUrl), true);
+        $processDataArr["job_id"] = $jobID;
+        $processDataArr["parenttaxon"] = $taxon;
+        $processDataArr["dateinitiated"] = $startDate;
+        $processDataArr["datereceived"] = $dateReceived;
+        $processDataArr["images"] = $resArr['images'];
+        $jsonFileName = $collid.'-r-'.$token.'.json';
+        $fp = fopen($SERVER_ROOT.'/temp/data/fieldguide/'.$jsonFileName, 'w');
+        fwrite($fp, json_encode($processDataArr));
+        fclose($fp);
+        $fileArr['results'][$jobID]['file'] = $jsonFileName;
+        $fileArr['results'][$jobID]['taxon'] = $taxon;
+        $fileArr['results'][$jobID]['inidate'] = $startDate;
+        $fileArr['results'][$jobID]['recdate'] = $dateReceived;
+        $fp = fopen($SERVER_ROOT.'/temp/data/fieldguide/'.$collid.'-FGLog.json', 'w');
+        fwrite($fp, json_encode($fileArr));
+        fclose($fp);
     }
 
-    public function deleteFGBatchResults($collid){
+    public function deleteFGBatchResults($collid,$jobId){
         global $SERVER_ROOT;
-        $jsonFileName = $collid.'-FGResults.json';
-        if(file_exists($SERVER_ROOT.'/temp/data/fieldguide/'.$jsonFileName)){
-            unlink($SERVER_ROOT.'/temp/data/fieldguide/'.$jsonFileName);
+        $status = '';
+        $jobsCnt = 0;
+        $fileArr = json_decode(file_get_contents($SERVER_ROOT.'/temp/data/fieldguide/'.$collid.'-FGLog.json'), true);
+        unlink($SERVER_ROOT.'/temp/data/fieldguide/'.$collid.'-FGLog.json');
+        $fileName = $fileArr['results'][$jobId]['file'];
+        unlink($SERVER_ROOT.'/temp/data/fieldguide/'.$fileName);
+        unset($fileArr['results'][$jobId]);
+        $resultsCnt = count($fileArr['results']);
+        if(isset($fileArr['jobs'])) $jobsCnt = count($fileArr['jobs']);
+        if(($jobsCnt + $resultsCnt) > 0){
+            $fp = fopen($SERVER_ROOT.'/temp/data/fieldguide/'.$collid.'-FGLog.json', 'w');
+            fwrite($fp, json_encode($fileArr));
+            fclose($fp);
         }
+        $status = 'Batch results deleted';
+        return $status;
     }
 
 	public function setCollID($val){
