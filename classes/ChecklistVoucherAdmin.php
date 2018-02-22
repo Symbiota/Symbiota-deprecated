@@ -157,7 +157,7 @@ class ChecklistVoucherAdmin {
 			foreach($locArr as $str){
 				$str = $this->cleanInStr($str);
 				if(strlen($str) > 4){
-					$locStr .= 'OR (MATCH(f.locality) AGAINST("'.$str.'")) ';
+					$locStr .= 'OR (MATCH(f.locality) AGAINST(\'"'.$str.'"\' IN BOOLEAN MODE)) ';
 				}
 				else{
 					$locStr .= 'OR (o.locality LIKE "%'.$str.'%") ';

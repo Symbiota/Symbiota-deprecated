@@ -10,8 +10,7 @@ class OccurrenceManager extends OccurrenceTaxaManager {
 	protected $sqlWhere;
 	protected $displaySearchArr = Array();
 	protected $reset = 0;
-	private $clName;
-	protected $clFootprintWkt;
+	private $voucherManager;
 	private $occurSearchProjectExists = 0;
 	protected $searchSupportManager = null;
 
@@ -52,8 +51,21 @@ class OccurrenceManager extends OccurrenceTaxaManager {
 		$sqlWhere = "";
 		if(array_key_exists("targetclid",$this->searchTermArr) && is_numeric($this->searchTermArr["targetclid"])){
 			//Used to exclude vouchers alredy linked to target checklist
-			$sqlWhere .= 'AND ('.$voucherManager->getSqlFrag().') AND (o.occid NOT IN(SELECT occid FROM fmvouchers WHERE clid = '.$this->searchTermArr["targetclid"].')) ';
-			$this->displaySearchArr[] = $voucherManager->getQueryVariableStr();
+			$sqlWhere .= 'AND ('.$this->voucherManager->getSqlFrag().') ';
+			$clOccidArr = array();
+			if(isset($this->taxaArr['search']) && is_numeric($this->taxaArr['search'])){
+				$sql = 'SELECT DISTINCT v.occid '.
+					'FROM fmvouchers v INNER JOIN taxstatus ts ON v.tid = ts.tidaccepted '.
+					'INNER JOIN taxstatus ts2 ON ts.tidaccepted = ts2.tidaccepted '.
+					'WHERE (v.clid = '.$this->searchTermArr["targetclid"].') AND (v.tid = '.$this->taxaArr['search'].')';
+				$rs = $this->conn->query($sql);
+				while($r = $rs->fetch_object()){
+					$clOccidArr[] = $r->occid;
+				}
+				$rs->free();
+			}
+			if($clOccidArr) $sqlWhere .= 'AND (o.occid NOT IN('.implode(',',$clOccidArr).')) ';
+			$this->displaySearchArr[] = $this->voucherManager->getQueryVariableStr();
 		}
 		elseif(array_key_exists('clid',$this->searchTermArr) && is_numeric($this->searchTermArr['clid'])){
 			$sqlWhere .= 'AND (v.clid = '.$this->searchTermArr['clid'].') ';
@@ -502,7 +514,7 @@ class OccurrenceManager extends OccurrenceTaxaManager {
 		//Search will be confinded to a clid vouchers, collid, catid, or will remain open to all collection
 		if(array_key_exists("targetclid",$_REQUEST) && is_numeric($_REQUEST['targetclid'])){
 			$this->searchTermArr["targetclid"] = $_REQUEST["targetclid"];
-			$this->setChecklistVariables($clid);
+			$this->setChecklistVariables($_REQUEST["targetclid"]);
 		}
 		elseif(array_key_exists('clid',$_REQUEST)){
 			//Limit by checklist voucher links
@@ -756,21 +768,20 @@ class OccurrenceManager extends OccurrenceTaxaManager {
 	}
 
 	private function setChecklistVariables($clid){
-		$voucherManager = new ChecklistVoucherAdmin($this->conn);
-		$voucherManager->setClid($clid);
-		$voucherManager->setCollectionVariables();
-		$this->clName = $voucherManager->getClName();
-		$this->clFootprintWkt = $voucherManager->getClFootprintWkt();
+		$this->voucherManager = new ChecklistVoucherAdmin($this->conn);
+		$this->voucherManager->setClid($clid);
+		$this->voucherManager->setCollectionVariables();
 	}
 
 	//Misc return functions
 	//Setters and getters
 	public function getClName(){
-		return $this->clName;
+		if(!$this->voucherManager) return false;
+		return $this->voucherManager->getClName();
 	}
 
 	public function getClFootprintWkt(){
-		return $this->clFootprintWkt;
+		return $this->voucherManager->getClFootprintWkt();
 	}
 
 	public function getTaxaArr(){

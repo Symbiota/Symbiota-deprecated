@@ -50,8 +50,8 @@ class OccurrenceMapManager extends OccurrenceManager {
 		elseif(array_key_exists("polycoords",$_REQUEST) && $_REQUEST["polycoords"]){
 			$this->searchTermArr["polycoords"] = $_REQUEST["polycoords"];
 		}
-		elseif($this->clFootprintWkt){
-			$this->searchTermArr["polycoords"] = $this->clFootprintWkt;
+		elseif($this->getClFootprintWkt()){
+			$this->searchTermArr["polycoords"] = $this->getClFootprintWkt();
 		}
 	}
 
@@ -160,7 +160,7 @@ class OccurrenceMapManager extends OccurrenceManager {
 			$sqlWhere .= ($sqlWhere?'AND ':'WHERE ').'(o.DecimalLatitude IS NOT NULL AND o.DecimalLongitude IS NOT NULL) ';
 			if(array_key_exists('clid',$this->searchTermArr) && $this->searchTermArr['clid']){
 				if(isset($this->searchTermArr["cltype"]) && $this->searchTermArr["cltype"] == 'all'){
-					$sqlWhere .= "AND (ST_Within(p.point,GeomFromText('".$this->clFootprintWkt." '))) ";
+					$sqlWhere .= "AND (ST_Within(p.point,GeomFromText('".$this->getClFootprintWkt()." '))) ";
 				}
 				else{
 					$sqlWhere .= "AND (v.clid IN(".$this->searchTermArr['clid'].")) ";

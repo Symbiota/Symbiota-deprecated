@@ -242,7 +242,8 @@ class OccurrenceGeorefTools {
 		}
 		if($searchType == 2){
 			//Wildcard search
-			$sqlWhere .= 'AND (o.locality LIKE "%'.$locality.'%") ';
+			$sql .= 'INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ';
+			$sqlWhere .= 'AND (MATCH(f.locality) AGAINST(\'"'.$locality.'"\' )) IN BOOLEAN MODE';
 		}
 		elseif($searchType == 3){
 			//Deep search
