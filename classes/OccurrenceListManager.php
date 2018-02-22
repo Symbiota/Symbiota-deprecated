@@ -28,7 +28,7 @@ class OccurrenceListManager extends OccurrenceManager{
 		if(!$this->recordCount || $this->reset){
 			$this->setRecordCnt($sqlWhere);
 		}
-		$sql = 'SELECT DISTINCT o.occid, c.collid, c.institutioncode, c.collectioncode, c.collectionname, c.icon, '.
+		$sql = 'SELECT o.occid, c.collid, c.institutioncode, c.collectioncode, c.collectionname, c.icon, '.
 			'o.catalognumber, o.family, o.sciname, o.scientificnameauthorship, o.tidinterpreted, o.recordedby, o.recordnumber, o.eventdate, o.year, o.enddayofyear, '.
 			'o.country, o.stateprovince, o.county, o.locality, o.decimallatitude, o.decimallongitude, o.localitysecurity, o.localitysecurityreason, '.
 			'o.habitat, o.minimumelevationinmeters, o.maximumelevationinmeters, o.observeruid, c.sortseq '.

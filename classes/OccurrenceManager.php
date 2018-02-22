@@ -50,14 +50,14 @@ class OccurrenceManager extends OccurrenceTaxaManager {
 
 	private function setSqlWhere(){
 		$sqlWhere = "";
-		if(array_key_exists("targetclid",$this->searchTermArr)){
+		if(array_key_exists("targetclid",$this->searchTermArr) && is_numeric($this->searchTermArr["targetclid"])){
 			//Used to exclude vouchers alredy linked to target checklist
-			$clid = $this->searchTermArr["targetclid"];
-			if(is_numeric($clid)){
-				$sqlWhere .= 'AND ('.$voucherManager->getSqlFrag().') '.
-						'AND (o.occid NOT IN(SELECT occid FROM fmvouchers WHERE clid = '.$clid.')) ';
-				$this->displaySearchArr[] = $voucherManager->getQueryVariableStr();
-			}
+			$sqlWhere .= 'AND ('.$voucherManager->getSqlFrag().') AND (o.occid NOT IN(SELECT occid FROM fmvouchers WHERE clid = '.$this->searchTermArr["targetclid"].')) ';
+			$this->displaySearchArr[] = $voucherManager->getQueryVariableStr();
+		}
+		elseif(array_key_exists('clid',$this->searchTermArr) && is_numeric($this->searchTermArr['clid'])){
+			$sqlWhere .= 'AND (v.clid = '.$this->searchTermArr['clid'].') ';
+			$this->displaySearchArr[] = 'Checklist ID: '.$this->searchTermArr['clid'];
 		}
 		elseif(array_key_exists("db",$this->searchTermArr) && $this->searchTermArr['db']){
 			$sqlWhere .= OccurrenceSearchSupport::getDbWhereFrag($this->cleanInStr($this->searchTermArr['db']));
@@ -372,7 +372,9 @@ class OccurrenceManager extends OccurrenceTaxaManager {
 
 	protected function getTableJoins($sqlWhere){
 		$sqlJoin = '';
-		if(array_key_exists('clid',$this->searchTermArr) && $this->searchTermArr['clid']) $sqlJoin .= 'INNER JOIN fmvouchers v ON o.occid = v.occid ';
+		if(array_key_exists('clid',$this->searchTermArr) && $this->searchTermArr['clid']){
+			$sqlJoin .= 'INNER JOIN fmvouchers v ON o.occid = v.occid ';
+		}
 		if(strpos($sqlWhere,'MATCH(f.recordedby)') || strpos($sqlWhere,'MATCH(f.locality)')){
 			$sqlJoin .= 'INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ';
 		}
