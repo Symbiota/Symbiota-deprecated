@@ -80,7 +80,7 @@ elseif($action == 'listdupsrecordedby'){
 		}
 	</script>
 </head>
-<body style="margin-left:0px;margin-right:0px">
+<body style="background-color:white;margin-left:0px;margin-right:0px">
 	<div class='navpath'>
 		<a href="../../index.php">Home</a> &gt;&gt;
 		<a href="../misc/collprofiles.php?collid=<?php echo $collid; ?>&emode=1">Collection Management</a> &gt;&gt;

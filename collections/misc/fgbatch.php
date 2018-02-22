@@ -1,6 +1,6 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/OccurrenceAPIManager.php');
+include_once($serverRoot.'/classes/FieldGuideManager.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $action = array_key_exists("action",$_POST)?$_POST["action"]:"";
@@ -8,7 +8,7 @@ $collId = array_key_exists("collid",$_REQUEST)?$_REQUEST["collid"]:0;
 $taxon = array_key_exists("taxon",$_POST)?$_POST["taxon"]:'';
 $jobId = array_key_exists("jobid",$_POST)?$_POST["jobid"]:0;
 
-$apiManager = new OccurrenceAPIManager();
+$apiManager = new FieldGuideManager();
 $currentJobs = array();
 $currentResults = array();
 $currentCount = 0;
@@ -24,7 +24,9 @@ if($SYMB_UID){
 
 if($isEditor){
     if($action == 'Initiate Process'){
-        $statusStr = $apiManager->initiateFGBatchProcess($collId,$taxon);
+        $apiManager->setCollID($collId);
+        $apiManager->setTaxon($taxon);
+        $statusStr = $apiManager->initiateFGBatchProcess();
     }
     if($action == 'Cancel Job'){
         $statusStr = $apiManager->cancelFGBatchProcess($collId,$jobId);
@@ -160,7 +162,7 @@ if($isEditor){
                 ?>
                 <div style="width:650px;margin-left:auto;margin-right:auto;">
                     <h2>Current Jobs:</h2>
-                    <table class="styledtable" style="font-family:Arial;font-size:12px;width:370px;margin-left:auto;margin-right:auto;">
+                    <table class="styledtable" style="font-family:Arial;font-size:12px;width:570px;margin-left:auto;margin-right:auto;">
                         <tr>
                             <th style="width:100px;">Date Initiated</th>
                             <th style="width:250px;">Parent Taxon</th>
@@ -200,7 +202,7 @@ if($isEditor){
                         <?php
                         foreach($currentResults as $job => $jArr){
                             echo '<tr>';
-                            echo '<td><a href="fgresults.php?collid='.$collId.'&resid='.$job.'" target="_blank">View Results</a></td>';
+                            echo '<td><a href="fgresults.php?collid='.$collId.'&resid='.$job.'">View Results</a></td>';
                             echo '<td>'.$jArr['inidate'].'</td>';
                             echo '<td>'.$jArr['recdate'].'</td>';
                             echo '<td>'.$jArr['taxon'].'</td>';
