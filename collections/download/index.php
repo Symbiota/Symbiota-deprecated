@@ -5,6 +5,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 $sourcePage = array_key_exists("sourcepage",$_REQUEST)?$_REQUEST["sourcepage"]:"specimen";
 $downloadType = array_key_exists("dltype",$_REQUEST)?$_REQUEST["dltype"]:"specimen";
 $taxonFilterCode = array_key_exists("taxonFilterCode",$_REQUEST)?$_REQUEST["taxonFilterCode"]:0;
+$displayHeader = array_key_exists("displayheader",$_REQUEST)?$_REQUEST["displayheader"]:0;
 
 $searchVar = $_REQUEST['searchvar'];
 ?>
@@ -70,27 +71,29 @@ $searchVar = $_REQUEST['searchvar'];
 	</script>
 </head>
 <body>
-<?php
-	$displayLeftMenu = (isset($collections_download_downloadMenu)?$collections_download_downloadMenu:false);
-	include($SERVER_ROOT.'/header.php');
-	if(isset($collections_download_downloadCrumbs)){
-		if($collections_download_downloadCrumbs){
+	<?php
+	if($displayHeader){
+		$displayLeftMenu = (isset($collections_download_downloadMenu)?$collections_download_downloadMenu:false);
+		include($SERVER_ROOT.'/header.php');
+		if(isset($collections_download_downloadCrumbs)){
+			if($collections_download_downloadCrumbs){
+				?>
+				<div class='navpath'>
+					<?php echo $collections_download_downloadCrumbs; ?>
+					<b>Specimen Download</b>
+				</div>
+				<?php
+			}
+		}
+		else{
 			?>
-			<div class='navpath'>
-				<?php echo $collections_download_downloadCrumbs; ?>
-				<b>Specimen Download</b>
+			<div class="navpath">
+				<a href="../../index.php">Home</a> &gt;&gt;
+				<a href="#" onclick="closePage(0)">Return to Search Page</a> &gt;&gt;
+				<b>Occurrence Record Download</b>
 			</div>
 			<?php
 		}
-	}
-	else{
-		?>
-		<div class="navpath">
-			<a href="../../index.php">Home</a> &gt;&gt;
-			<a href="#" onclick="closePage(0)">Return to Search Page</a> &gt;&gt;
-			<b>Occurrence Record Download</b>
-		</div>
-		<?php
 	}
 	?>
 
@@ -237,8 +240,8 @@ $searchVar = $_REQUEST['searchvar'];
 			</form>
 		</div>
 	</div>
-<?php
-	include($SERVER_ROOT.'/footer.php');
-?>
+	<?php
+	if($displayHeader) include($SERVER_ROOT.'/footer.php');
+	?>
 </body>
 </html>
