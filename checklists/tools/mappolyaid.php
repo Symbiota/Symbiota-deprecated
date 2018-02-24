@@ -9,6 +9,7 @@ $formSubmit = array_key_exists("formsubmit",$_POST)?$_POST["formsubmit"]:0;
 $latDef = array_key_exists("latdef",$_REQUEST)?$_REQUEST["latdef"]:'';
 $lngDef = array_key_exists("lngdef",$_REQUEST)?$_REQUEST["lngdef"]:'';
 $zoom = array_key_exists("zoom",$_REQUEST)&&$_REQUEST["zoom"]?$_REQUEST["zoom"]:5;
+$eMode = array_key_exists("emode",$_REQUEST)?$_REQUEST["emode"]:1;
 
 $clManager = new ChecklistAdmin();
 $clManager->setClid($clid);
@@ -93,7 +94,7 @@ else{
 					polygonOptions: polyOptions
 				});
 
-				drawingManager.setMap(map);
+				drawingManager.setMap(<?php echo ($eMode?'map':'null'); ?>);
 
 				google.maps.event.addListener(drawingManager, 'overlaycomplete', function(e) {
 					if (e.type != google.maps.drawing.OverlayType.MARKER) {
@@ -173,7 +174,7 @@ else{
 						strokeWeight: 0,
 						fillOpacity: 0.45,
 						editable: true,
-						draggable: true,
+						draggable: false,
 						map: map
 					});
 					footPoly.type = 'polygon';
@@ -199,7 +200,7 @@ else{
 
 			function setSelection(shape) {
 				selectedShape = shape;
-				selectedShape.setEditable(true);
+				selectedShape.setEditable(<?php echo ($eMode?'true':'false'); ?>);
 				if (shape.type == 'polygon') {
 					setPolygonStr(shape);
 				}
@@ -265,13 +266,19 @@ else{
 					<input name="lngdef" type="hidden" value="<?php echo $lngDef; ?>" />
 					<input name="zoom" type="hidden" value="<?php echo $zoom; ?>" />
 				</div>
-				<div style="float:left">
-					<button type="button" onclick="resetPolygon()">Redraw Polygon</button>
-					<a href="#" onclick="toggle('helptext')"><img alt="Display Help Text" src="../../images/qmark_big.png" style="width:15px;" /></a><br/>
-					<button type="button" onclick="reformCoordinates(this.form);">Reformat Coordinates</button><br/>
-					<button name="formsubmit" type="submit" value="save">Save Polygon</button><br/>
-					<button name="formsubmit" type="submit" value="save" onclick="deleteSelectedShape(this.form)">Delete Selected Shape</button>
-				</div>
+				<?php
+				if($eMode){
+					?>
+					<div style="float:left">
+						<button type="button" onclick="resetPolygon()">Redraw Polygon</button>
+						<a href="#" onclick="toggle('helptext')"><img alt="Display Help Text" src="../../images/qmark_big.png" style="width:15px;" /></a><br/>
+						<button type="button" onclick="reformCoordinates(this.form);">Reformat Coordinates</button><br/>
+						<button name="formsubmit" type="submit" value="save">Save Polygon</button><br/>
+						<button name="formsubmit" type="submit" value="save" onclick="deleteSelectedShape(this.form)">Delete Selected Shape</button>
+					</div>
+					<?php
+				}
+				?>
 				<div style="clear: both;">
 					<div id="helptext" style="clear:both;display:none;">
 						Click on polygon symbol to activate polygon tool and create a shape representing research area.<br/>

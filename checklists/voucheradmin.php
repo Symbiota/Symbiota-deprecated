@@ -168,17 +168,31 @@ if($clid && $isEditor){
 									<b><?php echo $LANG['LONGW'];?>:</b>
 									<input id="leftlong" type="text" name="lngwest" style="width:70px;" value="<?php echo isset($termArr['lngwest'])?$termArr['lngwest']:''; ?>" title="Longitude West" />
 								</div>
+								<?php
+								/*
+								if($clManager->getClFootprintWkt()){
+									?>
+									<div>
+										<input name="includewkt" value="1" type="checkbox" <?php if(isset($termArr['includewkt'])) echo 'CHECKED'; ?> />
+										<?php echo (isset($LANG['POLYGON_SEARCH'])?$LANG['POLYGON_SEARCH']:'Search based on polygon defining checklist research boundaries'); ?>
+										<a href="#" onclick="openPopup('tools/mappolyaid.php?clid=<?php echo $clid; ?>&emode=0','mappopup');return false;" target="_blank" title="View Polygon"><img src="../images/world.png" style="width:12px" /></a>
+										<a href="checklistadmin.php?clid=<?php echo $clid; ?>&tabindex=1" target="_blank" title="Edit Metadata and polygon"><img src="../images/edit.png" style="width:12px" /></a>
+									</div>
+									<?php
+								}
+								*/
+								?>
 								<div>
 									<input type="checkbox" name="latlngor" value="1" <?php if(isset($termArr['latlngor'])) echo 'CHECKED'; ?> />
-									<?php echo $LANG['INCLUDELATLONG'];?>
+									<?php echo (isset($LANG['INCLUDELATLONG']) && $LANG['INCLUDELATLONG']?$LANG['INCLUDELATLONG']:'Match on Lat/Long OR locality (include non-georeferenced occurrences)');?>
 								</div>
 								<div>
 									<input name="onlycoord" value="1" type="checkbox" <?php if(isset($termArr['onlycoord'])) echo 'CHECKED'; ?> />
-									<?php echo $LANG['ONLYCOORD'];?>
+									<?php echo (isset($LANG['ONLYCOORD'])?$LANG['ONLYCOORD']:'Only include occurrences with coordinates');?>
 								</div>
 								<div>
 									<input name="excludecult" value="1" type="checkbox" <?php if(isset($termArr['excludecult'])) echo 'CHECKED'; ?> />
-									<?php echo $LANG['EXCLUDE'];?>
+									<?php echo (isset($LANG['EXCLUDE'])?$LANG['EXCLUDE']:'Exclude cultivated species');?>
 								</div>
 							</div>
 						</td>
@@ -372,7 +386,11 @@ if($clid && $isEditor){
 						<li><a href="voucherreporthandler.php?rtype=fullcsv&clid=<?php echo $clid; ?>"><?php echo $LANG['FULLSPECLIST'];?></a></li>
 						<li><a href="checklist.php?printmode=1&showvouchers=0&defaultoverride=1&cl=<?php echo $clid; ?>" target="_blank"><?php echo $LANG['FULLPRINT'];?></a></li>
 						<li><a href="voucherreporthandler.php?rtype=fullvoucherscsv&clid=<?php echo $clid; ?>"><?php echo $LANG['FULLSPECLISTVOUCHER'];?></a></li>
-						<li><a href="voucherreporthandler.php?rtype=vouchersonlycsv&clid=<?php echo $clid; ?>"><?php echo $LANG['VOUCHERONLY'];?></a></li>
+						<li>
+							<a href="#" onclick="openPopup('../collections/download/index.php?searchvar=<?php echo urlencode('clid='.$clid); ?>&noheader=1','repvouchers');return false;">
+								<?php echo $LANG['VOUCHERONLY'];?>
+							</a>
+						</li>
 						<li><a href="checklist.php?printmode=1&showvouchers=1&defaultoverride=1&cl=<?php echo $clid; ?>" target="_blank"><?php echo $LANG['FULLPRINTVOUCHER'];?></a></li>
 						<li><?php echo $LANG['SPECMISSINGTITLE'];?></li>
 					</ul>
@@ -400,4 +418,4 @@ else{
 include($SERVER_ROOT.'/footer.php');
 ?>
 </body>
-</html> 
+</html>

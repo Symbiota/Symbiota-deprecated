@@ -24,6 +24,7 @@ $LANG['LONGE'] = 'Long Este';
 $LANG['LONGW'] = 'Long Oeste';
 $LANG['INCLUDELATLONG'] = 'Incluir Lat/Long y localidad como una condici&oacute;n "OR"';
 $LANG['ONLYCOORD'] = 'Solamente incluir ocurrencias con coordenadas';
+$LANG['POLYGON_SEARCH'] = 'Search based on polygon defining checklist research boundaries';
 $LANG['EXCLUDE'] = 'Excluir especies cultivadas';
 $LANG['TAXON'] = 'Tax&oacute;n';
 $LANG['SAVESEARCH'] = 'Guardar T&eacute;rminos de B&uacute;squeda';

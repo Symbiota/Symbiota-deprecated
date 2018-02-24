@@ -2,9 +2,9 @@
 include_once('../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/ChecklistVoucherAdmin.php');
 
-$clid = $_REQUEST['clid']; 
-$rType = $_REQUEST['rtype']; 
-	
+$clid = $_REQUEST['clid'];
+$rType = $_REQUEST['rtype'];
+
 $vManager = new ChecklistVoucherAdmin();
 $vManager->setClid($clid);
 $vManager->setCollectionVariables();
@@ -20,8 +20,5 @@ elseif($rType == 'fullcsv'){
 }
 elseif($rType == 'fullvoucherscsv'){
 	$vManager->downloadVoucherCsv();
-}
-elseif($rType == 'vouchersonlycsv'){
-	$vManager->downloadVoucherOnlyCsv();
 }
 ?>

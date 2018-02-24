@@ -24,6 +24,7 @@ $LANG['LONGE'] = 'Long East';
 $LANG['LONGW'] = 'Long West';
 $LANG['INCLUDELATLONG'] = 'Match on Lat/Long OR locality (include non-georeferenced occurrences)';
 $LANG['ONLYCOORD'] = 'Only include occurrences with coordinates';
+$LANG['POLYGON_SEARCH'] = 'Search based on polygon defining checklist research boundaries';
 $LANG['EXCLUDE'] = 'Exclude cultivated species';
 $LANG['TAXON'] = 'Taxon';
 $LANG['SAVESEARCH'] = 'Save Search Terms';
