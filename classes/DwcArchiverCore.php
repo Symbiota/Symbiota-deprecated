@@ -180,7 +180,7 @@ class DwcArchiverCore extends Manager{
 
 	private function setCollectionContacts(){
 		if($this->collArr){
-			$sql = 'SELECT DISTINCT  c.uid, c.collid, IFNULL(c.positionname,u.title) as positionname, c.role, u.firstname, u.lastname, c.nameoverride, u.title, CONCAT_WS(" ", u.firstname, u.lastname) AS contactname, '.
+			$sql = 'SELECT DISTINCT c.uid, c.collid, IFNULL(c.positionname,u.title) as positionname, c.role, u.firstname, u.lastname, c.nameoverride, u.title, CONCAT_WS(" ", u.firstname, u.lastname) AS contactname, '.
 				'u.institution, u.department, u.address, u.city, u.state, u.zip, u.country, u.phone, c.emailoverride, coll.email AS emailcoll, u.email AS emailuser, u.ispublic '.
 				'FROM omcollections coll INNER JOIN omcollectioncontacts c ON coll.collid = c.collid '.
 				'LEFT JOIN users u ON c.uid = u.uid '.
