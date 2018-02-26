@@ -39,7 +39,7 @@ class FieldGuideManager {
     }
 
     public function initiateFGBatchProcess(){
-        global $SERVER_ROOT, $CLIENT_ROOT;
+        global $SERVER_ROOT, $CLIENT_ROOT, $FIELDGUIDE_API_KEY;
         $status = '';
         $this->setServerDomain();
         $imgArr = $this->getFGBatchImgArr();
@@ -66,7 +66,7 @@ class FieldGuideManager {
             $pArr["job_id"] = $processDataArr["job_id"];
             $pArr["url"] = $dataFileUrl;
             $headers = array(
-                'authorization: Token 7044979d9ec245768dd7561d85865004',
+                'authorization: Token '.$FIELDGUIDE_API_KEY,
                 'Content-Type: application/x-www-form-urlencoded',
                 'Accept: application/json',
                 'Cache-Control: no-cache',
@@ -75,7 +75,7 @@ class FieldGuideManager {
             );
             $ch = curl_init();
             $options = array(
-                CURLOPT_URL => 'http://staging.fieldguide.net/api2/symbiota/submit_cv_job',
+                CURLOPT_URL => 'https://fieldguide.net/api2/symbiota/submit_cv_job',
                 CURLOPT_POST => true,
                 CURLOPT_HTTPHEADER => $headers,
                 CURLOPT_TIMEOUT => 90,
@@ -112,7 +112,7 @@ class FieldGuideManager {
     }
 
     public function cancelFGBatchProcess($collid,$jobId){
-        global $SERVER_ROOT;
+        global $SERVER_ROOT, $FIELDGUIDE_API_KEY;
         $status = '';
         $resultsCnt = 0;
         $fileArr = json_decode(file_get_contents($SERVER_ROOT.'/temp/data/fieldguide/'.$collid.'-FGLog.json'), true);
@@ -129,7 +129,7 @@ class FieldGuideManager {
         }
         $pArr["job_id"] = $jobID;
         $headers = array(
-            'authorization: Token 7044979d9ec245768dd7561d85865004',
+            'authorization: Token '.$FIELDGUIDE_API_KEY,
             'Content-Type: application/x-www-form-urlencoded',
             'Accept: application/json',
             'Cache-Control: no-cache',
@@ -138,7 +138,7 @@ class FieldGuideManager {
         );
         $ch = curl_init();
         $options = array(
-            CURLOPT_URL => 'http://staging.fieldguide.net/api2/symbiota/remove_cv_job',
+            CURLOPT_URL => 'https://fieldguide.net/api2/symbiota/remove_cv_job',
             CURLOPT_POST => true,
             CURLOPT_HTTPHEADER => $headers,
             CURLOPT_TIMEOUT => 90,
