@@ -140,7 +140,10 @@ if($isEditor){
             ?>
             <h1>Fieldguide Batch Processing</h1>
             <div style="margin:10px;">
-                Use this dialogue to initiate, cancel, or view the results of a Fieldguide Batch Image identification process.
+                Use this dialogue to initiate, cancel, or view the results of a Fieldguide Batch Image identification process. Either type a parent taxon into the Parent
+                Taxon box to initiate a batch image identification process for a particular taxonomic group, or leave the Parent Taxon box empty and click Initiate Process
+                to intiate a batch image identification process for your whole collection. Processes that are currently being identified by Fieldguide will show up in the
+                Current Jobs box. Once results are received from Fieldguide, the job will be moved to the Current Results box and you will be able to review the results.
             </div>
             <?php
             if($currentCount < 10){
