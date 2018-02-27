@@ -42,7 +42,7 @@ if($isEditor){
 ?>
 <html>
 <head>
-	<title><?php echo $collMetadata['collectionname']; ?> FieldGuide Batch Processing Utility</title>
+	<title><?php echo $collMetadata['collectionname']; ?> Fieldguide Batch Processing Utility</title>
 	<link href="../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
     <link rel="stylesheet" href="../../css/jquery-ui.css" type="text/css" />
@@ -109,7 +109,7 @@ if($isEditor){
 			echo "<div class='navpath'>";
 			echo "<a href='../../index.php'>Home</a> &gt;&gt; ";
 			echo $collections_misc_fgbatchCrumbs;
-			echo "<b>FieldGuide Batch Processing</b>";
+			echo "<b>Fieldguide Batch Processing</b>";
 			echo "</div>";
 		}
 	}
@@ -118,7 +118,7 @@ if($isEditor){
 		<div class='navpath'>
 			<a href='../../index.php'>Home</a> &gt;&gt; 
 			<a href='collprofiles.php?emode=1&collid=<?php echo $collId; ?>'>Collection Management</a> &gt;&gt; 
-			<b>FieldGuide Batch Processing</b>
+			<b>Fieldguide Batch Processing</b>
 		</div>
 		<?php 
 	}
@@ -138,9 +138,9 @@ if($isEditor){
         }
         if($isEditor && $imagesExist){
             ?>
-            <h1>FieldGuide Batch Processing</h1>
+            <h1>Fieldguide Batch Processing</h1>
             <div style="margin:10px;">
-                Use this dialogue to initiate, cancel, or view the results of a FieldGuide Batch Image identification process.
+                Use this dialogue to initiate, cancel, or view the results of a Fieldguide Batch Image identification process.
             </div>
             <?php
             if($currentCount < 10){

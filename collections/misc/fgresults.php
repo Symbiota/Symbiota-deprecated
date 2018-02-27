@@ -44,7 +44,7 @@ if($isEditor){
 ?>
 <html>
 <head>
-    <title><?php echo $collMetadata['collectionname']; ?> FieldGuide Results Viewer</title>
+    <title><?php echo $collMetadata['collectionname']; ?> Fieldguide Results Viewer</title>
     <link href="../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
     <link href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
     <link rel="stylesheet" href="../../css/jquery-ui.css" type="text/css" />
@@ -83,7 +83,7 @@ if($isEditor){
     <div class='navpath'>
         <a href='../../index.php'>Home</a> &gt;&gt;
         <a href='collprofiles.php?emode=1&collid=<?php echo $collId; ?>'>Collection Management</a> &gt;&gt;
-        <b>FieldGuide Results Viewer</b>
+        <b>Fieldguide Results Viewer</b>
     </div>
 
     <!-- inner text -->
@@ -137,7 +137,7 @@ if($isEditor){
                             <th>Current Identification</th>
                             <th></th>
                             <th></th>
-                            <th>FieldGuide Identification</th>
+                            <th>Fieldguide Identification</th>
                         </tr>
                         <?php
                         $setCnt = 0;
@@ -217,7 +217,7 @@ if($isEditor){
             }
             ?>
             <div>
-                <a href="fgbatch.php?collid=<?php echo $collId; ?>">Return to FieldGuide Batch Processing</a>
+                <a href="fgbatch.php?collid=<?php echo $collId; ?>">Return to Fieldguide Batch Processing</a>
             </div>
             <?php
         }
