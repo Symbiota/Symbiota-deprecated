@@ -39,6 +39,13 @@ ALTER TABLE `omcollectioncontacts`
 ALTER TABLE `omcollections` 
   ADD COLUMN `internalnotes` TEXT NULL AFTER `accessrights`;
 
+#Tag all collection admin and editors as non-volunteer crowdsource editors   
+UPDATE omcrowdsourcecentral c INNER JOIN omcrowdsourcequeue q ON c.omcsid = q.omcsid
+  INNER JOIN userroles r ON c.collid = r.tablepk AND q.uidprocessor = r.uid
+  SET q.isvolunteer = 0
+  WHERE r.role IN("CollAdmin","CollEditor") AND q.isvolunteer = 1;
+
+
 ALTER TABLE `omoccurrences`
   CHANGE COLUMN `labelProject` `labelProject` varchar(250) DEFAULT NULL,
   DROP INDEX `idx_occrecordedby`;

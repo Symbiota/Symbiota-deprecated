@@ -216,7 +216,7 @@ class OccurrenceIndividualManager extends Manager{
 		$sql = 'SELECT l.loanIdentifierOwn, i.institutioncode '.
 			'FROM omoccurloanslink llink INNER JOIN omoccurloans l ON llink.loanid = l.loanid '.
 			'INNER JOIN institutions i ON l.iidBorrower = i.iid '.
-			'WHERE (llink.occid = '.$this->occid.') AND llink.returndate IS NULL';
+			'WHERE (llink.occid = '.$this->occid.') AND (l.dateclosed IS NULL) AND (llink.returndate IS NULL)';
 		$result = $this->conn->query($sql);
 		if($result){
 			while($row = $result->fetch_object()){

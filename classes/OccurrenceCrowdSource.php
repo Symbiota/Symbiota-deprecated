@@ -106,43 +106,29 @@ class OccurrenceCrowdSource {
 	public function getProcessingStats(){
 		$retArr = array();
 		if($this->collid){
-			//Users to exclude because they are not volunteers
-			$editorUidArr = array();
-			$sql1 = 'SELECT DISTINCT uid FROM userroles '.
-				'WHERE ((role = "CollAdmin" OR role = "CollEditor") AND tablepk = '.$this->collid.') OR (role = "SuperAdmin")';
-			//$sql1 = 'SELECT DISTINCT uid FROM userpermissions '.
-			//	'WHERE (pname = "CollAdmin-'.$this->collid.'" OR pname = "CollEditor-'.$this->collid.'" OR pname = "SuperAdmin")';
-			$rs1 = $this->conn->query($sql1);
-			while($r1 = $rs1->fetch_object()){
-				$editorUidArr[] = $r1->uid;
-			}
-			$rs1->free();
-
 			//Processing scores by user
-			$sql = 'SELECT CONCAT_WS(", ", u.lastname, u.firstname) as username, u.uid, sum(IFNULL(q.points,0)) as usersum '.
+			$sql = 'SELECT CONCAT_WS(", ", u.lastname, u.firstname) as username, u.uid, q.isvolunteer, sum(IFNULL(q.points,0)) as usersum '.
 				'FROM omcrowdsourcequeue q INNER JOIN omcrowdsourcecentral c ON q.omcsid = c.omcsid '.
 				'INNER JOIN users u ON q.uidprocessor = u.uid '.
 				'WHERE c.collid = '.$this->collid.' '.
-				'GROUP BY username ORDER BY usersum DESC ';
+				'GROUP BY username, u.uid, q.isvolunteer ORDER BY usersum DESC ';
 			//echo $sql;
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
-				$tag = 'v';
-				if(in_array($r->uid,$editorUidArr)) $tag = 'e';
+				$tag = ($r->isvolunteer==1?'v':'e');
 				$retArr[$tag][$r->uid]['score'] = $r->usersum;
 				$retArr[$tag][$r->uid]['name'] = $r->username;
 			}
 			$rs->free();
 
 			//Processing counts by user
-			$sql = 'SELECT q.uidprocessor, q.reviewstatus, count(q.occid) as cnt '.
+			$sql = 'SELECT q.uidprocessor, q.reviewstatus, q.isvolunteer, count(q.occid) as cnt '.
 				'FROM omcrowdsourcequeue q INNER JOIN omcrowdsourcecentral c ON q.omcsid = c.omcsid '.
 				'WHERE c.collid = '.$this->collid.' AND q.uidprocessor IS NOT NULL '.
-				'GROUP BY q.uidprocessor, q.reviewstatus';
+				'GROUP BY q.uidprocessor, q.reviewstatus, q.isvolunteer';
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
-				$tag = 'v';
-				if(in_array($r->uidprocessor,$editorUidArr)) $tag = 'e';
+				$tag = ($r->isvolunteer==1?'v':'e');
 				$retArr[$tag][$r->uidprocessor][$r->reviewstatus] = $r->cnt;
 			}
 			$rs->free();
@@ -152,22 +138,13 @@ class OccurrenceCrowdSource {
 
 	public function getTopScores($catid){
 		$retArr = array();
-		//Users to exclude because they are not volunteers
-		$excludeUidArr = array();
-		$sql1 = 'SELECT DISTINCT uid FROM userroles '.
-			'WHERE (role = "CollAdmin") OR (role = "CollEditor") OR (role = "SuperAdmin")';
-		$rs1 = $this->conn->query($sql1);
-		while($r1 = $rs1->fetch_object()){
-			$excludeUidArr[] = $r1->uid;
-		}
-		$rs1->free();
 		//Get users
 		$sql = 'SELECT u.uid, CONCAT_WS(", ",u.lastname,u.firstname) as user, sum(q.points) AS toppoints '.
 			'FROM omcrowdsourcequeue q INNER JOIN users u ON q.uidprocessor = u.uid ';
 		if($catid){
 			$sql .= 'INNER JOIN omcrowdsourcecentral c ON q.omcsid = c.omcsid INNER JOIN omcollcatlink cat ON c.collid = cat.collid ';
 		}
-		$sql .= 'WHERE q.reviewstatus = 10 AND q.points is not null ';
+		$sql .= 'WHERE q.reviewstatus = 10 AND q.points is not null AND q.isvolunteer = 1 ';
 		if($catid){
 			$sql .= 'AND (cat.ccpk = '.$catid.') ';
 		}
@@ -175,13 +152,11 @@ class OccurrenceCrowdSource {
 		$rs = $this->conn->query($sql);
 		$cnt = 0;
 		while($r = $rs->fetch_object()){
-			if(!in_array($r->uid,$excludeUidArr)){
-				$topPoints = $r->toppoints;
-				if(!$topPoints) $topPoints = 0;
-				$retArr[$topPoints] = $r->user;
-				$cnt++;
-				if($cnt > 10) break;
-			}
+			$topPoints = $r->toppoints;
+			if(!$topPoints) $topPoints = 0;
+			$retArr[$topPoints] = $r->user;
+			$cnt++;
+			if($cnt > 10) break;
 		}
 		$rs->free();
 		return $retArr;
@@ -190,35 +165,48 @@ class OccurrenceCrowdSource {
 	public function getUserStats($catid){
 		$retArr = array();
 		$sql = 'SELECT c.collid, CONCAT_WS(":",c.institutioncode,c.collectioncode) as collcode, c.collectionname, '.
-			'q.reviewstatus, COUNT(q.occid) AS cnt, SUM(IFNULL(q.points,2)) AS points '.
+			'q.reviewstatus, q.isvolunteer, COUNT(q.occid) AS cnt, SUM(IFNULL(q.points,2)) AS points '.
 			'FROM omcrowdsourcequeue q INNER JOIN omcrowdsourcecentral csc ON q.omcsid = csc.omcsid '.
 			'INNER JOIN omcollections c ON csc.collid = c.collid ';
 		if($catid){
 			$sql .= 'INNER JOIN omcollcatlink cat ON c.collid = cat.collid WHERE (cat.ccpk = '.$catid.') ';
 		}
-		$sql .= 'GROUP BY c.collid,q.reviewstatus,q.uidprocessor '.
+		$sql .= 'GROUP BY c.collid,q.reviewstatus,q.uidprocessor,q.isvolunteer '.
 			'HAVING (q.uidprocessor = '.$GLOBALS['SYMB_UID'].' OR q.uidprocessor IS NULL) '.
 			'ORDER BY c.institutioncode,c.collectioncode,q.reviewstatus';
 		//echo $sql;
 		$rs = $this->conn->query($sql);
 		$pPoints = 0;
 		$aPoints = 0;
+		$nonVolunteerCnt = 0;
 		$totalCnt = 0;
 		while($r = $rs->fetch_object()){
 			$retArr[$r->collid]['name'] = $r->collectionname.' ('.$r->collcode.')';
 			$retArr[$r->collid]['cnt'][$r->reviewstatus] = $r->cnt;
-			$retArr[$r->collid]['points'][$r->reviewstatus] = $r->points;
+			if($r->isvolunteer) $retArr[$r->collid]['points'][$r->reviewstatus] = $r->points;
 			if($r->reviewstatus >= 10){
-				$aPoints += $r->points;
+				if($r->isvolunteer){
+					$aPoints += $r->points;
+				}
 			}
-			elseif($r->reviewstatus==5){
-				$pPoints += $r->points;
+			elseif($r->reviewstatus == 5){
+				if($r->isvolunteer){
+					$pPoints += $r->points;
+				}
 			}
-			if($r->reviewstatus > 0) $totalCnt += $r->cnt;
+			if($r->reviewstatus > 0){
+				if($r->isvolunteer){
+					$totalCnt += $r->cnt;
+				}
+				else{
+					$nonVolunteerCnt += $r->cnt;
+				}
+			}
 		}
 		$retArr['ppoints'] = $pPoints;
 		$retArr['apoints'] = $aPoints;
 		$retArr['totalcnt'] = $totalCnt;
+		$retArr['nonvolcnt'] = $nonVolunteerCnt;
 		$rs->free();
 		return $retArr;
 	}
