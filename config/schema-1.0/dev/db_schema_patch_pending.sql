@@ -34,6 +34,11 @@ GROUP BY initialtimestamp, uid
 HAVING cnt > 2) as inntab ON e.initialtimestamp = inntab.initialtimestamp AND e.uid = inntab.uid
 SET edittype = 1;
 
+#Tag all collection admin and editors as non-volunteer crowdsource editors   
+UPDATE omcrowdsourcecentral c INNER JOIN omcrowdsourcequeue q ON c.omcsid = q.omcsid
+  INNER JOIN userroles r ON c.collid = r.tablepk AND q.uidprocessor = r.uid
+  SET q.isvolunteer = 0
+  WHERE r.role IN("CollAdmin","CollEditor") AND q.isvolunteer = 1;
 
 
 #Occurrence Trait/Attribute adjustments
