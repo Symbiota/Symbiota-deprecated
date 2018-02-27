@@ -297,7 +297,7 @@ class FieldGuideManager {
             if($ifArr["status"] == 'OK'){
                 foreach($ifArr["result"] as $name){
                     if(!array_key_exists($name,$this->fgResTidArr)){
-                        $this->fgResTidArr[$name] = [];
+                        $this->fgResTidArr[$name] = array();
                     }
                 }
             }
