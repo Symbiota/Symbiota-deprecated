@@ -9,16 +9,19 @@ $vManager = new ChecklistVoucherAdmin();
 $vManager->setClid($clid);
 $vManager->setCollectionVariables();
 
-if($rType == 'missingoccurcsv'){
-	$vManager->exportMissingOccurCsv();
-}
-elseif($rType == 'problemtaxacsv'){
-	$vManager->exportProblemTaxaCsv();
-}
-elseif($rType == 'fullcsv'){
+if($rType == 'fullcsv'){
 	$vManager->downloadChecklistCsv();
 }
 elseif($rType == 'fullvoucherscsv'){
 	$vManager->downloadVoucherCsv();
+}
+elseif($rType == 'pensoftcsv'){
+	$vManager->downloadPensoftCsv();
+}
+elseif($rType == 'missingoccurcsv'){
+	$vManager->exportMissingOccurCsv();
+}
+elseif($rType == 'problemtaxacsv'){
+	$vManager->exportProblemTaxaCsv();
 }
 ?>
