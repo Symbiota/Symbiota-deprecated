@@ -63,7 +63,9 @@ class FieldGuideManager {
             fwrite($fp, json_encode($processDataArr));
             fclose($fp);
             $dataFileUrl = $this->serverDomain.$CLIENT_ROOT.(substr($CLIENT_ROOT,-1)=='/'?'':'/').'temp/data/fieldguide/'.$jsonFileName;
+            $responseUrl = $this->serverDomain.$CLIENT_ROOT.(substr($CLIENT_ROOT,-1)=='/'?'':'/').'webservices/fieldguidebatch.php';
             $pArr["job_id"] = $processDataArr["job_id"];
+            $pArr["response_url"] = $responseUrl;
             $pArr["url"] = $dataFileUrl;
             $headers = array(
                 'authorization: Token '.$FIELDGUIDE_API_KEY,
