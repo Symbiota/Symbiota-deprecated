@@ -10,15 +10,12 @@ $displayMode = array_key_exists('displaymode',$_REQUEST)?$_REQUEST['displaymode'
 if(!is_numeric($collid)) $collid = 0;
 if(!is_numeric($displayMode)) $displayMode = 0;
 
-$customField1 = array_key_exists('customfield1',$_REQUEST)?$_REQUEST['customfield1']:'';
-$customType1 = array_key_exists('customtype1',$_REQUEST)?$_REQUEST['customtype1']:'';
-$customValue1 = array_key_exists('customvalue1',$_REQUEST)?$_REQUEST['customvalue1']:'';
-$customField2 = array_key_exists('customfield2',$_REQUEST)?$_REQUEST['customfield2']:'';
-$customType2 = array_key_exists('customtype2',$_REQUEST)?$_REQUEST['customtype2']:'';
-$customValue2 = array_key_exists('customvalue2',$_REQUEST)?$_REQUEST['customvalue2']:'';
-$customField3 = array_key_exists('customfield3',$_REQUEST)?$_REQUEST['customfield3']:'';
-$customType3 = array_key_exists('customtype3',$_REQUEST)?$_REQUEST['customtype3']:'';
-$customValue3 = array_key_exists('customvalue3',$_REQUEST)?$_REQUEST['customvalue3']:'';
+$customField = array(); $customType = array(); $customValue = array();
+for($h=1;$h<4;$h++){
+	$customField[$h] = array_key_exists('customfield'.$h,$_REQUEST)?$_REQUEST['customfield'.$h]:'';
+	$customType[$h] = array_key_exists('customtype'.$h,$_REQUEST)?$_REQUEST['customtype'.$h]:'';
+	$customValue[$h] = array_key_exists('customvalue'.$h,$_REQUEST)?$_REQUEST['customvalue'.$h]:'';
+}
 
 $dlManager = new OccurrenceDownload();
 $collMeta = $dlManager->getCollectionMetadata($collid);
@@ -138,6 +135,7 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 			<?php
 			if($collid && $isEditor){
 				echo '<div style="clear:both;">';
+				$filterOptions = array('EQUALS'=>'EQUALS','NOTEQUALS'=>'NOT EQUALS','STARTS'=>'STARTS WITH','LESSTHAN'=>'LESS THAN','GREATERTHAN'=>'GREATER THAN','LIKE'=>'CONTAINS','NOTLIKE'=>'NOT CONTAINS','NULL'=>'IS NULL','NOTNULL'=>'IS NOT NULL');
 				if($displayMode == 1){
 					if($collMeta['manatype'] == 'Snapshot'){
 						?>
@@ -292,18 +290,18 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 												<option value="">---------------------------------</option>
 												<?php
 												foreach($advFieldArr as $k => $v){
-													echo '<option value="'.$k.'" '.($k==$customField1?'SELECTED':'').'>'.$v.'</option>';
+													echo '<option value="'.$k.'" '.($k==$customField[1]?'SELECTED':'').'>'.$v.'</option>';
 												}
 												?>
 											</select>
 											<select name="customtype1">
-												<option value="EQUALS">EQUALS</option>
-												<option <?php echo ($customType1=='STARTS'?'SELECTED':''); ?> value="STARTS">STARTS WITH</option>
-												<option <?php echo ($customType1=='LIKE'?'SELECTED':''); ?> value="LIKE">CONTAINS</option>
-												<option <?php echo ($customType1=='NULL'?'SELECTED':''); ?> value="NULL">IS NULL</option>
-												<option <?php echo ($customType1=='NOTNULL'?'SELECTED':''); ?> value="NOTNULL">IS NOT NULL</option>
+												<?php
+												foreach($filterOptions as $filterValue => $filterDisplay){
+													echo '<option '.($customType[1]=='.$filterValue.'?'SELECTED':'').' value="'.$filterValue.'">'.$filterDisplay.'</option>';
+												}
+												?>
 											</select>
-											<input name="customvalue1" type="text" value="<?php echo $customValue1; ?>" style="width:200px;" />
+											<input name="customvalue1" type="text" value="<?php echo $customValue[1]; ?>" style="width:200px;" />
 										</div>
 									</td>
 								</tr>
@@ -387,63 +385,31 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 										</div>
 									</td>
 									<td>
-										<div style="margin:10px 0px;">
-											<select name="customfield1" style="width:200px">
-												<option value="">Select Field Name</option>
-												<option value="">---------------------------------</option>
-												<?php
-												foreach($advFieldArr as $k => $v){
-													echo '<option value="'.$k.'" '.($k==$customField1?'SELECTED':'').'>'.$v.'</option>';
-												}
-												?>
-											</select>
-											<select name="customtype1">
-												<option value="EQUALS">EQUALS</option>
-												<option <?php echo ($customType1=='STARTS'?'SELECTED':''); ?> value="STARTS">STARTS WITH</option>
-												<option <?php echo ($customType1=='LIKE'?'SELECTED':''); ?> value="LIKE">CONTAINS</option>
-												<option <?php echo ($customType1=='NULL'?'SELECTED':''); ?> value="NULL">IS NULL</option>
-												<option <?php echo ($customType1=='NOTNULL'?'SELECTED':''); ?> value="NOTNULL">IS NOT NULL</option>
-											</select>
-											<input name="customvalue1" type="text" value="<?php echo $customValue1; ?>" style="width:200px;" />
-										</div>
-										<div style="margin:10px 0px;">
-											<select name="customfield2" style="width:200px">
-												<option value="">Select Field Name</option>
-												<option value="">---------------------------------</option>
-												<?php
-												foreach($advFieldArr as $k => $v){
-													echo '<option value="'.$k.'" '.($k==$customField2?'SELECTED':'').'>'.$v.'</option>';
-												}
-												?>
-											</select>
-											<select name="customtype2">
-												<option value="EQUALS">EQUALS</option>
-												<option <?php echo ($customType2=='STARTS'?'SELECTED':''); ?> value="STARTS">STARTS WITH</option>
-												<option <?php echo ($customType2=='LIKE'?'SELECTED':''); ?> value="LIKE">CONTAINS</option>
-												<option <?php echo ($customType2=='NULL'?'SELECTED':''); ?> value="NULL">IS NULL</option>
-												<option <?php echo ($customType2=='NOTNULL'?'SELECTED':''); ?> value="NOTNULL">IS NOT NULL</option>
-											</select>
-											<input name="customvalue2" type="text" value="<?php echo $customValue2; ?>" style="width:200px;" />
-										</div>
-										<div style="margin:10px 0px;">
-											<select name="customfield3" style="width:200px">
-												<option value="">Select Field Name</option>
-												<option value="">---------------------------------</option>
-												<?php
-												foreach($advFieldArr as $k => $v){
-													echo '<option value="'.$k.'" '.($k==$customField3?'SELECTED':'').'>'.$v.'</option>';
-												}
-												?>
-											</select>
-											<select name="customtype3">
-												<option value="EQUALS">EQUALS</option>
-												<option <?php echo ($customType3=='STARTS'?'SELECTED':''); ?> value="STARTS">STARTS WITH</option>
-												<option <?php echo ($customType3=='LIKE'?'SELECTED':''); ?> value="LIKE">CONTAINS</option>
-												<option <?php echo ($customType3=='NULL'?'SELECTED':''); ?> value="NULL">IS NULL</option>
-												<option <?php echo ($customType3=='NOTNULL'?'SELECTED':''); ?> value="NOTNULL">IS NOT NULL</option>
-											</select>
-											<input name="customvalue3" type="text" value="<?php echo $customValue3; ?>" style="width:200px;" />
-										</div>
+										<?php
+										for($i=1;$i<4;$i++){
+											?>
+											<div style="margin:10px 0px;">
+												<select name="customfield<?php echo $i; ?>" style="width:200px">
+													<option value="">Select Field Name</option>
+													<option value="">---------------------------------</option>
+													<?php
+													foreach($advFieldArr as $k => $v){
+														echo '<option value="'.$k.'" '.($k==$customField[1]?'SELECTED':'').'>'.$v.'</option>';
+													}
+													?>
+												</select>
+												<select name="customtype<?php echo $i; ?>">
+													<?php
+													foreach($filterOptions as $filterValue => $filterDisplay){
+														echo '<option '.($customType[1]=='.$filterValue.'?'SELECTED':'').' value="'.$filterValue.'">'.$filterDisplay.'</option>';
+													}
+													?>
+												</select>
+												<input name="customvalue<?php echo $i; ?>" type="text" value="<?php echo $customValue[1]; ?>" style="width:200px;" />
+											</div>
+											<?php
+										}
+										?>
 									</td>
 								</tr>
 								<?php

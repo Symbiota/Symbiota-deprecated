@@ -1,7 +1,7 @@
 <?php
 include_once($SERVER_ROOT.'/config/dbconnection.php');
 class OccurrenceDownload{
-	
+
 	private $conn;
 	private $redactLocalities = true;
 	private $rareReaderArr = array();
@@ -15,11 +15,11 @@ class OccurrenceDownload{
 	private $sqlWhere = '';
 	private $conditionArr = array();
 	private $taxonFilter;
-	
 	private $errorArr = array();
+
 	public function __construct(){
 		$this->conn = MySQLiConnectionFactory::getCon('readonly');
-		
+
 		//Set rare species variables
 		$this->securityArr = Array('locality','locationRemarks','minimumElevationInMeters','maximumElevationInMeters','verbatimElevation',
 				'decimalLatitude','decimalLongitude','geodeticDatum','coordinateUncertaintyInMeters','footprintWKT','verbatimCoordinates',
@@ -33,15 +33,17 @@ class OccurrenceDownload{
 		if(array_key_exists('RareSppReader', $GLOBALS['USER_RIGHTS'])){
 			$this->rareReaderArr = array_unique(array_merge($this->rareReaderArr,$GLOBALS['USER_RIGHTS']['RareSppReader']));
 		}
-		
+
 		//Character set
 		$this->charSetSource = strtoupper($GLOBALS['CHARSET']);
 		$this->charSetOut = $this->charSetSource;
 	}
+
 	public function __destruct(){
 		if(!($this->conn === false)) $this->conn->close();
 		//if($this->zipArchive) $this->zipArchive->close();
 	}
+
 	public function downloadData(){
 		$archiveFile = '';
 		$outstream = null;
@@ -120,7 +122,7 @@ class OccurrenceDownload{
 		//Clean up
 		if(file_exists($filePath.$fileName)) unlink($filePath.$fileName);
 	}
-	
+
 	private function writeOutData($outstream){
 		$recCnt = 0;
 		if($outstream){
@@ -161,15 +163,15 @@ class OccurrenceDownload{
 	 private function writeXmlFile($sql){
 	 //$this->downloadPath .= ".xml";
 	 //$this->downloadUrl .= ".xml";
-	 
+
 	 header("Content-Type: text/html/force-download");
 	 header("Content-Disposition: attachment; filename='symbiotadownload".time().".xml'");
 	 $out = new XMLWriter();
 	 $out->openURI('php://output');
 	 $out->xmlwriter_start_document("1.0","ISO-8859-1");
-	 
-	 
-	 
+
+
+
 	 <?xml version="1.0" encoding="UTF-8"?>
 	 $xw->startElementNS('ns0', 'approvePOrderResponse',
 	 'http://PhpRESTAppLib/POrderApprovalHtIF');
@@ -181,11 +183,11 @@ class OccurrenceDownload{
 	 xsi:schemaLocation="http://rs.tdwg.org/dwc/dwcrecord/ http://rs.tdwg.org/dwc/xsd/tdwg_dwc_simple.xsd">
 	 <SimpleDarwinRecord>
 	 <dc:type>Taxon</dc:type>
-	 
+
 	 xmlwriter_start_attribute($xml_resource , 'access_year');
 	 xmlwriter_write_attribute($xml_resource, 'access_year' , '2008');
 	 xmlwriter_end_attribute($xml_resource);
-	 
+
 	 StreamResult sr = new StreamResult(this.downloadPath);
 	 SAXTransformerFactory tf = (SAXTransformerFactory)SAXTransformerFactory.newInstance();
 	 TransformerHandler th = tf.newTransformerHandler();
@@ -235,6 +237,7 @@ class OccurrenceDownload{
 	 this.closeConnection();
 	 $result->close();
 	 }*/
+
 	//Return latest activity
 	public function getDataEntryActivity($format='rss',$days=0, $limit=0){
 		//format: rss, json
@@ -246,8 +249,9 @@ class OccurrenceDownload{
 			return $this->getDataEntryXML($days,$limit);
 		}
 	}
+
 	private function getDataEntryXML($days, $limit){
-		
+
 		//Create new document and write out to target
 		$newDoc = new DOMDocument('1.0',$this->charSetOut);
 		//Add root element
@@ -259,12 +263,12 @@ class OccurrenceDownload{
 		//Add Channel
 		$channelElem = $newDoc->createElement('channel');
 		$rootElem->appendChild($channelElem);
-		
+
 		//Add title, link, description, language
 		$titleElem = $newDoc->createElement('title');
 		$titleElem->appendChild($newDoc->createTextNode($GLOBALS['DEFAULT_TITLE'].' New Occurrence Records'));
 		$channelElem->appendChild($titleElem);
-		
+
 		$serverDomain = "http://";
 		if((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || $_SERVER['SERVER_PORT'] == 443) $serverDomain = "https://";
 		$serverDomain .= $_SERVER["SERVER_NAME"];
@@ -273,7 +277,7 @@ class OccurrenceDownload{
 		if($serverDomain){
 			$urlPathPrefix = $serverDomain.$GLOBALS['CLIENT_ROOT'].(substr($GLOBALS['CLIENT_ROOT'],-1)=='/'?'':'/');
 		}
-		
+
 		$linkElem = $newDoc->createElement('link');
 		$linkElem->appendChild($newDoc->createTextNode($urlPathPrefix));
 		$channelElem->appendChild($linkElem);
@@ -301,7 +305,7 @@ class OccurrenceDownload{
 		while($r = $rs->fetch_object()){
 			$itemElem = $newDoc->createElement('item');
 			$channelElem->appendChild($itemElem);
-			
+
 			$itemTitleElem = $newDoc->createElement('title');
 			$titleStr = $r->sciname.' - '.$r->recordedby.' '.($r->recordnumber?'#'.$r->recordnumber:'');
 			$itemTitleElem->appendChild($newDoc->createTextNode($titleStr));
@@ -310,7 +314,7 @@ class OccurrenceDownload{
 			$itemElem->appendChild($collLinkElem);
 			$catalogLinkElem = $newDoc->createElement('catalogNumber',$r->catalognumber);
 			$itemElem->appendChild($catalogLinkElem);
-			
+
 			if($r->guidtarget){
 				$occID = $r->guid;
 				if($r->guidtarget == 'occurrenceId'){
@@ -322,11 +326,11 @@ class OccurrenceDownload{
 				$guidLinkElem = $newDoc->createElement('occurrenceID',$occID);
 				$itemElem->appendChild($guidLinkElem);
 			}
-			
+
 			$itemLinkElem = $newDoc->createElement('link');
 			$itemLinkElem->appendChild($newDoc->createTextNode($serverDomain.'/collections/individual/index.php?occid='.$r->occid));
 			$itemElem->appendChild($itemLinkElem);
-			
+
 			$tnUrl = $r->thumbnailurl;
 			if(substr($tnUrl,0,1) == '/'){
 				if(isset($GLOBALS['IMAGE_DOMAIN']) && $GLOBALS['IMAGE_DOMAIN']){
@@ -339,7 +343,7 @@ class OccurrenceDownload{
 			$tnLinkElem = $newDoc->createElement('thumbnailUri');
 			$tnLinkElem->appendChild($newDoc->createTextNode($tnUrl));
 			$itemElem->appendChild($tnLinkElem);
-			
+
 			$latLinkElem = $newDoc->createElement('decimalLatitude',$r->decimallatitude);
 			$itemElem->appendChild($latLinkElem);
 			$lngLinkElem = $newDoc->createElement('decimalLongitude',$r->decimallongitude);
@@ -352,7 +356,7 @@ class OccurrenceDownload{
 			$itemElem->appendChild($pubDateLinkElem);
 			$creatorLinkElem = $newDoc->createElement('creator',$r->recordenteredby);
 			$itemElem->appendChild($creatorLinkElem);
-			
+
 			if($r->genericcolumn2){
 				$ipAddr = $newDoc->createElement('ipAddress',$r->genericcolumn2);
 				$itemElem->appendChild($ipAddr);
@@ -362,9 +366,11 @@ class OccurrenceDownload{
 		}
 		return $newDoc->saveXML();
 	}
+
 	public function setSqlWhere($sqlStr){
 		$this->sqlWhere = $sqlStr;
 	}
+
 	public function addCondition($field, $cond, $value = ''){
 		if($field){
 			if(!trim($cond)) $cond = 'EQUALS';
@@ -373,6 +379,7 @@ class OccurrenceDownload{
 			}
 		}
 	}
+
 	private function applyConditions(){
 		$sqlFrag = '';
 		if($this->conditionArr){
@@ -388,6 +395,9 @@ class OccurrenceDownload{
 					elseif($cond == 'EQUALS'){
 						$sqlFrag2 .= 'OR o.'.$field.' IN("'.implode('","',$valueArr).'") ';
 					}
+					elseif($cond == 'NOTEQUALS'){
+						$sqlFrag2 .= 'OR o.'.$field.' NOT IN("'.implode('","',$valueArr).'") ';
+					}
 					else{
 						foreach($valueArr as $value){
 							if($cond == 'STARTS'){
@@ -396,12 +406,21 @@ class OccurrenceDownload{
 							elseif($cond == 'LIKE'){
 								$sqlFrag2 .= 'OR o.'.$field.' LIKE "%'.$value.'%" ';
 							}
+							elseif($cond == 'NOTLIKE'){
+								$sqlFrag2 .= 'OR o.'.$field.' NOT LIKE "%'.$value.'%" ';
+							}
+							elseif($cond == 'LESSTHAN'){
+								$sqlFrag2 .= 'OR o.'.$field.' < "'.$value.'" ';
+							}
+							elseif($cond == 'GREATERTHAN'){
+								$sqlFrag2 .= 'OR o.'.$field.' > "'.$value.'" ';
+							}
 						}
 					}
 				}
 				$sqlFrag .= 'AND ('.substr($sqlFrag2,3).') ';
 			}
-			
+
 		}
 		//Build where
 		if($sqlFrag){
@@ -417,6 +436,7 @@ class OccurrenceDownload{
 			}
 		}
 	}
+
 	private function getSql(){
 		$sql = '';
 		if($this->schemaType == 'checklist'){
@@ -469,7 +489,7 @@ class OccurrenceDownload{
 						'o.georeferenceRemarks, o.minimumElevationInMeters, o.maximumElevationInMeters, o.verbatimElevation, '.
 						'IFNULL(o.modified,o.datelastmodified) AS modified, o.occid, CONCAT("urn:uuid:",g.guid) AS recordId ';
 			}
-			
+
 			$sql .= 'FROM omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid '.
 					'LEFT JOIN guidoccurrences g ON o.occid = g.occid '.
 					'LEFT JOIN taxa t ON o.tidinterpreted = t.tid ';
@@ -606,7 +626,7 @@ class OccurrenceDownload{
 		$rs->free();
 		return $retArr;
 	}
-	
+
 	//General setter, getters, and other configurations
 	public function setSchemaType($t){
 		$this->schemaType = $t;
@@ -627,7 +647,7 @@ class OccurrenceDownload{
 			$this->delimiter = $d;
 		}
 	}
-	
+
 	private function getContentType(){
 		if($this->zipFile){
 			return 'application/zip; charset='.$this->charSetOut;
@@ -639,14 +659,14 @@ class OccurrenceDownload{
 			return 'text/html; charset='.$this->charSetOut;
 		}
 	}
-	
+
 	public function setCharSetOut($cs){
 		$cs = strtoupper($cs);
 		if($cs == 'ISO-8859-1' || $cs == 'UTF-8'){
 			$this->charSetOut = $cs;
 		}
 	}
-	
+
 	public function setZipFile($c){
 		$this->zipFile = $c;
 	}
@@ -654,18 +674,19 @@ class OccurrenceDownload{
 	public function getErrorArr(){
 		return $this->errorArr;
 	}
-	
+
 	public function setRedactLocalities($cond){
 		if($cond == 0 || $cond === false){
 			$this->redactLocalities = false;
 		}
 	}
-	
+
 	public function setTaxonFilter($filter){
 		if(is_numeric($filter)){
 			$this->taxonFilter = $filter;
 		}
 	}
+
 	//Misc functions
 	private function stripSensitiveFields(&$row){
 		if($row["localitySecurity"] == 1 && $this->redactLocalities && !in_array($row["collid"],$this->rareReaderArr)){
@@ -674,6 +695,7 @@ class OccurrenceDownload{
 			}
 		}
 	}
+
 	private function encodeArr(&$inArr){
 		if($this->charSetSource && $this->charSetOut != $this->charSetSource){
 			foreach($inArr as $k => $v){
@@ -681,6 +703,7 @@ class OccurrenceDownload{
 			}
 		}
 	}
+
 	private function encodeStr($inStr){
 		$retStr = $inStr;
 		if($this->charSetSource){
@@ -699,6 +722,7 @@ class OccurrenceDownload{
 		}
 		return $retStr;
 	}
+
 	private function cleanInStr($inStr){
 		$retStr = trim($inStr);
 		$retStr = preg_replace('/\s\s+/', ' ',$retStr);

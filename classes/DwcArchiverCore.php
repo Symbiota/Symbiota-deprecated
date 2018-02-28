@@ -299,6 +299,9 @@ class DwcArchiverCore extends Manager{
 						elseif($cond == 'EQUALS'){
 							$sqlFrag2 .= 'OR o.'.$field.' IN("'.implode('","',$valueArr).'") ';
 						}
+						elseif($cond == 'NOTEQUALS'){
+							$sqlFrag2 .= 'OR o.'.$field.' NOT IN("'.implode('","',$valueArr).'") ';
+						}
 						else{
 							foreach($valueArr as $value){
 								if($cond == 'STARTS'){
@@ -306,6 +309,9 @@ class DwcArchiverCore extends Manager{
 								}
 								elseif($cond == 'LIKE'){
 									$sqlFrag2 .= 'OR o.'.$field.' LIKE "%'.$value.'%" ';
+								}
+								elseif($cond == 'NOTLIKE'){
+									$sqlFrag2 .= 'OR o.'.$field.' NOT LIKE "%'.$value.'%" ';
 								}
 								elseif($cond == 'LESSTHAN'){
 									$sqlFrag2 .= 'OR o.'.$field.' < "'.$value.'" ';
