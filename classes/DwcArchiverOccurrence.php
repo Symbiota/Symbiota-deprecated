@@ -33,8 +33,8 @@ class DwcArchiverOccurrence{
 		$occurFieldArr['scientificName'] = 'o.sciname AS scientificName';
 		//$occurTermArr['verbatimScientificName'] = 'http://symbiota.org/terms/verbatimScientificName';
 		//$occurFieldArr['verbatimScientificName'] = 'o.scientificname AS verbatimScientificName';
-		$occurTermArr['tidInterpreted'] = 'http://symbiota.org/terms/tidInterpreted';
-		$occurFieldArr['tidInterpreted'] = 'o.tidinterpreted';
+		$occurTermArr['taxonID'] = 'http://rs.tdwg.org/dwc/terms/taxonID';
+		$occurFieldArr['taxonID'] = 'o.tidinterpreted as taxonID';
 		$occurTermArr['scientificNameAuthorship'] = 'http://rs.tdwg.org/dwc/terms/scientificNameAuthorship';
 		$occurFieldArr['scientificNameAuthorship'] = 'IFNULL(t.author,o.scientificNameAuthorship) AS scientificNameAuthorship';
 		$occurTermArr['genus'] = 'http://rs.tdwg.org/dwc/terms/genus';
@@ -220,7 +220,7 @@ class DwcArchiverOccurrence{
 	private static function trimOccurrenceBySchemaType($occurArr, $schemaType, $extended){
 		$retArr = array();
 		if($schemaType == 'dwc'){
-			$trimArr = array('tidInterpreted','recordedByID','associatedCollectors','substrate','verbatimAttributes','cultivationStatus',
+			$trimArr = array('recordedByID','associatedCollectors','substrate','verbatimAttributes','cultivationStatus',
 				'localitySecurityReason','genericcolumn1','genericcolumn2','storageLocation','observerUid','processingStatus',
 				'duplicateQuantity','dateEntered','dateLastModified','sourcePrimaryKey-dbpk');
 			$retArr = array_diff_key($occurArr,array_flip($trimArr));
@@ -228,7 +228,7 @@ class DwcArchiverOccurrence{
 		elseif($schemaType == 'symbiota'){
 			$trimArr = array();
 			if(!$extended){
-				$trimArr = array('collectionID','rights','rightsHolder','accessRights','tidInterpreted','genericcolumn1','genericcolumn2',
+				$trimArr = array('collectionID','rights','rightsHolder','accessRights','genericcolumn1','genericcolumn2',
 					'storageLocation','observerUid','processingStatus','duplicateQuantity','dateEntered','dateLastModified');
 			}
 			$retArr = array_diff_key($occurArr,array_flip($trimArr));
