@@ -2,7 +2,7 @@
 include_once($SERVER_ROOT.'/config/dbconnection.php');
 
 class OccurrenceDownload{
-	
+
 	private $conn;
 	private $redactLocalities = true;
 	private $rareReaderArr = array();
@@ -22,7 +22,7 @@ class OccurrenceDownload{
 
  	public function __construct(){
 		$this->conn = MySQLiConnectionFactory::getCon('readonly');
-		
+
 		//Set rare species variables
 		$this->securityArr = Array('locality','locationRemarks','minimumElevationInMeters','maximumElevationInMeters','verbatimElevation',
 			'decimalLatitude','decimalLongitude','geodeticDatum','coordinateUncertaintyInMeters','footprintWKT','verbatimCoordinates',
@@ -36,7 +36,7 @@ class OccurrenceDownload{
 		if(array_key_exists('RareSppReader', $GLOBALS['USER_RIGHTS'])){
 			$this->rareReaderArr = array_unique(array_merge($this->rareReaderArr,$GLOBALS['USER_RIGHTS']['RareSppReader']));
 		}
-		
+
 		//Character set
 		$this->charSetSource = strtoupper($GLOBALS['CHARSET']);
 		$this->charSetOut = $this->charSetSource;
@@ -126,7 +126,7 @@ class OccurrenceDownload{
 		//Clean up
 		if(file_exists($filePath.$fileName)) unlink($filePath.$fileName);
 	}
-	
+
 	private function writeOutData($outstream){
 		$recCnt = 0;
 		if($outstream){
@@ -168,18 +168,18 @@ class OccurrenceDownload{
 	 private function writeXmlFile($sql){
 		//$this->downloadPath .= ".xml";
 		//$this->downloadUrl .= ".xml";
-		
+
 		header("Content-Type: text/html/force-download");
 		header("Content-Disposition: attachment; filename='symbiotadownload".time().".xml'");
 		$out = new XMLWriter();
 		$out->openURI('php://output');
 		$out->xmlwriter_start_document("1.0","ISO-8859-1");
-		
-		
-		
+
+
+
 		<?xml version="1.0" encoding="UTF-8"?>
 
-$xw->startElementNS('ns0', 'approvePOrderResponse', 
+$xw->startElementNS('ns0', 'approvePOrderResponse',
 	'http://PhpRESTAppLib/POrderApprovalHtIF');
 
 <SimpleDarwinRecordSet
@@ -190,12 +190,12 @@ $xw->startElementNS('ns0', 'approvePOrderResponse',
  xsi:schemaLocation="http://rs.tdwg.org/dwc/dwcrecord/ http://rs.tdwg.org/dwc/xsd/tdwg_dwc_simple.xsd">
  <SimpleDarwinRecord>
   <dc:type>Taxon</dc:type>
-		
+
 xmlwriter_start_attribute($xml_resource , 'access_year');
 xmlwriter_write_attribute($xml_resource, 'access_year' , '2008');
 xmlwriter_end_attribute($xml_resource);
 
-		
+
 
 		StreamResult sr = new StreamResult(this.downloadPath);
 			SAXTransformerFactory tf = (SAXTransformerFactory)SAXTransformerFactory.newInstance();
@@ -264,11 +264,11 @@ xmlwriter_end_attribute($xml_resource);
 	}
 
 	private function getDataEntryXML($days, $limit){
-		
+
 		//Create new document and write out to target
 		$newDoc = new DOMDocument('1.0',$this->charSetOut);
 
-		//Add root element 
+		//Add root element
 		$rootElem = $newDoc->createElement('rss');
 		$rootAttr = $newDoc->createAttribute('version');
 		$rootAttr->value = '2.0';
@@ -278,12 +278,12 @@ xmlwriter_end_attribute($xml_resource);
 		//Add Channel
 		$channelElem = $newDoc->createElement('channel');
 		$rootElem->appendChild($channelElem);
-		
+
 		//Add title, link, description, language
 		$titleElem = $newDoc->createElement('title');
 		$titleElem->appendChild($newDoc->createTextNode($GLOBALS['DEFAULT_TITLE'].' New Occurrence Records'));
 		$channelElem->appendChild($titleElem);
-		
+
 		$serverDomain = "http://";
 		if((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || $_SERVER['SERVER_PORT'] == 443) $serverDomain = "https://";
 		$serverDomain .= $_SERVER["SERVER_NAME"];
@@ -292,7 +292,7 @@ xmlwriter_end_attribute($xml_resource);
 		if($serverDomain){
 			$urlPathPrefix = $serverDomain.$GLOBALS['CLIENT_ROOT'].(substr($GLOBALS['CLIENT_ROOT'],-1)=='/'?'':'/');
 		}
-		
+
 		$linkElem = $newDoc->createElement('link');
 		$linkElem->appendChild($newDoc->createTextNode($urlPathPrefix));
 		$channelElem->appendChild($linkElem);
@@ -303,13 +303,13 @@ xmlwriter_end_attribute($xml_resource);
 		$channelElem->appendChild($languageElem);
 
 		//Create new item for target archives and load into array
-		$sql = 'SELECT o.occid, CONCAT_WS("-",c.institutioncode, c.collectioncode) as instcode, c.collectionname, g.guid, c.guidtarget, '. 
-			'o.occurrenceid, o.catalognumber, o.sciname, o.recordedby, o.recordnumber, IFNULL(CAST(o.eventdate AS CHAR),o.verbatimeventdate) as eventdate, '. 
-			'o.decimallatitude, o.decimallongitude, o.datelastmodified, o.recordenteredby, o.genericcolumn2, '. 
+		$sql = 'SELECT o.occid, CONCAT_WS("-",c.institutioncode, c.collectioncode) as instcode, c.collectionname, g.guid, c.guidtarget, '.
+			'o.occurrenceid, o.catalognumber, o.sciname, o.recordedby, o.recordnumber, IFNULL(CAST(o.eventdate AS CHAR),o.verbatimeventdate) as eventdate, '.
+			'o.decimallatitude, o.decimallongitude, o.datelastmodified, o.recordenteredby, o.genericcolumn2, '.
 			'IFNULL(i.thumbnailurl,i.url) AS thumbnailurl, o.processingstatus '.
 			'FROM omoccurrences o INNER JOIN omcollections c ON o.collid = c.collid '.
 			'INNER JOIN images i ON o.occid = i.occid '.
-			'INNER JOIN guidoccurrences g ON o.occid = g.occid '. 
+			'INNER JOIN guidoccurrences g ON o.occid = g.occid '.
 			'WHERE c.colltype = "Preserved Specimens" '.
 			'AND o.processingstatus IN("pending review","reviewed", "closed") AND (o.localitysecurity IS NULL OR o.localitysecurity = 0) ';
 		if($days && is_numeric($days)) $sql .= 'AND (o.datelastmodified > DATE_SUB(NOW(), INTERVAL '.$days.' DAY)) ';
@@ -321,7 +321,7 @@ xmlwriter_end_attribute($xml_resource);
 		while($r = $rs->fetch_object()){
 			$itemElem = $newDoc->createElement('item');
 			$channelElem->appendChild($itemElem);
-			
+
 			$itemTitleElem = $newDoc->createElement('title');
 			$titleStr = $r->sciname.' - '.$r->recordedby.' '.($r->recordnumber?'#'.$r->recordnumber:'');
 			$itemTitleElem->appendChild($newDoc->createTextNode($titleStr));
@@ -332,7 +332,7 @@ xmlwriter_end_attribute($xml_resource);
 
 			$catalogLinkElem = $newDoc->createElement('catalogNumber',$r->catalognumber);
 			$itemElem->appendChild($catalogLinkElem);
-			
+
 			if($r->guidtarget){
 				$occID = $r->guid;
 				if($r->guidtarget == 'occurrenceId'){
@@ -344,11 +344,11 @@ xmlwriter_end_attribute($xml_resource);
 				$guidLinkElem = $newDoc->createElement('occurrenceID',$occID);
 				$itemElem->appendChild($guidLinkElem);
 			}
-			
+
 			$itemLinkElem = $newDoc->createElement('link');
 			$itemLinkElem->appendChild($newDoc->createTextNode($serverDomain.'/collections/individual/index.php?occid='.$r->occid));
 			$itemElem->appendChild($itemLinkElem);
-			
+
 			$tnUrl = $r->thumbnailurl;
 			if(substr($tnUrl,0,1) == '/'){
 				if(isset($GLOBALS['IMAGE_DOMAIN']) && $GLOBALS['IMAGE_DOMAIN']){
@@ -361,7 +361,7 @@ xmlwriter_end_attribute($xml_resource);
 			$tnLinkElem = $newDoc->createElement('thumbnailUri');
 			$tnLinkElem->appendChild($newDoc->createTextNode($tnUrl));
 			$itemElem->appendChild($tnLinkElem);
-			
+
 			$latLinkElem = $newDoc->createElement('decimalLatitude',$r->decimallatitude);
 			$itemElem->appendChild($latLinkElem);
 			$lngLinkElem = $newDoc->createElement('decimalLongitude',$r->decimallongitude);
@@ -374,7 +374,7 @@ xmlwriter_end_attribute($xml_resource);
 			$itemElem->appendChild($pubDateLinkElem);
 			$creatorLinkElem = $newDoc->createElement('creator',$r->recordenteredby);
 			$itemElem->appendChild($creatorLinkElem);
-			
+
 			if($r->genericcolumn2){
 				$ipAddr = $newDoc->createElement('ipAddress',$r->genericcolumn2);
 				$itemElem->appendChild($ipAddr);
@@ -414,27 +414,39 @@ xmlwriter_end_attribute($xml_resource);
 					elseif($cond == 'EQUALS'){
 						$sqlFrag2 .= 'OR o.'.$field.' IN("'.implode('","',$valueArr).'") ';
 					}
+					elseif($cond == 'NOTEQUALS'){
+						$sqlFrag2 .= 'OR o.'.$field.' NOT IN("'.implode('","',$valueArr).'") ';
+					}
 					else{
 						foreach($valueArr as $value){
 							if($cond == 'STARTS'){
 								$sqlFrag2 .= 'OR o.'.$field.' LIKE "'.$value.'%" ';
 							}
-							elseif($cond == 'LIKE'){ 
+							elseif($cond == 'LIKE'){
 								$sqlFrag2 .= 'OR o.'.$field.' LIKE "%'.$value.'%" ';
+							}
+							elseif($cond == 'NOTLIKE'){
+								$sqlFrag2 .= 'OR o.'.$field.' NOT LIKE "%'.$value.'%" ';
+							}
+							elseif($cond == 'LESSTHAN'){
+								$sqlFrag2 .= 'OR o.'.$field.' < "'.$value.'" ';
+							}
+							elseif($cond == 'GREATERTHAN'){
+								$sqlFrag2 .= 'OR o.'.$field.' > "'.$value.'" ';
 							}
 						}
 					}
 				}
 				$sqlFrag .= 'AND ('.substr($sqlFrag2,3).') ';
 			}
-			
+
 		}
 		//Build where
 		if($sqlFrag){
 			$this->sqlWhere .= $sqlFrag;
 		}
 		if($this->sqlWhere){
-			//Make sure it starts with WHERE 
+			//Make sure it starts with WHERE
 			if(substr($this->sqlWhere,0,4) == 'AND '){
 				$this->sqlWhere = 'WHERE'.substr($this->sqlWhere,3);
 			}
@@ -517,7 +529,7 @@ xmlwriter_end_attribute($xml_resource);
 					'o.georeferenceRemarks, o.minimumElevationInMeters, o.maximumElevationInMeters, o.verbatimElevation, '.
 					'IFNULL(o.modified,o.datelastmodified) AS modified, o.occid, CONCAT("urn:uuid:",g.guid) AS recordId ';
 			}
-				
+
 			$sql .= 'FROM omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid '.
 				'LEFT JOIN guidoccurrences g ON o.occid = g.occid '.
 				'LEFT JOIN taxa t ON o.tidinterpreted = t.tid ';
@@ -660,7 +672,7 @@ xmlwriter_end_attribute($xml_resource);
 		$rs->free();
 		return $retArr;
 	}
-	
+
 	//General setter, getters, and other configurations
 	public function setSchemaType($t){
 		$this->schemaType = $t;
@@ -681,7 +693,7 @@ xmlwriter_end_attribute($xml_resource);
 			$this->delimiter = $d;
 		}
 	}
-	
+
 	private function getContentType(){
 		if($this->zipFile){
 			return 'application/zip; charset='.$this->charSetOut;
@@ -693,14 +705,14 @@ xmlwriter_end_attribute($xml_resource);
 			return 'text/html; charset='.$this->charSetOut;
 		}
 	}
-	
+
 	public function setCharSetOut($cs){
 		$cs = strtoupper($cs);
 		if($cs == 'ISO-8859-1' || $cs == 'UTF-8'){
 			$this->charSetOut = $cs;
 		}
 	}
-	
+
 	public function setZipFile($c){
 		$this->zipFile = $c;
 	}
@@ -708,13 +720,13 @@ xmlwriter_end_attribute($xml_resource);
 	public function getErrorArr(){
 		return $this->errorArr;
 	}
-	
+
 	public function setRedactLocalities($cond){
 		if($cond == 0 || $cond === false){
 			$this->redactLocalities = false;
 		}
 	}
-	
+
 	public function setTaxonFilter($filter){
 		if(is_numeric($filter)){
 			$this->taxonFilter = $filter;
