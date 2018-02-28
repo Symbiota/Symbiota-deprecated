@@ -162,6 +162,7 @@ if($isEditor){
                                 }
                                 foreach($fgidarr as $name){
                                     $valid = false;
+                                    $displayName = $name;
                                     $note = '';
                                     $tId = 0;
                                     if(array_key_exists($name,$tidArr)){
@@ -176,7 +177,7 @@ if($isEditor){
                                     else{
                                         $note = 'Not in thesaurus';
                                     }
-                                    if($note) $name = $name.' <span style="color:red;">'.$note.'</span>';
+                                    if($note) $displayName = $name.' <span style="color:red;">'.$note.'</span>';
                                     echo '<tr '.(($setCnt % 2) == 1?'class="alt"':'').'>';
                                     echo '<td>'."\n";
                                     if($firstOcc) echo '<a href="../editor/occurrenceeditor.php?occid='.$occId.'" target="_blank">'.$occId.'</a>'."\n";
@@ -193,7 +194,7 @@ if($isEditor){
                                     echo '<td>'."\n";
                                     if($valid && ($currID != $name)) echo '<input name="id'.$occId.'" type="radio" value="'.$tId.'" '.($firstRadio?'checked':'').'/>'."\n";
                                     echo '</td>'."\n";
-                                    echo '<td><a href="'.$CLIENT_ROOT.'/taxa/index.php?taxon='.$name.'" target="_blank">'.$name.'</a></td>'."\n";
+                                    echo '<td><a href="'.$CLIENT_ROOT.'/taxa/index.php?taxon='.$name.'" target="_blank">'.$displayName.'</a></td>'."\n";
                                     $firstOcc = false;
                                     $firstImg = false;
                                     if($valid) $firstRadio = false;
