@@ -111,18 +111,33 @@ if($clValue || $dynClid){
 <head>
 	<meta charset="<?php echo $CHARSET; ?>">
 	<title><?php echo $DEFAULT_TITLE; ?><?php echo $LANG['RESCHECK'];?><?php echo $clManager->getClName(); ?></title>
+    <link type="text/css" href="../css/bootstrap.css" rel="stylesheet" />
 	<link href="../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
-	<link type="text/css" href="../css/jquery-ui.css" rel="stylesheet" />
-	<script type="text/javascript" src="../js/jquery.js"></script>
-	<script type="text/javascript" src="../js/jquery-ui.js"></script>
-	<script type="text/javascript">
+	<link href="<?php echo $CLIENT_ROOT; ?>/css/jquery-ui.css" type="text/css" rel="stylesheet" />
+    <script src="<?php echo $CLIENT_ROOT; ?>/js/jquery.js" type="text/javascript"></script>
+    <script src="<?php echo $CLIENT_ROOT; ?>/js/jquery-ui.js" type="text/javascript"></script>
+    <script src="<?php echo $CLIENT_ROOT; ?>/js/jquery-1.10.2.min.js" type="text/javascript"></script>
+    <script src="<?php echo $CLIENT_ROOT; ?>/js/jquery.mobile-1.4.0.min.js" type="text/javascript"></script>
+    <script src="<?php echo $CLIENT_ROOT; ?>/js/jquery-1.9.1.js" type="text/javascript"></script>
+    <script src="<?php echo $CLIENT_ROOT; ?>/js/jquery-ui-1.10.4.js" type="text/javascript"></script>
+    <script src="<?php echo $CLIENT_ROOT; ?>/js/jquery.popupoverlay.js" type="text/javascript"></script>
+    <script type="text/javascript">
 		<?php include_once($SERVER_ROOT.'/config/googleanalytics.php'); ?>
 	</script>
 	<script type="text/javascript">
-		<?php if($clid) echo 'var clid = '.$clid.';'; ?>
+        <?php if($clid) echo 'var clid = '.$clid.';'; ?>
 	</script>
 	<script type="text/javascript" src="../js/symb/checklists.checklist.js?ver=201606"></script>
+    <?php
+    if($CHECKLIST_FG_EXPORT){
+        ?>
+        <script src="<?php echo $CLIENT_ROOT; ?>/js/pdfmake.min.js" type="text/javascript"></script>
+        <script src="<?php echo $CLIENT_ROOT; ?>/js/vfs_fonts.js" type="text/javascript"></script>
+        <script src="<?php echo $CLIENT_ROOT; ?>/js/symb/checklists.fieldguideexport.js?ver=1" type="text/javascript"></script>
+        <?php
+    }
+    ?>
 	<style type="text/css">
 		#sddm{margin:0;padding:0;z-index:30;}
 		#sddm:hover {background-color:#EAEBD8;}
@@ -134,6 +149,16 @@ if($clValue || $dynClid){
 		#sddm div{position: absolute;visibility:hidden;margin:0;padding:0;background:#EAEBD8;border:1px solid #5970B2}
 		#sddm div a	{position: relative;display:block;margin:0;padding:5px 10px;width:auto;white-space:nowrap;text-align:left;text-decoration:none;background:#EAEBD8;color:#2875DE;font-weight:bold;}
 		#sddm div a:hover{background:#49A3FF;color:#FFF}
+
+        a.boxclose{
+            float:right;
+            width:36px;
+            height:36px;
+            background:transparent url(../images/spatial_close_icon.png) repeat top left;
+            margin-top:-35px;
+            margin-right:-35px;
+            cursor:pointer;
+        }
 	</style>
 </head>
 
@@ -215,8 +240,8 @@ if($clValue || $dynClid){
 					    		<img src="../images/games/games.png" style="height:17px;" title="Access Species List Games" />
 					    	</span>
 					        <div id="m1" onmouseover="mcancelclosetime()" onmouseout="mclosetime()">
-					        	<?php 
-									$varStr = "?clid=".$clid."&dynclid=".$dynClid."&listname=".$clManager->getClName()."&taxonfilter=".$taxonFilter."&showcommon=".$showCommon.($clManager->getThesFilter()?"&thesfilter=".$clManager->getThesFilter():""); 
+					        	<?php
+									$varStr = "?clid=".$clid."&dynclid=".$dynClid."&listname=".$clManager->getClName()."&taxonfilter=".$taxonFilter."&showcommon=".$showCommon.($clManager->getThesFilter()?"&thesfilter=".$clManager->getThesFilter():"");
 					        	?>
 						        <a href="../games/namegame.php<?php echo $varStr; ?>"><?php echo $LANG['NAMEGAME'];?></a>
 						        <a href="../games/flashcards.php<?php echo $varStr; ?>"><?php echo $LANG['FLASH'];?></a>
@@ -302,17 +327,17 @@ if($clValue || $dynClid){
 										<div style="margin-left:10px;">
 											<?php 
 												if($displayCommonNames){
-													echo "<input type='checkbox' name='searchcommon' value='1'".($searchCommon?"checked":"")."/>".$LANG['COMMON']."<br/>";
+													echo "<input data-role='none' type='checkbox' name='searchcommon' value='1'".($searchCommon?"checked":"")."/>".$LANG['COMMON']."<br/>";
 												}
 											?>
-											<input type="checkbox" name="searchsynonyms" value="1"<?php echo ($searchSynonyms?"checked":"");?>/><?php echo $LANG['SYNON'];?>
-										</div>
+											<input data-role='none' type="checkbox" name="searchsynonyms" value="1"<?php echo ($searchSynonyms?"checked":"");?>/><?php echo $LANG['SYNON'];?>
+                                        </div>
 									</div>
 								</div>
 							    <!-- Thesaurus Filter -->
 							    <div>
 							    	<b><?php echo $LANG['FILTER'];?></b><br/>
-							    	<select name='thesfilter'>
+							    	<select data-role='none' name='thesfilter' id='thesfilter'>
 										<option value='0'><?php echo $LANG['OGCHECK'];?></option>
 										<?php 
 											$taxonAuthList = Array();
@@ -326,29 +351,29 @@ if($clValue || $dynClid){
 								<div>
 									<?php 
 										//Display Common Names: 0 = false, 1 = true 
-									    if($displayCommonNames) echo "<input id='showcommon' name='showcommon' type='checkbox' value='1' ".($showCommon?"checked":"")."/>".$LANG['COMMON']."";
+									    if($displayCommonNames) echo "<input data-role='none' id='showcommon' name='showcommon' type='checkbox' value='1' ".($showCommon?"checked":"")."/>".$LANG['COMMON']."";
 									?>
 								</div>
 								<div>
 									<!-- Display as Images: 0 = false, 1 = true  --> 
-								    <input name='showimages' type='checkbox' value='1' <?php echo ($showImages?"checked":""); ?> onclick="showImagesChecked(this.form);" />
+								    <input data-role='none' name='showimages' type='checkbox' value='1' <?php echo ($showImages?"checked":""); ?> onclick="showImagesChecked(this.form);" />
                                     <?php echo $LANG['DISPLAYIMG'];?>
 								</div>
 								<?php if($clValue){ ?>
 									<div style='display:<?php echo ($showImages?"none":"block");?>' id="showvouchersdiv">
 										<!-- Display as Vouchers: 0 = false, 1 = true  --> 
-									    <input name='showvouchers' type='checkbox' value='1' <?php echo ($showVouchers?"checked":""); ?>/>
+									    <input data-role='none' name='showvouchers' type='checkbox' value='1' <?php echo ($showVouchers?"checked":""); ?>/>
                                         <?php echo $LANG['NOTESVOUC'];?>
 									</div>
 								<?php } ?>
 								<div style='display:<?php echo ($showImages?"none":"block");?>' id="showauthorsdiv">
 									<!-- Display Taxon Authors: 0 = false, 1 = true  --> 
-								    <input name='showauthors' type='checkbox' value='1' <?php echo ($showAuthors?"checked":""); ?>/>
+								    <input data-role='none' name='showauthors' type='checkbox' value='1' <?php echo ($showAuthors?"checked":""); ?>/>
                                     <?php echo $LANG['TAXONAUT'];?>
 								</div>
 								<div style='' id="showalphataxadiv">
 									<!-- Display Taxa Alphabetically: 0 = false, 1 = true  --> 
-								    <input name='showalphataxa' type='checkbox' value='1' <?php echo ($showAlphaTaxa?"checked":""); ?>/>
+								    <input data-role='none' name='showalphataxa' type='checkbox' value='1' <?php echo ($showAlphaTaxa?"checked":""); ?>/>
                                     <?php echo $LANG['TAXONABC'];?>
 								</div>
 								<div style="margin:5px 0px 0px 5px;">
@@ -357,18 +382,27 @@ if($clValue || $dynClid){
 									<input type="hidden" name="proj" value="<?php echo $pid; ?>" />
 									<input type='hidden' name='defaultoverride' value='1' />
 									<?php if(!$taxonFilter) echo "<input type='hidden' name='pagenumber' value='".$pageNumber."' />"; ?>
-									<input type="submit" name="submitaction" value="Rebuild List" onclick="changeOptionFormAction('checklist.php?cl=<?php echo $clValue."&proj=".$pid."&dynclid=".$dynClid; ?>','_self');" />
+									<input data-role='none' type="submit" name="submitaction" value="Rebuild List" onclick="changeOptionFormAction('checklist.php?cl=<?php echo $clValue."&proj=".$pid."&dynclid=".$dynClid; ?>','_self');" />
 									<div class="button" style='float:right;margin-right:10px;width:16px;height:16px;padding:2px;' title="Download Checklist">
-										<input type="image" name="dllist" value="Download List" src="../images/dl.png" onclick="changeOptionFormAction('checklist.php?cl=<?php echo $clValue."&proj=".$pid."&dynclid=".$dynClid; ?>','_self');" />
-									</div>
+                                        <input data-role='none' type="image" name="dllist" value="Download List" src="../images/dl.png" onclick="changeOptionFormAction('checklist.php?cl=<?php echo $clValue."&proj=".$pid."&dynclid=".$dynClid; ?>','_self');" />
+                                    </div>
 									<div class="button" style='float:right;margin-right:10px;width:16px;height:16px;padding:2px;' title="Print in Browser">
-										<input type="image" name="printlist" value="Print List" src="../images/print.png" onclick="changeOptionFormAction('checklist.php','_blank');" />
+										<input data-role='none' type="image" name="printlist" value="Print List" src="../images/print.png" onclick="changeOptionFormAction('checklist.php','_blank');" />
 									</div>
 									<div class="button" id="wordicondiv" style='float:right;margin-right:10px;width:16px;height:16px;padding:2px;<?php echo ($showImages?'display:none;':''); ?>' title="Export to DOCX">
-										<input type="image" name="exportdoc" value="Export to DOCX" src="../images/wordicon.png" onclick="changeOptionFormAction('defaultchecklistexport.php','_self');" />
+										<input data-role='none' type="image" name="exportdoc" value="Export to DOCX" src="../images/wordicon.png" onclick="changeOptionFormAction('defaultchecklistexport.php','_self');" />
 									</div>
 								</div>
-							</fieldset>
+                                <?php
+                                if($CHECKLIST_FG_EXPORT){
+                                    ?>
+                                    <div style="margin:5px 0px 0px 5px;clear:both;">
+                                        <a class="" href="#" onclick="openFieldGuideExporter();"><b>Open Export Panel</b></a>
+                                    </div>
+                                    <?php
+                                }
+                                ?>
+                            </fieldset>
 						</form>
 						<?php 
 						if($clValue && $isEditor){
@@ -654,6 +688,16 @@ if($clValue || $dynClid){
 	</div>
 	<?php
 	if(!$printMode) include($SERVER_ROOT.'/footer.php');
-	?>
+
+	if($CHECKLIST_FG_EXPORT){
+        ?>
+        <!-- Field Guide Export -->
+        <div id="fieldguideexport" data-role="popup" class="well" style="width:600px;height:90%;font-size:14px;">
+            <a class="boxclose fieldguideexport_close" id="boxclose"></a>
+            <button data-role="none" type="button" onclick='prepareFieldGuideExport(<?php echo $clManager->getTaxaCount(); ?>);' >Export Field Guide</button>
+        </div>
+        <?php
+    }
+    ?>
 </body>
 </html>
