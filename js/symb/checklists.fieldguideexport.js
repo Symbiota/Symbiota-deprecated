@@ -85,13 +85,13 @@ function processDataResponse(res){
             for(im in tempArr[i]['img']){
                 var imgId = tempArr[i]['img'][im]['id'];
                 dataArr[family][sciname]['images'].push(tempArr[i]['img'][im]);
-                imgProcArr.push(imgId);
+                /*imgProcArr.push(imgId);
                 loadImageDataUri(imgId,function(res){
                     imgDataArr[imgId] = res;
                     var index = imgProcArr.indexOf(imgId);
                     imgProcArr.splice(index, 1);
                     if(loadingComplete && (procIndex == lastLoad) && (imgProcArr.length == 0)) createPDFGuide();
-                });
+                });*/
             }
         }
     }
@@ -143,14 +143,14 @@ function createPDFGuide(){
                     }
 
                     var rightColText = [];
-                    for(p in imgArr){
+                    /*for(p in imgArr){
                         var imgid = imgArr[p]['id'];
                         if(imgDataArr[imgid]){
                             var tempArr = [];
                             tempArr.push({image: imgDataArr[imgid], width: 150, alignment: 'right'});
                             rightColContent.push(tempArr);
                         }
-                    }
+                    }*/
 
                     //if(imgArr[0]['url']) testImg2 = imgArr[0]['url'];
 
