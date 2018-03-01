@@ -765,9 +765,10 @@ class TaxonomyUpload{
 
 		//Update geo lookup table
 		$sql3 = 'INSERT IGNORE INTO omoccurgeoindex(tid,decimallatitude,decimallongitude) '.
-			'SELECT DISTINCT tidinterpreted, round(decimallatitude,3), round(decimallongitude,3) '.
-			'FROM omoccurrences '.
-			'WHERE (tidinterpreted IS NOT NULL) AND (cultivationStatus IS NULL OR cultivationStatus <> 1) AND (decimallatitude IS NOT NULL) AND (decimallongitude IS NOT NULL)';
+			'SELECT DISTINCT o.tidinterpreted, round(o.decimallatitude,2), round(o.decimallongitude,2) '.
+			'FROM omoccurrences o '.
+			'WHERE (o.tidinterpreted IS NOT NULL) AND (o.decimallatitude between -180 and 180) AND (o.decimallongitude between -180 and 180) '.
+			'AND (o.cultivationStatus IS NULL OR o.cultivationStatus = 0) AND (o.coordinateUncertaintyInMeters IS NULL OR o.coordinateUncertaintyInMeters < 10000) ';
 		$this->conn->query($sql3);
 	}
 

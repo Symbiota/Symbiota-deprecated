@@ -264,31 +264,42 @@ class TaxonProfile extends Manager {
 				$latlonArr = explode(";",$GLOBALS['MAPPING_BOUNDARIES']);
 			}
 
-			$sqlBase = 'SELECT DecimalLatitude, DecimalLongitude FROM omoccurgeoindex WHERE (tid IN ('.$tidStr.')) ';
+			$sqlBase = 'SELECT DecimalLatitude AS declat, DecimalLongitude AS declng FROM omoccurgeoindex WHERE (tid IN ('.$tidStr.')) ';
+			/*
+			$sqlBase = 'SELECT DISTINCT tidinterpreted, round(decimallatitude,2) AS declat, round(decimallongitude,2) AS declng '.
+				'FROM omoccurrences '.
+				'WHERE (tidinterpreted IN ('.$tidStr.')) AND (cultivationStatus IS NULL OR cultivationStatus = 0) AND (coordinateUncertaintyInMeters IS NULL OR coordinateUncertaintyInMeters < 10000) ';
+			*/
 			$sql = $sqlBase;
 			if(count($latlonArr)==4){
 				$sql .= 'AND (DecimalLatitude BETWEEN '.$latlonArr[2].' AND '.$latlonArr[0].') AND (DecimalLongitude BETWEEN '.$latlonArr[3].' AND '.$latlonArr[1].') ';
 			}
+			/*
+			 else{
+				$sql .= 'AND (DecimalLatitude BETWEEN -80 AND 80) AND (DecimalLongitude BETWEEN -160 AND 160) ';
+			}
+			*/
 			$sql .= 'ORDER BY RAND() LIMIT 50';
 			//echo "<div>".$sql."</div>"; exit;
 			$result = $this->conn->query($sql);
 			while($row = $result->fetch_object()){
-				$lat = round($row->DecimalLatitude,2);
+				$lat = round($row->declat,2);
 				if($lat < $minLat) $minLat = $lat;
 				if($lat > $maxLat) $maxLat = $lat;
-				$long = round($row->DecimalLongitude,2);
+				$long = round($row->declng,2);
 				if($long < $minLong) $minLong = $long;
 				if($long > $maxLong) $maxLong = $long;
 				$mapArr[] = $lat.",".$long;
 			}
 			$result->free();
-			if(!$mapArr && $latlonArr){
-				$result = $this->conn->query($sqlBase.'LIMIT 50');
+			if(count($mapArr) < 50 && $latlonArr){
+				$result = $this->conn->query($sqlBase.' LIMIT 50');
+				//$result = $this->conn->query($sqlBase.'AND (DecimalLatitude BETWEEN -80 AND 80) AND (DecimalLongitude BETWEEN -160 AND 160) LIMIT 50');
 				while($row = $result->fetch_object()){
-					$lat = round($row->DecimalLatitude,2);
+					$lat = round($row->declat,2);
 					if($lat < $minLat) $minLat = $lat;
 					if($lat > $maxLat) $maxLat = $lat;
-					$long = round($row->DecimalLongitude,2);
+					$long = round($row->declng,2);
 					if($long < $minLong) $minLong = $long;
 					if($long > $maxLong) $maxLong = $long;
 					$mapArr[] = $lat.','.$long;
