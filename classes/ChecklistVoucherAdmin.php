@@ -726,6 +726,115 @@ class ChecklistVoucherAdmin {
 		fclose($out);
 	}
 
+	public function getPensoftChecklistArr(){
+		$clidStr = $this->clid;
+		if($this->childClidArr){
+			$clidStr .= ','.implode(',',$this->childClidArr);
+		}
+
+		$clArr = array();
+		$kingdomArr = array();
+		$rankArr = array();
+		//Get upper hierarchy
+		$sql = 'SELECT t.tid, t2.sciname as parentstr, t2.rankid '.
+				'FROM fmchklsttaxalink c INNER JOIN taxa t ON c.tid = t.tid '.
+				'INNER JOIN taxaenumtree e ON c.tid = e.tid '.
+				'INNER JOIN taxa t2 ON e.parenttid = t2.tid '.
+				'WHERE (e.taxauthid = 1) AND (c.clid IN('.$clidStr.'))';
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			$clArr[$r->tid][$r->rankid] = $r->parentstr;
+			$rankArr[$r->rankid] = $r->rankid;
+		}
+		$rs->free();
+
+		//Get taxa data
+		$sql = 'SELECT t.tid, t.kingdomname, t.sciname, t.author, t.unitname1, t.unitname2, t.unitind3, t.unitname3, t.rankid, c.familyoverride '.
+				'FROM fmchklsttaxalink c INNER JOIN taxa t ON c.tid = t.tid '.
+				'INNER JOIN taxstatus ts ON c.tid = ts.tid '.
+				'WHERE (ts.taxauthid = 1) AND (c.clid IN('.$clidStr.'))';
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			if(isset($kingdomArr[$r->kingdomname])) $kingdomArr[$r->kingdomname] += 1;
+			else $kingdomArr[$r->kingdomname] = 0;
+			$clArr[$r->tid]['tid'] = $r->tid;
+			//$clArr[$r->tid]['sciname'] = $r->sciname;
+			$clArr[$r->tid]['author'] = $r->author;
+			if($r->familyoverride) $clArr[$r->tid][140] = $r->familyoverride;
+			if($r->rankid < 180){
+				$clArr[$r->tid][$r->rankid] = $r->unitname1;
+			}
+			else{
+				$clArr[$r->tid][180] = $r->unitname1;
+				if($r->unitname2) $clArr[$r->tid]['epithet'] = $r->unitname2;
+				if($r->unitname3){
+					if($r->rankid == 230){
+						$clArr[$r->tid]['subsp'] = $r->unitname3;
+					}
+					elseif($r->rankid == 240){
+						$clArr[$r->tid]['var'] = $r->unitname3;
+					}
+					elseif($r->rankid == 260){
+						$clArr[$r->tid]['f'] = $r->unitname3;
+					}
+					else{
+						$clArr[$r->tid]['infra'] = $r->unitname3;
+					}
+				}
+			}
+		}
+		$rs->free();
+
+		if($clArr){
+			//Finish setting up rank array
+			asort($kingdomArr);
+			end($kingdomArr);
+			$sql = 'SELECT rankid, rankname FROM taxonunits WHERE kingdomname = "'.key($kingdomArr).'" AND (rankid IN('.implode(',',$rankArr).')) ';
+			$rs = $this->conn->query($sql);
+			while($r = $rs->fetch_object()){
+				$rankArr[$r->rankid] = $r->rankname;
+			}
+			$rs->free();
+
+			//Set header array
+			$headerArr = array('tid'=>'Taxon_Local_ID');
+			ksort($rankArr);
+			foreach($rankArr as $id => $name){
+				if($id > 180 && !isset($headerArr[180])) $headerArr[180] = 'genus';
+				if($id >= 220) break;
+				$headerArr[$id] = $name;
+			}
+			if(!isset($headerArr[180])) $headerArr[180] = 'genus';
+			$headerArr['epithet'] = 'species';
+			$headerArr['subsp'] = 'subspecies';
+			$headerArr['var'] = 'variety';
+			$headerArr['f'] = 'form';
+			$headerArr['author'] = 'authorship';
+			$headerArr['notes'] = 'notes';
+			$headerArr['habitat'] = 'habitat';
+			$headerArr['abundance'] = 'abundance';
+			$headerArr['source'] = 'source';
+
+			//set any unranked groups to unname node
+			foreach($headerArr as $k => $v){
+				if(is_numeric($v)) $headerArr[$k] = 'Unranked Node';
+			}
+
+			//Load data into output array
+			$outArr = array();
+			$outArr[1] = $headerArr;
+			foreach($clArr as $clKey => $clValueArr){
+				$rowArr = array();
+				foreach($headerArr as $hKey => $hValue){
+					if(array_key_exists($hKey, $clValueArr)) $rowArr[] = $clValueArr[$hKey];
+					else $rowArr[] = '';
+				}
+				$this->encodeArr($rowArr);
+				$outArr[] = $rowArr;
+			}
+		}
+	}
+
 	public function downloadVoucherCsv(){
 		if($this->clid){
 			$fileName = $this->getExportFileName();

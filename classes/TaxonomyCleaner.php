@@ -113,7 +113,6 @@ class TaxonomyCleaner extends Manager{
 					}
 				}
 				if($manualCheck){
-					//Check for near match using SoundEx
 					$thesLink = '';
 					if($isTaxonomyEditor){
 						$thesLink = ' <a href="#" onclick="openPopup(\'../../taxa/taxonomy/taxonomyloader.php\'); return false;" title="Open Thesaurus New Record Form"><img src="../../images/edit.png" style="width:12px" /><b style="font-size:70%;">T</b></a>';

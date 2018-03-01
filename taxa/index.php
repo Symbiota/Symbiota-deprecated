@@ -70,7 +70,7 @@ include($SERVER_ROOT.'/header.php');
 ?>
 <table id="innertable">
 <?php
-if($taxonManager->getSciName() != "unknown"){
+if($taxonManager->getSciName()){
 	$taxonRank = $taxonManager->getRankId();
 	if($taxonRank > 180){
 		?>

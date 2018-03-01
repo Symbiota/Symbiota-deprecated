@@ -140,11 +140,14 @@ class OccurrenceListManager extends OccurrenceManager{
 
 	public function getCloseTaxaMatch($name){
 		$retArr = array();
-		$searchName = trim($name);
-		$sql = 'SELECT tid, sciname FROM taxa WHERE soundex(sciname) = soundex("'.$searchName.'") AND sciname != "'.$searchName.'"';
-		if($rs = $this->conn->query($sql)){
+		$searchName = $this->cleanInStr($name);
+		$sql = 'SELECT tid, sciname FROM taxa WHERE soundex(sciname) = soundex(?)';
+		$stmt = $this->conn->prepare($sql);
+		$stmt->bind_param('s', $searchName);
+		$stmt->execute();
+		if($rs = $stmt->get_result()){
 			while($r = $rs->fetch_object()){
-				$retArr[] = $r->sciname;
+				if($searchName != $r->sciname) $retArr[$r->tid] = $r->sciname;
 			}
 			$rs->free();
 		}
