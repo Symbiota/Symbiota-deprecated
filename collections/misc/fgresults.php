@@ -35,6 +35,8 @@ if($isEditor){
     if($resultId){
         $apiManager->setJobID($resultId);
         $apiManager->setViewMode($viewMode);
+        $apiManager->setRecLimit($limit);
+        $apiManager->setRecStart($start);
         $apiManager->primeFGResults();
         $apiManager->processFGResults();
         $resultArr = $apiManager->getResults();
@@ -125,10 +127,7 @@ if($isEditor){
                         $href = 'fgresults.php?collid='.$collId.'&resid='.$resultId.'&viewmode='.$viewMode.'&start='.($start+$limit);
                         echo '<div style="float:right;"><a href="'.$href.'"><b>NEXT '.$limit.' RESULTS &gt;&gt;</b></a></div>';
                     }
-                    echo '<div><b>'.($start+1).' to '.($start+$recCnt).' Results </b></div>';
-                    if($start > 0){
-                        $resultArr = array_slice($resultArr,$start);
-                    }
+                    echo '<div><b>'.($start+1).' to '.($recCnt).' Results </b></div>';
                     ?>
                     <table class="styledtable" style="font-family:Arial;font-size:12px;">
                         <tr>
@@ -150,40 +149,73 @@ if($isEditor){
                                 $setCnt++;
                                 $firstOcc = true;
                                 $firstRadio = true;
+                                $recResults = false;
                                 $currID = $occArr['sciname'];
                                 unset($occArr['sciname']);
+                                foreach($occArr as $imgId => $imgArr){
+                                    if($imgArr['results']) $recResults = true;
+                                }
                             }
                             foreach($occArr as $imgId => $imgArr){
                                 if($prevImgId != $imgId){
                                     $prevImgId = $imgId;
                                     $imgurl = $imgArr['url'];
+                                    $fgStatus = $imgArr['status'];
                                     $fgidarr = $imgArr['results'];
                                     $firstImg = true;
                                 }
-                                foreach($fgidarr as $name){
-                                    $valid = false;
-                                    $displayName = $name;
-                                    $note = '';
-                                    $tId = 0;
-                                    if(array_key_exists($name,$tidArr)){
-                                        if(count($tidArr[$name]) == 1){
-                                            $valid = true;
-                                            $tId = $tidArr[$name][0];
+                                if($fgidarr){
+                                    foreach($fgidarr as $name){
+                                        $valid = false;
+                                        $displayName = $name;
+                                        $note = '';
+                                        $tId = 0;
+                                        if(array_key_exists($name,$tidArr) && $tidArr[$name]){
+                                            if(count($tidArr[$name]) == 1){
+                                                $valid = true;
+                                                $tId = $tidArr[$name][0];
+                                            }
+                                            else{
+                                                $note = 'Name ambiguous';
+                                            }
                                         }
                                         else{
-                                            $note = 'Name ambiguous';
+                                            $note = 'Not in thesaurus';
                                         }
+                                        if($note) $displayName = $name.' <span style="color:red;">'.$note.'</span>';
+                                        echo '<tr '.(($setCnt % 2) == 1?'class="alt"':'').'>';
+                                        echo '<td>'."\n";
+                                        if($firstOcc) echo '<a href="../editor/occurrenceeditor.php?occid='.$occId.'" target="_blank">'.$occId.'</a>'."\n";
+                                        echo '</td>'."\n";
+                                        echo '<td>'."\n";
+                                        if($firstOcc && $recResults) echo '<input name="occid[]" type="checkbox" value="'.$occId.'" />'."\n";
+                                        echo '</td>'."\n";
+                                        echo '<td>'."\n";
+                                        if($firstOcc) echo '<a href="'.$CLIENT_ROOT.'/taxa/index.php?taxon='.$currID.'" target="_blank">'.$currID.'</a>'."\n";
+                                        echo '</td>'."\n";
+                                        echo '<td>'."\n";
+                                        if($firstImg) echo '<a href="'.$imgurl.'" target="_blank">View Image</a>'."\n";
+                                        echo '</td>'."\n";
+                                        echo '<td>'."\n";
+                                        if($valid && ($currID != $name)) echo '<input name="id'.$occId.'" type="radio" value="'.$tId.'" '.($firstRadio?'checked':'').'/>'."\n";
+                                        echo '</td>'."\n";
+                                        echo '<td><a href="'.$CLIENT_ROOT.'/taxa/index.php?taxon='.$name.'" target="_blank">'.$displayName.'</a></td>'."\n";
+                                        $firstOcc = false;
+                                        $firstImg = false;
+                                        if($valid) $firstRadio = false;
                                     }
-                                    else{
-                                        $note = 'Not in thesaurus';
+                                }
+                                else{
+                                    $note = '';
+                                    if($fgStatus == 'OK' && !$fgidarr){
+                                        $note = '<span style="color:red;">No results provided.</span>';
                                     }
-                                    if($note) $displayName = $name.' <span style="color:red;">'.$note.'</span>';
                                     echo '<tr '.(($setCnt % 2) == 1?'class="alt"':'').'>';
                                     echo '<td>'."\n";
                                     if($firstOcc) echo '<a href="../editor/occurrenceeditor.php?occid='.$occId.'" target="_blank">'.$occId.'</a>'."\n";
                                     echo '</td>'."\n";
                                     echo '<td>'."\n";
-                                    if($firstOcc) echo '<input name="occid[]" type="checkbox" value="'.$occId.'" />'."\n";
+                                    if($firstOcc && $recResults) echo '<input name="occid[]" type="checkbox" value="'.$occId.'" />'."\n";
                                     echo '</td>'."\n";
                                     echo '<td>'."\n";
                                     if($firstOcc) echo '<a href="'.$CLIENT_ROOT.'/taxa/index.php?taxon='.$currID.'" target="_blank">'.$currID.'</a>'."\n";
@@ -192,12 +224,10 @@ if($isEditor){
                                     if($firstImg) echo '<a href="'.$imgurl.'" target="_blank">View Image</a>'."\n";
                                     echo '</td>'."\n";
                                     echo '<td>'."\n";
-                                    if($valid && ($currID != $name)) echo '<input name="id'.$occId.'" type="radio" value="'.$tId.'" '.($firstRadio?'checked':'').'/>'."\n";
                                     echo '</td>'."\n";
-                                    echo '<td><a href="'.$CLIENT_ROOT.'/taxa/index.php?taxon='.$name.'" target="_blank">'.$displayName.'</a></td>'."\n";
+                                    echo '<td>'.$note.'</td>'."\n";
                                     $firstOcc = false;
                                     $firstImg = false;
-                                    if($valid) $firstRadio = false;
                                 }
                             }
                         }

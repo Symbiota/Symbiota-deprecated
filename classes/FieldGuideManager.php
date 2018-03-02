@@ -13,6 +13,8 @@ class FieldGuideManager {
     private $token = '';
     private $taxon = '';
     private $viewMode = '';
+    private $recStart = 0;
+    private $recLimit = 0;
     private $fgResultArr = array();
     private $fgResOccArr = array();
     private $fgResTidArr = array();
@@ -163,9 +165,11 @@ class FieldGuideManager {
             'LEFT JOIN taxstatus AS ts ON o.tidinterpreted = ts.tid '.
             'LEFT JOIN taxaenumtree AS te ON ts.tidaccepted = te.tid '.
             'LEFT JOIN taxa AS t ON te.parenttid = t.TID '.
-            'WHERE o.collid = '.$this->collId.' AND ((ts.taxauthid = 1 AND te.taxauthid = 1 AND t.RankId = 100) '.
-            'OR ISNULL(o.tidinterpreted)) ';
-        if($tId) $sql .= 'AND o.tidinterpreted IN(SELECT tid FROM taxaenumtree WHERE parenttid = '.$tId.') ';
+            'LEFT JOIN taxa AS t2 ON o.tidinterpreted = t2.TID '.
+            'WHERE o.collid = '.$this->collId.' AND ((t2.SciName = "'.$this->taxon.'") OR '.
+            '((ts.taxauthid = 1 AND te.taxauthid = 1 AND t.RankId = 100)';
+        if($tId) $sql .= ' AND o.tidinterpreted IN(SELECT tid FROM taxaenumtree WHERE parenttid = '.$tId.')';
+        $sql .= ')) ';
         //echo "<div>Sql: ".$sql."</div>";
         $result = $this->conn->query($sql);
         while($row = $result->fetch_object()){
@@ -297,9 +301,11 @@ class FieldGuideManager {
         $this->primeFGResultsOccArr($imgIdArr);
         foreach($this->fgResultArr as $imgId => $ifArr){
             if($ifArr["status"] == 'OK'){
-                foreach($ifArr["result"] as $name){
-                    if(!array_key_exists($name,$this->fgResTidArr)){
-                        $this->fgResTidArr[$name] = array();
+                if($ifArr["result"]){
+                    foreach($ifArr["result"] as $name){
+                        if(!array_key_exists($name,$this->fgResTidArr)){
+                            $this->fgResTidArr[$name] = array();
+                        }
                     }
                 }
             }
@@ -309,7 +315,7 @@ class FieldGuideManager {
 
     public function primeFGResultsOccArr($imgArr){
         $imgIDStr = implode(",",$imgArr);
-        $sql = 'SELECT occid '.
+        $sql = 'SELECT DISTINCT occid '.
             'FROM images '.
             "WHERE imgid IN(".$imgIDStr.") ";
         //echo "<div>Sql: ".$sql."</div>";
@@ -339,12 +345,9 @@ class FieldGuideManager {
     public function getFGResultImgArr(){
         $returnArr = Array();
         $fgOccIdStr = implode(",",$this->fgResOccArr);
-        $sql = 'SELECT i.imgid, o.occid, o.sciname, t.SciName AS taxonorder, i.url '.
+        $sql = 'SELECT i.imgid, o.occid, o.sciname, i.url '.
             'FROM images AS i LEFT JOIN omoccurrences AS o ON i.occid = o.occid '.
-            'LEFT JOIN taxstatus AS ts ON o.tidinterpreted = ts.tid '.
-            'LEFT JOIN taxaenumtree AS te ON ts.tidaccepted = te.tid '.
-            'LEFT JOIN taxa AS t ON te.parenttid = t.TID '.
-            'WHERE o.occid IN('.$fgOccIdStr.') AND (ts.taxauthid = 1 AND te.taxauthid = 1 AND t.RankId = 100) ';
+            'WHERE o.occid IN('.$fgOccIdStr.') ';
         //echo "<div>Sql: ".$sql."</div>";
         $result = $this->conn->query($sql);
         while($row = $result->fetch_object()){
@@ -360,7 +363,6 @@ class FieldGuideManager {
             if(substr($imgUrl,0,1) == '/') $imgUrl = $localDomain.$imgUrl;
             $returnArr[$imgId]["occid"] = $row->occid;
             $returnArr[$imgId]["sciname"] = $row->sciname;
-            $returnArr[$imgId]["order"] = $row->taxonorder;
             $returnArr[$imgId]["url"] = $imgUrl;
         }
         $result->free();
@@ -370,29 +372,44 @@ class FieldGuideManager {
 
     public function processFGResults(){
         $imgArr = $this->getFGResultImgArr();
-        foreach($imgArr as $imgId => $ifArr){
-            if($this->fgResultArr[$imgId]){
-                $add = false;
-                $occId = $ifArr["occid"];
-                $currID = $ifArr["sciname"];
-                $imgUrl = $ifArr["url"];
-                $fgStatus = $this->fgResultArr[$imgId]["status"];
-                $fgResults = $this->fgResultArr[$imgId]["result"];
-                if($this->viewMode == 'full'){
-                    $add = true;
-                }
-                else{
-                    if($fgStatus == 'OK' && (count($fgResults) > 1 || $currID != $fgResults[0])){
+        $keyArr = array();
+        $imgArrKeys = array_keys($imgArr);
+        $imgArrKeys = array_slice($imgArrKeys,$this->recStart);
+        foreach($imgArrKeys as $key){
+            $keyArr[$key] = array();
+        }
+        $imgArr = array_intersect_key($imgArr,$keyArr);
+        $recCnt = count($imgArr);
+        $i = 0;
+        //echo json_encode($imgArr);
+        do{
+            foreach($this->fgResultArr as $imgId => $iArr){
+                if($imgArr[$imgId]){
+                    $ifArr = $imgArr[$imgId];
+                    $add = false;
+                    $occId = $ifArr["occid"];
+                    $currID = $ifArr["sciname"];
+                    $imgUrl = $ifArr["url"];
+                    $fgStatus = $this->fgResultArr[$imgId]["status"];
+                    $fgResults = $this->fgResultArr[$imgId]["result"];
+                    if($this->viewMode == 'full'){
                         $add = true;
                     }
-                }
-                if($add){
-                    $this->resultArr[$occId]["sciname"] = $currID;
-                    $this->resultArr[$occId][$imgId]["url"] = $imgUrl;
-                    $this->resultArr[$occId][$imgId]["results"] = $fgResults;
+                    else{
+                        if($fgStatus == 'OK' && (count($fgResults) > 1 || $currID != $fgResults[0])){
+                            $add = true;
+                        }
+                    }
+                    if($add){
+                        $this->resultArr[$occId]["sciname"] = $currID;
+                        $this->resultArr[$occId][$imgId]["url"] = $imgUrl;
+                        $this->resultArr[$occId][$imgId]["status"] = $fgStatus;
+                        $this->resultArr[$occId][$imgId]["results"] = $fgResults;
+                        $i++;
+                    }
                 }
             }
-        }
+        } while(($i <= $this->recLimit) && ($i <= $recCnt));
     }
 
     public function processDeterminations($pArr){
@@ -445,6 +462,14 @@ class FieldGuideManager {
 
     public function setCollID($val){
         $this->collId = $val;
+    }
+
+    public function setRecLimit($val){
+        $this->recLimit = $val;
+    }
+
+    public function setRecStart($val){
+        $this->recStart = $val;
     }
 
     public function setJobID($val){
