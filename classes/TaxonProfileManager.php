@@ -823,9 +823,9 @@ class TaxonProfileManager {
 		elseif($lang == 'fr' || $lang == 'french') $this->langArr =  array('fr','french');
 	}
 
-	public function getCloseTaxaMatches($testValue){
+	/*public function getCloseTaxaMatches($testValue){
 		$retArr = array();
-		$searchName = $this->cleanInStr($testValue);
+		$searchName = $this->con->real_escape_string($testValue);
 		$sql = 'SELECT tid, sciname FROM taxa WHERE soundex(sciname) = soundex(?)';
 		$stmt = $this->con->prepare($sql);
 		$stmt->bind_param('s', $searchName);
@@ -837,6 +837,17 @@ class TaxonProfileManager {
 			$rs->free();
 		}
 		return $retArr;
-	}
+	}*/
+
+    public function getCloseTaxaMatches($testValue){
+        $retArr = array();
+        $sql = 'SELECT tid, sciname FROM taxa WHERE soundex(sciname) = soundex("'.$testValue.'")';
+        if($rs = $this->con->query($sql)){
+            while($r = $rs->fetch_object()){
+                if($testValue != $r->sciname) $retArr[$r->tid] = $r->sciname;
+            }
+        }
+        return $retArr;
+    }
 }
 ?>
