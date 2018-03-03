@@ -205,7 +205,7 @@ if($isEditor){
                                         if($valid) $firstRadio = false;
                                     }
                                 }
-                                else{
+                                elseif($viewMode == 'full'){
                                     $note = '';
                                     if($fgStatus == 'OK' && !$fgidarr){
                                         $note = '<span style="color:red;">No results provided.</span>';
