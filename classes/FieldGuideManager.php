@@ -396,7 +396,7 @@ class FieldGuideManager {
                         $add = true;
                     }
                     else{
-                        if($fgStatus == 'OK' && (count($fgResults) > 1 || $currID != $fgResults[0])){
+                        if($fgStatus == 'OK' && $fgResults && (count($fgResults) > 1 || $currID != $fgResults[0])){
                             $add = true;
                         }
                     }
