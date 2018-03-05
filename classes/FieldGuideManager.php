@@ -15,6 +15,7 @@ class FieldGuideManager {
     private $viewMode = '';
     private $recStart = 0;
     private $recLimit = 0;
+    private $fgResultTot = 0;
     private $fgResultArr = array();
     private $fgResOccArr = array();
     private $fgResTidArr = array();
@@ -293,12 +294,11 @@ class FieldGuideManager {
 
     public function primeFGResults(){
         global $SERVER_ROOT;
+        $tempCntArr = array();
         $resultFilename = $this->collId.'-r-'.$this->token.'.json';
         $fileArr = json_decode(file_get_contents($SERVER_ROOT.'/temp/data/fieldguide/'.$resultFilename), true);
         $this->taxon = $fileArr["parenttaxon"];
         $this->fgResultArr = $fileArr["images"];
-        $imgIdArr = array_keys($this->fgResultArr);
-        $this->primeFGResultsOccArr($imgIdArr);
         foreach($this->fgResultArr as $imgId => $ifArr){
             if($ifArr["status"] == 'OK'){
                 if($ifArr["result"]){
@@ -309,19 +309,37 @@ class FieldGuideManager {
                     }
                 }
             }
+            $tempCntArr[] = $imgId;
         }
+        $imgIdArr = array_keys($this->fgResultArr);
+        $this->primeFGResultsOccArr($imgIdArr);
         $this->getFGResultTids();
     }
 
     public function primeFGResultsOccArr($imgArr){
+        $tempArr = $this->fgResultArr;
         $imgIDStr = implode(",",$imgArr);
-        $sql = 'SELECT DISTINCT occid '.
+        $sql = 'SELECT DISTINCT imgid, occid '.
             'FROM images '.
             "WHERE imgid IN(".$imgIDStr.") ";
         //echo "<div>Sql: ".$sql."</div>";
         $result = $this->conn->query($sql);
         while($row = $result->fetch_object()){
-            $this->fgResOccArr[] = $row->occid;
+            $add = false;
+            $imgId = $row->imgid;
+            $occId = $row->occid;
+            $fgStatus = $this->fgResultArr[$imgId]["status"];
+            $fgResults = $this->fgResultArr[$imgId]["result"];
+            if($this->viewMode == 'full'){
+                $add = true;
+            }
+            elseif($fgStatus == 'OK' && $fgResults && count($fgResults) > 0){
+                $add = true;
+            }
+            if($add){
+                if(!in_array($occId,$this->fgResOccArr)) $this->fgResOccArr[] = $occId;
+                $this->fgResultArr[$occId][$imgId] = $tempArr[$imgId];
+            }
         }
         $result->free();
     }
@@ -370,46 +388,54 @@ class FieldGuideManager {
         return $returnArr;
     }
 
-    public function processFGResults(){
-        $imgArr = $this->getFGResultImgArr();
-        $keyArr = array();
-        $imgArrKeys = array_keys($imgArr);
-        $imgArrKeys = array_slice($imgArrKeys,$this->recStart);
-        foreach($imgArrKeys as $key){
-            $keyArr[$key] = array();
+    public function getReturnOccArr(){
+        $returnArr = array();
+        $occIDStr = implode(",",$this->fgResOccArr);
+        $sql = 'SELECT DISTINCT occid '.
+            'FROM omoccurrences '.
+            "WHERE occid IN(".$occIDStr.") ".
+            'ORDER BY occid '.
+            'LIMIT '.$this->recStart.','.$this->recLimit;
+        //echo "<div>Sql: ".$sql."</div>";
+        $result = $this->conn->query($sql);
+        while($row = $result->fetch_object()){
+            $returnArr[] = $row->occid;
         }
-        $imgArr = array_intersect_key($imgArr,$keyArr);
-        $recCnt = count($imgArr);
-        $i = 0;
+        $result->free();
+        return $returnArr;
+    }
+
+    public function processFGResults(){
+        $this->fgResultTot = count($this->fgResOccArr);
+        $imgArr = $this->getFGResultImgArr();
+        $limitArr = $this->getReturnOccArr();
+        $i = 1;
+        $prevOccid = 0;
         //echo json_encode($imgArr);
-        do{
-            foreach($this->fgResultArr as $imgId => $iArr){
-                if($imgArr[$imgId]){
-                    $ifArr = $imgArr[$imgId];
-                    $add = false;
-                    $occId = $ifArr["occid"];
-                    $currID = $ifArr["sciname"];
-                    $imgUrl = $ifArr["url"];
-                    $fgStatus = $this->fgResultArr[$imgId]["status"];
-                    $fgResults = $this->fgResultArr[$imgId]["result"];
-                    if($this->viewMode == 'full'){
-                        $add = true;
-                    }
-                    else{
-                        if($fgStatus == 'OK' && $fgResults && (count($fgResults) > 1 || $currID != $fgResults[0])){
-                            $add = true;
+        foreach($this->fgResultArr as $occId => $oArr){
+            if(($i > $this->recLimit)){
+                break;
+            }
+            if(in_array($occId,$limitArr)){
+                foreach($oArr as $imgId => $iArr){
+                    if($imgArr[$imgId]){
+                        $ifArr = $imgArr[$imgId];
+                        $currID = $ifArr["sciname"];
+                        $imgUrl = $ifArr["url"];
+                        $fgStatus = $iArr["status"];
+                        $fgResults = $iArr["result"];
+                        if($prevOccid != $occId){
+                            $prevOccid = $occId;
+                            $i++;
                         }
-                    }
-                    if($add){
                         $this->resultArr[$occId]["sciname"] = $currID;
                         $this->resultArr[$occId][$imgId]["url"] = $imgUrl;
                         $this->resultArr[$occId][$imgId]["status"] = $fgStatus;
                         $this->resultArr[$occId][$imgId]["results"] = $fgResults;
-                        $i++;
                     }
                 }
             }
-        } while(($i <= $this->recLimit) && ($i <= $recCnt));
+        }
     }
 
     public function processDeterminations($pArr){
@@ -488,6 +514,10 @@ class FieldGuideManager {
 
     public function getResults(){
         return $this->resultArr;
+    }
+
+    public function getResultTot(){
+        return $this->fgResultTot;
     }
 
     public function getTids(){

@@ -14,6 +14,7 @@ $limit = array_key_exists('limit',$_REQUEST)?$_REQUEST['limit']:100;
 $apiManager = new FieldGuideManager();
 $cleanManager = new OccurrenceCleaner();
 $resultArr = array();
+$resultTot = 0;
 $statusStr = '';
 
 if($collId) $cleanManager->setCollId($collId);
@@ -41,6 +42,7 @@ if($isEditor){
         $apiManager->processFGResults();
         $resultArr = $apiManager->getResults();
         $tidArr = $apiManager->getTids();
+        $resultTot = $apiManager->getResultTot();
     }
 }
 ?>
@@ -123,11 +125,19 @@ if($isEditor){
                 <form name="fgbatchidform" action="fgresults.php" method="post" onsubmit="return validateForm(this);">
                     <?php
                     $recCnt = count($resultArr);
-                    if($recCnt > $limit){
-                        $href = 'fgresults.php?collid='.$collId.'&resid='.$resultId.'&viewmode='.$viewMode.'&start='.($start+$limit);
-                        echo '<div style="float:right;"><a href="'.$href.'"><b>NEXT '.$limit.' RESULTS &gt;&gt;</b></a></div>';
+                    if($resultTot > $limit){
+                        echo '<div style="width:300px;float:right;">';
+                        if($start > 0){
+                            $href = 'fgresults.php?collid='.$collId.'&resid='.$resultId.'&viewmode='.$viewMode.'&start='.($start-$limit);
+                            echo '<div style="float:left;"><a href="'.$href.'"><b>&lt;&lt; LAST '.$limit.' RESULTS</b></a></div>';
+                        }
+                        if(($start+$limit) < $resultTot){
+                            $href = 'fgresults.php?collid='.$collId.'&resid='.$resultId.'&viewmode='.$viewMode.'&start='.($start+$limit);
+                            echo '<div style="float:right;"><a href="'.$href.'"><b>NEXT '.$limit.' RESULTS &gt;&gt;</b></a></div>';
+                        }
+                        echo '</div>';
                     }
-                    echo '<div><b>'.($start+1).' to '.($recCnt).' Results </b></div>';
+                    echo '<div><b>'.($start+1).' to '.($start+$recCnt).' of '.$resultTot.' Results </b></div>';
                     ?>
                     <table class="styledtable" style="font-family:Arial;font-size:12px;">
                         <tr>
@@ -171,16 +181,21 @@ if($isEditor){
                                         $note = '';
                                         $tId = 0;
                                         if(array_key_exists($name,$tidArr) && $tidArr[$name]){
-                                            if(count($tidArr[$name]) == 1){
-                                                $valid = true;
-                                                $tId = $tidArr[$name][0];
+                                            if($currID == $name){
+                                                $note = 'Current determination';
                                             }
                                             else{
-                                                $note = 'Name ambiguous';
+                                                if(count($tidArr[$name]) == 1){
+                                                    $valid = true;
+                                                    $tId = $tidArr[$name][0];
+                                                }
+                                                else{
+                                                    $note = 'Name ambiguous';
+                                                }
                                             }
                                         }
                                         else{
-                                            $note = 'Not in thesaurus';
+                                            $note = 'Not valid in thesaurus';
                                         }
                                         if($note) $displayName = $name.' <span style="color:red;">'.$note.'</span>';
                                         echo '<tr '.(($setCnt % 2) == 1?'class="alt"':'').'>';
@@ -197,7 +212,7 @@ if($isEditor){
                                         if($firstImg) echo '<a href="'.$imgurl.'" target="_blank">View Image</a>'."\n";
                                         echo '</td>'."\n";
                                         echo '<td>'."\n";
-                                        if($valid && ($currID != $name)) echo '<input name="id'.$occId.'" type="radio" value="'.$tId.'" '.($firstRadio?'checked':'').'/>'."\n";
+                                        if($valid) echo '<input name="id'.$occId.'" type="radio" value="'.$tId.'" '.($firstRadio?'checked':'').'/>'."\n";
                                         echo '</td>'."\n";
                                         echo '<td><a href="'.$CLIENT_ROOT.'/taxa/index.php?taxon='.$name.'" target="_blank">'.$displayName.'</a></td>'."\n";
                                         $firstOcc = false;
