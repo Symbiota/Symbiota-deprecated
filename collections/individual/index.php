@@ -894,7 +894,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 						</div>
 					<?php
 				}
-				if($genticArr){
+				if($genticArr || isset($GENBANK_SUB_TOOL_PATH)){
 					?>
 					<div id="genetictab">
 						<?php
