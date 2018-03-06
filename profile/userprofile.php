@@ -1,6 +1,7 @@
 <?php 
 include_once('../config/symbini.php');
-include_once($serverRoot.'/classes/ProfileManager.php');
+include_once($SERVER_ROOT.'/classes/ProfileManager.php');
+include_once($SERVER_ROOT.'/classes/Manager.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $userId = $_REQUEST["userid"];
@@ -9,6 +10,8 @@ $userId = $_REQUEST["userid"];
 if(!is_numeric($userId)) $userId = 0;
 
 $pHandler = new ProfileManager();
+$manager = new Manager();
+$middle = $manager->checkFieldExists('users','middleinitial');
 $pHandler->setUid($userId);
 $person = $pHandler->getPerson();
 $tokenCount = $pHandler->getTokenCnt();
@@ -22,7 +25,7 @@ if($userId != $SYMB_UID) $isSelf = false;
 		</div>
 		<div style="margin:20px;">
 			<?php
-			echo '<div>'.$person->getFirstName().' '.$person->getLastName().'</div>';
+			echo '<div>'.$person->getFirstName().' '.($middle?$person->getMiddleInitial().' ':'').$person->getLastName().'</div>';
 			if($person->getTitle()) echo '<div>'.$person->getTitle().'</div>';
 			if($person->getInstitution()) echo '<div>'.$person->getInstitution().'</div>';
             if($person->getDepartment()) echo '<div>'.$person->getDepartment().'</div>';
@@ -57,6 +60,20 @@ if($userId != $SYMB_UID) $isSelf = false;
 							</div>
 			            </td>
 				    </tr>
+                    <?php
+                    if($middle){
+                        ?>
+                        <tr>
+                            <td><b>Middle Initial:</b></td>
+                            <td>
+                                <div>
+                                    <input id="middleinitial" name="middleinitial" size="3" value="<?php echo $person->getMiddleInitial();?>">
+                                </div>
+                            </td>
+                        </tr>
+                        <?php
+                    }
+                    ?>
 				    <tr>
 				        <td><b>Last Name:</b></td>
 				        <td>

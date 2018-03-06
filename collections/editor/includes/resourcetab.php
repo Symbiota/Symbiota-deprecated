@@ -244,13 +244,26 @@ $dupClusterArr = $dupManager->getClusterArr($occid);
 						<b>Notes:</b><br/>
 						<input name="notes" type="text" value="" style="width:95%" />
 					</div>
-					<div style="margin:2px;">
-						<input name="submitaction" type="hidden" value="addgeneticsubmit" />
-						<input name="csmode" type="hidden" value="<?php echo $crowdSourceMode; ?>" />
-						<input name="tabtarget" type="hidden" value="3" />
-						<input name="subbut" type="button" value="Add New Genetic Resource" onclick="submitAddGeneticResource(this.form)" />
-						<input name="occid" type="hidden" value="<?php echo $occid; ?>" />
-					</div>
+                    <div style="margin:2px;">
+                        <div style="margin:2px;float:left;">
+                            <input name="submitaction" type="hidden" value="addgeneticsubmit" />
+                            <input name="csmode" type="hidden" value="<?php echo $crowdSourceMode; ?>" />
+                            <input name="tabtarget" type="hidden" value="3" />
+                            <input name="subbut" type="button" value="Add New Genetic Resource" onclick="submitAddGeneticResource(this.form)" />
+                            <input name="occid" type="hidden" value="<?php echo $occid; ?>" />
+                        </div>
+                        <div style="margin:2px;float:right;">
+                            <?php
+                            if(isset($GENBANK_SUB_TOOL_PATH)){
+                                include_once $GENBANK_SUB_TOOL_PATH."/genbankgen/plugin.php";
+                                if (class_exists('GenBankGen\Plugin')) {
+                                    $p = new GenBankGen\Plugin($defaults);
+                                    $p->embed();
+                                }
+                            }
+                            ?>
+                        </div>
+                    </div>
 				</form>
 			</fieldset>
 		</div>

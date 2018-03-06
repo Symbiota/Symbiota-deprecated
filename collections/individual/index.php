@@ -296,7 +296,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 						<li><a href="#maptab"><span>Map</span></a></li>
 						<?php
 					}
-					if($genticArr) echo '<li><a href="#genetictab"><span>Genetic Data</span></a></li>';
+					if($genticArr || isset($GENBANK_SUB_TOOL_PATH)) echo '<li><a href="#genetictab"><span>Genetic Data</span></a></li>';
 					if($dupClusterArr){
 						?>
 						<li><a href="#dupestab"><span>Duplicates</span></a></li>
@@ -912,6 +912,13 @@ header("Content-Type: text/html; charset=".$CHARSET);
 							</div>
 							<?php
 						}
+                        if(isset($GENBANK_SUB_TOOL_PATH)){
+                            include_once $GENBANK_SUB_TOOL_PATH."/genbankgen/plugin.php";
+                            if(class_exists('GenBankGen\Plugin')) {
+                                $p = new GenBankGen\Plugin($defaults);
+                                $p->embed();
+                            }
+                        }
 						?>
 					</div>
 					<?php

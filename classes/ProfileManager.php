@@ -1,5 +1,6 @@
 <?php
 include_once($SERVER_ROOT.'/config/dbconnection.php');
+include_once($SERVER_ROOT.'/classes/Manager.php');
 include_once("Person.php");
 include_once("Encryption.php");
 
@@ -91,7 +92,8 @@ class ProfileManager{
     }
 	
 	public function getPerson(){
-		$sqlStr = "SELECT u.uid, u.firstname, u.lastname, u.title, u.institution, u.department, ".
+        $manager = new Manager();
+	    $sqlStr = "SELECT u.uid, u.firstname, ".($manager->checkFieldExists('users','middleinitial')?'u.middleinitial, ':'')."u.lastname, u.title, u.institution, u.department, ".
 			"u.address, u.city, u.state, u.zip, u.country, u.phone, u.email, ".
 			"u.url, u.biography, u.ispublic, u.notes, ul.username, ul.lastlogindate ".
 			"FROM users u LEFT JOIN userlogin ul ON u.uid = ul.uid ".
@@ -105,6 +107,7 @@ class ProfileManager{
 			$person->setUserName($row->username);
 			$person->setLastLoginDate($row->lastlogindate);
 			$person->setFirstName($row->firstname);
+			if($row->middleinitial) $person->setMiddleInitial($row->middleinitial);
 			$person->setLastName($row->lastname);
 			$person->setTitle($row->title);
 			$person->setInstitution($row->institution);
@@ -145,11 +148,14 @@ class ProfileManager{
 	
 	public function updateProfile($person){
 		$success = false;
+        $manager = new Manager();
+        $middle = $manager->checkFieldExists('users','middleinitial');
 		if($person){
 			$editCon = $this->getConnection("write");
 			$fields = 'UPDATE users SET ';
 			$where = 'WHERE (uid = '.$person->getUid().')';
 			$values = 'firstname = "'.$this->cleanInStr($person->getFirstName()).'"';
+			if($middle) $values = 'middleinitial = "'.$this->cleanInStr($person->getMiddleInitial()).'"';
 			$values .= ', lastname= "'.$this->cleanInStr($person->getLastName()).'"';
 			$values .= ', title= "'.$this->cleanInStr($person->getTitle()).'"';
 			$values .= ', institution="'.$this->cleanInStr($person->getInstitution()).'"';
@@ -264,8 +270,10 @@ class ProfileManager{
 	
 	public function register($postArr){
 		$status = false;
-		
+        $manager = new Manager();
+        $middle = $manager->checkFieldExists('users','middleinitial');
 		$firstName = $postArr['firstname'];
+		if($middle) $middle = $postArr['middleinitial'];
 		$lastName = $postArr['lastname'];
 		if($postArr['institution'] && !trim(strpos($postArr['institution'],' ')) && preg_match('/[a-z]+[A-Z]+[a-z]+[A-Z]+/',$postArr['institution'])){
 			if($postArr['title'] && !trim(strpos($postArr['title'],' ')) && preg_match('/[a-z]+[A-Z]+[a-z]+[A-Z]+/',$postArr['title'])){
@@ -277,6 +285,7 @@ class ProfileManager{
 		$person->setPassword($postArr['pwd']);
 		$person->setUserName($this->userName);
 		$person->setFirstName($firstName);
+		if($middle) $person->setMiddleInitial($middle);
 		$person->setLastName($lastName);
 		$person->setTitle($postArr['title']);
 		$person->setInstitution($postArr['institution']);
@@ -297,6 +306,10 @@ class ProfileManager{
 		$values = 'VALUES (';
 		$fields .= 'firstname ';
 		$values .= '"'.$this->cleanInStr($person->getFirstName()).'"';
+		if($middle){
+            $fields .= 'middleinitial ';
+            $values .= '"'.$this->cleanInStr($person->getMiddleInitial()).'"';
+        }
 		$fields .= ', lastname';
 		$values .= ', "'.$this->cleanInStr($person->getLastName()).'"';
 		if($person->getTitle()){

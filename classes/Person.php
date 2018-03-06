@@ -10,6 +10,7 @@ class Person{
 	private $userName;
 	private $lastLoginDate;
 	private $firstName;
+    private $middleInitial;
 	private $lastName;
 	private $title;
 	private $institution;
@@ -56,6 +57,14 @@ class Person{
 	public function setFirstName($firstName){
 		if($firstName) $this->firstName = trim($firstName);
 	}
+
+    public function getMiddleInitial(){
+        return $this->cleanOutStr($this->middleInitial);
+    }
+
+    public function setMiddleInitial($middleInitial){
+        if($middleInitial) $this->middleInitial = trim($middleInitial);
+    }
 	
 	public function getLastName(){
 		return $this->cleanOutStr($this->lastName);

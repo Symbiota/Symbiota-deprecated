@@ -77,6 +77,7 @@ $ACTIVATE_EXSICCATI = 0;			//Activates exsiccati fields within data entry pages;
 $ACTIVATE_CHECKLIST_FG_EXPORT = 0;			//Activates checklist fieldguide export tool
 $ACTIVATE_FIELDGUIDE = 0;	//Activates FieldGuide Batch Processing module
 $FIELDGUIDE_API_KEY = '';	//API Key for FieldGuide Batch Processing module
+$GENBANK_SUB_TOOL_PATH = '';	//Path to GenBank Submission tool installation
 $ACTIVATE_GEOLOCATE_TOOLKIT = 0;	//Activates GeoLocate Toolkit located within the Processing Toolkit menu items
 
 $RIGHTS_TERMS = array(
