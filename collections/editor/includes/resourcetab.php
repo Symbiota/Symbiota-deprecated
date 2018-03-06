@@ -254,14 +254,14 @@ $dupClusterArr = $dupManager->getClusterArr($occid);
                         </div>
                         <div style="margin:2px;float:right;">
                             <?php
-                            if(isset($GENBANK_SUB_TOOL_PATH)){
+                            /*if(isset($GENBANK_SUB_TOOL_PATH)){
                                 include_once $GENBANK_SUB_TOOL_PATH."/genbankgen/plugin.php";
                                 if(class_exists('\GenBankGen\Plugin')) {
                                     $defaults->SYMB_UID = $SYMB_UID;
                                     $p = new \GenBankGen\Plugin($defaults);
                                     echo $p->embed();
                                 }
-                            }
+                            }*/
                             ?>
                         </div>
                     </div>
