@@ -914,9 +914,10 @@ header("Content-Type: text/html; charset=".$CHARSET);
 						}
                         if(isset($GENBANK_SUB_TOOL_PATH)){
                             include_once $GENBANK_SUB_TOOL_PATH."/genbankgen/plugin.php";
-                            if(class_exists('GenBankGen\Plugin')) {
-                                $p = new GenBankGen\Plugin($defaults);
-                                $p->embed();
+                            if(class_exists('\GenBankGen\Plugin')) {
+                                $defaults->SYMB_UID = $SYMB_UID;
+                                $p = new \GenBankGen\Plugin($defaults);
+                                echo $p->embed();
                             }
                         }
 						?>
