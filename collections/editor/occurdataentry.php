@@ -23,7 +23,7 @@ if($SYMB_UID){
 	$collMap = $occManager->getCollMap();
 
 	if($collMap && $collMap['colltype']=='General Observations') $isGenObs = 1;
-	
+
 	if($IS_ADMIN || ($collid && array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collid,$USER_RIGHTS["CollAdmin"]))){
 		$isEditor = 1;
 	}
@@ -52,7 +52,7 @@ if($SYMB_UID){
 	</script>
 	<script type="text/javascript" src="../../js/symb/collections.occureditormain.js"></script>
 	<script type="text/javascript" src="../../js/symb/collections.occureditortools.js"></script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditorshare.js"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditorshare.js?ver=201803"></script>
 </head>
 <body>
 	<!-- inner text -->
@@ -80,7 +80,7 @@ if($SYMB_UID){
 				}
 				?>
 			</div>
-			<?php 
+			<?php
 			if($statusStr){
 				?>
 				<div id="statusdiv" style="margin:5px 0px 5px 15px;">

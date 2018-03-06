@@ -387,7 +387,7 @@ $duManager->loadFieldMap();
 			if($duManager->getTransferCount() && !$finalTransfer){
 				?>
 				<fieldset style="margin:15px;">
-					<legend style="<?php if($uploadType == $SKELETAL) echo 'background-color:lightgreen'; ?>"><b>Final transfer</b></legend>
+					<legend style="<?php if($uploadType == $SKELETAL) echo 'background-color:lightgreen'; ?>"><b>Pending Data Transfer Report</b></legend>
 					<div style="margin:5px;">
 						<?php
 						$reportArr = $duManager->getTransferReport();

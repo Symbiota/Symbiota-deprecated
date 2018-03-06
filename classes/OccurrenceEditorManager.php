@@ -121,12 +121,11 @@ class OccurrenceEditorManager {
 		global $CLIENT_ROOT;
 		if($overrideQry){
 			$this->qryArr = $overrideQry;
-			unset($_SESSION['editorquery']);
 		}
-		elseif(array_key_exists('q_catalognumber',$_REQUEST) || array_key_exists('q_identifier',$_REQUEST)){
+		else{
 			//Need to keep q_identifier in code until LBCC croudsourcing Drupal site is no longer active
 			if(array_key_exists('q_identifier',$_REQUEST) && $_REQUEST['q_identifier']) $this->qryArr['cn'] = trim($_REQUEST['q_identifier']);
-			if($_REQUEST['q_catalognumber']) $this->qryArr['cn'] = trim($_REQUEST['q_catalognumber']);
+			if(array_key_exists('q_catalognumber',$_REQUEST) && $_REQUEST['q_catalognumber']) $this->qryArr['cn'] = trim($_REQUEST['q_catalognumber']);
 			if(array_key_exists('q_othercatalognumbers',$_REQUEST) && $_REQUEST['q_othercatalognumbers']) $this->qryArr['ocn'] = trim($_REQUEST['q_othercatalognumbers']);
 			if(array_key_exists('q_recordedby',$_REQUEST) && $_REQUEST['q_recordedby']) $this->qryArr['rb'] = trim($_REQUEST['q_recordedby']);
 			if(array_key_exists('q_recordnumber',$_REQUEST) && $_REQUEST['q_recordnumber']) $this->qryArr['rn'] = trim($_REQUEST['q_recordnumber']);
@@ -147,10 +146,6 @@ class OccurrenceEditorManager {
 			}
 			if(array_key_exists('orderby',$_REQUEST)) $this->qryArr['orderby'] = trim($_REQUEST['orderby']);
 			if(array_key_exists('orderbydir',$_REQUEST)) $this->qryArr['orderbydir'] = trim($_REQUEST['orderbydir']);
-			unset($_SESSION['editorquery']);
-		}
-		elseif(isset($_SESSION['editorquery'])){
-			$this->qryArr = json_decode($_SESSION['editorquery'],true);
 		}
 	}
 
@@ -591,7 +586,6 @@ class OccurrenceEditorManager {
 			}
 			$rs->free();
 			$this->qryArr['rc'] = (int)$recCnt;
-			$_SESSION['editorquery'] = json_encode($this->qryArr);
 		}
 		return $recCnt;
 	}
@@ -1425,8 +1419,7 @@ class OccurrenceEditorManager {
 		$fn = $this->cleanInStr($fieldName);
 		$ov = $this->cleanInStr($oldValue);
 
-		$sql = 'SELECT COUNT(o.occid) AS retcnt '.
-			'FROM omoccurrences o ';
+		$sql = 'SELECT COUNT(DISTINCT o.occid) AS retcnt FROM omoccurrences o ';
 		$this->addTableJoins($sql);
 		$sql .= $this->getBatchUpdateWhere($fn,$ov,$buMatch);
 

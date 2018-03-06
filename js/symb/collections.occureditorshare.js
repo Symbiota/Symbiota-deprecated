@@ -172,7 +172,37 @@ function submitBatchUpdate(f){
 		type: "POST",
 		url: "rpc/batchupdateverify.php",
 		dataType: "json",
-		data: { collid: f.collid.value, fieldname: fieldName, oldvalue: oldValue, bumatch: buMatch, ouid: f.ouid.value }
+		data: { 
+			collid: f.collid.value, 
+			fieldname: fieldName, 
+			oldvalue: oldValue, 
+			bumatch: buMatch, 
+			ouid: f.ouid.value,
+			q_identifier: f.q_identifier?f.q_identifier.value:'',
+			q_catalognumber: f.q_catalognumber?f.q_catalognumber.value:'',
+			q_othercatalognumbers: f.q_othercatalognumbers?f.q_othercatalognumbers.value:'',
+			q_recordedby: f.q_recordedby?f.q_recordedby.value:'',
+			q_recordnumber: f.q_recordnumber?f.q_recordnumber.value:'',
+			q_eventdate: f.q_eventdate?f.q_eventdate.value:'',
+			q_recordenteredby: f.q_recordenteredby?f.q_recordenteredby.value:'',
+			q_observeruid: f.q_observeruid?f.q_observeruid.value:'',
+			q_processingstatus: f.q_processingstatus?f.q_processingstatus.value:'',
+			q_datelastmodified: f.q_datelastmodified?f.q_datelastmodified.value:'',
+			q_exsiccatiid: f.q_exsiccatiid?f.q_exsiccatiid.value:'',
+			q_dateentered: f.q_dateentered?f.q_dateentered.value:'',
+			q_ocrfrag: f.q_ocrfrag?f.q_ocrfrag.value:'',
+			q_imgonly: f.q_imgonly?f.q_imgonly.value:'',
+			q_withoutimg: f.q_withoutimg?f.q_withoutimg.value:'',
+			q_customfield1: f.q_customfield1?f.q_customfield1.value:'',
+			q_customtype1: f.q_customtype1?f.q_customtype1.value:'',
+			q_customvalue1: f.q_customvalue1?f.q_customvalue1.value:'',
+			q_customfield2: f.q_customfield2?f.q_customfield2.value:'',
+			q_customtype2: f.q_customtype2?f.q_customtype2.value:'',
+			q_customvalue2: f.q_customvalue2?f.q_customvalue2.value:'',
+			q_customfield3: f.q_customfield3?f.q_customfield3.value:'',
+			q_customtype3: f.q_customtype3?f.q_customtype3.value:'',
+			q_customvalue3: f.q_customvalue3?f.q_customvalue3.value:''
+		}
 	}).done(function( retCnt ) {
 		if(confirm("You are about to update "+retCnt+" records.\nNote that you won't be able to undo this Replace operation!\nDo you want to continue?")){
 			f.submit();
