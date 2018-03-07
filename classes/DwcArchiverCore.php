@@ -1640,14 +1640,14 @@ class DwcArchiverCore extends Manager{
 						$typeValue = strtolower($r['typeStatus']);
 						$typeInvalid = true;
 						$invalidText = '';
-						foreach($typeArr as $testValue){
-							if($typeValue == strtolower($testValue)){
+						foreach($typeArr as $testStr){
+							if($typeValue == strtolower($testStr)){
 								$typeInvalid = false;
 								break;
 							}
-							elseif(stripos($typeValue, $testValue)){
-								$r['typeStatus'] = $testValue;
-								$invalidText = $typeValue;
+							elseif(stripos($typeValue, $testStr)){
+								$invalidText = $r['typeStatus'];
+								$r['typeStatus'] = $testStr;
 								$typeInvalid = false;
 								break;
 							}
@@ -1657,8 +1657,8 @@ class DwcArchiverCore extends Manager{
 							$r['typeStatus'] = 'Other material';
 						}
 						if($invalidText){
-							if($r['occurrenceremarks']) $invalidText = $r['occurrenceremarks'].'; '.$invalidText;
-							$r['occurrenceremarks'] = $invalidText;
+							if($r['occurrenceRemarks']) $invalidText = $r['occurrenceRemarks'].'; '.$invalidText;
+							$r['occurrenceRemarks'] = $invalidText;
 						}
 					}
 					else{
