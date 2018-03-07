@@ -374,6 +374,7 @@ if($clid && $isEditor){
 						<li><a href="reports/voucherreporthandler.php?rtype=fullvoucherscsv&clid=<?php echo $clid; ?>"><?php echo $LANG['FULLSPECLISTVOUCHER'];?></a></li>
 						<li><a href="checklist.php?printmode=1&showvouchers=1&defaultoverride=1&cl=<?php echo $clid; ?>" target="_blank"><?php echo $LANG['FULLPRINTVOUCHER'];?></a></li>
 						<li><a href="reports/voucherreporthandler.php?rtype=pensoftcsv&clid=<?php echo $clid; ?>"><?php echo (isset($LANG['PENSOFT_DOWNLOAD'])?$LANG['PENSOFT_DOWNLOAD']:'Pensoft checklist download');?></a></li>
+						<li><a href="../collections/download/downloadhandler.php?schema=pensoft&clid=<?php echo $clid; ?>" target="blank"><?php echo 'Pensoft vouchers'; ?></a></li>
 						<li><a href="#" onclick="openPopup('reports/download.php?clid=<?php echo $clid; ?>','repvouchers');return false;"><?php echo $LANG['VOUCHERONLY'];?></a></li>
 						<li><?php echo $LANG['SPECMISSINGTITLE'];?></li>
 					</ul>
