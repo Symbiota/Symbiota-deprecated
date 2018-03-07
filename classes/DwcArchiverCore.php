@@ -21,7 +21,7 @@ class DwcArchiverCore extends Manager{
 	private $targetPath;
 	protected $serverDomain;
 
-	private $schemaType = 'dwc';			//dwc, symbiota, backup
+	private $schemaType = 'dwc';			//dwc, symbiota, backup, coge, pensoft
 	private $limitToGuids = false;			//Limit output to only records with GUIDs
 	private $extended = 0;
 	private $delimiter = ',';
@@ -286,6 +286,9 @@ class DwcArchiverCore extends Manager{
 				}
 				elseif($field == 'traitid'){
 					$sqlFrag .= 'AND (s.traitid IN('.implode(',',$condArr['EQUALS']).')) ';
+				}
+				elseif($field == 'clid'){
+					$sqlFrag .= 'AND (v.clid IN('.implode(',',$condArr['EQUALS']).')) ';
 				}
 				else{
 					$sqlFrag2 = '';
@@ -650,10 +653,10 @@ class DwcArchiverCore extends Manager{
 		if(!$sql) return false;
 		$sql .= ' LIMIT 1000000';
 		$fieldArr = $this->occurrenceFieldArr['fields'];
-		if($this->schemaType == 'dwc'){
+		if($this->schemaType == 'dwc' || $this->schemaType == 'pensoft'){
 			unset($fieldArr['localitySecurity']);
 		}
-		if($this->schemaType == 'dwc' || $this->schemaType == 'backup'){
+		if($this->schemaType == 'dwc' || $this->schemaType == 'pensoft' || $this->schemaType == 'backup'){
 			unset($fieldArr['collId']);
 		}
 		if(!$this->collArr){
@@ -717,10 +720,10 @@ class DwcArchiverCore extends Manager{
 						$r['collectionID'] = $guid;
 					}
 				}
-				if($this->schemaType == 'dwc'){
+				if($this->schemaType == 'dwc' || $this->schemaType == 'pensoft'){
 					unset($r['localitySecurity']);
 				}
-				if($this->schemaType == 'dwc' || $this->schemaType == 'backup'){
+				if($this->schemaType == 'dwc' || $this->schemaType == 'pensoft' || $this->schemaType == 'backup'){
 					unset($r['collid']);
 				}
 				//Add upper taxonomic data
@@ -1534,10 +1537,10 @@ class DwcArchiverCore extends Manager{
 
 		//Output header
 		$fieldArr = $this->occurrenceFieldArr['fields'];
-		if($this->schemaType == 'dwc'){
+		if($this->schemaType == 'dwc' || $this->schemaType == 'pensoft'){
 			unset($fieldArr['localitySecurity']);
 		}
-		if($this->schemaType == 'dwc' || $this->schemaType == 'backup'){
+		if($this->schemaType == 'dwc' || $this->schemaType == 'pensoft' || $this->schemaType == 'backup'){
 			unset($fieldArr['collId']);
 		}
 		$fieldOutArr = array();
@@ -1582,7 +1585,11 @@ class DwcArchiverCore extends Manager{
 		if($rs = $this->conn->query($sql,MYSQLI_USE_RESULT)){
 			$this->setServerDomain();
 			$urlPathPrefix = $this->serverDomain.$GLOBALS['CLIENT_ROOT'].(substr($GLOBALS['CLIENT_ROOT'],-1)=='/'?'':'/');
-
+			$typeArr = null;
+			if($this->schemaType == 'pensoft'){
+				$typeArr = array('Other material', 'Holotype', 'Paratype', 'Isotype', 'Isoparatype', 'Isolectotype', 'Isoneotype', 'Isosyntype');
+				//$typeArr = array('Other material', 'Holotype', 'Paratype', 'Hapantotype', 'Syntype', 'Isotype', 'Neotype', 'Lectotype', 'Paralectotype', 'Isoparatype', 'Isolectotype', 'Isoneotype', 'Isosyntype');
+			}
 			while($r = $rs->fetch_assoc()){
 				//Set occurrence GUID based on GUID target
 				$guidTarget = $this->collArr[$r['collid']]['guidtarget'];
@@ -1624,8 +1631,41 @@ class DwcArchiverCore extends Manager{
 				}
 				if($this->schemaType == 'dwc'){
 					unset($r['localitySecurity']);
+					unset($r['collid']);
 				}
-				if($this->schemaType == 'dwc' || $this->schemaType == 'backup'){
+				elseif($this->schemaType == 'pensoft'){
+					unset($r['localitySecurity']);
+					unset($r['collid']);
+					if($r['typeStatus']){
+						$typeValue = strtolower($r['typeStatus']);
+						$typeInvalid = true;
+						$invalidText = '';
+						foreach($typeArr as $testValue){
+							if($typeValue == strtolower($testValue)){
+								$typeInvalid = false;
+								break;
+							}
+							elseif(stripos($typeValue, $testValue)){
+								$r['typeStatus'] = $testValue;
+								$invalidText = $typeValue;
+								$typeInvalid = false;
+								break;
+							}
+						}
+						if($typeInvalid){
+							$invalidText = $r['typeStatus'];
+							$r['typeStatus'] = 'Other material';
+						}
+						if($invalidText){
+							if($r['occurrenceremarks']) $invalidText = $r['occurrenceremarks'].'; '.$invalidText;
+							$r['occurrenceremarks'] = $invalidText;
+						}
+					}
+					else{
+						$r['typeStatus'] = 'Other material';
+					}
+				}
+				elseif($this->schemaType == 'backup'){
 					unset($r['collid']);
 				}
 				//Add upper taxonomic data
@@ -1932,7 +1972,7 @@ class DwcArchiverCore extends Manager{
 
 	public function setSchemaType($type){
 		//dwc, symbiota, backup, coge
-		if(in_array($type, array('dwc','backup','coge'))){
+		if(in_array($type, array('dwc','backup','coge','pensoft'))){
 			$this->schemaType = $type;
 		}
 		else{

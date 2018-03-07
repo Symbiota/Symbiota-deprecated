@@ -2,7 +2,12 @@
 class DwcArchiverOccurrence{
 
 	public static function getOccurrenceArr($schemaType, $extended){
-		$occurFieldArr['id'] = 'o.occid';
+		if($schemaType == 'pensoft'){
+			$occurFieldArr['Taxon_Local_ID'] = 'v.tid AS Taxon_Local_ID';
+		}
+		else{
+			$occurFieldArr['id'] = 'o.occid';
+		}
 		$occurTermArr['institutionCode'] = 'http://rs.tdwg.org/dwc/terms/institutionCode';
 		$occurFieldArr['institutionCode'] = 'IFNULL(o.institutionCode,c.institutionCode) AS institutionCode';
 		$occurTermArr['collectionCode'] = 'http://rs.tdwg.org/dwc/terms/collectionCode';
@@ -205,10 +210,13 @@ class DwcArchiverOccurrence{
 		$occurFieldArr['recordId'] = 'g.guid AS recordId';
 		$occurTermArr['references'] = 'http://purl.org/dc/terms/references';
 		$occurFieldArr['references'] = '';
+		if($schemaType == 'pensoft'){
+			$occurFieldArr['occid'] = 'o.occid';
+		}
 
 		$occurrenceFieldArr['terms'] = self::trimOccurrenceBySchemaType($occurTermArr, $schemaType, $extended);
 		$occurFieldArr = self::trimOccurrenceBySchemaType($occurFieldArr, $schemaType, $extended);
-		if($schemaType == 'dwc'){
+		if($schemaType == 'dwc' || $schemaType == 'pensoft'){
 			$occurFieldArr['recordedBy'] = 'CONCAT_WS("; ",o.recordedBy,o.associatedCollectors) AS recordedBy';
 			$occurFieldArr['occurrenceRemarks'] = 'CONCAT_WS("; ",o.occurrenceRemarks,o.verbatimAttributes) AS occurrenceRemarks';
 			$occurFieldArr['habitat'] = 'CONCAT_WS("; ",o.habitat, o.substrate) AS habitat';
@@ -219,7 +227,7 @@ class DwcArchiverOccurrence{
 
 	private static function trimOccurrenceBySchemaType($occurArr, $schemaType, $extended){
 		$retArr = array();
-		if($schemaType == 'dwc'){
+		if($schemaType == 'dwc' || $schemaType == 'pensoft'){
 			$trimArr = array('recordedByID','associatedCollectors','substrate','verbatimAttributes','cultivationStatus',
 				'localitySecurityReason','genericcolumn1','genericcolumn2','storageLocation','observerUid','processingStatus',
 				'duplicateQuantity','dateEntered','dateLastModified','sourcePrimaryKey-dbpk');

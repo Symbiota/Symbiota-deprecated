@@ -5,10 +5,8 @@ include_once($SERVER_ROOT.'/classes/OccurrenceMapManager.php');
 include_once($SERVER_ROOT.'/classes/DwcArchiverCore.php');
 
 $sourcePage = array_key_exists("sourcepage",$_REQUEST)?$_REQUEST["sourcepage"]:"specimen";
-$schema = array_key_exists("schema",$_POST)?$_POST["schema"]:"symbiota";
+$schema = array_key_exists("schema",$_REQUEST)?$_REQUEST["schema"]:"symbiota";
 $cSet = array_key_exists("cset",$_POST)?$_POST["cset"]:'';
-
-$searchVar = $_REQUEST['searchvar'];
 
 if($schema == "backup"){
 	$collid = $_POST["collid"];
@@ -49,7 +47,7 @@ if($schema == "backup"){
 }
 else{
 	$zip = (array_key_exists('zip',$_POST)?$_POST['zip']:0);
-	$format = $_POST['format'];
+	$format = (array_key_exists('format',$_POST)?$_POST['format']:'csv');
 	$extended = (array_key_exists('extended',$_POST)?$_POST['extended']:0);
 
 	$redactLocalities = 1;
@@ -136,6 +134,18 @@ else{
 			if(array_key_exists('customfield2',$_POST) && $_POST['customfield2']){
 				$dwcaHandler->addCondition($_POST['customfield2'],$_POST['customtype2'],$_POST['customvalue2']);
 			}
+		}
+		elseif($schema == 'pensoft'){
+			$dwcaHandler->setCharSetOut('ISO-8859-1');
+			$dwcaHandler->setSchemaType('pensoft');
+			$dwcaHandler->setExtended(false);
+			$dwcaHandler->setDelimiter('csv');
+			$dwcaHandler->setRedactLocalities(1);
+			$dwcaHandler->setIncludeDets(0);
+			$dwcaHandler->setIncludeImgs(0);
+			$dwcaHandler->setIncludeAttributes(0);
+			$dwcaHandler->addCondition('clid','EQUALS',$_REQUEST['clid']);
+			$zip = false;
 		}
 		else{
 			//Is an occurrence download
