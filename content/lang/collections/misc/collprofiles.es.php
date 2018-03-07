@@ -1,7 +1,7 @@
 <?php
 /*
 ------------------
-Language: Español (Spanish)
+Language: Espanol (Spanish)
 ------------------
 */
 
@@ -24,7 +24,7 @@ $LANG['ADMIN_CONTROL'] = 'Panel de Control de Administraci&oacute;n';
 $LANG['VIEW_COMMENTS'] = 'Ver Comentarios Publicados';
 $LANG['EDIT_META'] = 'Editar metadatos e Informaci&oacute;n de Contacto';
 $LANG['MANAGE_PERMISSIONS'] = 'Administrar Permisos';
-$LANG['FIELDGUIDE_BATCH'] = 'FieldGuide Batch Image Processing';
+$LANG['FIELDGUIDE_BATCH'] = 'Fieldguide Batch Image Processing';
 $LANG['IMPORT_SPECIMEN'] = 'Importar/Actualizar Registros de Espec&iacute;menes';
 $LANG['TEXT_FILE_IMPORT'] = 'Carga R&aacute;pida de Archivos';
 $LANG['SKELETAL_FILE_IMPORT'] = 'Carga Archivo Estructural';
@@ -47,6 +47,12 @@ $LANG['COLLECTION_TYPE'] = 'Tipo de Colecci&oacute;n';
 $LANG['MANAGEMENT'] = 'Administraci&oacute;n';
 $LANG['LAST_UPDATE'] = '&uacute;ltima Actualizaci&oacute;n';
 $LANG['GLOBAL_UNIQUE_ID'] = 'Identificador &uacute;nico Global';
+$LANG['DWCA_PUB'] = 'DwC-Archive Publishing';
+$LANG['LIVE_DOWNLOAD'] = 'Live Data Download';
+$LANG['FULL_DATA'] = 'DwC-Archive File';
+$LANG['LOGIN_TO_ACCESS'] = 'Login for access';
+$LANG['IPT_SOURCE'] = 'IPT / DwC-A Source';
+$LANG['DIGITAL_METADATA'] = 'Digital Metadata';
 $LANG['USAGE_RIGHTS'] = 'Derechos de Uso';
 $LANG['RIGHTS_HOLDER'] = 'Propietario de Derechos';
 $LANG['ACCESS_RIGHTS'] = 'Derechos de Acceso';

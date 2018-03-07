@@ -3,7 +3,12 @@ class DwcArchiverOccurrence{
 
 	public static function getOccurrenceArr($schemaType, $extended){
         global $QUICK_HOST_ENTRY_IS_ACTIVE;
-	    $occurFieldArr['id'] = 'o.occid';
+        if($schemaType == 'pensoft'){
+        	$occurFieldArr['Taxon_Local_ID'] = 'v.tid AS Taxon_Local_ID';
+        }
+        else{
+        	$occurFieldArr['id'] = 'o.occid';
+        }
 		$occurTermArr['institutionCode'] = 'http://rs.tdwg.org/dwc/terms/institutionCode';
 		$occurFieldArr['institutionCode'] = 'IFNULL(o.institutionCode,c.institutionCode) AS institutionCode';
 		$occurTermArr['collectionCode'] = 'http://rs.tdwg.org/dwc/terms/collectionCode';
@@ -34,8 +39,8 @@ class DwcArchiverOccurrence{
 		$occurFieldArr['scientificName'] = 'o.sciname AS scientificName';
 		//$occurTermArr['verbatimScientificName'] = 'http://symbiota.org/terms/verbatimScientificName';
 		//$occurFieldArr['verbatimScientificName'] = 'o.scientificname AS verbatimScientificName';
-		$occurTermArr['tidInterpreted'] = 'http://symbiota.org/terms/tidInterpreted';
-		$occurFieldArr['tidInterpreted'] = 'o.tidinterpreted';
+		$occurTermArr['taxonID'] = 'http://rs.tdwg.org/dwc/terms/taxonID';
+		$occurFieldArr['taxonID'] = 'o.tidinterpreted as taxonID';
 		$occurTermArr['scientificNameAuthorship'] = 'http://rs.tdwg.org/dwc/terms/scientificNameAuthorship';
 		$occurFieldArr['scientificNameAuthorship'] = 'IFNULL(t.author,o.scientificNameAuthorship) AS scientificNameAuthorship';
 		$occurTermArr['genus'] = 'http://rs.tdwg.org/dwc/terms/genus';
@@ -210,10 +215,13 @@ class DwcArchiverOccurrence{
 		$occurFieldArr['recordId'] = 'g.guid AS recordId';
 		$occurTermArr['references'] = 'http://purl.org/dc/terms/references';
 		$occurFieldArr['references'] = '';
+		if($schemaType == 'pensoft'){
+			$occurFieldArr['occid'] = 'o.occid';
+		}
 
 		$occurrenceFieldArr['terms'] = self::trimOccurrenceBySchemaType($occurTermArr, $schemaType, $extended);
 		$occurFieldArr = self::trimOccurrenceBySchemaType($occurFieldArr, $schemaType, $extended);
-		if($schemaType == 'dwc'){
+		if($schemaType == 'dwc' || $schemaType == 'pensoft'){
 			$occurFieldArr['recordedBy'] = 'CONCAT_WS("; ",o.recordedBy,o.associatedCollectors) AS recordedBy';
 			$occurFieldArr['occurrenceRemarks'] = 'CONCAT_WS("; ",o.occurrenceRemarks,o.verbatimAttributes) AS occurrenceRemarks';
 			$occurFieldArr['habitat'] = 'CONCAT_WS("; ",o.habitat, o.substrate) AS habitat';
@@ -224,8 +232,8 @@ class DwcArchiverOccurrence{
 
 	private static function trimOccurrenceBySchemaType($occurArr, $schemaType, $extended){
 		$retArr = array();
-		if($schemaType == 'dwc'){
-			$trimArr = array('tidInterpreted','recordedByID','associatedCollectors','substrate','verbatimAttributes','cultivationStatus',
+		if($schemaType == 'dwc' || $schemaType == 'pensoft'){
+			$trimArr = array('recordedByID','associatedCollectors','substrate','verbatimAttributes','cultivationStatus',
 				'localitySecurityReason','genericcolumn1','genericcolumn2','storageLocation','observerUid','processingStatus',
 				'duplicateQuantity','dateEntered','dateLastModified','sourcePrimaryKey-dbpk','host');
 			$retArr = array_diff_key($occurArr,array_flip($trimArr));
@@ -233,7 +241,7 @@ class DwcArchiverOccurrence{
 		elseif($schemaType == 'symbiota'){
 			$trimArr = array();
 			if(!$extended){
-				$trimArr = array('collectionID','rights','rightsHolder','accessRights','tidInterpreted','genericcolumn1','genericcolumn2',
+				$trimArr = array('collectionID','rights','rightsHolder','accessRights','genericcolumn1','genericcolumn2',
 					'storageLocation','observerUid','processingStatus','duplicateQuantity','dateEntered','dateLastModified');
 			}
 			$retArr = array_diff_key($occurArr,array_flip($trimArr));

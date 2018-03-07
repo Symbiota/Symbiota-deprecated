@@ -727,6 +727,7 @@ class OccurrenceEditorManager {
 	}
 
 	public function editOccurrence($occArr,$autoCommit){
+		global $USER_RIGHTS;
 		$status = '';
 		$quickHostEntered = false;
 		if(!$autoCommit && $this->getObserverUid() == $GLOBALS['SYMB_UID']){
@@ -881,8 +882,17 @@ class OccurrenceEditorManager {
 				if($this->conn->query($sql)){
 					if(strtolower($occArr['processingstatus']) != 'unprocessed'){
 						//UPDATE uid within omcrowdsourcequeue, only if not yet processed
-						$sql = 'UPDATE omcrowdsourcequeue SET uidprocessor = '.$this->symbUid.', reviewstatus = 5 '.
-							'WHERE (uidprocessor IS NULL) AND (occid = '.$occArr['occid'].')';
+						$isVolunteer = true;
+						if(array_key_exists('CollAdmin',$USER_RIGHTS) && in_array($this->collId, $USER_RIGHTS['CollAdmin'])){
+							$isVolunteer = false;
+						}
+						elseif(array_key_exists('CollEditor',$USER_RIGHTS) && in_array($this->collId, $USER_RIGHTS['CollEditor'])){
+							$isVolunteer = false;
+						}
+
+						$sql = 'UPDATE omcrowdsourcequeue SET uidprocessor = '.$this->symbUid.', reviewstatus = 5 ';
+						if(!$isVolunteer) $sql .= ', isvolunteer = 0 ';
+						$sql .= 'WHERE (uidprocessor IS NULL) AND (occid = '.$occArr['occid'].')';
 						if(!$this->conn->query($sql)){
 							$status = 'ERROR tagging user as the crowdsourcer (#'.$occArr['occid'].'): '.$this->conn->error.' ';
 						}

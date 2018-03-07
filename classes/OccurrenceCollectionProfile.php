@@ -36,7 +36,7 @@ class OccurrenceCollectionProfile {
 		$sql = 'SELECT c.collid, c.institutioncode, c.CollectionCode, c.CollectionName, '.
 			'c.FullDescription, c.Homepage, c.individualurl, c.Contact, c.email, '.
 			'c.latitudedecimal, c.longitudedecimal, c.icon, c.colltype, c.managementtype, c.publicedits, '.
-			'c.guidtarget, c.rights, c.rightsholder, c.accessrights, c.sortseq, c.securitykey, c.collectionguid, s.uploaddate '.
+			'c.guidtarget, c.rights, c.rightsholder, c.accessrights, c.dwcaurl, c.sortseq, c.securitykey, c.collectionguid, s.uploaddate '.
 			'FROM omcollections c INNER JOIN omcollectionstats s ON c.collid = s.collid ';
 		if($this->collid){
 			$sql .= 'WHERE (c.collid = '.$this->collid.') ';
@@ -66,6 +66,7 @@ class OccurrenceCollectionProfile {
 			$retArr[$row->collid]['rights'] = $row->rights;
 			$retArr[$row->collid]['rightsholder'] = $row->rightsholder;
 			$retArr[$row->collid]['accessrights'] = $row->accessrights;
+			$retArr[$row->collid]['dwcaurl'] = $row->dwcaurl;
 			$retArr[$row->collid]['sortseq'] = $row->sortseq;
 			$retArr[$row->collid]['skey'] = $row->securitykey;
 			$retArr[$row->collid]['guid'] = $row->collectionguid;
@@ -146,7 +147,42 @@ class OccurrenceCollectionProfile {
 			$outStr .= '<b>'.$LANG['GLOBAL_UNIQUE_ID'].':</b> '.$collArr['guid'];
 			$outStr .= '</div>';
 		}
-		$outStr .= '<div style="margin-top:5px;"><b>Digital Metadata:</b> <a href="../datasets/emlhandler.php?collid='.$collArr['collid'].'" target="_blank">EML File</a></div>';
+		if($collArr['dwcaurl']){
+			$dwcaUrl = $collArr['dwcaurl'];
+			if(strpos($dwcaUrl, '/content/dwca/')){
+				$dwcaUrl = substr($dwcaUrl,0,strpos($dwcaUrl, '/content/dwca/'));
+				$dwcaUrl .= '/collections/datasets/datapublisher.php';
+			}
+			$outStr .= '<div style="margin-top:5px;">';
+			$outStr .= '<b>'.(isset($LANG['DWCA_PUB'])?$LANG['DWCA_PUB']:'DwC-Archive Publishing').':</b> ';
+			$outStr .= '<a href="'.$dwcaUrl.'">'.$dwcaUrl.'</a>';
+			$outStr .= '</div>';
+		}
+		$outStr .= '<div style="margin-top:5px;">';
+		if($collArr['managementtype'] == 'Live Data'){
+			$outStr .= '<b>'.(isset($LANG['LIVE_DOWNLOAD'])?$LANG['LIVE_DOWNLOAD']:'Live Data Download').':</b> ';
+			if($GLOBALS['SYMB_UID']){
+				$outStr .= '<a href="../../webservices/dwc/dwcapubhandler.php?collid='.$collArr['collid'].'">'.(isset($LANG['FULL_DATA'])?$LANG['FULL_DATA']:'DwC-Archive File').'</a>';
+			}
+			else{
+				$outStr .= '<a href="../../profile/index.php?refurl=../collections/misc/collprofiles.php?collid='.$collArr['collid'].'">'.(isset($LANG['LOGIN_TO_ACCESS'])?$LANG['LOGIN_TO_ACCESS']:'Login for access').'</a>';
+			}
+		}
+		elseif($collArr['managementtype'] == 'Snapshot'){
+			$pathArr = $this->getDwcaPath($collArr['collid']);
+			if($pathArr){
+				$outStr .= '<div style="float:left"><b>'.(isset($LANG['IPT_SOURCE'])?$LANG['IPT_SOURCE']:'IPT / DwC-A Source').':</b> </div>';
+				$outStr .= '<div style="float:left;margin-left:3px;">';
+				$delimiter = '';
+				foreach($pathArr as $pArr){
+					$outStr .= $delimiter.'<a href="'.$pArr['path'].'" target="_blank">'.$pArr['title'].'</a>';
+					$delimiter = '<br/>';
+				}
+				$outStr .= '</div>';
+			}
+		}
+		$outStr .= '</div>';
+		$outStr .= '<div style="clear:both;margin-top:5px;"><b>'.(isset($LANG['DIGITAL_METADATA'])?$LANG['DIGITAL_METADATA']:'Digital Metadata').':</b> <a href="../datasets/emlhandler.php?collid='.$collArr['collid'].'" target="_blank">EML File</a></div>';
 		$outStr .= '<div style="margin-top:5px;"><b>'.$LANG['USAGE_RIGHTS'].':</b> ';
 		if($collArr['rights']){
 			$rights = $collArr['rights'];
@@ -180,6 +216,22 @@ class OccurrenceCollectionProfile {
 				'</div>';
 		}
 		return $outStr;
+	}
+
+	private function getDwcaPath($collid){
+		$retArr = array();
+		$sql = 'SELECT uspid, title, path FROM uploadspecparameters WHERE (collid = '.$collid.') AND (uploadtype = 8)';
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			if(trim($r->path)){
+				$retArr[$r->uspid]['title'] = $r->title;
+				$retStr = $r->path;
+				$retStr = str_replace('/archive.do', '/resource.do', $retStr);
+				$retArr[$r->uspid]['path'] = $retStr;
+			}
+		}
+		$rs->free();
+		return $retArr;
 	}
 
 	//Editing functions
@@ -359,7 +411,7 @@ class OccurrenceCollectionProfile {
 		$urlPrefix .= $_SERVER["SERVER_NAME"];
 		if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $urlPrefix .= ':'.$_SERVER["SERVER_PORT"];
 		$urlBase = $urlPrefix.$urlBase;
-		
+
 		//Clean file name
 		$fileName = basename($_FILES['iconfile']['name']);
 		$imgExt = '';
@@ -368,11 +420,11 @@ class OccurrenceCollectionProfile {
 		$fileName = str_replace(array("%20","%23"," ","__"),"_",$fileName);
 		if(strlen($fileName) > 30) $fileName = substr($fileName,0,30);
 		$fileName .= $imgExt;
-		
+
 		//Upload file
 		$fullUrl = '';
 		if(move_uploaded_file($_FILES['iconfile']['tmp_name'], $targetPath.$fileName)) $fullUrl = $urlBase.$fileName;
-		
+
 		return $fullUrl;
 	}
 
@@ -407,7 +459,7 @@ class OccurrenceCollectionProfile {
 		}
 		return $retArr;
 	}
-	
+
 	public function linkAddress($addIID){
 		$status = false;
 		if($this->collid && is_numeric($addIID)){
@@ -718,7 +770,7 @@ class OccurrenceCollectionProfile {
 		}
 		return $retArr;
 	}
-	
+
 	public function updateStatistics($verbose = false){
 		$occurMaintenance = new OccurrenceMaintenance();
 		if($verbose){
@@ -741,7 +793,7 @@ class OccurrenceCollectionProfile {
 			ob_flush();
 		}
 	}
-	
+
 	public function getStatCollectionList($catId = ""){
 		//Set collection array
 		$collIdArr = array();
@@ -999,7 +1051,7 @@ class OccurrenceCollectionProfile {
 			$statArr[$r->collcode]['collcode'] = $r->collcode;
 			$statArr[$r->collcode]['collectionname'] = $r->collectionname;
 		}
-		
+
 		$sql = 'SELECT CONCAT_WS("-",c.institutioncode,c.collectioncode) as collcode, CONCAT_WS("-",year(o.dateEntered),month(o.dateEntered)) as dateEntered, '.
 			'c.collectionname, month(o.dateEntered) as monthEntered, year(o.dateEntered) as yearEntered, COUNT(o.occid) AS speccnt '.
 			'FROM omoccurrences AS o INNER JOIN omcollections AS c ON o.collid = c.collid '.
@@ -1010,7 +1062,7 @@ class OccurrenceCollectionProfile {
 		while($r = $rs->fetch_object()){
 			$statArr[$r->collcode]['stats'][$r->dateEntered]['speccnt'] = $r->speccnt;
 		}
-		
+
 		$sql = 'SELECT CONCAT_WS("-",c.institutioncode,c.collectioncode) as collcode, CONCAT_WS("-",year(o.dateLastModified),month(o.dateLastModified)) as dateEntered, '.
 			'c.collectionname, month(o.dateLastModified) as monthEntered, year(o.dateLastModified) as yearEntered, '.
 			'COUNT(CASE WHEN o.processingstatus = "unprocessed" THEN o.occid ELSE NULL END) AS unprocessedCount, '.
@@ -1100,7 +1152,7 @@ class OccurrenceCollectionProfile {
     	}
     	return $retArr;
     }
-    
+
     public function getCategoryArr(){
     	$retArr = array();
     	$sql = 'SELECT ccpk, category '.
@@ -1113,7 +1165,7 @@ class OccurrenceCollectionProfile {
     	$rs->free();
     	return $retArr;
     }
-    
+
     //Setters and getter
 	public function getErrorStr(){
 		return $this->errorStr;

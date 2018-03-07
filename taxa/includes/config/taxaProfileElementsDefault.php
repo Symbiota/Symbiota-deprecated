@@ -133,9 +133,11 @@ if($descArr = $taxonManager->getDescriptions()){
         foreach($descArr as $dArr){
             foreach($dArr as $id => $vArr){
                 if($vArr["caption"] == $PORTAL_TAXA_DESC){
-                    $tempArr = $descArr[$descIndex][$id];
-                    unset($descArr[$descIndex][$id]);
-                    array_unshift($descArr[$descIndex],$tempArr);
+                    if($descArr[$descIndex]){
+                        $tempArr = $descArr[$descIndex][$id];
+                        unset($descArr[$descIndex][$id]);
+                        array_unshift($descArr[$descIndex],$tempArr);
+                    }
                     $descIndex++;
                 }
             }

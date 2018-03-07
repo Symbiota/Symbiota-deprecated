@@ -37,6 +37,7 @@ if($isEditor){
 	// ******************************  editing a profile  ************************************//
 	if($action == "Submit Edits"){
 		$firstname = $_REQUEST["firstname"];
+        $middleinitial = (array_key_exists("middleinitial",$_REQUEST)?$_REQUEST["middleinitial"]:'');
 		$lastname = $_REQUEST["lastname"];
 		$email = $_REQUEST["email"];
 
@@ -55,6 +56,7 @@ if($isEditor){
 		$newPerson = new Person();
 		$newPerson->setUid($userId);
 		$newPerson->setFirstName($firstname);
+        if($middleinitial) $newPerson->setMiddleInitial($middleinitial);
 		$newPerson->setLastName($lastname);
 		$newPerson->setTitle($title);
 		$newPerson->setInstitution($institution);

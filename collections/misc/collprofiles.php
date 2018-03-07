@@ -237,7 +237,7 @@ if($SYMB_UID){
                                     ?>
                                     <li>
                                         <a href="fgbatch.php?collid=<?php echo $collid; ?>" >
-                                            <?php echo (isset($LANG['FIELDGUIDE_BATCH'])?$LANG['FIELDGUIDE_BATCH']:'FieldGuide Batch Image Processing'); ?>
+                                            <?php echo (isset($LANG['FIELDGUIDE_BATCH'])?$LANG['FIELDGUIDE_BATCH']:'Fieldguide Batch Image Processing'); ?>
                                         </a>
                                     </li>
                                     <?php

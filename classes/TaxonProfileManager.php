@@ -30,16 +30,16 @@ class TaxonProfileManager {
 	private $parentName;
 	private $pid;
 	private $projName;
-	
+
 	private $vernaculars;				// An array of vernaculars of above language. Array(vernacularName) --Display order is controlled by SQL
 	private $synonyms;					// An array of synonyms. Array(synonymName) --Display order is controlled by SQL
 	private $acceptedTaxa;				// Array(tid -> SciName) Used if target is not accepted
-	private $imageArr; 
+	private $imageArr;
 
 	//used if taxa rank is at genus or family level
 	private $sppArray;
 
-	private $con; 
+	private $con;
 
  	public function __construct(){
  		$this->con = MySQLiConnectionFactory::getCon("readonly");
@@ -134,19 +134,19 @@ class TaxonProfileManager {
         }
 		$result->close();
  	}
- 	
+
  	public function setAttributes(){
  		if(count($this->acceptedTaxa) < 2){
 			if($this->clid) $this->setChecklistInfo();
 			$this->setVernaculars();
 			$this->setSynonyms();
 		}
- 		
+
  	}
 
  	public function setAccepted(){
 		$this->acceptedTaxa = Array();
-		$sql = "SELECT t.Tid, ts.family, t.SciName, t.Author, t.RankId, ts.ParentTID, t.SecurityStatus ". 
+		$sql = "SELECT t.Tid, ts.family, t.SciName, t.Author, t.RankId, ts.ParentTID, t.SecurityStatus ".
 			"FROM taxstatus ts INNER JOIN taxa t ON ts.TidAccepted = t.TID ".
 			"WHERE (ts.taxauthid = ".($this->taxAuthId?$this->taxAuthId:"1").") AND (ts.Tid = ".$this->submittedTid.") ORDER BY t.SciName";
 		$result = $this->con->query($sql);
@@ -167,7 +167,7 @@ class TaxonProfileManager {
 
  	private function setChecklistInfo(){
  		if($this->tid && $this->clid){
-			$sql = "SELECT Habitat, Abundance, Notes ". 
+			$sql = "SELECT Habitat, Abundance, Notes ".
 				"FROM fmchklsttaxalink  ".
 				"WHERE (tid = ".$this->tid.") AND (clid = ".$this->clid.") ";
 			//echo $sql;
@@ -182,18 +182,18 @@ class TaxonProfileManager {
 			$result->free();
  		}
  	}
- 	
+
  	public function getTid(){
  		return $this->tid;
  	}
- 	
+
  	public function getSciName(){
  		return $this->sciName;
  	}
- 	
+
  	public function getDisplayName(){
  		// If only one accepted name exists & $taxStatusId = 0 (no thesuarus): show unaccepted name & accepted name's images
-		// If only one accepted name exists & $taxStatusId > 0: show accepted name & images 
+		// If only one accepted name exists & $taxStatusId > 0: show accepted name & images
  		if(!$this->taxAuthId){
  			return $this->submittedSciName;
  		}
@@ -201,7 +201,7 @@ class TaxonProfileManager {
  			return $this->sciName;
  		}
  	}
- 	
+
 	public function getAuthor(){
  		if(!$this->taxAuthId){
  			return $this->submittedAuthor;
@@ -210,15 +210,15 @@ class TaxonProfileManager {
 			return $this->author;
  		}
  	}
- 
+
  	public function getSubmittedTid(){
  		return $this->submittedTid;
  	}
- 	
+
  	public function getSubmittedSciName(){
  		return $this->submittedSciName;
  	}
- 	
+
  	public function setTaxAuthId($id){
  		if(is_numeric($id)){
 	 		$this->taxAuthId = $this->con->real_escape_string($id);
@@ -229,17 +229,17 @@ class TaxonProfileManager {
 		$this->sppArray = Array();
 		$sql = '';
 		if($this->clid){
-			$sql = 'SELECT t.tid, t.sciname, t.securitystatus '. 
+			$sql = 'SELECT t.tid, t.sciname, t.securitystatus '.
 				'FROM taxa t INNER JOIN taxaenumtree te ON t.tid = te.tid '.
-				'INNER JOIN fmchklsttaxalink ctl ON ctl.TID = t.tid '. 
+				'INNER JOIN fmchklsttaxalink ctl ON ctl.TID = t.tid '.
 				'WHERE (ctl.clid = '.$this->clid.') AND t.rankid = 220 AND (te.taxauthid = 1) AND (te.parenttid = '.$this->tid.')';
 		}
 		elseif($this->pid){
-			$sql = 'SELECT DISTINCT t.tid, t.sciname, t.securitystatus '. 
+			$sql = 'SELECT DISTINCT t.tid, t.sciname, t.securitystatus '.
 				'FROM taxa t INNER JOIN taxaenumtree te ON t.tid = te.tid '.
 				'INNER JOIN taxstatus ts ON t.tid = ts.tidaccepted '.
-				'INNER JOIN fmchklsttaxalink ctl ON ts.Tid = ctl.TID '. 
-				'INNER JOIN fmchklstprojlink cpl ON ctl.clid = cpl.clid '. 
+				'INNER JOIN fmchklsttaxalink ctl ON ts.Tid = ctl.TID '.
+				'INNER JOIN fmchklstprojlink cpl ON ctl.clid = cpl.clid '.
 				'WHERE (ts.taxauthid = 1) AND (te.taxauthid = 1) AND (cpl.pid = '.$this->pid.') '.
 				'AND (te.parenttid = '.$this->tid.') AND (t.rankid = 220)';
 		}
@@ -250,41 +250,41 @@ class TaxonProfileManager {
 				'WHERE (te.taxauthid = 1) AND (ts.taxauthid = 1) AND (t.rankid = 220) AND (te.parenttid = '.$this->tid.')';
 		}
 		//echo $sql; exit;
-		
+
 		$tids = Array();
 		$result = $this->con->query($sql);
 		while($row = $result->fetch_object()){
 			$sn = ucfirst(strtolower($row->sciname));
 			$this->sppArray[$sn]["tid"] = $row->tid;
-			$this->sppArray[$sn]["security"] = $row->securitystatus;  
+			$this->sppArray[$sn]["security"] = $row->securitystatus;
 			$tids[] = $row->tid;
 		}
 		$result->close();
-		
+
 		//If no tids exist because there are no species in default project, grab all species from that taxon
 		if(!$tids){
 			$sql = 'SELECT DISTINCT t.sciname, t.tid, t.securitystatus '.
-				'FROM taxa t INNER JOIN taxstatus ts ON t.Tid = ts.tidaccepted '. 
+				'FROM taxa t INNER JOIN taxstatus ts ON t.Tid = ts.tidaccepted '.
 				'INNER JOIN taxaenumtree te ON ts.tid = te.tid '.
 				'WHERE (te.taxauthid = 1) AND (ts.taxauthid = 1) AND (t.rankid = 220) AND (te.parenttid = '.$this->tid.')';
 			//echo $sql;
-			
+
 			$result = $this->con->query($sql);
 			while($row = $result->fetch_object()){
 				$sn = ucfirst(strtolower($row->sciname));
 				$this->sppArray[$sn]["tid"] = $row->tid;
-				$this->sppArray[$sn]["security"] = $row->securitystatus;  
+				$this->sppArray[$sn]["security"] = $row->securitystatus;
 				$tids[] = $row->tid;
 			}
 			$result->free();
 		}
-		
+
 		if($tids){
-			//Get Images 
+			//Get Images
 			$sql = 'SELECT t.sciname, t.tid, i.imgid, i.url, i.thumbnailurl, i.caption, '.
 				'IFNULL(i.photographer,CONCAT_WS(" ",u.firstname,u.lastname)) AS photographer '.
 				'FROM images i INNER JOIN '.
-				'(SELECT ts1.tid, SUBSTR(MIN(CONCAT(LPAD(i.sortsequence,6,"0"),i.imgid)),7) AS imgid '. 
+				'(SELECT ts1.tid, SUBSTR(MIN(CONCAT(LPAD(i.sortsequence,6,"0"),i.imgid)),7) AS imgid '.
 				'FROM taxstatus ts1 INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '.
 				'INNER JOIN images i ON ts2.tid = i.tid '.
 				'WHERE ts1.taxauthid = 1 AND ts2.taxauthid = 1 AND (ts1.tid IN('.implode(',',$tids).')) '.
@@ -307,7 +307,7 @@ class TaxonProfileManager {
 			}
 			$result->close();
 		}
-		
+
 		//Get Maps, if rank is genus level or higher
 		if($this->rankId > 140){
 			foreach($this->sppArray as $sn => $snArr){
@@ -321,11 +321,11 @@ class TaxonProfileManager {
 			}
 		}
 	}
- 
+
 	public function getSppArray(){
 		return $this->sppArray;
 	}
-	
+
 	public function setVernaculars(){
 		if($this->tid){
 			$this->vernaculars = Array();
@@ -356,11 +356,11 @@ class TaxonProfileManager {
 			$result->free();
 		}
 	}
- 	
+
  	public function getVernaculars(){
  		return $this->vernaculars;
  	}
- 	
+
  	public function getVernacularStr(){
  		$str = "";
  		if($this->vernaculars){
@@ -374,7 +374,7 @@ class TaxonProfileManager {
  		}
  		return $str;
  	}
- 	
+
  	public function setSynonyms(){
 		if($this->tid){
 			$this->synonyms = Array();
@@ -397,7 +397,7 @@ class TaxonProfileManager {
 			}
 		}
  	}
- 	
+
 	public function getSynonyms(){
 		return $this->synonyms;
 	}
@@ -424,12 +424,12 @@ class TaxonProfileManager {
 		if($str && $cnt > 1) $str .= "</span>";
  		return $str;
  	}
- 	
+
 	private function setTaxaImages(){
 		$this->imageArr = array();
 		if($this->tid){
 			$tidArr = Array($this->tid);
-			$sql1 = 'SELECT DISTINCT ts.tid '. 
+			$sql1 = 'SELECT DISTINCT ts.tid '.
 				'FROM taxstatus ts INNER JOIN taxaenumtree tn ON ts.tid = tn.tid '.
 				'WHERE tn.taxauthid = 1 AND ts.taxauthid = 1 AND ts.tid = ts.tidaccepted '.
 				'AND tn.parenttid = '.$this->tid;
@@ -438,7 +438,7 @@ class TaxonProfileManager {
 				$tidArr[] = $r1->tid;
 			}
 			$rs1->free();
-	
+
 			$tidStr = implode(",",$tidArr);
 			$sql = 'SELECT t.sciname, ti.imgid, ti.url, ti.thumbnailurl, ti.originalurl, ti.caption, ti.occid, '.
 				'IFNULL(ti.photographer,CONCAT_WS(" ",u.firstname,u.lastname)) AS photographer '.
@@ -452,7 +452,7 @@ class TaxonProfileManager {
 			$result = $this->con->query($sql);
 			while($row = $result->fetch_object()){
 				$imgUrl = $row->url;
-				if($imgUrl == 'empty' && $row->originalurl) $imgUrl = $row->originalurl; 
+				if($imgUrl == 'empty' && $row->originalurl) $imgUrl = $row->originalurl;
 				$this->imageArr[$row->imgid]["url"] = $imgUrl;
 				$this->imageArr[$row->imgid]["thumbnailurl"] = $row->thumbnailurl;
 				$this->imageArr[$row->imgid]["photographer"] = $row->photographer;
@@ -506,8 +506,8 @@ class TaxonProfileManager {
 			}
 			else{
 				//echo '<img class="delayedimg" src="" delayedsrc="'.$imgUrl.'" />';
-			}		
-			*/	
+			}
+			*/
 			echo '</a></div>';
 			echo '<div class="photographer">';
 			if($imgObj['photographer']){
@@ -581,7 +581,7 @@ class TaxonProfileManager {
 		}
 		return $maps;
  	}
- 	
+
  	public function getGoogleStaticMap($tidStr = 0){
 		if(!$tidStr){
 			$tidArr = Array($this->tid,$this->submittedTid);
@@ -599,7 +599,7 @@ class TaxonProfileManager {
 	 		if(isset($GLOBALS['MAPPING_BOUNDARIES'])){
 	 			$latlonArr = explode(";",$GLOBALS['MAPPING_BOUNDARIES']);
 	 		}
-	
+
 	 		$sqlBase = "SELECT t.sciname, gi.DecimalLatitude, gi.DecimalLongitude ".
 				"FROM omoccurgeoindex gi INNER JOIN taxa t ON gi.tid = t.tid ".
 				"WHERE (gi.tid IN ($tidStr)) ";
@@ -640,7 +640,7 @@ class TaxonProfileManager {
 			if(!$mapArr) return 0;
 			$latDist = $maxLat - $minLat;
 			$longDist = $maxLong - $minLong;
-			
+
 			$googleUrl = '//maps.googleapis.com/maps/api/staticmap?size=256x256&maptype=terrain';
 			if(array_key_exists('GOOGLE_MAP_KEY',$GLOBALS) && $GLOBALS['GOOGLE_MAP_KEY']) $googleUrl .= '&key='.$GLOBALS['GOOGLE_MAP_KEY'];
             if(array_key_exists('TAXON_PROFILE_MAP_CENTER',$GLOBALS) && $GLOBALS['TAXON_PROFILE_MAP_CENTER']) $googleUrl .= '&center='.$GLOBALS['TAXON_PROFILE_MAP_CENTER'];
@@ -652,7 +652,7 @@ class TaxonProfileManager {
             }
 		}
 		$coordStr = implode("|",$mapArr);
-		if(!$coordStr) return ""; 
+		if(!$coordStr) return "";
 		$googleUrl .= "&markers=".$coordStr;
  		return $googleUrl;
  	}
@@ -673,7 +673,7 @@ class TaxonProfileManager {
 				$rsArr[] = $r;
 			}
 			$rs->free();
-			
+
 			//Get descriptions associated with accepted name only
 			$usedCaptionArr = array();
 			foreach($rsArr as $n => $rowArr){
@@ -689,12 +689,12 @@ class TaxonProfileManager {
 					$retArr = $this->loadDescriptionArr($rowArr, $retArr);
 				}
 			}
-				
+
 			ksort($retArr);
 		}
 		return $retArr;
 	}
-	
+
 	private function loadDescriptionArr($rowArr,$retArr){
 		$indexKey = 0;
 		if(!in_array(strtolower($rowArr['language']), $this->langArr)){
@@ -712,11 +712,11 @@ class TaxonProfileManager {
 	public function getFamily(){
  		return $this->family;
  	}
- 
+
  	public function getRankId(){
  		return $this->rankId;
  	}
- 
+
  	public function getParentTid(){
  		return $this->parentTid;
  	}
@@ -741,11 +741,11 @@ class TaxonProfileManager {
  			return false;
  		}
  	}
- 
+
 	public function getSecurityStatus(){
 		return $this->securityStatus;
 	}
-	
+
 	public function setDisplayLocality($dl){
 		$this->displayLocality = $dl;
 	}
@@ -770,13 +770,13 @@ class TaxonProfileManager {
 		}
 		$result->close();
 	}
-	
+
 	public function getClid(){
-		return $this->clid;		
+		return $this->clid;
 	}
 
 	public function getClName(){
-		return $this->clName;		
+		return $this->clName;
 	}
 
 	public function getParentClid(){
@@ -811,27 +811,43 @@ class TaxonProfileManager {
 			$rs->close();
 		}
 	}
-	
+
 	public function getProjName(){
 		return $this->projName;
 	}
-	
+
 	public function setLanguage($lang){
 		$lang = strtolower($lang);
 		if($lang == 'en' || $lang == 'english') $this->langArr = array('en','english');
 		elseif($lang == 'es' || $lang == 'spanish') $this->langArr = array('es','spanish','espanol');
 		elseif($lang == 'fr' || $lang == 'french') $this->langArr =  array('fr','french');
 	}
-	
-	public function getCloseTaxaMatches($testValue){
+
+	/*public function getCloseTaxaMatches($testValue){
 		$retArr = array();
-		$sql = 'SELECT tid, sciname FROM taxa WHERE soundex(sciname) = soundex("'.$testValue.'")';
-		if($rs = $this->con->query($sql)){
+		$searchName = $this->con->real_escape_string($testValue);
+		$sql = 'SELECT tid, sciname FROM taxa WHERE soundex(sciname) = soundex(?)';
+		$stmt = $this->con->prepare($sql);
+		$stmt->bind_param('s', $searchName);
+		$stmt->execute();
+		if($rs = $stmt->get_result()){
 			while($r = $rs->fetch_object()){
 				if($testValue != $r->sciname) $retArr[$r->tid] = $r->sciname;
 			}
+			$rs->free();
 		}
 		return $retArr;
-	}
+	}*/
+
+    public function getCloseTaxaMatches($testValue){
+        $retArr = array();
+        $sql = 'SELECT tid, sciname FROM taxa WHERE soundex(sciname) = soundex("'.$testValue.'")';
+        if($rs = $this->con->query($sql)){
+            while($r = $rs->fetch_object()){
+                if($testValue != $r->sciname) $retArr[$r->tid] = $r->sciname;
+            }
+        }
+        return $retArr;
+    }
 }
 ?>

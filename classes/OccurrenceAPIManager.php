@@ -99,7 +99,7 @@ class OccurrenceAPIManager{
     }
 
     public function processImageUpload($pArr){
-        global $PARAMS_ARR;
+        global $PARAMS_ARR, $SOLR_MODE;
         $occManager = new OccurrenceEditorImages();
         $occId = 0;
         $occId = ($pArr["occid"]?$pArr["occid"]:$this->getOccFromCatNum($pArr["collid"],$pArr["catnum"]));
@@ -131,7 +131,8 @@ class OccurrenceAPIManager{
     }
 
     public function processImageUploadDetermination($occId,$pArr){
-        $prevDet = '';
+        global $PARAMS_ARR, $SOLR_MODE;
+	    $prevDet = '';
         $detTidAccepted = 0;
         $detFamily = '';
         $detSciNameAuthor = '';
@@ -227,184 +228,7 @@ class OccurrenceAPIManager{
         return $occId;
     }
 
-    public function checkFGBatchProcess($collid){
-        $retArr = Array();
-        $jsonFileName = $collid.'-FGBatch.json';
-        $jsonFile = $GLOBALS['SERVER_ROOT'].(substr($GLOBALS['SERVER_ROOT'],-1)=='/'?'':'/').'temp/data/fieldguide/'.$jsonFileName;
-        if(file_exists($jsonFile)){
-            $jsonStr = file_get_contents($jsonFile);
-            $retArr = json_decode($jsonStr,true);
-        }
-        return $retArr;
-    }
-
-    public function checkFGBatchResults($collid){
-        $results = false;
-        $jsonFileName = $collid.'-FGResults.json';
-        $jsonFile = $GLOBALS['SERVER_ROOT'].(substr($GLOBALS['SERVER_ROOT'],-1)=='/'?'':'/').'temp/data/fieldguide/'.$jsonFileName;
-        if(file_exists($jsonFile)){
-            $results = true;
-        }
-        return $results;
-    }
-
-    public function initiateFGBatchProcess($collid){
-        global $SERVER_ROOT, $CLIENT_ROOT;
-        $this->setServerDomain();
-        $imgArr = $this->getFGBatchImgArr($collid);
-        if($imgArr){
-            $processDataArr = array();
-            $pArr = array();
-            $jsonFileName = $collid.'-FGBatch.json';
-            $token = sprintf( '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
-                mt_rand( 0, 0xffff ), mt_rand( 0, 0xffff ),
-                mt_rand( 0, 0xffff ),
-                mt_rand( 0, 0x0fff ) | 0x4000,
-                mt_rand( 0, 0x3fff ) | 0x8000,
-                mt_rand( 0, 0xffff ), mt_rand( 0, 0xffff ), mt_rand( 0, 0xffff )
-            );
-            $processDataArr["job_id"] = $collid.'_'.$token;
-            $processDataArr["images"] = $imgArr;
-            $fp = fopen($SERVER_ROOT.'/temp/data/fieldguide/'.$jsonFileName, 'w');
-            fwrite($fp, json_encode($processDataArr));
-            fclose($fp);
-            $dataFileUrl = $this->serverDomain.$CLIENT_ROOT.(substr($CLIENT_ROOT,-1)=='/'?'':'/').'temp/data/fieldguide/'.$jsonFileName;
-            $pArr["job_id"] = $processDataArr["job_id"];
-            $pArr["url"] = $dataFileUrl;
-            $headers = array(
-                'authorization: Token 7044979d9ec245768dd7561d85865004',
-                'Content-Type: application/x-www-form-urlencoded',
-                'Accept: application/json',
-                'Cache-Control: no-cache',
-                'Pragma: no-cache',
-                'Content-Length: '.strlen(http_build_query($pArr))
-            );
-            $ch = curl_init();
-            $options = array(
-                CURLOPT_URL => 'http://staging.fieldguide.net/api2/symbiota/submit_cv_job',
-                CURLOPT_POST => true,
-                CURLOPT_HTTPHEADER => $headers,
-                CURLOPT_TIMEOUT => 90,
-                CURLOPT_POSTFIELDS => http_build_query($pArr),
-                CURLOPT_RETURNTRANSFER => true
-            );
-            curl_setopt_array($ch, $options);
-            $result = curl_exec($ch);
-            curl_close($ch);
-        }
-    }
-
-    public function cancelFGBatchProcess($collid){
-        global $SERVER_ROOT;
-        $jsonFileName = $collid.'-FGBatch.json';
-        if(file_exists($SERVER_ROOT.'/temp/data/fieldguide/'.$jsonFileName)){
-            $dataArr = json_decode(file_get_contents($SERVER_ROOT.'/temp/data/fieldguide/'.$jsonFileName), true);
-            $jobID = $dataArr['job_id'];
-            if($jobID){
-                $pArr["job_id"] = $jobID;
-                $headers = array(
-                    'authorization: Token 7044979d9ec245768dd7561d85865004',
-                    'Content-Type: application/x-www-form-urlencoded',
-                    'Accept: application/json',
-                    'Cache-Control: no-cache',
-                    'Pragma: no-cache',
-                    'Content-Length: '.strlen(http_build_query($pArr))
-                );
-                $ch = curl_init();
-                $options = array(
-                    CURLOPT_URL => 'http://staging.fieldguide.net/api2/symbiota/remove_cv_job',
-                    CURLOPT_POST => true,
-                    CURLOPT_HTTPHEADER => $headers,
-                    CURLOPT_TIMEOUT => 90,
-                    CURLOPT_POSTFIELDS => http_build_query($pArr),
-                    CURLOPT_RETURNTRANSFER => true
-                );
-                curl_setopt_array($ch, $options);
-                $result = curl_exec($ch);
-                curl_close($ch);
-            }
-        }
-        unlink($SERVER_ROOT.'/temp/data/fieldguide/'.$jsonFileName);
-    }
-
-    public function getFGBatchImgArr($collid){
-        $returnArr = Array();
-        $sql = 'SELECT i.imgid, o.occid, o.sciname, i.url '.
-            'FROM images AS i LEFT JOIN omoccurrences AS o ON i.occid = o.occid '.
-            'WHERE o.collid = '.$collid.' ';
-        //echo "<div>Sql: ".$sql."</div>";
-        $result = $this->conn->query($sql);
-        while($row = $result->fetch_object()){
-            $imgId = $row->imgid;
-            $imgUrl = $row->url;
-            $localDomain = '';
-            if(isset($GLOBALS['IMAGE_DOMAIN']) && $GLOBALS['IMAGE_DOMAIN']){
-                $localDomain = $GLOBALS['IMAGE_DOMAIN'];
-            }
-            else{
-                $localDomain = $this->serverDomain;
-            }
-            if(substr($imgUrl,0,1) == '/') $imgUrl = $localDomain.$imgUrl;
-            $returnArr[$imgId]["occid"] = $row->occid;
-            $returnArr[$imgId]["sciname"] = $row->sciname;
-            $returnArr[$imgId]["url"] = $imgUrl;
-        }
-        $result->free();
-
-        return $returnArr;
-    }
-
-    public function checkImages($collid){
-        $images = false;
-        $sql = 'SELECT i.imgid '.
-            'FROM images AS i LEFT JOIN omoccurrences AS o ON i.occid = o.occid '.
-            'WHERE o.collid = '.$collid.' LIMIT 1';
-        //echo "<div>Sql: ".$sql."</div>";
-        $result = $this->conn->query($sql);
-        while($row = $result->fetch_object()){
-            if($row->imgid) $images = true;
-        }
-        $result->free();
-
-        return $images;
-    }
-
-    public function validateFGResults($jobId){
-        global $SERVER_ROOT;
-        $valid = false;
-        $collId = substr($jobId, 0, strpos($jobId, '_'));
-        $jsonFileName = $collId.'-FGBatch.json';
-        if(file_exists($SERVER_ROOT.'/temp/data/fieldguide/'.$jsonFileName)){
-            $dataArr = json_decode(file_get_contents($SERVER_ROOT.'/temp/data/fieldguide/'.$jsonFileName), true);
-            $fileJobID = $dataArr['job_id'];
-            if($fileJobID == $jobId) $valid = true;
-        }
-        return $valid;
-    }
-
-    public function processFGResults($jobId,$resultUrl){
-        global $SERVER_ROOT;
-        $collId = substr($jobId, 0, strpos($jobId, '_'));
-        $jsonResFileName = $collId.'-FGResults.json';
-        $jsonBatFileName = $collId.'-FGBatch.json';
-        if(file_get_contents($resultUrl)){
-            $resultsData = file_get_contents($resultUrl);
-            $fp = fopen($SERVER_ROOT.'/temp/data/fieldguide/'.$jsonResFileName, 'w');
-            fwrite($fp, $resultsData);
-            fclose($fp);
-            unlink($SERVER_ROOT.'/temp/data/fieldguide/'.$jsonBatFileName);
-        }
-    }
-
-    public function deleteFGBatchResults($collid){
-        global $SERVER_ROOT;
-        $jsonFileName = $collid.'-FGResults.json';
-        if(file_exists($SERVER_ROOT.'/temp/data/fieldguide/'.$jsonFileName)){
-            unlink($SERVER_ROOT.'/temp/data/fieldguide/'.$jsonFileName);
-        }
-    }
-
-	public function setCollID($val){
+    public function setCollID($val){
         $this->collId = $this->cleanInStr($val);
     }
 

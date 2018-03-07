@@ -409,7 +409,7 @@ else{
     <?php
     if($crowdSourceMode == 1){
 		?>
-		<link href="includes/config/occureditorcrowdsource.css?ver=170601" type="text/css" rel="stylesheet" id="editorCssLink" />
+		<link href="includes/config/occureditorcrowdsource.css?ver=1802" type="text/css" rel="stylesheet" id="editorCssLink" />
 		<?php
     }
     else{
