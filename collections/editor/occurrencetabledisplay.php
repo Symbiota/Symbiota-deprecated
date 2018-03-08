@@ -97,6 +97,10 @@ if($SYMB_UID){
 		$occManager->setSqlWhere($occIndex,$recLimit);
 		$qryCnt = $occManager->getQueryRecordCount(1);
 	}
+	elseif(isset($_SESSION['editorquery'])){
+		//Make sure query is null
+		unset($_SESSION['editorquery']);
+	}
 
 	$recArr = $occManager->getOccurMap();
 	$navStr = '<div style="float:right;">';
@@ -128,7 +132,7 @@ else{
     <link href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 	<script src="../../js/jquery.js" type="text/javascript"></script>
 	<script src="../../js/jquery-ui.js" type="text/javascript"></script>
-	<script src="../../js/symb/collections.occureditorshare.js?ver=201803" type="text/javascript" ></script>
+	<script src="../../js/symb/collections.occureditorshare.js?ver=20180308" type="text/javascript" ></script>
 </head>
 <body style="margin-left: 0px; margin-right: 0px;background-color:white;">
 	<!-- inner text -->
@@ -239,34 +243,6 @@ else{
 									Match Whole Field<br/>
 									<input name="bumatch" type="radio" value="1" />
 									Match Any Part of Field
-								</div>
-								<div style="margin:2px;">
-									<?php
-									if(isset($_REQUEST['q_identifier']) && $_REQUEST['q_identifier']) echo '<input name="q_identifier" type="hidden" value="'.$_REQUEST['q_identifier'].'" />';
-									if(isset($_REQUEST['q_catalognumber']) && $_REQUEST['q_catalognumber']) echo '<input name="q_catalognumber" type="hidden" value="'.$_REQUEST['q_catalognumber'].'" />';
-									if(isset($_REQUEST['q_othercatalognumbers']) && $_REQUEST['q_othercatalognumbers']) echo '<input name="q_othercatalognumbers" type="hidden" value="'.$_REQUEST['q_othercatalognumbers'].'" />';
-									if(isset($_REQUEST['q_recordedby']) && $_REQUEST['q_recordedby']) echo '<input name="q_recordedby" type="hidden" value="'.$_REQUEST['q_recordedby'].'" />';
-									if(isset($_REQUEST['q_recordnumber']) && $_REQUEST['q_recordnumber']) echo '<input name="q_recordnumber" type="hidden" value="'.$_REQUEST['q_recordnumber'].'" />';
-									if(isset($_REQUEST['q_eventdate']) && $_REQUEST['q_eventdate']) echo '<input name="q_eventdate" type="hidden" value="'.$_REQUEST['q_eventdate'].'" />';
-									if(isset($_REQUEST['q_recordenteredby']) && $_REQUEST['q_recordenteredby']) echo '<input name="q_recordenteredby" type="hidden" value="'.$_REQUEST['q_recordenteredby'].'" />';
-									if(isset($_REQUEST['q_observeruid']) && $_REQUEST['q_observeruid']) echo '<input name="q_observeruid" type="hidden" value="'.$_REQUEST['q_observeruid'].'" />';
-									if(isset($_REQUEST['q_processingstatus']) && $_REQUEST['q_processingstatus']) echo '<input name="q_processingstatus" type="hidden" value="'.$_REQUEST['q_processingstatus'].'" />';
-									if(isset($_REQUEST['q_datelastmodified']) && $_REQUEST['q_datelastmodified']) echo '<input name="q_datelastmodified" type="hidden" value="'.$_REQUEST['q_datelastmodified'].'" />';
-									if(isset($_REQUEST['q_exsiccatiid']) && $_REQUEST['q_exsiccatiid']) echo '<input name="q_exsiccatiid" type="hidden" value="'.$_REQUEST['q_exsiccatiid'].'" />';
-									if(isset($_REQUEST['q_dateentered']) && $_REQUEST['q_dateentered']) echo '<input name="q_dateentered" type="hidden" value="'.$_REQUEST['q_dateentered'].'" />';
-									if(isset($_REQUEST['q_ocrfrag']) && $_REQUEST['q_ocrfrag']) echo '<input name="q_ocrfrag" type="hidden" value="'.$_REQUEST['q_ocrfrag'].'" />';
-									if(isset($_REQUEST['q_imgonly']) && $_REQUEST['q_imgonly']) echo '<input name="q_imgonly" type="hidden" value="'.$_REQUEST['q_imgonly'].'" />';
-									if(isset($_REQUEST['q_withoutimg']) && $_REQUEST['q_withoutimg']) echo '<input name="q_withoutimg" type="hidden" value="'.$_REQUEST['q_withoutimg'].'" />';
-									for($x=1;$x<4;$x++){
-										if(isset($_REQUEST['q_customfield'.$x]) && $_REQUEST['q_customfield'.$x]){
-											echo '<input name="q_customfield'.$x.'" type="hidden" value="'.$_REQUEST['q_customfield'.$x].'" />';
-											echo '<input name="q_customtype'.$x.'" type="hidden" value="'.$_REQUEST['q_customtype'.$x].'" />';
-											echo '<input name="q_customvalue'.$x.'" type="hidden" value="'.$_REQUEST['q_customvalue'.$x].'" />';
-										}
-									}
-									if(isset($_REQUEST['orderby']) && $_REQUEST['orderby']) echo '<input name="orderby" type="hidden" value="'.$_REQUEST['orderby'].'" />';
-									if(isset($_REQUEST['orderbydir']) && $_REQUEST['orderbydir']) echo '<input name="orderbydir" type="hidden" value="'.$_REQUEST['orderbydir'].'" />';
-									?>
 								</div>
 								<div style="margin:2px;">
 									<input name="collid" type="hidden" value="<?php echo $collId; ?>" />

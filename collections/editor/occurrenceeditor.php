@@ -284,6 +284,7 @@ if($SYMB_UID){
 				$occManager->setSqlWhere($occIndex);
 			}
 			else{
+				unset($_SESSION['editorquery']);
 				$occIndex = false;
 			}
 		}
@@ -297,6 +298,10 @@ if($SYMB_UID){
 			$occManager->setSqlWhere($occIndex);
 			$qryCnt = $occManager->getQueryRecordCount();
 		}
+	}
+	elseif(isset($_SESSION['editorquery'])){
+		//Make sure query variables are null
+		unset($_SESSION['editorquery']);
 	}
 
 	if(!$goToMode){
@@ -439,7 +444,7 @@ else{
 	<script type="text/javascript" src="../../js/symb/collections.occureditormain.js?ver=20180203"></script>
 	<script type="text/javascript" src="../../js/symb/collections.occureditortools.js?ver=170204"></script>
 	<script type="text/javascript" src="../../js/symb/collections.occureditorimgtools.js?ver=170310"></script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditorshare.js?ver=201803"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditorshare.js?ver=20180308"></script>
 </head>
 <body>
 	<!-- inner text -->
