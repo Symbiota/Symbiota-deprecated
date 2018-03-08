@@ -4,7 +4,8 @@ var voucherAssocCleared = false;
 var abortFormVerification = false;
 
 $(document).ready(function() {
-
+	
+	var editForm = document.fullform;
 	function split( val ) {
 		return val.split( /,\s*/ );
 	}
@@ -20,7 +21,7 @@ $(document).ready(function() {
 	$("#occedittabs").tabs({
 		select: function(event, ui) {
 			if(verifyLeaveForm()){
-				document.fullform.submitaction.disabled = true;
+				editForm.submitaction.disabled = true;
 			}
 			else{
 				return false;
@@ -132,7 +133,6 @@ $(document).ready(function() {
 			},
 			minLength: 4,
 			select: function( event, ui ) {
-				var editForm = document.fullform;
 				$.each(ui.item, function(k, v) {
 					if($( "input[name="+k+"]" ).val() == ""){
 						$( "input[name="+k+"]" ).val(v);
@@ -162,7 +162,7 @@ $(document).ready(function() {
 
 	$("#ffstate").autocomplete({
 		source: function( request, response ) {
-			$.getJSON( "rpc/lookupState.php", { term: request.term, "country": document.fullform.country.value }, response );
+			$.getJSON( "rpc/lookupState.php", { term: request.term, "country": editForm.country.value }, response );
 		},
 		minLength: 2,
 		autoFocus: true,
@@ -173,7 +173,7 @@ $(document).ready(function() {
 
 	$("#ffcounty").autocomplete({ 
 		source: function( request, response ) {
-			$.getJSON( "rpc/lookupCounty.php", { term: request.term, "state": document.fullform.stateprovince.value }, response );
+			$.getJSON( "rpc/lookupCounty.php", { term: request.term, "state": editForm.stateprovince.value }, response );
 		},
 		minLength: 2,
 		autoFocus: true,
@@ -184,7 +184,7 @@ $(document).ready(function() {
 
 	$("#ffmunicipality").autocomplete({ 
 		source: function( request, response ) {
-			$.getJSON( "rpc/lookupMunicipality.php", { term: request.term, "state": document.fullform.stateprovince.value }, response );
+			$.getJSON( "rpc/lookupMunicipality.php", { term: request.term, "state": editForm.stateprovince.value }, response );
 		},
 		minLength: 2,
 		autoFocus: true,
@@ -239,9 +239,12 @@ $(document).ready(function() {
 	
 	//Remember Auto Processing Status
 	var apstatus = getCookie("autopstatus");
-	if(getCookie("autopstatus")) document.fullform.autoprocessingstatus.value = apstatus;
+	if(getCookie("autopstatus")){
+		editForm.autoprocessingstatus.value = apstatus;
+		if(editForm.occid.value == 0) editForm.processingstatus.value = apstatus;
+	}
 	//Remember Auto Duplicate search status 
-	if(getCookie("autodupe") == 1) document.fullform.autodupe.checked = true; 
+	if(getCookie("autodupe") == 1) editForm.autodupe.checked = true; 
 });
 
 function toggleStyle(){

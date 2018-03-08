@@ -441,7 +441,7 @@ else{
 	</script>
 	<script type="text/javascript" src="../../js/symb/collections.coordinateValidation.js?ver=170310"></script>
 	<script type="text/javascript" src="../../js/symb/wktpolygontools.js?ver=180208"></script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditormain.js?ver=20180203"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditormain.js?ver=20180308"></script>
 	<script type="text/javascript" src="../../js/symb/collections.occureditortools.js?ver=170204"></script>
 	<script type="text/javascript" src="../../js/symb/collections.occureditorimgtools.js?ver=170310"></script>
 	<script type="text/javascript" src="../../js/symb/collections.occureditorshare.js?ver=20180308"></script>
@@ -1346,6 +1346,26 @@ else{
 										if($navStr){
 											//echo '<div style="float:right;margin-right:20px;">'.$navStr.'</div>'."\n";
 										}
+										if(!$occId){
+											$userChecklists = $occManager->getUserChecklists();
+											if($userChecklists){
+												?>
+												<fieldset>
+													<legend><b>Checklist Voucher</b></legend>
+													Link Occurrence to Checklist:
+													<select name="clidvoucher">
+														<option value="">No Checklist Selected</option>
+														<option value="">---------------------------------------------</option>
+														<?php
+														foreach($userChecklists as $clid => $clName){
+															echo '<option value="'.$clid.'">'.$clName.'</option>';
+														}
+														?>
+													</select>
+												</fieldset>
+												<?php
+											}
+										}
 										?>
 										<div style="padding:10px;">
 											<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
@@ -1353,6 +1373,20 @@ else{
 											<input type="hidden" name="observeruid" value="<?php echo $SYMB_UID; ?>" />
 											<input type="hidden" name="csmode" value="<?php echo $crowdSourceMode; ?>" />
 											<input type="hidden" name="linkdupe" value="" />
+											Status Auto-Set:
+											<select name="autoprocessingstatus" onchange="autoProcessingStatusChanged(this)">
+												<option value=''>Not Activated</option>
+												<option value=''>-------------------</option>
+												<?php
+												foreach($processingStatusArr as $v){
+													$keyOut = strtolower($v);
+													//Don't display all options if editor is crowd sourced
+													if($isEditor || ($keyOut != 'reviewed' && $keyOut != 'closed')){
+														echo '<option value="'.$keyOut.'" '.($crowdSourceMode && $keyOut == "pending review"?'SELECTED':'').'>'.ucwords($v).'</option>';
+													}
+												}
+												?>
+											</select>
 											<?php
 											if($occId){
 												if(($isEditor == 1 || $isEditor == 2) && !$crowdSourceMode){
@@ -1370,21 +1404,6 @@ else{
 												?>
 												<div id="editButtonDiv">
 													<input type="submit" name="submitaction" value="Save Edits" style="width:150px;" onclick="return verifyFullFormEdits(this.form)" disabled />
-													<br/>
-													Status Auto-Set:
-													<select name="autoprocessingstatus" onchange="autoProcessingStatusChanged(this)">
-														<option value=''>Not Activated</option>
-														<option value=''>-------------------</option>
-														<?php
-														foreach($processingStatusArr as $v){
-															$keyOut = strtolower($v);
-															//Don't display all options if editor is crowd sourced
-															if($isEditor || ($keyOut != 'reviewed' && $keyOut != 'closed')){
-																echo '<option value="'.$keyOut.'" '.($crowdSourceMode && $keyOut == "pending review"?'SELECTED':'').'>'.ucwords($v).'</option>';
-															}
-														}
-														?>
-													</select>
 													<?php
 													if($occIndex !== false){
 														?>
@@ -1397,24 +1416,6 @@ else{
 												<?php
 											}
 											else{
-												$userChecklists = $occManager->getUserChecklists();
-												if($userChecklists){
-													?>
-													<fieldset>
-														<legend><b>Checklist Voucher</b></legend>
-														Link Occurrence to Checklist:
-														<select name="clidvoucher">
-															<option value="">No Checklist Selected</option>
-															<option value="">---------------------------------------------</option>
-															<?php
-															foreach($userChecklists as $clid => $clName){
-																echo '<option value="'.$clid.'">'.$clName.'</option>';
-															}
-															?>
-														</select>
-													</fieldset>
-													<?php
-												}
 												?>
 												<div id="addButtonDiv">
 													<input type="hidden" name="recordenteredby" value="<?php echo $paramsArr['un']; ?>" />
@@ -1430,7 +1431,6 @@ else{
 														<input type="radio" name="gotomode" value="0" <?php echo (!$goToMode?'CHECKED':''); ?> /> Remain on Editing Page (add images, determinations, etc)
 													</div>
 												</div>
-
 												<?php
 											}
 											?>
