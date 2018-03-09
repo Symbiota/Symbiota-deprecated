@@ -17,7 +17,6 @@ var rightColContent = [];
 
 function openFieldGuideExporter(){
     var taxonFilter = document.getElementById("thesfilter").value;
-    //document.getElementById("exporteriframe").src = "fieldguideexporter.php?thesfilter="+taxonFilter+"&cl=<?php echo $clValue; ?>";
     $("#fieldguideexport").popup("show");
 }
 
@@ -34,24 +33,6 @@ function prepareFieldGuideExport(taxCnt){
         loadIndex++;
     }
     while(processed < taxCnt);
-}
-
-function lazyLoadData(index,callback){
-    var startindex = 0;
-    loadingComplete = false;
-    if(index > 0) startindex = (index*lazyLoadCnt) + 1;
-    var http = new XMLHttpRequest();
-    var url = "rpc/fieldguideexporter.php";
-    var params = 'rows='+lazyLoadCnt+'&start='+startindex+'&cl=<?php echo $clValue."&pid=".$pid."&dynclid=".$dynClid."&thesfilter=".($thesFilter?$thesFilter:1); ?>';
-    //console.log(url+'?'+params);
-    http.open("POST", url, true);
-    http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-    http.onreadystatechange = function() {
-        if(http.readyState == 4 && http.status == 200) {
-            callback(http.responseText);
-        }
-    };
-    http.send(params);
 }
 
 function processDataResponse(res){
@@ -85,13 +66,16 @@ function processDataResponse(res){
             for(im in tempArr[i]['img']){
                 var imgId = tempArr[i]['img'][im]['id'];
                 dataArr[family][sciname]['images'].push(tempArr[i]['img'][im]);
-                /*imgProcArr.push(imgId);
+                imgProcArr.push(imgId);
                 loadImageDataUri(imgId,function(res){
-                    imgDataArr[imgId] = res;
-                    var index = imgProcArr.indexOf(imgId);
+                    var imgArr = res.split("-||-");
+                    var resId = imgArr[0];
+                    var resData = imgArr[1];
+                    imgDataArr[resId] = resData;
+                    var index = imgProcArr.indexOf(resId);
                     imgProcArr.splice(index, 1);
                     if(loadingComplete && (procIndex == lastLoad) && (imgProcArr.length == 0)) createPDFGuide();
-                });*/
+                });
             }
         }
     }
@@ -101,8 +85,15 @@ function processDataResponse(res){
 
 function createPDFGuide(){
     var contentArr = [];
+    contentArr.push({
+        toc: {
+            title: {text: 'INDEX', alignment: 'left', style: 'TOCHeader'}
+        },
+        pageBreak: 'after'
+    });
     var familyKeys = Object.keys(dataArr);
     familyKeys.sort();
+    //contentArr.push({toc: {title: 'INDEX'}});
     for(i in familyKeys){
         var familyName = familyKeys[i];
         var famArr = dataArr[familyName];
@@ -112,6 +103,8 @@ function createPDFGuide(){
             for(s in scinameKeys){
                 var sciname = scinameKeys[s];
                 if(typeof sciname === "string"){
+                    leftColContent = [];
+                    rightColContent = [];
                     var taxonOrder = dataArr[familyName][sciname]['order'];
                     var scinameAuthor = dataArr[familyName][sciname]['author'];
                     var commonName = '';
@@ -133,55 +126,81 @@ function createPDFGuide(){
                         leftColContent.push({text: commonName, style: 'commontext'});
                     }
                     leftColContent.push('\n\n');
-                    for(d in descArr){
-                        if(descArr[d]['heading']){
-                            leftColContent.push({text: descArr[d]['heading']+':', style: 'descheadtext'});
+                    //console.log(typeof descArr);
+                    if(Object.keys(descArr).length !== 0){
+                        var source = descArr.source;
+                        delete descArr.source;
+                        for(d in descArr){
+                            if(descArr[d]['heading']){
+                                leftColContent.push({text: descArr[d]['heading']+':', style: 'descheadtext'});
+                                leftColContent.push(' ');
+                            }
+                            leftColContent.push({text: descArr[d]['statement'], style: 'descstattext'});
                             leftColContent.push(' ');
                         }
-                        leftColContent.push({text: descArr[d]['statement'], style: 'descstattext'});
-                        leftColContent.push(' ');
-                    }
-
-                    var rightColText = [];
-                    /*for(p in imgArr){
-                        var imgid = imgArr[p]['id'];
-                        if(imgDataArr[imgid]){
-                            var tempArr = [];
-                            tempArr.push({image: imgDataArr[imgid], width: 150, alignment: 'right'});
-                            rightColContent.push(tempArr);
+                        if(source){
+                            leftColContent.push('\n');
+                            leftColContent.push({text: source, style: 'descsourcetext', alignment: 'right'});
                         }
-                    }*/
-
-                    //if(imgArr[0]['url']) testImg2 = imgArr[0]['url'];
+                    }
+                    else{
+                        leftColContent.push({text: 'No Description Available', style: 'nodesctext'});
+                    }
+                    if(imgArr.length > 0){
+                        for(p in imgArr){
+                            var imgid = imgArr[p]['id'];
+                            var owner = imgArr[p]['owner'];
+                            var photographer = imgArr[p]['photographer'];
+                            if(imgDataArr[imgid]){
+                                var tempArr = [];
+                                var creditStr = '';
+                                tempArr.push({image: imgDataArr[imgid], width: 150, alignment: 'right'});
+                                rightColContent.push(tempArr);
+                                if(photographer){
+                                    creditStr = 'Photograph by: '+photographer;
+                                }
+                                if(owner){
+                                    creditStr += (photographer?'\n':'')+owner;
+                                }
+                                if(creditStr){
+                                    tempArr = [];
+                                    tempArr.push({text: creditStr, style: 'imageCredit', alignment: 'right'});
+                                    rightColContent.push(tempArr);
+                                }
+                            }
+                        }
+                    }
 
                     var leftColArr = {
                         width: 340,
                         text: leftColContent
                     };
-                    var rightColArr = {
-                        /*table: {
-                            widths: [160],
-                            body: [{image: testImg2, width: 150, alignment: 'right'}]
+                    if(rightColContent.length > 1){
+                        var rightColArr = {
+                            table: {
+                                widths: [160],
+                                body: rightColContent
+                            },
+                            layout: 'noBorders'
 
-                            body: [
-                                [{image: testImg2, width: 150, alignment: 'right'}],
-                                [{image: testImageDataUrl, width: 150, alignment: 'right'}],
-                                [{image: testImageDataUrl, width: 150, alignment: 'right'}]
-                            ]
-                        },
-                        layout: 'noBorders'*/
+                        };
+                    }
+                    else{
+                        var rightColArr = {
+                            table: {
+                                widths: [160],
+                                body: [rightColContent]
+                            },
+                            layout: 'noBorders'
 
-                        table: {
-                            widths: [160],
-                            body: rightColContent
-                        },
-                        layout: 'noBorders'
-
-                    };
+                        };
+                    }
                     var pageArr = {
                         columns: [leftColArr, rightColArr],
                         pageBreak: 'after'
                     };
+                    var TOCString = familyName+': '+sciname;
+                    contentArr.push({text: TOCString, tocItem: true, alignment: 'left', margin: [-500, 0, 0, 0]});
                     contentArr.push(pageArr);
                 }
             }
@@ -189,6 +208,35 @@ function createPDFGuide(){
     }
     var docDefinition = {
         content: contentArr,
+        footer: function(page){
+            return [
+                {canvas: [{ type: 'line', x1: 20, y1: 0, x2: 595-20, y2: 0, lineWidth: 1 }]},
+                {
+                    columns: [
+                        {
+                            width: 400,
+                            text: checklistName, alignment: 'right', style: 'checkListName', margin: [20, 10, 20, 10]
+                        },
+                        {
+                            width: 200,
+                            columns: [
+                                {
+                                    width: 30,
+                                    text: page, alignment: 'left', style: 'pageNumber', margin: [20, 10, 20, 10]
+                                },
+                                {
+                                    width: 170,
+                                    text: 'Back to Contents', alignment: 'right', style: 'TOCLink', margin: [0, 10, 40, 10],
+                                    linkToPage: 1
+                                }
+
+
+                            ]
+                        }
+                    ]
+                }
+            ];
+        },
         styles: {
             ordertext: {
                 fontSize: 11.5,
@@ -209,11 +257,34 @@ function createPDFGuide(){
                 fontSize: 10.5
             },
             descheadtext: {
-                fontSize: 11.5,
+                fontSize: 11,
+                bold: true
+            },
+            nodesctext: {
+                fontSize: 15,
                 bold: true
             },
             descstattext: {
-                fontSize: 11
+                fontSize: 10.5
+            },
+            descsourcetext: {
+                fontSize: 8
+            },
+            checkListName: {
+                fontSize: 9,
+                bold: true
+            },
+            pageNumber: {
+                fontSize: 11,
+                bold: true
+            },
+            TOCLink: {
+                fontSize: 10,
+                bold: true
+            },
+            imageCredit: {
+                fontSize: 6,
+                margin: [ 0, 0, 0, 13 ]
             }
         }
     };

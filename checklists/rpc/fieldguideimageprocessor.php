@@ -12,6 +12,7 @@ $fgManager = new ChecklistFGExportManager();
 
 if($imgID){
     $url = $fgManager->getImageUrl($imgID);
-    echo $fgManager->getImageDataUrl($url);
+    $dataUrl = $fgManager->getImageDataUrl($url);
+    echo $imgID.'-||-'.$dataUrl;
 }
 ?>

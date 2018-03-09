@@ -117,16 +117,32 @@ if($clValue || $dynClid){
 	<link href="<?php echo $CLIENT_ROOT; ?>/css/jquery-ui.css" type="text/css" rel="stylesheet" />
     <script src="<?php echo $CLIENT_ROOT; ?>/js/jquery.js" type="text/javascript"></script>
     <script src="<?php echo $CLIENT_ROOT; ?>/js/jquery-ui.js" type="text/javascript"></script>
-    <script src="<?php echo $CLIENT_ROOT; ?>/js/jquery-1.10.2.min.js" type="text/javascript"></script>
-    <script src="<?php echo $CLIENT_ROOT; ?>/js/jquery.mobile-1.4.0.min.js" type="text/javascript"></script>
-    <script src="<?php echo $CLIENT_ROOT; ?>/js/jquery-1.9.1.js" type="text/javascript"></script>
-    <script src="<?php echo $CLIENT_ROOT; ?>/js/jquery-ui-1.10.4.js" type="text/javascript"></script>
     <script src="<?php echo $CLIENT_ROOT; ?>/js/jquery.popupoverlay.js" type="text/javascript"></script>
     <script type="text/javascript">
 		<?php include_once($SERVER_ROOT.'/config/googleanalytics.php'); ?>
 	</script>
 	<script type="text/javascript">
         <?php if($clid) echo 'var clid = '.$clid.';'; ?>
+
+        <?php if($clManager->getClName()) echo 'var checklistName = "'.$clManager->getClName().'";'; ?>
+
+        function lazyLoadData(index,callback){
+            var startindex = 0;
+            loadingComplete = false;
+            if(index > 0) startindex = (index*lazyLoadCnt) + 1;
+            var http = new XMLHttpRequest();
+            var url = "rpc/fieldguideexporter.php";
+            var params = 'rows='+lazyLoadCnt+'&start='+startindex+'&cl=<?php echo $clValue."&pid=".$pid."&dynclid=".$dynClid."&thesfilter=".($thesFilter?$thesFilter:1); ?>';
+            //console.log(url+'?'+params);
+            http.open("POST", url, true);
+            http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+            http.onreadystatechange = function() {
+                if(http.readyState == 4 && http.status == 200) {
+                    callback(http.responseText);
+                }
+            };
+            http.send(params);
+        }
 	</script>
 	<script type="text/javascript" src="../js/symb/checklists.checklist.js?ver=201606"></script>
     <?php
@@ -134,7 +150,7 @@ if($clValue || $dynClid){
         ?>
         <script src="<?php echo $CLIENT_ROOT; ?>/js/pdfmake.min.js" type="text/javascript"></script>
         <script src="<?php echo $CLIENT_ROOT; ?>/js/vfs_fonts.js" type="text/javascript"></script>
-        <script src="<?php echo $CLIENT_ROOT; ?>/js/symb/checklists.fieldguideexport.js?ver=1" type="text/javascript"></script>
+        <script src="<?php echo $CLIENT_ROOT; ?>/js/symb/checklists.fieldguideexport.js?ver=12" type="text/javascript"></script>
         <?php
     }
     ?>
