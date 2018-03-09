@@ -1244,6 +1244,8 @@ function autoProcessingStatusChanged(selectObj){
 	var selValue = selectObj.value;
 	if(selValue){
 		document.cookie = "autopstatus=" + selValue;
+		var editForm = document.fullform;
+		if(editForm.occid.value == 0) editForm.processingstatus.value = selValue;
 	}
 	else{
 		document.cookie = "autopstatus=;expires=Thu, 01 Jan 1970 00:00:01 GMT;";
