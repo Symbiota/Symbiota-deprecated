@@ -106,13 +106,13 @@ $taxonName = ($tid?$taxaArr[$tid]:'');
 
 		function openNewTermPopup(glossid,relation){
 			var urlStr = 'addterm.php?rellanguage=<?php echo $language.'&taxatid='.$tid.'&taxaname='.$taxonName; ?>';
-			newWindow = window.open(urlStr,'addnewpopup','toolbar=0,status=1,scrollbars=1,width=1250,height=900,left=20,top=20');
+			newWindow = window.open(urlStr,'addnewpopup','toolbar=0,status=1,scrollbars=1,width=1250,height=700,left=20,top=20');
 			if (newWindow.opener == null) newWindow.opener = self;
 		}
 
 		function openTermPopup(glossid){
 			var urlStr = 'individual.php?glossid='+glossid;
-			newWindow = window.open(urlStr,'popup','toolbar=0,status=1,scrollbars=1,width=800,height=750,left=20,top=20');
+			newWindow = window.open(urlStr,'popup','toolbar=0,status=1,scrollbars=1,width=800,height=450,left=20,top=20');
 			if (newWindow.opener == null) newWindow.opener = self;
 			return false;
 		}
@@ -179,7 +179,9 @@ $taxonName = ($tid?$taxaArr[$tid]:'');
 						</a>
 					</div>
 					<div>
+						<!--
 						<a href='glossaryloader.php'>Batch Upload Terms</a>
+						 -->
 					</div>
 					<?php
 				}
@@ -194,35 +196,49 @@ $taxonName = ($tid?$taxaArr[$tid]:'');
 				<form name="downloadform" action="glossdocexport.php" method="post" onsubmit="return verifyDownloadForm(this);">
 					<fieldset style="padding:8px">
 						<legend><b>Download Options</b></legend>
-						<div style="margin-bottom:8px;">
-							Primary language will be language selected to the left.
-						</div>
-						<div style="margin-bottom:8px;">
-							<div>
-								<input name="exporttype" type="radio" value="singlelanguage" checked /> Single Language
+						<?php
+						if(count($langArr) > 1){
+							?>
+							<div style="margin-bottom:8px;">
+								Primary language will be language selected to the left.
 							</div>
-							<div style="margin-left:25px;">
+							<div style="margin-bottom:8px;">
+								<div>
+									<input name="exporttype" type="radio" value="singlelanguage" checked /> Single Language
+								</div>
+								<div style="margin-left:25px;">
+									<input name="images" type="checkbox" value="images" /> Include Images
+								</div>
+							</div>
+							<div>
+								<div>
+									<input name="exporttype" type="radio" value="translation" /> Translation Table
+								</div>
+								<div style="float:left;margin-left:25px;">
+									<b>Translations</b><br />
+									<?php
+									foreach($langArr as $k => $v){
+										echo '<input name="language[]" type="checkbox" value="'.$v.'" /> '.$v.'<br />';
+									}
+									?>
+								</div>
+								<div style="float:left;margin-left:15px;padding-top:1.1em;">
+									<input name="definitions" type="radio" value="nodef" checked /> Without Definitions<br />
+									<input name="definitions" type="radio" value="onedef" /> Primary Definition Only<br />
+									<input name="definitions" type="radio" value="alldef" /> All Definitions
+								</div>
+							</div>
+							<?php
+						}
+						else{
+							?>
+							<div style="margin-left:5px;">
+								<input name="exporttype" type="hidden" value="singlelanguage" />
 								<input name="images" type="checkbox" value="images" /> Include Images
 							</div>
-						</div>
-						<div>
-							<div>
-								<input name="exporttype" type="radio" value="translation" /> Translation Table
-							</div>
-							<div style="float:left;margin-left:25px;">
-								<b>Translations</b><br />
-								<?php
-								foreach($langArr as $k => $v){
-									echo '<input name="language[]" type="checkbox" value="'.$v.'" /> '.$v.'<br />';
-								}
-								?>
-							</div>
-							<div style="float:left;margin-left:15px;padding-top:1.1em;">
-								<input name="definitions" type="radio" value="nodef" checked /> Without Definitions<br />
-								<input name="definitions" type="radio" value="onedef" /> Primary Definition Only<br />
-								<input name="definitions" type="radio" value="alldef" /> All Definitions
-							</div>
-						</div>
+							<?php
+						}
+						?>
 						<div style="clear:both;padding:15px">
 							<input name="searchlanguage" type="hidden" value="" />
 							<input name="searchtaxa" type="hidden" value="" />

@@ -908,6 +908,7 @@ class ChecklistVoucherAdmin {
 	private function getExportFileName(){
 		$fileName = $this->clName;
 		if($fileName){
+			$fileName = str_replace(Array('.',' ',':','&','"',"'",'(',')','[',']'),'',$fileName);
 			if(strlen($fileName) > 20){
 				$nameArr = explode(' ',$fileName);
 				foreach($nameArr as $k => $w){
@@ -919,7 +920,6 @@ class ChecklistVoucherAdmin {
 		else{
 			$fileName = 'symbiota';
 		}
-		$fileName = str_replace(Array('.',' ',':'),'',$fileName);
 		$fileName .= '_'.time().'.csv';
 		return $fileName;
 	}
