@@ -3,7 +3,8 @@ include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceLabel.php');
 @include_once("Image/Barcode.php");
 @include_once("Image/Barcode2.php");
-require_once $SERVER_ROOT.'/classes/PhpWord/Autoloader.php';
+require_once $SERVER_ROOT.'/vendor/phpoffice/phpword/bootstrap.php';
+
 header("Content-Type: text/html; charset=".$CHARSET);
 ini_set('max_execution_time', 180); //180 seconds = 3 minutes
 
@@ -17,10 +18,6 @@ elseif(class_exists('Image_Barcode')){
 }
 
 $labelManager = new OccurrenceLabel();
-use PhpOffice\PhpWord\Autoloader;
-use PhpOffice\PhpWord\Settings;
-Autoloader::register();
-Settings::loadConfig();
 
 $collid = $_POST["collid"];
 $hPrefix = $_POST['lhprefix'];
@@ -35,13 +32,6 @@ $useBarcode = array_key_exists('bc',$_POST)?$_POST['bc']:0;
 $useSymbBarcode = array_key_exists('symbbc',$_POST)?$_POST['symbbc']:0;
 $barcodeOnly = array_key_exists('bconly',$_POST)?$_POST['bconly']:0;
 $action = array_key_exists('submitaction',$_POST)?$_POST['submitaction']:'';
-
-$exportEngine = '';
-$exportExtension = '';
-if($action == 'Export to DOCX'){
-	$exportEngine = 'Word2007';
-	$exportExtension = 'docx';
-}
 
 $sectionStyle = array();
 if($rowsPerPage==1){
@@ -335,8 +325,8 @@ foreach($labelArr as $occid => $occArr){
 	}
 }
 
-$targetFile = $SERVER_ROOT.'/temp/report/'.$paramsArr['un'].'_'.date('Ymd').'_labels_'.$ses_id.'.'.$exportExtension;
-$phpWord->save($targetFile, $exportEngine);
+$targetFile = $SERVER_ROOT.'/temp/report/'.$paramsArr['un'].'_'.date('Ymd').'_labels_'.$ses_id.'.docx';
+$phpWord->save($targetFile, 'Word2007');
 
 header('Content-Description: File Transfer');
 header('Content-type: application/force-download');

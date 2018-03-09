@@ -1,37 +1,26 @@
 <?php
 include_once('../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/ChecklistManager.php');
-require_once $SERVER_ROOT.'/classes/PhpWord/Autoloader.php';
+require_once $SERVER_ROOT.'/vendor/phpoffice/phpword/bootstrap.php';
+
 header("Content-Type: text/html; charset=".$CHARSET);
 ini_set('max_execution_time', 240); //240 seconds = 4 minutes
 
-$ses_id = session_id();
-
-$clManager = new ChecklistManager();
-use PhpOffice\PhpWord\Autoloader;
-use PhpOffice\PhpWord\Settings;
-Autoloader::register();
-Settings::loadConfig();
-
-$clValue = array_key_exists("cl",$_REQUEST)?$_REQUEST["cl"]:0; 
+$clValue = array_key_exists("cl",$_REQUEST)?$_REQUEST["cl"]:0;
 $dynClid = array_key_exists("dynclid",$_REQUEST)?$_REQUEST["dynclid"]:0;
 $pageNumber = array_key_exists("pagenumber",$_REQUEST)?$_REQUEST["pagenumber"]:1;
 $pid = array_key_exists("pid",$_REQUEST)?$_REQUEST["pid"]:"";
 $thesFilter = array_key_exists("thesfilter",$_REQUEST)?$_REQUEST["thesfilter"]:0;
-$taxonFilter = array_key_exists("taxonfilter",$_REQUEST)?$_REQUEST["taxonfilter"]:""; 
-$showAuthors = array_key_exists("showauthors",$_REQUEST)?$_REQUEST["showauthors"]:0; 
-$showCommon = array_key_exists("showcommon",$_REQUEST)?$_REQUEST["showcommon"]:0; 
-$showImages = array_key_exists("showimages",$_REQUEST)?$_REQUEST["showimages"]:0; 
-$showVouchers = array_key_exists("showvouchers",$_REQUEST)?$_REQUEST["showvouchers"]:0; 
-$showAlphaTaxa = array_key_exists("showalphataxa",$_REQUEST)?$_REQUEST["showalphataxa"]:0; 
+$taxonFilter = array_key_exists("taxonfilter",$_REQUEST)?$_REQUEST["taxonfilter"]:"";
+$showAuthors = array_key_exists("showauthors",$_REQUEST)?$_REQUEST["showauthors"]:0;
+$showCommon = array_key_exists("showcommon",$_REQUEST)?$_REQUEST["showcommon"]:0;
+$showImages = array_key_exists("showimages",$_REQUEST)?$_REQUEST["showimages"]:0;
+$showVouchers = array_key_exists("showvouchers",$_REQUEST)?$_REQUEST["showvouchers"]:0;
+$showAlphaTaxa = array_key_exists("showalphataxa",$_REQUEST)?$_REQUEST["showalphataxa"]:0;
 $searchCommon = array_key_exists("searchcommon",$_REQUEST)?$_REQUEST["searchcommon"]:0;
 $searchSynonyms = array_key_exists("searchsynonyms",$_REQUEST)?$_REQUEST["searchsynonyms"]:0;
 
-$exportEngine = '';
-$exportExtension = '';
-$exportEngine = 'Word2007';
-$exportExtension = 'docx';
-
+$clManager = new ChecklistManager();
 if($clValue){
 	$statusStr = $clManager->setClValue($clValue);
 }
@@ -48,7 +37,7 @@ $showDetails = 0;
 	$showDetails = $defaultArr["ddetails"];
 	if($action != "Rebuild List"){
 		$showCommon = $defaultArr["dcommon"];
-		$showImages = $defaultArr["dimages"]; 
+		$showImages = $defaultArr["dimages"];
 		$showVouchers = $defaultArr["dvouchers"];
 		$showAuthors = $defaultArr["dauthors"];
 		$showAlphaTaxa = $defaultArr["dalpha"];
@@ -71,10 +60,6 @@ if($showAlphaTaxa) $clManager->setShowAlphaTaxa();
 $clid = $clManager->getClid();
 $pid = $clManager->getPid();
 
-$isEditor = false;
-if($IS_ADMIN || (array_key_exists("ClAdmin",$USER_RIGHTS) && in_array($clid,$USER_RIGHTS["ClAdmin"]))){
-	$isEditor = true;
-}
 $taxaArray = Array();
 if($clValue || $dynClid){
 	$taxaArray = $clManager->getTaxaList($pageNumber,0);
@@ -120,7 +105,7 @@ if($clValue){
 	if($clArray["publication"]){
 		$publication = str_replace('&quot;','"',preg_replace('/\s+/',' ',$clArray["publication"]));
 		$publication = str_replace('&apos;',"'",$publication);
-		$textrun->addText(htmlspecialchars('Publication: '),'topicFont');
+		$textrun->addText('Publication: ','topicFont');
 		$textrun->addText(htmlspecialchars($publication),'textFont');
 		$textrun->addTextBreak(1);
 	}
@@ -130,21 +115,21 @@ if(($clArray["locality"] || ($clValue && ($clArray["latcentroid"] || $clArray["a
 	$locStr = str_replace('&apos;',"'",$locStr);
 	if($clValue && $clArray["latcentroid"]) $locStr .= " (".$clArray["latcentroid"].", ".$clArray["longcentroid"].")";
 	if($locStr){
-		$textrun->addText(htmlspecialchars('Locality: '),'topicFont');
+		$textrun->addText('Locality: ','topicFont');
 		$textrun->addText(htmlspecialchars($locStr),'textFont');
 		$textrun->addTextBreak(1);
 	}
 	if($clValue && $clArray["abstract"]){
 		$abstract = str_replace('&quot;','"',preg_replace('/\s+/',' ',$clArray["abstract"]));
 		$abstract = str_replace('&apos;',"'",$abstract);
-		$textrun->addText(htmlspecialchars('Abstract: '),'topicFont');
+		$textrun->addText('Abstract: ','topicFont');
 		$textrun->addText(htmlspecialchars($abstract),'textFont');
 		$textrun->addTextBreak(1);
 	}
 	if($clValue && $clArray["notes"]){
 		$notes = str_replace('&quot;','"',preg_replace('/\s+/',' ',$clArray["notes"]));
 		$notes = str_replace('&apos;',"'",$notes);
-		$textrun->addText(htmlspecialchars('Notes: '),'topicFont');
+		$textrun->addText('Notes: ','topicFont');
 		$textrun->addText(htmlspecialchars($notes),'textFont');
 		$textrun->addTextBreak(1);
 	}
@@ -220,7 +205,7 @@ else{
 		}
 		$textrun = $section->addTextRun('scinamePara');
 		$textrun->addLink('http://'.$_SERVER['HTTP_HOST'].$CLIENT_ROOT.'/taxa/index.php?taxauthid=1&taxon='.$tid.'&cl='.$clid,htmlspecialchars($sppArr['sciname']),'scientificnameFont');
-		if(array_key_exists("author",$sppArr)){ 
+		if(array_key_exists("author",$sppArr)){
 			$sciAuthor = str_replace('&quot;','"',$sppArr["author"]);
 			$sciAuthor = str_replace('&apos;',"'",$sciAuthor);
 			$textrun->addText(htmlspecialchars(' '.$sciAuthor),'textFont');
@@ -252,11 +237,10 @@ else{
 		}
 	}
 }
-
 $fileName = str_replace(' ','_',$clManager->getClName());
 $fileName = str_replace('/','_',$fileName);
-$targetFile = $SERVER_ROOT.'/temp/report/'.$fileName.'.'.$exportExtension;
-$phpWord->save($targetFile, $exportEngine);
+$targetFile = $SERVER_ROOT.'/temp/report/'.$fileName.'.docx';
+$phpWord->save($targetFile, 'Word2007');
 
 header('Content-Description: File Transfer');
 header('Content-type: application/force-download');

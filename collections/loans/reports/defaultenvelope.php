@@ -1,13 +1,9 @@
 <?php
 include_once('../../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/SpecLoans.php');
-require_once $SERVER_ROOT.'/classes/PhpWord/Autoloader.php';
+require_once $SERVER_ROOT.'/vendor/phpoffice/phpword/bootstrap.php';
 
 $loanManager = new SpecLoans();
-use PhpOffice\PhpWord\Autoloader;
-use PhpOffice\PhpWord\Settings;
-Autoloader::register();
-Settings::loadConfig();
 
 $collId = $_REQUEST['collid'];
 $printMode = $_POST['print'];
@@ -54,7 +50,7 @@ if($export){
 	$phpWord->addFontStyle('acctnumFont', array('size'=>8,'name'=>'Arial'));
 	$phpWord->addParagraphStyle('toAddress', array('align'=>'left','indent'=>6,'lineHeight'=>1.0,'spaceAfter'=>0,'keepNext'=>true,'keepLines'=>true));
 	$phpWord->addFontStyle('toAddressFont', array('size'=>12,'name'=>'Arial'));
-	
+
 	$section = $phpWord->addSection(array('pageSizeW'=>13662.992125984,'pageSizeH'=>5952.755905512,'marginLeft'=>360,'marginRight'=>360,'marginTop'=>360,'marginBottom'=>360,'headerHeight'=>0,'footerHeight'=>0));
 	$section->addTextBreak(5);
 	if($accountNum){
@@ -83,7 +79,7 @@ if($export){
 		$textrun->addTextBreak(1);
 		$textrun->addText(htmlspecialchars($invoiceArr['country']),'toAddressFont');
 	}
-	
+
 	$targetFile = $SERVER_ROOT.'/temp/report/'.$paramsArr['un'].'_addressed_envelope.'.$exportExtension;
 	$phpWord->save($targetFile, $exportEngine);
 
@@ -101,7 +97,7 @@ else{
 		<head>
 			<title>Addressed Envelope</title>
 			<style type="text/css">
-				<?php 
+				<?php
 					include_once($SERVER_ROOT.'/css/main.css');
 				?>
 				body {font-family:arial,sans-serif;}
@@ -121,7 +117,7 @@ else{
 					</tr>
 					<tr style="">
 						<td>
-							<?php 
+							<?php
 								if($accountNum){
 									echo '<div class="accnum">Acct. #'.$accountNum.'</div>';
 								}
@@ -131,7 +127,7 @@ else{
 					<tr style="height:1.5in;">
 						<td>
 							<div class="toaddress">
-								<?php 
+								<?php
 								echo $invoiceArr['contact'].'<br />';
 								echo $invoiceArr['institutionname'].' ('.$invoiceArr['institutioncode'].')<br />';
 								if($invoiceArr['institutionname2']){

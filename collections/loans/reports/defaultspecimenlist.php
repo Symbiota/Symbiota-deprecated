@@ -1,13 +1,9 @@
 <?php
 include_once('../../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/SpecLoans.php');
-require_once $SERVER_ROOT.'/classes/PhpWord/Autoloader.php';
+require_once $SERVER_ROOT.'/vendor/phpoffice/phpword/bootstrap.php';
 
 $loanManager = new SpecLoans();
-use PhpOffice\PhpWord\Autoloader;
-use PhpOffice\PhpWord\Settings;
-Autoloader::register();
-Settings::loadConfig();
 
 $collId = $_REQUEST['collid'];
 $printMode = $_POST['print'];
@@ -21,13 +17,7 @@ $displayAll = array_key_exists('displayall',$_POST)?$_POST['displayall']:0;
 $formSubmit = array_key_exists('formsubmit',$_POST)?$_POST['formsubmit']:'';
 
 $export = false;
-$exportEngine = '';
-$exportExtension = '';
-if($printMode == 'doc'){
-	$export = true;
-	$exportEngine = 'Word2007';
-	$exportExtension = 'docx';
-}
+if($printMode == 'doc') $export = true;
 
 if($collId) $loanManager->setCollId($collId);
 
@@ -62,9 +52,9 @@ if($export){
 	$phpWord->addTableStyle('headerTable',$tableHeadStyle,$colRowStyle);
 	$phpWord->addTableStyle('listTable',$tableStyle,$colRowStyle);
 	$cellStyle = array('valign'=>'bottom');
-	
+
 	$section = $phpWord->addSection(array('pageSizeW'=>12240,'pageSizeH'=>15840,'marginLeft'=>1080,'marginRight'=>1080,'marginTop'=>1080,'marginBottom'=>1080,'headerHeight'=>0,'footerHeight'=>0));
-	
+
 	$textrun = $section->addTextRun('header');
 	$textrun->addText(htmlspecialchars('List of specimens loaned to: '.$invoiceArr['institutioncode']),'headerFont');
 	$section->addTextBreak(1);
@@ -87,9 +77,9 @@ if($export){
 		$table->addCell(4500,$cellStyle)->addText(htmlspecialchars($specArr['collector']),'colFont','colSpace');
 		$table->addCell(6000,$cellStyle)->addText(htmlspecialchars($specArr['sciname']),'colFont','colSpace');
 	}
-	
-	$targetFile = $SERVER_ROOT.'/temp/report/'.$loanId.'_specimen_list.'.$exportExtension;
-	$phpWord->save($targetFile, $exportEngine);
+
+	$targetFile = $SERVER_ROOT.'/temp/report/'.$loanId.'_specimen_list.docx';
+	$phpWord->save($targetFile, 'Word2007');
 
 	header('Content-Description: File Transfer');
 	header('Content-type: application/force-download');
@@ -105,7 +95,7 @@ else{
 		<head>
 			<title><?php echo $identifier; ?> Specimen List</title>
 			<style type="text/css">
-				<?php 
+				<?php
 					include_once($SERVER_ROOT.'/css/main.css');
 				?>
 				body {font-family:arial,sans-serif;}
