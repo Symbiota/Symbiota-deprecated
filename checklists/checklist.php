@@ -580,7 +580,6 @@ if($clValue || $dynClid){
 						}
 					}
 					else{
-						$voucherArr = $clManager->getVoucherArr();
 						foreach($taxaArray as $tid => $sppArr){
 							if(!$showAlphaTaxa){
 								$family = $sppArr['family'];
@@ -625,6 +624,7 @@ if($clValue || $dynClid){
 							}
 							echo "</div>\n";
 							if($showVouchers){
+								$voucherArr = $clManager->getVoucherArr();
 								$voucStr = '';
 								if(array_key_exists($tid,$voucherArr)){
 									$voucCnt = 0;
