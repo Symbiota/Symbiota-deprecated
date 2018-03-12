@@ -307,8 +307,8 @@ class ProfileManager{
 		$fields .= 'firstname ';
 		$values .= '"'.$this->cleanInStr($person->getFirstName()).'"';
 		if($middle){
-            $fields .= 'middleinitial ';
-            $values .= '"'.$this->cleanInStr($person->getMiddleInitial()).'"';
+            $fields .= ', middleinitial ';
+            $values .= ', "'.$this->cleanInStr($person->getMiddleInitial()).'"';
         }
 		$fields .= ', lastname';
 		$values .= ', "'.$this->cleanInStr($person->getLastName()).'"';
