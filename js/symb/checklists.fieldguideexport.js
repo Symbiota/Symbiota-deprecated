@@ -10,10 +10,25 @@ var loadIndex = 0;
 var procIndex = 0;
 var lastLoad = 0;
 var dataArr = [];
-var imgProcArr = [];
+var lastImage = 0;
 var imgDataArr = [];
 var leftColContent = [];
 var rightColContent = [];
+var priDescSource = '';
+var secDescSource = '';
+var anyDescSource = 0;
+var photog = [];
+var photoNum = 0;
+
+function hideWorking(){
+    $('#loadingOverlay').popup('hide');
+    $("#fieldguideexport").popup("show");
+}
+
+function showWorking(){
+    $("#fieldguideexport").popup("hide");
+    $('#loadingOverlay').popup('show');
+}
 
 function openFieldGuideExporter(){
     var taxonFilter = document.getElementById("thesfilter").value;
@@ -21,7 +36,9 @@ function openFieldGuideExporter(){
 }
 
 function prepareFieldGuideExport(taxCnt){
-    //showWorking();
+    showWorking();
+    processSettings();
+    document.getElementById("loaderMessage").innerHTML = "Loading data...";
     var processed = 0;
     lastLoad = Math.ceil(taxCnt/lazyLoadCnt);
     do{
@@ -33,6 +50,25 @@ function prepareFieldGuideExport(taxCnt){
         loadIndex++;
     }
     while(processed < taxCnt);
+}
+
+function processSettings(){
+    priDescSource = document.getElementById("fgPriDescSource").value;
+    secDescSource = document.getElementById("fgSecDescSource").value;
+    anyDescSource = document.getElementById("fgUseAltDesc").checked;
+    if(document.getElementById("fgUseAllPhotog").checked == true){
+        photog = 'all';
+    }
+    else{
+        photog = [];
+        var dbElements = document.getElementsByName("photog[]");
+        for(i = 0; i < dbElements.length; i++){
+            if(dbElements[i].checked){
+                photog.push(dbElements[i].value);
+            }
+        }
+    }
+    photoNum = $("input[name=fgMaxImages]:checked").val();
 }
 
 function processDataResponse(res){
@@ -47,10 +83,13 @@ function processDataResponse(res){
         dataArr[family][sciname]['order'] = tempArr[i]['order'];
         if(tempArr[i]['vern']) dataArr[family][sciname]['common'] = tempArr[i]['vern'][0];
         if(tempArr[i]['desc']){
-            if(tempArr[i]['desc']['Field Guide']){
-                dataArr[family][sciname]['desc'] = tempArr[i]['desc']['Field Guide'];
+            if(tempArr[i]['desc'][priDescSource]){
+                dataArr[family][sciname]['desc'] = tempArr[i]['desc'][priDescSource];
             }
-            else{
+            else if(tempArr[i]['desc'][secDescSource]){
+                dataArr[family][sciname]['desc'] = tempArr[i]['desc'][secDescSource];
+            }
+            else if(anyDescSource){
                 var x = 0;
                 do{
                     for(de in tempArr[i]['desc']){
@@ -66,24 +105,22 @@ function processDataResponse(res){
             for(im in tempArr[i]['img']){
                 var imgId = tempArr[i]['img'][im]['id'];
                 dataArr[family][sciname]['images'].push(tempArr[i]['img'][im]);
-                imgProcArr.push(imgId);
+                lastImage = imgId;
                 loadImageDataUri(imgId,function(res){
                     var imgArr = res.split("-||-");
                     var resId = imgArr[0];
                     var resData = imgArr[1];
-                    imgDataArr[resId] = resData;
-                    var index = imgProcArr.indexOf(resId);
-                    imgProcArr.splice(index, 1);
-                    if(loadingComplete && (procIndex == lastLoad) && (imgProcArr.length == 0)) createPDFGuide();
+                    if(resData) imgDataArr[resId] = resData;
+                    if(loadingComplete && (procIndex == lastLoad) && (lastImage == resId)) createPDFGuide();
                 });
             }
         }
     }
     procIndex++;
-    if(loadingComplete && (procIndex == lastLoad) && (imgProcArr.length == 0)) createPDFGuide();
 }
 
 function createPDFGuide(){
+    document.getElementById("loaderMessage").innerHTML = "Creating PDF...";
     var contentArr = [];
     contentArr.push({
         toc: {
@@ -221,11 +258,11 @@ function createPDFGuide(){
                             width: 200,
                             columns: [
                                 {
-                                    width: 30,
+                                    width: 60,
                                     text: page, alignment: 'left', style: 'pageNumber', margin: [20, 10, 20, 10]
                                 },
                                 {
-                                    width: 170,
+                                    width: 140,
                                     text: 'Back to Contents', alignment: 'right', style: 'TOCLink', margin: [0, 10, 40, 10],
                                     linkToPage: 1
                                 }
@@ -289,6 +326,7 @@ function createPDFGuide(){
         }
     };
     pdfMake.createPdf(docDefinition).download('optionalName.pdf');
+    hideWorking();
 }
 
 function loadImageDataUri(imgid,callback){
@@ -304,4 +342,25 @@ function loadImageDataUri(imgid,callback){
         }
     };
     http.send(params);
+}
+
+function selectAllPhotog(){
+    var boxesChecked = true;
+    var selectAll = document.getElementById("fgUseAllPhotog");
+    if(!selectAll.checked){
+        boxesChecked = false;
+    }
+    var dbElements = document.getElementsByName("photog[]");
+    for(i = 0; i < dbElements.length; i++){
+        dbElements[i].checked = boxesChecked;
+    }
+}
+
+function checkPhotogSelections(){
+    var boxesChecked = true;
+    var dbElements = document.getElementsByName("photog[]");
+    for(i = 0; i < dbElements.length; i++){
+        if(!dbElements[i].checked) boxesChecked = false;
+    }
+    document.getElementById("fgUseAllPhotog").checked = boxesChecked;
 }

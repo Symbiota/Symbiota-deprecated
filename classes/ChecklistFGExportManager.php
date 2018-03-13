@@ -16,10 +16,12 @@ class ChecklistFGExportManager {
 	private $language = "English";
     private $index = 0;
     private $recLimit = 0;
-	private $thesFilter = 0;
+	private $thesFilter = 1;
 	private $imageLimit = 100;
 	private $taxaLimit = 500;
-	private $basicSql;
+    private $photogNameArr = array();
+    private $photogIdArr = array();
+    private $maxPhoto = 0;
 
 	function __construct() {
 		$this->conn = MySQLiConnectionFactory::getCon("readonly");
@@ -93,7 +95,7 @@ class ChecklistFGExportManager {
             'FROM '.$this->linkTable.' AS ctl LEFT JOIN taxstatus AS ts ON ctl.tid = ts.tid '.
             'LEFT JOIN taxa AS t ON ts.tidaccepted = t.TID '.
             'WHERE (ts.taxauthid = '.$this->thesFilter.') AND '.$this->sqlWhereVar.' ';
-        $sql .= "LIMIT ".$this->index.",".$this->recLimit;
+        if($this->index || $this->recLimit) $sql .= "LIMIT ".$this->index.",".$this->recLimit;
         //echo $sql; exit;
         $rs = $this->conn->query($sql);
         while($row = $rs->fetch_object()){
@@ -150,34 +152,54 @@ class ChecklistFGExportManager {
     }
 
     public function primeImages(){
-        $sql = 'SELECT ti.tid, ti.imgid, ti.thumbnailurl, ti.url, ti.`owner`, '.
-            'IFNULL(ti.photographer,IFNULL(CONCAT_WS(" ",u.firstname,u.lastname),CONCAT_WS(" ",u2.firstname,u2.lastname))) AS photographer '.
-            'FROM images AS ti LEFT JOIN users AS u ON ti.photographeruid = u.uid '.
-            'LEFT JOIN userlogin AS ul ON ti.username = ul.username '.
-            'LEFT JOIN users AS u2 ON ul.uid = u2.uid '.
-            'LEFT JOIN taxstatus AS ts ON ti.tid = ts.tid '.
-            'WHERE ts.taxauthid = '.$this->thesFilter.' AND ti.tid IN('.$this->sqlTaxaStr.') AND ti.SortSequence < 500 ';
-        $sql .= 'ORDER BY ti.tid, ti.sortsequence ';
-        //echo $sql; exit;
-        $i = 0;
-        $currTid = 0;
-        $result = $this->conn->query($sql);
-        while($row = $result->fetch_object()){
-            if($currTid != $row->tid){
-                $currTid = $row->tid;
-                $i = 0;
+        if($this->maxPhoto > 0){
+            $photogNameStr = '';
+            $photogIdStr = '';
+            if($this->photogNameArr){
+                $photogNameStr .= '"';
+                $photogNameStr .= implode('","',$this->photogIdArr);
+                $photogNameStr .= '"';
             }
-            if($i < 3){
-                $imgUrl = $row->thumbnailurl;
-                if((!$imgUrl || $imgUrl == 'empty') && $row->url) $imgUrl = $row->url;
-                $this->dataArr[$row->tid]["img"][$row->imgid]['id'] = $row->imgid;
-                $this->dataArr[$row->tid]["img"][$row->imgid]['owner'] = $row->owner;
-                $this->dataArr[$row->tid]["img"][$row->imgid]['photographer'] = $row->photographer;
+            if($this->photogIdArr){
+                $photogIdStr .= implode(",",$this->photogIdArr);
             }
-            $i++;
+            $sql = 'SELECT ti.tid, ti.imgid, ti.thumbnailurl, ti.url, ti.`owner`, '.
+                'IFNULL(ti.photographer,IFNULL(CONCAT_WS(" ",u.firstname,u.lastname),CONCAT_WS(" ",u2.firstname,u2.lastname))) AS photographer '.
+                'FROM images AS ti LEFT JOIN users AS u ON ti.photographeruid = u.uid '.
+                'LEFT JOIN userlogin AS ul ON ti.username = ul.username '.
+                'LEFT JOIN users AS u2 ON ul.uid = u2.uid '.
+                'LEFT JOIN taxstatus AS ts ON ti.tid = ts.tid '.
+                'WHERE ts.taxauthid = '.$this->thesFilter.' AND ti.tid IN('.$this->sqlTaxaStr.') AND ti.SortSequence < 500 ';
+            if($photogNameStr || $photogIdStr){
+                $tempSql = 'AND (';
+                if($photogNameStr) $tempSql .= '(ti.photographer IN('.$photogNameStr.'))';
+                if($photogNameStr && $photogIdStr) $tempSql .= ' OR ';
+                if($photogIdStr) $tempSql .= '(ti.photographeruid IN('.$photogIdStr.'))';
+                $tempSql .= ') ';
+                $sql .= $tempSql;
+            }
+            $sql .= 'ORDER BY ti.tid, ti.sortsequence ';
+            //echo $sql; exit;
+            $i = 0;
+            $currTid = 0;
+            $result = $this->conn->query($sql);
+            while($row = $result->fetch_object()){
+                if($currTid != $row->tid){
+                    $currTid = $row->tid;
+                    $i = 0;
+                }
+                if($i < $this->maxPhoto){
+                    $imgUrl = $row->thumbnailurl;
+                    if((!$imgUrl || $imgUrl == 'empty') && $row->url) $imgUrl = $row->url;
+                    $this->dataArr[$row->tid]["img"][$row->imgid]['id'] = $row->imgid;
+                    $this->dataArr[$row->tid]["img"][$row->imgid]['owner'] = $row->owner;
+                    $this->dataArr[$row->tid]["img"][$row->imgid]['photographer'] = $row->photographer;
+                }
+                $i++;
+            }
+            $result->free();
         }
-        $result->free();
-    }
+	}
 
     public function getImageUrl($imgID){
         $imgUrl = '';
@@ -198,6 +220,46 @@ class ChecklistFGExportManager {
         $base64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
 
         return $base64;
+    }
+
+    public function getDescSourceList(){
+        $descSourceList = Array();
+        $sql = 'SELECT DISTINCT tdb.caption '.
+            'FROM taxadescrblock AS tdb '.
+            'WHERE tdb.tid IN('.$this->sqlTaxaStr.') '.
+            'ORDER BY tdb.caption ';
+        //echo $sql;
+        $rs = $this->conn->query($sql);
+        while ($row = $rs->fetch_object()){
+            $descSourceList[] = $row->caption;
+        }
+        $rs->free();
+        return $descSourceList;
+    }
+
+    public function getPhotogList(){
+        $photogList = Array();
+        $sql = 'SELECT DISTINCT ti.photographeruid, ti.photographer, u.firstname, u.lastname '.
+            'FROM images AS ti LEFT JOIN users AS u ON ti.photographeruid = u.uid '.
+            'LEFT JOIN taxstatus AS ts ON ti.tid = ts.tid '.
+            'WHERE ts.taxauthid = '.$this->thesFilter.' AND ti.tid IN('.$this->sqlTaxaStr.') AND ti.SortSequence < 500 ';
+        //echo $sql;
+        $rs = $this->conn->query($sql);
+        while ($row = $rs->fetch_object()){
+            $uId = $row->photographeruid;
+            $givenName = $row->photographer;
+            $lastName = $row->lastname;
+            $firstName = $row->firstname;
+            if($uId){
+                $nameStr = $lastName.', '.$firstName;
+                $photogList[$nameStr] = $uId;
+            }
+            else{
+                $photogList[$givenName] = 0;
+            }
+        }
+        $rs->free();
+        return $photogList;
     }
 
     //Setters and getters
@@ -251,6 +313,26 @@ class ChecklistFGExportManager {
 			$this->language = $l;
 		}
 	}
+
+    public function setPhotogJson($json){
+        $photogArr = json_decode($json,true);
+        if(is_array($photogArr)){
+            foreach($photogArr as $str){
+                $parts = explode("---",$str);
+                $id = $parts[0];
+                $name = $parts[1];
+                if($id) $this->photogIdArr[] = $id;
+                elseif($name) $this->photogNameArr[] = $name;
+            }
+        }
+        elseif($photogArr != 'all'){
+            $this->maxPhoto = 0;
+        }
+    }
+
+    public function setMaxPhoto($cnt){
+        $this->maxPhoto = $cnt;
+    }
 
 	public function setImageLimit($cnt){
 		$this->imageLimit = $cnt;
