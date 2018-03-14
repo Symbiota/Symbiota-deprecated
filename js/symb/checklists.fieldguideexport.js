@@ -12,6 +12,7 @@ var lastLoad = 0;
 var dataArr = [];
 var lastImage = 0;
 var imgDataArr = [];
+var contentArr = [];
 var leftColContent = [];
 var rightColContent = [];
 var priDescSource = '';
@@ -19,6 +20,12 @@ var secDescSource = '';
 var anyDescSource = 0;
 var photog = [];
 var photoNum = 0;
+var zipFile = '';
+var zipFolder = '';
+var pdfFileNum = 0;
+var pdfFileTot = 0;
+var projFileName = '';
+var savedPDFs = 0;
 
 function hideWorking(){
     $('#loadingOverlay').popup('hide');
@@ -38,9 +45,10 @@ function openFieldGuideExporter(){
 function prepareFieldGuideExport(taxCnt){
     showWorking();
     processSettings();
-    document.getElementById("loaderMessage").innerHTML = "Loading data...";
     var processed = 0;
     lastLoad = Math.ceil(taxCnt/lazyLoadCnt);
+    pdfFileTot = Math.ceil(taxCnt/100);
+    projFileName = checklistName.replace(/ /g,"_");
     do{
         lazyLoadData(loadIndex,function(res){
             loadingComplete = true;
@@ -73,6 +81,7 @@ function processSettings(){
 
 function processDataResponse(res){
     var tempArr = JSON.parse(res);
+    var imagesExist = false;
     for(i in tempArr) {
         var family = tempArr[i]['family'];
         if(!family) family = "Family Undefined";
@@ -102,6 +111,7 @@ function processDataResponse(res){
         }
         dataArr[family][sciname]['images'] = [];
         if(tempArr[i]['img']){
+            imagesExist = true;
             for(im in tempArr[i]['img']){
                 var imgId = tempArr[i]['img'][im]['id'];
                 dataArr[family][sciname]['images'].push(tempArr[i]['img'][im]);
@@ -111,17 +121,21 @@ function processDataResponse(res){
                     var resId = imgArr[0];
                     var resData = imgArr[1];
                     if(resData) imgDataArr[resId] = resData;
-                    if(loadingComplete && (procIndex == lastLoad) && (lastImage == resId)) createPDFGuide();
+                    if(loadingComplete && (procIndex == lastLoad) && (lastImage == resId)) createPDFGuides();
                 });
             }
         }
     }
     procIndex++;
+    if(loadingComplete && (procIndex == lastLoad) && (!imagesExist)) createPDFGuides();
 }
 
-function createPDFGuide(){
-    document.getElementById("loaderMessage").innerHTML = "Creating PDF...";
-    var contentArr = [];
+function createPDFGuides(){
+    pdfFileNum = 1;
+    var taxonNum = 0;
+    zipFile = new JSZip();
+    zipFolder = zipFile.folder("files");
+    contentArr = [];
     contentArr.push({
         toc: {
             title: {text: 'INDEX', alignment: 'left', style: 'TOCHeader'}
@@ -130,121 +144,138 @@ function createPDFGuide(){
     });
     var familyKeys = Object.keys(dataArr);
     familyKeys.sort();
-    //contentArr.push({toc: {title: 'INDEX'}});
     for(i in familyKeys){
         var familyName = familyKeys[i];
-        var famArr = dataArr[familyName];
-        if(famArr){
-            var scinameKeys = Object.keys(famArr);
+        if(typeof familyName === "string"){
+            var scinameKeys = Object.keys(dataArr[familyName]);
             scinameKeys.sort();
             for(s in scinameKeys){
+                if(taxonNum == 100){
+                    savePDFFile(contentArr,pdfFileNum);
+                    taxonNum = 0;
+                    contentArr = [];
+                    contentArr.push({
+                        toc: {
+                            title: {text: 'INDEX', alignment: 'left', style: 'TOCHeader'}
+                        },
+                        pageBreak: 'after'
+                    });
+                }
                 var sciname = scinameKeys[s];
                 if(typeof sciname === "string"){
-                    leftColContent = [];
-                    rightColContent = [];
-                    var taxonOrder = dataArr[familyName][sciname]['order'];
-                    var scinameAuthor = dataArr[familyName][sciname]['author'];
-                    var commonName = '';
-                    var descArr = [];
-                    var imgArr = [];
-                    var imgBodyArr = [];
-                    if(dataArr[familyName][sciname]['common']) commonName = dataArr[familyName][sciname]['common'];
-                    if(dataArr[familyName][sciname]['desc']) descArr = dataArr[familyName][sciname]['desc'];
-                    if(dataArr[familyName][sciname]['images']) imgArr = dataArr[familyName][sciname]['images'];
-                    leftColContent.push({text: taxonOrder, style: 'ordertext'});
-                    leftColContent.push('\n');
-                    leftColContent.push({text: familyName, style: 'familytext'});
-                    leftColContent.push('\n');
-                    leftColContent.push({text: sciname, style: 'scinametext'});
-                    leftColContent.push(' ');
-                    leftColContent.push({text: scinameAuthor, style: 'authortext'});
-                    if(commonName){
-                        leftColContent.push('\n');
-                        leftColContent.push({text: commonName, style: 'commontext'});
-                    }
-                    leftColContent.push('\n\n');
-                    //console.log(typeof descArr);
-                    if(Object.keys(descArr).length !== 0){
-                        var source = descArr.source;
-                        delete descArr.source;
-                        for(d in descArr){
-                            if(descArr[d]['heading']){
-                                leftColContent.push({text: descArr[d]['heading']+':', style: 'descheadtext'});
-                                leftColContent.push(' ');
-                            }
-                            leftColContent.push({text: descArr[d]['statement'], style: 'descstattext'});
-                            leftColContent.push(' ');
-                        }
-                        if(source){
-                            leftColContent.push('\n');
-                            leftColContent.push({text: source, style: 'descsourcetext', alignment: 'right'});
-                        }
-                    }
-                    else{
-                        leftColContent.push({text: 'No Description Available', style: 'nodesctext'});
-                    }
-                    if(imgArr.length > 0){
-                        for(p in imgArr){
-                            var imgid = imgArr[p]['id'];
-                            var owner = imgArr[p]['owner'];
-                            var photographer = imgArr[p]['photographer'];
-                            if(imgDataArr[imgid]){
-                                var tempArr = [];
-                                var creditStr = '';
-                                tempArr.push({image: imgDataArr[imgid], width: 150, alignment: 'right'});
-                                rightColContent.push(tempArr);
-                                if(photographer){
-                                    creditStr = 'Photograph by: '+photographer;
-                                }
-                                if(owner){
-                                    creditStr += (photographer?'\n':'')+owner;
-                                }
-                                if(creditStr){
-                                    tempArr = [];
-                                    tempArr.push({text: creditStr, style: 'imageCredit', alignment: 'right'});
-                                    rightColContent.push(tempArr);
-                                }
-                            }
-                        }
-                    }
-
-                    var leftColArr = {
-                        width: 340,
-                        text: leftColContent
-                    };
-                    if(rightColContent.length > 1){
-                        var rightColArr = {
-                            table: {
-                                widths: [160],
-                                body: rightColContent
-                            },
-                            layout: 'noBorders'
-
-                        };
-                    }
-                    else{
-                        var rightColArr = {
-                            table: {
-                                widths: [160],
-                                body: [rightColContent]
-                            },
-                            layout: 'noBorders'
-
-                        };
-                    }
-                    var pageArr = {
-                        columns: [leftColArr, rightColArr],
-                        pageBreak: 'after'
-                    };
-                    var TOCString = familyName+': '+sciname;
-                    contentArr.push({text: TOCString, tocItem: true, alignment: 'left', margin: [-500, 0, 0, 0]});
-                    contentArr.push(pageArr);
+                    createPDFPage(familyName,sciname);
+                    taxonNum++;
                 }
             }
         }
     }
+    savePDFFile(contentArr,pdfFileNum);
+}
+
+function createPDFPage(familyName,sciname){
+    leftColContent = [];
+    rightColContent = [];
+    var taxonOrder = dataArr[familyName][sciname]['order'];
+    var scinameAuthor = dataArr[familyName][sciname]['author'];
+    var commonName = '';
+    var descArr = [];
+    var imgArr = [];
+    var imgBodyArr = [];
+    if(dataArr[familyName][sciname]['common']) commonName = dataArr[familyName][sciname]['common'];
+    if(dataArr[familyName][sciname]['desc']) descArr = dataArr[familyName][sciname]['desc'];
+    if(dataArr[familyName][sciname]['images']) imgArr = dataArr[familyName][sciname]['images'];
+    leftColContent.push({text: taxonOrder, style: 'ordertext'});
+    leftColContent.push('\n');
+    leftColContent.push({text: familyName, style: 'familytext'});
+    leftColContent.push('\n');
+    leftColContent.push({text: sciname, style: 'scinametext'});
+    leftColContent.push(' ');
+    leftColContent.push({text: scinameAuthor, style: 'authortext'});
+    if(commonName){
+        leftColContent.push('\n');
+        leftColContent.push({text: commonName, style: 'commontext'});
+    }
+    leftColContent.push('\n\n');
+    if(Object.keys(descArr).length !== 0){
+        var source = descArr.source;
+        delete descArr.source;
+        for(d in descArr){
+            if(descArr[d]['heading']){
+                leftColContent.push({text: descArr[d]['heading']+':', style: 'descheadtext'});
+                leftColContent.push(' ');
+            }
+            leftColContent.push({text: descArr[d]['statement'], style: 'descstattext'});
+            leftColContent.push(' ');
+        }
+        if(source){
+            leftColContent.push('\n');
+            leftColContent.push({text: source, style: 'descsourcetext', alignment: 'right'});
+        }
+    }
+    else{
+        leftColContent.push({text: 'No Description Available', style: 'nodesctext'});
+    }
+    if(imgArr.length > 0){
+        for(p in imgArr){
+            var imgid = imgArr[p]['id'];
+            var owner = imgArr[p]['owner'];
+            var photographer = imgArr[p]['photographer'];
+            if(imgDataArr[imgid]){
+                var tempArr = [];
+                var creditStr = '';
+                tempArr.push({image: imgDataArr[imgid], width: 150, alignment: 'right'});
+                rightColContent.push(tempArr);
+                if(photographer){
+                    creditStr = 'Photograph by: '+photographer;
+                }
+                if(owner){
+                    creditStr += (photographer?'\n':'')+owner;
+                }
+                if(creditStr){
+                    tempArr = [];
+                    tempArr.push({text: creditStr, style: 'imageCredit', alignment: 'right'});
+                    rightColContent.push(tempArr);
+                }
+            }
+        }
+    }
+
+    var leftColArr = {
+        width: 340,
+        text: leftColContent
+    };
+    if(rightColContent.length > 1){
+        var rightColArr = {
+            table: {
+                widths: [160],
+                body: rightColContent
+            },
+            layout: 'noBorders'
+
+        };
+    }
+    else{
+        var rightColArr = {
+            table: {
+                widths: [160],
+                body: [rightColContent]
+            },
+            layout: 'noBorders'
+
+        };
+    }
+    var pageArr = {
+        columns: [leftColArr, rightColArr],
+        pageBreak: 'after'
+    };
+    var TOCString = familyName+': '+sciname;
+    contentArr.push({text: TOCString, tocItem: true, alignment: 'left', margin: [-500, 0, 0, 0]});
+    contentArr.push(pageArr);
+}
+
+function savePDFFile(content,fileNum){
     var docDefinition = {
-        content: contentArr,
+        content: content,
         footer: function(page){
             return [
                 {canvas: [{ type: 'line', x1: 20, y1: 0, x2: 595-20, y2: 0, lineWidth: 1 }]},
@@ -325,8 +356,20 @@ function createPDFGuide(){
             }
         }
     };
-    pdfMake.createPdf(docDefinition).download('optionalName.pdf');
-    hideWorking();
+    pdfFileNum++;
+    const pdfDocGenerator = pdfMake.createPdf(docDefinition);
+    pdfDocGenerator.getBase64((data) => {
+        var filename = projFileName+'-'+fileNum+'.pdf';
+        zipFolder.file(filename, data.substr(data.indexOf(',')+1), {base64: true});
+        savedPDFs++;
+        if(savedPDFs == pdfFileTot){
+            zipFile.generateAsync({type:"blob"}).then(function(content) {
+                var zipfilename = projFileName+'.zip';
+                saveAs(content,zipfilename);
+                hideWorking();
+            });
+        }
+    });
 }
 
 function loadImageDataUri(imgid,callback){

@@ -131,9 +131,9 @@ class ChecklistFGExportManager {
             $heading = ($row->displayheader?strip_tags($row->heading):'');
             $statement = strip_tags($row->statement);
             $source = strip_tags($row->source);
-            $this->dataArr[$row->tid]["desc"][$row->caption]['source'] = $source;
-            $this->dataArr[$row->tid]["desc"][$row->caption][$row->tdsid]['heading'] = $heading;
-            $this->dataArr[$row->tid]["desc"][$row->caption][$row->tdsid]['statement'] = $statement;
+            $this->dataArr[$row->tid]["desc"][$row->caption]['source'] = $this->cleanOutStr(htmlspecialchars_decode($source));
+            $this->dataArr[$row->tid]["desc"][$row->caption][$row->tdsid]['heading'] = $this->cleanOutStr(htmlspecialchars_decode($heading));
+            $this->dataArr[$row->tid]["desc"][$row->caption][$row->tdsid]['statement'] = $this->cleanOutStr(htmlspecialchars_decode($statement));
         }
         $rs->free();
     }
@@ -146,7 +146,7 @@ class ChecklistFGExportManager {
         //echo $sql; exit;
         $result = $this->conn->query($sql);
         while($row = $result->fetch_object()){
-            $this->dataArr[$row->tid]["vern"][] = $row->VernacularName;
+            $this->dataArr[$row->tid]["vern"][] = strtoupper($row->VernacularName);
         }
         $result->free();
     }
@@ -193,7 +193,7 @@ class ChecklistFGExportManager {
                     if((!$imgUrl || $imgUrl == 'empty') && $row->url) $imgUrl = $row->url;
                     $this->dataArr[$row->tid]["img"][$row->imgid]['id'] = $row->imgid;
                     $this->dataArr[$row->tid]["img"][$row->imgid]['owner'] = $row->owner;
-                    $this->dataArr[$row->tid]["img"][$row->imgid]['photographer'] = $row->photographer;
+                    $this->dataArr[$row->tid]["img"][$row->imgid]['photographer'] = $this->cleanOutStr(htmlspecialchars_decode($row->photographer));
                 }
                 $i++;
             }
@@ -363,8 +363,8 @@ class ChecklistFGExportManager {
     }
 
 	private function cleanOutStr($str){
-		$str = str_replace('"',"&quot;",$str);
-		$str = str_replace("'","&apos;",$str);
+		$str = str_replace("&nbsp;"," ",$str);
+        $str = str_replace("&ndash;","-",$str);
 		return $str;
 	}
 

@@ -163,7 +163,9 @@ if($clValue || $dynClid){
         ?>
         <script src="<?php echo $CLIENT_ROOT; ?>/js/pdfmake.min.js" type="text/javascript"></script>
         <script src="<?php echo $CLIENT_ROOT; ?>/js/vfs_fonts.js" type="text/javascript"></script>
-        <script src="<?php echo $CLIENT_ROOT; ?>/js/symb/checklists.fieldguideexport.js?ver=14" type="text/javascript"></script>
+        <script src="<?php echo $CLIENT_ROOT; ?>/js/jszip.min.js" type="text/javascript"></script>
+        <script src="<?php echo $CLIENT_ROOT; ?>/js/FileSaver.min.js" type="text/javascript"></script>
+        <script src="<?php echo $CLIENT_ROOT; ?>/js/symb/checklists.fieldguideexport.js?ver=19" type="text/javascript"></script>
         <?php
     }
     ?>
@@ -833,7 +835,7 @@ if($clValue || $dynClid){
 
         <div id="loadingOverlay" data-role="popup" style="width:100%;height:100%;position:relative;">
             <div id="loader"></div>
-            <div id="loaderMessage"></div>
+            <div id="loaderMessage">This may take several minutes...</div>
         </div>
         <?php
     }
