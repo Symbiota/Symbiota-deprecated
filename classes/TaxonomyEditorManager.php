@@ -31,8 +31,8 @@ class TaxonomyEditorManager{
 
 	private $errorStr = '';
 
-	function __construct() {
-		$this->conn = MySQLiConnectionFactory::getCon("write");
+	function __construct($type = 'write') {
+		$this->conn = MySQLiConnectionFactory::getCon($type);
 	}
 
 	function __destruct(){
@@ -329,17 +329,14 @@ class TaxonomyEditorManager{
 	public function submitChangeToAccepted($tid,$tidAccepted,$switchAcceptance = true){
 		$statusStr = '';
 		if(is_numeric($tid)){
-			$sql = "UPDATE taxstatus SET tidaccepted = ".$tid.
-				" WHERE (tid = ".$tid.") AND (taxauthid = ".$this->taxAuthId.')';
+			$sql = 'UPDATE taxstatus SET tidaccepted = '.$tid.' WHERE (tid = '.$tid.') AND (taxauthid = '.$this->taxAuthId.')';
 			$status = $this->conn->query($sql);
 
-			if($switchAcceptance){
-				$sqlSwitch = 'UPDATE taxstatus SET tidaccepted = '.$tid.
-					' WHERE (tidaccepted = '.$tidAccepted.') AND (taxauthid = '.$this->taxAuthId.')';
+			if($switchAcceptance && is_numeric($tidAccepted)){
+				$sqlSwitch = 'UPDATE taxstatus SET tidaccepted = '.$tid.' WHERE (tidaccepted = '.$tidAccepted.') AND (taxauthid = '.$this->taxAuthId.')';
 				if(!$this->conn->query($sqlSwitch)){
 					$statusStr = 'ERROR changing to accepted: '.$this->conn->error;
 				}
-
 				$this->updateDependentData($tidAccepted,$tid);
 			}
 		}
@@ -348,11 +345,12 @@ class TaxonomyEditorManager{
 
 	public function submitChangeToNotAccepted($tid,$tidAccepted,$reason,$notes){
 		$status = '';
-		if(is_numeric($tid)){
+		if(is_numeric($tid) && is_numeric($tidAccepted)){
 			//Change subject taxon to Not Accepted
+			$reason = $this->cleanInStr($reason);
+			$notes = $this->cleanInStr($notes);
 			$sql = 'UPDATE taxstatus '.
-				'SET tidaccepted = '.$tidAccepted.', unacceptabilityreason = '.($reason?'"'.$reason.'"':'NULL').
-				', notes = '.($notes?'"'.$notes.'"':'NULL').' '.
+				'SET tidaccepted = '.$tidAccepted.', unacceptabilityreason = '.($reason?'"'.$reason.'"':'NULL').', notes = '.($notes?'"'.$notes.'"':'NULL').' '.
 				'WHERE (tid = '.$tid.') AND (taxauthid = '.$this->taxAuthId.')';
 			//echo $sql;
 			if(!$this->conn->query($sql)){
@@ -373,24 +371,22 @@ class TaxonomyEditorManager{
 	}
 
 	private function updateDependentData($tid, $tidNew){
-		if(is_numeric($tid) && is_numeric($tidNew)){
-			//method to update descr, vernaculars,
-			$this->conn->query('DELETE FROM kmdescr WHERE inherited IS NOT NULL AND (tid = '.$tid.')');
-			$this->conn->query('UPDATE IGNORE kmdescr SET tid = '.$tidNew.' WHERE (tid = '.$tid.')');
-			$this->conn->query('DELETE FROM kmdescr WHERE (tid = '.$tid.')');
-			$this->resetCharStateInheritance($tidNew);
+		//method to update descr, vernaculars,
+		$this->conn->query('DELETE FROM kmdescr WHERE inherited IS NOT NULL AND (tid = '.$tid.')');
+		$this->conn->query('UPDATE IGNORE kmdescr SET tid = '.$tidNew.' WHERE (tid = '.$tid.')');
+		$this->conn->query('DELETE FROM kmdescr WHERE (tid = '.$tid.')');
+		$this->resetCharStateInheritance($tidNew);
 
-			$sqlVerns = 'UPDATE taxavernaculars SET tid = '.$tidNew.' WHERE (tid = '.$tid.')';
-			$this->conn->query($sqlVerns);
+		$sqlVerns = 'UPDATE taxavernaculars SET tid = '.$tidNew.' WHERE (tid = '.$tid.')';
+		$this->conn->query($sqlVerns);
 
-			//$sqltd = 'UPDATE taxadescrblock tb LEFT JOIN (SELECT DISTINCT caption FROM taxadescrblock WHERE (tid = '.
-			//	$tidNew.')) lj ON tb.caption = lj.caption '.
-			//	'SET tid = '.$tidNew.' WHERE (tid = '.$tid.') AND lj.caption IS NULL';
-			//$this->conn->query($sqltd);
+		//$sqltd = 'UPDATE taxadescrblock tb LEFT JOIN (SELECT DISTINCT caption FROM taxadescrblock WHERE (tid = '.
+		//	$tidNew.')) lj ON tb.caption = lj.caption '.
+		//	'SET tid = '.$tidNew.' WHERE (tid = '.$tid.') AND lj.caption IS NULL';
+		//$this->conn->query($sqltd);
 
-			$sqltl = 'UPDATE taxalinks SET tid = '.$tidNew.' WHERE (tid = '.$tid.')';
-			$this->conn->query($sqltl);
-		}
+		$sqltl = 'UPDATE taxalinks SET tid = '.$tidNew.' WHERE (tid = '.$tid.')';
+		$this->conn->query($sqltl);
 	}
 
 	private function resetCharStateInheritance($tid){
@@ -622,12 +618,20 @@ class TaxonomyEditorManager{
 			}
 
 			//Link occurrence images to the new name
-			$sql2 = 'UPDATE omoccurrences o INNER JOIN images i ON o.occid = i.occid '.
-				'SET i.tid = o.tidinterpreted '.
-				'WHERE i.tid IS NULL AND o.tidinterpreted IS NOT NULL';
-			$this->conn->query($sql2);
-			if(!$this->conn->query($sql2)){
-				echo 'WARNING: Taxon loaded into taxa, but update occurrence images with matching name: '.$this->conn->error;
+			$occidArr = array();
+			$sql2a = 'SELECT occid FROM omoccurrences WHERE (tidinterpreted = '.$tid.')';
+			$rs2a = $this->conn->query($sql2a);
+			while($r2a = $rs2a->fetch_object()){
+				$occidArr[] = $r2a->occid;
+			}
+			$rs2a->free();
+
+			if($occidArr){
+				$sql2 = 'UPDATE images SET tid = '.$tid.' WHERE tid IS NULL AND occid IN('.implode(',',$occidArr).')';
+				$this->conn->query($sql2);
+				if(!$this->conn->query($sql2)){
+					echo 'WARNING: Taxon loaded into taxa, but update occurrence images with matching name: '.$this->conn->error;
+				}
 			}
 
 			//Add their geopoints to omoccurgeoindex
@@ -1078,6 +1082,39 @@ class TaxonomyEditorManager{
 			}
 			$rs->free();
 		}
+		return $retArr;
+	}
+
+	//Functions retriving autocomplete data
+	public function getAcceptedTaxa($queryTerm){
+		global $CHARSET;
+		$retArr = Array();
+		$sql = 'SELECT t.tid, t.sciname, t.author '.
+			'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
+			'WHERE (ts.taxauthid = '.$this->taxAuthId.') AND (ts.tid = ts.tidaccepted) AND (t.sciname LIKE "'.$this->cleanInStr($queryTerm).'%") '.
+			'ORDER BY t.sciname LIMIT 20';
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			$sciname = $r->sciname.' '.$r->author;
+			if($CHARSET == 'ISO-8859-1') $sciname = utf8_encode($r->sciname.' '.$r->author);
+			$retArr[] = array('id' => $r->tid,'value' => $sciname);
+		}
+		$rs->free();
+		return $retArr;
+	}
+
+	public function getChildAccepted($tid){
+		if(!is_numeric($tid)) return false;
+		$retArr = array();
+		$sql = 'SELECT t.tid, t.sciname '.
+			'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
+			'WHERE (ts.taxauthid = 1) AND (ts.parenttid = '.$tid.') AND (ts.tid = ts.tidaccepted) '.
+			'ORDER BY t.sciname LIMIT 20';
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			$retArr[$r->tid] = $r->sciname;
+		}
+		$rs->free();
 		return $retArr;
 	}
 

@@ -71,14 +71,14 @@ if($editable){
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET;?>"/>
 	<link href="../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
-	<link type="text/css" href="../../css/jquery-ui.css" rel="Stylesheet" />	
-	<script type="text/javascript" src="../../js/jquery.js"></script>
-	<script type="text/javascript" src="../../js/jquery-ui.js"></script>
+	<link href="../../js/jquery-ui-1.12.1/jquery-ui.min.css" type="text/css" rel="Stylesheet" />
+	<script src="../../js/jquery-3.2.1.min.js" type="text/javascript"></script>
+	<script src="../../js/jquery-ui-1.12.1/jquery-ui.min.js" type="text/javascript"></script>
 	<script>
 		var tid = <?php echo $taxonEditorObj->getTid(); ?>;
 		var tabIndex = <?php echo $tabIndex; ?>;
 	</script>
-	<script src="../../js/symb/taxa.taxonomyeditor.js?ver=20161227"></script>
+	<script src="../../js/symb/taxa.taxonomyeditor.js?ver=201802"></script>
 </head>
 <body>
 <?php
@@ -95,11 +95,11 @@ if($editable){
 	else{
 		?>
 		<div class="navpath">
-			<a href="../../index.php">Home</a> &gt;&gt; 
-			<a href="taxonomydisplay.php">Taxonomy Tree Viewer</a> &gt;&gt; 
+			<a href="../../index.php">Home</a> &gt;&gt;
+			<a href="taxonomydisplay.php">Taxonomy Tree Viewer</a> &gt;&gt;
 			<b>Taxonomy Editor</b>
 		</div>
-		<?php 
+		<?php
 	}
 	?>
 	<!-- This is inner text! -->
@@ -112,11 +112,11 @@ if($editable){
 				<?php echo $statusStr; ?>
 			</div>
 			<hr/>
-			<?php 
+			<?php
 		}
 		if($editable && $tid){
 			?>
-			
+
 			<div style="float:right;" title="Go to taxonomy display">
 				<a href="taxonomydisplay.php?target=<?php echo $taxonEditorObj->getUnitName1();?>&showsynonyms=1">
 					<img style='border:0px;width:15px;' src='../../images/toparent.png'/>
@@ -128,10 +128,10 @@ if($editable){
 				</a>
 			</div>
 			<h1>
-				<?php 
+				<?php
 					echo "<a href='../admin/tpeditor.php?tid=".$taxonEditorObj->getTid()."' style='color:inherit;text-decoration:none;'>";
 					echo "<i>".$taxonEditorObj->getSciName()."</i> ".$taxonEditorObj->getAuthor()." [".$taxonEditorObj->getTid()."]";
-					echo "</a>" 
+					echo "</a>"
 				?>
 			</h1>
 			<div id="tabs" class="taxondisplaydiv">
@@ -214,7 +214,7 @@ if($editable){
 								<select id="rankid" name="rankid">
 									<option value="0">Non-Ranked Node</option>
 									<option value="">---------------------------------</option>
-									<?php 
+									<?php
 									$rankArr = $taxonEditorObj->getRankArr();
 									foreach($rankArr as $rankId => $rName){
 										echo '<option value="'.$rankId.'" '.($taxonEditorObj->getRankId()==$rankId?'SELECTED':'').'>'.$rName.'</option>';
@@ -244,7 +244,7 @@ if($editable){
 						<div style="clear:both;">
 							<div style="float:left;width:110px;font-weight:bold;">Locality Security: </div>
 							<div class="editfield">
-								<?php 
+								<?php
 									switch($taxonEditorObj->getSecurityStatus()){
 										case 0:
 											echo "show all locality data";
@@ -283,7 +283,7 @@ if($editable){
 								<select name="taxauthid" onchange="this.form.submit()">
 									<option value="1">Default Taxonomy</option>
 									<option value="1">----------------------------</option>
-									<?php 
+									<?php
 										$ttIdArr = $taxonEditorObj->getTaxonomicThesaurusIds();
 										foreach($ttIdArr as $ttID => $ttName){
 											echo '<option value='.$ttID.' '.($taxAuthId==$ttID?'SELECTED':'').'>'.$ttName.'</option>';
@@ -294,14 +294,14 @@ if($editable){
 								<input type="hidden" name="tabindex" value="1" />
 							</form>
 						</div>
-						<div style="font-size:120%;font-weight:bold;">Status: 
+						<div style="font-size:120%;font-weight:bold;">Status:
 							<span style='color:red;'>
-							<?php 
+							<?php
 								switch($taxonEditorObj->getIsAccepted()){
 									case -2:		//In conflict, needs to be resolved
 										echo "In Conflict, needs to be resolved!";
 										break;
-									case -1:		//Taxonomic status not yet assigned 
+									case -1:		//Taxonomic status not yet assigned
 										echo "Taxonomy not yet defined for this taxon.";
 										break;
 									case 0:			//Not Accepted
@@ -322,7 +322,7 @@ if($editable){
 									</a>
 								</div>
 								<?php
-								if($taxonEditorObj->getRankId() > 140 && $taxonEditorObj->getFamily()){ 
+								if($taxonEditorObj->getRankId() > 140 && $taxonEditorObj->getFamily()){
 									?>
 									<div>
 										<div style="float:left;width:120px;font-weight:bold;">Family: </div>
@@ -331,7 +331,7 @@ if($editable){
 										</div>
 									</div>
 									<?php
-								} 
+								}
 								?>
 								<div>
 									<div style="float:left;width:120px;font-weight:bold;">Parent Taxon: </div>
@@ -346,9 +346,9 @@ if($editable){
 								<div class="tsedit" style="display:none;clear:both;">
 									<input type="hidden" name="tid" value="<?php echo $taxonEditorObj->getTid(); ?>" />
 									<input type="hidden" name="taxauthid" value="<?php echo $taxAuthId;?>">
-									<?php 
+									<?php
 										$aArr = $taxonEditorObj->getAcceptedArr();
-										$aStr = key($aArr); 
+										$aStr = key($aArr);
 									?>
 									<input type="hidden" name="tidaccepted" value="<?php echo ($taxonEditorObj->getIsAccepted()==1?$taxonEditorObj->getTid():$aStr); ?>" />
 									<input type="hidden" name="tabindex" value="1" />
@@ -358,7 +358,7 @@ if($editable){
 							</form>
 						</div>
 						<div id="AcceptedDiv" style="margin-top:30px;clear:both;">
-							<?php 
+							<?php
 							if($taxonEditorObj->getIsAccepted() <> 1){	//Is Not Accepted
 								$acceptedArr = $taxonEditorObj->getAcceptedArr();
 								?>
@@ -366,7 +366,7 @@ if($editable){
 								<div style="float:right;cursor:pointer;" onclick="toggle('acceptedits')">
 									<img style="border:0px;width:15px;" src="../../images/edit.png" />
 								</div>
-								<?php 
+								<?php
 								if($acceptedArr){
 									echo "<ul>\n";
 									foreach($acceptedArr as $tidAccepted => $linkedTaxonArr){
@@ -384,7 +384,7 @@ if($editable){
 										}
 										echo "</li>\n";
 									}
-									
+
 									echo "</ul>\n";
 								}
 								else{
@@ -392,11 +392,11 @@ if($editable){
 								}
 								?>
 								<div class="acceptedits" style="display:none;">
-									<form id="accepteditsform" name="accepteditsform" action="taxoneditor.php" method="post" onsubmit="return verifyAcceptEditsForm(this);" >
+									<form id="accepteditsform" name="accepteditsform" action="taxoneditor.php" method="post" onsubmit="return verifyLinkToAcceptedForm(this);" >
 										<fieldset style="width:380px;margin:20px;">
 											<legend><b>Link to Another Accepted Name</b></legend>
 											<div>
-												Accepted Taxon: 
+												Accepted Taxon:
 												<input id="aefacceptedstr" name="acceptedstr" type="text" style="width:300px;" />
 												<input name="tidaccepted" type="hidden" />
 											</div>
@@ -407,13 +407,13 @@ if($editable){
 												<input type="hidden" name="tid" value="<?php echo $taxonEditorObj->getTid();?>" />
 												<input type="hidden" name="taxauthid" value="<?php echo $taxAuthId;?>" />
 												<input type="hidden" name="tabindex" value="1" />
-												<input type="hidden" name="submitaction" value="linktoaccepted" /> 
+												<input type="hidden" name="submitaction" value="linktoaccepted" />
 												<input type="submit" name="pseudosubmit" value="Add Link" />
 											</div>
 										</fieldset>
 									</form>
-									<?php 
-									if($acceptedArr && count($acceptedArr)==1){ 
+									<?php
+									if($acceptedArr && count($acceptedArr)==1){
 										?>
 										<form id="changetoacceptedform" name="changetoacceptedform" action="taxoneditor.php" method="post">
 											<fieldset style="width:350px;margin:20px;">
@@ -430,8 +430,8 @@ if($editable){
 												</div>
 											</fieldset>
 										</form>
-										<?php 
-									} 
+										<?php
+									}
 									?>
 								</div>
 							<?php
@@ -439,7 +439,7 @@ if($editable){
 							?>
 						</div>
 						<div id="SynonymDiv" style="clear:both;padding-top:15px;">
-							<?php 
+							<?php
 							if($taxonEditorObj->getIsAccepted() <> 0){	//Is Accepted
 								?>
 								<div style="font-size:110%;"><u><b>Synonyms</b></u></div>
@@ -447,7 +447,7 @@ if($editable){
 									<img style='border:0px;width:15px;' src='../../images/edit.png'/>
 								</div>
 								<ul>
-								<?php 
+								<?php
 								$synonymArr = $taxonEditorObj->getSynonyms();
 								if($synonymArr){
 									foreach($synonymArr as $tidSyn => $synArr){
@@ -502,8 +502,8 @@ if($editable){
 												</div>
 											</form>
 										</fieldset>
-										<?php 	
-									} 
+										<?php
+									}
 									?>
 								</ul>
 							<?php
@@ -517,32 +517,36 @@ if($editable){
 										<fieldset style="width:90%px;">
 											<legend><b>Change to Not Accepted</b></legend>
 											<div style="margin:5px;">
-												<b>Accepted Name:</b> 
+												<b>Accepted Name:</b>
 												<input id="ctnafacceptedstr" name="acceptedstr" type="text" style="width:270px;" />
 												<input name="tidaccepted" type="hidden" value="" />
 											</div>
 											<div style="margin:5px;">
-												<b>Reason:</b> 
+												<b>Reason:</b>
 												<input name="unacceptabilityreason" type="text" style="width:400px;" />
 											</div>
 											<div style="margin:5px;">
-												<b>Notes:</b> 
+												<b>Notes:</b>
 												<input name="notes" type="text" style="width:400px;" />
 											</div>
 											<div style="margin:5px;">
-												<input type="hidden" name="tid" value="<?php echo $taxonEditorObj->getTid();?>" />
-												<input type="hidden" name="taxauthid" value="<?php echo $taxAuthId;?>">
-												<input type="hidden" name="tabindex" value="1" />
-												<input type="hidden" name="submitaction" value="changetonotaccepted" /> 
-												<input type='submit' name='pseudosubmit' value='Change Status to Not Accepted' />
+												<input name="tid" type="hidden" value="<?php echo $taxonEditorObj->getTid();?>" />
+												<input name="taxauthid" type="hidden" value="<?php echo $taxAuthId;?>">
+												<input name="tabindex" type="hidden" value="1" />
+												<input name="submitaction" type="hidden" value="changetonotaccepted" />
+												<input name="pseudosubmit" type="submit" value="Change Status to Not Accepted" />
 											</div>
 											<div style="margin:5px;">
 												* Synonyms will be transferred to Accepted Taxon
 											</div>
+											<fieldset id="ctnaError" style="margin:5px;display:none">
+												<legend><b>Accepted child taxa need to be resolved</b></legend>
+
+											</fieldset>
 										</fieldset>
 									</form>
 								</div>
-								<?php 
+								<?php
 							}
 							?>
 						</div>
@@ -560,7 +564,7 @@ if($editable){
 								<input type="image" name="imagesubmit" src="../../images/undo.png" style="width:20px;"/>
 							</form>
 						</div>
-						<?php 
+						<?php
 						if($hierarchyArr = $taxonEditorObj->getHierarchyArr()){
 							$indent = 0;
 							foreach($hierarchyArr as $hierTid => $hierSciname){
@@ -580,7 +584,7 @@ if($editable){
 					</fieldset>
 				</div>
 			</div>
-		<?php 
+		<?php
 		}
 		else{
 			if(!$tid){
@@ -593,12 +597,12 @@ if($editable){
 				<div style="margin:30px;font-weight:bold;font-size:120%;">
 					You are not authorized to access this page
 				</div>
-				<?php 
+				<?php
 			}
 		}
 		?>
 	</div>
-	<?php 
+	<?php
 	include($SERVER_ROOT.'/footer.php');
 	?>
 </body>
