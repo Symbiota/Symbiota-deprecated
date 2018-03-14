@@ -17,6 +17,7 @@ class ImageShared{
 
 	private $sourceWidth = 0;
 	private $sourceHeight = 0;
+	private $sourceFileSize = 0;
 
 	private $tnPixWidth = 200;
 	private $webPixWidth = 1600;
@@ -47,6 +48,8 @@ class ImageShared{
 
 	private $errArr = array();
 
+	private $context = null;
+
 	// No implementation in Symbiota
 	public $documentGuid;  // Guid for transfer document containing image record.
 	public $documentDate;  // Creation date for transfer document containing image record.
@@ -69,6 +72,17 @@ class ImageShared{
 		if(array_key_exists('imgFileSizeLimit',$GLOBALS)){
 			$this->webFileSizeLimit = $GLOBALS['imgFileSizeLimit'];
 		}
+		//Needed to avoid 403 errors
+		ini_set('user_agent','Mozilla/4.0 (compatible; MSIE 6.0)');
+		$opts = array(
+			'http'=>array(
+				'user_agent' => $GLOBALS['DEFAULT_TITLE'],
+				'method'=>"GET",
+				'header'=> implode("\r\n", array('Content-type: text/plain;'))
+			)
+		);
+		$this->context = stream_context_create($opts);
+		//$context = stream_context_create( array( "http" => array( "header" => "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36" ) ) );
 		ini_set('memory_limit','512M');
  	}
 
@@ -197,7 +211,8 @@ class ImageShared{
 		}
 		//Clean and copy file
 		$fileName = $this->cleanFileName($sourceUri);
-		if(copy($sourceUri, $this->targetPath.$fileName.$this->imgExt)){
+		$context = stream_context_create( array( "http" => array( "header" => "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36" ) ) );
+		if(copy($sourceUri, $this->targetPath.$fileName.$this->imgExt, $this->context)){
 			$this->sourcePath = $this->targetPath.$fileName.$this->imgExt;
 			$this->imgName = $fileName;
 			//$this->testOrientation();
@@ -243,25 +258,13 @@ class ImageShared{
 		$imgInfo = null;
 		if(strtolower(substr($fPath,0,7)) == 'http://' || strtolower(substr($fPath,0,8)) == 'https://'){
 			//Image is URL
-			$imgInfo = getimagesize(str_replace(' ', '%20', $fPath));
-			list($this->sourceWidth, $this->sourceHeight) = $imgInfo;
+			if($dimArr = $this->getImgDim($fPath)){
+				$this->sourceWidth = $dimArr[0];
+				$this->sourceHeight = $dimArr[1];
+			}
 
 			if($pos = strrpos($fName,'/')){
 				$fName = substr($fName,$pos+1);
-			}
-		}
-		if($imgInfo){
-			if($imgInfo[2] == IMAGETYPE_GIF){
-				$this->imgExt = '.gif';
-				$this->format = 'image/gif';
-			}
-			elseif($imgInfo[2] == IMAGETYPE_PNG){
-				$this->imgExt = '.png';
-				$this->format = 'image/png';
-			}
-			elseif($imgInfo[2] == IMAGETYPE_JPEG){
-				$this->imgExt = '.jpg';
-				$this->format = 'image/jpeg';
 			}
 		}
 
@@ -350,17 +353,16 @@ class ImageShared{
 			$imgTnUrl = $this->imgName.'_tn.jpg';
 		}
 
-		//Get image dimensions
+		//Get image variable
 		if(!$this->sourceWidth || !$this->sourceHeight){
 			list($this->sourceWidth, $this->sourceHeight) =  $this->getImgDim(str_replace(' ', '%20', $this->sourcePath));
 		}
-		//Get image file size
-		$fileSize = $this->getSourceFileSize();
+		$this->setSourceFileSize();
 
 		//Create large image
 		$imgLgUrl = "";
 		if($this->mapLargeImg){
-			if($this->sourceWidth > ($this->webPixWidth*1.2) || $fileSize > $this->webFileSizeLimit){
+			if($this->sourceWidth > ($this->webPixWidth*1.2) || $this->sourceFileSize > $this->webFileSizeLimit){
 				//Source image is wide enough can serve as large image, or it's too large to serve as basic web image
 				if(substr($this->sourcePath,0,7)=='http://' || substr($this->sourcePath,0,8)=='https://') {
 					$imgLgUrl = $this->sourcePath;
@@ -368,7 +370,7 @@ class ImageShared{
 				else{
 					if($this->sourceWidth < ($this->lgPixWidth*1.2)){
 						//Image width is small enough to serve as large image
-						if(copy($this->sourcePath,$this->targetPath.$this->imgName.'_lg'.$this->imgExt)){
+						if(copy($this->sourcePath,$this->targetPath.$this->imgName.'_lg'.$this->imgExt, $this->context)){
 							$imgLgUrl = $this->imgName.'_lg'.$this->imgExt;
 						}
 					}
@@ -387,10 +389,10 @@ class ImageShared{
 			$imgWebUrl = $this->sourcePath;
 		}
 		if(!$imgWebUrl){
-			if($this->sourceWidth < ($this->webPixWidth*1.2) && $fileSize < $this->webFileSizeLimit){
+			if($this->sourceWidth < ($this->webPixWidth*1.2) && $this->sourceFileSize < $this->webFileSizeLimit){
 				//Image width and file size is small enough to serve as web image
 				if(strtolower(substr($this->sourcePath,0,7)) == 'http://' || strtolower(substr($this->sourcePath,0,8)) == 'https://'){
-					if(copy($this->sourcePath, $this->targetPath.$this->imgName.$this->imgExt)){
+					if(copy($this->sourcePath, $this->targetPath.$this->imgName.$this->imgExt, $this->context)){
 						$imgWebUrl = $this->imgName.$this->imgExt;
 					}
 				}
@@ -1065,21 +1067,26 @@ class ImageShared{
 	}
 
 	public function getSourceFileSize(){
-		$fileSize = 0;
-		if($this->sourcePath){
+		if(!$this->sourceFileSize) $this->setSourceFileSize();
+		return $this->sourceFileSize;
+	}
+
+	private function setSourceFileSize(){
+		if($this->sourcePath && !$this->sourceFileSize){
 			if(strtolower(substr($this->sourcePath,0,7)) == 'http://' || strtolower(substr($this->sourcePath,0,8)) == 'https://'){
 				$x = array_change_key_case(get_headers($this->sourcePath, 1),CASE_LOWER);
 				if ( strcasecmp($x[0], 'HTTP/1.1 200 OK') != 0 ) {
-					if(isset($x['content-length'][1])) $fileSize = $x['content-length'][1];
-					elseif(isset($x['content-length'])) $fileSize = $x['content-length'];
+					if(isset($x['content-length'][1])) $this->sourceFileSize = $x['content-length'][1];
+					elseif(isset($x['content-length'])) $this->sourceFileSize = $x['content-length'];
 				}
 	 			else {
-	 				if(isset($x['content-length'])) $fileSize = $x['content-length'];
+	 				if(isset($x['content-length'])) $this->sourceFileSize = $x['content-length'];
 	 			}
 	 			/*
 				$ch = curl_init($this->sourcePath);
 				curl_setopt($ch, CURLOPT_NOBODY, true);
 				curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+				curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36');
 				curl_setopt($ch, CURLOPT_HEADER, true);
 				$data = curl_exec($ch);
 				curl_close($ch);
@@ -1087,21 +1094,20 @@ class ImageShared{
 					return 0;
 				}
 				if(preg_match('/Content-Length: (\d+)/', $data, $matches)) {
-				  $fileSize = (int)$matches[1];
+				  $this->sourceFileSize = (int)$matches[1];
 				}
 				*/
 			}
 			else{
-				$fileSize = filesize($this->sourcePath);
+				$this->sourceFileSize = filesize($this->sourcePath);
 			}
 		}
-		return $fileSize;
+		return $this->sourceFileSize;
 	}
 
 	public function uriExists($uri) {
 		$exists = false;
 
-		//And next try
 		if(substr($uri,0,1) == '/'){
 			if($GLOBALS['IMAGE_ROOT_URL'] && strpos($uri,$GLOBALS['IMAGE_ROOT_URL']) === 0){
 				$fileName = str_replace($GLOBALS['IMAGE_ROOT_URL'],$GLOBALS['IMAGE_ROOT_PATH'],$uri);
@@ -1132,12 +1138,30 @@ class ImageShared{
 				curl_setopt($handle, CURLOPT_FAILONERROR, true);
 				curl_setopt($handle, CURLOPT_FOLLOWLOCATION, true );
 				curl_setopt($handle, CURLOPT_SSL_VERIFYPEER, false);
-				//curl_setopt($handle, CURLOPT_USERAGENT, get_user_agent_string() );
+				curl_setopt($handle, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36');
 				curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
 				$exists = curl_exec($handle);
 				$retCode = curl_getinfo($handle, CURLINFO_HTTP_CODE);
+				//print_r(curl_getinfo($handle)); exit;
 				// $retcode >= 400 -> not found, $retcode = 200, found.
 				if($retCode < 400) $exists = true;
+				if($retCode == 403) $this->errArr[] = "403 Forbidden error (resource is not public or portal's IP address has been blocked)";
+				if($exists){
+					if(!$this->format){
+						if($this->format = curl_getinfo($handle, CURLINFO_CONTENT_TYPE)){
+							if(!$this->imgExt){
+								if($this->format == 'image/gif') $this->imgExt = '.gif';
+								elseif($this->format == 'image/png') $this->imgExt = '.png';
+								elseif($this->format == 'image/jpeg') $this->imgExt = '.jpg';
+							}
+						}
+					}
+					if(!$this->sourceFileSize){
+						if($fileSize = curl_getinfo($handle, CURLINFO_CONTENT_LENGTH_DOWNLOAD )){
+							$this->sourceFileSize = $fileSize;
+						}
+					}
+				}
 				curl_close($handle);
 			}
 		}
@@ -1162,46 +1186,55 @@ class ImageShared{
 		if(!$imgUrl) return false;
 		$imgDim = self::getImgDim1($imgUrl);
 		if(!$imgDim) $imgDim = self::getImgDim2($imgUrl);
-		if(!$imgDim) $imgDim = getimagesize($imgUrl);
+		if(!$imgDim) $imgDim = @getimagesize($imgUrl);
 		return $imgDim;
 	}
 
 	// Retrieve JPEG width and height without downloading/reading entire image.
 	private static function getImgDim1($imgUrl) {
-		$handle = fopen($imgUrl, "rb") or die("Invalid file stream.");
-		$new_block = NULL;
-		if(!feof($handle)) {
-			$new_block = fread($handle, 32);
-			$i = 0;
-			if($new_block[$i]=="\xFF" && $new_block[$i+1]=="\xD8" && $new_block[$i+2]=="\xFF" && $new_block[$i+3]=="\xE0") {
-				$i += 4;
-				if($new_block[$i+2]=="\x4A" && $new_block[$i+3]=="\x46" && $new_block[$i+4]=="\x49" && $new_block[$i+5]=="\x46" && $new_block[$i+6]=="\x00") {
-					// Read block size and skip ahead to begin cycling through blocks in search of SOF marker
-					$block_size = unpack("H*", $new_block[$i] . $new_block[$i+1]);
-					$block_size = hexdec($block_size[1]);
-					while(!feof($handle)) {
-						$i += $block_size;
-						$new_block .= fread($handle, $block_size);
-						if(isset($new_block[$i]) && $new_block[$i]=="\xFF") {
-							// New block detected, check for SOF marker
-							$sof_marker = array("\xC0", "\xC1", "\xC2", "\xC3", "\xC5", "\xC6", "\xC7", "\xC8", "\xC9", "\xCA", "\xCB", "\xCD", "\xCE", "\xCF");
-							if(in_array($new_block[$i+1], $sof_marker)) {
-								// SOF marker detected. Width and height information is contained in bytes 4-7 after this byte.
-								$size_data = $new_block[$i+2] . $new_block[$i+3] . $new_block[$i+4] . $new_block[$i+5] . $new_block[$i+6] . $new_block[$i+7] . $new_block[$i+8];
-								$unpacked = unpack("H*", $size_data);
-								$unpacked = $unpacked[1];
-								$height = hexdec($unpacked[6] . $unpacked[7] . $unpacked[8] . $unpacked[9]);
-								$width = hexdec($unpacked[10] . $unpacked[11] . $unpacked[12] . $unpacked[13]);
-								return array($width, $height);
-							} else {
-								// Skip block marker and read block size
-								$i += 2;
-								$block_size = unpack("H*", $new_block[$i] . $new_block[$i+1]);
-								$block_size = hexdec($block_size[1]);
+		$opts = array(
+				'http'=>array(
+						'user_agent' => $GLOBALS['DEFAULT_TITLE'],
+						'method'=>"GET",
+						'header'=> implode("\r\n", array('Content-type: text/plain;'))
+				)
+		);
+		$context = stream_context_create($opts);
+		if($handle = fopen($imgUrl, "rb", false, $context)){
+			$new_block = NULL;
+			if(!feof($handle)) {
+				$new_block = fread($handle, 32);
+				$i = 0;
+				if($new_block[$i]=="\xFF" && $new_block[$i+1]=="\xD8" && $new_block[$i+2]=="\xFF" && $new_block[$i+3]=="\xE0") {
+					$i += 4;
+					if($new_block[$i+2]=="\x4A" && $new_block[$i+3]=="\x46" && $new_block[$i+4]=="\x49" && $new_block[$i+5]=="\x46" && $new_block[$i+6]=="\x00") {
+						// Read block size and skip ahead to begin cycling through blocks in search of SOF marker
+						$block_size = unpack("H*", $new_block[$i] . $new_block[$i+1]);
+						$block_size = hexdec($block_size[1]);
+						while(!feof($handle)) {
+							$i += $block_size;
+							$new_block .= fread($handle, $block_size);
+							if(isset($new_block[$i]) && $new_block[$i]=="\xFF") {
+								// New block detected, check for SOF marker
+								$sof_marker = array("\xC0", "\xC1", "\xC2", "\xC3", "\xC5", "\xC6", "\xC7", "\xC8", "\xC9", "\xCA", "\xCB", "\xCD", "\xCE", "\xCF");
+								if(in_array($new_block[$i+1], $sof_marker)) {
+									// SOF marker detected. Width and height information is contained in bytes 4-7 after this byte.
+									$size_data = $new_block[$i+2] . $new_block[$i+3] . $new_block[$i+4] . $new_block[$i+5] . $new_block[$i+6] . $new_block[$i+7] . $new_block[$i+8];
+									$unpacked = unpack("H*", $size_data);
+									$unpacked = $unpacked[1];
+									$height = hexdec($unpacked[6] . $unpacked[7] . $unpacked[8] . $unpacked[9]);
+									$width = hexdec($unpacked[10] . $unpacked[11] . $unpacked[12] . $unpacked[13]);
+									return array($width, $height);
+								} else {
+									// Skip block marker and read block size
+									$i += 2;
+									$block_size = unpack("H*", $new_block[$i] . $new_block[$i+1]);
+									$block_size = hexdec($block_size[1]);
+								}
 							}
-						}
-						else {
-							return FALSE;
+							else {
+								return FALSE;
+							}
 						}
 					}
 				}
@@ -1214,6 +1247,7 @@ class ImageShared{
 		$curl = curl_init($imgUrl);
 		curl_setopt($curl, CURLOPT_HTTPHEADER, array( "Range: bytes=0-65536" ));
 		//curl_setopt($curl, CURLOPT_HTTPHEADER, array( "Range: bytes=0-32768" ));
+		curl_setopt($curl, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36');
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
 		curl_setopt($curl, CURLOPT_TIMEOUT, 10);
 		$data = curl_exec($curl);
