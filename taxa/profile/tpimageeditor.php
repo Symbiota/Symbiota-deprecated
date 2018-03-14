@@ -257,7 +257,7 @@ if($tid){
 								else{
 									?>
 									<div style='float:right;margin-right:10px;'>
-										<a href="../../imagelib/imgdetails.php?imgid=<?php echo $imgArr["imgid"];?>&emode=1" target="_blank">
+										<a href="../../imagelib/imgdetails.php?imgid=<?php echo $imgArr["imgid"];?>&emode=1">
 											<img src="../../images/edit.png" style="border:0px;" />
 										</a>
 									</div>
@@ -297,7 +297,7 @@ if($tid){
 									?>
 									<div>
 										<b>Source URL:</b>
-										<?php echo $imgArr["sourceurl"];?>
+										<a href="<?php echo $imgArr["sourceurl"];?>" target="_blank"><?php echo $imgArr["sourceurl"]; ?></a>
 									</div>
 									<?php
 									}
