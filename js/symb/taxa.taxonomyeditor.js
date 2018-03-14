@@ -120,14 +120,14 @@ function verifyChangeToNotAcceptedForm(f){
 		dataType: "json",
 		data: { tid: f.tid.value, tidaccepted: f.taxauthid.value }
 	}).done(function( retJSON ) {
-		if(retJSON){
+		if(retJSON.length > 0){
 			alert("ERROR: Name can't be changed to non-accepted until accepted child taxa are reassigned");
 			var outStr = '';
 			$.each( retJSON, function(key,value){
 				outStr = outStr + '<a href="taxoneditor.php?tid=' + key + '" target="_blank">' + value + ' <img src="../../images/edit.png" style="width:12px" /></a><br/>';
 			});
-			$("#ctnaError").html(outStr);
-			$("#ctnaError").show();
+			$("#ctnaErrorDiv").html(outStr);
+			$("#ctnaErrorFS").show();
 		}
 		else{
 			f.submit();

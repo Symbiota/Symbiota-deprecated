@@ -330,7 +330,16 @@ class TaxonomyEditorManager{
 		$statusStr = '';
 		if(is_numeric($tid)){
 			$sql = 'UPDATE taxstatus SET tidaccepted = '.$tid.' WHERE (tid = '.$tid.') AND (taxauthid = '.$this->taxAuthId.')';
-			$status = $this->conn->query($sql);
+			while(!$this->conn->query($sql)){
+				if(stripos($statusStr,'duplicate entry') !== false){
+					if(!$this->conn->query('DELETE FROM taxstatus WHERE (tid = '.$tid.') AND (taxauthid = '.$this->taxAuthId.') LIMIT 1')){
+						break;
+					}
+				}
+				else{
+					break;
+				}
+			}
 
 			if($switchAcceptance && is_numeric($tidAccepted)){
 				$sqlSwitch = 'UPDATE taxstatus SET tidaccepted = '.$tid.' WHERE (tidaccepted = '.$tidAccepted.') AND (taxauthid = '.$this->taxAuthId.')';

@@ -40,10 +40,7 @@ if($editable){
 	}
 	elseif(array_key_exists("changetoaccepted",$_REQUEST)){
 		$tidAccepted = $_REQUEST["tidaccepted"];
-		$switchAcceptance = false;
-		if(array_key_exists("switchacceptance",$_REQUEST)){
-			$switchAcceptance = true;
-		}
+		$switchAcceptance = array_key_exists("switchacceptance",$_REQUEST)?true:false;
 		$statusStr = $taxonEditorObj->submitChangeToAccepted($tid,$tidAccepted,$switchAcceptance);
 	}
 	elseif($submitAction == 'changetonotaccepted'){
@@ -115,8 +112,8 @@ if($editable){
 			<?php
 		}
 		if($editable && $tid){
+			$hierarchyArr = $taxonEditorObj->getHierarchyArr()
 			?>
-
 			<div style="float:right;" title="Go to taxonomy display">
 				<a href="taxonomydisplay.php?target=<?php echo $taxonEditorObj->getUnitName1();?>&showsynonyms=1">
 					<img style='border:0px;width:15px;' src='../../images/toparent.png'/>
@@ -129,7 +126,7 @@ if($editable){
 			</div>
 			<h1>
 				<?php
-					echo "<a href='../admin/tpeditor.php?tid=".$taxonEditorObj->getTid()."' style='color:inherit;text-decoration:none;'>";
+					echo "<a href='../profile/tpeditor.php?tid=".$taxonEditorObj->getTid()."' style='color:inherit;text-decoration:none;'>";
 					echo "<i>".$taxonEditorObj->getSciName()."</i> ".$taxonEditorObj->getAuthor()." [".$taxonEditorObj->getTid()."]";
 					echo "</a>"
 				?>
@@ -393,7 +390,7 @@ if($editable){
 								?>
 								<div class="acceptedits" style="display:none;">
 									<form id="accepteditsform" name="accepteditsform" action="taxoneditor.php" method="post" onsubmit="return verifyLinkToAcceptedForm(this);" >
-										<fieldset style="width:380px;margin:20px;">
+										<fieldset style="width:400px;margin:20px;padding:15px">
 											<legend><b>Link to Another Accepted Name</b></legend>
 											<div>
 												Accepted Taxon:
@@ -412,27 +409,30 @@ if($editable){
 											</div>
 										</fieldset>
 									</form>
-									<?php
-									if($acceptedArr && count($acceptedArr)==1){
-										?>
-										<form id="changetoacceptedform" name="changetoacceptedform" action="taxoneditor.php" method="post">
-											<fieldset style="width:350px;margin:20px;">
-												<legend><b>Change to Accepted</b></legend>
-												<div>
-													<input type="checkbox" name="switchacceptance" value="1" checked /> Switch Acceptance with Currently Accepted Name
-												</div>
-												<div>
-													<input type="hidden" name="tid" value="<?php echo $taxonEditorObj->getTid();?>" />
-													<input type="hidden" name="taxauthid" value="<?php echo $taxAuthId;?>" />
-													<input type="hidden" name="tidaccepted" value="<?php echo $aStr; ?>" />
-													<input type="hidden" name="tabindex" value="1" />
-													<input type='submit' id='changetoacceptedsubmit' name='changetoaccepted' value='Change Status to Accepted' />
-												</div>
-											</fieldset>
-										</form>
-										<?php
-									}
-									?>
+									<form id="changetoacceptedform" name="changetoacceptedform" action="taxoneditor.php" method="post">
+										<fieldset style="width:400px;margin:20px;padding:15px;">
+											<legend><b>Change to Accepted</b></legend>
+											<?php
+											$acceptedTid = key($acceptedArr);
+											if($acceptedArr && count($acceptedArr)==1){
+												if(!array_key_exists($acceptedTid, $hierarchyArr)){
+													?>
+													<div>
+														<input type="checkbox" name="switchacceptance" value="1" checked /> Switch Acceptance with Currently Accepted Name
+													</div>
+													<?php
+												}
+											}
+											?>
+											<div>
+												<input type="hidden" name="tid" value="<?php echo $taxonEditorObj->getTid();?>" />
+												<input type="hidden" name="taxauthid" value="<?php echo $taxAuthId;?>" />
+												<input type="hidden" name="tidaccepted" value="<?php echo $aStr; ?>" />
+												<input type="hidden" name="tabindex" value="1" />
+												<input type='submit' id='changetoacceptedsubmit' name='changetoaccepted' value='Change Status to Accepted' />
+											</div>
+										</fieldset>
+									</form>
 								</div>
 							<?php
 							}
@@ -539,9 +539,9 @@ if($editable){
 											<div style="margin:5px;">
 												* Synonyms will be transferred to Accepted Taxon
 											</div>
-											<fieldset id="ctnaError" style="margin:5px;display:none">
-												<legend><b>Accepted child taxa need to be resolved</b></legend>
-
+											<fieldset id="ctnaErrorFS" style="margin:10px;padding:15px;width:350px;display:none">
+												<legend style="color:orange"><b>Accepted child taxa need to be resolved</b></legend>
+												<div id="ctnaErrorDiv"></div>
 											</fieldset>
 										</fieldset>
 									</form>
@@ -565,7 +565,7 @@ if($editable){
 							</form>
 						</div>
 						<?php
-						if($hierarchyArr = $taxonEditorObj->getHierarchyArr()){
+						if($hierarchyArr){
 							$indent = 0;
 							foreach($hierarchyArr as $hierTid => $hierSciname){
 								echo '<div style="margin-left:'.$indent.'px;">';
