@@ -2,6 +2,7 @@
 include_once('../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/ChecklistManager.php');
 include_once($SERVER_ROOT.'/classes/ChecklistAdmin.php');
+if($CHECKLIST_FG_EXPORT) include_once($SERVER_ROOT.'/classes/ChecklistFGExportManager.php');
 include_once($SERVER_ROOT.'/content/lang/checklists/checklist.'.$LANG_TAG.'.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 
@@ -105,6 +106,18 @@ if($IS_ADMIN || (array_key_exists("ClAdmin",$USER_RIGHTS) && in_array($clid,$USE
 $taxaArray = Array();
 if($clValue || $dynClid){
 	$taxaArray = $clManager->getTaxaList($pageNumber,($printMode?0:500));
+    if($CHECKLIST_FG_EXPORT){
+        $fgManager = new ChecklistFGExportManager();
+        if($clValue){
+            $fgManager->setClValue($clValue);
+        }
+        elseif($dynClid){
+            $fgManager->setDynClid($dynClid);
+        }
+        $fgManager->setSqlVars();
+        $fgManager->setLanguage($LANG_TAG);
+        $fgManager->primeDataArr();
+    }
 }
 ?>
 <html>
@@ -132,7 +145,7 @@ if($clValue || $dynClid){
             if(index > 0) startindex = (index*lazyLoadCnt) + 1;
             var http = new XMLHttpRequest();
             var url = "rpc/fieldguideexporter.php";
-            var params = 'rows='+lazyLoadCnt+'&start='+startindex+'&cl=<?php echo $clValue."&pid=".$pid."&dynclid=".$dynClid."&thesfilter=".($thesFilter?$thesFilter:1); ?>';
+            var params = 'rows='+lazyLoadCnt+'&photogArr='+JSON.stringify(photog)+'&photoNum='+photoNum+'&start='+startindex+'&cl=<?php echo $clValue."&pid=".$pid."&dynclid=".$dynClid."&thesfilter=".($thesFilter?$thesFilter:1); ?>';
             //console.log(url+'?'+params);
             http.open("POST", url, true);
             http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
@@ -150,7 +163,9 @@ if($clValue || $dynClid){
         ?>
         <script src="<?php echo $CLIENT_ROOT; ?>/js/pdfmake.min.js" type="text/javascript"></script>
         <script src="<?php echo $CLIENT_ROOT; ?>/js/vfs_fonts.js" type="text/javascript"></script>
-        <script src="<?php echo $CLIENT_ROOT; ?>/js/symb/checklists.fieldguideexport.js?ver=12" type="text/javascript"></script>
+        <script src="<?php echo $CLIENT_ROOT; ?>/js/jszip.min.js" type="text/javascript"></script>
+        <script src="<?php echo $CLIENT_ROOT; ?>/js/FileSaver.min.js" type="text/javascript"></script>
+        <script src="<?php echo $CLIENT_ROOT; ?>/js/symb/checklists.fieldguideexport.js?ver=19" type="text/javascript"></script>
         <?php
     }
     ?>
@@ -174,6 +189,44 @@ if($clValue || $dynClid){
             margin-top:-35px;
             margin-right:-35px;
             cursor:pointer;
+        }
+
+        #loader {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            z-index: 1;
+            width: 150px;
+            height: 150px;
+            margin: -75px 0 0 -75px;
+            border: 16px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 16px solid #3498db;
+            width: 120px;
+            height: 120px;
+            -webkit-animation: spin 2s linear infinite;
+            animation: spin 2s linear infinite;
+        }
+
+        #loaderMessage {
+            position: absolute;
+            top: 65%;
+            z-index: 1;
+            font-size: 25px;
+            font-weight: bold;
+            text-align: center;
+            width: 100%;
+            color: #f3f3f3;
+        }
+
+        @-webkit-keyframes spin {
+            0% { -webkit-transform: rotate(0deg); }
+            100% { -webkit-transform: rotate(360deg); }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 	</style>
 </head>
@@ -708,9 +761,81 @@ if($clValue || $dynClid){
 	if($CHECKLIST_FG_EXPORT){
         ?>
         <!-- Field Guide Export -->
-        <div id="fieldguideexport" data-role="popup" class="well" style="width:600px;height:90%;font-size:14px;">
+        <div id="fieldguideexport" data-role="popup" class="well" style="width:600px;min-height:250px;font-size:14px;">
             <a class="boxclose fieldguideexport_close" id="boxclose"></a>
-            <button data-role="none" type="button" onclick='prepareFieldGuideExport(<?php echo $clManager->getTaxaCount(); ?>);' >Export Field Guide</button>
+            <h2>Fieldguide Export Settings</h2>
+
+            <div style="margin-top:5px;">
+                <b>Primary Description Source:</b>
+                <select data-role='none' name='fgPriDescSource' id='fgPriDescSource'>
+                    <?php
+                    $descSourceList = Array();
+                    $descSourceList = $fgManager->getDescSourceList();
+                    foreach($descSourceList as $source){
+                        echo "<option value='".$source."'>".$source."</option>\n";
+                    }
+                    ?>
+                </select>
+            </div>
+            <div style="margin-top:5px;">
+                <b>Secondary Description Source:</b>
+                <select data-role='none' name='fgSecDescSource' id='fgSecDescSource'>
+                    <?php
+                    foreach($descSourceList as $source){
+                        echo "<option value='".$source."'>".$source."</option>\n";
+                    }
+                    ?>
+                </select>
+            </div>
+            <div style="margin-top:5px;">
+                <b>Use Other Description Sources:</b>
+                <input data-role='none' name='fgUseAltDesc' id='fgUseAltDesc' type='checkbox' value='1' checked />
+            </div>
+            <div style="margin-top:5px;">
+                <b>Photographers:</b>
+                <input data-role='none' name='fgUseAllPhotog' id='fgUseAllPhotog' type='checkbox' value='1' onclick="selectAllPhotog();" checked /> Use All
+                <a href="#" id='fgShowPhotog' title="Show Photographers List" style="margin-left:8px;font-size:10px;" onclick="toggle('fgPhotogBox');toggle('fgShowPhotog');toggle('fgHidePhotog');return false;">Show Photographers</a>
+                <a href="#" id='fgHidePhotog' title="Hide Photographers List" style="display:none;margin-left:8px;font-size:10px;" onclick="toggle('fgPhotogBox');toggle('fgShowPhotog');toggle('fgHidePhotog');return false;">Hide Photographers</a>
+                <div id='fgPhotogBox' style="display:none;width:570px;margin-top:10px;margin-bottom:10px;">
+                    <table style="font-family:Arial;font-size:12px;">
+                        <?php
+                        $photogList = Array();
+                        $i = 1;
+                        $innerHtml = '';
+                        $innerHtml .= '<tr>';
+                        $photogList = $fgManager->getPhotogList();
+                        ksort($photogList, SORT_STRING | SORT_FLAG_CASE);
+                        foreach($photogList as $name => $id){
+                            if($name){
+                                $value = $id.'---'.$name;
+                                if((($i % 3) == 1)) $innerHtml .= '</tr><tr>';
+                                $innerHtml .= '<td style="width:190px;">';
+                                $innerHtml .= "<input data-role='none' name='photog[]' type='checkbox' value='".$value."' onclick='checkPhotogSelections();' checked /> ".$name;
+                                $innerHtml .= '</td>';
+                                $i++;
+                            }
+                        }
+                        $innerHtml .= '</tr>';
+                        echo $innerHtml;
+                        ?>
+                    </table>
+                </div>
+            </div>
+            <div style="margin-top:5px;">
+                <b>Max Images Per Taxon:</b>
+                <input data-role="none" name="fgMaxImages" type="radio" value="0" checked /> 0
+                <input data-role="none" name="fgMaxImages" type="radio" value="1"/> 1
+                <input data-role="none" name="fgMaxImages" type="radio" value="2"/> 2
+                <input data-role="none" name="fgMaxImages" type="radio" value="3"/> 3
+            </div>
+            <div style="margin-top:10px;float:right;">
+                <button data-role="none" type="button" onclick='prepareFieldGuideExport(<?php echo $clManager->getTaxaCount(); ?>);' >Export Field Guide</button>
+            </div>
+        </div>
+
+        <div id="loadingOverlay" data-role="popup" style="width:100%;height:100%;position:relative;">
+            <div id="loader"></div>
+            <div id="loaderMessage">This may take several minutes...</div>
         </div>
         <?php
     }
