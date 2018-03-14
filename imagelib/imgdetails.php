@@ -283,11 +283,20 @@ if($imgArr){
 				</div>
 				<div style="padding:10px;float:left;">
 					<?php
+					if($SYMB_UID && ($IS_ADMIN || array_key_exists("TaxonProfile",$USER_RIGHTS))){
+						?>
+						<div style="float:right;margin-right:15px;" title="Go to Taxon Profile editing page">
+							<a href="../taxa/profile/tpeditor.php?tid=<?php echo $imgArr['tid']; ?>&tabindex=1">
+								<img src="../images/edit.png" style="border:0px;" /><span style="font-size:70%">TP</span>
+							</a>
+						</div>
+						<?php
+					}
 					if($imgArr['occid']){
 						?>
-						<div style="float:right;margin-right:10px;" title="Must have editing privileges for this collection managing image">
+						<div style="float:right;margin-right:15px;" title="Must have editing privileges for this collection managing image">
 							<a href="../collections/editor/occurrenceeditor.php?occid=<?php echo $imgArr['occid']; ?>&tabtarget=2">
-								<img src="../images/edit.png" style="border:0px;" />
+								<img src="../images/edit.png" style="border:0px;" /><span style="font-size:70%">SPEC</span>
 							</a>
 						</div>
 						<?php
@@ -295,15 +304,17 @@ if($imgArr){
 					else{
 						if($isEditor){
 							?>
-							<div style="float:right;margin-right:10px;cursor:pointer;">
-								<img src="../images/edit.png" style="border:0px;" onclick="toggle('imageedit');" />
+							<div style="float:right;margin-right:15px;">
+								<a href="#" title="Edit Image">
+									<img src="../images/edit.png" style="border:0px;" onclick="toggle('imageedit');return false" /><span style="font-size:70%">IMG</span>
+								</a>
 							</div>
 							<?php
 						}
 					}
 					?>
 					<div style="clear:both;margin-top:80px;">
-						<b>Scientific Name:</b> <?php echo '<i>'.$imgArr["sciname"].'</i> '.$imgArr["author"]; ?>
+						<b>Scientific Name:</b> <?php echo '<a href="../taxa/index.php?taxon='.$imgArr["tid"].'"><i>'.$imgArr["sciname"].'</i> '.$imgArr["author"].'</a>'; ?>
 					</div>
 					<?php
 						if($imgArr["caption"]) echo "<div><b>Caption:</b> ".$imgArr["caption"]."</div>";
