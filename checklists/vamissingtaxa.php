@@ -2,8 +2,8 @@
 include_once('../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/ChecklistVoucherAdmin.php');
 
-$action = array_key_exists("submitaction",$_REQUEST)?$_REQUEST["submitaction"]:""; 
-$clid = array_key_exists("clid",$_REQUEST)?$_REQUEST["clid"]:0; 
+$action = array_key_exists("submitaction",$_REQUEST)?$_REQUEST["submitaction"]:"";
+$clid = array_key_exists("clid",$_REQUEST)?$_REQUEST["clid"]:0;
 $pid = array_key_exists("pid",$_REQUEST)?$_REQUEST["pid"]:"";
 $displayMode = (array_key_exists('displaymode',$_REQUEST)?$_REQUEST['displaymode']:0);
 $startIndex = array_key_exists("start",$_REQUEST)?$_REQUEST["start"]:0;
@@ -31,7 +31,7 @@ else{
 
 <div id="innertext" style="background-color:white;">
 	<div style='float:left;font-weight:bold;margin-left:5px'>
-		 
+
 		<?php
 		if($displayMode == 2){
 			echo 'Problem Taxa: ';
@@ -39,20 +39,20 @@ else{
 		else{
 			echo 'Possible Missing Taxa: ';
 		}
-		echo $vManager->getMissingTaxaCount(); 
+		echo $vManager->getMissingTaxaCount();
 		?>
 	</div>
 	<div style="float:left;margin-left:5px">
 		<a href="voucheradmin.php?clid=<?php echo $clid.'&pid='.$pid.'&displaymode='.$displayMode; ?>&tabindex=1"><img src="../images/refresh.png" style="border:0px;" title="Refresh List" /></a>
 	</div>
 	<div style="float:left;margin-left:5px;">
-		<a href="voucherreporthandler.php?rtype=<?php echo ($displayMode==2?'problemtaxacsv':'missingoccurcsv').'&clid='.$clid; ?>" target="_blank" title="Download Specimen Records">
+		<a href="reports/voucherreporthandler.php?rtype=<?php echo ($displayMode==2?'problemtaxacsv':'missingoccurcsv').'&clid='.$clid; ?>" target="_blank" title="Download Specimen Records">
 			<img src="<?php echo $clientRoot; ?>/images/dl.png" style="border:0px;" />
 		</a>
 	</div>
 	<div style="float:right;">
 		<form name="displaymodeform" method="post" action="voucheradmin.php">
-			<b>Display Mode:</b> 
+			<b>Display Mode:</b>
 			<select name="displaymode" onchange="this.form.submit()">
 				<option value="0">Species List</option>
 				<option value="1" <?php echo ($displayMode==1?'SELECTED':''); ?>>Batch Linking</option>
@@ -62,9 +62,9 @@ else{
 			<input name="pid" type="hidden" value="<?php echo $pid; ?>" />
 			<input name="tabindex" type="hidden" value="1" />
 		</form>
-	</div> 
+	</div>
 	<div>
-		<?php 
+		<?php
 		$recCnt = 0;
 		if($displayMode==1){
 			if($missingArr){
@@ -85,7 +85,7 @@ else{
 							<th>Collector</th>
 							<th>Locality</th>
 						</tr>
-						<?php 
+						<?php
 						ksort($missingArr);
 						foreach($missingArr as $sciname => $sArr){
 							foreach($sArr as $occid => $oArr){
@@ -106,8 +106,8 @@ else{
 						}
 						?>
 					</table>
-					<input name="tabindex" value="1" type="hidden" /> 
-					<input name="clid" value="<?php echo $clid; ?>" type="hidden" /> 
+					<input name="tabindex" value="1" type="hidden" />
+					<input name="clid" value="<?php echo $clid; ?>" type="hidden" />
 					<input name="pid" value="<?php echo $pid; ?>" type="hidden" />
 					<input name="displaymode" value="1" type="hidden" />
 					<input name="usecurrent" style="margin-top:8px;" value="1" type="checkbox" checked /> Add name using current taxonomy<br/>
@@ -124,10 +124,10 @@ else{
 			if($missingArr){
 				?>
 				<div style="clear:both;margin:10px;">
-					Listed below are species name obtained from specimens matching the above search term but 
-					are not found within the taxonomic thesaurus (possibly misspelled?). To add as a voucher, 
-					type the correct name from the checklist, and then click the Link Voucher button. 
-					The correct name must already be added to the checklist before voucher can be linked. 
+					Listed below are species name obtained from specimens matching the above search term but
+					are not found within the taxonomic thesaurus (possibly misspelled?). To add as a voucher,
+					type the correct name from the checklist, and then click the Link Voucher button.
+					The correct name must already be added to the checklist before voucher can be linked.
 				</div>
 				<table class="styledtable" style="font-family:Arial;font-size:12px;">
 					<tr>
@@ -136,7 +136,7 @@ else{
 						<th>Collector</th>
 						<th>Locality</th>
 					</tr>
-					<?php 
+					<?php
 					ksort($missingArr);
 					foreach($missingArr as $sciname => $sArr){
 						foreach($sArr as $occid => $oArr){
@@ -145,9 +145,9 @@ else{
 								<td><?php echo $sciname; ?></td>
 								<td>
 									<input id="tid-<?php echo $occid; ?>" name="sciname" type="text" value="" onfocus="initAutoComplete('tid-<?php echo $occid; ?>')" />
-									<input name="formsubmit" type="button" value="Link Voucher" onclick="linkVoucher(<?php echo $occid.','.$clid; ?>)" title="Link Voucher" /> 
+									<input name="formsubmit" type="button" value="Link Voucher" onclick="linkVoucher(<?php echo $occid.','.$clid; ?>)" title="Link Voucher" />
 								</td>
-								<?php 
+								<?php
 								echo '<td>';
 								echo $oArr['recordedby'].' '.$oArr['recordnumber'].'<br/>';
 								if($oArr['eventdate']) echo $oArr['eventdate'].'<br/>';
@@ -158,7 +158,7 @@ else{
 								?>
 								<td><?php echo $oArr['locality']; ?></td>
 							</tr>
-							<?php 
+							<?php
 							$recCnt++;
 						}
 					}
@@ -172,10 +172,10 @@ else{
 				?>
 				<div style="margin:20px;clear:both;">
 					<div style="clear:both;margin:10px;">
-						Listed below are species name not found in the checklist but are represented by one or more specimens 
-						that have a locality matching the above search term. 
+						Listed below are species name not found in the checklist but are represented by one or more specimens
+						that have a locality matching the above search term.
 					</div>
-					<?php 
+					<?php
 					foreach($missingArr as $tid => $sn){
 						?>
 						<div>
@@ -184,7 +184,7 @@ else{
 								<img src="../images/link.png" style="width:13px;" title="Link Voucher Specimens" />
 							</a>
 						</div>
-						<?php 
+						<?php
 						$recCnt++;
 					}
 					?>
