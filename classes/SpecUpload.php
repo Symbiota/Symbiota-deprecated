@@ -457,12 +457,14 @@ class SpecUpload{
 				}
 				$logPath .= '_'.date('Ymd').".log";
 				$this->logFH = fopen($logPath, 'a');
-				fwrite($this->logFH,"Start time: ".date('Y-m-d h:i:s A')."\n");
+				$this->outputMsg('Start time: '.date('Y-m-d h:i:s A'));
+				$this->outputMsg('REMOTE_ADDR: '.$_SERVER['REMOTE_ADDR']);
+				$this->outputMsg('QUERY_STRING: '.$_SERVER['QUERY_STRING']);
 			}
 		}
 	}
 
-	protected function outputMsg($str, $indent = 0){
+	public function outputMsg($str, $indent = 0){
 		if($this->verboseMode == 1){
 			echo $str;
 			ob_flush();
