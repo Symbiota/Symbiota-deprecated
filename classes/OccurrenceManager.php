@@ -781,6 +781,7 @@ class OccurrenceManager extends OccurrenceTaxaManager {
 	}
 
 	public function getClFootprintWkt(){
+		if(!$this->voucherManager) return false;
 		return $this->voucherManager->getClFootprintWkt();
 	}
 
