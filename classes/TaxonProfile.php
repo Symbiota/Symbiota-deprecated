@@ -392,11 +392,11 @@ class TaxonProfile extends Manager {
 		if($this->tid){
 			$rsArr = array();
 			$sql = 'SELECT ts.tid, tdb.tdbid, tdb.caption, tdb.source, tdb.sourceurl, '.
-					'tds.tdsid, tds.heading, tds.statement, tds.displayheader, tdb.language '.
-					'FROM taxstatus ts INNER JOIN taxadescrblock tdb ON ts.tid = tdb.tid '.
-					'INNER JOIN taxadescrstmts tds ON tdb.tdbid = tds.tdbid '.
-					'WHERE (ts.tidaccepted = '.$this->tid.') AND (ts.taxauthid = 1) '.
-					'ORDER BY tdb.displaylevel,tds.sortsequence';
+				'tds.tdsid, tds.heading, tds.statement, tds.displayheader, tdb.language '.
+				'FROM taxstatus ts INNER JOIN taxadescrblock tdb ON ts.tid = tdb.tid '.
+				'INNER JOIN taxadescrstmts tds ON tdb.tdbid = tds.tdbid '.
+				'WHERE (ts.tidaccepted = '.$this->tid.') AND (ts.taxauthid = 1) '.
+				'ORDER BY tdb.displaylevel,tds.sortsequence';
 			//echo $sql; exit;
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_assoc()){

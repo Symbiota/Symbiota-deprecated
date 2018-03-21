@@ -86,7 +86,7 @@ if($taxonManager->getSciName()){
 				echo "&nbsp;<a href='".$parentLink."'><img border='0' height='10px' src='../images/toparent.png' title='Go to Parent' /></a>";
 			 	//If submitted tid does not equal accepted tid, state that user will be redirected to accepted
 			 	if(!$taxonManager->isAccepted()){
-			 		echo '<span style="font-size:90%;margin-left:25px;"> ('.(isset($LANG['REDIRECT'])?$LANG['REDIRECT']:'redirected from').': <i>'.$taxonManager->getSubmittedValue('sciname').'</i>'.$taxonManager->getSubmittedValue('author').')</span>';
+			 		echo '<span style="font-size:90%;margin-left:25px;"> ('.(isset($LANG['REDIRECT'])?$LANG['REDIRECT']:'redirected from').': <i>'.$taxonManager->getSubmittedValue('sciname').'</i> '.$taxonManager->getSubmittedValue('author').')</span>';
 			 	}
 			 	?>
 			</div>
