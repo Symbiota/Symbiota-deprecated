@@ -20,29 +20,31 @@ if(substr($SERVER_ROOT,-1) == '/'){
 //Check cookie to see if signed in
 $PARAMS_ARR = Array();				//params => 'un=egbot&dn=Edward+Gilbert&uid=301'
 $USER_RIGHTS = Array();
-if((isset($_COOKIE["SymbiotaCrumb"]) && (!isset($_REQUEST['submit']) || $_REQUEST['submit'] != "logout"))){
-    $tokenArr = json_decode(Encryption::decrypt($_COOKIE["SymbiotaCrumb"]), true);
-    if($tokenArr){
-        $pHandler = new ProfileManager();
-        if($pHandler->setUserName($tokenArr[0])){
-            $pHandler->setRememberMe(true);
-            $pHandler->setToken($tokenArr[1]);
-            $pHandler->setTokenAuthSql();
-            if(!$pHandler->authenticate()){
-                $pHandler->reset();
+if(!isset($_SESSION['userparams'])){
+    if((isset($_COOKIE["SymbiotaCrumb"]) && (!isset($_REQUEST['submit']) || $_REQUEST['submit'] != "logout"))){
+        $tokenArr = json_decode(Encryption::decrypt($_COOKIE["SymbiotaCrumb"]), true);
+        if($tokenArr){
+            $pHandler = new ProfileManager();
+            if($pHandler->setUserName($tokenArr[0])){
+                $pHandler->setRememberMe(true);
+                $pHandler->setToken($tokenArr[1]);
+                $pHandler->setTokenAuthSql();
+                if(!$pHandler->authenticate()){
+                    $pHandler->reset();
+                }
             }
+            $pHandler->__destruct();
         }
-        $pHandler->__destruct();
     }
-}
 
-if((isset($_COOKIE["SymbiotaCrumb"]) && ((isset($_REQUEST['submit']) && $_REQUEST['submit'] == "logout") || isset($_REQUEST['loginas'])))){
-    $tokenArr = json_decode(Encryption::decrypt($_COOKIE["SymbiotaCrumb"]), true);
-    if($tokenArr){
-        $pHandler = new ProfileManager();
-        $uid = $pHandler->getUid($tokenArr[0]);
-        $pHandler->deleteToken($uid,$tokenArr[1]);
-        $pHandler->__destruct();
+    if((isset($_COOKIE["SymbiotaCrumb"]) && ((isset($_REQUEST['submit']) && $_REQUEST['submit'] == "logout") || isset($_REQUEST['loginas'])))){
+        $tokenArr = json_decode(Encryption::decrypt($_COOKIE["SymbiotaCrumb"]), true);
+        if($tokenArr){
+            $pHandler = new ProfileManager();
+            $uid = $pHandler->getUid($tokenArr[0]);
+            $pHandler->deleteToken($uid,$tokenArr[1]);
+            $pHandler->__destruct();
+        }
     }
 }
 
