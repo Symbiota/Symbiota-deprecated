@@ -412,12 +412,11 @@ class ProfileManager{
 			if(array_key_exists("adminEmail",$GLOBALS)){
 				$bodyStr .= "<".$GLOBALS["adminEmail"].">";
 			}
-			$headerStr = "MIME-Version: 1.0 \r\n".
-				"Content-type: text/html; charset=".$charset." \r\n".
-				"To: ".$emailAddr." \r\n";
-			if(array_key_exists("adminEmail",$GLOBALS)){
-				$headerStr .= "From: Admin <".$GLOBALS["adminEmail"]."> \r\n";
-			}
+            $fromAddr = $GLOBALS['ADMIN_EMAIL'];
+            $headerStr = "MIME-Version: 1.0 \r\n".
+                "Content-type: text/html \r\n".
+                "To: ".$emailAddr." \r\n";
+            $headerStr .= "From: Admin <".$fromAddr."> \r\n";
 			if(mail($emailAddr,$subject,$bodyStr,$headerStr)){
 				$status = true;
 			}

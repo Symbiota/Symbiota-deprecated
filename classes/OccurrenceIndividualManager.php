@@ -337,12 +337,12 @@ class OccurrenceIndividualManager extends Manager{
 			$emailAddr = $GLOBALS['ADMIN_EMAIL'];
 			$comUrl = 'http://'.$_SERVER['SERVER_NAME'].$GLOBALS['CLIENT_ROOT'].'/collections/individual/index.php?occid='.$this->occid.'#commenttab';
 			$subject = $GLOBALS['DEFAULT_TITLE'].' inappropriate comment reported<br/>';
-			$bodyStr = 'The following comment has been recorted as inappropriate:<br/> '.
+			$bodyStr = 'The following comment has been reported as inappropriate:<br/> '.
 			'<a href="'.$comUrl.'">'.$comUrl.'</a>';
 			$headerStr = "MIME-Version: 1.0 \r\n".
 				"Content-type: text/html \r\n".
 				"To: ".$emailAddr." \r\n";
-				$headerStr .= "From: Admin <".$emailAddr."> \r\n";
+            $headerStr .= "From: Admin <".$emailAddr."> \r\n";
 			if(!mail($emailAddr,$subject,$bodyStr,$headerStr)){
 				$this->errorMessage = 'ERROR sending email to portal manager, error unknown';
 				$status = false;
