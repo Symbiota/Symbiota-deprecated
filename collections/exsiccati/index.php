@@ -13,6 +13,11 @@ $imagesOnly = array_key_exists('imagesonly',$_REQUEST)?$_REQUEST['imagesonly']:0
 $sortBy = array_key_exists('sortby',$_REQUEST)?$_REQUEST['sortby']:0;
 $formSubmit = array_key_exists('formsubmit',$_REQUEST)?$_REQUEST['formsubmit']:'';
 
+if(!$specimenOnly && !array_key_exists('searchterm', $_POST)){
+	//Make specimen only the default action
+	$specimenOnly = 1;
+}
+
 $statusStr = '';
 $isEditor = 0;
 if($IS_ADMIN || array_key_exists('CollAdmin',$USER_RIGHTS)){
