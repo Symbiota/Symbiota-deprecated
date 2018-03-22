@@ -4,7 +4,7 @@ include_once($SERVER_ROOT.'/config/dbconnection.php');
 class OccurrenceGeorefTools {
 
 	private $conn;
-	private $collId;
+	private $collStr;
 	private $collName;
 	private $managementType;
 	private $qryVars = array();
@@ -20,9 +20,9 @@ class OccurrenceGeorefTools {
 
 	public function getLocalityArr(){
 		$retArr = array();
-		if($this->collId){
+		if($this->collStr){
 			$sql = 'SELECT occid, country, stateprovince, county, municipality, locality, verbatimcoordinates ,decimallatitude, decimallongitude '.
-				'FROM omoccurrences WHERE (collid = '.$this->collId.') AND (locality IS NOT NULL OR verbatimcoordinates IS NOT NULL) ';
+				'FROM omoccurrences WHERE (collid IN('.$this->collStr.')) AND (locality IS NOT NULL OR verbatimcoordinates IS NOT NULL) ';
 			if(!$this->qryVars || !array_key_exists('qdisplayall',$this->qryVars) || !$this->qryVars['qdisplayall']){
 				$sql .= 'AND (decimalLatitude IS NULL) ';
 			}
@@ -126,7 +126,7 @@ class OccurrenceGeorefTools {
 
 	public function updateCoordinates($geoRefArr){
 		global $paramsArr;
-		if($this->collId){
+		if($this->collStr){
 			if(is_numeric($geoRefArr['decimallatitude']) && is_numeric($geoRefArr['decimallongitude'])){
 				set_time_limit(1000);
 				$localStr =  $this->cleanInStr(implode(',',$geoRefArr['locallist']));
@@ -176,7 +176,7 @@ class OccurrenceGeorefTools {
 						$sql .= ',processingstatus = "'.$geoRefArr['processingstatus'].'" ';
 						$this->addOccurEdits('processingstatus',$geoRefArr['processingstatus'],$localStr);
 					}
-					$sql .= ' WHERE (collid = '.$this->collId.') AND (occid IN('.$localStr.'))';
+					$sql .= ' WHERE (collid IN('.$this->collStr.')) AND (occid IN('.$localStr.'))';
 					//echo $sql; exit;
 					if(!$this->conn->query($sql)){
 						$this->errorStr = 'ERROR batch updating coordinates: '.$this->conn->error;
@@ -196,7 +196,7 @@ class OccurrenceGeorefTools {
 
 		$sql = 'INSERT INTO omoccuredits(occid, FieldName, FieldValueNew, FieldValueOld, appliedstatus, uid'.($hasEditType?',editType ':'').') '.
 			'SELECT occid, "'.$fieldName.'", "'.$fieldValue.'", IFNULL('.$fieldName.',""), 1 as ap, '.$GLOBALS['SYMB_UID'].($hasEditType?',1 ':'').' FROM omoccurrences '.
-			'WHERE (collid = '.$this->collId.') AND (occid IN('.$occidStr.')) ';
+			'WHERE (collid IN('.$this->collStr.')) AND (occid IN('.$occidStr.')) ';
 		if(strpos($fieldName,'elevationinmeters')) $sql .= 'AND (minimumelevationinmeters IS NULL)';
 		//echo $sql.';<br/>';
 		if(!$this->conn->query($sql)){
@@ -208,9 +208,7 @@ class OccurrenceGeorefTools {
 	public function getCoordStatistics(){
 		$retArr = array();
 		$totalCnt = 0;
-		$sql = 'SELECT COUNT(*) AS cnt '.
-			'FROM omoccurrences '.
-			'WHERE (collid = '.$this->collId.')';
+		$sql = 'SELECT COUNT(*) AS cnt FROM omoccurrences WHERE (collid IN('.$this->collStr.'))';
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
 			$totalCnt = $r->cnt;
@@ -218,9 +216,7 @@ class OccurrenceGeorefTools {
 		$rs->free();
 
 		//Full count
-		$sql2 = 'SELECT COUNT(occid) AS cnt '.
-			'FROM omoccurrences '.
-			'WHERE (collid = '.$this->collId.') AND (decimalLatitude IS NULL) AND (georeferenceVerificationStatus IS NULL) ';
+		$sql2 = 'SELECT COUNT(occid) AS cnt FROM omoccurrences WHERE (collid IN('.$this->collStr.')) AND (decimalLatitude IS NULL) AND (georeferenceVerificationStatus IS NULL) ';
 		if($rs2 = $this->conn->query($sql2)){
 			if($r2 = $rs2->fetch_object()){
 				$retArr['total'] = $r2->cnt;
@@ -232,13 +228,13 @@ class OccurrenceGeorefTools {
 		return $retArr;
 	}
 
-	public function getGeorefClones($locality, $country, $state, $county, $searchType, $collid){
+	public function getGeorefClones($locality, $country, $state, $county, $searchType, $collStr){
 		$occArr = array();
 		$sql = 'SELECT count(o.occid) AS cnt, o.decimallatitude, o.decimallongitude, o.coordinateUncertaintyInMeters, o.georeferencedby, o.locality '.
 			'FROM omoccurrences o ';
 		$sqlWhere = 'WHERE (o.decimallatitude IS NOT NULL) AND (o.decimallongitude IS NOT NULL) ';
-		if($collid){
-			$sqlWhere .= 'AND (o.collid = '.$collid.') ';
+		if($collStr){
+			$sqlWhere .= 'AND (o.collid IN('.$collStr.')) ';
 		}
 		if($searchType == 2){
 			//Wildcard search
@@ -295,10 +291,9 @@ class OccurrenceGeorefTools {
 
 	//Setters and getters
 	public function setCollId($cid){
-		if(is_numeric($cid)){
-			$this->collId = $cid;
-			$sql = 'SELECT collectionname, managementtype '.
-				'FROM omcollections WHERE collid = '.$cid;
+		if(preg_match('/^[\d,]$/',$cid)){
+			$this->collStr = $cid;
+			$sql = 'SELECT collectionname, managementtype FROM omcollections WHERE collid IN('.$cid.')';
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
 				$this->collName = $r->collectionname;
@@ -319,8 +314,7 @@ class OccurrenceGeorefTools {
 	//Get data functions
 	public function getCountryArr(){
 		$retArr = array();
-		$sql = 'SELECT DISTINCT country '.
-			'FROM omoccurrences WHERE collid = '.$this->collId;
+		$sql = 'SELECT DISTINCT country FROM omoccurrences WHERE collid IN('.$this->collStr.')';
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
 			$cStr = trim($r->country);
@@ -333,8 +327,7 @@ class OccurrenceGeorefTools {
 
 	public function getStateArr($countryStr = ''){
 		$retArr = array();
-		$sql = 'SELECT DISTINCT stateprovince '.
-			'FROM omoccurrences WHERE collid = '.$this->collId.' ';
+		$sql = 'SELECT DISTINCT stateprovince FROM omoccurrences WHERE collid IN('.$this->collStr.') ';
 		/*if($countryStr){
 			$sql .= 'AND country = "'.$countryStr.'" ';
 		}*/
@@ -350,8 +343,7 @@ class OccurrenceGeorefTools {
 
 	public function getCountyArr($countryStr = '',$stateStr = ''){
 		$retArr = array();
-		$sql = 'SELECT DISTINCT county '.
-			'FROM omoccurrences WHERE collid = '.$this->collId.' ';
+		$sql = 'SELECT DISTINCT county FROM omoccurrences WHERE collid IN('.$this->collStr.') ';
 		/*if($countryStr){
 			$sql .= 'AND country = "'.$countryStr.'" ';
 		}*/
@@ -371,8 +363,7 @@ class OccurrenceGeorefTools {
 
 	public function getMunicipalityArr($countryStr = '',$stateStr = ''){
 		$retArr = array();
-		$sql = 'SELECT DISTINCT municipality '.
-			'FROM omoccurrences WHERE collid = '.$this->collId.' ';
+		$sql = 'SELECT DISTINCT municipality FROM omoccurrences WHERE collid IN('.$this->collStr.') ';
 		/*if($countryStr){
 			$sql .= 'AND country = "'.$countryStr.'" ';
 		}*/
@@ -392,9 +383,7 @@ class OccurrenceGeorefTools {
 
 	public function getProcessingStatus(){
 		$retArr = array();
-		$sql = 'SELECT DISTINCT processingstatus '.
-			'FROM omoccurrences '.
-			'WHERE collid = '.$this->collId;
+		$sql = 'SELECT DISTINCT processingstatus FROM omoccurrences WHERE collid IN('.$this->collStr.')';
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
 			if($r->processingstatus) $retArr[] = $r->processingstatus;

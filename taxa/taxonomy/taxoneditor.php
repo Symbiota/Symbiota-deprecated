@@ -322,7 +322,7 @@ if($editable){
 								if($taxonEditorObj->getRankId() > 140 && $taxonEditorObj->getFamily()){
 									?>
 									<div>
-										<div style="float:left;width:120px;font-weight:bold;">Family: </div>
+										<div style="float:left;width:130px;font-weight:bold;">Family: </div>
 										<div style="">
 											<?php echo $taxonEditorObj->getFamily();?>
 										</div>
@@ -331,7 +331,7 @@ if($editable){
 								}
 								?>
 								<div>
-									<div style="float:left;width:120px;font-weight:bold;">Parent Taxon: </div>
+									<div style="float:left;width:130px;font-weight:bold;">Parent Taxon: </div>
 									<div class="tsedit">
 										<?php echo $taxonEditorObj->getParentNameFull();?>
 									</div>
@@ -344,8 +344,8 @@ if($editable){
 									<input type="hidden" name="tid" value="<?php echo $taxonEditorObj->getTid(); ?>" />
 									<input type="hidden" name="taxauthid" value="<?php echo $taxAuthId;?>">
 									<?php
-										$aArr = $taxonEditorObj->getAcceptedArr();
-										$aStr = key($aArr);
+									$aArr = $taxonEditorObj->getAcceptedArr();
+									$aStr = key($aArr);
 									?>
 									<input type="hidden" name="tidaccepted" value="<?php echo ($taxonEditorObj->getIsAccepted()==1?$taxonEditorObj->getTid():$aStr); ?>" />
 									<input type="hidden" name="tabindex" value="1" />
