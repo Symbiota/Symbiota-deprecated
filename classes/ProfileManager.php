@@ -225,12 +225,12 @@ class ProfileManager{
 		}
 		if($status){
 			//Get email address
-			$emailStr = ""; 
+            $emailAddr = "";
 			$sql = 'SELECT u.email FROM users u INNER JOIN userlogin ul ON u.uid = ul.uid '.
 				'WHERE (ul.username = "'.$this->cleanInStr($un).'")';
 			$result = $this->conn->query($sql);
 			if($row = $result->fetch_object()){
-				$emailStr = $row->email;
+                $emailAddr = $row->email;
 			}
 			$result->free();
 
@@ -242,15 +242,13 @@ class ProfileManager{
 			if(array_key_exists("adminEmail",$GLOBALS)){
 				$bodyStr .= "<".$GLOBALS["adminEmail"].">";
 			}
-			$headerStr = "MIME-Version: 1.0 \r\n".
-				"Content-type: text/html; charset=".$charset." \r\n".
-				"To: ".$emailStr." \r\n";
-			if(array_key_exists("adminEmail",$GLOBALS)){
-				$headerStr .= "From: Admin <".$GLOBALS["adminEmail"]."> \r\n";
-			}
-			mail($emailStr,$subject,$bodyStr,$headerStr);
-			
-			$returnStr = "Your new password was just emailed to: ".$emailStr;
+			$fromAddr = $GLOBALS['ADMIN_EMAIL'];
+            $headerStr = "MIME-Version: 1.0 \r\n".
+                "Content-type: text/html \r\n".
+                "To: ".$emailAddr." \r\n";
+            $headerStr .= "From: Admin <".$fromAddr."> \r\n";
+            mail($emailAddr,$subject,$bodyStr,$headerStr);
+			$returnStr = "Your new password was just emailed to: ".$emailAddr;
 		}
 		else{
 			$returnStr = "Reset Failed! Contact Administrator";
@@ -412,12 +410,11 @@ class ProfileManager{
 			if(array_key_exists("adminEmail",$GLOBALS)){
 				$bodyStr .= "<".$GLOBALS["adminEmail"].">";
 			}
-			$headerStr = "MIME-Version: 1.0 \r\n".
-				"Content-type: text/html; charset=".$charset." \r\n".
-				"To: ".$emailAddr." \r\n";
-			if(array_key_exists("adminEmail",$GLOBALS)){
-				$headerStr .= "From: Admin <".$GLOBALS["adminEmail"]."> \r\n";
-			}
+            $fromAddr = $GLOBALS['ADMIN_EMAIL'];
+            $headerStr = "MIME-Version: 1.0 \r\n".
+                "Content-type: text/html \r\n".
+                "To: ".$emailAddr." \r\n";
+            $headerStr .= "From: Admin <".$fromAddr."> \r\n";
 			if(mail($emailAddr,$subject,$bodyStr,$headerStr)){
 				$status = true;
 			}
