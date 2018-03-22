@@ -2,6 +2,7 @@
 include_once($SERVER_ROOT.'/config/dbconnection.php');
 include_once('Manager.php');
 include_once('OccurrenceDuplicate.php');
+include_once('OccurrenceAccessStats.php');
 
 class OccurrenceIndividualManager extends Manager{
 
@@ -10,6 +11,7 @@ class OccurrenceIndividualManager extends Manager{
 	private $dbpk;
 	private $occArr = array();
 	private $metadataArr = array();
+	private $displayFormat = 'html';
 
 	public function __construct() {
 		parent::__construct();
@@ -143,7 +145,7 @@ class OccurrenceIndividualManager extends Manager{
 						$this->metadataArr['email'] = $r->email;
 						$this->metadataArr['icon'] = $r->icon;
 					}
-					$rsSec->close();
+					$rsSec->free();
 				}
 				$this->loadImages();
 				$this->loadDeterminations();
@@ -151,6 +153,11 @@ class OccurrenceIndividualManager extends Manager{
 				$this->loadExsiccati();
 				$result->free();
 			}
+			//Set access statistics
+			$accessType = 'view';
+			if(in_array($this->displayFormat,array('json','xml','rdf','turtle'))) $accessType = 'api'.strtoupper($this->displayFormat);
+			$statsManager = new OccurrenceAccessStats();
+			$statsManager->recordAccessEvent($this->occid, $accessType);
 		}
 		else{
 			trigger_error('Unable to set occurrence array; '.$this->conn->error,E_USER_ERROR);
@@ -729,6 +736,11 @@ class OccurrenceIndividualManager extends Manager{
 
 	public function setDbpk($pk){
 		$this->dbpk = $pk;
+	}
+
+	public function setDisplayFormat($f){
+		if(!in_array($f,array('json','xml','rdf','turtle','html'))) $f = 'html';
+		$this->displayFormat = $f;
 	}
 }
 ?>

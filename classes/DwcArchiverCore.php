@@ -6,6 +6,7 @@ include_once($SERVER_ROOT.'/classes/DwcArchiverDetermination.php');
 include_once($SERVER_ROOT.'/classes/DwcArchiverImage.php');
 include_once($SERVER_ROOT.'/classes/DwcArchiverAttribute.php');
 include_once($SERVER_ROOT.'/classes/UuidFactory.php');
+include_once('OccurrenceAccessStats.php');
 
 class DwcArchiverCore extends Manager{
 
@@ -30,6 +31,7 @@ class DwcArchiverCore extends Manager{
 	private $determinationFieldArr = array();
 	private $imageFieldArr = array();
 	private $attributeFieldArr = array();
+	private $isPublicDownload = false;
 
 	private $securityArr = array();
 	private $includeDets = 1;
@@ -1590,6 +1592,7 @@ class DwcArchiverCore extends Manager{
 				$typeArr = array('Other material', 'Holotype', 'Paratype', 'Isotype', 'Isoparatype', 'Isolectotype', 'Isoneotype', 'Isosyntype');
 				//$typeArr = array('Other material', 'Holotype', 'Paratype', 'Hapantotype', 'Syntype', 'Isotype', 'Neotype', 'Lectotype', 'Paralectotype', 'Isoparatype', 'Isolectotype', 'Isoneotype', 'Isosyntype');
 			}
+			$statsManager = new OccurrenceAccessStats();
 			while($r = $rs->fetch_assoc()){
 				//Set occurrence GUID based on GUID target
 				$guidTarget = $this->collArr[$r['collid']]['guidtarget'];
@@ -1688,6 +1691,13 @@ class DwcArchiverCore extends Manager{
 				$this->encodeArr($r);
 				$this->addcslashesArr($r);
 				$this->writeOutRecord($fh,$r);
+				//Set access statistics
+				if($this->isPublicDownload){
+					if($this->schemaType == 'dwc' || $this->schemaType == 'symbiota'){
+						//Don't count is dl is backup, GeoLocate transfer, or pensoft
+						$statsManager->recordAccessEvent($r['occid'], 'download');
+					}
+				}
 			}
 			$rs->free();
 		}
@@ -2026,6 +2036,10 @@ class DwcArchiverCore extends Manager{
 		elseif(is_string($approvedCollid)){
 			$this->rareReaderArr = explode(',',$approvedCollid);
 		}
+	}
+
+	public function setIsPublicDownload(){
+		$this->isPublicDownload = true;
 	}
 
 	public function setCharSetOut($cs){

@@ -1,5 +1,7 @@
 <?php
 include_once($SERVER_ROOT.'/config/dbconnection.php');
+include_once('OccurrenceAccessStats.php');
+
 class OccurrenceDownload{
 
 	private $conn;
@@ -15,6 +17,7 @@ class OccurrenceDownload{
 	private $sqlWhere = '';
 	private $conditionArr = array();
 	private $taxonFilter;
+	private $isPublicDownload = false;
 	private $errorArr = array();
 
 	public function __construct(){
@@ -22,8 +25,8 @@ class OccurrenceDownload{
 
 		//Set rare species variables
 		$this->securityArr = Array('locality','locationRemarks','minimumElevationInMeters','maximumElevationInMeters','verbatimElevation',
-				'decimalLatitude','decimalLongitude','geodeticDatum','coordinateUncertaintyInMeters','footprintWKT','verbatimCoordinates',
-				'georeferenceRemarks','georeferencedBy','georeferenceProtocol','georeferenceSources','georeferenceVerificationStatus','habitat');
+			'decimalLatitude','decimalLongitude','geodeticDatum','coordinateUncertaintyInMeters','footprintWKT','verbatimCoordinates',
+			'georeferenceRemarks','georeferencedBy','georeferenceProtocol','georeferenceSources','georeferenceVerificationStatus','habitat');
 		if($GLOBALS['IS_ADMIN'] || array_key_exists("CollAdmin", $GLOBALS['USER_RIGHTS']) || array_key_exists("RareSppAdmin", $GLOBALS['USER_RIGHTS']) || array_key_exists("RareSppReadAll", $GLOBALS['USER_RIGHTS'])){
 			$this->redactLocalities = false;
 		}
@@ -129,6 +132,7 @@ class OccurrenceDownload{
 			$sql = $this->getSql();
 			$result = $this->conn->query($sql,MYSQLI_USE_RESULT);
 			if($result){
+				$statsManager = new OccurrenceAccessStats();
 				$outputHeader = true;
 				while($row = $result->fetch_assoc()){
 					if($outputHeader){
@@ -148,6 +152,10 @@ class OccurrenceDownload{
 					}
 					else{
 						fwrite($outstream, implode($this->delimiter,$row)."\n");
+					}
+					//Set access statistics
+					if($this->isPublicDownload){
+						if($this->schemaType != 'checklist') if(array_key_exists('occid',$row)) $statsManager->recordAccessEvent($row['occid'], 'download');
 					}
 					$recCnt++;
 				}
@@ -685,6 +693,10 @@ class OccurrenceDownload{
 		if(is_numeric($filter)){
 			$this->taxonFilter = $filter;
 		}
+	}
+
+	public function setIsPublicDownload(){
+		$this->isPublicDownload = true;
 	}
 
 	//Misc functions

@@ -75,6 +75,7 @@ else{
 	}
 	if($schema == "georef"){
 		$dlManager = new OccurrenceDownload();
+		if(array_key_exists("publicsearch",$_POST)) $dlManager->setIsPublicDownload();
 		if(array_key_exists("publicsearch",$_POST) && $_POST["publicsearch"]){
 			$dlManager->setSqlWhere($occurManager->getSqlWhere());
 		}
@@ -149,6 +150,7 @@ else{
 		}
 		else{
 			//Is an occurrence download
+			if(array_key_exists("publicsearch",$_POST)) $dwcaHandler->setIsPublicDownload();
 			$dwcaHandler->setCharSetOut($cSet);
 			$dwcaHandler->setSchemaType($schema);
 			$dwcaHandler->setExtended($extended);

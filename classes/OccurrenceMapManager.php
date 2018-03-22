@@ -1,5 +1,6 @@
 <?php
-include_once($SERVER_ROOT.'/classes/OccurrenceManager.php');
+include_once('OccurrenceManager.php');
+include_once('OccurrenceAccessStats.php');
 
 class OccurrenceMapManager extends OccurrenceManager {
 
@@ -59,6 +60,7 @@ class OccurrenceMapManager extends OccurrenceManager {
 	public function getCoordinateMap($start, $limit){
 		$coordArr = Array();
 		if($this->sqlWhere){
+			$statsManager = new OccurrenceAccessStats();
 			$sql = 'SELECT o.occid, CONCAT_WS(" ",o.recordedby,IFNULL(o.recordnumber,o.eventdate)) AS identifier, '.
 				'o.sciname, o.family, o.tidinterpreted, o.DecimalLatitude, o.DecimalLongitude, o.collid, o.catalognumber, '.
 				'o.othercatalognumbers, c.institutioncode, c.collectioncode, c.CollectionName '.
@@ -91,6 +93,7 @@ class OccurrenceMapManager extends OccurrenceManager {
 					//$coordArr[$collName][$occId]["cn"] = $this->htmlEntities($row->catalognumber);
 					//$coordArr[$collName][$occId]["ocn"] = $this->htmlEntities($row->othercatalognumbers);
 					$coordArr[$collName]["c"] = $color;
+					$statsManager->recordAccessEvent($occId, 'map');
 				}
 			}
 			if(array_key_exists("undefined",$coordArr)){
@@ -130,6 +133,11 @@ class OccurrenceMapManager extends OccurrenceManager {
 				$retArr[$occId]['l'] = str_replace('.,',',',$r->locality);
 			}
 			$result->free();
+			//Set access statistics
+			if($retArr){
+				$statsManager = new OccurrenceAccessStats();
+				$statsManager->recordAccessEventByArr(array_keys($retArr),'list');
+			}
 		}
 		return $retArr;
 	}

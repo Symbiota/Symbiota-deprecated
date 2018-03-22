@@ -1,5 +1,6 @@
 <?php
 include_once($SERVER_ROOT.'/config/dbconnection.php');
+include_once('OccurrenceAccessStats.php');
 
 class MappingShared{
 
@@ -28,9 +29,7 @@ class MappingShared{
 
     public function getGenObsInfo(){
 		$retVar = '';
-		$sql = 'SELECT collid '.
-			'FROM omcollections '.
-			'WHERE collectionname = "General Observations"';
+		$sql = 'SELECT collid FROM omcollections WHERE collectionname = "General Observations"';
 		if($rs = $this->conn->query($sql)){
 			while($r = $rs->fetch_object()){
 				$retVar = $r->collid;
@@ -43,8 +42,7 @@ class MappingShared{
 	public function getGeoCoords($mapWhere,$limit=1000,$includeDescr=false){
 		global $USER_RIGHTS;
 		$coordArr = Array();
-		$sql = '';
-		$sql = 'SELECT o.occid, CONCAT_WS(" ",o.recordedby,IFNULL(o.recordnumber,o.eventdate)) AS identifier, '.
+		$sql = 'SELECT DISTINCT o.occid, CONCAT_WS(" ",o.recordedby,IFNULL(o.recordnumber,o.eventdate)) AS identifier, '.
 			'o.sciname, o.family, o.tidinterpreted, o.DecimalLatitude, o.DecimalLongitude, o.collid, o.catalognumber, '.
 			'o.othercatalognumbers, c.institutioncode, c.collectioncode, c.CollectionName ';
 		if($includeDescr){
@@ -98,6 +96,7 @@ class MappingShared{
 			}
 		}
 		//echo "<div>SQL: ".$sql."</div>";
+		$statsManager = new OccurrenceAccessStats();
 		$result = $this->conn->query($sql);
 		while($row = $result->fetch_object()){
 			if(($row->DecimalLongitude <= 180 && $row->DecimalLongitude >= -180) && ($row->DecimalLatitude <= 90 && $row->DecimalLatitude >= -90)){
@@ -134,13 +133,14 @@ class MappingShared{
 						$coordArr[$taxaMapper[$sciName]][$occId][$v] = $this->xmlentities($v);
 					}
 				}
+				//Set access statistics
+				$statsManager->recordAccessEvent($occId, 'map');
 			}
 		}
 		if(array_key_exists("undefined",$coordArr)){
 			$coordArr["undefined"]["color"] = $this->iconColors[7];
 		}
 		$result->free();
-
 		return $coordArr;
 		//return $sql;
 	}
