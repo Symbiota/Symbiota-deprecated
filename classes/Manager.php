@@ -53,14 +53,10 @@ class Manager  {
     public function checkFieldExists($table, $field){
         $exists = false;
         $this->__construct(null,'readonly');
-
-        $sql = 'SELECT COLUMN_NAME '.
-            'FROM information_schema.COLUMNS '.
-            'WHERE TABLE_NAME = "'.$table.'" AND COLUMN_NAME = "'.$field.'" ';
+        $sql = 'SELECT '.$field.' FROM '.$table.' LIMIT 1 ';
         //echo "<div>SQL: ".$sql."</div>";
-        $result = $this->conn->query($sql);
-        while($r = $result->fetch_object()){
-            if($r->COLUMN_NAME) $exists = true;
+        if($result = $this->conn->query($sql)){
+            $exists = true;
         }
         return $exists;
     }

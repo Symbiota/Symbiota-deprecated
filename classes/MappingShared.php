@@ -1,8 +1,9 @@
 <?php
 include_once($serverRoot.'/config/dbconnection.php');
+include_once('OccurrenceAccessStats.php');
 
 class MappingShared{
-	
+
 	private $iconColors = Array();
 	private $googleIconArr = Array();
 	private $taxaArr = Array();
@@ -26,7 +27,7 @@ class MappingShared{
 	public function __destruct(){
  		if(!($this->conn === false)) $this->conn->close();
 	}
-	
+
     public function getGenObsInfo(){
 		$retVar = '';
 		$sql = 'SELECT collid '.
@@ -40,12 +41,12 @@ class MappingShared{
 		}
 		return $retVar;
 	}
-	
+
 	public function getGeoCoords($mapWhere,$limit=1000,$includeDescr=false){
 		global $userRights;
 		$coordArr = Array();
 		$sql = '';
-		$sql = 'SELECT o.occid, CONCAT_WS(" ",o.recordedby,IFNULL(o.recordnumber,o.eventdate)) AS identifier, '.
+		$sql = 'SELECT DISTINCT o.occid, CONCAT_WS(" ",o.recordedby,IFNULL(o.recordnumber,o.eventdate)) AS identifier, '.
 			'o.sciname, o.family, o.tidinterpreted, o.DecimalLatitude, o.DecimalLongitude, o.collid, o.catalognumber, '.
 			'o.othercatalognumbers, c.institutioncode, c.collectioncode, c.CollectionName ';
 		if($includeDescr){
@@ -97,6 +98,7 @@ class MappingShared{
 			}
 		}
 		//echo "<div>SQL: ".$sql."</div>";
+		$statsManager = new OccurrenceAccessStats();
 		$result = $this->conn->query($sql);
 		while($row = $result->fetch_object()){
 			if(($row->DecimalLongitude <= 180 && $row->DecimalLongitude >= -180) && ($row->DecimalLatitude <= 90 && $row->DecimalLatitude >= -90)){
@@ -116,7 +118,7 @@ class MappingShared{
 						$sciName = $family;
 					}
 				}
-				if(!array_key_exists($sciName,$taxaMapper)) $sciName = "undefined"; 
+				if(!array_key_exists($sciName,$taxaMapper)) $sciName = "undefined";
 				$coordArr[$taxaMapper[$sciName]][$occId]["collid"] = $row->collid;
 				$coordArr[$taxaMapper[$sciName]][$occId]["latLngStr"] = $latLngStr;
 				$coordArr[$taxaMapper[$sciName]][$occId]["identifier"] = $row->identifier;
@@ -133,17 +135,19 @@ class MappingShared{
 						$coordArr[$taxaMapper[$sciName]][$occId][$v] = $this->xmlentities($row->$v);
 					}
 				}
+				//Set access statistics
+				$statsManager->recordAccessEvent($occId, 'map');
 			}
 		}
 		if(array_key_exists("undefined",$coordArr)){
 			$coordArr["undefined"]["color"] = $this->iconColors[7];
 		}
 		$result->free();
-		
+
 		return $coordArr;
 		//return $sql;
 	}
-	
+
     public function writeKMLFile($coordArr){
     	global $defaultTitle, $userRights, $clientRoot, $charset;
 		$fileName = $defaultTitle;
@@ -158,18 +162,18 @@ class MappingShared{
 		$fileName .= time().".kml";
     	header ('Cache-Control: must-revalidate, post-check=0, pre-check=0');
 		header ('Content-type: application/vnd.google-earth.kml+xml');
-		header ("Content-Disposition: attachment; filename=\"$fileName\""); 
+		header ("Content-Disposition: attachment; filename=\"$fileName\"");
 		echo "<?xml version='1.0' encoding='".$charset."'?>\n";
         echo "<kml xmlns='http://www.opengis.net/kml/2.2'>\n";
         echo "<Document>\n";
 		echo "<Folder>\n<name>".$defaultTitle." Specimens - ".date('j F Y g:ia')."</name>\n";
-        
+
 		$cnt = 0;
 		foreach($coordArr as $sciName => $contentArr){
 			$iconStr = $this->googleIconArr[$cnt%44];
 			$cnt++;
 			unset($contentArr["color"]);
-			
+
 			echo "<Style id='sn_".$iconStr."'>\n";
             echo "<IconStyle><scale>1.1</scale><Icon>";
 			echo "<href>http://maps.google.com/mapfiles/kml/".$iconStr.".png</href>";
@@ -210,20 +214,20 @@ class MappingShared{
 		echo "</Document>\n";
 		echo "</kml>\n";
     }
-	
+
 	private function xmlentities($string){
 		return str_replace(array ('&','"',"'",'<','>','?'),array ('&amp;','&quot;','&apos;','&lt;','&gt;','&apos;'),$string);
 	}
-	
+
     //Setters and getters
     public function setTaxaArr($tArr){
     	$this->taxaArr = $tArr;
     }
-	
+
 	public function setFieldArr($fArr){
     	$this->fieldArr = $fArr;
     }
-	
+
 	public function setSearchTermsArr($stArr){
     	$this->searchTermsArr = $stArr;
 		$this->searchTerms = 1;

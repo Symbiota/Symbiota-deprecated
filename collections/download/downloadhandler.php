@@ -112,6 +112,7 @@ else{
 		}
 	}
 	if($schema == "georef"){
+		if(array_key_exists("publicsearch",$_POST)) $dlManager->setIsPublicDownload();
 		if(array_key_exists("publicsearch",$_POST) && $_POST["publicsearch"]){
 			$dlManager->setSqlWhere($occurManager->getSqlWhere());
 		}
@@ -191,6 +192,7 @@ else{
 			$dwcaHandler->setRedactLocalities($redactLocalities);
 			if($rareReaderArr) $dwcaHandler->setRareReaderArr($rareReaderArr);
 
+			if(array_key_exists("publicsearch",$_POST)) $dwcaHandler->setIsPublicDownload();
 			if(array_key_exists("publicsearch",$_POST) && $_POST["publicsearch"]){
                 if($SOLR_MODE && $occWhereStr){
                     $dwcaHandler->setCustomWhereSql($occWhereStr);

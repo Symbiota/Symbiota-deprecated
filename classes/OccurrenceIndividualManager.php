@@ -2,6 +2,7 @@
 include_once($SERVER_ROOT.'/config/dbconnection.php');
 include_once('Manager.php');
 include_once('OccurrenceDuplicate.php');
+include_once("OccurrenceAccessStats.php");
 
 class OccurrenceIndividualManager extends Manager{
 
@@ -10,6 +11,7 @@ class OccurrenceIndividualManager extends Manager{
 	private $dbpk;
 	private $occArr = array();
 	private $metadataArr = array();
+	private $displayFormat = 'html';
 
 	public function __construct() {
 		parent::__construct();
@@ -156,6 +158,11 @@ class OccurrenceIndividualManager extends Manager{
 				$this->loadExsiccati();
 				$result->free();
 			}
+			//Set access statistics
+			$accessType = 'view';
+			if(in_array($this->displayFormat,array('json','xml','rdf','turtle'))) $accessType = 'api'.strtoupper($this->displayFormat);
+			$statsManager = new OccurrenceAccessStats();
+			$statsManager->recordAccessEvent($this->occid, $accessType);
 		}
 		else{
 			trigger_error('Unable to set occurrence array; '.$this->conn->error,E_USER_ERROR);
@@ -337,12 +344,12 @@ class OccurrenceIndividualManager extends Manager{
 			$emailAddr = $GLOBALS['ADMIN_EMAIL'];
 			$comUrl = 'http://'.$_SERVER['SERVER_NAME'].$GLOBALS['CLIENT_ROOT'].'/collections/individual/index.php?occid='.$this->occid.'#commenttab';
 			$subject = $GLOBALS['DEFAULT_TITLE'].' inappropriate comment reported<br/>';
-			$bodyStr = 'The following comment has been recorted as inappropriate:<br/> '.
+			$bodyStr = 'The following comment has been reported as inappropriate:<br/> '.
 			'<a href="'.$comUrl.'">'.$comUrl.'</a>';
 			$headerStr = "MIME-Version: 1.0 \r\n".
 				"Content-type: text/html \r\n".
 				"To: ".$emailAddr." \r\n";
-				$headerStr .= "From: Admin <".$emailAddr."> \r\n";
+            $headerStr .= "From: Admin <".$emailAddr."> \r\n";
 			if(!mail($emailAddr,$subject,$bodyStr,$headerStr)){
 				$this->errorMessage = 'ERROR sending email to portal manager, error unknown';
 				$status = false;
@@ -734,6 +741,11 @@ class OccurrenceIndividualManager extends Manager{
 
 	public function setDbpk($pk){
 		$this->dbpk = $pk;
+	}
+
+	public function setDisplayFormat($f){
+		if(!in_array($f,array('json','xml','rdf','turtle','html'))) $f = 'html';
+		$this->displayFormat = $f;
 	}
 }
 ?>

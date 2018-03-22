@@ -1,5 +1,6 @@
 <?php
 include_once("OccurrenceManager.php");
+include_once("OccurrenceAccessStats.php");
 
 class OccurrenceListManager extends OccurrenceManager{
 
@@ -129,6 +130,11 @@ class OccurrenceListManager extends OccurrenceManager{
                 $previousOccid = $r->occid;
             }
             $rs->free();
+        }
+        //Set access statistics
+        if($returnArr){
+        	$statsManager = new OccurrenceAccessStats();
+        	$statsManager->recordAccessEventByArr(array_keys($returnArr),'list');
         }
         return $returnArr;
     }

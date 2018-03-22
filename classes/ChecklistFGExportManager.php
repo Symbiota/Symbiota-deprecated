@@ -16,10 +16,12 @@ class ChecklistFGExportManager {
 	private $language = "English";
     private $index = 0;
     private $recLimit = 0;
-	private $thesFilter = 0;
+	private $thesFilter = 1;
 	private $imageLimit = 100;
 	private $taxaLimit = 500;
-	private $basicSql;
+    private $photogNameArr = array();
+    private $photogIdArr = array();
+    private $maxPhoto = 0;
 
 	function __construct() {
 		$this->conn = MySQLiConnectionFactory::getCon("readonly");
@@ -93,7 +95,7 @@ class ChecklistFGExportManager {
             'FROM '.$this->linkTable.' AS ctl LEFT JOIN taxstatus AS ts ON ctl.tid = ts.tid '.
             'LEFT JOIN taxa AS t ON ts.tidaccepted = t.TID '.
             'WHERE (ts.taxauthid = '.$this->thesFilter.') AND '.$this->sqlWhereVar.' ';
-        $sql .= "LIMIT ".$this->index.",".$this->recLimit;
+        if($this->index || $this->recLimit) $sql .= "LIMIT ".$this->index.",".$this->recLimit;
         //echo $sql; exit;
         $rs = $this->conn->query($sql);
         while($row = $rs->fetch_object()){
@@ -119,7 +121,7 @@ class ChecklistFGExportManager {
     }
 
     public function primeDescData(){
-        $sql = 'SELECT tdb.tid, tdb.caption, tds.tdsid, tds.heading, tds.statement, tds.displayheader '.
+        $sql = 'SELECT tdb.tid, tdb.caption, tdb.source, tds.tdsid, tds.heading, tds.statement, tds.displayheader '.
             'FROM taxadescrblock AS tdb LEFT JOIN taxadescrstmts AS tds ON tdb.tdbid = tds.tdbid '.
             'WHERE tdb.tid IN('.$this->sqlTaxaStr.') '.
             'ORDER BY tdb.tid,tdb.displaylevel,tds.sortsequence ';
@@ -128,8 +130,10 @@ class ChecklistFGExportManager {
         while($row = $rs->fetch_object()){
             $heading = ($row->displayheader?strip_tags($row->heading):'');
             $statement = strip_tags($row->statement);
-            $this->dataArr[$row->tid]["desc"][$row->caption][$row->tdsid]['heading'] = $heading;
-            $this->dataArr[$row->tid]["desc"][$row->caption][$row->tdsid]['statement'] = $statement;
+            $source = strip_tags($row->source);
+            $this->dataArr[$row->tid]["desc"][$row->caption]['source'] = $this->cleanOutStr(htmlspecialchars_decode($source));
+            $this->dataArr[$row->tid]["desc"][$row->caption][$row->tdsid]['heading'] = $this->cleanOutStr(htmlspecialchars_decode($heading));
+            $this->dataArr[$row->tid]["desc"][$row->caption][$row->tdsid]['statement'] = $this->cleanOutStr(htmlspecialchars_decode($statement));
         }
         $rs->free();
     }
@@ -142,47 +146,60 @@ class ChecklistFGExportManager {
         //echo $sql; exit;
         $result = $this->conn->query($sql);
         while($row = $result->fetch_object()){
-            $this->dataArr[$row->tid]["vern"][] = $row->VernacularName;
+            $this->dataArr[$row->tid]["vern"][] = strtoupper($row->VernacularName);
         }
         $result->free();
     }
 
     public function primeImages(){
-        $sql = 'SELECT ti.tid, ti.imgid, ti.thumbnailurl, ti.url, IFNULL(ti.photographer,CONCAT_WS(" ",u.firstname,u.lastname)) AS photographer '.
-            'FROM images AS ti LEFT JOIN users AS u ON ti.photographeruid = u.uid '.
-            'LEFT JOIN taxstatus AS ts ON ti.tid = ts.tid '.
-            'WHERE ts.taxauthid = '.$this->thesFilter.' AND ti.tid IN('.$this->sqlTaxaStr.') AND ti.SortSequence < 500 ';
-        $sql .= 'ORDER BY ti.tid, ti.sortsequence ';
-        //echo $sql; exit;
-        $i = 0;
-        $currTid = 0;
-        $result = $this->conn->query($sql);
-        while($row = $result->fetch_object()){
-            if($currTid != $row->tid){
-                $currTid = $row->tid;
-                $i = 0;
+        if($this->maxPhoto > 0){
+            $photogNameStr = '';
+            $photogIdStr = '';
+            if($this->photogNameArr){
+                $photogNameStr .= '"';
+                $photogNameStr .= implode('","',$this->photogIdArr);
+                $photogNameStr .= '"';
             }
-            if($i < 3){
-                $imgUrl = $row->thumbnailurl;
-                if((!$imgUrl || $imgUrl == 'empty') && $row->url) $imgUrl = $row->url;
-                /*$type = pathinfo($imgUrl, PATHINFO_EXTENSION);
-                if($data = $this->curl_get_contents($imgUrl)){
-                    $dataUri = 'data:image/' . $type . ';base64,' . base64_encode($data);
-                    $this->dataArr[$row->tid]["img"][$row->imgid]['url'] = $dataUri;
-                    $this->dataArr[$row->tid]["img"][$row->imgid]['photographer'] = $row->photographer;
-                }*/
-                //$data = file_get_contents($imgUrl);
-                //$dataUri = 'data:image/' . $type . ';base64,' . base64_encode($data);
-                //$this->dataArr[$row->tid]["img"][$row->imgid]['url'] = $dataUri;
-                //$this->dataArr[$row->tid]["img"][$row->imgid]['photographer'] = $row->photographer;
-
-                $this->dataArr[$row->tid]["img"][$row->imgid]['id'] = $row->imgid;
-                $this->dataArr[$row->tid]["img"][$row->imgid]['photographer'] = $row->photographer;
+            if($this->photogIdArr){
+                $photogIdStr .= implode(",",$this->photogIdArr);
             }
-            $i++;
+            $sql = 'SELECT ti.tid, ti.imgid, ti.thumbnailurl, ti.url, ti.`owner`, '.
+                'IFNULL(ti.photographer,IFNULL(CONCAT_WS(" ",u.firstname,u.lastname),CONCAT_WS(" ",u2.firstname,u2.lastname))) AS photographer '.
+                'FROM images AS ti LEFT JOIN users AS u ON ti.photographeruid = u.uid '.
+                'LEFT JOIN userlogin AS ul ON ti.username = ul.username '.
+                'LEFT JOIN users AS u2 ON ul.uid = u2.uid '.
+                'LEFT JOIN taxstatus AS ts ON ti.tid = ts.tid '.
+                'WHERE ts.taxauthid = '.$this->thesFilter.' AND ti.tid IN('.$this->sqlTaxaStr.') AND ti.SortSequence < 500 ';
+            if($photogNameStr || $photogIdStr){
+                $tempSql = 'AND (';
+                if($photogNameStr) $tempSql .= '(ti.photographer IN('.$photogNameStr.'))';
+                if($photogNameStr && $photogIdStr) $tempSql .= ' OR ';
+                if($photogIdStr) $tempSql .= '(ti.photographeruid IN('.$photogIdStr.'))';
+                $tempSql .= ') ';
+                $sql .= $tempSql;
+            }
+            $sql .= 'ORDER BY ti.tid, ti.sortsequence ';
+            //echo $sql; exit;
+            $i = 0;
+            $currTid = 0;
+            $result = $this->conn->query($sql);
+            while($row = $result->fetch_object()){
+                if($currTid != $row->tid){
+                    $currTid = $row->tid;
+                    $i = 0;
+                }
+                if($i < $this->maxPhoto){
+                    $imgUrl = $row->thumbnailurl;
+                    if((!$imgUrl || $imgUrl == 'empty') && $row->url) $imgUrl = $row->url;
+                    $this->dataArr[$row->tid]["img"][$row->imgid]['id'] = $row->imgid;
+                    $this->dataArr[$row->tid]["img"][$row->imgid]['owner'] = $row->owner;
+                    $this->dataArr[$row->tid]["img"][$row->imgid]['photographer'] = $this->cleanOutStr(htmlspecialchars_decode($row->photographer));
+                }
+                $i++;
+            }
+            $result->free();
         }
-        $result->free();
-    }
+	}
 
     public function getImageUrl($imgID){
         $imgUrl = '';
@@ -198,15 +215,6 @@ class ChecklistFGExportManager {
     }
 
     public function getImageDataUrl($url){
-        /*$ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
-        $data = curl_exec($ch);
-        curl_close($ch);*/
-
-        //$path = 'myfolder/myimage.png';
         $type = pathinfo($url, PATHINFO_EXTENSION);
         $data = file_get_contents($url);
         $base64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
@@ -214,165 +222,47 @@ class ChecklistFGExportManager {
         return $base64;
     }
 
-    public function getCoordinates($tid = 0,$abbreviated=false){
-		$retArr = array();
-		if(!$this->basicSql) $this->setClSql();
-		if($this->clid){
-			//Add children checklists to query
-			$clidStr = $this->clid;
-			if($this->childClidArr){
-				$clidStr .= ','.implode(',',$this->childClidArr);
-			}
+    public function getDescSourceList(){
+        $descSourceList = Array();
+        $sql = 'SELECT DISTINCT tdb.caption '.
+            'FROM taxadescrblock AS tdb '.
+            'WHERE tdb.tid IN('.$this->sqlTaxaStr.') '.
+            'ORDER BY tdb.caption ';
+        //echo $sql;
+        $rs = $this->conn->query($sql);
+        while ($row = $rs->fetch_object()){
+            $descSourceList[] = $row->caption;
+        }
+        $rs->free();
+        return $descSourceList;
+    }
 
-			$retCnt = 0;
-			//Grab general points
-			try{
-				$sql1 = '';
-				if($tid){
-					$sql1 = 'SELECT DISTINCT cc.tid, t.sciname, cc.decimallatitude, cc.decimallongitude, cc.notes '.
-						'FROM fmchklstcoordinates cc INNER JOIN taxa t ON cc.tid = t.tid '.
-						'WHERE cc.tid = '.$tid.' AND cc.clid IN ('.$clidStr.') AND cc.decimallatitude IS NOT NULL AND cc.decimallongitude IS NOT NULL ';
-				}
-				else{
-					$sql1 = 'SELECT DISTINCT cc.tid, t.sciname, cc.decimallatitude, cc.decimallongitude, cc.notes '.
-						'FROM fmchklstcoordinates cc INNER JOIN ('.$this->basicSql.') t ON cc.tid = t.tid '.
-						'WHERE cc.clid IN ('.$clidStr.') AND cc.decimallatitude IS NOT NULL AND cc.decimallongitude IS NOT NULL ';
-				}
-				if($abbreviated){
-					$sql1 .= 'ORDER BY RAND() LIMIT 50';
-				}
-				//echo $sql1;
-				$rs1 = $this->conn->query($sql1);
-				if($rs1){
-					while($r1 = $rs1->fetch_object()){
-						if($abbreviated){
-							$retArr[] = $r1->decimallatitude.','.$r1->decimallongitude;
-						}
-						else{
-							$retArr[$r1->tid][] = array('ll'=>$r1->decimallatitude.','.$r1->decimallongitude,'sciname'=>$this->cleanOutStr($r1->sciname),'notes'=>$this->cleanOutStr($r1->notes));
-						}
-						$retCnt++;
-					}
-					$rs1->free();
-				}
-			}
-			catch(Exception $e){
-				echo 'Caught exception getting general coordinates: ',  $e->getMessage(), "\n";
-			}
+    public function getPhotogList(){
+        $photogList = Array();
+        $sql = 'SELECT DISTINCT ti.photographeruid, ti.photographer, u.firstname, u.lastname '.
+            'FROM images AS ti LEFT JOIN users AS u ON ti.photographeruid = u.uid '.
+            'LEFT JOIN taxstatus AS ts ON ti.tid = ts.tid '.
+            'WHERE ts.taxauthid = '.$this->thesFilter.' AND ti.tid IN('.$this->sqlTaxaStr.') AND ti.SortSequence < 500 ';
+        //echo $sql;
+        $rs = $this->conn->query($sql);
+        while ($row = $rs->fetch_object()){
+            $uId = $row->photographeruid;
+            $givenName = $row->photographer;
+            $lastName = $row->lastname;
+            $firstName = $row->firstname;
+            if($uId){
+                $nameStr = $lastName.', '.$firstName;
+                $photogList[$nameStr] = $uId;
+            }
+            else{
+                $photogList[$givenName] = 0;
+            }
+        }
+        $rs->free();
+        return $photogList;
+    }
 
-			if(!$abbreviated || $retCnt < 50){
-				try{
-					//Grab voucher points
-					$sql2 = '';
-					if($tid){
-						$sql2 = 'SELECT DISTINCT v.tid, o.occid, o.decimallatitude, o.decimallongitude, '.
-							'CONCAT(o.recordedby," (",IFNULL(o.recordnumber,o.eventdate),")") as notes '.
-							'FROM omoccurrences o INNER JOIN fmvouchers v ON o.occid = v.occid '.
-							'WHERE v.tid = '.$tid.' AND v.clid IN ('.$clidStr.') AND o.decimallatitude IS NOT NULL AND o.decimallongitude IS NOT NULL '.
-							'AND (o.localitysecurity = 0 OR o.localitysecurity IS NULL) ';
-					}
-					else{
-						$sql2 = 'SELECT DISTINCT v.tid, o.occid, o.decimallatitude, o.decimallongitude, '.
-							'CONCAT(o.recordedby," (",IFNULL(o.recordnumber,o.eventdate),")") as notes '.
-							'FROM omoccurrences o INNER JOIN fmvouchers v ON o.occid = v.occid '.
-							'INNER JOIN ('.$this->basicSql.') t ON v.tid = t.tid '.
-							'WHERE v.clid IN ('.$clidStr.') AND o.decimallatitude IS NOT NULL AND o.decimallongitude IS NOT NULL '.
-							'AND (o.localitysecurity = 0 OR o.localitysecurity IS NULL) ';
-					}
-					if($abbreviated){
-						$sql2 .= 'ORDER BY RAND() LIMIT 50';
-					}
-					//echo $sql2;
-					$rs2 = $this->conn->query($sql2);
-					if($rs2){
-						while($r2 = $rs2->fetch_object()){
-							if($abbreviated){
-								$retArr[] = $r2->decimallatitude.','.$r2->decimallongitude;
-							}
-							else{
-								$retArr[$r2->tid][] = array('ll'=>$r2->decimallatitude.','.$r2->decimallongitude,'notes'=>$this->cleanOutStr($r2->notes),'occid'=>$r2->occid);
-							}
-						}
-						$rs2->free();
-					}
-				}
-				catch(Exception $e){
-					//echo 'Caught exception getting voucher coordinates: ',  $e->getMessage(), "\n";
-				}
-			}
-		}
-		return $retArr;
-	}
-
-	//Checklist index page fucntions
-	public function getChecklists(){
-		$retArr = Array();
-		$sql = 'SELECT p.pid, p.projname, p.ispublic, c.clid, c.name, c.access '.
-			'FROM fmchecklists c LEFT JOIN fmchklstprojlink cpl ON c.clid = cpl.clid '.
-			'LEFT JOIN fmprojects p ON cpl.pid = p.pid '.
-			'WHERE ((c.access LIKE "public%") ';
-		if(isset($GLOBALS['USER_RIGHTS']['ClAdmin']) && $GLOBALS['USER_RIGHTS']['ClAdmin']) $sql .= 'OR (c.clid IN('.implode(',',$GLOBALS['USER_RIGHTS']['ClAdmin']).'))';
-		$sql .= ') AND ((p.pid IS NULL) OR (p.ispublic = 1) ';
-		if(isset($GLOBALS['USER_RIGHTS']['ProjAdmin']) && $GLOBALS['USER_RIGHTS']['ProjAdmin']) $sql .= 'OR (p.pid IN('.implode(',',$GLOBALS['USER_RIGHTS']['ProjAdmin']).'))';
-		$sql .= ') ';
-		if($this->pid) $sql .= 'AND (p.pid = '.$this->pid.') ';
-		$sql .= 'ORDER BY p.projname, c.Name';
-		//echo $sql;
-		$rs = $this->conn->query($sql);
-		while($row = $rs->fetch_object()){
-			if($row->pid){
-				$pid = $row->pid;
-				$projName = $row->projname.(!$row->ispublic?' (Private)':'');
-			}
-			else{
-				$pid = 0;
-				$projName = 'Undefinded Inventory Project';
-			}
-			$retArr[$pid]['name'] = $this->cleanOutStr($projName);
-			$retArr[$pid]['clid'][$row->clid] = $this->cleanOutStr($row->name).($row->access=='private'?' (Private)':'');
-		}
-		$rs->free();
-		if(isset($retArr[0])){
-			$tempArr = $retArr[0];
-			unset($retArr[0]);
-			$retArr[0] = $tempArr;
-		}
-		return $retArr;
-	}
-
-	public function echoResearchPoints($target){
-		$clCluster = '';
-		if(isset($GLOBALS['USER_RIGHTS']['ClAdmin'])) {
-			$clCluster = $GLOBALS['USER_RIGHTS']['ClAdmin'];
-		}
-		$sql = 'SELECT c.clid, c.name, c.longcentroid, c.latcentroid '.
-			'FROM fmchecklists c INNER JOIN fmchklstprojlink cpl ON c.CLID = cpl.clid '.
-			'INNER JOIN fmprojects p ON cpl.pid = p.pid '.
-			'WHERE (c.access = "public"'.($clCluster?' OR c.clid IN('.implode(',',$clCluster).')':'').') AND (c.LongCentroid IS NOT NULL) AND (p.pid = '.$this->pid.')';
-		$result = $this->conn->query($sql);
-		while($row = $result->fetch_object()){
-			$idStr = $row->clid;
-			$nameStr = $this->cleanOutStr($row->name);
-			echo "var point".$idStr." = new google.maps.LatLng(".$row->latcentroid.", ".$row->longcentroid.");\n";
-			echo "points.push( point".$idStr." );\n";
-			echo 'var marker'.$idStr.' = new google.maps.Marker({ position: point'.$idStr.', map: map, title: "'.$nameStr.'" });'."\n";
-			//Single click event
-			echo 'var infoWin'.$idStr.' = new google.maps.InfoWindow({ content: "<div style=\'width:300px;\'><b>'.$nameStr.'</b><br/>Double Click to open</div>" });'."\n";
-			echo "infoWins.push( infoWin".$idStr." );\n";
-			echo "google.maps.event.addListener(marker".$idStr.", 'click', function(){ closeAllInfoWins(); infoWin".$idStr.".open(map,marker".$idStr."); });\n";
-			//Double click event
-			if($target == 'keys'){
-				echo "var lStr".$idStr." = '../ident/key.php?cl=".$idStr."&proj=".$this->pid."&taxon=All+Species';\n";
-			}
-			else{
-				echo "var lStr".$idStr." = 'checklist.php?cl=".$idStr."&proj=".$this->pid."';\n";
-			}
-			echo "google.maps.event.addListener(marker".$idStr.", 'dblclick', function(){ closeAllInfoWins(); marker".$idStr.".setAnimation(google.maps.Animation.BOUNCE); window.location.href = lStr".$idStr."; });\n";
-		}
-		$result->free();
-	}
-
-	//Setters and getters
+    //Setters and getters
     public function setThesFilter($filt){
 		$this->thesFilter = $filt;
 	}
@@ -424,6 +314,26 @@ class ChecklistFGExportManager {
 		}
 	}
 
+    public function setPhotogJson($json){
+        $photogArr = json_decode($json,true);
+        if(is_array($photogArr)){
+            foreach($photogArr as $str){
+                $parts = explode("---",$str);
+                $id = $parts[0];
+                $name = $parts[1];
+                if($id) $this->photogIdArr[] = $id;
+                elseif($name) $this->photogNameArr[] = $name;
+            }
+        }
+        elseif($photogArr != 'all'){
+            $this->maxPhoto = 0;
+        }
+    }
+
+    public function setMaxPhoto($cnt){
+        $this->maxPhoto = $cnt;
+    }
+
 	public function setImageLimit($cnt){
 		$this->imageLimit = $cnt;
 	}
@@ -453,8 +363,8 @@ class ChecklistFGExportManager {
     }
 
 	private function cleanOutStr($str){
-		$str = str_replace('"',"&quot;",$str);
-		$str = str_replace("'","&apos;",$str);
+		$str = str_replace("&nbsp;"," ",$str);
+        $str = str_replace("&ndash;","-",$str);
 		return $str;
 	}
 
