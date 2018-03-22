@@ -21,7 +21,6 @@ if(!is_numeric($tabIndex)) $tabIndex = 0;
 if(!is_numeric($clid)) $clid = 0;
 if($pk && !preg_match('/^[a-zA-Z0-9\s_]+$/',$pk)) $pk = '';
 if($submit && !preg_match('/^[a-zA-Z0-9\s_]+$/',$submit)) $submit = '';
-if($format && !in_array($format,array('json','xml','rdf','turtle'))) $format = '';
 
 $indManager = new OccurrenceIndividualManager();
 if($occid){
@@ -35,6 +34,7 @@ elseif($collid && $pk){
 	$indManager->setDbpk($pk);
 }
 
+$indManager->setDisplayFormat($format);
 $occArr = $indManager->getOccData();
 if(!$occid) $occid = $indManager->getOccid();
 $collMetadata = $indManager->getMetadata();

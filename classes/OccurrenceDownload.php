@@ -1,5 +1,6 @@
 <?php
 include_once($SERVER_ROOT.'/config/dbconnection.php');
+include_once('OccurrenceAccessStats.php');
 
 class OccurrenceDownload{
 
@@ -18,6 +19,7 @@ class OccurrenceDownload{
     private $taxonFilter;
     private $errorArr = array();
     private $tidArr = array();
+    private $isPublicDownload = false;
     private $occArr = array();
 
  	public function __construct(){
@@ -133,6 +135,7 @@ class OccurrenceDownload{
 			$sql = $this->getSql();
 			$result = $this->conn->query($sql,MYSQLI_USE_RESULT);
 			if($result){
+				$statsManager = new OccurrenceAccessStats();
 				$outputHeader = true;
 				while($row = $result->fetch_assoc()){
 					if($outputHeader){
@@ -152,6 +155,10 @@ class OccurrenceDownload{
 					}
 					else{
 						fwrite($outstream, implode($this->delimiter,$row)."\n");
+					}
+					//Set access statistics
+					if($this->isPublicDownload){
+						if($this->schemaType != 'checklist') if(array_key_exists('occid',$row)) $statsManager->recordAccessEvent($row['occid'], 'download');
 					}
 					$recCnt++;
 				}
@@ -733,7 +740,11 @@ xmlwriter_end_attribute($xml_resource);
 		}
 	}
 
-    public function setTidArr($tidArr){
+	public function setIsPublicDownload(){
+		$this->isPublicDownload = true;
+	}
+
+	public function setTidArr($tidArr){
         if(is_array($tidArr)){
             $this->tidArr = $tidArr;
         }
