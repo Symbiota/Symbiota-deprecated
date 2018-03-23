@@ -602,7 +602,7 @@ $collManager->cleanOutArr($collData);
 								</td>
 							</tr>
 							<?php 
-							if($isEditor){
+							if($IS_ADMIN){
 								?>
 								<tr>
 									<td>
