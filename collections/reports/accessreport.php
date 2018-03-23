@@ -96,6 +96,7 @@ else{
 				if (newWindow.opener == null) newWindow.opener = self;
 			}
 		</script>
+		<script src="<?php echo $CLIENT_ROOT; ?>/js/symb/shared.js" type="text/javascript" ></script>
 	</head>
 	<body>
 		<?php
@@ -109,6 +110,16 @@ else{
 		?>
 		<!-- This is inner text! -->
 		<div id="innertext" style="min-width:1100px">
+			<div>
+				<div style="float:left;font-size:120%"><b><u>User Access Statistics</u></b></div>
+				<div id="desc_details" style="clear:both;display:none;width:500px;">Displays general user access statistics for all specimens within collection.
+					Download = any specimen download excluding data backups and custom downloads made by collection administrators (e.g. via Data Management Menu),
+					Full View = viewing full record via occurrence details page,
+					List View = viewing basic field data through a list view (e.g. default occurrence listing tab within the general search interface),
+					Map View = occurrence represented as a dot within any of the map-based search interfaces
+				</div>
+				<div id="desc_info" style="float:left;margin-left:5px;"><a href="#" onclick="toggle('desc_details');toggle('desc_info');"><img src="../../images/info.png" style="width:12px" /></a></div>
+			</div>
 			<?php
 			if($isEditor){
 				//Setup navigation bar
@@ -132,11 +143,11 @@ else{
 					$navStr .= '&gt;&gt;';
 				}
 				$navStr .= '</div>';
-				$retToMenuStr = '<div class="returnDiv" style="display:none"><b><a href="#" onclick="printFriendlyMode(false)">Exit Print Mode</a></b></div>';
+				$retToMenuStr = '<div class="returnDiv" style="clear:both;display:none"><b><a href="#" onclick="printFriendlyMode(false)">Exit Print Mode</a></b></div>';
 				echo $retToMenuStr;
-				$accessTypeArr = array('view'=>'Full View','map'=>'Map View','list'=>'List View','download'=>'Record Download','downloadJSON'=>'API JSON Download');
+				$accessTypeArr = array('download'=>'Download','view'=>'Full View','list'=>'List View','map'=>'Map View','downloadJSON'=>'API JSON Download');
 				?>
-				<div id="filterDiv">
+				<div id="filterDiv" style="clear:both;padding-top:5px;">
 					<form name="filter" action="accessreport.php" method="post" onsubmit="return validateFilterForm(this)">
 						<fieldset style="width:375px;text-align:left;">
 							<legend><b>Filter</b></legend>

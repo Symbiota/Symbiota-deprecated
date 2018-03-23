@@ -455,6 +455,21 @@ class OccurrenceIndividualManager extends Manager{
 		return $retArr;
 	}
 
+	public function getAccessStats(){
+		$retArr = Array();
+		$sql = 'SELECT year(accessdate) as accessdate, accesstype, count(*) AS cnt '.
+				'FROM omoccuraccessstats '.
+				'WHERE (occid = '.$this->occid.') '.
+				'GROUP BY accessdate, accesstype';
+		//echo '<div>'.$sql.'</div>';
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			$retArr[$r->accessdate][$r->accesstype] = $r->cnt;
+		}
+		$rs->free();
+		return $retArr;
+	}
+
 	//Voucher management
 	public function getVoucherChecklists(){
 		global $IS_ADMIN, $userRights;
