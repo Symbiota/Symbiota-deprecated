@@ -996,6 +996,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 					<div id="edittab">
 						<div style="padding:15px;">
 							<?php
+							//Display basic stats
 							if(array_key_exists('CollAdmin',$USER_RIGHTS) && in_array($collid,$USER_RIGHTS['CollAdmin']) && in_array($collid,$USER_RIGHTS['CollEditor'])){
 								?>
 								<div style="float:right;" title="Manage Edits">
@@ -1009,6 +1010,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 							echo '<b>Date modified:</b> '.($occArr['datelastmodified']?$occArr['datelastmodified']:'not recorded').'<br/>';
 							if($occArr['modified'] && $occArr['modified'] != $occArr['datelastmodified']) echo '<b>Source date modified:</b> '.$occArr['modified'];
 							echo '</div>';
+							//Display edits
 							$editArr = $indManager->getEditArr();
 							$externalEdits = $indManager->getExternalEditArr();
 							if($editArr || $externalEdits){
@@ -1083,9 +1085,22 @@ header("Content-Type: text/html; charset=".$CHARSET);
 								}
 							}
 							else{
-								echo '<div style="margin:25px 15px;"><b>Record has not been edited</b></div>';
+								echo '<div style="margin:25px 0px;"><b>Record has not been edited since being entered</b></div>';
 							}
 							echo '<div style="margin:15px">Note: Edits are only viewable by collection administrators and editors</div>';
+							//Display Access Stats
+							$accessStats = $indManager->getAccessStats();
+							if($accessStats){
+								echo '<div style="margin-top:30px"><b>Access Stats</b></div>';
+								echo '<table class="styledtable" style="font-size:100%;width:300px;">';
+								echo '<tr><th>Year</th><th>Access Type</th><th>Count</th></tr>';
+								foreach($accessStats as $accessDate => $arr1){
+									foreach($arr1 as $accessType => $accessCnt){
+										echo '<tr><td>'.$accessDate.'</td><td>'.$accessType.'</td><td>'.$accessCnt.'</td></tr>';
+									}
+								}
+								echo '</table>';
+							}
 							?>
 						</div>
 					</div>

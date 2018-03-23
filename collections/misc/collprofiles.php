@@ -201,7 +201,7 @@ if($SYMB_UID){
 										<?php echo $LANG['MANAGE_PERMISSIONS']; ?>
 									</a>
 								</li>
-								<?php 
+								<?php
 								if($collData['colltype'] != 'General Observations'){
 									?>
 									<li>
@@ -244,7 +244,7 @@ if($SYMB_UID){
 											<?php echo (isset($LANG['CREATE_PROFILE'])?$LANG['CREATE_PROFILE']:'Create a new Import Profile'); ?>
 										</a>
 									</li>
-									<?php 
+									<?php
 									if($collData['managementtype'] != 'Aggregate'){
 										?>
 										<li>
@@ -265,8 +265,13 @@ if($SYMB_UID){
 											<?php echo $LANG['REVIEW_SPEC_EDITS']; ?>
 										</a>
 									</li>
+									<li>
+										<a href="../reports/accessreport.php?collid=<?php echo $collid; ?>">
+											<?php echo (isset($LANG['ACCESS_REPORT'])?$LANG['ACCESS_REPORT']:'View Access Statistics'); ?>
+										</a>
+									</li>
 									<?php
-								} 
+								}
 								?>
 								<li>
 									<a href="../datasets/duplicatemanager.php?collid=<?php echo $collid; ?>">
@@ -276,7 +281,7 @@ if($SYMB_UID){
 								<li>
 									<?php echo $LANG['MAINTENANCE_TASKS']; ?>
 								</li>
-								<?php 
+								<?php
 								if($collData['colltype'] != 'General Observations'){
 									?>
 									<li style="margin-left:10px;">
@@ -285,14 +290,14 @@ if($SYMB_UID){
 										</a>
 									</li>
 									<?php
-								} 
+								}
 								?>
 								<li style="margin-left:10px;">
 									<a href="#" onclick="newWindow = window.open('collbackup.php?collid=<?php echo $collid; ?>','bucollid','scrollbars=1,toolbar=0,resizable=1,width=600,height=250,left=20,top=20');">
 										<?php echo $LANG['BACKUP_DATA_FILE']; ?>
 									</a>
 								</li>
-								<?php 
+								<?php
 								if($collData['managementtype'] == 'Live Data'){
 									?>
 									<li style="margin-left:10px;">
@@ -323,7 +328,7 @@ if($SYMB_UID){
 			}
 			?>
 			<div style='margin:10px;'>
-				<?php 
+				<?php
 				echo $collManager->getMetadataHtml($collData, $LANG);
 				if($addrArr = $collManager->getAddress()){
 					?>
@@ -347,7 +352,7 @@ if($SYMB_UID){
 					</div>
 					<?php
 				}
-				//Collection Statistics 
+				//Collection Statistics
 				$statsArr = $collManager->getBasicStats();
 				$extrastatsArr = Array();
 				$georefPerc = 0;
@@ -408,7 +413,7 @@ if($SYMB_UID){
 			?>
 			<h2><?php echo $DEFAULT_TITLE; ?> Natural History Collections and Observation Projects</h2>
 			<div style='margin:10px;clear:both;'>
-				<?php 
+				<?php
 				$serverDomain = "http://";
 				if((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || $_SERVER['SERVER_PORT'] == 443) $serverDomain = "https://";
 				$serverDomain .= $_SERVER["SERVER_NAME"];
@@ -442,7 +447,7 @@ if($SYMB_UID){
 								</a>
 							</h3>
 							<div style='margin:10px;'>
-								<?php 
+								<?php
 								echo $collManager->getMetadataHtml($collArr, $LANG);
 								?>
 							</div>
