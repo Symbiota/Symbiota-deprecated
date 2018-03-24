@@ -675,14 +675,12 @@ class TaxonomyCleaner extends Manager{
 
 	//Misc fucntions
 	public function getCollMap(){
+		global $USER_RIGHTS, $IS_ADMIN;
 		$retArr = Array();
-		$sql = 'SELECT collid, CONCAT_WS("-",institutioncode, collectioncode) AS code, collectionname, icon, colltype, managementtype FROM omcollections ';
-		if($this->collid){
-			$sql .= 'WHERE (collid IN('.$this->collid.')) ';
-		}
-		else{
-			$sql .= 'ORDER BY collectionname, collectioncode ';
-		}
+		$sql = 'SELECT collid, CONCAT_WS("-",institutioncode, collectioncode) AS code, collectionname, icon, colltype, managementtype FROM omcollections '.
+			'WHERE (colltype IN("Preserved Specimens","Observations")) AND (collid IN('.implode(',', $USER_RIGHTS['CollAdmin']).')) ';
+		if($IS_ADMIN) $sql .= 'OR (collid IN('.$this->collid.')) ';
+		$sql .= 'ORDER BY collectionname, collectioncode ';
 		//echo $sql;
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){

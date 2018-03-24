@@ -17,7 +17,7 @@ if($SYMB_UID){
 $statusStr = '';
 ?>
 <div style="margin:10px;">
-<?php 
+<?php
 if($SYMB_UID){
 	//Collection is defined and User is logged-in and have permissions
 	if($statusStr){
@@ -27,7 +27,7 @@ if($SYMB_UID){
 			<?php echo $statusStr; ?>
 		</div>
 		<hr/>
-		<?php 
+		<?php
 	}
 	$genArr = array();
 	if(array_key_exists('General Observations',$collArr)){
@@ -70,7 +70,7 @@ if($SYMB_UID){
 							Review/Verify Occurrence Edits
 						</a>
 					</li>
-					<!-- 
+					<!--
 					<li>Import csv file</li>
 					 -->
 					<li>
@@ -78,7 +78,7 @@ if($SYMB_UID){
 							Backup file download (CSV extract)
 						</a>
 					</li>
-					<!-- 
+					<!--
 					<li>
 						<a href="../collections/cleaning/index.php?collid=<?php echo $collId; ?>">
 							Data Cleaning Module
@@ -93,36 +93,39 @@ if($SYMB_UID){
 	else{
 		echo '<div>Personal specimen management has not been setup for your login. Please contact the site administrator (<a href="mailto:'.$adminEmail.'">'.$adminEmail.'</a>) to activate this feature.</div>';
 	}
+	$cArr = array();
 	if(array_key_exists('Preserved Specimens',$collArr)){
 		$cArr = $collArr['Preserved Specimens'];
 		?>
 		<fieldset style="margin:15px;padding:15px;">
 			<legend style="font-weight:bold;"><b>Collection Management</b></legend>
 			<ul>
-				<?php 
+				<?php
 				foreach($cArr as $collId => $cName){
 					echo '<li><a href="../collections/misc/collprofiles.php?collid='.$collId.'&emode=1">'.$cName.'</a></li>';
 				}
 				?>
 			</ul>
 		</fieldset>
-		<?php 
+		<?php
 	}
+	$oArr = array();
 	if(array_key_exists('Observations',$collArr)){
-		$cArr = $collArr['Observations'];
+		$oArr = $collArr['Observations'];
 		?>
 		<fieldset style="margin:15px;padding:15px;">
 			<legend style="font-weight:bold;"><b>Observation Project Management</b></legend>
 			<ul>
-				<?php 
-				foreach($cArr as $collId => $cName){
+				<?php
+				foreach($oArr as $collId => $cName){
 					echo '<li><a href="../collections/misc/collprofiles.php?collid='.$collId.'&emode=1">'.$cName.'</a></li>';
 				}
 				?>
 			</ul>
 		</fieldset>
-		<?php 
+		<?php
 	}
+	$genAdminArr = array();
 	if($genArr && isset($USER_RIGHTS['CollAdmin'])){
 		$genAdminArr = array_intersect_key($genArr,array_flip($USER_RIGHTS['CollAdmin']));
 		if($genAdminArr){
@@ -130,7 +133,7 @@ if($SYMB_UID){
 			<fieldset style="margin:15px;padding:15px;">
 				<legend style="font-weight:bold;"><b>General Observation Administration</b></legend>
 				<ul>
-					<?php 
+					<?php
 					foreach($genAdminArr as $id => $name){
 						echo '<li><a href="../collections/misc/collprofiles.php?collid='.$id.'&emode=1">'.$name.'</a></li>';
 					}
@@ -138,8 +141,23 @@ if($SYMB_UID){
 				</ul>
 			</fieldset>
 			<?php
-		} 
+		}
+	}
+	if((count($cArr)+count($oArr)) > 1){
+		?>
+		<fieldset style="margin:15px;padding:15px;">
+			<legend style="font-weight:bold;"><b>Batch Editing Tools</b></legend>
+			<ul>
+			<li><a href="../collections/georef/batchgeoreftool.php">Georeferencing Tool</a></li>
+			<?php
+			if(isset($USER_RIGHTS['CollAdmin']) && count(array_diff($USER_RIGHTS['CollAdmin'],array_keys($genAdminArr))) > 1){
+				echo '<li><a href="../collections/cleaning/taxonomycleaner.php">Taxonomy Cleaning Tool</a></li>';
+			}
+			?>
+			</ul>
+		</fieldset>
+		<?php
 	}
 }
-?>	
+?>
 </div>

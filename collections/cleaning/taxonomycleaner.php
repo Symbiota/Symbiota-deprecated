@@ -14,19 +14,19 @@ $action = array_key_exists('submitaction',$_POST)?$_POST['submitaction']:'';
 
 $cleanManager = new TaxonomyCleaner();
 if(is_array($collid)) $collid = implode(',',$collid);
-$cleanManager->setCollId($collid);
+$activeCollArr = explode(',', $collid);
+foreach($activeCollArr as $k => $id){
+	if(!in_array($id,$USER_RIGHTS["CollAdmin"])) unset($activeCollArr[$k]);
+}
+$cleanManager->setCollId($IS_ADMIN?$collid:implode(',',$activeCollArr));
 $collMap = $cleanManager->getCollMap();
 
 $isEditor = false;
 if($IS_ADMIN){
 	$isEditor = true;
 }
-else{
-	if($collid){
-		if(array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collid,$USER_RIGHTS["CollAdmin"])){
-			$isEditor = true;
-		}
-	}
+elseif($activeCollArr){
+	$isEditor = true;
 }
 ?>
 <html>
@@ -81,7 +81,7 @@ else{
 					type: "POST",
 					url: "rpc/remaptaxon.php",
 					dataType: "json",
-					data: { collid: <?php echo $collid; ?>, oldsciname: oldName, tid: targetTid, idq: idQualifier }
+					data: { collid: "<?php echo $collid; ?>", oldsciname: oldName, tid: targetTid, idq: idQualifier }
 				}).done(function( res ) {
 					if(res == "1"){
 						$("#remapSpan-"+msgCode).text(" >>> Taxon remapped successfully!");
@@ -146,7 +146,7 @@ else{
 			}
 			else{
 				?>
-				<a href="../../sitemap.php">Site Map</a> &gt;&gt;
+				<a href="../../profile/viewprofile.php?tabindex=1">Specimen Management</a> &gt;&gt;
 				<?php
 			}
 			?>
@@ -155,29 +155,56 @@ else{
 		<!-- inner text block -->
 		<div id="innertext">
 			<?php
-			if($isEditor){
-				if($collid){
+			if($collid){
+				if($isEditor){
 					?>
-					<div style="font-weight: bold; font-size: 130%; margin-bottom: 10px">
+					<div style="float:left;font-weight: bold; font-size: 130%; margin-bottom: 10px">
 						<?php
 						if(is_numeric($collid)){
 							echo $collMap[$collid]['collectionname'].' ('.$collMap[$collid]['code'].')';
 						}
 						else{
-							echo 'Multiple Collection Cleaning Tool (<a href="#" onclick="$(\'#collDiv\').show()" style="color:blue;text-decoration:underline">'.count($collMap).' collections</a>)';
+							echo 'Multiple Collection Cleaning Tool (<a href="#" onclick="$(\'#collDiv\').show()" style="color:blue;text-decoration:underline">'.count($activeCollArr).' collections</a>)';
 						}
 						?>
 					</div>
 					<?php
-					if(count($collMap) > 1){
-						echo '<div id="collDiv" style="display:none;margin:0px 20px">';
-						foreach($collMap as $k => $vArr){
-							echo '<div>'.$vArr['collectionname'].' ('.$vArr['code'].')</div>';
+					if(count($collMap) > 1 && $activeCollArr){
+						?>
+						<div style="float:left;margin-left:5px;"><a href="#" onclick="toggle('mult_coll_fs')"><img src="../../images/add.png" style="width:12px" /></a></div>
+						<div style="clear:both">
+							<fieldset id="mult_coll_fs" style="display:none;padding: 15px;margin:20px;">
+								<legend><b>Multiple Collection Selector</b></legend>
+								<form name="selectcollidform" action="taxonomycleaner.php" method="post" onsubmit="return checkSelectCollidForm(this)">
+									<div><input name="selectall" type="checkbox" onclick="selectAllCollections(this);" /> Select / Unselect All</div>
+									<?php
+									foreach($collMap as $id => $collArr){
+										if(in_array($id, $USER_RIGHTS["CollAdmin"])){
+											echo '<div>';
+											echo '<input name="collid[]" type="checkbox" value="'.$id.'" /> ';
+											echo $collArr['collectionname'].' ('.$collArr['code'].')';
+											echo '</div>';
+										}
+									}
+									?>
+									<div style="margin: 15px">
+										<button name="submitaction" type="submit" value="EvaluateCollections">Evaluate Collections</button>
+									</div>
+								</form>
+								<div>* Only collections with administrative access are shown</div>
+							</fieldset>
+						</div>
+						<?php
+					}
+					if(count($activeCollArr) > 1){
+						echo '<div id="collDiv" style="display:none;margin:0px 20px;clear:both;">';
+						foreach($activeCollArr as $activeCollid){
+							echo '<div>'.$collMap[$activeCollid]['collectionname'].' ('.$collMap[$activeCollid]['code'].')</div>';
 						}
 						echo '</div>';
 					}
 					?>
-					<div style="margin:20px;">
+					<div style="margin:20px;clear:both;">
 						<?php
 						if($action){
 							if($action == 'deepindex'){
@@ -256,33 +283,37 @@ else{
 					</div>
 					<?php
 				}
-				elseif($IS_ADMIN){
-					?>
-					<div style="margin:0px 0px 20px 20xp;font-weight:bold;font-size:120%;">Batch Taxonomic Cleaning Tool</div>
-					<fieldset style="padding: 15px;margin:20px;">
-						<legend><b>Collection Selector</b></legend>
-						<form name="selectcollidform" action="taxonomycleaner.php" method="post" onsubmit="return checkSelectCollidForm(this)">
-							<div><input name="selectall" type="checkbox" onclick="selectAllCollections(this);" /> Select / Unselect All</div>
-							<?php
-							foreach($collMap as $id => $collArr){
-								echo '<div>';
-								echo '<input name="collid[]" type="checkbox" value="'.$id.'" /> ';
-								echo $collArr['collectionname'].' ('.$collArr['code'].')';
-								echo '</div>';
-							}
-							?>
-							<div style="margin: 15px">
-								<button name="submitaction" type="submit" value="EvaluateCollections">Evaluate Collections</button>
-							</div>
-						</form>
-					</fieldset>
-					<?php
+				else{
+					echo '<div><b>ERROR: you do not have permission to edit this collection</b></div>';
 				}
+			}
+			elseif($collMap){
+				?>
+				<div style="margin:0px 0px 20px 20xp;font-weight:bold;font-size:120%;">Batch Taxonomic Cleaning Tool</div>
+				<fieldset style="padding: 15px;margin:20px;">
+					<legend><b>Collection Selector</b></legend>
+					<form name="selectcollidform" action="taxonomycleaner.php" method="post" onsubmit="return checkSelectCollidForm(this)">
+						<div><input name="selectall" type="checkbox" onclick="selectAllCollections(this);" /> Select / Unselect All</div>
+						<?php
+						foreach($collMap as $id => $collArr){
+							echo '<div>';
+							echo '<input name="collid[]" type="checkbox" value="'.$id.'" /> ';
+							echo $collArr['collectionname'].' ('.$collArr['code'].')';
+							echo '</div>';
+						}
+						?>
+						<div style="margin: 15px">
+							<button name="submitaction" type="submit" value="EvaluateCollections">Evaluate Collections</button>
+						</div>
+					</form>
+					<div>* Only collections with administrative access are shown</div>
+				</fieldset>
+				<?php
 			}
 			else{
 				?>
-				<div style="margin:20px;font-weight:bold;font-size:120%;">
-					ERROR: You don't have the necessary permissions to access this data cleaning module.
+				<div style='font-weight:bold;font-size:120%;'>
+					ERROR: Collection identifier is null
 				</div>
 				<?php
 			}
