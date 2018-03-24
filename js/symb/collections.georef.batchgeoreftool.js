@@ -307,7 +307,7 @@ function openFirstRecSet(){
 	var selObj = document.getElementById("locallist");
 	if(selObj.selectedIndex > -1){
 		var occidStr = selObj.options[selObj.selectedIndex].value;
-		occWindow=open("../editor/occurrenceeditor.php?collid="+collId+"&q_catalognumber=occid"+occidStr+"&occindex=0","occsearch","resizable=1,scrollbars=1,toolbar=0,width=950,height=700,left=20,top=20");
+		occWindow=open("../editor/occurrenceeditor.php?q_catalognumber=occid"+occidStr+"&occindex=0","occsearch","resizable=1,scrollbars=1,toolbar=0,width=950,height=700,left=20,top=20");
 		if(occWindow.opener == null) occWindow.opener = self;
 	}
 	else{
@@ -395,7 +395,30 @@ function updateMaxElev(maxFeetValue){
 	f.maximumelevationinmeters.value = Math.round(maxFeetValue*.0305)*10;
 }
 
+function checkSelectCollidForm(f){
+	var formVerified = false;
+	for(var h=0;h<f.length;h++){
+		if(f.elements[h].name == "collid[]" && f.elements[h].checked){
+			formVerified = true;
+			break;
+		}
+	}
+	if(!formVerified){
+		alert("Please choose at least one collection!");
+		return false;
+	}
+	return true;
+}
+
 //Misc functions
+function selectAllCollections(cbObj){
+	var cbStatus = cbObj.checked
+	var f = cbObj.form;
+	for(var i=0;i<f.length;i++){
+		if(f.elements[i].name == "collid[]") f.elements[i].checked = cbStatus;
+	}
+}
+
 function openMappingAid() {
 	var f = document.georefform;
 	var latDef = f.decimallatitude.value;

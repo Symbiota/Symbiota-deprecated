@@ -4,7 +4,7 @@ include_once($SERVER_ROOT.'/classes/OccurrenceGeorefTools.php');
 
 if(!$SYMB_UID) header('Location: ../profile/index.php?refurl=../collections/georef/batchgeoreftool.php?'.$_SERVER['QUERY_STRING']);
 
-$collId = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
+$collid = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
 $submitAction = array_key_exists('submitaction',$_POST)?$_POST['submitaction']:'';
 
 $qCountry = array_key_exists('qcountry',$_POST)?$_POST['qcountry']:'';
@@ -43,19 +43,27 @@ $maximumElevationInFeet = array_key_exists('maximumelevationinfeet',$_POST)?$_PO
 if(!$georeferenceSources) $georeferenceSources = 'georef batch tool '.date('Y-m-d');
 if(!$georeferenceVerificationStatus) $georeferenceVerificationStatus = 'reviewed - high confidence';
 
-$geoManager = new OccurrenceGeorefTools();
-$geoManager->setCollId($collId);
+if(is_array($collid)) $collid = implode(',',$collid);
 
-$editor = false;
-if($IS_ADMIN
-	|| (array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collId,$USER_RIGHTS["CollAdmin"]))
-	|| (array_key_exists("CollEditor",$USER_RIGHTS) && in_array($collId,$USER_RIGHTS["CollEditor"]))){
- 	$editor = true;
+$geoManager = new OccurrenceGeorefTools();
+$activeCollArr = explode(',', $collid);
+foreach($activeCollArr as $k => $id){
+	if(!in_array($id,$USER_RIGHTS["CollAdmin"]) && !in_array($id,$USER_RIGHTS["CollEditor"])) unset($activeCollArr[$k]);
+}
+$geoManager->setCollId($IS_ADMIN?$collid:implode(',',$activeCollArr));
+$collMap = $geoManager->getCollMap();
+
+$isEditor = false;
+if($IS_ADMIN){
+	$isEditor = true;
+}
+elseif($activeCollArr){
+	$isEditor = true;
 }
 
 $statusStr = '';
 $localArr;
-if($editor && $submitAction){
+if($isEditor && $submitAction){
 	if($qCountry) $geoManager->setQueryVariables('qcountry',$qCountry);
 	if($qState) $geoManager->setQueryVariables('qstate',$qState);
 	if($qCounty) $geoManager->setQueryVariables('qcounty',$qCounty);
@@ -81,42 +89,95 @@ header("Content-Type: text/html; charset=".$CHARSET);
 		<link type="text/css" href="<?php echo $CLIENT_ROOT; ?>/css/jquery-ui.css" rel="Stylesheet" />
 		<script type="text/javascript" src="<?php echo $CLIENT_ROOT; ?>/js/jquery.js"></script>
 		<script type="text/javascript" src="<?php echo $CLIENT_ROOT; ?>/js/jquery-ui.js"></script>
-		<script type="text/javascript" src="<?php echo $CLIENT_ROOT; ?>/js/symb/collections.georef.batchgeoreftool.js?ver=161212"></script>
+		<script type="text/javascript" src="<?php echo $CLIENT_ROOT; ?>/js/symb/collections.georef.batchgeoreftool.js?ver=1803"></script>
 	</head>
 	<body>
 		<!-- This is inner text! -->
 		<div  id='innertext'>
-			<div style="float:left;">
-				<div style="font-weight:bold;font-size:150%;margin-top:6px;">
-					<?php echo $geoManager->getCollName(); ?>
-				</div>
-				<div class='navpath' style="margin:10px;">
-					<a href='../../index.php'>Home</a> &gt;&gt;
-					<?php
-					if(isset($collections_editor_georeftoolsCrumbs)){
-						echo $collections_editor_georeftoolsCrumbs." &gt;&gt;";
-					}
-					else{
+			<?php
+			if($collid){
+				?>
+				<div style="float:left;">
+					<div style="font-weight: bold; font-size:140%;float:left">
+						<?php
+						if(is_numeric($collid)){
+							echo $collMap[$collid]['collectionname'].' ('.$collMap[$collid]['code'].')';
+						}
+						else{
+							echo 'Multiple Collection Cleaning Tool (<a href="#" onclick="$(\'#collDiv\').show()" style="color:blue;text-decoration:underline">'.count($activeCollArr).' collections</a>)';
+						}
 						?>
-						<a href='../misc/collprofiles.php?emode=1&collid=<?php echo $collId; ?>'>Control Menu</a> &gt;&gt;
+					</div>
+					<?php
+					if(count($collMap) > 1 && $activeCollArr){
+						?>
+						<div style="float:left;margin-left:5px;"><a href="#" onclick="toggle('mult_coll_div')"><img src="../../images/add.png" style="width:12px" /></a></div>
 						<?php
 					}
 					?>
-					<b>Batch Georeferencing Tools</b>
-				</div>
-				<?php
-				if($statusStr){
-					?>
-					<div style='margin:20px;font-weight:bold;color:red;'>
-						<?php echo $statusStr; ?>
+					<div class='navpath' style="margin:10px;clear:both;">
+						<a href='../../index.php'>Home</a> &gt;&gt;
+						<?php
+						if(is_numeric($collid)){
+							?>
+							<a href="../misc/collprofiles.php?collid=<?php echo $collid; ?>&emode=1">Collection Management Menu</a> &gt;&gt;
+							<?php
+						}
+						else{
+							?>
+							<a href="../../profile/viewprofile.php?tabindex=1">Specimen Management</a> &gt;&gt;
+							<?php
+						}
+						?>
+						<b>Batch Georeferencing Tools</b>
 					</div>
 					<?php
-				}
-				?>
-			</div>
-			<?php
-			if($collId){
-				if($editor){
+					if($statusStr){
+						?>
+						<div style='margin:20px;font-weight:bold;color:red;'>
+							<?php echo $statusStr; ?>
+						</div>
+						<?php
+					}
+					if(count($collMap) > 1 && $activeCollArr){
+						?>
+						<div id="mult_coll_div" style="clear:both;display:none;">
+							<fieldset style="padding: 15px;margin:20px;">
+								<legend><b>Multiple Collection Selector</b></legend>
+								<form name="selectcollidform" action="batchgeoreftool.php" method="post" onsubmit="return checkSelectCollidForm(this)">
+									<div><input name="selectall" type="checkbox" onclick="selectAllCollections(this);" /> Select / Unselect All</div>
+									<?php
+									foreach($collMap as $id => $collArr){
+										if(in_array($id, $USER_RIGHTS["CollAdmin"]) || in_array($id, $USER_RIGHTS["CollEditor"])){
+											echo '<div>';
+											echo '<input name="collid[]" type="checkbox" value="'.$id.'" /> ';
+											echo $collArr['collectionname'].' ('.$collArr['code'].')';
+											echo '</div>';
+										}
+									}
+									?>
+									<div style="margin: 15px">
+										<button name="submitaction" type="submit" value="EvaluateCollections">Evaluate Collections</button>
+									</div>
+								</form>
+								<div>* Only collections with administrative access are shown</div>
+							</fieldset>
+						</div>
+						<?php
+					}
+					if(count($activeCollArr) > 1){
+						echo '<div id="collDiv" style="display:none;margin:0px 20px;clear:both;">';
+						foreach($activeCollArr as $activeCollid){
+							echo '<div>'.$collMap[$activeCollid]['collectionname'].' ('.$collMap[$activeCollid]['code'].')</div>';
+						}
+						echo '</div>';
+					}
+					?>
+				</div>
+				<?php
+			}
+			if($collid){
+				if($isEditor){
 					?>
 					<div style="float:right;">
 						<form name="queryform" method="post" action="batchgeoreftool.php" onsubmit="return verifyQueryForm(this)">
@@ -178,7 +239,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 											<select name="qprocessingstatus">
 												<option value="">All Processing Status</option>
 												<option value="">-----------------------</option>
-												<?php 
+												<?php
 												$processingStatus = $geoManager->getProcessingStatus();
 												foreach($processingStatus as $pStatus){
 													echo '<option '.($qProcessingStatus==$pStatus?'SELECTED':'').'>'.$pStatus.'</option>';
@@ -207,7 +268,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 								</div>
 								<div style="margin-top:5px;clear:both;">
 									<div style="float:right;">
-										<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
+										<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
 										<input name="submitaction" type="submit" value="Generate List" />
 										<span id="qworkingspan" style="display:none;">
 											<img src="../../images/workingcircle.gif" />
@@ -233,9 +294,15 @@ header("Content-Type: text/html; charset=".$CHARSET);
 								<span style="margin-left:10px;">
 									<a href="#" onclick="analyseLocalityStr();"><img src="../../images/find.png" title="Analyse Locality string for embedded Lat/Long or UTM" style="width:15px;" /></a>
 								</span>
-								<span style="margin-left:10px;">
-									<a href="#" onclick="openFirstRecSet();"><img src="../../images/edit.png" title="Edit first set of records" style="width:15px;" /></a>
-								</span>
+								<?php
+								if(count($activeCollArr) == 1){
+									?>
+									<span style="margin-left:10px;">
+										<a href="#" onclick="openFirstRecSet();"><img src="../../images/edit.png" title="Edit first set of records" style="width:15px;" /></a>
+									</span>
+									<?php
+								}
+								?>
 							</div>
 							<div style="font-weight:bold;">
 								<?php
@@ -441,7 +508,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 											<input name="qvstatus" type="hidden" value="<?php echo $qVStatus; ?>" />
 											<input name="qprocessingstatus" type="hidden" value="<?php echo $qProcessingStatus; ?>" />
 											<input name="qdisplayall" type="hidden" value="<?php echo $qDisplayAll; ?>" />
-											<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
+											<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
 										</td>
 										<td colspan="4">
 											<b>Processing status: </b>
@@ -465,10 +532,10 @@ header("Content-Type: text/html; charset=".$CHARSET);
 										</td>
 									</tr>
 								</table>
-								<div style="margin-top:15px">Note: Existing data within following georeference fields will be replaced with incoming data. 
-								However, elevation data will only be added when the target fields are null. 
-								No incoming data will replace existing elevational data. 
-								Georeference fields that will be replaced: decimalLatitude, decimalLongitude, coordinateUncertaintyInMeters, geodeticdatum, 
+								<div style="margin-top:15px">Note: Existing data within following georeference fields will be replaced with incoming data.
+								However, elevation data will only be added when the target fields are null.
+								No incoming data will replace existing elevational data.
+								Georeference fields that will be replaced: decimalLatitude, decimalLongitude, coordinateUncertaintyInMeters, geodeticdatum,
 								footprintwkt, georeferencedby, georeferenceRemarks, georeferenceSources, georeferenceVerificationStatus </div>
 							</div>
 						</form>
@@ -482,6 +549,29 @@ header("Content-Type: text/html; charset=".$CHARSET);
 					</div>
 					<?php
 				}
+			}
+			elseif($collMap){
+				?>
+				<div style="margin:0px 0px 20px 20xp;font-weight:bold;font-size:120%;">Batch Georeferencing Tool</div>
+				<fieldset style="padding: 15px;margin:20px;">
+					<legend><b>Collection Selector</b></legend>
+					<form name="selectcollidform" action="batchgeoreftool.php" method="post" onsubmit="return checkSelectCollidForm(this)">
+						<div><input name="selectall" type="checkbox" onclick="selectAllCollections(this);" /> Select / Unselect All</div>
+						<?php
+						foreach($collMap as $id => $collArr){
+							echo '<div>';
+							echo '<input name="collid[]" type="checkbox" value="'.$id.'" /> ';
+							echo $collArr['collectionname'].' ('.$collArr['code'].')';
+							echo '</div>';
+						}
+						?>
+						<div style="margin: 15px">
+							<button name="submitaction" type="submit" value="EvaluateCollections">Evaluate Collections</button>
+						</div>
+					</form>
+					<div>* Only collections with administrative access are shown</div>
+				</fieldset>
+				<?php
 			}
 			else{
 				?>
