@@ -495,23 +495,9 @@ header("Content-Type: text/html; charset=".$CHARSET);
 									</tr>
 									<tr>
 										<td colspan="3">
-											<input name="submitaction" type="submit" value="Update Coordinates" />
-											<span id="workingspan" style="display:none;">
-												<img src="../../images/workingcircle.gif" />
-											</span>
-											<input name="qcountry" type="hidden" value="<?php echo $qCountry; ?>" />
-											<input name="qstate" type="hidden" value="<?php echo $qState; ?>" />
-											<input name="qcounty" type="hidden" value="<?php echo $qCounty; ?>" />
-											<input name="qmunicipality" type="hidden" value="<?php echo $qMunicipality; ?>" />
-											<input name="qlocality" type="hidden" value="<?php echo $qLocality; ?>" />
-											<input name="qsciname" type="hidden" value="<?php echo $qSciname; ?>" />
-											<input name="qvstatus" type="hidden" value="<?php echo $qVStatus; ?>" />
-											<input name="qprocessingstatus" type="hidden" value="<?php echo $qProcessingStatus; ?>" />
-											<input name="qdisplayall" type="hidden" value="<?php echo $qDisplayAll; ?>" />
-											<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
+											<b>Processing status: </b>
 										</td>
 										<td colspan="4">
-											<b>Processing status: </b>
 											<select name="processingstatus">
 												<option value="">Leave as is</option>
 												<option value="unprocessed">Unprocessed</option>
@@ -529,6 +515,24 @@ header("Content-Type: text/html; charset=".$CHARSET);
 												Georefer by:
 												<input name="georeferencedby" type="text" value="<?php echo $paramsArr['un']; ?>" style="width:75px" readonly />
 											</span>
+										</td>
+									</tr>
+									<tr>
+										<td colspan="7">
+											<input name="submitaction" type="submit" value="Update Coordinates" />
+											<span id="workingspan" style="display:none;">
+												<img src="../../images/workingcircle.gif" />
+											</span>
+											<input name="qcountry" type="hidden" value="<?php echo $qCountry; ?>" />
+											<input name="qstate" type="hidden" value="<?php echo $qState; ?>" />
+											<input name="qcounty" type="hidden" value="<?php echo $qCounty; ?>" />
+											<input name="qmunicipality" type="hidden" value="<?php echo $qMunicipality; ?>" />
+											<input name="qlocality" type="hidden" value="<?php echo $qLocality; ?>" />
+											<input name="qsciname" type="hidden" value="<?php echo $qSciname; ?>" />
+											<input name="qvstatus" type="hidden" value="<?php echo $qVStatus; ?>" />
+											<input name="qprocessingstatus" type="hidden" value="<?php echo $qProcessingStatus; ?>" />
+											<input name="qdisplayall" type="hidden" value="<?php echo $qDisplayAll; ?>" />
+											<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
 										</td>
 									</tr>
 								</table>
