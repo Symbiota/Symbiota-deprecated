@@ -112,9 +112,9 @@ if($chars){
 	<?php 
 	if($isEditor){
 		?>
-		<div style="float:right;margin:15px;" title="Edit Character Matrix">
-			<a href="tools/massupdate.php?clid=<?php echo $clid; ?>"><img src="../images/edit.png" /><span style="font-size:70%;">CM</span></a>
-		</div>
+		<!-- <div style="float:right;margin:15px;" title="Edit Character Matrix">
+			<a href="tools/massupdate.php?clid=<?php echo ($clValue?$clValue:$dynClid); ?>"><img src="../images/edit.png" /><span style="font-size:70%;">CM</span></a>
+		</div> -->
 		<?php 
 	}
 	?>
