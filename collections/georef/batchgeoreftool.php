@@ -181,7 +181,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 											<select name="qprocessingstatus">
 												<option value="">All Processing Status</option>
 												<option value="">-----------------------</option>
-												<?php 
+												<?php
 												$processingStatus = $geoManager->getProcessingStatus();
 												foreach($processingStatus as $pStatus){
 													echo '<option '.($qProcessingStatus==$pStatus?'SELECTED':'').'>'.$pStatus.'</option>';
@@ -431,23 +431,9 @@ header("Content-Type: text/html; charset=".$CHARSET);
 									</tr>
 									<tr>
 										<td colspan="3">
-											<input name="submitaction" type="submit" value="Update Coordinates" />
-											<span id="workingspan" style="display:none;">
-												<img src="../../images/workingcircle.gif" />
-											</span>
-											<input name="qcountry" type="hidden" value="<?php echo $qCountry; ?>" />
-											<input name="qstate" type="hidden" value="<?php echo $qState; ?>" />
-											<input name="qcounty" type="hidden" value="<?php echo $qCounty; ?>" />
-											<input name="qmunicipality" type="hidden" value="<?php echo $qMunicipality; ?>" />
-											<input name="qlocality" type="hidden" value="<?php echo $qLocality; ?>" />
-											<input name="qsciname" type="hidden" value="<?php echo $qSciname; ?>" />
-											<input name="qvstatus" type="hidden" value="<?php echo $qVStatus; ?>" />
-											<input name="qprocessingstatus" type="hidden" value="<?php echo $qProcessingStatus; ?>" />
-											<input name="qdisplayall" type="hidden" value="<?php echo $qDisplayAll; ?>" />
-											<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
+											<b>Processing status: </b>
 										</td>
 										<td colspan="4">
-											<b>Processing status: </b>
 											<select name="processingstatus">
 												<option value="">Leave as is</option>
 												<option value="unprocessed">Unprocessed</option>
@@ -467,11 +453,32 @@ header("Content-Type: text/html; charset=".$CHARSET);
 											</span>
 										</td>
 									</tr>
+									<tr>
+										<td colspan="3">
+											<input name="submitaction" type="submit" value="Update Coordinates" />
+											<span id="workingspan" style="display:none;">
+												<img src="../../images/workingcircle.gif" />
+											</span>
+											<input name="qcountry" type="hidden" value="<?php echo $qCountry; ?>" />
+											<input name="qstate" type="hidden" value="<?php echo $qState; ?>" />
+											<input name="qcounty" type="hidden" value="<?php echo $qCounty; ?>" />
+											<input name="qmunicipality" type="hidden" value="<?php echo $qMunicipality; ?>" />
+											<input name="qlocality" type="hidden" value="<?php echo $qLocality; ?>" />
+											<input name="qsciname" type="hidden" value="<?php echo $qSciname; ?>" />
+											<input name="qvstatus" type="hidden" value="<?php echo $qVStatus; ?>" />
+											<input name="qprocessingstatus" type="hidden" value="<?php echo $qProcessingStatus; ?>" />
+											<input name="qdisplayall" type="hidden" value="<?php echo $qDisplayAll; ?>" />
+											<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
+										</td>
+										<td colspan="4">
+											&nbsp;
+										</td>
+									</tr>
 								</table>
-								<div style="margin-top:15px">Note: Existing data within following georeference fields will be replaced with incoming data. 
-								However, elevation data will only be added when the target fields are null. 
-								No incoming data will replace existing elevational data. 
-								Georeference fields that will be replaced: decimalLatitude, decimalLongitude, coordinateUncertaintyInMeters, geodeticdatum, 
+								<div style="margin-top:15px">Note: Existing data within following georeference fields will be replaced with incoming data.
+								However, elevation data will only be added when the target fields are null.
+								No incoming data will replace existing elevational data.
+								Georeference fields that will be replaced: decimalLatitude, decimalLongitude, coordinateUncertaintyInMeters, geodeticdatum,
 								footprintwkt, georeferencedby, georeferenceRemarks, georeferenceSources, georeferenceVerificationStatus </div>
 							</div>
 						</form>

@@ -301,7 +301,7 @@ class OccurrenceGeorefTools {
 
 	//Setters and getters
 	public function setCollId($cid){
-		if(preg_match('/\\d/',$cid)){
+		if(preg_match('/^[\d,]+$/',$cid)){
             $this->collStr = $cid;
 			$sql = 'SELECT collectionname, managementtype FROM omcollections WHERE collid IN('.$cid.')';
 			$rs = $this->conn->query($sql);
