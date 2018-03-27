@@ -17,10 +17,11 @@ class KeyDataManager extends Manager{
 	private $charArr = Array();
 	private $taxaCount;
 	private $lang;
+    private $langArr = Array();
 	private $commonDisplay = false;
 	private $pid;
 	private $dynClid;
-	
+
 	function __construct(){
         parent::__construct(null,'readonly');
     }
@@ -43,15 +44,22 @@ class KeyDataManager extends Manager{
 		}
 		return $this->pid;
 	}
- 	
-	public function setLanguage($l){
-		$this->lang = $l;
-	}
-	
+
+    public function setLanguage($l){
+        $this->lang = $l;
+        $this->langArr[] = $l;
+        $sql = "SELECT iso639_1 FROM adminlanguages WHERE langname = '".$l."' ";
+        $result = $this->conn->query($sql);
+        if($row = $result->fetch_object()){
+            $this->langArr[] = $row->iso639_1;
+        }
+        $result->close();
+    }
+
 	public function setCommonDisplay($bool){
 		$this->commonDisplay = $bool;
 	}
-	
+
 	public function getTaxaFilterList(){
 		$returnArr = Array();
 		$sql = "SELECT DISTINCT nt.UnitName1, ts.Family ";
@@ -125,11 +133,11 @@ class KeyDataManager extends Manager{
 		}
 		return $this->clid;
 	}
-	
+
 	public function getClid(){
 		return $this->clid;
 	}
-	
+
 	public function setDynClid($id){
 		$this->dynClid = $id;
 	}
@@ -154,7 +162,7 @@ class KeyDataManager extends Manager{
 	public function getTaxaCount(){
 		return $this->taxaCount;
 	}
-	
+
 	public function getClName(){
 		return $this->clName;
 	}
@@ -162,15 +170,15 @@ class KeyDataManager extends Manager{
 	public function getClAuthors(){
 		return $this->clAuthors;
 	}
-	
+
 	public function getClType(){
 		return $this->clType;
 	}
-	
+
 	public function setRelevanceValue($rel){
 		$this->relevanceValue = ($rel?$rel:0);
 	}
-	
+
 	public function getRelevanceValue(){
 		return $this->relevanceValue;
 	}
@@ -199,7 +207,7 @@ class KeyDataManager extends Manager{
 	//							)
 	public function getCharList(){
 		$returnArray = Array();
-		//Rate char list: Get list of char that are coded for a percentage of taxa list that is greater than 
+		//Rate char list: Get list of char that are coded for a percentage of taxa list that is greater than
 		$charList = Array();
 		$countMin = $this->taxaCount * $this->relevanceValue;
 		$loopCnt = 0;
@@ -238,7 +246,7 @@ class KeyDataManager extends Manager{
 				"ORDER BY chead.hid,	chars.SortSequence, cs.SortSequence ";
 			//echo $sqlChar.'<br/>';
 			$result = $this->conn->query($sqlChar);
-	
+
 			//Process recordset
 			$langList = Array();
 			$headingArray = Array();
@@ -405,97 +413,98 @@ class KeyDataManager extends Manager{
 		return $returnArray;
  	}
 
- 	//return an array: family => array(TID => DisplayName)
-	public function getTaxaList(){
-		$taxaList[] = null;
-	    unset($taxaList);
-	    $sqlTaxa = "";
-		if($this->commonDisplay){
-			$sqlTaxa = "SELECT innert.tid, innert.Family, IFNULL(v.VernacularName, innert.DisplayName) AS DisplayName, innert.ParentTID ".
-				"FROM (".$this->sql.") innert LEFT JOIN (SELECT vern.tid, vern.VernacularName FROM taxavernaculars vern WHERE vern.Language = 'English' AND vern.SortSequence = 1) v ON innert.tid = v.tid ";
-		}
-		else{
-			$sqlTaxa = $this->sql;
-		}
-		//echo $sqlTaxa; exit;
-		$result = $this->conn->query($sqlTaxa);
- 		$returnArray = array();
- 		$sppArr = array();
- 		$count = 0;
-	    while ($row = $result->fetch_object()){
-			$count++;
-	    	$family = $row->Family;
-			$tid = $row->tid;
-	    	$displayName = $row->DisplayName;
-	    	unset($sppArr);
-	    	if(array_key_exists($family, $returnArray)) $sppArr = $returnArray[$family];
-	    	$sppArr[$tid] = $displayName;
-	    	$returnArray[$family] = $sppArr;
-	    }
-	    $this->taxaCount = $count;
-		$result->close();
- 		return $returnArray;		
-	}
+    //return an array: family => array(TID => DisplayName)
+    public function getTaxaList(){
+        $taxaList[] = null;
+        unset($taxaList);
+        //echo $this->sql; exit;
+        $result = $this->conn->query($this->sql);
+        $returnArray = array();
+        $sppArr = array();
+        $count = 0;
+        while ($row = $result->fetch_object()){
+            $family = $row->Family;
+            $tid = $row->tid;
+            $displayName = $row->DisplayName;
+            unset($sppArr);
+            if(array_key_exists($family, $returnArray)) $sppArr = $returnArray[$family];
+            if(!$returnArray[$family][$tid]){
+                $count++;
+                $sppArr[$tid] = $displayName;
+                $returnArray[$family] = $sppArr;
+            }
+        }
+        $this->taxaCount = $count;
+        $result->close();
+        return $returnArray;
+    }
 
-	public function setTaxaListSQL(){
-		if(!$this->sql){
-			$sqlBase = "SELECT DISTINCT t.tid, ts.Family, t.SciName AS DisplayName, ts.ParentTID ";
-			$sqlFromBase = "";
-			$sqlWhere = "";
-			if($this->dynClid){
-				$sqlFromBase = "INNER JOIN taxstatus ts ON t.tid = ts.tid) ".
-	    			"INNER JOIN fmdyncltaxalink clk ON t.tid = clk.tid ";
-				$sqlWhere = "WHERE (clk.dynclid = ".$this->dynClid.") AND ts.taxauthid = 1 AND t.RankId = 220 ";
-			}
-			else{
-				$sqlFromBase = "INNER JOIN taxstatus ts ON t.tid = ts.tid) ".
-	    			"INNER JOIN fmchklsttaxalink clk ON t.tid = clk.tid ";
-				$sqlWhere = "WHERE (clk.clid = ".$this->clid.") AND ts.taxauthid = 1 AND t.RankId = 220 ";
-				if($this->clType == "dynamic"){
-					$sqlFromBase = "INNER JOIN taxstatus ts ON t.tid = ts.tid) ".
-	    				"INNER JOIN omoccurrences o ON t.tid = o.TidInterpreted ";
-					$sqlWhere = "WHERE ts.taxauthid = 1 AND t.RankId = 220 AND (".$this->dynamicSql.") ";
-				}
-			}
-			//If a taxon limit has been set, add taxon value to sql
-			if($this->taxonFilter){
-				if($this->taxonFilter == "All Species"){
-					//Do nothing
-				}
-				else{
-					$sqlWhere .= 'AND ((ts.Family = "'.$this->taxonFilter.'") OR (t.UnitName1 = "'.$this->taxonFilter.'")) ';
-				}
-			}
-	
-			//Limit by character attribute selections
-			$count = 0;
-			if($this->charArr){
-				//Create sql string
-				foreach($this->charArr as $cid => $states){		//key=cid, value=array of cs
-					$count++;
-					$sqlFromBase .= 'INNER JOIN kmdescr AS D'.$count.' ON t.TID = D'.$count.'.TID) ';
-					$stateStr = "";
-					foreach($states as $cs){
-						 $stateStr.=(empty($stateStr)?"":"OR ")."(D".$count.".CS='$cs') ";
-					}
-					$sqlWhere.=" AND (D".$count.".CID=".$cid.") AND (".$stateStr.")";
-				}
-			}
-			$sqlFrom = "FROM ".str_repeat("(",$count)."(taxa t ".$sqlFromBase;
-			$this->sql = $sqlBase.$sqlFrom.$sqlWhere;
-			//echo $this->sql;
-		}
-	}
-	
-	public function getIntroHtml(){
-		$returnStr = "<h2>Please enter a checklist, taxonomic group, and then select 'Submit Criteria'</h2>";
-		$returnStr .= "This key is still in the developmental phase. The application, data model, and actual data will need tuning. ".
-			"The key has been developed to minimize the exclusion of species due to the ".
-			"lack of data. The consequences of this is that a 'shrubs' selection may show non-shrubs until that information is corrected. ".
-			"User input is necessary for the key to improve! Please email me with suggestions, comments, or problems: <a href='".$adminEmail."'>".$adminEmail."</a><br><br>";
-		$returnStr .= "<b>Note:</b> If few morphological characters are displayed for a particular checklist, it is likely due to not yet having enough ".
-		"morphological data compiled for that subset of species. If you would like to help, please email me at the above address. ";
-		return $returnStr;
-	}
+    public function setTaxaListSQL(){
+        if(!$this->sql){
+            $sqlBase = "SELECT DISTINCT t.tid, ts.Family, ".($this->commonDisplay?'IFNULL(v.VernacularName,t.SciName)':'t.SciName')." AS DisplayName, ts.ParentTID ";
+            $sqlFromBase = "";
+            $sqlWhere = "";
+            if($this->dynClid){
+                $sqlFromBase = "INNER JOIN taxstatus ts ON t.tid = ts.tid) ".
+                    "INNER JOIN fmdyncltaxalink clk ON t.tid = clk.tid ";
+                $sqlWhere = "WHERE (clk.dynclid = ".$this->dynClid.") AND ts.taxauthid = 1 AND t.RankId = 220 ";
+            }
+            else{
+                $sqlFromBase = "INNER JOIN taxstatus ts ON t.tid = ts.tid) ";
+                if($this->clType == "dynamic"){
+                    $sqlFromBase .= "INNER JOIN omoccurrences o ON t.tid = o.TidInterpreted ";
+                }
+                else{
+                    $sqlFromBase .= "INNER JOIN fmchklsttaxalink clk ON t.tid = clk.tid ";
+                }
+                if($this->clType == "dynamic"){
+                    $sqlWhere = "WHERE ts.taxauthid = 1 AND t.RankId = 220 AND (".$this->dynamicSql.") ";
+                }
+                else{
+                    $sqlWhere = "WHERE (clk.clid = ".$this->clid.") AND ts.taxauthid = 1 AND t.RankId = 220 ";
+                }
+            }
+            if($this->commonDisplay){
+                $sqlFromBase .= "LEFT JOIN taxavernaculars v ON t.tid = v.tid ";
+                if($this->langArr){
+                    $sqlWhere .= "AND (v.Language IN('".implode("','",$this->langArr)."') OR ISNULL(v.Language)) ";
+                }
+            }
+            //If a taxon limit has been set, add taxon value to sql
+            if($this->taxonFilter && $this->taxonFilter != "All Species"){
+                $sqlWhere .= 'AND ((ts.Family = "'.$this->taxonFilter.'") OR (t.UnitName1 = "'.$this->taxonFilter.'")) ';
+            }
+
+            //Limit by character attribute selections
+            $count = 0;
+            if($this->charArr){
+                //Create sql string
+                foreach($this->charArr as $cid => $states){		//key=cid, value=array of cs
+                    $count++;
+                    $sqlFromBase .= 'INNER JOIN kmdescr AS D'.$count.' ON t.TID = D'.$count.'.TID) ';
+                    $stateStr = "";
+                    foreach($states as $cs){
+                        $stateStr.=(empty($stateStr)?"":"OR ")."(D".$count.".CS='$cs') ";
+                    }
+                    $sqlWhere .= " AND (D".$count.".CID=".$cid.") AND (".$stateStr.") ";
+                }
+            }
+            //if($this->commonDisplay) $sqlWhere .= "ORDER BY t.tid, v.SortSequence ";
+            $sqlFrom = "FROM ".str_repeat("(",$count)."(taxa t ".$sqlFromBase;
+            $this->sql = $sqlBase.$sqlFrom.$sqlWhere;
+            //echo $this->sql;
+        }
+    }
+
+    public function getIntroHtml(){
+        $returnStr = "<h2>Please enter a checklist, taxonomic group, and then select 'Submit Criteria'</h2>";
+        $returnStr .= "This key is still in the developmental phase. The application, data model, and actual data will need tuning. ".
+            "The key has been developed to minimize the exclusion of species due to the ".
+            "lack of data. The consequences of this is that a 'shrubs' selection may show non-shrubs until that information is corrected. ".
+            "User input is necessary for the key to improve! Please email me with suggestions, comments, or problems: <a href='".$adminEmail."'>".$adminEmail."</a><br><br>";
+        $returnStr .= "<b>Note:</b> If few morphological characters are displayed for a particular checklist, it is likely due to not yet having enough ".
+            "morphological data compiled for that subset of species. If you would like to help, please email me at the above address. ";
+        return $returnStr;
+    }
 }
 ?>
