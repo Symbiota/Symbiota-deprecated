@@ -1253,7 +1253,6 @@ class ImageShared{
 		$data = curl_exec($curl);
 		curl_close($curl);
 		$width = 0; $height = 0;
-		ini_set('memory_limit', '256M');
 		$im = @imagecreatefromstring($data);
 		$width = @imagesx($im);
 		$height = @imagesy($im);
