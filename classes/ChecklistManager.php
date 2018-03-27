@@ -199,7 +199,7 @@ class ChecklistManager {
     			$this->speciesCount++;
     			$speciesPrev = $taxonTokens[0]." ".$taxonTokens[1];
     		}
-    		if(!$taxonPrev || strpos($sciName,$taxonPrev) === false){
+    		if(!$taxonPrev || $sciName != $taxonPrev){
     			$this->taxaCount++;
     		}
     		$taxonPrev = implode(" ",$taxonTokens);
@@ -434,14 +434,14 @@ class ChecklistManager {
 				$clidStr .= ','.implode(',',$this->childClidArr);
 			}
 			if($this->thesFilter){
-				$this->basicSql = 'SELECT t.tid, IFNULL(ctl.familyoverride,ts.family) AS family, '.
+				$this->basicSql = 'SELECT DISTINCT t.tid, IFNULL(ctl.familyoverride,ts.family) AS family, '.
 					't.sciname, t.author, ctl.habitat, ctl.abundance, ctl.notes, ctl.source '.
 					'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tidaccepted '.
 					'INNER JOIN fmchklsttaxalink ctl ON ts.tid = ctl.tid '.
 			  		'WHERE (ts.taxauthid = '.$this->thesFilter.') AND (ctl.clid IN ('.$clidStr.')) ';
 			}
 			else{
-				$this->basicSql = 'SELECT t.tid, IFNULL(ctl.familyoverride,ts.family) AS family, '.
+				$this->basicSql = 'SELECT DISTINCT t.tid, IFNULL(ctl.familyoverride,ts.family) AS family, '.
 					't.sciname, t.author, ctl.habitat, ctl.abundance, ctl.notes, ctl.source '.
 					'FROM taxa t INNER JOIN fmchklsttaxalink ctl ON t.tid = ctl.tid '.
 					'INNER JOIN taxstatus ts ON t.tid = ts.tid '.
@@ -449,7 +449,7 @@ class ChecklistManager {
 			}
 		}
 		else{
-			$this->basicSql = 'SELECT t.tid, ts.family, t.sciname, t.author '.
+			$this->basicSql = 'SELECT DISTINCT t.tid, ts.family, t.sciname, t.author '.
 				'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
 				'INNER JOIN fmdyncltaxalink ctl ON t.tid = ctl.tid '.
     	  		'WHERE (ts.taxauthid = '.($this->thesFilter?$this->thesFilter:'1').') AND (ctl.dynclid = '.$this->dynClid.') ';
