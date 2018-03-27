@@ -20,13 +20,13 @@ $coordRange = 50;
 if($coorArr && count($coorArr) == 4) $coordRange = ($coorArr[0] - $coorArr[2]);
 $zoomInt = 5;
 if($coordRange < 20){
-	$zoomInt = 6;
+	$zoomInt = 7;
 }
 elseif($coordRange > 35 && $coordRange < 40){
-	$zoomInt = 4;
+	$zoomInt = 5;
 }
 elseif($coordRange > 40){
-	$zoomInt = 3;
+	$zoomInt = 4;
 }
 ?>
 <html>

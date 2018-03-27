@@ -1150,9 +1150,22 @@ header("Content-Type: text/html; charset=".$CHARSET);
 								}
 							}
 							else{
-								echo '<div style="margin:25px 15px;"><b>Record has not been edited</b></div>';
+								echo '<div style="margin:25px 0px;"><b>Record has not been edited since being entered</b></div>';
 							}
 							echo '<div style="margin:15px">Note: Edits are only viewable by collection administrators and editors</div>';
+							//Display Access Stats
+							$accessStats = $indManager->getAccessStats();
+							if($accessStats){
+								echo '<div style="margin-top:30px"><b>Access Stats</b></div>';
+								echo '<table class="styledtable" style="font-size:100%;width:300px;">';
+								echo '<tr><th>Year</th><th>Access Type</th><th>Count</th></tr>';
+								foreach($accessStats as $accessDate => $arr1){
+									foreach($arr1 as $accessType => $accessCnt){
+										echo '<tr><td>'.$accessDate.'</td><td>'.$accessType.'</td><td>'.$accessCnt.'</td></tr>';
+									}
+								}
+								echo '</table>';
+							}
 							?>
 						</div>
 					</div>

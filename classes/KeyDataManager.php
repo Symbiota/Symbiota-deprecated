@@ -417,7 +417,7 @@ class KeyDataManager extends Manager{
 		else{
 			$sqlTaxa = $this->sql;
 		}
-		//echo $sqlTaxa.'<br/>';
+		//echo $sqlTaxa; exit;
 		$result = $this->conn->query($sqlTaxa);
  		$returnArray = array();
  		$sppArr = array();
@@ -443,24 +443,18 @@ class KeyDataManager extends Manager{
 			$sqlFromBase = "";
 			$sqlWhere = "";
 			if($this->dynClid){
-				$sqlFromBase = "INNER JOIN taxstatus ts1 ON t.tid = ts1.tid) ".
-	    			"INNER JOIN taxa t1 ON t.UnitName1 = t1.UnitName1 AND t.UnitName2 = t1.UnitName2) ".
-	                "INNER JOIN taxstatus ts ON ts.tidaccepted = t1.tid) ".
-	                "INNER JOIN fmdyncltaxalink clk ON ts.tid = clk.tid ";
-				$sqlWhere = "WHERE (clk.dynclid = ".$this->dynClid.") AND ts.taxauthid = 1 AND ts1.taxauthid = 1 AND t.RankId = 220 ";
+				$sqlFromBase = "INNER JOIN taxstatus ts ON t.tid = ts.tid) ".
+	    			"INNER JOIN fmdyncltaxalink clk ON t.tid = clk.tid ";
+				$sqlWhere = "WHERE (clk.dynclid = ".$this->dynClid.") AND ts.taxauthid = 1 AND t.RankId = 220 ";
 			}
 			else{
 				$sqlFromBase = "INNER JOIN taxstatus ts ON t.tid = ts.tid) ".
-	    			"INNER JOIN taxa t1 ON t.UnitName1 = t1.UnitName1 AND t.UnitName2 = t1.UnitName2) ".
-	                "INNER JOIN taxstatus ts1 ON ts1.tidaccepted = t1.tid) ".
-	                "INNER JOIN fmchklsttaxalink clk ON ts1.tid = clk.tid ";
-				$sqlWhere = "WHERE (clk.clid = ".$this->clid.") AND ts1.taxauthid = 1 AND ts.taxauthid = 1 AND t.RankId = 220 ";
+	    			"INNER JOIN fmchklsttaxalink clk ON t.tid = clk.tid ";
+				$sqlWhere = "WHERE (clk.clid = ".$this->clid.") AND ts.taxauthid = 1 AND t.RankId = 220 ";
 				if($this->clType == "dynamic"){
 					$sqlFromBase = "INNER JOIN taxstatus ts ON t.tid = ts.tid) ".
-	    				"INNER JOIN taxa t1 ON t.UnitName1 = t1.UnitName1 AND t.UnitName2 = t1.UnitName2) ".
-	        	        "INNER JOIN taxstatus ts1 ON ts1.tidaccepted = t1.tid) ".
-	            	    "INNER JOIN omoccurrences o ON ts1.tid = o.TidInterpreted ";
-					$sqlWhere = "WHERE ts.taxauthid = 1 AND ts1.taxauthid = 1 AND t.RankId = 220 AND (".$this->dynamicSql.") ";
+	    				"INNER JOIN omoccurrences o ON t.tid = o.TidInterpreted ";
+					$sqlWhere = "WHERE ts.taxauthid = 1 AND t.RankId = 220 AND (".$this->dynamicSql.") ";
 				}
 			}
 			//If a taxon limit has been set, add taxon value to sql
@@ -487,7 +481,7 @@ class KeyDataManager extends Manager{
 					$sqlWhere.=" AND (D".$count.".CID=".$cid.") AND (".$stateStr.")";
 				}
 			}
-			$sqlFrom = "FROM ".str_repeat("(",$count)."(((taxa t ".$sqlFromBase; 
+			$sqlFrom = "FROM ".str_repeat("(",$count)."(taxa t ".$sqlFromBase;
 			$this->sql = $sqlBase.$sqlFrom.$sqlWhere;
 			//echo $this->sql;
 		}
