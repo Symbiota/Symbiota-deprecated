@@ -53,7 +53,6 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 	?>
 	<!-- This is inner text! -->
 	<div id="innertext">
-        <div id="hiddendiv" style="display:none;">12345678</div>
         <div id="tabs" style="margin:0px;">
 			<ul>
 				<?php 
