@@ -89,8 +89,8 @@ class OccurrenceListManager extends OccurrenceManager{
             $returnArr[$occId]["sex"] = $this->cleanOutStr($row->sex);
             $localitySecurity = $row->LocalitySecurity;
             if(!$localitySecurity || $canReadRareSpp
-                || (array_key_exists("CollEditor", $GLOBALS['USER_RIGHTS']) && in_array($collIdStr,$GLOBALS['USER_RIGHTS']["CollEditor"]))
-                || (array_key_exists("RareSppReader", $GLOBALS['USER_RIGHTS']) && in_array($collIdStr,$GLOBALS['USER_RIGHTS']["RareSppReader"]))){
+           		|| (array_key_exists("CollEditor", $GLOBALS['USER_RIGHTS']) && in_array($row->CollID,$GLOBALS['USER_RIGHTS']["CollEditor"]))
+           		|| (array_key_exists("RareSppReader", $GLOBALS['USER_RIGHTS']) && in_array($row->CollID,$GLOBALS['USER_RIGHTS']["RareSppReader"]))){
                 $returnArr[$occId]["locality"] = $this->cleanOutStr(str_replace('.,',',',$row->locality));
                 $returnArr[$occId]["collnumber"] = $this->cleanOutStr($row->recordnumber);
                 $returnArr[$occId]["habitat"] = $this->cleanOutStr($row->habitat);
