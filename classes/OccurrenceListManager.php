@@ -151,12 +151,11 @@ class OccurrenceListManager extends OccurrenceManager{
 		$stmt = $this->conn->prepare($sql);
 		$stmt->bind_param('s', $searchName);
 		$stmt->execute();
-		if($rs = $stmt->get_result()){
-			while($r = $rs->fetch_object()){
-				if($searchName != $r->sciname) $retArr[$r->tid] = $r->sciname;
-			}
-			$rs->free();
+		$stmt->bind_result($tid, $sciname);
+		while($stmt->fetch()){
+			if($searchName != $sciname) $retArr[$tid] = $sciname;
 		}
+		$stmt->close();
 		return $retArr;
 	}
 }
