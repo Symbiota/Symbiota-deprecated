@@ -36,6 +36,7 @@ if($IS_ADMIN || (array_key_exists("ClAdmin",$USER_RIGHTS) && in_array($clid,$USE
 		$clManager->batchAdjustChecklist($_POST);
 	}
 }
+$clManager->setCollectionVariables();
 ?>
 
 <html>
@@ -50,8 +51,9 @@ if($IS_ADMIN || (array_key_exists("ClAdmin",$USER_RIGHTS) && in_array($clid,$USE
 	<script type="text/javascript">
 		var clid = <?php echo $clid; ?>;
 		var tabIndex = <?php echo $tabIndex; ?>;
+		var footprintwktExists = <?php echo ($clManager->getClFootprintWkt()?'true':'false') ?>;
 	</script>
-	<script type="text/javascript" src="../js/symb/checklists.voucheradmin.js?ver=130330"></script>
+	<script type="text/javascript" src="../js/symb/checklists.voucheradmin.js?ver=180330"></script>
 	<style type="text/css">
 		li{margin:5px;}
 	</style>
@@ -87,7 +89,6 @@ if($statusStr){
 }
 
 if($clid && $isEditor){
-	$clManager->setCollectionVariables();
 	$termArr = $clManager->getQueryVariablesArr();
 	$collList = $clManager->getCollectionList();
 	if($termArr){
@@ -153,42 +154,34 @@ if($clid && $isEditor){
 							<div style="float:left;">
 								<div>
 									<b><?php echo $LANG['LATN'];?>:</b>
-									<input id="upperlat" type="text" name="latnorth" style="width:70px;" value="<?php echo isset($termArr['latnorth'])?$termArr['latnorth']:''; ?>" title="Latitude North" />
-									<a href="#" onclick="openPopup('../collections/mapboundingbox.php','boundingbox')"><img src="../images/world.png" width="15px" title="Find Coordinate" /></a>
+									<input id="upperlat" type="text" name="latnorth" style="width:80px;" value="<?php echo isset($termArr['latnorth'])?$termArr['latnorth']:''; ?>" title="Latitude North" />
+									<a href="#" onclick="openPopup('tools/mapboundingbox.php','boundingbox')"><img src="../images/world.png" style="width:12px" title="Find Coordinate" /></a>
 								</div>
 								<div>
 									<b><?php echo $LANG['LATS'];?>:</b>
-									<input id="bottomlat" type="text" name="latsouth" style="width:70px;" value="<?php echo isset($termArr['latsouth'])?$termArr['latsouth']:''; ?>" title="Latitude South" />
+									<input id="bottomlat" type="text" name="latsouth" style="width:80px;" value="<?php echo isset($termArr['latsouth'])?$termArr['latsouth']:''; ?>" title="Latitude South" />
 								</div>
 								<div>
 									<b><?php echo $LANG['LONGE'];?>:</b>
-									<input id="rightlong" type="text" name="lngeast" style="width:70px;" value="<?php echo isset($termArr['lngeast'])?$termArr['lngeast']:''; ?>" title="Longitude East" />
+									<input id="rightlong" type="text" name="lngeast" style="width:80px;" value="<?php echo isset($termArr['lngeast'])?$termArr['lngeast']:''; ?>" title="Longitude East" />
 								</div>
 								<div>
 									<b><?php echo $LANG['LONGW'];?>:</b>
-									<input id="leftlong" type="text" name="lngwest" style="width:70px;" value="<?php echo isset($termArr['lngwest'])?$termArr['lngwest']:''; ?>" title="Longitude West" />
-								</div>
-								<?php
-								/*
-								if($clManager->getClFootprintWkt()){
-									?>
-									<div>
-										<input name="includewkt" value="1" type="checkbox" <?php if(isset($termArr['includewkt'])) echo 'CHECKED'; ?> />
-										<?php echo (isset($LANG['POLYGON_SEARCH'])?$LANG['POLYGON_SEARCH']:'Search based on polygon defining checklist research boundaries'); ?>
-										<a href="#" onclick="openPopup('tools/mappolyaid.php?clid=<?php echo $clid; ?>&emode=0','mappopup');return false;" target="_blank" title="View Polygon"><img src="../images/world.png" style="width:12px" /></a>
-										<a href="checklistadmin.php?clid=<?php echo $clid; ?>&tabindex=1" target="_blank" title="Edit Metadata and polygon"><img src="../images/edit.png" style="width:12px" /></a>
-									</div>
-									<?php
-								}
-								*/
-								?>
-								<div>
-									<input type="checkbox" name="latlngor" value="1" <?php if(isset($termArr['latlngor'])) echo 'CHECKED'; ?> />
-									<?php echo (isset($LANG['INCLUDELATLONG']) && $LANG['INCLUDELATLONG']?$LANG['INCLUDELATLONG']:'Match on Lat/Long OR locality (include non-georeferenced occurrences)');?>
+									<input id="leftlong" name="lngwest" type="text" style="width:80px;" value="<?php echo isset($termArr['lngwest'])?$termArr['lngwest']:''; ?>" title="Longitude West" />
 								</div>
 								<div>
-									<input name="onlycoord" value="1" type="checkbox" <?php if(isset($termArr['onlycoord'])) echo 'CHECKED'; ?> />
+									<input name="latlngor" type="checkbox" value="1" <?php if(isset($termArr['latlngor'])) echo 'CHECKED'; ?> onclick="coordInputSelected(this)" />
+									<?php echo (isset($LANG['INCLUDELATLONG']) && $LANG['INCLUDELATLONG']?$LANG['INCLUDELATLONG']:'Match on lat/long OR locality (include non-georeferenced occurrences)');?>
+								</div>
+								<div>
+									<input name="onlycoord" value="1" type="checkbox" <?php if(isset($termArr['onlycoord'])) echo 'CHECKED'; ?> onclick="coordInputSelected(this)" />
 									<?php echo (isset($LANG['ONLYCOORD'])?$LANG['ONLYCOORD']:'Only include occurrences with coordinates');?>
+								</div>
+								<div>
+									<input name="includewkt" value="1" type="checkbox" <?php if(isset($termArr['includewkt'])) echo 'CHECKED'; ?> onclick="coordInputSelected(this)" />
+									<?php echo (isset($LANG['POLYGON_SEARCH'])?$LANG['POLYGON_SEARCH']:'Search based on polygon defining checklist research boundaries'); ?>
+									<a href="#" onclick="openPopup('tools/mappolyaid.php?clid=<?php echo $clid; ?>&emode=0','mappopup');return false;" target="_blank" title="View Polygon"><img src="../images/world.png" style="width:12px" /></a>
+									<a href="checklistadmin.php?clid=<?php echo $clid; ?>&tabindex=1" target="_blank" title="Edit Metadata and polygon"><img src="../images/edit.png" style="width:12px" /></a>
 								</div>
 								<div>
 									<input name="excludecult" value="1" type="checkbox" <?php if(isset($termArr['excludecult'])) echo 'CHECKED'; ?> />

@@ -50,9 +50,24 @@ ALTER TABLE `omoccurrences`
   CHANGE COLUMN `labelProject` `labelProject` varchar(250) DEFAULT NULL,
   DROP INDEX `idx_occrecordedby`;
 
-REPLACE omoccurrencesfulltext(occid,locality,recordedby) 
+
+DELETE FROM omoccurrencesfulltext 
+WHERE locality IS NULL AND recordedby IS NULL;
+
+REPLACE INTO omoccurrencesfulltext(occid,locality,recordedby) 
   SELECT occid, CONCAT_WS("; ", municipality, locality), recordedby
-  FROM omoccurrences;
+  FROM omoccurrences
+  WHERE municipality IS NOT NULL OR locality IS NOT NULL OR recordedby IS NOT NULL;
+
+OPTIMIZE table omoccurrencesfulltext;
+
+REPLACE INTO omoccurpoints (occid,point)
+SELECT occid, Point(decimalLatitude, decimalLongitude) 
+FROM omoccurrences 
+WHERE decimalLatitude IS NOT NULL AND decimalLongitude IS NOT NULL;
+
+OPTIMIZE table omoccurpoints;
+
 
 #Add edittype field and run update query to tag batch updates (edittype = 1)
 ALTER TABLE `omoccuredits` 
@@ -63,12 +78,6 @@ FROM omoccuredits
 GROUP BY initialtimestamp, uid
 HAVING cnt > 2) as inntab ON e.initialtimestamp = inntab.initialtimestamp AND e.uid = inntab.uid
 SET edittype = 1;
-
-
-INSERT INTO omoccurpoints (occid,point)
-SELECT o.occid,Point(o.decimalLatitude, o.decimalLongitude) 
-FROM omoccurrences o LEFT JOIN omoccurpoints p ON o.occid = p.occid
-WHERE o.decimalLatitude IS NOT NULL AND o.decimalLongitude IS NOT NULL AND p.occid IS NULL;
 
 
 
@@ -88,3 +97,52 @@ WHERE o.decimalLatitude IS NOT NULL AND o.decimalLongitude IS NOT NULL AND p.occ
 
 #Collection GUID issue
 
+
+DELIMITER //
+
+DROP TRIGGER IF EXISTS `omoccurrences_insert`//
+CREATE TRIGGER `omoccurrences_insert` AFTER INSERT ON `omoccurrences`
+FOR EACH ROW BEGIN
+	IF NEW.`decimalLatitude` IS NOT NULL AND NEW.`decimalLongitude` IS NOT NULL THEN
+		INSERT INTO omoccurpoints (`occid`,`point`) 
+		VALUES (NEW.`occid`,Point(NEW.`decimalLatitude`, NEW.`decimalLongitude`));
+	END IF;
+	IF NEW.`recordedby` IS NOT NULL OR NEW.`municipality` IS NOT NULL OR NEW.`locality` IS NOT NULL THEN
+		INSERT INTO omoccurrencesfulltext (`occid`,`recordedby`,`locality`) 
+		VALUES (NEW.`occid`,NEW.`recordedby`,CONCAT_WS("; ", NEW.`municipality`, NEW.`locality`));
+	END IF;
+END
+//
+
+DROP TRIGGER IF EXISTS `omoccurrences_update`//
+CREATE TRIGGER `omoccurrences_update` AFTER UPDATE ON `omoccurrences`
+FOR EACH ROW BEGIN
+	IF NEW.`decimalLatitude` IS NOT NULL AND NEW.`decimalLongitude` IS NOT NULL THEN
+		IF EXISTS (SELECT `occid` FROM omoccurpoints WHERE `occid`=NEW.`occid`) THEN
+			UPDATE omoccurpoints 
+			SET `point` = Point(NEW.`decimalLatitude`, NEW.`decimalLongitude`)
+			WHERE `occid` = NEW.`occid`;
+		ELSE 
+			INSERT INTO omoccurpoints (`occid`,`point`) 
+			VALUES (NEW.`occid`,Point(NEW.`decimalLatitude`, NEW.`decimalLongitude`));
+		END IF;
+	ELSE
+		DELETE FROM omoccurpoints WHERE `occid` = NEW.`occid`;
+	END IF;
+
+	IF NEW.`recordedby` IS NOT NULL OR NEW.`municipality` IS NOT NULL OR NEW.`locality` IS NOT NULL THEN
+		IF EXISTS (SELECT `occid` FROM omoccurrencesfulltext WHERE `occid`=NEW.`occid`) THEN
+			UPDATE omoccurrencesfulltext 
+			SET `recordedby` = NEW.`recordedby`,`locality` = CONCAT_WS("; ", NEW.`municipality`, NEW.`locality`)
+			WHERE `occid` = NEW.`occid`;
+		ELSE
+			INSERT INTO omoccurrencesfulltext (`occid`,`recordedby`,`locality`) 
+			VALUES (NEW.`occid`,NEW.`recordedby`,CONCAT_WS("; ", NEW.`municipality`, NEW.`locality`));
+		END IF;
+	ELSE 
+		DELETE FROM omoccurrencesfulltext WHERE `occid` = NEW.`occid`;
+	END IF;
+END
+//
+
+DELIMITER ;

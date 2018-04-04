@@ -1,9 +1,7 @@
 $('html').hide();
-$(document).ready(function() {
-	$('html').show();
-});
 
 $(document).ready(function() {
+	$('html').show();
 	$('#tabs').tabs({ 
 		active: tabIndex,
 		beforeLoad: function( event, ui ) {
@@ -89,6 +87,19 @@ function linkVoucher(occidIn, clidIn){
 	});
 }
 
+function coordInputSelected(formElem){
+	if(formElem.checked == true){
+		var f = formElem.form;
+		var name = formElem.name;
+		if(name != "latlngor") f.latlngor.checked = false;
+		if(name != "onlycoord") f.onlycoord.checked = false;
+		if(name != "includewkt") f.includewkt.checked = false;
+		if(name == "includewkt"){
+			if(!footprintwktExists) alert('The checklist polygon needs to be defined before you can use this feature. Click the editing pencil to the right of the checkbox and use the tools in the "Polygon Footprint" box to define the polygon for the research area.');
+		}
+	}
+}
+
 //Validate form functions
 function validateSqlFragForm(f){
 	if(!isNumeric(f.latnorth.value) || !isNumeric(f.latsouth.value) || !isNumeric(f.lngwest.value) || !isNumeric(f.lngeast.value)){
@@ -146,7 +157,7 @@ function openPopup(urlStr,windowName){
 	else if(document.body.offsetWidth){
 		wWidth = document.body.offsetWidth*0.9;
 	}
-	newWindow = window.open(urlStr,windowName,'scrollbars=1,toolbar=0,resizable=1,width='+(wWidth)+',height=600,left=20,top=20');
+	newWindow = window.open(urlStr,windowName,'scrollbars=1,toolbar=0,resizable=1,width='+(wWidth)+',height=630,left=20,top=20');
 	if (newWindow.opener == null) newWindow.opener = self;
 	return false;
 }

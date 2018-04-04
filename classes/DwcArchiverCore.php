@@ -6,7 +6,7 @@ include_once($SERVER_ROOT.'/classes/DwcArchiverDetermination.php');
 include_once($SERVER_ROOT.'/classes/DwcArchiverImage.php');
 include_once($SERVER_ROOT.'/classes/DwcArchiverAttribute.php');
 include_once($SERVER_ROOT.'/classes/UuidFactory.php');
-include_once('OccurrenceAccessStats.php');
+include_once($SERVER_ROOT.'/classes/OccurrenceAccessStats.php');
 
 class DwcArchiverCore extends Manager{
 

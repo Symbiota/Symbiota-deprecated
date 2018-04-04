@@ -396,7 +396,9 @@ class OccurrenceManager extends OccurrenceTaxaManager {
 		if(strpos($sqlWhere,'ts.family')){
 			$sqlJoin .= 'LEFT JOIN taxstatus ts ON o.tidinterpreted = ts.tid ';
 		}
-		if(array_key_exists("polycoords",$this->searchTermArr)) $sqlJoin .= 'LEFT JOIN omoccurpoints p ON o.occid = p.occid ';
+		if(array_key_exists("polycoords",$this->searchTermArr) || strpos($sqlWhere,'p.point')){
+			$sqlJoin .= 'INNER JOIN omoccurpoints p ON o.occid = p.occid ';
+		}
 		return $sqlJoin;
 	}
 
