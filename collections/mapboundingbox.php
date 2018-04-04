@@ -19,7 +19,7 @@ else{
 <html>
 	<head>
 		<title><?php echo $DEFAULT_TITLE.' - '.$LANG['MBB_TITLE']; ?></title>
-	</head> 
+	</head>
 	<body style="background-color:#ffffff;">
 	<script src="//maps.googleapis.com/maps/api/js?<?php echo (isset($GOOGLE_MAP_KEY) && $GOOGLE_MAP_KEY?'key='.$GOOGLE_MAP_KEY:''); ?>"></script>
 	<script type="text/javascript">
@@ -35,7 +35,7 @@ else{
 				mapTypeId: google.maps.MapTypeId.TERRAIN,
 				scaleControl: true
 			};
-	
+
 			map = new google.maps.Map(document.getElementById("map"), dmOptions);
 
 			//placeRectangle(latCenter, lngCenter);
@@ -70,7 +70,7 @@ else{
 			google.maps.event.addListener(rectangle, 'bounds_changed', function(event) {
 				recordRectBounds(rectangle.getBounds());
 			});
-			
+
 			rectangle.setMap(map);
 
 			recordRectBounds(newBounds);
@@ -85,19 +85,32 @@ else{
 			document.getElementById("elon").value = ne.lng().toFixed(5);
 		}
 
-		function updateParentForm() {
-			opener.document.getElementById("upperlat").value = Math.abs(parseFloat(document.getElementById("nlat").value));
-			opener.document.getElementById("bottomlat").value = Math.abs(parseFloat(document.getElementById("slat").value));
-			opener.document.getElementById("leftlong").value = Math.abs(parseFloat(document.getElementById("wlon").value));
-			opener.document.getElementById("rightlong").value = Math.abs(parseFloat(document.getElementById("elon").value));
-			if(document.getElementById("nlat").value < 0) opener.document.getElementById('upperlat_NS').value = 'S';
-			else opener.document.getElementById('upperlat_NS').value = 'N';
-			if(document.getElementById("slat").value < 0) opener.document.getElementById('bottomlat_NS').value = 'S';
-			else opener.document.getElementById('bottomlat_NS').value = 'N';
-			if(document.getElementById("wlon").value < 0) opener.document.getElementById('leftlong_EW').value = 'W';
-			else opener.document.getElementById('leftlong_EW').value = 'E';
-			if(document.getElementById("elon").value < 0) opener.document.getElementById('rightlong_EW').value = 'W';
-			else opener.document.getElementById('rightlong_EW').value = 'E';
+		function updateParentForm(f) {
+			var nlat = "";
+			var slat = "";
+			var wlon = "";
+			var elon = "";
+
+			if(f.nlat.value != ""){
+				opener.document.getElementById("upperlat").value = Math.abs(parseFloat(f.nlat.value));
+				if(f.nlat.value < 0) opener.document.getElementById('upperlat_NS').value = 'S';
+				else opener.document.getElementById('upperlat_NS').value = 'N';
+			}
+			if(f.slat.value != ""){
+				opener.document.getElementById("bottomlat").value = Math.abs(parseFloat(f.slat.value));
+				if(f.slat.value < 0) opener.document.getElementById('bottomlat_NS').value = 'S';
+				else opener.document.getElementById('bottomlat_NS').value = 'N';
+			}
+			if(f.wlon.value != ""){
+				opener.document.getElementById("leftlong").value = Math.abs(parseFloat(f.wlon.value));
+				if(f.wlon.value < 0) opener.document.getElementById('leftlong_EW').value = 'W';
+				else opener.document.getElementById('leftlong_EW').value = 'E';
+			}
+			if(f.elon.value != ""){
+				opener.document.getElementById("rightlong").value = Math.abs(parseFloat(f.elon.value));
+				if(f.elon.value < 0) opener.document.getElementById('rightlong_EW').value = 'W';
+				else opener.document.getElementById('rightlong_EW').value = 'E';
+			}
 			self.close();
 			return false;
 		}
@@ -107,13 +120,13 @@ else{
 	</script>
 	<div style="width:500px;"><?php echo $LANG['MBB_INSTRUCTIONS']; ?></div>
 	<div id='map' style='width:100%; height: 520px'></div>
-	<form id="mapForm" onsubmit="return updateParentForm();">
+	<form id="mapForm" onsubmit="return false">
 		<table>
 			<tr><td>
 				<?php echo $LANG['MBB_NORTHERN']; ?>: <input type="text" id="nlat" size="13" name="nlat" value="" />
 			</td><td>
 				<?php echo $LANG['MBB_EASTERN']; ?>: <input type="text" id="elon" size="13" name="elon" value="" />
-				<input type="submit" name="addcoords" value="<?php echo $LANG['SUBMIT']; ?>" />	
+				<button onclick="updateParentForm(this.form);"><?php echo $LANG['SUBMIT']; ?></button>
 			</td></tr>
 			<tr><td>
 				<?php echo $LANG['MBB_SOUTHERN']; ?>: <input type="text" id="slat" size="13" name="slat" value="" />
