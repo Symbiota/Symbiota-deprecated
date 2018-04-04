@@ -9,6 +9,7 @@ $formSubmit = array_key_exists("formsubmit",$_REQUEST)?$_REQUEST["formsubmit"]:"
 $specHandler = new ProfileManager();
 
 $collArr = array();
+$collEditor = false;
 if($SYMB_UID){
 	$specHandler->setUid($SYMB_UID);
 	$collArr = $specHandler->getPersonalCollectionArr();
@@ -31,7 +32,8 @@ if($SYMB_UID){
 	}
 	$genArr = array();
 	if(array_key_exists('General Observations',$collArr)){
-		$genArr = $collArr['General Observations'];
+        $collEditor = true;
+	    $genArr = $collArr['General Observations'];
 		foreach($genArr as $collId => $cName){
 			?>
 			<fieldset style="margin:15px;padding:15px;">
@@ -90,11 +92,9 @@ if($SYMB_UID){
 			<?php
 		}
 	}
-	else{
-		echo '<div>Personal specimen management has not been setup for your login. Please contact the site administrator (<a href="mailto:'.$adminEmail.'">'.$adminEmail.'</a>) to activate this feature.</div>';
-	}
 	if(array_key_exists('Preserved Specimens',$collArr)){
-		$cArr = $collArr['Preserved Specimens'];
+        $collEditor = true;
+	    $cArr = $collArr['Preserved Specimens'];
 		?>
 		<fieldset style="margin:15px;padding:15px;">
 			<legend style="font-weight:bold;"><b>Collection Management</b></legend>
@@ -109,7 +109,8 @@ if($SYMB_UID){
 		<?php 
 	}
 	if(array_key_exists('Observations',$collArr)){
-		$cArr = $collArr['Observations'];
+        $collEditor = true;
+	    $cArr = $collArr['Observations'];
 		?>
 		<fieldset style="margin:15px;padding:15px;">
 			<legend style="font-weight:bold;"><b>Observation Project Management</b></legend>
@@ -124,7 +125,8 @@ if($SYMB_UID){
 		<?php 
 	}
 	if($genArr && isset($USER_RIGHTS['CollAdmin'])){
-		$genAdminArr = array_intersect_key($genArr,array_flip($USER_RIGHTS['CollAdmin']));
+        $collEditor = true;
+	    $genAdminArr = array_intersect_key($genArr,array_flip($USER_RIGHTS['CollAdmin']));
 		if($genAdminArr){
 			?>
 			<fieldset style="margin:15px;padding:15px;">
@@ -140,6 +142,9 @@ if($SYMB_UID){
 			<?php
 		} 
 	}
+    if(!$collEditor){
+        echo '<div>Personal specimen management or collection management has not been setup for your login. Please contact the site administrator (<a href="mailto:'.$adminEmail.'">'.$adminEmail.'</a>) to activate this feature.</div>';
+    }
 }
 ?>	
 </div>
