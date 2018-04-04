@@ -783,14 +783,14 @@ class DwcArchiverCore extends Manager{
 					if($firstColl['collcode']) $fileNameSeed .= '-'.$firstColl['collcode'];
 				}
 				if($this->schemaType == 'backup'){
-					$fileNameSeed .= '_backup';
+					$fileNameSeed .= '_backup_'.date('Y-m-d_His',$this->ts);
 				}
 			}
 			else{
-				$fileNameSeed = 'SymbiotaOutput';
+				$fileNameSeed = 'SymbOutput_'.date('Y-m-d_His',$this->ts);
 			}
 		}
-		$fileName = str_replace(array(' ','"',"'"),'',$fileNameSeed).'_'.date('Y-m-d_His',$this->ts).'.zip';
+		$fileName = str_replace(array(' ','"',"'"),'',$fileNameSeed).'_DwC-A.zip';
 
 		if(!$this->targetPath) $this->setTargetPath();
 		$archiveFile = '';
