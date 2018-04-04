@@ -53,6 +53,7 @@ if($spprid) $specManager->setProjVariables($spprid);
 				var uploadType = document.getElementById('projecttype').value;
 				if(uploadType == 'local'){
 					$("div.profileDiv").show();
+					$("#titleDiv").show();
 					$("#sourcePathInfoIplant").hide();
 					$("#chooseFileDiv").hide();
 					if($("[name='sourcepath']").val() == "-- Use Default Path --") $("[name='sourcepath']").val("");
@@ -67,6 +68,8 @@ if($spprid) $specManager->setProjVariables($spprid);
 				}
 				else if(uploadType == 'idigbio'){
 					$("div.profileDiv").hide();
+					$("#titleDiv").show();
+					$("[name='title']").val("iDigBio CSV upload");
 					$("#specKeyPatternDiv").show();
 					$("#patternReplaceDiv").show();
 					$("#replaceStrDiv").show();
@@ -76,6 +79,8 @@ if($spprid) $specManager->setProjVariables($spprid);
 				}
 				else if(uploadType == 'iplant'){
 					$("div.profileDiv").hide();
+					$("#titleDiv").show();
+					$("[name='title']").val("iPlant Image Processing");
 					$("#specKeyPatternDiv").show();
 					$("#patternReplaceDiv").show();
 					$("#replaceStrDiv").show();
@@ -292,7 +297,7 @@ if($spprid) $specManager->setProjVariables($spprid);
 										<?php
 									}
 									?>
-									<div id="titleDiv" class="profileDiv" style="display:<?php echo ($projectType=='local'?'block':'none'); ?>">
+									<div id="titleDiv" style="display:<?php echo ($spprid?'block':'none'); ?>;clear:both">
 										<div style="width:180px;float:left;">
 											<b>Title:</b>
 										</div>

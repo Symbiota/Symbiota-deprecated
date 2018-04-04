@@ -112,17 +112,9 @@ class SpecProcessorManager {
 		if(isset($addArr['projecttype'])){
 			$sourcePath = $addArr['sourcepath'];
 			if($sourcePath == '-- Use Default Path --') $sourcePath = '';
-			if($addArr['projecttype'] == 'idigbio'){
+			if($addArr['projecttype'] == 'idigbio' || $addArr['projecttype'] == 'iplant'){
 				$sql = 'INSERT INTO specprocessorprojects(collid,title,speckeypattern,patternreplace,replacestr,projecttype,sourcepath) '.
-					'VALUES('.$this->collid.',"iDigBio CSV upload","'.$this->cleanInStr($addArr['speckeypattern']).'",'.
-					($addArr['patternreplace']?'"'.$this->cleanInStr($addArr['patternreplace']).'"':'NULL').','.
-					($addArr['replacestr']?'"'.$this->conn->real_escape_string($addArr['replacestr']).'"':'NULL').','.
-					($addArr['projecttype']?'"'.$this->cleanInStr($addArr['projecttype']).'"':'NULL').','.
-					($sourcePath?'"'.$this->cleanInStr($sourcePath).'"':'NULL').')';
-			}
-			elseif($addArr['projecttype'] == 'iplant'){
-				$sql = 'INSERT INTO specprocessorprojects(collid,title,speckeypattern,patternreplace,replacestr,projecttype,sourcepath) '.
-					'VALUES('.$this->collid.',"IPlant Image Processing","'.$this->cleanInStr($addArr['speckeypattern']).'",'.
+					'VALUES('.$this->collid.',"'.$this->cleanInStr($addArr['title']).'","'.$this->cleanInStr($addArr['speckeypattern']).'",'.
 					($addArr['patternreplace']?'"'.$this->cleanInStr($addArr['patternreplace']).'"':'NULL').','.
 					($addArr['replacestr']?'"'.$this->conn->real_escape_string($addArr['replacestr']).'"':'NULL').','.
 					($addArr['projecttype']?'"'.$this->cleanInStr($addArr['projecttype']).'"':'NULL').','.
@@ -174,8 +166,8 @@ class SpecProcessorManager {
 			$sqlWhere .= 'WHERE (collid = '.$this->collid.') ';
 		}
 		if($sqlWhere){
-			$sql = 'SELECT collid, title, speckeypattern, patternreplace, replacestr,coordx1, coordx2, coordy1, coordy2, sourcepath, targetpath, '.
-				'imgurl, webpixwidth, tnpixwidth, lgpixwidth, jpgcompression, createtnimg, createlgimg, source '.
+			$sql = 'SELECT collid, title, speckeypattern, patternreplace, replacestr, projecttype, coordx1, coordx2, coordy1, coordy2, sourcepath, targetpath, '.
+				'imgurl, webpixwidth, tnpixwidth, lgpixwidth, jpgcompression, createtnimg, createlgimg, source, lastrundate '.
 				'FROM specprocessorprojects '.$sqlWhere;
 			//echo $sql;
 			$rs = $this->conn->query($sql);
@@ -185,6 +177,7 @@ class SpecProcessorManager {
 				$this->specKeyPattern = $row->speckeypattern;
 				$this->patternReplace = $row->patternreplace;
 				$this->replaceStr = $row->replacestr;
+				$this->projectType = $row->projecttype;
 				$this->coordX1 = $row->coordx1;
 				$this->coordX2 = $row->coordx2;
 				$this->coordY1 = $row->coordy1;
@@ -198,20 +191,20 @@ class SpecProcessorManager {
 				if($row->jpgcompression) $this->jpgQuality = $row->jpgcompression;
 				$this->createTnImg = $row->createtnimg;
 				$this->createLgImg = $row->createlgimg;
-				//Temporary code for setting projectType until proectType field is added to specprocessorprojects table
-				$this->lastRunDate = $row->source;
-				//$this->lastRunDate = $row->lastrundate;
-				if($this->title == 'iDigBio CSV upload'){
-					$this->projectType = 'idigbio';
-				}
-				elseif($this->title == 'IPlant Image Processing'){
-					$this->projectType = 'iplant';
-				}
-				elseif($this->title == 'OCR Harvest'){
-					break;
-				}
-				else{
-					$this->projectType = 'local';
+				$this->lastRunDate = $row->lastrundate;
+				if(!$this->projectType){
+					if($this->title == 'iDigBio CSV upload'){
+						$this->projectType = 'idigbio';
+					}
+					elseif($this->title == 'IPlant Image Processing'){
+						$this->projectType = 'iplant';
+					}
+					elseif($this->title == 'OCR Harvest'){
+						break;
+					}
+					else{
+						$this->projectType = 'local';
+					}
 				}
 			}
 			$rs->free();
@@ -227,9 +220,7 @@ class SpecProcessorManager {
 	public function getProjects(){
 		$projArr = array();
 		if($this->collid){
-			$sql = 'SELECT spprid, title '.
-				'FROM specprocessorprojects '.
-				'WHERE (collid = '.$this->collid.') AND title != "OCR Harvest"';
+			$sql = 'SELECT spprid, title FROM specprocessorprojects  WHERE (collid = '.$this->collid.') AND title != "OCR Harvest"';
 			$rs = $this->conn->query($sql);
 			while($row = $rs->fetch_object()){
 				$projArr[$row->spprid] = $row->title;
@@ -245,8 +236,8 @@ class SpecProcessorManager {
 		$cnt = 0;
 		if($this->collid){
 			$sql = 'SELECT COUNT(DISTINCT o.occid) AS cnt '.
-					'FROM omoccurrences o INNER JOIN images i ON o.occid = i.occid '.
-					'WHERE (o.collid = '.$this->collid.') ';
+				'FROM omoccurrences o INNER JOIN images i ON o.occid = i.occid '.
+				'WHERE (o.collid = '.$this->collid.') ';
 			if($procStatus){
 				if($procStatus == 'null'){
 					$sql .= 'AND processingstatus IS NULL';
@@ -269,9 +260,9 @@ class SpecProcessorManager {
 		$cnt = 0;
 		if($this->collid){
 			$sql = 'SELECT COUNT(DISTINCT o.occid) AS cnt '.
-					'FROM omoccurrences o INNER JOIN images i ON o.occid = i.occid '.
-					'LEFT JOIN specprocessorrawlabels r ON i.imgid = r.imgid '.
-					'WHERE o.collid = '.$this->collid.' AND r.imgid IS NULL ';
+				'FROM omoccurrences o INNER JOIN images i ON o.occid = i.occid '.
+				'LEFT JOIN specprocessorrawlabels r ON i.imgid = r.imgid '.
+				'WHERE o.collid = '.$this->collid.' AND r.imgid IS NULL ';
 			if($procStatus){
 				if($procStatus == 'null'){
 					$sql .= 'AND processingstatus IS NULL';
@@ -292,9 +283,7 @@ class SpecProcessorManager {
 	public function getProcessingStatusList(){
 		$retArr = array();
 		if($this->collid){
-			$sql = 'SELECT DISTINCT processingstatus '.
-				'FROM omoccurrences '.
-				'WHERE collid = '.$this->collid;
+			$sql = 'SELECT DISTINCT processingstatus FROM omoccurrences WHERE collid = '.$this->collid;
 			//echo $sql;
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
