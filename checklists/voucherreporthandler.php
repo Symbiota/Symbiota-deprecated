@@ -18,6 +18,10 @@ elseif($rType == 'fullvoucherscsv'){
 elseif($rType == 'pensoftcsv'){
 	$vManager->downloadPensoftCsv();
 }
+elseif($rType == 'pensoftxlsx'){
+	$vManager->downloadPensoftXlsx();
+	exit;
+}
 elseif($rType == 'missingoccurcsv'){
 	$vManager->exportMissingOccurCsv();
 }

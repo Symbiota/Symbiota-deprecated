@@ -1,5 +1,10 @@
 <?php
 include_once($SERVER_ROOT.'/config/dbconnection.php');
+include_once($SERVER_ROOT.'/classes/DwcArchiverCore.php');
+require_once($SERVER_ROOT.'/vendor/autoload.php');
+
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class ChecklistVoucherAdmin {
 
@@ -488,7 +493,7 @@ class ChecklistVoucherAdmin {
 	//Export functions used within voucherreporthandler.php
 	public function exportMissingOccurCsv(){
 		if($sqlFrag = $this->getSqlFrag()){
-			$fileName = 'Missing_'.$this->getExportFileName();
+			$fileName = 'Missing_'.$this->getExportFileName().'.csv';
 
 			$fieldArr = $this->getOccurrenceFieldArr();
 			$localitySecurityFields = $this->getLocalitySecurityArr();
@@ -544,7 +549,7 @@ class ChecklistVoucherAdmin {
 	}
 
 	public function exportProblemTaxaCsv(){
-		$fileName = 'ProblemTaxa_'.$this->getExportFileName();
+		$fileName = 'ProblemTaxa_'.$this->getExportFileName().'.csv';
 
 		if($sqlFrag = $this->getSqlFrag()){
 			$fieldArr = $this->getOccurrenceFieldArr();
@@ -609,7 +614,7 @@ class ChecklistVoucherAdmin {
 				$clidStr .= ','.implode(',',$this->childClidArr);
 			}
 
-			$fileName = $this->getExportFileName();
+			$fileName = $this->getExportFileName().'.csv';
 			$sql = 'SELECT DISTINCT '.implode(',',$fieldArr).' '.
 				'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
 				'INNER JOIN fmchklsttaxalink ctl ON ctl.tid = t.tid '.
@@ -624,7 +629,7 @@ class ChecklistVoucherAdmin {
 			$headerArr = $dataArr['header'];
 			$taxaArr = $dataArr['taxa'];
 			//Steram data out
-			$fileName = $this->getExportFileName();
+			$fileName = $this->getExportFileName().'.csv';
 			header ('Cache-Control: must-revalidate, post-check=0, pre-check=0');
 			header ('Content-Type: text/csv');
 			header ('Content-Disposition: attachment; filename="'.$fileName.'"');
@@ -645,7 +650,82 @@ class ChecklistVoucherAdmin {
 		}
 	}
 
-	public function getPensoftArr(){
+	public function downloadPensoftXlsx(){
+		global $TEMP_DIR_ROOT;
+		$spreadsheet = new Spreadsheet();
+		$taxaSheet = $spreadsheet->getActiveSheet()->setTitle('Taxa');
+		$penArr = $this->getPensoftArr();
+		$headerArr = $penArr['header'];
+		$taxaArr = $penArr['taxa'];
+		//print_r($taxaArr); exit;
+
+		$letters = range('A', 'Z');
+		//Output header
+		$columnCnt = 0;
+		foreach($headerArr as $headerValue){
+			$colLet = $letters[$columnCnt%26].'1';
+			if($columnCnt > 26) $colLet = $colLet.$letters[floor($columnCnt/26)];
+			$taxaSheet->setCellValue($colLet, $headerValue);
+			$columnCnt++;
+		}
+
+		//Output data
+		$rowCnt = 2;
+		foreach($taxaArr as $tid => $recArr){
+			$columnCnt = 0;
+			foreach($headerArr as $headerKey => $v){
+				$colLet = $letters[$columnCnt%26].$rowCnt;
+				if($columnCnt > 26) $colLet = $colLet.$letters[floor($columnCnt/26)];
+				$cellValue = (isset($recArr[$headerKey])?$recArr[$headerKey]:'');
+				$taxaSheet->setCellValue($colLet, $cellValue);
+				$columnCnt++;
+			}
+			$rowCnt++;
+		}
+
+		//Create Materials worksheet
+		$materialsSheet = $spreadsheet->createSheet(1)->setTitle('Materials');
+
+		$dwcaHandler = new DwcArchiverCore();
+		$dwcaHandler->setVerboseMode(0);
+		$dwcaHandler->setCharSetOut('ISO-8859-1');
+		$dwcaHandler->setSchemaType('pensoft');
+		$dwcaHandler->setExtended(false);
+		$dwcaHandler->setRedactLocalities(1);
+		$dwcaHandler->addCondition('clid','EQUALS',$_REQUEST['clid']);
+		$dwcArr = $dwcaHandler->getDwcArray();
+
+		if($dwcArr){
+			//Output header
+			$headerArr = array_keys($dwcArr[0]);
+			$columnCnt = 0;
+			foreach($headerArr as $headerValue){
+				$colLet = $letters[$columnCnt%26];
+				if($columnCnt > 25) $colLet = $letters[floor(($columnCnt/26)-1)].$colLet;
+				$materialsSheet->setCellValue($colLet.'1', $headerValue);
+				$columnCnt++;
+			}
+			//Output occurrence records
+			foreach($dwcArr as $cnt => $rowArr){
+				$rowCnt = $cnt+2;
+				$columnCnt = 0;
+				foreach($rowArr as $colKey => $cellValue){
+					$colLet = $letters[$columnCnt%26];
+					if($columnCnt > 25) $colLet = $letters[floor(($columnCnt/26)-1)].$colLet;
+					$materialsSheet->setCellValue($colLet.$rowCnt, $cellValue);
+					$columnCnt++;
+				}
+			}
+		}
+
+		//Create ExternalLinks worksheet
+		$spreadsheet->createSheet(2)->setTitle('ExternalLinks');
+
+		$writer = new Xlsx($spreadsheet);
+		$writer->save($TEMP_DIR_ROOT.'/downloads/'.$this->getExportFileName().'.xlsx');
+	}
+
+	private function getPensoftArr(){
 		$clidStr = $this->clid;
 		if($this->childClidArr){
 			$clidStr .= ','.implode(',',$this->childClidArr);
@@ -721,20 +801,20 @@ class ChecklistVoucherAdmin {
 			$headerArr = array('tid'=>'Taxon_Local_ID');
 			ksort($rankArr);
 			foreach($rankArr as $id => $name){
-				if($id > 180 && !isset($headerArr[180])) $headerArr[180] = 'genus';
+				if($id > 180 && !isset($headerArr[180])) $headerArr[180] = 'Genus';
 				if($id >= 220) break;
 				$headerArr[$id] = $name;
 			}
-			if(!isset($headerArr[180])) $headerArr[180] = 'genus';
-			$headerArr['epithet'] = 'species';
-			$headerArr['subsp'] = 'subspecies';
-			$headerArr['var'] = 'variety';
-			$headerArr['f'] = 'form';
-			$headerArr['author'] = 'authorship';
-			$headerArr['notes'] = 'notes';
-			$headerArr['habitat'] = 'habitat';
-			$headerArr['abundance'] = 'abundance';
-			$headerArr['source'] = 'source';
+			if(!isset($headerArr[180])) $headerArr[180] = 'Genus';
+			$headerArr['epithet'] = 'Species';
+			$headerArr['subsp'] = 'Subspecies';
+			$headerArr['var'] = 'Variety';
+			$headerArr['f'] = 'Form';
+			$headerArr['author'] = 'Authorship';
+			$headerArr['notes'] = 'Notes';
+			$headerArr['habitat'] = 'Habitat';
+			$headerArr['abundance'] = 'Abundance';
+			$headerArr['source'] = 'Source';
 
 			//set any unranked groups to unname node
 			foreach($headerArr as $k => $v){
@@ -747,7 +827,7 @@ class ChecklistVoucherAdmin {
 
 	public function downloadVoucherCsv(){
 		if($this->clid){
-			$fileName = $this->getExportFileName();
+			$fileName = $this->getExportFileName().'.csv';
 
 			$fieldArr = array('tid'=>'t.tid AS taxonID', 'family'=>'IFNULL(ctl.familyoverride,ts.family) AS family', 'scientificName'=>'t.sciname', 'author'=>'t.author AS scientificNameAuthorship');
 			$fieldArr['clhabitat'] = 'ctl.habitat AS cl_habitat';
@@ -830,7 +910,7 @@ class ChecklistVoucherAdmin {
 		else{
 			$fileName = 'symbiota';
 		}
-		$fileName .= '_'.time().'.csv';
+		$fileName .= '_'.time();
 		return $fileName;
 	}
 

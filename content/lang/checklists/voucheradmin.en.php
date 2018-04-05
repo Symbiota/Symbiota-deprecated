@@ -50,6 +50,7 @@ $LANG['FULLPRINT'] = 'Full species list (Print Friendly)';
 $LANG['FULLSPECLISTVOUCHER'] = 'Full species list with vouchers (CSV)';
 $LANG['FULLPRINTVOUCHER'] = 'Full species list with vouchers (Print Friendly)';
 $LANG['PENSOFT_DOWNLOAD'] = 'Pensoft checklist download';
+$LANG['PENSOFT_XLSX_DOWNLOAD'] = 'Pensoft Excel download';
 $LANG['VOUCHERONLY'] = 'Occurrence vouchers only (DwC-A, CSV, Tab-delimited)';
 $LANG['SPECMISSINGTITLE'] = 'Possible species additions based on specimen vouchers';
 $LANG['SPECMISSTAXA'] = 'Specimens of taxa missing from checklist (CSV)';

@@ -644,8 +644,8 @@ class DwcArchiverCore extends Manager{
        return $returnvalue;
     }
 
-    private function getDwcArray() {
-		$result = Array();
+    public function getDwcArray() {
+		$retArr = Array();
 		if(!$this->occurrenceFieldArr){
 			$this->occurrenceFieldArr = DwcArchiverOccurrence::getOccurrenceArr($this->schemaType, $this->extended);
 		}
@@ -679,6 +679,11 @@ class DwcArchiverCore extends Manager{
 		//Populate Upper Taxonomic data
 		$this->setUpperTaxonomy();
 		if($rs = $this->conn->query($sql,MYSQLI_USE_RESULT)){
+			$typeArr = null;
+			if($this->schemaType == 'pensoft'){
+				$typeArr = array('Other material', 'Holotype', 'Paratype', 'Isotype', 'Isoparatype', 'Isolectotype', 'Isoneotype', 'Isosyntype');
+				//$typeArr = array('Other material', 'Holotype', 'Paratype', 'Hapantotype', 'Syntype', 'Isotype', 'Neotype', 'Lectotype', 'Paralectotype', 'Isoparatype', 'Isolectotype', 'Isoneotype', 'Isosyntype');
+			}
 			$this->setServerDomain();
 			$urlPathPrefix = $this->serverDomain.$GLOBALS['CLIENT_ROOT'].(substr($GLOBALS['CLIENT_ROOT'],-1)=='/'?'':'/');
 			$hasRecords = false;
@@ -686,10 +691,7 @@ class DwcArchiverCore extends Manager{
 			while($r = $rs->fetch_assoc()){
 				$hasRecords = true;
 				//Protect sensitive records
-				if($this->redactLocalities
-                   && $r["localitySecurity"] == 1
-                   && !in_array($r['collid'],$this->rareReaderArr)
-                ){
+				if($this->redactLocalities && $r["localitySecurity"] == 1 && !in_array($r['collid'],$this->rareReaderArr)){
 					$protectedFields = array();
 					foreach($this->securityArr as $v){
 						if(array_key_exists($v,$r) && $r[$v]){
@@ -722,12 +724,45 @@ class DwcArchiverCore extends Manager{
 						$r['collectionID'] = $guid;
 					}
 				}
-				if($this->schemaType == 'dwc' || $this->schemaType == 'pensoft'){
+				if($this->schemaType == 'dwc'){
 					unset($r['localitySecurity']);
 				}
-				if($this->schemaType == 'dwc' || $this->schemaType == 'pensoft' || $this->schemaType == 'backup'){
+				if($this->schemaType == 'dwc' || $this->schemaType == 'backup'){
 					unset($r['collid']);
 				}
+				if($this->schemaType == 'pensoft'){
+					unset($r['localitySecurity']);
+					unset($r['collid']);
+					if($r['typeStatus']){
+						$typeValue = strtolower($r['typeStatus']);
+						$typeInvalid = true;
+						$invalidText = '';
+						foreach($typeArr as $testStr){
+							if($typeValue == strtolower($testStr)){
+								$typeInvalid = false;
+								break;
+							}
+							elseif(stripos($typeValue, $testStr)){
+								$invalidText = $r['typeStatus'];
+								$r['typeStatus'] = $testStr;
+								$typeInvalid = false;
+								break;
+							}
+						}
+						if($typeInvalid){
+							$invalidText = $r['typeStatus'];
+							$r['typeStatus'] = 'Other material';
+						}
+						if($invalidText){
+							if($r['occurrenceRemarks']) $invalidText = $r['occurrenceRemarks'].'; '.$invalidText;
+							$r['occurrenceRemarks'] = $invalidText;
+						}
+					}
+					else{
+						$r['typeStatus'] = 'Other material';
+					}
+				}
+
 				//Add upper taxonomic data
 				if($r['family'] && $this->upperTaxonomy){
 					$famStr = strtolower($r['family']);
@@ -748,18 +783,18 @@ class DwcArchiverCore extends Manager{
 
 				foreach($r as $rKey => $rValue){
 					if(substr($rKey, 0, 2) == 't_') $rKey = substr($rKey,2);
-	                $result[$cnt][$rKey] = $rValue;
+					$retArr[$cnt][$rKey] = $rValue;
 				}
 				$cnt++;
 			}
 			$rs->free();
-			$result[0]['associatedMedia'] = $this->getAssociatedMedia();
+			//$retArr[0]['associatedMedia'] = $this->getAssociatedMedia();
 		}
 		else{
 			$this->logOrEcho("ERROR creating occurrence file: ".$this->conn->error."\n");
 			$this->logOrEcho("\tSQL: ".$sql."\n");
 		}
-		return $result;
+		return $retArr;
     }
 
     private function getAssociatedMedia(){
@@ -2053,6 +2088,7 @@ class DwcArchiverCore extends Manager{
 		$this->geolocateVariables = $geolocateArr;
 	}
 
+	//Misc functions
 	public function setServerDomain($domain = ''){
 		if($domain){
 			$this->serverDomain = $domain;

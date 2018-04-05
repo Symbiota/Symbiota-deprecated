@@ -49,6 +49,7 @@ $LANG['FULLPRINT'] = 'Listado de especies completo (Print Friendly)';
 $LANG['FULLSPECLISTVOUCHER'] = 'Listado de especies completo con vouchers (CSV)';
 $LANG['FULLPRINTVOUCHER'] = 'Listado de especies completo con vouchers (Print Friendly)';
 $LANG['PENSOFT_DOWNLOAD'] = 'Listado de especies en el formato del Pensoft';
+$LANG['PENSOFT_XLSX_DOWNLOAD'] = 'Listado de especies en el formato del Pensoft';
 $LANG['VOUCHERONLY'] = 'Vouchers solomente (DwC-A, CSV, Tab-delimited)';
 $LANG['SPECMISSINGTITLE'] = 'Posibles adiciones de especies basadas en vales de muestra';
 $LANG['SPECMISSTAXA'] = 'Espec&iacute;menes de taxa faltantes del listado de Comprobaci&oacute;n (CSV)';
