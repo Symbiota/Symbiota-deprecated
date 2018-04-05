@@ -722,8 +722,7 @@ class ChecklistVoucherAdmin {
 			'FROM fmchklsttaxalink c INNER JOIN taxa t ON c.tid = t.tid '.
 			'INNER JOIN taxaenumtree e ON c.tid = e.tid '.
 			'INNER JOIN taxa t2 ON e.parenttid = t2.tid '.
-			'WHERE (e.taxauthid = 1) AND (c.clid IN('.$clidStr.'))'.
-			'ORDER BY IFNULL(c.familyoverride, ts.family), t.sciname';
+			'WHERE (e.taxauthid = 1) AND (c.clid IN('.$clidStr.'))';
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
 			$clArr[$r->tid][$r->rankid] = $this->encodeStr($r->parentstr);
