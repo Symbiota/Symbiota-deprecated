@@ -6,7 +6,7 @@ include_once($SERVER_ROOT.'/classes/DwcArchiverDetermination.php');
 include_once($SERVER_ROOT.'/classes/DwcArchiverImage.php');
 include_once($SERVER_ROOT.'/classes/DwcArchiverAttribute.php');
 include_once($SERVER_ROOT.'/classes/UuidFactory.php');
-include_once('OccurrenceAccessStats.php');
+include_once($SERVER_ROOT.'/classes/OccurrenceAccessStats.php');
 
 class DwcArchiverCore extends Manager{
 
@@ -586,7 +586,7 @@ class DwcArchiverCore extends Manager{
        return $returnvalue;
     }
 
-    private function getDwcArray() {
+    public function getDwcArray() {
 		$result = Array();
 		if(!$this->occurrenceFieldArr){
 			$this->occurrenceFieldArr = DwcArchiverOccurrence::getOccurrenceArr($this->schemaType, $this->extended);
@@ -621,6 +621,11 @@ class DwcArchiverCore extends Manager{
 		//Populate Upper Taxonomic data
 		$this->setUpperTaxonomy();
 		if($rs = $this->conn->query($sql,MYSQLI_USE_RESULT)){
+			$typeArr = null;
+			if($this->schemaType == 'pensoft'){
+				$typeArr = array('Other material', 'Holotype', 'Paratype', 'Isotype', 'Isoparatype', 'Isolectotype', 'Isoneotype', 'Isosyntype');
+				//$typeArr = array('Other material', 'Holotype', 'Paratype', 'Hapantotype', 'Syntype', 'Isotype', 'Neotype', 'Lectotype', 'Paralectotype', 'Isoparatype', 'Isolectotype', 'Isoneotype', 'Isosyntype');
+			}
 			$this->setServerDomain();
 			$urlPathPrefix = $this->serverDomain.$GLOBALS['CLIENT_ROOT'].(substr($GLOBALS['CLIENT_ROOT'],-1)=='/'?'':'/');
 			$hasRecords = false;
@@ -664,11 +669,43 @@ class DwcArchiverCore extends Manager{
 						$r['collectionID'] = $guid;
 					}
 				}
-				if($this->schemaType == 'dwc' || $this->schemaType == 'pensoft'){
+				if($this->schemaType == 'dwc'){
 					unset($r['localitySecurity']);
 				}
-				if($this->schemaType == 'dwc' || $this->schemaType == 'pensoft' || $this->schemaType == 'backup'){
+				if($this->schemaType == 'dwc' || $this->schemaType == 'backup'){
 					unset($r['collid']);
+				}
+				if($this->schemaType == 'pensoft'){
+					unset($r['localitySecurity']);
+					unset($r['collid']);
+					if($r['typeStatus']){
+						$typeValue = strtolower($r['typeStatus']);
+						$typeInvalid = true;
+						$invalidText = '';
+						foreach($typeArr as $testStr){
+							if($typeValue == strtolower($testStr)){
+								$typeInvalid = false;
+								break;
+							}
+							elseif(stripos($typeValue, $testStr)){
+								$invalidText = $r['typeStatus'];
+								$r['typeStatus'] = $testStr;
+								$typeInvalid = false;
+								break;
+							}
+						}
+						if($typeInvalid){
+							$invalidText = $r['typeStatus'];
+							$r['typeStatus'] = 'Other material';
+						}
+						if($invalidText){
+							if($r['occurrenceRemarks']) $invalidText = $r['occurrenceRemarks'].'; '.$invalidText;
+							$r['occurrenceRemarks'] = $invalidText;
+						}
+					}
+					else{
+						$r['typeStatus'] = 'Other material';
+					}
 				}
 				//Add upper taxonomic data
 				if($r['family'] && $this->upperTaxonomy){
@@ -695,7 +732,7 @@ class DwcArchiverCore extends Manager{
 				$cnt++;
 			}
 			$rs->free();
-			$result[0]['associatedMedia'] = $this->getAssociatedMedia();
+			//$result[0]['associatedMedia'] = $this->getAssociatedMedia();
 		}
 		else{
 			$this->logOrEcho("ERROR creating occurrence file: ".$this->conn->error."\n");
