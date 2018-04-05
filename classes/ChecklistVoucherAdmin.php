@@ -623,33 +623,6 @@ class ChecklistVoucherAdmin {
 		}
 	}
 
-	public function downloadPensoftCsv(){
-		$dataArr = $this->getPensoftArr();
-		if($dataArr){
-			$headerArr = $dataArr['header'];
-			$taxaArr = $dataArr['taxa'];
-			//Steram data out
-			$fileName = $this->getExportFileName().'.csv';
-			header ('Cache-Control: must-revalidate, post-check=0, pre-check=0');
-			header ('Content-Type: text/csv');
-			header ('Content-Disposition: attachment; filename="'.$fileName.'"');
-			$out = fopen('php://output', 'w');
-			fputcsv($out, $headerArr);
-			foreach($taxaArr as $clKey => $clValueArr){
-				$outArr = array();
-				foreach($headerArr as $hKey => $hValue){
-					if(array_key_exists($hKey, $clValueArr)) $outArr[] = $clValueArr[$hKey];
-					else $outArr[] = '';
-				}
-				fputcsv($out, $outArr);
-			}
-			fclose($out);
-		}
-		else{
-			echo "Recordset is empty.\n";
-		}
-	}
-
 	public function downloadPensoftXlsx(){
 		global $TEMP_DIR_ROOT;
 		$spreadsheet = new Spreadsheet();
@@ -721,8 +694,18 @@ class ChecklistVoucherAdmin {
 		//Create ExternalLinks worksheet
 		$spreadsheet->createSheet(2)->setTitle('ExternalLinks');
 
+		//$file = $TEMP_DIR_ROOT.'/downloads/'.$this->getExportFileName().'.xlsx';
+		$file = $this->getExportFileName().'.xlsx';
+		header('Content-Description: Checklist Pensoft Export');
+		header('Content-Disposition: attachment; filename='.basename($file));
+		header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+		//header('Content-Length: '.filesize($file));
+		header('Cache-Control: must-revalidate');
+		header('Pragma: public');
+
 		$writer = new Xlsx($spreadsheet);
-		$writer->save($TEMP_DIR_ROOT.'/downloads/'.$this->getExportFileName().'.xlsx');
+		$writer->save('php://output');
+
 	}
 
 	private function getPensoftArr(){

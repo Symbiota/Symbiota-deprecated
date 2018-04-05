@@ -380,9 +380,7 @@ if($clid && $isEditor){
 						<li><a href="checklist.php?printmode=1&showvouchers=0&defaultoverride=1&cl=<?php echo $clid; ?>" target="_blank"><?php echo $LANG['FULLPRINT'];?></a></li>
 						<li><a href="voucherreporthandler.php?rtype=fullvoucherscsv&clid=<?php echo $clid; ?>"><?php echo $LANG['FULLSPECLISTVOUCHER'];?></a></li>
 						<li><a href="checklist.php?printmode=1&showvouchers=1&defaultoverride=1&cl=<?php echo $clid; ?>" target="_blank"><?php echo $LANG['FULLPRINTVOUCHER'];?></a></li>
-						<li><a href="voucherreporthandler.php?rtype=pensoftcsv&clid=<?php echo $clid; ?>"><?php echo (isset($LANG['PENSOFT_DOWNLOAD'])?$LANG['PENSOFT_DOWNLOAD']:'Pensoft checklist download');?></a></li>
-						<li><a href="voucherreporthandler.php?rtype=pensoftxlsx&clid=<?php echo $clid; ?>" target="_blank"><?php echo (isset($LANG['PENSOFT_DOWNLOAD'])?$LANG['PENSOFT_XLSX_DOWNLOAD']:'Pensoft Excel download');?></a></li>
-						<li><a href="../collections/download/downloadhandler.php?schema=pensoft&clid=<?php echo $clid; ?>" target="blank"><?php echo 'Pensoft vouchers'; ?></a></li>
+						<li><a href="voucherreporthandler.php?rtype=pensoftxlsx&clid=<?php echo $clid; ?>" target="_blank"><?php echo (isset($LANG['PENSOFT_XLSX_EXPORT'])?$LANG['PENSOFT_XLSX_EXPORT']:'Pensoft Excel Export');?></a></li>
 						<li>
 							<a href="#" onclick="openPopup('../collections/download/index.php?searchvar=<?php echo urlencode('clid='.$clid); ?>&noheader=1','repvouchers');return false;">
 								<?php echo (isset($LANG['VOUCHERONLY'])?$LANG['VOUCHERONLY']:'Occurrence vouchers only (DwC-A, CSV, Tab-delimited)'); ?>
