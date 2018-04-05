@@ -716,25 +716,12 @@ class ChecklistVoucherAdmin {
 
 		$clArr = array();
 		$kingdomArr = array();
-		$rankArr = array();
-		//Get upper hierarchy
-		$sql = 'SELECT t.tid, t2.sciname as parentstr, t2.rankid '.
-			'FROM fmchklsttaxalink c INNER JOIN taxa t ON c.tid = t.tid '.
-			'INNER JOIN taxaenumtree e ON c.tid = e.tid '.
-			'INNER JOIN taxa t2 ON e.parenttid = t2.tid '.
-			'WHERE (e.taxauthid = 1) AND (c.clid IN('.$clidStr.'))';
-		$rs = $this->conn->query($sql);
-		while($r = $rs->fetch_object()){
-			$clArr[$r->tid][$r->rankid] = $this->encodeStr($r->parentstr);
-			$rankArr[$r->rankid] = $r->rankid;
-		}
-		$rs->free();
-
 		//Get taxa data
 		$sql = 'SELECT t.tid, t.kingdomname, t.sciname, t.author, t.unitname1, t.unitname2, t.unitind3, t.unitname3, t.rankid, c.familyoverride '.
 			'FROM fmchklsttaxalink c INNER JOIN taxa t ON c.tid = t.tid '.
 			'INNER JOIN taxstatus ts ON c.tid = ts.tid '.
-			'WHERE (ts.taxauthid = 1) AND (c.clid IN('.$clidStr.'))';
+			'WHERE (ts.taxauthid = 1) AND (c.clid IN('.$clidStr.')) '.
+			'ORDER BY IFNULL(c.familyoverride, ts.family), t.sciname';
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
 			if(isset($kingdomArr[$r->kingdomname])) $kingdomArr[$r->kingdomname] += 1;
@@ -764,6 +751,20 @@ class ChecklistVoucherAdmin {
 					}
 				}
 			}
+		}
+		$rs->free();
+
+		$rankArr = array();
+		//Get upper hierarchy
+		$sql = 'SELECT t.tid, t2.sciname as parentstr, t2.rankid '.
+			'FROM fmchklsttaxalink c INNER JOIN taxa t ON c.tid = t.tid '.
+			'INNER JOIN taxaenumtree e ON c.tid = e.tid '.
+			'INNER JOIN taxa t2 ON e.parenttid = t2.tid '.
+			'WHERE (e.taxauthid = 1) AND (c.clid IN('.$clidStr.'))';
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			$clArr[$r->tid][$r->rankid] = $this->encodeStr($r->parentstr);
+			$rankArr[$r->rankid] = $r->rankid;
 		}
 		$rs->free();
 
