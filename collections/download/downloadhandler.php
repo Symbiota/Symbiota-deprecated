@@ -171,18 +171,6 @@ else{
 				$dwcaHandler->addCondition($_POST['customfield2'],$_POST['customtype2'],$_POST['customvalue2']);
 			}
 		}
-		elseif($schema == 'pensoft'){
-			$dwcaHandler->setCharSetOut('ISO-8859-1');
-			$dwcaHandler->setSchemaType('pensoft');
-			$dwcaHandler->setExtended(false);
-			$dwcaHandler->setDelimiter('csv');
-			$dwcaHandler->setRedactLocalities(1);
-			$dwcaHandler->setIncludeDets(0);
-			$dwcaHandler->setIncludeImgs(0);
-			$dwcaHandler->setIncludeAttributes(0);
-			$dwcaHandler->addCondition('clid','EQUALS',$_REQUEST['clid']);
-			$zip = false;
-		}
 		else{
 			//Is an occurrence download
 			$dwcaHandler->setCharSetOut($cSet);

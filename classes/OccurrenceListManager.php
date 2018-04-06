@@ -89,8 +89,8 @@ class OccurrenceListManager extends OccurrenceManager{
             $returnArr[$occId]["sex"] = $this->cleanOutStr($row->sex);
             $localitySecurity = $row->LocalitySecurity;
             if(!$localitySecurity || $canReadRareSpp
-                || (array_key_exists("CollEditor", $GLOBALS['USER_RIGHTS']) && in_array($collIdStr,$GLOBALS['USER_RIGHTS']["CollEditor"]))
-                || (array_key_exists("RareSppReader", $GLOBALS['USER_RIGHTS']) && in_array($collIdStr,$GLOBALS['USER_RIGHTS']["RareSppReader"]))){
+           		|| (array_key_exists("CollEditor", $GLOBALS['USER_RIGHTS']) && in_array($row->CollID,$GLOBALS['USER_RIGHTS']["CollEditor"]))
+           		|| (array_key_exists("RareSppReader", $GLOBALS['USER_RIGHTS']) && in_array($row->CollID,$GLOBALS['USER_RIGHTS']["RareSppReader"]))){
                 $returnArr[$occId]["locality"] = $this->cleanOutStr(str_replace('.,',',',$row->locality));
                 $returnArr[$occId]["collnumber"] = $this->cleanOutStr($row->recordnumber);
                 $returnArr[$occId]["habitat"] = $this->cleanOutStr($row->habitat);
@@ -169,12 +169,11 @@ class OccurrenceListManager extends OccurrenceManager{
 		$stmt = $this->conn->prepare($sql);
 		$stmt->bind_param('s', $searchName);
 		$stmt->execute();
-		if($rs = $stmt->get_result()){
-			while($r = $rs->fetch_object()){
-				if($searchName != $r->sciname) $retArr[$r->tid] = $r->sciname;
-			}
-			$rs->free();
+		$stmt->bind_result($tid, $sciname);
+		while($stmt->fetch()){
+			if($searchName != $sciname) $retArr[$tid] = $sciname;
 		}
+		$stmt->close();
 		return $retArr;
 	}
 }
