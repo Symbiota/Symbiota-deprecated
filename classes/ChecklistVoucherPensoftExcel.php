@@ -8,6 +8,7 @@ class ChecklistVoucherPensoftExcel extends ChecklistVoucherPensoft {
 
 	function __construct() {
 		parent::__construct();
+		ini_set('memory_limit','512M');
 	}
 
 	function __destruct(){
