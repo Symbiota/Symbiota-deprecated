@@ -1,6 +1,6 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($SERVER_ROOT.'/classes/ChecklistVoucherAdmin.php');
+include_once($SERVER_ROOT.'/classes/ChecklistVoucherPensoftExcel.php');
 
 $clid = $_REQUEST['clid'];
 $rType = $_REQUEST['rtype'];
