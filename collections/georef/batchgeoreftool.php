@@ -48,7 +48,9 @@ if(is_array($collid)) $collid = implode(',',$collid);
 $geoManager = new OccurrenceGeorefTools();
 $activeCollArr = explode(',', $collid);
 foreach($activeCollArr as $k => $id){
-	if(!in_array($id,$USER_RIGHTS["CollAdmin"]) && !in_array($id,$USER_RIGHTS["CollEditor"])) unset($activeCollArr[$k]);
+	if((!isset($USER_RIGHTS["CollAdmin"]) || !in_array($id,$USER_RIGHTS["CollAdmin"])) && (!isset($USER_RIGHTS["CollEditor"]) || !in_array($id,$USER_RIGHTS["CollEditor"]))){
+		unset($activeCollArr[$k]);
+	}
 }
 $geoManager->setCollId($IS_ADMIN?$collid:implode(',',$activeCollArr));
 $collMap = $geoManager->getCollMap();
@@ -150,7 +152,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 									foreach($collMap as $id => $collArr){
 										if(in_array($id, $USER_RIGHTS["CollAdmin"]) || in_array($id, $USER_RIGHTS["CollEditor"])){
 											echo '<div>';
-											echo '<input name="collid[]" type="checkbox" value="'.$id.'" /> ';
+											echo '<input name="collid[]" type="checkbox" value="'.$id.'" '.(in_array($id,$activeCollArr)?'CHECKED':'').' /> ';
 											echo $collArr['collectionname'].' ('.$collArr['code'].')';
 											echo '</div>';
 										}

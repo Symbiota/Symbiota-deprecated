@@ -15,11 +15,12 @@ $action = array_key_exists('submitaction',$_POST)?$_POST['submitaction']:'';
 $cleanManager = new TaxonomyCleaner();
 if(is_array($collid)) $collid = implode(',',$collid);
 $activeCollArr = explode(',', $collid);
+
 foreach($activeCollArr as $k => $id){
-	if(!in_array($id,$USER_RIGHTS["CollAdmin"])) unset($activeCollArr[$k]);
+	if(!isset($USER_RIGHTS["CollAdmin"]) || !in_array($id,$USER_RIGHTS["CollAdmin"])) unset($activeCollArr[$k]);
 }
+if(!$activeCollArr && strpos($collid, ',')) $collid = 0;
 $cleanManager->setCollId($IS_ADMIN?$collid:implode(',',$activeCollArr));
-$collMap = $cleanManager->getCollMap();
 
 $isEditor = false;
 if($IS_ADMIN){
@@ -155,6 +156,7 @@ elseif($activeCollArr){
 		<!-- inner text block -->
 		<div id="innertext">
 			<?php
+			$collMap = $cleanManager->getCollMap();
 			if($collid){
 				if($isEditor){
 					?>
@@ -181,7 +183,7 @@ elseif($activeCollArr){
 									foreach($collMap as $id => $collArr){
 										if(in_array($id, $USER_RIGHTS["CollAdmin"])){
 											echo '<div>';
-											echo '<input name="collid[]" type="checkbox" value="'.$id.'" /> ';
+											echo '<input name="collid[]" type="checkbox" value="'.$id.'" '.(in_array($id,$activeCollArr)?'CHECKED':'').' /> ';
 											echo $collArr['collectionname'].' ('.$collArr['code'].')';
 											echo '</div>';
 										}
