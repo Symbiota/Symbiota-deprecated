@@ -26,13 +26,6 @@ include($serverRoot."/header.php");
 <link rel="stylesheet" href="../css/jquery.bxslider.css">
 <script src="../js/jquery.bxslider.js"></script>
 <script>
-    $(function() {
-        $("#accordion").accordion({
-            collapsible: true,
-            heightStyle: "fill"
-        });
-    });
-
     $(document).ready(function () {
         $("#heightSlider").slider({
             range: "min",
