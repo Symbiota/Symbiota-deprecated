@@ -60,7 +60,7 @@ $(document).ready(function () {
                 <div class="centered">Search records of all digitized specimens of the OSU Herbaria, including non-Oregon taxa and type specimens.</div>
             </div>
         </a>
-        <a href="#" class="home-box garden-box">
+        <a href="<?php echo $clientRoot; ?>/garden/index.php" class="home-box garden-box">
             <img src="images/layout/garden-with-natives-box.jpg" alt="Garden with Natives">
             <h3>Garden with Natives</h3>
             <div class="box-overlay">

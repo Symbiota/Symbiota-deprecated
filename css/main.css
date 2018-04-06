@@ -247,6 +247,10 @@ img.image-right {
 	max-width: 1100px;
 	margin: 0 auto;
 }
+.garden-content {
+	max-width: 1100px;
+	margin: 0 auto;
+}
 /* responsive videos */
 .video-wrapper {
 	position:relative;
@@ -1058,9 +1062,6 @@ button.menu-toggle {
 		background-size: cover;
 		height: 200px;
 	}
-	.news-wrapper .inner-content {
-		display: block;
-	}
 	.news-wrapper .col1, .news-wrapper .col2 {
 		width: 100%;
 		padding: 0;
@@ -1109,4 +1110,440 @@ button.menu-toggle {
 	}
 }
 
+#innertext {
+	width: 97%;
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+	margin: 0 auto;
+}
 
+.navpath {
+	padding-left: 15px;
+	padding-top: 5px;
+}
+
+.native-banner-wrapper {
+	background: #9678C2;
+	height: 58px;
+	color: #ffffff;
+	padding: 10px;
+}
+.native-banner-wrapper h2 {
+	display: block;
+	font-size: 30px;
+}
+
+.garden-header-wrapper {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+	height: 566px;
+}
+.garden-header-wrapper .col2 {
+	flex: 1;
+	background: url("../images/layout/garden-with-natives-bg.jpg") no-repeat;
+	background-size: cover;
+}
+.garden-header-wrapper .col1 {
+	flex: 1;
+	padding: 20px 30px;
+	background: #4e1e97;
+	color: #ffffff;
+}
+.garden-header-wrapper .col1 .col-content {
+	width: 475px;
+	margin: 0 auto;
+	padding-left: 30px;
+}
+.garden-header-wrapper h2 {
+	color: #ffffff;
+	font-size: 30px;
+}
+
+.metro-wrapper {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+	width: 100%;
+	margin: 0 auto 30px;
+}
+.metro-wrapper .metro-col1 {
+	flex: 1;
+	background: url("../images/metro_logo.png") no-repeat;
+	background-size: cover;
+	width: 105px;
+	height: 41px;
+	padding: 10px;
+	float: left;
+}
+.metro-wrapper .metro-col2 {
+	flex: 1;
+	max-width: 700px;
+	float: right;
+	padding: 10px 20px;
+}
+
+.garden-content h2 {
+	display: block;
+	color: #4e1e97;
+	font-size: 30px;
+	margin-top: 20px;
+	margin-bottom: 0;
+	text-align:center;
+	width:100%;
+}
+
+.garden-content .home-boxes {
+	padding-top: 30px;
+}
+
+.garden-name-search-box {
+	width: 375px;
+	margin: 0 auto;
+	text-align:center;
+}
+
+
+div.gardenSearchTable {
+	border: 1px solid #75B04D;
+	background-color: #FFFFFF;
+	text-align: center;
+	border-collapse: collapse;
+	margin: 20px auto;
+}
+.divTable.gardenSearchTable .divTableCell, .divTable.gardenSearchTable .divTableHead {
+	border: 1px solid #75B04D;
+	padding: 3px 2px;
+}
+.divTable.gardenSearchTable .divTableBody .divTableCell {
+	font-size: 13px;
+}
+.divTable.gardenSearchTable .divTableHeading {
+	background: #75B04D;
+}
+.divTable.gardenSearchTable .divTableHeading .divTableHead {
+	font-size: 15px;
+	font-weight: normal;
+	color: #FFFFFF;
+	text-align: center;
+	border: 1px solid #FFFFFF;
+}
+.divTable.gardenSearchTable .divTableHeading .divTableHead:first-child {
+	border-left: none;
+}
+
+div.plantTypeCol {
+	width: 100%;
+	text-align: center;
+	border-collapse: collapse;
+}
+.divTable.plantTypeCol .divTableCell, .divTable.plantTypeCol .divTableHead {
+	border: 0px;
+	padding: 3px 2px;
+}
+.divTable.plantTypeCol .divTableBody .divTableCell {
+	font-size: 13px;
+	width: 150px;
+	height: 120px;
+}
+
+div.sunlightCol {
+	width: 100%;
+	text-align: center;
+	border-collapse: collapse;
+}
+.divTable.sunlightCol .divTableCell, .divTable.sunlightCol .divTableHead {
+	border: 0px solid #75B04D;
+	padding: 3px 2px;
+}
+.divTable.sunlightCol .divTableBody .divTableCell {
+	font-size: 13px;
+	width: 150px;
+	height: 120px;
+}
+
+div.moistureCol {
+	width: 100%;
+	text-align: center;
+	border-collapse: collapse;
+}
+.divTable.moistureCol .divTableCell, .divTable.moistureCol .divTableHead {
+	border: 0px solid #75B04D;
+	padding: 3px 2px;
+}
+.divTable.moistureCol .divTableBody .divTableCell {
+	font-size: 13px;
+	width: 150px;
+	height: 120px;
+}
+
+div.sizeCol {
+	width: 100%;
+	text-align: center;
+	border-collapse: collapse;
+}
+.divTable.sizeCol .divTableCell, .divTable.sizeCol .divTableHead {
+	border: 0px solid #75B04D;
+	padding: 3px 2px;
+}
+.divTable.sizeCol .divTableBody .divTableCell {
+	font-size: 13px;
+	width: 375px;
+}
+
+div.growthCol {
+	width: 100%;
+	text-align: center;
+	border-collapse: collapse;
+}
+.divTable.growthCol .divTableCell, .divTable.growthCol .divTableHead {
+	border: 0px solid #75B04D;
+	padding: 3px 2px;
+}
+.divTable.growthCol .divTableBody .divTableCell {
+	font-size: 20px;
+	width: 150px;
+	height: 70px;
+}
+
+.divTable{ display: table; }
+.divTableRow { display: table-row; }
+.divTableHeading { display: table-header-group;}
+.divTableCell, .divTableHead { display: table-cell;}
+.divTableHeading { display: table-header-group;}
+.divTableBody { display: table-row-group;}
+
+.featureCheckBox {
+	position: absolute;
+	left: -9999px;
+}
+.featureCheckBoxLabel {
+	display: inline-block;
+	cursor: pointer;
+	width: 95px;
+	height: 95px;
+	margin: auto;
+}
+.featureCheckBoxDiv {
+	background: white;
+	width: 110px;
+	height: 110px;
+	text-align: center;
+	margin: auto;
+}
+.featureCheckBox:checked ~ .featureCheckBoxDiv {
+	background: #D4E6C8;
+}
+.planttype1 {background: url("../images/plant_type_icon1.png") center; background-size: cover;}
+.planttype2 {background: url("../images/plant_type_icon2.png") center; background-size: cover;}
+.planttype3 {background: url("../images/plant_type_icon3.png") center; background-size: cover;}
+.planttype4 {background: url("../images/plant_type_icon4.png") center; background-size: cover;}
+.planttype5 {background: url("../images/plant_type_icon5.png") center; background-size: cover;}
+.planttype6 {background: url("../images/plant_type_icon6.png") center; background-size: cover;}
+.sunlight1 {background: url("../images/sunlight_icon1.png") center; background-size: cover;}
+.sunlight2 {background: url("../images/sunlight_icon2.png") center; background-size: cover;}
+.sunlight3 {background: url("../images/sunlight_icon3.png") center; background-size: cover;}
+.sunlight4 {background: url("../images/sunlight_icon4.png") center; background-size: cover;}
+.sunlight5 {background: url("../images/sunlight_icon5.png") center; background-size: cover;}
+.moisture1 {background: url("../images/moisture_icon1.png") center; background-size: cover;}
+.moisture2 {background: url("../images/moisture_icon2.png") center; background-size: cover;}
+.moisture3 {background: url("../images/moisture_icon3.png") center; background-size: cover;}
+.moisture4 {background: url("../images/moisture_icon4.png") center; background-size: cover;}
+.moisture5 {background: url("../images/moisture_icon5.png") center; background-size: cover;}
+
+.featureTextCheckBox {
+	position: absolute;
+	left: -9999px;
+}
+.featureTextCheckBoxLabel {
+	display: inline-block;
+	cursor: pointer;
+	width: 95px;
+	height: 30px;
+	margin: auto;
+}
+.featureTextCheckBoxDiv {
+	background: white;
+	width: 110px;
+	height: 50px;
+	display: flex;
+	align-items: center;
+	margin: auto;
+}
+.featureTextCheckBox:checked ~ .featureTextCheckBoxDiv {
+	background: #D4E6C8;
+}
+.unselectable {
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+
+.custom-label {
+	height: 10px;
+	position: relative;
+	width: 25px;
+	text-align: center;
+	top: -2px;
+	left: -4px;
+	color: black;
+	font-size:12px;
+}
+
+.custom-label-bar {
+	background: #4e1e97;
+	width: 3px;
+	height: 26px;
+	position: relative;
+	top: -2px;
+	left: 7px;
+}
+
+.feature-slider-range {
+	width: 360px;
+	margin: 0 auto;
+	margin-bottom: 20px;
+}
+
+.feature-slider-low-value {
+	float: left;
+}
+
+.feature-slider-high-value {
+	float: right;
+}
+
+.feature-slider-label {
+	width: 100%;
+	margin-top: 20px;
+	text-align: center;
+	font-size: 20px;
+}
+
+#heightSlider{
+	pointer-events: none;
+	width: 340px;
+	height: 15px;
+	display: block;
+	border: 1px solid #4e1e97;
+	border-top-left-radius: 0;
+	border-top-right-radius: 0;
+	border-bottom-left-radius: 0;
+	border-bottom-right-radius: 0;
+	margin: 0 auto;
+}
+#heightSlider .ui-widget-header {
+	overflow: hidden;
+	background: #A3CE7D;
+	height: 13px;
+	margin: 0;
+	cursor: none;
+}
+#heightSlider .ui-slider .ui-slider-range {
+	position: absolute;
+	z-index: 1;
+	font-size: .7em;
+	display: block;
+	border: 0;
+	background-position: 0 0;
+}
+#heightSlider .ui-slider-horizontal .ui-slider-range {
+	top: 0;
+	height: 100%;
+	overflow: hidden;
+}
+#heightSlider .ui-corner-all {
+	border-top-left-radius: 0;
+	border-top-right-radius: 0;
+	border-bottom-left-radius: 0;
+	border-bottom-right-radius: 0;
+}
+#height-handle {
+	background: transparent;
+	border: 0px;
+	cursor: col-resize;
+	position: absolute;
+	display: block;
+	z-index: 99;
+	pointer-events: auto;
+}
+
+#widthSlider{
+	pointer-events: none;
+	width: 340px;
+	height: 15px;
+	display: block;
+	border: 1px solid #4e1e97;
+	border-top-left-radius: 0;
+	border-top-right-radius: 0;
+	border-bottom-left-radius: 0;
+	border-bottom-right-radius: 0;
+	margin: 0 auto;
+}
+#widthSlider .ui-widget-header {
+	overflow: hidden;
+	background: #A3CE7D;
+	height: 13px;
+	margin: 0;
+	cursor: none;
+}
+#widthSlider .ui-slider .ui-slider-range {
+	position: absolute;
+	z-index: 1;
+	font-size: .7em;
+	display: block;
+	border: 0;
+	background-position: 0 0;
+}
+#widthSlider .ui-slider-horizontal .ui-slider-range {
+	top: 0;
+	height: 100%;
+	overflow: hidden;
+}
+#widthSlider .ui-corner-all {
+	border-top-left-radius: 0;
+	border-top-right-radius: 0;
+	border-bottom-left-radius: 0;
+	border-bottom-right-radius: 0;
+}
+#width-handle {
+	background: transparent;
+	border: 0px;
+	cursor: col-resize;
+	position: absolute;
+	display: block;
+	z-index: 99;
+	pointer-events: auto;
+}
+.advSearchToggleCheck {
+	position: absolute;
+	left: -9999px;
+}
+.advSearchToggleLabel {
+	display: flex;
+	align-items: center;
+	background-color: #75B04D;
+	cursor: pointer;
+	width: 150px;
+	height: 50px;
+	margin: auto;
+	font-size: 20px;
+	color: white;
+}
+#showAdvSearchFilters {
+	width: 100%;
+	text-align: center;
+	display: block;
+}
+#hideAdvSearchFilters {
+	width: 100%;
+	text-align: center;
+	display: none;
+}
+#advSearchWrapper {
+	display: none;
+}
