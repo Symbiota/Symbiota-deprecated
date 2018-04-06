@@ -2,7 +2,7 @@
 include_once($SERVER_ROOT.'/classes/ChecklistVoucherPensoft.php');
 
 define('EOL',(PHP_SAPI == 'cli') ? PHP_EOL : '<br />');
-require_once '../vendor/phpoffice/phpexcel/PHPExcel.php';
+require_once $SERVER_ROOT.'/vendor/phpoffice/phpexcel/PHPExcel.php';
 
 class ChecklistVoucherPensoftExcel extends ChecklistVoucherPensoft {
 
