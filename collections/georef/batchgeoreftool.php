@@ -295,7 +295,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 									<a href="#" onclick="analyseLocalityStr();"><img src="../../images/find.png" title="Analyse Locality string for embedded Lat/Long or UTM" style="width:15px;" /></a>
 								</span>
 								<?php
-								if(count($activeCollArr) == 1){
+								if(!strpos($collid,',')){
 									?>
 									<span style="margin-left:10px;">
 										<a href="#" onclick="openFirstRecSet();"><img src="../../images/edit.png" title="Edit first set of records" style="width:15px;" /></a>

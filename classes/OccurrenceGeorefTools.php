@@ -70,9 +70,6 @@ class OccurrenceGeorefTools {
 				if(array_key_exists('qprocessingstatus',$this->qryVars) && $this->qryVars['qprocessingstatus']){
 					$sql .= 'AND (processingstatus = "'.$this->qryVars['qprocessingstatus'].'") ';
 				}
-				else{
-					$orderBy .= 'processingstatus,';
-				}
 				if(array_key_exists('qlocality',$this->qryVars) && $this->qryVars['qlocality']){
 					$sql .= 'AND (locality LIKE "%'.$this->qryVars['qlocality'].'%") ';
 				}
