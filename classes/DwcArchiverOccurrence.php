@@ -272,7 +272,7 @@ class DwcArchiverOccurrence{
 				}
 				$sql = 'SELECT '.trim($sqlFrag,', ');
 			}
-			$sql .= ' FROM omoccurrences o INNER JOIN omcollections c ON o.collid = c.collid '.
+			$sql .= ' FROM omoccurrences o LEFT JOIN omcollections c ON o.collid = c.collid '.
 				'INNER JOIN guidoccurrences g ON o.occid = g.occid '.
 				'LEFT JOIN taxa t ON o.tidinterpreted = t.TID ';
 			$sql .= $tableJoinStr.$conditionSql;
