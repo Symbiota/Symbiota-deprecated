@@ -473,6 +473,8 @@ class TaxonProfile extends Manager {
 
 	//Set children data for taxon higher than species level
 	private function setSppData($page, $taxaLimit, $pid, $clid){
+		if(!is_numeric($page)) $page = 0;
+		if(!is_numeric($taxaLimit)) $taxaLimit = 50;
 		if($this->tid){
 			$this->sppArray = Array();
 			$start = ($page*$taxaLimit);
@@ -600,28 +602,38 @@ class TaxonProfile extends Manager {
 		$retArr = array();
 		$sql = 'SELECT t.tid, ts.family, t.sciname, t.author, t.rankid, ts.parenttid '.
 			'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
-			'WHERE (ts.taxauthid = '.$this->taxAuthId.') ';
+			'WHERE (ts.taxauthid = ?) ';
 		if(is_numeric($searchStr)){
-			$sql .= 'AND (t.TID = '.$searchStr.') ';
+			$sql .= 'AND (t.TID = ?) ';
 		}
 		else{
-			$sql .= 'AND (t.SciName = "'.$this->cleanInStr($searchStr).'") ';
+			$sql .= 'AND (t.SciName = ?) ';
 		}
-		$rs = $this->conn->query($sql);
-		while($r = $rs->fetch_object()){
-			$retArr[$r->tid]['sciname'] = $r->sciname;
-			$retArr[$r->tid]['family'] = $r->family;
-			$retArr[$r->tid]['author'] = $r->author;
-			$retArr[$r->tid]['rankid'] = $r->rankid;
-			$retArr[$r->tid]['parenttid'] = $r->parenttid;
+		$stmt = $this->conn->prepare($sql);
+		if(is_numeric($searchStr)){
+			$stmt->bind_param('is', $this->taxAuthId, $searchStr);
 		}
-		$rs->free();
+		else{
+			$stmt->bind_param('is', $this->taxAuthId, $searchStr);
+		}
+		$stmt->execute();
+		$stmt->bind_result($tid, $family, $sciname, $author, $rankid, $parentTid);
+
+		while($stmt->fetch()){
+			$retArr[$tid]['sciname'] = $sciname;
+			$retArr[$tid]['family'] = $family;
+			$retArr[$tid]['author'] = $author;
+			$retArr[$tid]['rankid'] = $rankid;
+			$retArr[$tid]['parenttid'] = $parentTid;
+		}
+		$stmt->close();
+
 		if(count($retArr) > 1){
 			//Get parents so that user can determine which taxon they are looking for
 			$sql2 = 'SELECT e.tid, t.tid AS parenttid, t.sciname, t.rankid, ts.parenttid AS directparenttid '.
 				'FROM taxa t INNER JOIN taxaenumtree e ON t.tid = e.parenttid '.
 				'INNER JOIN taxstatus ts ON t.tid = ts.tid '.
-				'WHERE (e.taxauthid = 1) AND (ts.taxauthid = 1) AND (e.tid IN('.implode(array_keys($retArr),',').'))';
+				'WHERE (e.taxauthid = '.$this->taxAuthId.') AND (ts.taxauthid = '.$this->taxAuthId.') AND (e.tid IN('.implode(array_keys($retArr),',').'))';
 			$rs2 = $this->conn->query($sql2);
 			while($r2 = $rs2->fetch_object()){
 				$retArr[$tid]['parent'][$parenttid] = array('sciname' => $r2->sciname, 'rankid' => $r2->rankid, 'directparenttid' => $r2->directparenttid);
@@ -633,17 +645,15 @@ class TaxonProfile extends Manager {
 
 	public function getCloseTaxaMatches($testValue){
 		$retArr = array();
-		$searchName = $this->cleanInStr($testValue);
 		$sql = 'SELECT tid, sciname FROM taxa WHERE soundex(sciname) = soundex(?)';
 		$stmt = $this->conn->prepare($sql);
-		$stmt->bind_param('s', $searchName);
+		$stmt->bind_param('s', $testValue);
 		$stmt->execute();
-		if($rs = $stmt->get_result()){
-			while($r = $rs->fetch_object()){
-				if($testValue != $r->sciname) $retArr[$r->tid] = $r->sciname;
-			}
-			$rs->free();
+		$stmt->bind_result($tid, $sciname);
+		while($stmt->fetch()){
+			if($testValue != $sciname) $retArr[$tid] = $sciname;
 		}
+		$stmt->close();
 		return $retArr;
 	}
 
