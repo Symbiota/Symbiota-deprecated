@@ -13,6 +13,16 @@ $lang = array_key_exists("lang",$_REQUEST)?$_REQUEST["lang"]:$DEFAULT_LANG;
 $taxaLimit = array_key_exists("taxalimit",$_REQUEST)?$_REQUEST["taxalimit"]:50;
 $page = array_key_exists("page",$_REQUEST)?$_REQUEST["page"]:0;
 
+//Sanitation
+$taxonValue = preg_replace('/[^a-zA-Z0-9-\s]/', '', $taxonValue);
+$taxonValue = htmlspecialchars($taxonValue, ENT_QUOTES, 'UTF-8');
+if(!is_numeric($tid)) $tid = 0;
+if(!is_numeric($taxAuthId)) $taxAuthId = 1;
+if(!is_numeric($clid)) $clid = 0;
+if(!is_numeric($pid)) $pid = 1;
+if(!is_numeric($taxaLimit)) $taxaLimit = 50;
+if(!is_numeric($page)) $page = 0;
+
 $taxonManager = new TaxonProfile();
 if($taxAuthId) $taxonManager->setTaxAuthId($taxAuthId);
 if(!$tid && $taxonValue){
@@ -22,7 +32,7 @@ if(!$tid && $taxonValue){
 }
 
 if($pid === '' && isset($DEFAULT_PROJ_ID) && $DEFAULT_PROJ_ID) $pid = $DEFAULT_PROJ_ID;
-if($lang) $taxonManager->setLanguage($lang);
+if($lang) $lang = $taxonManager->setLanguage($lang);
 $tidSubmit = $tid;
 $tid = $taxonManager->setTid($tidSubmit);
 
@@ -409,7 +419,7 @@ else{
 	?>
 	<tr><td>
 		<div style="margin-top:45px;margin-left:20px">
-			<h1><?php echo '<i>'.$taxonValue.'</i> '.(isset($LANG['NOT_FOUND'])?$LANG['NOT_FOUND']:'not found'); ?></h1>
+			<h1><?php echo '<i>'.htmlspecialchars($taxonValue, ENT_QUOTES, 'UTF-8').'</i> '.(isset($LANG['NOT_FOUND'])?$LANG['NOT_FOUND']:'not found'); ?></h1>
 			<?php
 			if($matchArr = $taxonManager->getCloseTaxaMatches($taxonValue)){
 				?>

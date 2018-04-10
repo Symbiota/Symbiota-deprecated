@@ -762,6 +762,8 @@ class TaxonProfile extends Manager {
 		if($lang == 'en' || $lang == 'english') $this->langArr = array('en','english');
 		elseif($lang == 'es' || $lang == 'spanish') $this->langArr = array('es','spanish','espanol');
 		elseif($lang == 'fr' || $lang == 'french') $this->langArr =  array('fr','french');
+		else $lang = 'en';
+		return $lang;
 	}
 }
 ?>
