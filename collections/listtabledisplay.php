@@ -195,7 +195,7 @@ $urlPrefix = (isset($_SERVER['HTTPS'])?'https://':'http://').$_SERVER['HTTP_HOST
 							<td><?php echo $occArr['state']; ?></td>
 							<td><?php echo $occArr['county']; ?></td>
 							<td><?php echo ((strlen($occArr['locality'])>80)?substr($occArr['locality'],0,80).'...':$occArr['locality']); ?></td>
-							<td><?php echo ((strlen($occArr['habitat'])>80)?substr($occArr['habitat'],0,80).'...':$occArr['habitat']); ?></td>
+							<td><?php if(isset($occArr['habitat'])) echo ((strlen($occArr['habitat'])>80)?substr($occArr['habitat'],0,80).'...':$occArr['habitat']); ?></td>
 							<td><?php echo (array_key_exists("elev",$occArr)?$occArr['elev']:""); ?></td>
 							<td><?php echo (array_key_exists("date",$occArr)?$occArr['date']:""); ?></td>
 							<td><?php echo $occArr['collector']; ?></td>
