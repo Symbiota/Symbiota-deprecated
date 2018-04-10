@@ -139,13 +139,20 @@ if($isEditor){
 			}
 
 			function changeFormExport(action,target){
-				document.selectform.action = action;
-				document.selectform.target = target;
+				var f = document.selectform;
+				if(action == "labelsword.php" && document.getElementById('packetradio').checked == true){
+					alert("Packet labels are not yet available as a Word document");
+					return false;
+				}
+				f.action = action;
+				f.target = target;
+				return true;
 			}
 
 			function changeAnnoFormExport(action,target){
-				document.annoselectform.action = action;
-				document.annoselectform.target = target;
+				var f = document.annoselectform;
+				f.action = action;
+				f.target = target;
 			}
 
 			function checkPrintOnlyCheck(f){
@@ -302,7 +309,7 @@ if($isEditor){
 						if($action == "Filter Specimen Records"){
 							if($occArr){
 								?>
-								<form name="selectform" id="selectform" action="defaultlabels.php" method="post" onsubmit="return validateSelectForm(this);">
+								<form name="selectform" id="selectform" action="labels.php" method="post" onsubmit="return validateSelectForm(this);">
 									<div style="margin-top: 15px; margin-left: 15px;">
 										<input name="" value="" type="checkbox" onclick="selectAll(this);" />
 										Select/Deselect all Specimens
@@ -401,21 +408,22 @@ if($isEditor){
 										}
 										?>
 										<fieldset style="float:left;margin:10px;width:150px;">
-											<legend><b>Rows Per Page</b></legend>
-											<input type="radio" name="rpp" value="1" /> 1<br/>
-											<input type="radio" name="rpp" value="2" checked /> 2<br/>
-											<input type="radio" name="rpp" value="3" /> 3<br/>
+											<legend><b>Label Format</b></legend>
+											<input type="radio" name="labelformat" value="1" /> 1 row per page<br/>
+											<input type="radio" name="labelformat" value="2" checked /> 2 row per page<br/>
+											<input type="radio" name="labelformat" value="3" /> 3 row per page<br/>
+											<input id="packetradio" type="radio" name="labelformat" value="packet" /> packet labels<br/>
 										</fieldset>
 										<div style="float:left;margin: 15px 50px;">
 											<input type="hidden" name="collid" value="<?php echo $collid; ?>" />
-											<input type="submit" name="submitaction" onclick="changeFormExport('defaultlabels.php','_blank');" value="Print in Browser" />
+											<input type="submit" name="submitaction" onclick="changeFormExport('labels.php','_blank');" value="Print in Browser" />
 											<br/><br/>
-											<input type="submit" name="submitaction" onclick="changeFormExport('defaultlabels.php','_self');" value="Export to CSV" />
+											<input type="submit" name="submitaction" onclick="changeFormExport('labels.php','_self');" value="Export to CSV" />
 											<?php
 											if($reportsWritable){
 												?>
 												<br/><br/>
-												<input type="submit" name="submitaction" onclick="changeFormExport('defaultlabelsexport.php','_self');" value="Export to DOCX" />
+												<input type="submit" name="submitaction" onclick="return changeFormExport('labelsword.php','_self');" value="Export to DOCX" />
 												<?php
 											}
 											?>

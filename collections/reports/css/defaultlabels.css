@@ -1,0 +1,111 @@
+body {
+	font-family:arial,sans-serif;
+}
+
+table.labels {
+	table-layout:fixed;
+	width:100%;
+	page-break-before:auto;
+	page-break-inside:avoid;
+}
+
+table.labels td {
+	width: 600px;
+	font-size:10pt;
+}
+
+p.printbreak {
+	page-break-after:always;
+}
+
+.lheader {
+	width:100%; 
+	text-align:center; 
+	font:bold 14pt arial,sans-serif; 
+	margin-bottom:10px;
+}
+
+.family {
+	width:100%;
+	text-align:right;
+}
+
+.scientificnamediv {
+	font-size:11pt;
+}
+
+.identifiedbydiv {
+	margin-left:15px;
+}
+
+.identificationreferences {
+	margin-left:15px;
+}
+
+.identificationremarks {
+	margin-left:15px;
+}
+
+.taxonremarks {
+	margin-left:15px;
+}
+
+.loc1div {
+	font-size:11pt;
+}
+
+.country {
+	font-weight:bold;
+}
+
+.stateprovince {
+	font-weight:bold;
+}
+
+.county {
+	font-weight:bold;
+}
+
+.associatedtaxa {
+	font-style:italic;
+}
+
+.collectordiv {
+	margin-top:10px;
+}
+
+.recordnumber {
+	margin-left:10px;
+}
+
+.associatedcollectors {
+	margin-left:15px;
+	clear:both;
+}
+
+.cnbarcode {
+	width:100%; 
+	text-align:center;
+}
+
+.lfooter {
+	width:100%; 
+	text-align:center; 
+	font:bold 12pt arial,sans-serif; 
+	padding-top:10px;
+	clear:both;
+}
+
+.barcodeonly {
+	width:220px; 
+	height:50px; 
+	float:left;
+	padding:10px; 
+	text-align:center; 
+}
+
+.symbbarcode {
+	width:100%; 
+	text-align:center;
+	margin-top:10px;
+}

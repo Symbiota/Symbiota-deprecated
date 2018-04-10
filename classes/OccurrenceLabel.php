@@ -440,6 +440,24 @@ class OccurrenceLabel{
 	}
 
 	//Misc functions
+	function parseCSS($fileName){
+		global $SERVER_ROOT;
+		if(!$fileName) $fileName = 'defaultlabels.css';
+		$fh = fopen($SERVER_ROOT.'/collections/reports/css/'.$fileName);
+		$retArr = array();
+		preg_match_all('/(.+?)\s?\{\s?(.+?)\s?\}/', $css, $matches);
+		foreach($matches[0] AS $i => $original){
+			foreach(explode(';', $matches[2][$i]) AS $attr){
+				if (strlen(trim($attr)) > 0){
+					list($name, $value) = explode(':', $attr);
+					$retArr[$matches[1][$i]][trim($name)] = trim($value);
+				}
+			}
+		}
+			return $retArr;
+	}
+
+	//Internal cleaning functions
 	private function cleanInStr($str){
 		$newStr = trim($str);
 		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
