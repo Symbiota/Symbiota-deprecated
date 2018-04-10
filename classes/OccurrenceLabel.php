@@ -31,7 +31,7 @@ class OccurrenceLabel{
 			$sqlWhere = '';
 			$sqlOrderBy = '';
 			if($postArr['taxa']){
-				$sqlWhere .= 'AND (o.sciname = "'.$this->cleanInStr($postArr['taxa']).'") ';
+				$sqlWhere .= 'AND (o.sciname LIKE "'.$this->cleanInStr($postArr['taxa']).'%") ';
 			}
 			if($postArr['labelproject']){
 				$sqlWhere .= 'AND (o.labelproject = "'.$this->cleanInStr($postArr['labelproject']).'") ';
@@ -280,26 +280,14 @@ class OccurrenceLabel{
 	public function getLabelProjects(){
 		$retArr = array();
 		if($this->collid){
-			$sql = 'SELECT DISTINCT labelproject, observeruid '.
-				'FROM omoccurrences '.
-				'WHERE labelproject IS NOT NULL AND collid = '.$this->collid.' ';
+			$sql = 'SELECT DISTINCT labelproject FROM omoccurrences WHERE labelproject IS NOT NULL AND collid = '.$this->collid.' ';
 			if($this->collArr['colltype'] == 'General Observations') $sql .= 'AND (observeruid = '.$GLOBALS['SYMB_UID'].') ';
-			$sql .= 'ORDER BY labelproject';
 			$rs = $this->conn->query($sql);
-			$altArr = array();
 			while($r = $rs->fetch_object()){
-				if($GLOBALS['SYMB_UID'] == $r->observeruid){
-					$retArr[] = $r->labelproject;
-				}
-				else{
-					$altArr[] = $r->labelproject;
-				}
+				$retArr[] = $r->labelproject;
 			}
+			sort($retArr);
 			$rs->free();
-			if($altArr){
-				if($retArr) $retArr[] = '------------------';
-				$retArr = array_merge($retArr,$altArr);
-			}
 		}
 		return $retArr;
 	}

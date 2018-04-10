@@ -258,7 +258,7 @@ if($isEditor){
 							<div style="margin:3px;clear:both;">
 								Label Projects:
 								<select name="labelproject" >
-									<option value=""></option>
+									<option value="">All Projects</option>
 									<option value="">-------------------------</option>
 									<?php
 									$lProj = '';
