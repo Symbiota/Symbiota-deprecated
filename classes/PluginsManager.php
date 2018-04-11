@@ -144,6 +144,7 @@ class PluginsManager {
 				$files = $reducedFileArr;
 			}
 			else{
+				unlink($previousArr);
 				unset($previousArr);
 				$previousArr = array();
 			}
