@@ -20,46 +20,47 @@ class PluginsManager {
 
 	private function setSlideShow($ssid,$numSlides,$numDays,$imageType,$clid,$dayInterval){
 		global $SERVER_ROOT;
+		$previousFile = $SERVER_ROOT.'/temp/slideshow/'.$ssid.'_previous.json';
+		$infoFile = $SERVER_ROOT.'/temp/slideshow/'.$ssid.'_info.json';
 		$currentDate = date("Y-m-d");
-		$replace = 0;
-		if(file_exists($SERVER_ROOT.'/temp/slideshow/'.$ssid.'_info.json')){
-			$oldArr = json_decode(file_get_contents($SERVER_ROOT.'/temp/slideshow/'.$ssid.'_info.json'), true);
-			$lastDate = $oldArr['lastDate'];
+		$replace = false;
+		$lastCLID = '';
+		if(file_exists($infoFile)){
+			$oldArr = json_decode(file_get_contents($infoFile), true);
 			$lastCLID = $oldArr['clid'];
-			$lastNumSlides = $oldArr['numslides'];
-			$lastNumDays = $oldArr['numdays'];
-			$lastImageType = $oldArr['imagetype'];
-			$replaceDate = date('Y-m-d', strtotime($lastDate. ' + '.$dayInterval.' days'));
-			if(($currentDate > $replaceDate) || ($clid != $lastCLID) || ($numSlides != $lastNumSlides) || ($numDays != $lastNumDays) || ($imageType != $lastImageType)){
-				$replace = 1;
-			}
+			$replaceDate = date('Y-m-d', strtotime($oldArr['lastDate']. ' + '.$dayInterval.' days'));
+			if($currentDate > $replaceDate) $replace = true;
+			elseif($clid != $lastCLID) $replace = true;
+			elseif($numSlides != $oldArr['numslides']) $replace = true;
+			elseif($numDays != $oldArr['numdays']) $replace = true;
+			elseif($imageType != $oldArr['imagetype']) $replace = true;
 		}
 		else{
-			$replace = 1;
+			$replace = true;
 		}
 
-		if($replace == 1){
+		if($replace){
 			ini_set('max_execution_time', 180); //180 seconds = 3 minutes
 			$sinceDate = date('Y-m-d', strtotime($currentDate. ' - '.$numDays.' days'));
 
-			//Delete old files
+			$previousArr = Array();
 			if($clid){
-				$previous = Array();
-				if(file_exists($SERVER_ROOT.'/temp/slideshow/'.$ssid.'_previous.json')){
-					$previous = json_decode(file_get_contents($SERVER_ROOT.'/temp/slideshow/'.$ssid.'_previous.json'), true);
-					unlink($SERVER_ROOT.'/temp/slideshow/'.$ssid.'_previous.json');
+				if(file_exists($previousFile)){
+					$previousArr = json_decode(file_get_contents($previousFile), true);
+					unlink($previousArr);
 					if($clid != $lastCLID){
-						$previous = Array();
+						unset($previousArr);
+						$previousArr = Array();
 					}
 				}
 			}
 			else{
-				if(file_exists($SERVER_ROOT.'/temp/slideshow/'.$ssid.'_previous.json')){
-					unlink($SERVER_ROOT.'/temp/slideshow/'.$ssid.'_previous.json');
+				if(file_exists($previousFile)){
+					unlink($previousFile);
 				}
 			}
-			if(file_exists($SERVER_ROOT.'/temp/slideshow/'.$ssid.'_info.json')){
-				unlink($SERVER_ROOT.'/temp/slideshow/'.$ssid.'_info.json');
+			if(file_exists($infoFile)){
+				unlink($infoFile);
 			}
 
 			//Create new files
@@ -99,59 +100,62 @@ class PluginsManager {
 			}
 			$sql .= 'ORDER BY i.sortsequence LIMIT 200 ';
 			//echo '<div>'.$sql.'</div>';
+			//Set local domain
+			$localDomain = "http://";
+			if((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || $_SERVER['SERVER_PORT'] == 443) $localDomain = "https://";
+			$localDomain .= $_SERVER["SERVER_NAME"];
+			if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $localDomain .= ':'.$_SERVER["SERVER_PORT"];
+			//Get records
 			$cnt = 1;
-			$imgIdArr = Array();
  			$conn = MySQLiConnectionFactory::getCon("readonly");
 			$rs = $conn->query($sql);
 			while(($row = $rs->fetch_object()) && ($cnt < ($numSlides + 1))){
-				if(!in_array($row->imgid, $previous)){
-					$file = $row->url;
-					if (substr($row->url, 0, 1) == '/'){
-						//If imageDomain variable is set within symbini file, image
-						if(isset($GLOBALS['imageDomain']) && $GLOBALS['imageDomain']){
-							$file = $GLOBALS['imageDomain'].$row->url;
-						}
-						else{
-							//Use local domain
-							$domain = "http://";
-							if((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || $_SERVER['SERVER_PORT'] == 443) $domain = "https://";
-							$domain .= $_SERVER["SERVER_NAME"];
-							if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $domain .= ':'.$_SERVER["SERVER_PORT"];
-							$file = $domain.$row->url;
-						}
-					}
+				$file = $row->url;
+				if (substr($row->url, 0, 1) == '/'){
+					//If imageDomain variable is set within symbini file, image
+					if(isset($GLOBALS['imageDomain']) && $GLOBALS['imageDomain']) $file = $GLOBALS['imageDomain'].$row->url;
+					else $file = $localDomain.$row->url;
+				}
 
-					if($size = ImageShared::getImgDim(str_replace(' ', '%20', $file))){
-						$width = $size[0];
-						$height = $size[1];
-						$files[$row->imgid]['url'] = $file;
-						$files[$row->imgid]['width'] = $width;
-						$files[$row->imgid]['height'] = $height;
-						$files[$row->imgid]['tid'] = $row->tid;
-						$files[$row->imgid]['occid'] = $row->occid;
-						$files[$row->imgid]['photographer'] = $row->photographer;
-						$files[$row->imgid]['owner'] = $row->owner;
-						$files[$row->imgid]['sciname'] = $row->sciname;
-						$files[$row->imgid]['occsciname'] = $row->occsciname;
-						$files[$row->imgid]['photographerName'] = $row->photographerName;
-						$files[$row->imgid]['identifier'] = $row->identifier;
-						if($clid) $imgIdArr[] = $row->imgid;
-						$cnt++;
-					}
+				if($size = ImageShared::getImgDim(str_replace(' ', '%20', $file))){
+					$width = $size[0];
+					$height = $size[1];
+					$files[$row->imgid]['url'] = $file;
+					$files[$row->imgid]['width'] = $width;
+					$files[$row->imgid]['height'] = $height;
+					$files[$row->imgid]['tid'] = $row->tid;
+					$files[$row->imgid]['occid'] = $row->occid;
+					$files[$row->imgid]['photographer'] = $row->photographer;
+					$files[$row->imgid]['owner'] = $row->owner;
+					$files[$row->imgid]['sciname'] = $row->sciname;
+					$files[$row->imgid]['occsciname'] = $row->occsciname;
+					$files[$row->imgid]['photographerName'] = $row->photographerName;
+					$files[$row->imgid]['identifier'] = $row->identifier;
+					$cnt++;
 				}
 			}
 			$rs->free();
 			$conn->close();
+
+			//Remove previous slideshow images, unless there are less than 10 images available
+			$reducedFileArr = array_diff_key($files, array_flip($previousArr));
+			if(count($reducedFileArr) > 10){
+				$previousArr = array_merge($previousArr,array_keys($files));
+				$files = $reducedFileArr;
+			}
+			else{
+				unset($previousArr);
+				$previousArr = array();
+			}
 			$ssIdInfo['files'] = $files;
-			$previous = array_merge($previous,$imgIdArr);
 
 			//Save data to slideshow history/configuration files
 			if($clid){
-				$fp = fopen($SERVER_ROOT.'/temp/slideshow/'.$ssid.'_previous.json', 'w');
-				fwrite($fp, json_encode($previous));
+				$fp = fopen($previousFile, 'w');
+				fwrite($fp, json_encode($previousArr));
 				fclose($fp);
 			}
-			$fp = fopen($SERVER_ROOT.'/temp/slideshow/'.$ssid.'_info.json', 'w');
+			$fp = fopen($infoFile, 'w');
 			fwrite($fp, json_encode($ssIdInfo));
 			fclose($fp);
 		}
