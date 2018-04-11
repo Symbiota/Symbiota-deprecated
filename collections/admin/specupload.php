@@ -799,23 +799,26 @@ $duManager->loadFieldMap();
 						<fieldset style="width:95%;padding:15px">
 							<legend style="font-weight:bold;font-size:120%;">Notes from Nature File Import</legend>
 							<?php
-							$duManager->echoFieldMapTable(true, 'spec')
+							if($duManager->echoFieldMapTable(true, 'spec')){
+								?>
+								<div style="margin:10px 0px;">
+									Processing Status:
+									<select name="processingstatus">
+										<option value="">Leave as is / No Explicit Setting</option>
+										<option value="">--------------------------</option>
+										<?php
+										foreach($processingList as $ps){
+											echo '<option value="'.$ps.'">'.ucwords($ps).'</option>';
+										}
+										?>
+									</select>
+								</div>
+								<div style="margin:20px;">
+									<input type="submit" name="action" value="Start Upload" />
+								</div>
+								<?php
+							}
 							?>
-							<div style="margin:10px 0px;">
-								Processing Status:
-								<select name="processingstatus">
-									<option value="">Leave as is / No Explicit Setting</option>
-									<option value="">--------------------------</option>
-									<?php
-									foreach($processingList as $ps){
-										echo '<option value="'.$ps.'">'.ucwords($ps).'</option>';
-									}
-									?>
-								</select>
-							</div>
-							<div style="margin:20px;">
-								<input type="submit" name="action" value="Start Upload" />
-							</div>
 						</fieldset>
 						<input name="matchcatnum" type="hidden" value="0" />
 						<input name="matchothercatnum" type="hidden" value="0" />

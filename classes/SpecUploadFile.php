@@ -43,7 +43,7 @@ class SpecUploadFile extends SpecUploadBase{
 					return false;
 				}
 			}
-			//If a zip file, unpackage and assume that first and/or only file is the occurrrence file
+			//If a zip file, unpackage and assume that last or only file is the occurrrence file
 			if($finalPath && substr($this->ulFileName,-4) == ".zip"){
 				$this->ulFileName = '';
 				$zipFilePath = $finalPath;
@@ -55,21 +55,23 @@ class SpecUploadFile extends SpecUploadBase{
 						if(substr($fileName,0,2) != '._'){
 							$ext = strtolower(substr(strrchr($fileName, '.'), 1));
 							if($ext == 'csv' || $ext == 'txt'){
+								$this->ulFileName = $fileName;
 								if($this->uploadType != $this->NFNUPLOAD || stripos($fileName,'.reconcile.')){
-									$this->ulFileName = $fileName;
-									$zip->extractTo($this->uploadTargetPath,$fileName);
-									$zip->close();
-									unlink($zipFilePath);
 									break;
 								}
 							}
 						}
+					}
+					if($this->ulFileName){
+						$zip->extractTo($this->uploadTargetPath,$this->ulFileName);
 					}
 				}
 				else{
 					echo 'failed, code:' . $res;
 					return false;
 				}
+				$zip->close();
+				unlink($zipFilePath);
 			}
 		}
 		return $this->ulFileName;

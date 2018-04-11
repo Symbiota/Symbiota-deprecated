@@ -225,23 +225,22 @@ class SpecUploadBase extends SpecUpload{
 	}
 
 	public function echoFieldMapTable($autoMap, $mode){
-
 		$prefix = '';
 		$fieldMap = $this->fieldMap;
 		$symbFields = $this->symbFields;
 		$sourceArr = $this->sourceArr;
 		$translationMap = array('accession'=>'catalognumber','accessionid'=>'catalognumber','accessionnumber'=>'catalognumber',
-				'taxonfamilyname'=>'family','scientificname'=>'sciname','species'=>'specificepithet','commonname'=>'taxonremarks',
-				'observer'=>'recordedby','collector'=>'recordedby','primarycollector'=>'recordedby','field:collector'=>'recordedby','collectedby'=>'recordedby',
-				'collectornumber'=>'recordnumber','collectionnumber'=>'recordnumber','field:collectorfieldnumber'=>'recordnumber',
-				'datecollected'=>'eventdate','date'=>'eventdate','collectiondate'=>'eventdate','observedon'=>'eventdate','dateobserved'=>'eventdate',
-				'cf' => 'identificationqualifier','detby'=>'identifiedby','determinor'=>'identifiedby','determinationdate'=>'dateidentified',
-				'placestatename'=>'stateprovince','state'=>'stateprovince','placecountyname'=>'county','municipiocounty'=>'county',
-				'location'=>'locality','field:localitydescription'=>'locality','latitude'=>'verbatimlatitude','longitude'=>'verbatimlongitude',
-				'elevationmeters'=>'minimumelevationinmeters','field:associatedspecies'=>'associatedtaxa',
-				'specimennotes'=>'occurrenceremarks','notes'=>'occurrenceremarks','generalnotes'=>'occurrenceremarks',
-				'plantdescription'=>'verbatimattributes','description'=>'verbatimattributes','field:habitat'=>'habitat','habitatdescription'=>'habitat',
-				'subject_references'=>'tempfield01','subject_recordid'=>'tempfield02');
+			'taxonfamilyname'=>'family','scientificname'=>'sciname','species'=>'specificepithet','commonname'=>'taxonremarks',
+			'observer'=>'recordedby','collector'=>'recordedby','primarycollector'=>'recordedby','field:collector'=>'recordedby','collectedby'=>'recordedby',
+			'collectornumber'=>'recordnumber','collectionnumber'=>'recordnumber','field:collectorfieldnumber'=>'recordnumber',
+			'datecollected'=>'eventdate','date'=>'eventdate','collectiondate'=>'eventdate','observedon'=>'eventdate','dateobserved'=>'eventdate',
+			'cf' => 'identificationqualifier','detby'=>'identifiedby','determinor'=>'identifiedby','determinationdate'=>'dateidentified',
+			'placestatename'=>'stateprovince','state'=>'stateprovince','placecountyname'=>'county','municipiocounty'=>'county',
+			'location'=>'locality','field:localitydescription'=>'locality','latitude'=>'verbatimlatitude','longitude'=>'verbatimlongitude',
+			'elevationmeters'=>'minimumelevationinmeters','field:associatedspecies'=>'associatedtaxa',
+			'specimennotes'=>'occurrenceremarks','notes'=>'occurrenceremarks','generalnotes'=>'occurrenceremarks',
+			'plantdescription'=>'verbatimattributes','description'=>'verbatimattributes','field:habitat'=>'habitat','habitatdescription'=>'habitat',
+			'subject_references'=>'tempfield01','subject_recordid'=>'tempfield02');
 		if($mode == 'ident'){
 			$prefix = 'ID-';
 			$fieldMap = $this->identFieldMap;
@@ -264,9 +263,9 @@ class SpecUploadBase extends SpecUpload{
 			if($symbField != 'dbpk') $sourceSymbArr[$fArr["field"]] = $symbField;
 		}
 
-		if($this->uploadType == $this->NFNUPLOAD && !in_array('subject_references', $this->sourceArr) && !in_array('recordid', $this->sourceArr)){
-			echo '<div style="color:red">ERROR: input field does not contain proper identifier field (e.g. subject_references, recordID)</div>';
-			return;
+		if($this->uploadType == $this->NFNUPLOAD && !in_array('subject_references', $this->sourceArr) && !in_array('subject_recordid', $this->sourceArr)){
+			echo '<div style="color:red">ERROR: input file does not contain proper identifier field (e.g. occid as subject_references or recordID as subject_recordid)</div>';
+			return false;
 		}
 		//Output table rows for source data
 		echo '<table class="styledtable" style="width:600px;font-family:Arial;font-size:12px;">';
@@ -324,6 +323,7 @@ class SpecUploadBase extends SpecUpload{
 			}
 		}
 		echo '</table>';
+		return true;
 	}
 
 	public function saveFieldMap($newTitle = ''){
