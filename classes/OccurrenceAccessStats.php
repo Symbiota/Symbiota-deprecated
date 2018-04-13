@@ -38,7 +38,8 @@ class OccurrenceAccessStats {
 	public function recordAccessEvent($occid,$accessType){
 		$status = false;
 		if(is_numeric($occid)){
-			$sql = 'INSERT INTO omoccuraccessstats '.
+			/*
+			 $sql = 'INSERT INTO omoccuraccessstats '.
 				'SET occid='.$occid.', accessdate="'.date('Y-m-d').'", ipaddress="'.$this->cleanInStr($_SERVER['REMOTE_ADDR']).'", '.
 				'cnt=1, accesstype="'.$this->cleanInStr($accessType).'" ON DUPLICATE KEY UPDATE cnt=cnt+1';
 			//echo $sql.'<br/>';
@@ -49,7 +50,9 @@ class OccurrenceAccessStats {
 				$this->errorMessage = date('Y-m-d H:i:s').' - ERROR recording access event: '.$this->conn->error;
 				$this->logError($sql);
 			}
+			*/
 		}
+		return true;
 		return $status;
 	}
 
