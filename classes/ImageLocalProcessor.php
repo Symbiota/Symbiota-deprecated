@@ -294,6 +294,12 @@ class ImageLocalProcessor {
 								$this->logOrEcho("Processing File (".date('Y-m-d h:i:s A')."): ".$fileName);
 								$fileExt = strtolower(substr($fileName,strrpos($fileName,'.')));
 								if($fileExt == ".jpg"){
+									//If file name contains space, attempt to rename file with spaces replaced with underscores
+									if(strpos($fileName,' ') !== false){
+										if(rename($this->sourcePathBase.$pathFrag.$fileName, $this->sourcePathBase.$pathFrag.str_replace(' ', '_', $fileName))){
+											$fileName = str_replace(' ', '_', $fileName);
+										}
+									}
 									if($this->processImageFile($fileName,$pathFrag)){
 										if(!in_array($this->activeCollid,$this->collProcessedArr)) $this->collProcessedArr[] = $this->activeCollid;
 									}
