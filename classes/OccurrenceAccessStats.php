@@ -55,6 +55,7 @@ class OccurrenceAccessStats {
 
 	public function batchRecordEventsBySql($sqlFrag,$accessType){
 		$status = true;
+		/*
 		$sql = 'INSERT INTO omoccuraccessstats(occid,accessdate,ipaddress,cnt,accesstype) '.
 			'SELECT o.occid, "'.date('Y-m-d').'", "'.$this->cleanInStr($_SERVER['REMOTE_ADDR']).'", 1, "'.$this->cleanInStr($accessType).'" ';
 		$sql .= $sqlFrag;
@@ -63,6 +64,7 @@ class OccurrenceAccessStats {
 			$this->errorMessage = date('Y-m-d H:i:s').' - ERROR batch recording access event by SQL: '.$this->conn->error;
 			$this->logError($sql);
 		}
+		*/
 		return $status;
 	}
 
