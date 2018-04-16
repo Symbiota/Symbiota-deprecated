@@ -337,10 +337,10 @@ ul.square-bullets {
 .herbarium-box h3 {
 	background: rgb(60, 100, 30);
 }
-.garden-box h3 {
+.plant-box h3 {
 	background: rgb(167, 18, 176);
 }
-.plant-box h3 {
+.garden-box h3 {
 	background: rgb(78, 30, 151);
 }
 .box-overlay {
@@ -370,10 +370,10 @@ ul.square-bullets {
 .herbarium-box .box-overlay {
 	background: rgba(60, 100, 30, 0.75);
 }
-.garden-box .box-overlay {
+.plant-box .box-overlay {
 	background: rgba(167, 18, 176, 0.756);
 }
-.plant-box .box-overlay {
+.garden-box .box-overlay {
 	background: rgba(78, 30, 151, 0.75);
 }
 .home-box:hover .box-overlay {
@@ -531,9 +531,13 @@ ul.square-bullets {
 	display: block;
 	font-size: 30px;
 }
-.books-wrapper a.btn {
+.books-wrapper .btn {
 	background: #ffffff;
 	color: #b04e2c;
+	overflow: hidden;
+}
+.books-wrapper .btn:hover {
+	color: #B04E2C;
 }
 .our-app div {
 	overflow: hidden;
@@ -1018,6 +1022,7 @@ button.menu-toggle {
 }
 .green-btn {
 	background: #74B147;
+	border: none;
 }
 .purple {
 	background: #4e1e97;

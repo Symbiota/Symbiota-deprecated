@@ -36,42 +36,42 @@ $(document).ready(function () {
             <img src="images/layout/mapping-box.jpg" alt="Mapping">
             <h3>Mapping</h3>
             <div class="box-overlay">
-                <div class="centered">Mapping box overlay content here</div>
+                <div class="centered">GIS mapping of plant occurrences within and beyond Oregon</div>
             </div>
         </a>
         <a href="<?php echo $clientRoot; ?>/checklists/dynamicmap.php?interface=key" class="home-box key-box">
             <img src="images/layout/interactive-key-box.jpg" alt="Interactive Key">
             <h3>Interactive Key</h3>
             <div class="box-overlay">
-                <div class="centered">Mapping box overlay content here</div>
+                <div class="centered">Identification tool allowing user to select recognizable characters</div>
             </div>
         </a>
         <a href="#" class="home-box plant-box">
             <img src="images/layout/plant-inventories-box.jpg" alt="Plant Inventories">
             <h3>Plant Inventories</h3>
             <div class="box-overlay">
-                <div class="centered">Plant Inventories box overlay content here</div>
+                <div class="centered">Curated lists of plants within a defined area coupled with identification tools</div>
             </div>
         </a>
         <a href="<?php echo $clientRoot; ?>/collections/harvestparams.php?db[]=5,8,10,7" class="home-box herbarium-box">
             <img src="images/layout/herbarium-box.jpg" alt="OSU Herbarium">
             <h3>OSU Herbarium</h3>
             <div class="box-overlay">
-                <div class="centered">Search records of all digitized specimens of the OSU Herbaria, including non-Oregon taxa and type specimens.</div>
+                <div class="centered">Searchable access to all digitized specimens of OSU’s herbaria, including non-Oregon taxa and type specimens</div>
             </div>
         </a>
         <a href="<?php echo $clientRoot; ?>/garden/index.php" class="home-box garden-box">
             <img src="images/layout/garden-with-natives-box.jpg" alt="Garden with Natives">
-            <h3>Garden with Natives</h3>
+            <h3>Gardening with Natives</h3>
             <div class="box-overlay">
-                <div class="centered">Garden with Natives box overlay content here</div>
+                <div class="centered">Garden planning tools and searchable information about native species for gardens and landscapes</div>
             </div>
         </a>
         <a href="<?php echo $clientRoot; ?>/imagelib/search.php" class="home-box image-box">
             <img src="images/layout/image-search-box.jpg" alt="Image Search">
             <h3>Image Search</h3>
             <div class="box-overlay">
-                <div class="centered">Image Search box overlay content here</div>
+                <div class="centered">Field photos and herbarium specimen images of Oregon plants to view by browsing or targeted searches</div>
             </div>
         </a>
     </div>
@@ -80,16 +80,13 @@ $(document).ready(function () {
     <div class="inner-content">
         <div class="col1">
             <h2>Who is OregonFlora?</h2>
-            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Eos facilis incidunt iste iure magni mollitia
-                repellat totam! Blanditiis cum debitis illo in laboriosam, non, pariatur perspiciatis quibusdam saepe
-                tempora voluptatibus?</p>
+            <p>LWe are a passionate group of scientists based at Oregon State University whose mission is to provide accurate information about our state’s vascular plants. We communicate data to a broad audience through our website, custom data requests, and the Flora of Oregon books. People with a wide range of plant expertise are also a part of our team—more than 1,000 volunteers have shared photos, reviewed data, prepared floristic treatments and submitted lists of plants observed on hikes. Some of our key programmatic partners include:</p>
             <ul>
-                <li>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deserunt, rerum.</li>
-                <li>Aspernatur in iure necessitatibus nobis, quis repellendus unde vero? Beatae.</li>
-                <li>Doloribus laudantium magni necessitatibus neque placeat quaerat repellat sit tempore?</li>
+                <li>Native Plant Society of Oregon</li>
+                <li>OR/WA Bureau of Land Management</li>
+                <li>Metro</li>
+                <li>OSU Herbarium</li>
             </ul>
-            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Aspernatur, at dicta fugit laborum mollitia
-                perspiciatis suscipit tempore temporibus! Aspernatur, consequatur!</p>
         </div>
         <div class="col2">
             <div class="slider">
@@ -108,12 +105,13 @@ $(document).ready(function () {
         <div class="col1">
             <h2>Welcome to our new site!
                 Here’s what’s changed</h2>
+            <p>OregonFlora has joined forces with Symbiota to present our website as a Symbiota portal! Symbiota is an open source content management system that allows us to collaborate and share data with diverse biodiversity collections, and to tailor the information we present to the needs of our website users. </p>
             <ul class="square-bullets purple-bullets">
-                <li>Oregon Plant Atlas — an interactive mapping program which draws from a database of over 540,000 records to display plant distributions and the data behind each mappable point.</li>
-                <li>Photo Gallery — a collection of photographs for each plant featuring its habitat, general features, and details, as well as images of herbarium specimens.</li>
-                <li>Rare Plant Guide — a searchable database and field-oriented fact sheets about some of Oregon's rare and threatened species.</li>
-                <li>Vascular Plant Checklist — provides the taxonomic foundation for the complete project, listing accepted scientific names, common names, and synonyms for all Oregon vascular plants.</li>
-                <li>Garden with Natives  — provides a compreshensive guide for native plants suitable for your location. Includes pictures, cultivation info and plants for unique garden/landscape settings.</li>
+                <li>Taxon profile pages—comprehensive information about a plant gathered in one location. Find accepted names and synonyms, native/exotic status, images, distribution map, and external links for each of the ~4,700 species, subspecies, and varieties of Oregon vascular plants. Use the Plant Taxon Search box in the header to navigate to the page of your choice or click on a species name in other website tools to link to its profile page.</li>
+                <li>Mapping –a spatial mapping tool. Enter search parameters such as plant names or collectors to retrieve records statewide or draw a shape on the map to limit your results to a defined region. Import and export datasets for analysis.</li>
+                <li>Interactive key—identification tool for all plants in the state. Define the general area of your unknown plant and select its recognizable characters to narrow the possibilities. </li>
+                <li>Inventories—plant occurrences of a defined place presented as a checklist and an interactive key.</li>
+                <li>OSU Herbarium—all databased specimen records of angiosperms and bryophytes in a searchable, downloadable format.</li>
             </ul>
         </div>
         <div class="col2">
@@ -128,21 +126,14 @@ $(document).ready(function () {
         <div class="col1">&nbsp;</div>
         <div class="col2">
             <div class="col-content">
-                <h2>Garden with Natives</h2>
-                <p>Learn which of Oregon’s 3,450 native species are commercially available, their characteristics, and
-                    where they naturally occur.</p>
+                <h2>Gardening with Natives</h2>
+                <p>Learn which of Oregon’s 3,450 native species are commercially available, their characteristics, and where they naturally occur.</p>
                 <ul class="square-bullets white-bullets">
-                    <li>Search for plants using 16 characteristics for selection, such as type of plant, sunlight,
-                        moisture, size, etc.
-                    </li>
-                    <li>Or browse collections of plants suitable for unique garden/lanscape settings, such as
-                        Meadowscape, Woodland Garden, etc.
-                    </li>
-                    <li>Select a plant and link to a profile page with photos and cultivation details.</li>
+                    <li>Search for plants using 23 characteristics for selection, such as type of plant, sunlight and moisture needs, size, and ease of growth.</li>
+                    <li>Browse collections of plants suitable for unique garden and landscape objectives, including pollinator gardens, meadowscapes, and more.</li>
+                    <li>Link to garden-focused profile pages with photos and cultivation details.</li>
                 </ul>
-                <p>By gardening with Natives you create a landscape that is appropriate for your soils and climate and
-                    provide habitat for wildlife. Once established, many native plants need minimal irrigation beyond
-                    normal rainfall. They require less maintenance, pest control and fertilization.</p>
+                <p>Native plants are wise gardening choices, letting you create a landscape that reflects the unique character of the soils, climate, and plant communities of your region. Once established, many native species require less maintenance, irrigation, and fertilizer.</p>
                 <a href="/gardening-with-natives.php" class="btn light-purple-btn full-width-btn">Learn More about
                     Gardening with Natives</a>
             </div>
@@ -155,6 +146,9 @@ $(document).ready(function () {
         </div>
         <div class="col2">
             <h2>News and Events</h2>
+            <ul>
+                <li><a href="https://www.facebook.com/OregonFloraProject/">Facebook</a></li>
+            </ul>
             <p>news and events go here.</p>
         </div>
     </div>
@@ -169,27 +163,26 @@ $(document).ready(function () {
                     <img src="images/layout/flora-of-oregon-book.jpg" alt="Flora of Oregon Vol 1" class="image-left">
                     <strong>Flora of Oregon
                         Volume 1:</strong>
-                    Pteridophytes, Gymnosperms, and Monocotsbr <br>
-                    <a href="#" class="btn">Order online</a>
+                    Pteridophytes, Gymnosperms, and Monocots <br>
+                    <a href="https://shop.brit.org/products/floraoforegon1" class="btn" target="_blank">Order Online</a>
                 </div>
                 <div class="vol2">
                     <img src="images/layout/flora-of-oregon-book2.jpg" alt="Flora of Oregon Vol 2" class="image-left">
                     <strong>Flora of Oregon
                         Volume 2:</strong>
                     Dicots Adoxaceae - Fagaceae <br><br>
-                    <strong>Available late 2018</strong>
+                    <span class="btn">Available late 2018</span>
                 </div>
-                <p>A comprehensive reference containing plant descriptions, illustrations, and front chapters covering diverse topics. Do you have a copy of Flora of Oregon Volume 1 and 2? Ask your local bookstore to stock it as well.</p>
+                <p>A comprehensive reference containing plant descriptions, pen and ink illustrations, and front chapters covering diverse topics. Do you have your copy of Flora of Oregon?</p>
             </div>
             <div class="our-app">
                 <h3>Oregon Wildflowers App</h3>
-                <img src="images/layout/oregon-wildflowers-app.jpg" alt="Oregon Wildflowers App" class="image-left">
+                <a href="http://www.highcountryapps.com/OregonWildflowers.aspx" target="_blank"><img src="images/layout/oregon-wildflowers-app.jpg" alt="Oregon Wildflowers App" class="image-left"></a>
                 <div>
-                    An identification guide to over 1,500 wildflowers, shrubs and vines across the state. Works
-                    without an internet connection once downloaded onto your mobile phone or tablet.<br>
-                    <p><a href="#" class="btn">Order online</a></p>
-                    <p><a href="#"><img src="images/layout/icon-google-play.png" alt="Google Play"></a></p>
-                    <p><a href=""><img src="images/layout/icon-apple-app-store.png" alt="Apple App Store"></a></p>
+                    <p>An identification guide to over 1,050 wildflowers, shrubs and vines across the state. Works
+                    without an internet connection once downloaded onto your mobile phone or tablet.</p>
+                    <p><a href="https://play.google.com/store/apps/details?id=com.emountainworks.android.oregonfieldguide" target="_blank"><img src="images/layout/icon-google-play.png" alt="Google Play"></a></p>
+                    <p><a href="https://itunes.apple.com/us/app/id828499164&mt=8" target="_blank"><img src="images/layout/icon-apple-app-store.png" alt="Apple App Store"></a></p>
                 </div>
             </div>
         </div>
