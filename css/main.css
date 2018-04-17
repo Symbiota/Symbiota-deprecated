@@ -1329,6 +1329,7 @@ div.growthCol {
 	width: 95px;
 	height: 95px;
 	margin: auto;
+	font-size: 0px;
 }
 .featureCheckBoxDiv {
 	background: white;
@@ -1336,9 +1337,6 @@ div.growthCol {
 	height: 110px;
 	text-align: center;
 	margin: auto;
-}
-.featureCheckBox:checked ~ .featureCheckBoxDiv {
-	background: #D4E6C8;
 }
 .planttype1 {background: url("../images/plant_type_icon1.png") center; background-size: cover;}
 .planttype2 {background: url("../images/plant_type_icon2.png") center; background-size: cover;}
@@ -1375,9 +1373,6 @@ div.growthCol {
 	display: flex;
 	align-items: center;
 	margin: auto;
-}
-.featureTextCheckBox:checked ~ .featureTextCheckBoxDiv {
-	background: #D4E6C8;
 }
 .unselectable {
 	-webkit-touch-callout: none;
@@ -1550,5 +1545,134 @@ div.growthCol {
 	display: none;
 }
 #advSearchWrapper {
+	display: none;
+}
+:focus {
+	outline: 0;
+}
+#characteristicsPane {
+	width: 1000px;
+	margin: 20px auto 10px;
+}
+#usesPane {
+	width: 1000px;
+	margin: 20px auto 10px;
+}
+#wildlifePane {
+	width: 1000px;
+	margin: 20px auto 10px;
+}
+#morePane {
+	width: 1000px;
+	margin: 20px auto 10px;
+}
+#availabilityPane {
+	width: 1000px;
+	margin: 20px auto 10px;
+}
+.advSearchOptionWrapper {
+	width: 100%;
+	margin: auto;
+	clear: both;
+}
+.advSearchOptionHeader {
+	width: 100%;
+	clear: both;
+}
+.advSearchOptCheckBox {
+	position: absolute;
+	left: -9999px;
+}
+.advSearchOptCheckBoxLabel {
+	display: inline-block;
+	cursor: pointer;
+}
+.advSearchOptCheckBoxDiv {
+	background: white;
+	display: flex;
+	align-items: center;
+	float:left;
+	padding: 15px;
+	margin: 10px;
+}
+.selectedOption {
+	background: #D4E6C8;
+}
+
+.wildlifeOptIconDiv {
+	width: 48px;
+	height: 48px;
+	float: left;
+}
+.wildlife1 {background: url("../images/wildlife_icon1.png") center; background-size: cover;}
+.wildlife2 {background: url("../images/wildlife_icon2.png") center; background-size: cover;}
+.wildlife3 {background: url("../images/wildlife_icon3.png") center; background-size: cover;}
+.wildlife4 {background: url("../images/wildlife_icon4.png") center; background-size: cover;}
+.wildlife5 {background: url("../images/wildlife_icon5.png") center; background-size: cover;}
+
+.results-wrapper {
+	width: 100%;
+	background-color: #947AC0;
+	min-height: 100px;
+	margin: 20px 0px;
+	display: none;
+}
+.results-content {
+	max-width: 1100px;
+	margin: 0 auto;
+	color: white;
+	padding: 20px;
+}
+.topResultsBar {
+
+}
+.resultsDiv {
+	float: left;
+}
+#resultCount {
+
+}
+.resetButtonDiv {
+	float: left;
+	margin-left: 20px;
+	color: black;
+}
+#resetButton {
+
+}
+.displaySettingDiv {
+	float: left;
+	margin-left: 20px;
+}
+.listDisplayDiv {
+	float: left;
+	margin-left: 20px;
+}
+.gridDisplayDiv {
+	float: left;
+	margin-left: 20px;
+}
+.searchManifestWrapper {
+	clear: both;
+	margin: 20px auto;
+	width: 100%;
+}
+#searchCriteriaManifest {
+	background-color: #947AC0;
+	cursor: default;
+	width: 100%;
+}
+div.mf_container {
+	border: 0px;
+	width: 100%;
+}
+.searchResultListToggleShow {
+	cursor: pointer;
+}
+.searchResultListToggleHide {
+	display: none;
+	cursor: pointer;
+}
+.searchResultListHiddenRow {
 	display: none;
 }
