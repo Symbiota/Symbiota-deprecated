@@ -53,7 +53,7 @@ $(document).ready(function () {
                 <div class="centered">Plant Inventories box overlay content here</div>
             </div>
         </a>
-        <a href="<?php echo $clientRoot; ?>/collections/harvestparams.php?db[]=5,8,10,7" class="home-box herbarium-box">
+        <a href="<?php echo $clientRoot; ?>/collections/harvestparams.php?db[]=5,8,10,7,238,239,240,241" class="home-box herbarium-box">
             <img src="images/layout/herbarium-box.jpg" alt="OSU Herbarium">
             <h3>OSU Herbarium</h3>
             <div class="box-overlay">
