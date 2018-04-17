@@ -47,7 +47,7 @@ class PluginsManager {
 			if($clid){
 				if(file_exists($previousFile)){
 					$previousArr = json_decode(file_get_contents($previousFile), true);
-					unlink($previousArr);
+					unlink($previousFile);
 					if($clid != $lastCLID){
 						unset($previousArr);
 						$previousArr = Array();
@@ -144,7 +144,7 @@ class PluginsManager {
 				$files = $reducedFileArr;
 			}
 			else{
-				unlink($previousArr);
+				unlink($previousFile);
 				unset($previousArr);
 				$previousArr = array();
 			}
