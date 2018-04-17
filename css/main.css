@@ -430,11 +430,11 @@ ul.square-bullets {
 	justify-content: space-between;
 }
 .welcome-wrapper .col1 {
-	width: 40%;
+	width: 60%;
 	padding-right: 20px;
 }
 .welcome-wrapper .col2 {
-	width: 60%;
+	width: 40%;
 	padding-left: 30px;
 }
 .welcome-wrapper h2 {

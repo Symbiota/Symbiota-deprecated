@@ -22,7 +22,7 @@
                 </div>
             </div>
             <div class="footer-right">
-                <p>OregonFlora is based at the <a href="http://oregonstate.edu/dept/botany/herbarium/index.php" target="_blank">OSU Herbarium</a> at Oregon State University.<br>
+                <p>OregonFlora is based at the <a href="http://oregonstate.edu/dept/botany/herbarium/index.php" target="_blank">OSU Herbarium</a> at Oregon State University.
                 Our program is wholly funded through grants and contributions.  We welcome your support!</p>
                 <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_blank">
                     <input type="hidden" name="cmd" value="_s-xclick">
