@@ -72,8 +72,8 @@ class TaxonomyUtilities {
 					if($retArr['unitname2'] && !preg_match('/^[\-a-z]+$/',$retArr['unitname2'])){
 						if(preg_match('/[A-Z]{1}[\-a-z]+/',$retArr['unitname2'])){
 							//Check to see if is term is genus author
-							$sql = 'SELECT tid FROM taxa WHERE unitname1 = "'.$retArr['unitname1'].'" AND unitname2 = "'.$retArr['unitname2'].'"';
 							$con = MySQLiConnectionFactory::getCon('readonly');
+							$sql = 'SELECT tid FROM taxa WHERE unitname1 = "'.$con->real_escape_string($retArr['unitname1']).'" AND unitname2 = "'.$con->real_escape_string($retArr['unitname2']).'"';
 							$rs = $con->query($sql);
 							if($rs->num_rows){
 								if(isset($retArr['author'])) unset($retArr['author']);

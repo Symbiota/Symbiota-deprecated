@@ -4,7 +4,7 @@ include_once($SERVER_ROOT.'/classes/TaxonomyCleaner.php');
 header("Content-Type: text/html; charset=UTF-8");
 
 $collid = $_REQUEST['collid'];
-$oldSciname = $_REQUEST['oldsciname'];
+$oldSciname = urldecode($_REQUEST['oldsciname']);
 $tid = $_REQUEST['tid'];
 $idQualifier = (isset($_REQUEST['idq'])?$_REQUEST['idq']:'');
 

@@ -92,12 +92,6 @@ $(document).ready(function() {
 			if($( "#ffsciname" ).val()){
 				verifyFullFormSciName();
 			}
-			else{
-				$( "#tidinterpreted" ).val("");
-				$( 'input[name=scientificnameauthorship]' ).val("");
-				$( 'input[name=family]' ).val("");
-				$( 'input[name=localitysecurity]' ).prop('checked', false);
-			}
 		}
 	});
 
@@ -297,7 +291,7 @@ function verifyFullFormSciName(){
 		}
 		else{
 			$( 'select[name=confidenceranking]' ).val(5);
-            alert("WARNING: Taxon not found. It may be misspelled or needs to be added to taxonomic thesaurus by a taxonomic editor.");
+            alert("WARNING: Taxon not found. It may be misspelled or needs to be added to taxonomic thesaurus by a taxonomic editor. You can continue entering this specimen using this name and the name will be resolved at a later date.");
 		}
 	});
 }
@@ -1107,7 +1101,7 @@ function verifyDetSciName(f){
 			f.tidtoadd.value = data.tid;
 		}
 		else{
-            alert("WARNING: Taxon not found. It may be misspelled or needs to be added to taxonomic thesaurus by a taxonomic editor.");
+            alert("WARNING: Taxon not found. It may be misspelled or needs to be added to taxonomic thesaurus by a taxonomic editor. Continue entering this specimen using this name and the name will be resolved at a later date.");
 			f.scientificnameauthorship.value = "";
 			f.family.value = "";
 			f.tidtoadd.value = "";
