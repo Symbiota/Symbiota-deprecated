@@ -2,7 +2,7 @@ $(document).ready(function() {
 	//Filter autocomplete
 	$("#taxonfilter").autocomplete({ 
 		source: function( request, response ) {
-			$.getJSON( "rpc/clsearchsuggest.php", { term: request.term, cl: clid }, response );
+			$.getJSON( "rpc/searchsuggest.php", { term: request.term, clid: clid }, response );
 		}
 	},
 	{ minLength: 3 });
@@ -10,10 +10,12 @@ $(document).ready(function() {
 	//Species add form
 	$("#speciestoadd").autocomplete({
 		source: function( request, response ) {
-			$.getJSON( "rpc/speciessuggest.php", { term: request.term, cl: clid }, response );
+			$.getJSON( "rpc/speciessuggest.php", { term: request.term }, response );
 		}
-	},{ minLength: 4, }
-	);
+	},{ 
+		minLength: 4,
+		autoFocus: true
+	});
 
 });
 

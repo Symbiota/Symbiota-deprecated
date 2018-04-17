@@ -54,11 +54,12 @@ function initAutoComplete(formElem){
 	$("#"+formElem).autocomplete({
 		source: function( request, response ){
 			$.ajax({
-				url: "rpc/clspeciessuggest.php",
+				url: "rpc/searchsuggest.php",
 				dataType: "json",
 				data: {
 					term : request.term,
-					cl : $('#clvalue').val() 
+					clid : $('#clvalue').val(), 
+					deep : '0' 
 				},
 				success: function(data) {
 					response(data);

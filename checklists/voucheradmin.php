@@ -53,7 +53,7 @@ $clManager->setCollectionVariables();
 		var tabIndex = <?php echo $tabIndex; ?>;
 		var footprintwktExists = <?php echo ($clManager->getClFootprintWkt()?'true':'false') ?>;
 	</script>
-	<script type="text/javascript" src="../js/symb/checklists.voucheradmin.js?ver=180330"></script>
+	<script type="text/javascript" src="../js/symb/checklists.voucheradmin.js?ver=180411"></script>
 	<style type="text/css">
 		li{margin:5px;}
 	</style>

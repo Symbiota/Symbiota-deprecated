@@ -122,7 +122,7 @@ if($clValue || $dynClid){
 	<script type="text/javascript">
 		<?php if($clid) echo 'var clid = '.$clid.';'; ?>
 	</script>
-	<script type="text/javascript" src="../js/symb/checklists.checklist.js?ver=2017096"></script>
+	<script type="text/javascript" src="../js/symb/checklists.checklist.js?ver=201804"></script>
 	<style type="text/css">
 		#sddm{margin:0;padding:0;z-index:30;}
 		#sddm:hover {background-color:#EAEBD8;}
@@ -136,7 +136,6 @@ if($clValue || $dynClid){
 		#sddm div a:hover{background:#49A3FF;color:#FFF}
 	</style>
 </head>
-
 <body <?php echo ($printMode?'style="background-color:#ffffff;"':''); ?>>
 <?php
 	if(!$printMode){

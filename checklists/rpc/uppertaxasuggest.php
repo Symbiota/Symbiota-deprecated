@@ -6,6 +6,6 @@ header("Content-Type: text/html; charset=".$CHARSET);
 $term = $_REQUEST['term'];
 
 $clManager = new ChecklistManager();
-$retArr = $clManager->getSpeciesSearch($term);
+$retArr = $clManager->getUpperTaxa($term);
 echo json_encode($retArr);
 ?>

@@ -3,9 +3,9 @@ include_once('../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/VoucherManager.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 
-$clid = array_key_exists("clid",$_REQUEST)?$_REQUEST["clid"]:""; 
-$tid = array_key_exists("tid",$_REQUEST)?$_REQUEST["tid"]:""; 
-$tabIndex = array_key_exists("tabindex",$_POST)?$_POST["tabindex"]:0; 
+$clid = array_key_exists("clid",$_REQUEST)?$_REQUEST["clid"]:"";
+$tid = array_key_exists("tid",$_REQUEST)?$_REQUEST["tid"]:"";
+$tabIndex = array_key_exists("tabindex",$_POST)?$_POST["tabindex"]:0;
 $action = array_key_exists("action",$_POST)?$_POST["action"]:"";
 
 $isEditor = false;
@@ -61,15 +61,15 @@ $clArray = $vManager->getChecklistData();
 		<title>Species Details: <?php echo $vManager->getTaxonName()." of ".$vManager->getClName(); ?></title>
 		<link href="../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 		<link href="../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
-		<link type="text/css" href="../css/jquery-ui.css" rel="Stylesheet" />	
+		<link type="text/css" href="../css/jquery-ui.css" rel="Stylesheet" />
 		<script type="text/javascript" src="../js/jquery.js"></script>
 		<script type="text/javascript" src="../js/jquery-ui.js"></script>
 		<script type="text/javascript">
-		
+
 			$(document).ready(function() {
 				$("#renamesciname").autocomplete({
 					source: function( request, response ) {
-						$.getJSON( "rpc/speciessuggest.php", { term: request.term, cl: <?php echo $clid;?> }, response );
+						$.getJSON( "rpc/speciessuggest.php", { term: request.term }, response );
 					},
 					minLength: 3,
 					autoFocus: true,
@@ -84,7 +84,7 @@ $clArray = $vManager->getChecklistData();
 				$('#tabs').tabs({
 					active: <?php echo $tabIndex; ?>
 				});
-	
+
 			});
 
 			function validateRenameForm(f){
@@ -96,7 +96,7 @@ $clArray = $vManager->getChecklistData();
 				}
 				return false;
 			}
-			
+
 			function checkScinameExistance(f){
 				$.ajax({
 					type: "POST",
@@ -112,7 +112,7 @@ $clArray = $vManager->getChecklistData();
 						f.renametid.value = "";
 					}
 				});
-			} 
+			}
 
 			function openPopup(urlStr,windowName){
 				newWindow = window.open(urlStr,windowName,'scrollbars=1,toolbar=0,resizable=1,width=800,height=650,left=20,top=20');
@@ -132,7 +132,7 @@ $clArray = $vManager->getChecklistData();
 			<h1>
 				<?php echo "<i>".$vManager->getTaxonName()."</i> of ".$vManager->getClName();?>
 			</h1>
-			<?php 
+			<?php
 			if($status){
 				?>
 				<hr />
@@ -140,9 +140,9 @@ $clArray = $vManager->getChecklistData();
 					<?php echo $status;?>
 				</div>
 				<hr />
-				<?php 
+				<?php
 			}
-			if($isEditor){ 
+			if($isEditor){
 				?>
 				<div id="tabs" style="margin:10px;width:90%;">
 				    <ul>
@@ -198,7 +198,7 @@ $clArray = $vManager->getChecklistData();
 								</div>
 								<div style='clear:both;margin:3px;'>
 									<div style='width:100px;font-weight:bold;float:left;'>
-										Family Override: 
+										Family Override:
 									</div>
 									<div style="float:left;">
 										<input name='familyoverride' type='text' value="<?php echo $clArray["familyoverride"];?>" size='65' maxlength='250' />
@@ -218,8 +218,8 @@ $clArray = $vManager->getChecklistData();
 							<fieldset style='margin:5px;padding:15px;'>
 								<legend><b>Rename Taxon / Transfer Vouchers</b></legend>
 								<div style='margin-top:2px;'>
-									<div style='width:120px;font-weight:bold;float:left;'>
-										New Taxon Name:
+									<div style='width:130px;font-weight:bold;float:left;'>
+										Target Taxon:
 									</div>
 									<div style='float:left;'>
 										<input id="renamesciname" name='renamesciname' type="text" size="50" />
@@ -250,8 +250,8 @@ $clArray = $vManager->getChecklistData();
 						</form>
 					</div>
 					<div id="voucherdiv">
-						<?php 
-						if($occurrenceModIsActive){ 
+						<?php
+						if($occurrenceModIsActive){
 							?>
 							<div style="float:right;margin-top:10px;">
 								<a href="../collections/list.php?db=all&thes=1&reset=1&taxa=<?php echo $vManager->getTaxonName()."&targetclid=".$vManager->getClid()."&targettid=".$tid;?>">
@@ -266,12 +266,12 @@ $clArray = $vManager->getChecklistData();
 							}
 							?>
 							<ul>
-							<?php 
+							<?php
 							foreach($vArray as $occid => $iArray){
 							?>
 								<li>
-								
-									<a href="#" onclick="openPopup('../collections/individual/index.php?occid=<?php echo $occid; ?>','indpane')"><?php echo $occid; ?></a>: 
+
+									<a href="#" onclick="openPopup('../collections/individual/index.php?occid=<?php echo $occid; ?>','indpane')"><?php echo $occid; ?></a>:
 									<?php
 									if($iArray['catalognumber']) echo $iArray['catalognumber'].', ';
 									echo '<b>'.$iArray['collector'].'</b>, ';
@@ -279,7 +279,7 @@ $clArray = $vManager->getChecklistData();
 									if($iArray['sciname']) echo $iArray['sciname'];
 									echo ($iArray['notes']?', '.$iArray['notes']:'').($iArray['editornotes']?', '.$iArray['editornotes']:'');
 									?>
-									<a href="#" onclick="toggle('vouch-<?php echo $occid;?>')"><img src="../images/edit.png" /></a> 
+									<a href="#" onclick="toggle('vouch-<?php echo $occid;?>')"><img src="../images/edit.png" /></a>
 									<form action="clsppeditor.php" method='post' name='delform' style="display:inline;" onsubmit="return window.confirm('Are you sure you want to delete this voucher record?');">
 										<input type='hidden' name='tid' value="<?php echo $vManager->getTid();?>" />
 										<input type='hidden' name='clid' value="<?php echo $vManager->getClid();?>" />
@@ -310,25 +310,25 @@ $clArray = $vManager->getChecklistData();
 										</form>
 									</div>
 								</li>
-								<?php 
-							} 
+								<?php
+							}
 							?>
 							</ul>
-							<?php 
-						} 
+							<?php
+						}
 						?>
 					</div>
-					<!-- 
+					<!--
 					<div id="coorddiv">
-					
+
 					</div>
 					-->
  				</div>
-				<?php 
+				<?php
 			}
 			else{
 				echo "<div>You must be logged-in and have editing rights to edited species details</div>";
-			} 
+			}
 			?>
 		</div>
 	</body>

@@ -103,7 +103,8 @@ our animation centered, and no-repeating */
             var taxaSuggest = function (searchTerm, callback) {
                 if (searchTerm.length >= 3) {
                     $.get('rpc/gettaxasuggest.php?term=' + searchTerm, function (data, status) {
-                        callback(eval(data));
+                        //callback(eval(data));
+                    	callback(data);
                     });
                 }
             };

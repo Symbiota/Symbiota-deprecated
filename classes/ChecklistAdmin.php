@@ -340,7 +340,14 @@ class ChecklistAdmin{
 			}
 		}
 		else{
-			$insertStatus = 'ERROR: unable to add species ('.$this->conn->error;
+			$mysqlErr = $this->conn->error;
+			$insertStatus = 'ERROR adding species: ';
+			if(strpos($mysqlErr,'Duplicate') !== false){
+				$insertStatus .= 'Species already exists within checklist';
+			}
+			else{
+				$insertStatus .= $this->conn->error;
+			}
 		}
 		return $insertStatus;
 	}
