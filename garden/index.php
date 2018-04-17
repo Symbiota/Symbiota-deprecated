@@ -459,7 +459,7 @@ include($serverRoot."/header.php");
 <div class="garden-content">
     <div class="garden-name-search-wrapper">
         <h2>Garden native plant search</h2>
-        <h2>Search by plant name</h2>
+        <h2>Search by plant name <i class="fa fa-question-circle green"></i></h2>
         <div class="garden-name-search-box">
             Search by scientific name
             <input type="text" id="garden-sciname-search-input" title="Enter scientific name here." />
@@ -474,7 +474,7 @@ include($serverRoot."/header.php");
 </div>
 <div class="garden-content">
     <div class="basic-feature-search-wrapper">
-        <h2>Search by plant features</h2>
+        <h2>Search by plant features <i class="fa fa-question-circle green"></i></h2>
         <span class="garden-feature-search-text">Filter for any combination of features within one or more categories</span>
         <div class="divTable gardenSearchTable">
             <div class="divTableHeading">
