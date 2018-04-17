@@ -64,6 +64,7 @@ class OccurrenceEditorManager {
 			if($id != $this->collId){
 				unset($this->collMap);
 				$this->collMap = array();
+				$this->getCollMap();
 			}
 			$this->collId = $this->cleanInStr($id);
 		}
@@ -72,12 +73,12 @@ class OccurrenceEditorManager {
 	public function getCollMap(){
 		if(!$this->collMap){
 			$sqlWhere = '';
-			if($this->collId){
-				$sqlWhere .= 'WHERE (c.collid = '.$this->collId.')';
-			}
-			elseif($this->occid){
+			if($this->occid){
 				$sqlWhere .= 'INNER JOIN omoccurrences o ON c.collid = o.collid '.
 					'WHERE (o.occid = '.$this->occid.')';
+			}
+			elseif($this->collId){
+				$sqlWhere .= 'WHERE (c.collid = '.$this->collId.')';
 			}
 			if($sqlWhere){
 				$sql = 'SELECT c.collid, c.collectionname, c.institutioncode, c.collectioncode, c.colltype, c.managementtype '.
@@ -94,7 +95,7 @@ class OccurrenceEditorManager {
 				$rs->free();
 			}
 		}
-		if(!$this->collId) $this->collId = $this->collMap['collid'];
+		if($this->collMap && !$this->collId) $this->collId = $this->collMap['collid'];
 		return $this->collMap;
 	}
 
@@ -707,13 +708,13 @@ class OccurrenceEditorManager {
 		}
 		if($editArr || $quickHostEntered){
 			if($editArr){
-				//Deal with scientific name changes, which isn't allows handled correctly with AJAX code
+				//Deal with scientific name changes if the AJAX code fails
 				if(in_array('sciname',$editArr) && $occArr['sciname'] && !$occArr['tidinterpreted']){
 					$sql2 = 'SELECT t.tid, t.author, ts.family '.
 						'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
-						'WHERE ts.taxauthid = 1 AND sciname = "'.$occArr['sciname'].'"';
+						'WHERE ts.taxauthid = 1 AND sciname = "'.$this->cleanInStr($occArr['sciname']).'"';
 					$rs2 = $this->conn->query($sql2);
-					while($r2 = $rs2->fetch_object()){
+					if($r2 = $rs2->fetch_object()){
 						$occArr['tidinterpreted'] = $r2->tid;
 						if(!$occArr['scientificnameauthorship']) $occArr['scientificnameauthorship'] = $r2->author;
 						if(!$occArr['family']) $occArr['family'] = $r2->family;

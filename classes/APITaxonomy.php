@@ -13,7 +13,12 @@ class APITaxonomy extends Manager{
 
 	public function getTaxon($sciname){
 		$retArr = array();
-		$sql = 'SELECT tid, sciname, author FROM taxa WHERE (sciname = "'.$this->cleanInStr($sciname).'")';
+		$sciname = preg_replace('/[^a-zA-Z\- ]+/', '', $sciname);
+		$sql = 'SELECT tid, sciname, author FROM taxa WHERE (sciname = "'.$sciname.'")';
+		if(preg_match('/\s{1}\D{1}\s{1}/i',$sciname)){
+			$sciname = preg_replace('/\s{1}x{1}\s{1}/i', ' _ ', $sciname);
+			$sql = 'SELECT tid, sciname, author FROM taxa WHERE (sciname LIKE "'.$sciname.'")';
+		}
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
 			$retArr[$r->tid]['sciname'] = $r->sciname;
@@ -34,6 +39,6 @@ class APITaxonomy extends Manager{
 	}
 
 	//Setters and getters
-	
+
 }
 ?>

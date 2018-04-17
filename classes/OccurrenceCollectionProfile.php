@@ -3,7 +3,7 @@ include_once($SERVER_ROOT.'/config/dbconnection.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceMaintenance.php');
 include_once($SERVER_ROOT.'/classes/UuidFactory.php');
 
-//Used by /collections/misc/collprofiles.php page
+//Used by collprofiles.php, collmetadata, and collcontact.php pages
 class OccurrenceCollectionProfile {
 
 	private $conn;
@@ -15,8 +15,8 @@ class OccurrenceCollectionProfile {
     private $endpointKey;
     private $idigbioKey;
 
-	public function __construct(){
-		$this->conn = MySQLiConnectionFactory::getCon("readonly");
+	public function __construct($connType = 'readonly'){
+		$this->conn = MySQLiConnectionFactory::getCon($connType);
 	}
 
 	public function __destruct(){
@@ -234,7 +234,7 @@ class OccurrenceCollectionProfile {
 		return $retArr;
 	}
 
-	//Editing functions
+	//Collection metadata editing functions
 	public function submitCollEdits($postArr){
         global $GBIF_USERNAME,$GBIF_PASSWORD;
 	    $status = true;
@@ -493,6 +493,44 @@ class OccurrenceCollectionProfile {
 		return $status;
 	}
 
+	//Contact editing functions
+	public function getContactArr(){
+		$retArr = array();
+		$sql = 'SELECT c.collcontid, c.uid, c.nameoverride, CONCAT_WS(" ",u.firstname,u.lastname) AS contactName, c.emailoverride, u.email, '.
+			'c.positionname, u.title, c.role, c.notes, c.initialtimestamp '.
+			'FROM omcollectioncontacts c LEFT JOIN users u ON c.uid = c.uid '.
+			'WHERE (c.collid = ?)';
+		$stmt = $this->conn->prepare($sql);
+		$stmt->bind_param('i', $this->collid);
+		$stmt->execute();
+		$stmt->bind_result($contactID, $uid, $nameOverride, $contactName, $emailOverride, $email, $positionName, $title, $role, $notes, $ts);
+		while($stmt->fetch()){
+			$retArr[$contactID]['uid'] = $uid;
+			$retArr[$contactID]['nameOverride'] = $nameOverride;
+			$retArr[$contactID]['contactName'] = $contactName;
+			$retArr[$contactID]['emailOverride'] = $emailOverride;
+			$retArr[$contactID]['email'] = $email;
+			$retArr[$contactID]['positionName'] = $positionName;
+			$retArr[$contactID]['title'] = $title;
+			$retArr[$contactID]['role'] = $role;
+			$retArr[$contactID]['notes'] = $notes;
+			$retArr[$contactID]['ts'] = $ts;
+		}
+		$stmt->free();
+		return $retArr;
+	}
+
+	public function submitContactEdits(){
+		$sql = '';
+
+	}
+
+	public function submitContactAdd(){
+		$sql = '';
+
+	}
+
+
 	//Publishing functions
     public function triggerGBIFCrawl($datasetKey){
         global $GBIF_USERNAME,$GBIF_PASSWORD;
@@ -649,6 +687,7 @@ class OccurrenceCollectionProfile {
         return $this->idigbioKey;
     }
 
+    //Get taxon and geo statistics
     public function getTaxonCounts($f=''){
 		$family = $this->cleanInStr($f);
 		$returnArr = Array();
@@ -1141,6 +1180,7 @@ class OccurrenceCollectionProfile {
         return $statsArr;
     }
 
+    //General data retrival functions
     public function getInstitutionArr(){
     	$retArr = array();
     	$sql = 'SELECT iid,institutionname,institutioncode '.

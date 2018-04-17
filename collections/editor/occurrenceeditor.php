@@ -51,7 +51,10 @@ if($SYMB_UID){
 	$occManager->setOccId($occId);
 	$occManager->setCollId($collId);
 	$collMap = $occManager->getCollMap();
-	if($occId && !$collId && !$crowdSourceMode) $collId = $collMap['collid'];
+	if(isset($collMap['collid']) && $collId != $collMap['collid']){
+		$collId = $collMap['collid'];
+		$occManager->setCollId($collId);
+	}
 
 	if($collMap && $collMap['colltype']=='General Observations') $isGenObs = 1;
 
@@ -309,7 +312,18 @@ if($SYMB_UID){
 		if($oArr){
 			if(!$occId) $occId = $occManager->getOccId();
 			$occArr = $oArr[$occId];
-			if(!$collMap) $collMap = $occManager->getCollMap();
+			if(!$collMap){
+				$collMap = $occManager->getCollMap();
+				//if(isset($collMap['collid'])) $collId = $collMap['collid'];
+				if(!$isEditor){
+					if(isset($USER_RIGHTS["CollAdmin"]) && in_array($collMap['collid'],$USER_RIGHTS["CollAdmin"])){
+						$isEditor = 1;
+					}
+					elseif(isset($USER_RIGHTS["CollEditor"]) && in_array($collMap['collid'],$USER_RIGHTS["CollEditor"])){
+						$isEditor = 1;
+					}
+				}
+			}
 		}
 	}
 	elseif($goToMode == 2){
@@ -407,9 +421,8 @@ else{
     ?>
 	<script src="../../js/jquery.js?ver=140310" type="text/javascript"></script>
 	<script src="../../js/jquery-ui.js?ver=140310" type="text/javascript"></script>
-	<script src="../../js/jquery.imagetool-1.7.js?ver=140310" type="text/javascript"></script>
 	<script type="text/javascript">
-		var collId = "<?php echo $collId; ?>";
+		var collId = "<?php echo (isset($collMap['collid'])?$collMap['collid']:$collId); ?>";
 		var csMode = "<?php echo $crowdSourceMode; ?>";
 		var tabTarget = <?php echo (is_numeric($tabTarget)?$tabTarget:'0'); ?>;
 		var imgArr = [];
@@ -439,12 +452,13 @@ else{
         }
 
 	</script>
-	<script type="text/javascript" src="../../js/symb/collections.coordinateValidation.js?ver=170310"></script>
-	<script type="text/javascript" src="../../js/symb/wktpolygontools.js?ver=180208"></script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditormain.js?ver=20180308"></script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditortools.js?ver=170204"></script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditorimgtools.js?ver=170310"></script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditorshare.js?ver=20180309"></script>
+	<script src="../../js/symb/collections.coordinateValidation.js?ver=170310" type="text/javascript"></script>
+	<script src="../../js/symb/wktpolygontools.js?ver=180208" type="text/javascript"></script>
+	<script src="../../js/symb/collections.occureditormain.js?ver=20180308" type="text/javascript"></script>
+	<script src="../../js/symb/collections.occureditortools.js?ver=170204" type="text/javascript"></script>
+	<script src="../../js/symb/collections.occureditorimgtools.js?ver=170310" type="text/javascript"></script>
+	<script src="../../js/jquery.imagetool-1.7.js?ver=140310" type="text/javascript"></script>
+	<script src="../../js/symb/collections.occureditorshare.js?ver=20180309" type="text/javascript"></script>
 </head>
 <body>
 	<!-- inner text -->
@@ -509,7 +523,7 @@ else{
 							else{
 								if($isEditor == 1 || $isEditor == 2){
 									?>
-									<a href="../misc/collprofiles.php?collid=<?php echo $collId; ?>&emode=1" onclick="return verifyLeaveForm()">Collection Management</a> &gt;&gt;
+									<a href="../misc/collprofiles.php?collid=<?php echo (isset($collMap['collid'])?$collMap['collid']:$collId); ?>&emode=1" onclick="return verifyLeaveForm()">Collection Management</a> &gt;&gt;
 									<?php
 								}
 							}

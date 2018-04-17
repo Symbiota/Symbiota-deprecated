@@ -236,15 +236,17 @@ class OccurrenceTaxaManager {
 						}
 					}
 					else{
+						$term = $searchTaxon;
+						if(stripos($term,'x') || !mb_check_encoding($term, 'ASCII')) $term = preg_replace('/\s{1}\D{1,2}\s{1}/', ' _ ', $term);
 						if(array_key_exists("tid",$searchArr)){
 							$rankid = current($searchArr['tid']);
 							$tidArr = array_keys($searchArr['tid']);
 							$sqlWhereTaxa .= "OR (o.tidinterpreted IN(".implode(',',$tidArr).")) ";
 							//Return matches that are not linked to thesaurus
-							if($rankid == 180) $sqlWhereTaxa .= "OR (o.sciname LIKE '".$this->cleanInStr($searchTaxon)."%') ";
+							if($rankid == 180) $sqlWhereTaxa .= "OR (o.sciname LIKE '".$this->cleanInStr($term)."%') ";
 						}
 						else{
-							$term = $this->cleanInStr(trim($searchTaxon,'%'));
+							$term = $this->cleanInStr(trim($term,'%'));
 							//Protect against someone trying to download big pieces of the occurrence table through the user interface
 							if(strlen($term) < 4) $term .= ' ';
 							//Return matches for "Pinus a"
