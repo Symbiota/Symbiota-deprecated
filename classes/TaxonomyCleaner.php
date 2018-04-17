@@ -705,16 +705,17 @@ class TaxonomyCleaner extends Manager{
 	public function getTaxaSuggest($queryString){
 		$retArr = Array();
 		$sql = 'SELECT tid, sciname FROM taxa ';
-		$queryString = $this->cleanInStr($queryString);
+		//$queryString = $this->cleanInStr($queryString);
+		$queryString = preg_replace('/[()\'"+\-=@$%]+/i', '', $queryString);
 		if($queryString){
 			$tokenArr = explode(' ',$queryString);
 			$token = array_shift($tokenArr);
-			if($token == 'x' && $tokenArr) $token = array_shift($tokenArr);
-			$sql .= 'WHERE unitname1 LIKE "'.$token.'%" ';
+			if($token == 'x') $token = array_shift($tokenArr);
+			if($token) $sql .= 'WHERE unitname1 LIKE "'.$token.'%" ';
 			if($tokenArr){
 				$token = array_shift($tokenArr);
-				if($token == 'x' && $tokenArr) $token = array_shift($tokenArr);
-				$sql .= 'AND unitname2 LIKE "'.$token.'%" ';
+				if($token == 'x') $token = array_shift($tokenArr);
+				if($token) $sql .= 'AND unitname2 LIKE "'.$token.'%" ';
 				if($tokenArr){
 					$token = array_shift($tokenArr);
 					if($tokenArr){
