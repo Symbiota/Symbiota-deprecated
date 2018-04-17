@@ -71,7 +71,7 @@ class DwcArchiverCore extends Manager{
 			'georeferenceVerificationStatus','habitat','informationWithheld');
 
 		//ini_set('memory_limit','512M');
-		set_time_limit(500);
+		set_time_limit(600);
 	}
 
 	public function __destruct(){

@@ -75,8 +75,8 @@ function verifyModifyLoginForm(f){
         window.alert("New login must have a value");
         return false;
     }
-	if( /[^0-9A-Za-z_!@#$-+]/.test( newLogin ) ) {
-        alert("Login name should only contain 0-9A-Za-z_!@ (spaces are not allowed)");
+	if( /[^0-9A-Za-z_!@#$-+.]/.test( newLogin ) ) {
+        alert("Login name should only contain 0-9A-Za-z_.!@ (spaces are not allowed)");
         return false;
     }
     if(f.newloginpwd){
