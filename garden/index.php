@@ -217,6 +217,7 @@ include($serverRoot."/header.php");
                         searchCriteriaArr.splice(index, 1);
                     }
                 }
+                getSearchResults();
             }
         });
     });

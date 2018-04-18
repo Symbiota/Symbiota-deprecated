@@ -70,8 +70,10 @@ class GardenSearchManager {
         $sqlWhere = 'WHERE ('.implode(' AND ',$this->sqlWhereArr).') ';
         if($this->display == 'grid'){
             $sqlSelect = 'SELECT t.TID, t.SciName, i.thumbnailurl ';
-            $sqlFrom = 'FROM taxa AS t LEFT JOIN images AS i ON t.TID = i.tid ';
+            $sqlFrom = 'FROM taxa AS t LEFT JOIN taxaenumtree AS te ON t.TID = te.parenttid ';
+            $sqlFrom .= 'LEFT JOIN images AS i ON (te.tid = i.tid OR t.TID = i.tid) ';
             if(isset($this->searchParamsArr['common'])) $sqlFrom .= 'LEFT JOIN taxavernaculars AS v ON t.TID = v.TID ';
+            $sqlWhere .= 'AND te.taxauthid = 1 ';
             $sqlSuffix = 'ORDER BY t.SciName, i.sortsequence ';
         }
         elseif($this->display == 'list'){
@@ -87,6 +89,7 @@ class GardenSearchManager {
 
     public function getDataArr(){
         $returnArr = array();
+        //echo $this->sql; exit;
         $result = $this->conn->query($this->sql);
         while($row = $result->fetch_object()){
             $tid = $row->TID;
