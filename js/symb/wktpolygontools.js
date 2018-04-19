@@ -5,6 +5,7 @@ function reformCoordinates(f){
 }
 
 function validatePolygon(footprintWktInput){
+	if(footprintWkt == "" || footprintWkt == "undefined") return "";
 	var footprintWkt = trimPolygon(footprintWktInput);
 	if(footprintWkt.substring(0,2) == "[{"){
 		//Translate old json format to polygon wkt string
@@ -50,7 +51,9 @@ function validatePolygon(footprintWktInput){
 		var lastSet = footprintWkt.substr(footprintWkt.lastIndexOf(",")+1);
 		if(firstSet != lastSet) footprintWkt = footprintWkt + ", " + firstSet;
 	}
-	return "POLYGON (("+footprintWkt.trim()+"))";
+	footprintWkt = footprintWkt.trim();
+	if(footprintWkt != "") footprintWkt = "POLYGON (("+footprintWkt+"))";
+	return footprintWkt;
 }
 
 function validatePoints(footprintWkt, switchPoints){

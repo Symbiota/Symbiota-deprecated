@@ -223,7 +223,10 @@ else{
 					coordinates.push(parseFloat(latlngArr[0]).toFixed(6)+" "+parseFloat(latlngArr[1]).toFixed(6));
 				}
 				if(coordinates[0] != coordinates[i]) coordinates.push(coordinates[0]);
-				document.getElementById("footprintwkt").value = "POLYGON (("+coordinates.toString()+"))";
+				var coordStr = coordinates.toString();
+				if(coordStr && coordStr != "" && coordStr != undefined){
+					document.getElementById("footprintwkt").value = "POLYGON (("+coordStr+"))";
+				}
 			}
 
 			function deleteSelectedShape(f) {

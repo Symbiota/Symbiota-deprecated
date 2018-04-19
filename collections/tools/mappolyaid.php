@@ -202,7 +202,9 @@ else{
 
 			function updateParentForm() {
 				if(opener.document.getElementById("footprintwkt")){
-					if(polygonWkt && polygonWkt.substring(7) != "POLYGON") polygonWkt = "POLYGON (("+polygonWkt+"))";
+					if(polygonWkt && polygonWkt != "" && polygonWkt != undefined && polygonWkt.substring(7) != "POLYGON"){
+						polygonWkt = "POLYGON (("+polygonWkt+"))";
+					}
 					opener.document.getElementById("footprintwkt").value = polygonWkt;
 					try{
 						opener.document.getElementById("footprintwkt").onchange();
