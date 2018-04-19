@@ -35,7 +35,7 @@ if($IS_ADMIN || array_key_exists("KeyAdmin",$USER_RIGHTS)){
 			if(f.chartype.value == ""){
 				alert("A character type must be selected");
 				return false;
-			} 
+			}
 			if(f.sortsequence.value && !isNumeric(f.sortsequence.value)){
 				alert("Sort Sequence must be a numeric value only");
 				return false;
@@ -49,7 +49,7 @@ if($IS_ADMIN || array_key_exists("KeyAdmin",$USER_RIGHTS)){
 		}
 	</script>
 	<style type="text/css">
-		input{ autocomplete: off; } 
+		input{ autocomplete: off; }
 	</style>
 </head>
 <body>
@@ -57,12 +57,12 @@ if($IS_ADMIN || array_key_exists("KeyAdmin",$USER_RIGHTS)){
 	include($SERVER_ROOT."/header.php");
 	?>
 	<div class='navpath'>
-		<a href='../../index.php'>Home</a> &gt;&gt; 
+		<a href='../../index.php'>Home</a> &gt;&gt;
 		<b>Character Management</b>
 	</div>
 	<!-- This is inner text! -->
 	<div id="innertext">
-		<?php 
+		<?php
 		if($isEditor){
 			?>
 			<div id="addeditchar">
@@ -83,7 +83,7 @@ if($IS_ADMIN || array_key_exists("KeyAdmin",$USER_RIGHTS)){
 								<div style="float:left;">
 									Type:<br />
 									<select name="chartype" style="width:180px;">
-										<option value="UM">Unordered Multi-state</option>
+										<option value="UM">Multi-state</option>
 									</select>
 								</div>
 								<div style="margin-left:30px;float:left;">
@@ -108,7 +108,7 @@ if($IS_ADMIN || array_key_exists("KeyAdmin",$USER_RIGHTS)){
 											echo '<option value="'.$k.'">'.$v['name'].'</option>';
 										}
 										?>
-									</select> 
+									</select>
 									<a href="#" onclick="openHeadingAdmin(); return false;"><img src="../../images/edit.png" /></a>
 								</div>
 							</div>
@@ -123,12 +123,12 @@ if($IS_ADMIN || array_key_exists("KeyAdmin",$USER_RIGHTS)){
 					</form>
 				</div>
 				<div id="charlist" style="padding-left:10px;">
-					<?php 
+					<?php
 					if($charArr){
 						?>
 						<h3>Characters by Heading</h3>
 						<ul>
-							<?php 
+							<?php
 							foreach($headingArr as $hid => $hArr){
 								if(array_key_exists($hid, $charArr)){
 									?>
@@ -136,7 +136,7 @@ if($IS_ADMIN || array_key_exists("KeyAdmin",$USER_RIGHTS)){
 										<a href="#" onclick="toggle('char-<?php echo $hid; ?>');return false;"><b><?php echo $hArr['name']; ?></b></a>
 										<div id="char-<?php echo $hid; ?>" style="display:block;">
 											<ul>
-												<?php 
+												<?php
 												$charList = $charArr[$hid];
 												foreach($charList as $cid => $charName){
 													echo '<li>';
@@ -157,7 +157,7 @@ if($IS_ADMIN || array_key_exists("KeyAdmin",$USER_RIGHTS)){
 									<a href="#" onclick="toggle('char-0');return false;"><b>No Assigned Header</b></a>
 									<div id="char-0" style="display:block;">
 										<ul>
-											<?php 
+											<?php
 											foreach($noHeaderArr as $cid => $charName){
 												echo '<li>';
 												echo '<a href="chardetails.php?cid='.$cid.'">'.$charName.'</a>';
@@ -171,7 +171,7 @@ if($IS_ADMIN || array_key_exists("KeyAdmin",$USER_RIGHTS)){
 							}
 							?>
 						</ul>
-					<?php 
+					<?php
 					}
 					else{
 						echo '<div style="font-weight:bold;font-size:120%;">There are no existing characters</div>';
@@ -179,14 +179,14 @@ if($IS_ADMIN || array_key_exists("KeyAdmin",$USER_RIGHTS)){
 					?>
 				</div>
 			</div>
-			<?php 
+			<?php
 		}
 		else{
 			echo '<h2>You are not authorized to add characters</h2>';
 		}
 		?>
 	</div>
-	<?php 
+	<?php
 	include($SERVER_ROOT.'/footer.php');
 	?>
 </body>
