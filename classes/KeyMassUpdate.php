@@ -25,8 +25,7 @@ class KeyMassUpdate extends KeyManager{
 			'FROM kmcharacters c INNER JOIN kmchartaxalink ctl ON c.CID = ctl.CID '.
 			'INNER JOIN kmcharheading ch ON c.hid = ch.hid '.
 			'LEFT JOIN kmchardependance cd ON c.CID = cd.CID '.
-			'WHERE ch.language = "'.$this->language.'" AND (ctl.Relation = "include") '.
-			'AND (c.chartype="UM" OR c.chartype="OM") AND (c.defaultlang="'.$this->language.'") ';
+			'WHERE ch.language = "'.$this->language.'" AND (c.chartype="UM" OR c.chartype="OM") AND (c.defaultlang="'.$this->language.'") ';
 		$strFrag = '';
 		if($tidFilter && is_numeric($tidFilter)){
 			$strFrag = implode(',',$this->getParentArr($tidFilter)).','.$tidFilter;
@@ -36,8 +35,8 @@ class KeyMassUpdate extends KeyManager{
 			if($parTidArr) $strFrag = implode(',',$parTidArr);
 		}
 		if($strFrag){
-			$sql .= 'AND (ctl.TID In ('.$strFrag.') AND ctl.relation = "include") ';
-				//'AND (c.cid NOT In(SELECT DISTINCT CID FROM kmchartaxalink WHERE (TID In ('.$strFrag.') AND relation = "exclude"))) ';
+			$sql .= 'AND (ctl.TID In ('.$strFrag.') AND ctl.relation = "include") '.
+				'AND (c.cid NOT In(SELECT DISTINCT CID FROM kmchartaxalink WHERE (TID In ('.$strFrag.') AND relation = "exclude"))) ';
 		}
 		$sql .= 'ORDER BY c.hid, c.SortSequence, c.CharName';
 		//echo $sql;
@@ -86,10 +85,8 @@ class KeyMassUpdate extends KeyManager{
 		$rs->free();
 
 		//Get accepted taxa
-		$sql = 'SELECT DISTINCT ts.tid '.
-			'FROM taxstatus ts INNER JOIN taxstatus ts2 ON ts.tidaccepted = ts2.tidaccepted '.
-			'INNER JOIN fmchklsttaxalink c ON ts2.tid = c.tid ';
-		$sqlWhere = 'WHERE (ts.taxauthid = '.$this->taxAuthId.') AND (ts2.taxauthid = '.$this->taxAuthId.') AND (c.clid = '.$this->clid.') ';
+		$sql = 'SELECT DISTINCT ts.tidaccepted FROM taxstatus ts INNER JOIN fmchklsttaxalink c ON ts.tid = c.tid ';
+		$sqlWhere = 'WHERE (ts.taxauthid = '.$this->taxAuthId.') AND (c.clid = '.$this->clid.') ';
 		if(array_key_exists('include', $tidLimitArr)){
 			$sql .= 'INNER JOIN taxaenumtree e1 ON ts.tid = e1.tid ';
 			$sqlWhere .= ' AND (e1.taxauthid = '.$this->taxAuthId.') AND (e1.parenttid IN('.implode(',',$tidLimitArr['include']).')) ';
@@ -102,7 +99,7 @@ class KeyMassUpdate extends KeyManager{
 		//echo $sql.'<br/>';
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
-			$tidArr[$r->tid] = $r->tid;
+			$tidArr[$r->tidaccepted] = $r->tidaccepted;
 		}
 		$rs->free();
 
@@ -118,7 +115,6 @@ class KeyMassUpdate extends KeyManager{
 			}
 			$rs->free();
 		}
-
 		if($tidArr){
 			//Get parents
 			$sql2 = 'SELECT DISTINCT t.tid, t.sciname, ts.parenttid, t.rankid '.
@@ -181,7 +177,7 @@ class KeyMassUpdate extends KeyManager{
 		if(is_numeric($tid)){
 			echo '<tr><td>';
 			echo '<span style="margin-left:'.($indent*10).'px"><b>'.($indent?'<i>':'').htmlspecialchars($sciname, ENT_QUOTES, 'UTF-8').($indent?'</i>':'').'</b></span>';
-			echo '<a href="editor.php?tid='.$tid.'" target="_blank"><img src="../../images/edit.png" /></a>';
+			echo '<a href="editor.php?tid='.$tid.'" target="_blank"> <img src="../../images/edit.png" /></a>';
 			echo '</td>';
 			foreach($this->stateArr as $cs => $csName){
 				$isSelected = false;

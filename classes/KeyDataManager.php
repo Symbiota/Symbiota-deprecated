@@ -3,7 +3,7 @@ include_once($SERVER_ROOT.'/config/dbconnection.php');
 
 class KeyDataManager {
 
-	private $sql;
+	private $sql = '';
 	private $relevanceValue;		//Percent (as a decimal) of Taxa that must be coded for a CID to be displayed
 	private $keyCon;
 	private $taxonFilter;
@@ -20,11 +20,10 @@ class KeyDataManager {
 	private $commonDisplay = false;
 	private $pid;
 	private $dynClid;
-	
+
 	function __construct() {
 		$this->relevanceValue = .9;
 		$this->keyCon = MySQLiConnectionFactory::getCon("readonly");
-		$this->sql = "";
 	}
 
 	public function __destruct(){
@@ -45,15 +44,15 @@ class KeyDataManager {
 		}
 		return $this->pid;
 	}
- 	
+
 	public function setLanguage($l){
 		$this->lang = $l;
 	}
-	
+
 	public function setCommonDisplay($bool){
 		$this->commonDisplay = $bool;
 	}
-	
+
 	public function getTaxaFilterList(){
 		$returnArr = Array();
 		$sql = "SELECT DISTINCT nt.UnitName1, ts.Family ";
@@ -127,11 +126,11 @@ class KeyDataManager {
 		}
 		return $this->clid;
 	}
-	
+
 	public function getClid(){
 		return $this->clid;
 	}
-	
+
 	public function setDynClid($id){
 		$this->dynClid = $id;
 	}
@@ -154,7 +153,7 @@ class KeyDataManager {
 	public function getTaxaCount(){
 		return $this->taxaCount;
 	}
-	
+
 	public function getClName(){
 		return $this->clName;
 	}
@@ -162,15 +161,15 @@ class KeyDataManager {
 	public function getClAuthors(){
 		return $this->clAuthors;
 	}
-	
+
 	public function getClType(){
 		return $this->clType;
 	}
-	
+
 	public function setRelevanceValue($rel){
 		$this->relevanceValue = ($rel?$rel:0);
 	}
-	
+
 	public function getRelevanceValue(){
 		return $this->relevanceValue;
 	}
@@ -199,7 +198,7 @@ class KeyDataManager {
 	//							)
 	public function getCharList(){
 		$returnArray = Array();
-		//Rate char list: Get list of char that are coded for a percentage of taxa list that is greater than 
+		//Rate char list: Get list of char that are coded for a percentage of taxa list that is greater than
 		$charList = Array();
 		$countMin = $this->taxaCount * $this->relevanceValue;
 		$loopCnt = 0;
@@ -226,18 +225,18 @@ class KeyDataManager {
 				"GROUP BY cs.CID, cs.CS, cs.CharStateName, charnames.CharName, charnames.Heading, charnames.URL, characters.DifficultyRank, charnames.Language, characters.Type ".
 				"HAVING (((cs.CID) In (".implode(",",$charList).")) AND ((cs.CS)<>'-') AND ((characters.Type)='UM' Or (characters.Type)='OM') AND characters.DifficultyRank < 3) ".
 				"ORDER BY charnames.Heading, characters.SortSequence, cs.SortSequence";*/
-			$sqlChar = "SELECT DISTINCT cs.CID, cs.CS, cs.CharStateName, cs.Description AS csdescr, chars.CharName, 
-				chars.description AS chardescr, chars.hid, chead.headingname, chars.helpurl, Count(cs.CS) AS Ct, chars.DifficultyRank, 
-				chars.defaultlang FROM (((($this->sql) AS tList INNER JOIN kmdescr d ON tList.TID = d.TID) 
-				INNER JOIN kmcs cs ON (d.CS = cs.CS)	AND (d.CID = cs.CID)) INNER JOIN kmcharacters chars ON chars.cid = cs.CID) 
-				INNER JOIN kmcharheading chead ON chars.hid = chead.hid 
-				GROUP BY chead.language, cs.CID, cs.CS, cs.CharStateName, chars.CharName, chead.headingname, chars.helpurl, 
-				chars.DifficultyRank, chars.defaultlang, chars.chartype HAVING (chead.language = 'English' AND ((cs.CID) In (".implode(",",$charList).")) AND ((cs.CS)<>'-') AND 
-				((chars.chartype)='UM' Or (chars.chartype)='OM') AND chars.DifficultyRank < 3) 
+			$sqlChar = "SELECT DISTINCT cs.CID, cs.CS, cs.CharStateName, cs.Description AS csdescr, chars.CharName,
+				chars.description AS chardescr, chars.hid, chead.headingname, chars.helpurl, Count(cs.CS) AS Ct, chars.DifficultyRank,
+				chars.defaultlang FROM (((($this->sql) AS tList INNER JOIN kmdescr d ON tList.TID = d.TID)
+				INNER JOIN kmcs cs ON (d.CS = cs.CS)	AND (d.CID = cs.CID)) INNER JOIN kmcharacters chars ON chars.cid = cs.CID)
+				INNER JOIN kmcharheading chead ON chars.hid = chead.hid
+				GROUP BY chead.language, cs.CID, cs.CS, cs.CharStateName, chars.CharName, chead.headingname, chars.helpurl,
+				chars.DifficultyRank, chars.defaultlang, chars.chartype HAVING (chead.language = 'English' AND ((cs.CID) In (".implode(",",$charList).")) AND ((cs.CS)<>'-') AND
+				((chars.chartype)='UM' Or (chars.chartype)='OM') AND chars.DifficultyRank < 3)
 				ORDER BY chead.hid,	chars.SortSequence, cs.SortSequence ";
 			//echo $sqlChar.'<br/>';
 			$result = $this->keyCon->query($sqlChar);
-	
+
 			//Process recordset
 			$langList = Array();
 			$headingArray = Array();
@@ -262,23 +261,23 @@ class KeyDataManager {
 					if($csDescr) $charStateName = "<span class='characterStateName' title='".$csDescr."'>".$charStateName."</span>";
 					$diffRank = false;
 					if($row->DifficultyRank && $row->DifficultyRank > 1 && !array_key_exists($charCID,$this->charArr)) $diffRank = true;
-	
+
 					//Set HeadingName within the $charArray, if not yet set
 					$headingArray[$headingID]["HeadingNames"][$language] = $headingName;
-	
+
 					//Set CharName within the $stateArray, if not yet set
 					if(!array_key_exists($headingID, $headingArray) || !array_key_exists($charCID, $headingArray[$headingID]) || !array_key_exists("CharNames", $headingArray[$headingID][$charCID]) || !array_key_exists($language, $headingArray[$headingID][$charCID]["CharNames"])){
 						$headingArray[$headingID][$charCID]["CharNames"][$language] = "<div class='dynam'".($diffRank?" style='display:none;' ":" style='display:;'")."><span class='dynamlang' lang='".$language."'".
 							($language==$this->lang?" style='display:;'":" style='display:none;'").">&nbsp;&nbsp;".$charName."</span></div>";
 					}
-	
+
 					$checked = "";
 					if($this->charArr && array_key_exists($charCID,$this->charArr) && in_array($cs,$this->charArr[$charCID])) $checked = "checked";
 					if(!array_key_exists($headingID,$headingArray) || !array_key_exists($charCID,$headingArray[$headingID]) || !array_key_exists($cs,$headingArray[$headingID][$charCID]) || !$headingArray[$headingID][$charCID][$cs]["ROOT"]){
 						$headingArray[$headingID][$charCID][$cs]["ROOT"] = "<div class='dynamopt'".//($diffRank?" style='display:none;' class='dynam'":" style='display:;'").
-							">&nbsp;&nbsp;<input type='checkbox' name='attr[]' id='cb".$charCID."-".$cs."' value='".$charCID."-".$cs."' $checked onclick='javascript: document.keyform.submit();'>";
+							">&nbsp;&nbsp;<input type='checkbox' name='attr[]' id='cb".$charCID."-".$cs."' value='".$charCID."-".$cs."' $checked onclick='document.keyform.submit();' />";
 					}
-	
+
 					$headingArray[$headingID][$charCID][$cs][$language] = $charStateName;
 				}
 			}
@@ -356,65 +355,58 @@ class KeyDataManager {
 	    }
 	    $this->taxaCount = $count;
 		$result->close();
- 		return $returnArray;		
+ 		return $returnArray;
 	}
 
 	public function setTaxaListSQL(){
 		if(!$this->sql){
-			$sqlBase = "SELECT DISTINCT t.tid, ts.Family, t.SciName AS DisplayName, ts.ParentTID ";
-			$sqlFromBase = "";
-			$sqlWhere = "";
+			$sqlFromBase = 'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
+				'INNER JOIN taxa t1 ON t.UnitName1 = t1.UnitName1 AND t.UnitName2 = t1.UnitName2 '.
+				'INNER JOIN taxstatus ts1 ON ts1.tidaccepted = t1.tid ';
+			$sqlWhere = 'WHERE (ts.taxauthid = 1) AND (ts1.taxauthid = 1) AND (t.RankId = 220) AND (ts.tid = ts.tidaccepted) ';
 			if($this->dynClid){
-				$sqlFromBase = "INNER JOIN taxstatus ts1 ON t.tid = ts1.tid) ".
-	    			"INNER JOIN taxa t1 ON t.UnitName1 = t1.UnitName1 AND t.UnitName2 = t1.UnitName2) ".
-	                "INNER JOIN taxstatus ts ON ts.tidaccepted = t1.tid) ".
-	                "INNER JOIN fmdyncltaxalink clk ON ts.tid = clk.tid ";
-				$sqlWhere = "WHERE (clk.dynclid = ".$this->dynClid.") AND ts.taxauthid = 1 AND ts1.taxauthid = 1 AND t.RankId = 220 ";
+				$sqlFromBase .= 'INNER JOIN fmdyncltaxalink clk ON ts.tid = clk.tid ';
+				$sqlWhere .= 'AND (clk.dynclid = '.$this->dynClid.') ';
 			}
 			else{
-				$sqlFromBase = "INNER JOIN taxstatus ts ON t.tid = ts.tid) ".
-	    			"INNER JOIN taxa t1 ON t.UnitName1 = t1.UnitName1 AND t.UnitName2 = t1.UnitName2) ".
-	                "INNER JOIN taxstatus ts1 ON ts1.tidaccepted = t1.tid) ".
-	                "INNER JOIN fmchklsttaxalink clk ON ts1.tid = clk.tid ";
-				$sqlWhere = "WHERE (clk.clid = ".$this->clid.") AND ts1.taxauthid = 1 AND ts.taxauthid = 1 AND t.RankId = 220 ";
-				if($this->clType == "dynamic"){
-					$sqlFromBase = "INNER JOIN taxstatus ts ON t.tid = ts.tid) ".
-	    				"INNER JOIN taxa t1 ON t.UnitName1 = t1.UnitName1 AND t.UnitName2 = t1.UnitName2) ".
-	        	        "INNER JOIN taxstatus ts1 ON ts1.tidaccepted = t1.tid) ".
-	            	    "INNER JOIN omoccurrences o ON ts1.tid = o.TidInterpreted ";
-					$sqlWhere = "WHERE ts.taxauthid = 1 AND ts1.taxauthid = 1 AND t.RankId = 220 AND (".$this->dynamicSql.") ";
+				if($this->clType == 'dynamic'){
+					$sqlFromBase .= 'INNER JOIN omoccurrences o ON ts1.tid = o.TidInterpreted ';
+					$sqlWhere .= 'AND ('.$this->dynamicSql.') ';
+				}
+				else{
+					$sqlFromBase .= 'INNER JOIN fmchklsttaxalink clk ON ts1.tid = clk.tid ';
+					$sqlWhere .= 'AND (clk.clid = '.$this->clid.') ';
 				}
 			}
 			//If a taxon limit has been set, add taxon value to sql
 			if($this->taxonFilter){
-				if($this->taxonFilter == "All Species"){
+				if($this->taxonFilter == 'All Species'){
 					//Do nothing
 				}
 				else{
 					$sqlWhere .= 'AND ((ts.Family = "'.$this->taxonFilter.'") OR (t.UnitName1 = "'.$this->taxonFilter.'")) ';
 				}
 			}
-	
+
 			//Limit by character attribute selections
 			$count = 0;
 			if($this->charArr){
 				//Create sql string
 				foreach($this->charArr as $cid => $states){		//key=cid, value=array of cs
 					$count++;
-					$sqlFromBase .= 'INNER JOIN kmdescr AS D'.$count.' ON t.TID = D'.$count.'.TID) ';
-					$stateStr = "";
+					$sqlFromBase .= 'INNER JOIN kmdescr AS D'.$count.' ON t.TID = D'.$count.'.TID ';
+					$stateStr = '';
 					foreach($states as $cs){
-						 $stateStr.=(empty($stateStr)?"":"OR ")."(D".$count.".CS='$cs') ";
+						 $stateStr.=(empty($stateStr)?'':'OR ').'(D'.$count.'.CS="'.$cs.'") ';
 					}
-					$sqlWhere.=" AND (D".$count.".CID=".$cid.") AND (".$stateStr.")";
+					$sqlWhere.=' AND (D'.$count.'.CID='.$cid.') AND ('.$stateStr.')';
 				}
 			}
-			$sqlFrom = "FROM ".str_repeat("(",$count)."(((taxa t ".$sqlFromBase; 
-			$this->sql = $sqlBase.$sqlFrom.$sqlWhere;
+			$this->sql = 'SELECT DISTINCT t.tid, ts.Family, t.SciName AS DisplayName, ts.ParentTID '.$sqlFromBase.$sqlWhere;
 			//echo $this->sql;
 		}
 	}
-	
+
 	public function getIntroHtml(){
 		$returnStr = "<h2>Please enter a checklist, taxonomic group, and then select 'Submit Criteria'</h2>";
 		$returnStr .= "This key is still in the developmental phase. The application, data model, and actual data will need tuning. ".
