@@ -14,9 +14,6 @@ $collManager = new OccurrenceCollectionProfile();
 if(!$collManager->setCollid($collid)) $collid = '';
 
 $isEditor = 0;
-$collPubArr = array();
-$publishGBIF = false;
-$publishIDIGBIO = false;
 
 if($IS_ADMIN){
 	$isEditor = 1;
@@ -55,15 +52,6 @@ if($isEditor){
 		if(!$collManager->removeAddress($_GET['removeiid'])){
 			$statusStr = $collManager->getErrorStr();
 		}
-	}
-}
-if(isset($GBIF_USERNAME) && isset($GBIF_PASSWORD) && isset($GBIF_ORG_KEY) && $collid){
-	$collPubArr = $collManager->getCollPubArr($collid);
-	if($collPubArr[$collid]['publishToGbif']){
-		$publishGBIF = true;
-	}
-	if($collPubArr[$collid]['publishToIdigbio']){
-		$publishIDIGBIO = true;
 	}
 }
 $collData = current($collManager->getCollectionMetadata());
@@ -527,7 +515,7 @@ $collManager->cleanOutArr($collData);
 									<td>
 										<div>
 											GBIF <input type="checkbox" name="publishToGbif" value="1"
-														onchange="checkGUIDSource(this.form);" <?php echo($publishGBIF ? 'CHECKED' : ''); ?> />
+														onchange="checkGUIDSource(this.form);" <?php echo($collData['publishtogbif'] ? 'CHECKED' : ''); ?> />
 											<a id="pubagginfo" href="#" onclick="return false"
 											   title="More information about Publishing to Aggregators">
 												<img src="../../images/info.png" style="width:15px;"/>
@@ -535,7 +523,7 @@ $collManager->cleanOutArr($collData);
 										</div>
 										<!--
 										<div>
-											iDigBio <input type="checkbox" name="publishToIdigbio" value="1" onchange="checkGUIDSource(this.form);" <?php echo($publishIDIGBIO?'CHECKED':''); ?> />
+											iDigBio <input type="checkbox" name="publishToIdigbio" value="1" onchange="checkGUIDSource(this.form);" <?php echo($collData['publishtoidigbio']?'CHECKED':''); ?> />
 										</div>
 										<div id="pubagginfodialog">
 											Check boxes to make Darwin Core Archives published from this collection

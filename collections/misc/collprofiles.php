@@ -186,11 +186,11 @@ if($SYMB_UID){
 							<legend><b><?php echo $LANG['ADMIN_CONTROL']; ?></b></legend>
 							<ul>
 
-                                <li>
-                                    <a href="commentlist.php?collid=<?php echo $collid; ?>" >
+								<li>
+									<a href="commentlist.php?collid=<?php echo $collid; ?>" >
 										<?php echo $LANG['VIEW_COMMENTS']; ?>
-                                    </a>
-                                </li>
+									</a>
+								</li>
 								<li>
 									<a href="collmetadata.php?collid=<?php echo $collid; ?>" >
 										<?php echo $LANG['EDIT_META']; ?>
@@ -254,7 +254,7 @@ if($SYMB_UID){
 										</li>
 										<li>
 											<a href="../datasets/datapublisher.php?collid=<?php echo $collid; ?>">
-	                                            <?php echo $LANG['DARWIN_CORE_PUB']; ?>
+												<?php echo $LANG['DARWIN_CORE_PUB']; ?>
 											</a>
 										</li>
 										<?php
@@ -286,7 +286,7 @@ if($SYMB_UID){
 									?>
 									<li style="margin-left:10px;">
 										<a href="../cleaning/index.php?obsuid=0&collid=<?php echo $collid; ?>">
-	                                        <?php echo $LANG['DATA_CLEANING']; ?>
+											<?php echo $LANG['DATA_CLEANING']; ?>
 										</a>
 									</li>
 									<?php
@@ -330,6 +330,33 @@ if($SYMB_UID){
 			<div style='margin:10px;'>
 				<?php
 				echo $collManager->getMetadataHtml($collData, $LANG);
+
+				if($collData['publishtogbif'] && $datasetKey){
+					$datasetKey = $collManager->getDatasetKey();
+					if($datasetKey){
+						$dataUrl = 'http://www.gbif.org/dataset/'.$datasetKey;
+						?>
+						<div style="margin-top:5px;">
+							<div><b>GBIF Dataset page:</b> <a href="<?php echo $dataUrl; ?>" target="_blank"><?php echo $dataUrl; ?></a></div>
+						</div>
+						<?php
+					}
+				}
+				if($collData['publishtoidigbio']){
+					$idigbioKey = $collManager->getIdigbioKey();
+					if(!$idigbioKey){
+						$idigbioKey = $collManager->findIdigbioKey($collData['guid']);
+					}
+
+					if($idigbioKey){
+						$dataUrl = 'https://www.idigbio.org/portal/recordsets/'.$idigbioKey;
+						?>
+						<div style="margin-top:5px;">
+							<div><b>iDigBio Dataset page:</b> <a href="<?php echo $dataUrl; ?>" target="_blank"><?php echo $dataUrl; ?></a></div>
+						</div>
+						<?php
+					}
+				}
 				if($addrArr = $collManager->getAddress()){
 					?>
 					<div style="margin-top:5px;">
