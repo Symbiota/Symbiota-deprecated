@@ -37,7 +37,7 @@ if($isEditor){
     $logData = $apiManager->checkFGLog($collId);
     if(isset($logData['jobs'])) $currentJobs = $logData['jobs'];
     if(isset($logData['results'])) $currentResults = $logData['results'];
-    $currentCount = count($currentJobs) + count($currentResults);
+    $currentCount = count($currentJobs);
 }
 ?>
 <html>
@@ -146,7 +146,7 @@ if($isEditor){
                 Current Jobs box. Once results are received from Fieldguide, the job will be moved to the Current Results box and you will be able to review the results.
             </div>
             <?php
-            if($currentCount < 10){
+            if($currentCount < 20){
                 ?>
                 <form action="fgbatch.php" method="post" style="" onsubmit="">
                     <fieldset style="margin: 15px auto 15px auto;width:600px;padding:15px;">
