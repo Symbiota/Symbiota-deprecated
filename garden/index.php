@@ -217,6 +217,7 @@ include($serverRoot."/header.php");
                         searchCriteriaArr.splice(index, 1);
                     }
                 }
+                getSearchResults();
             }
         });
     });
@@ -1021,35 +1022,35 @@ include($serverRoot."/header.php");
 <div class="garden-content">
     <h2>Browse Plant Collections</h2>
     <div class="home-boxes">
-        <a href="<?php echo $clientRoot; ?>/spatial/index.php" class="home-box image-box" target="_blank">
+        <a href="<?php echo $clientRoot; ?>/checklists/checklist.php?cl=14796&pid=3" class="home-box image-box">
             <img src="<?php echo $clientRoot; ?>/images/layout/Meadowscape_sm.jpg" alt="Meadowscape">
             <h3>Meadowscape</h3>
             <div class="box-overlay">
                 <div class="centered">A sun-loving mix of flowering herbs, perennials, and grasses</div>
             </div>
         </a>
-        <a href="<?php echo $clientRoot; ?>/checklists/dynamicmap.php?interface=key" class="home-box image-box">
+        <a href="<?php echo $clientRoot; ?>/checklists/checklist.php?cl=14797" class="home-box image-box">
             <img src="<?php echo $clientRoot; ?>/images/layout/Pollinator_garden_sm.jpg" alt="Pollinator Garden">
             <h3>Pollinator Garden</h3>
             <div class="box-overlay">
                 <div class="centered">Description text</div>
             </div>
         </a>
-        <a href="#" class="home-box image-box">
+        <a href="<?php echo $clientRoot; ?>/checklists/checklist.php?cl=14798&pid=3" class="home-box image-box">
             <img src="<?php echo $clientRoot; ?>/images/layout/Rock_garden_sm.jpg" alt="Rock Garden">
             <h3>Rock Garden</h3>
             <div class="box-overlay">
                 <div class="centered">Description text</div>
             </div>
         </a>
-        <a href="<?php echo $clientRoot; ?>/collections/harvestparams.php?db[]=5,8,10,7" class="home-box image-box">
+        <a href="<?php echo $clientRoot; ?>/checklists/checklist.php?cl=14799&pid=3" class="home-box image-box">
             <img src="<?php echo $clientRoot; ?>/images/layout/Water_features_garden_sm.jpg" alt="Rain Garden">
             <h3>Rain Garden</h3>
             <div class="box-overlay">
                 <div class="centered">Description text</div>
             </div>
         </a>
-        <a href="<?php echo $clientRoot; ?>/garden/index.php" class="home-box image-box">
+        <a href="<?php echo $clientRoot; ?>/checklists/checklist.php?cl=14800&pid=3" class="home-box image-box">
             <img src="<?php echo $clientRoot; ?>/images/layout/Woodland_garden_sm.jpg" alt="Woodland Garden">
             <h3>Woodland Garden</h3>
             <div class="box-overlay">

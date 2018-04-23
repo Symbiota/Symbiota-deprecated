@@ -59,7 +59,7 @@
                         <ul>
                             <li><a href="<?php echo $clientRoot; ?>/spatial/index.php" target="_blank">Mapping</a></li>
                             <li><a href="<?php echo $clientRoot; ?>/checklists/dynamicmap.php?interface=key">Interactive Key</a></li>
-                            <li><a href="#">Plant Inventories</a></li>
+                            <li><a href="<?php echo $clientRoot; ?>/projects/index.php?pid=3">Plant Inventories</a></li>
                             <li><a href="<?php echo $clientRoot; ?>/collections/harvestparams.php?db[]=5,8,10,7,238,239,240,241">OSU Herbarium</a></li>
                             <li><a href="<?php echo $clientRoot; ?>/garden/index.php">Garden with Natives</a></li>
                             <li><a href="<?php echo $clientRoot; ?>/imagelib/search.php">Image Search</a></li>
@@ -68,7 +68,7 @@
                     <li class="menu-item-has-children"><a href="#">Resources</a>
                         <ul>
                             <li><a href="#">What's New</a></li>
-                            <li><a href="#">Archived Newsletter</a></li>
+                            <li><a href="<?php echo $clientRoot; ?>/newsletters/index.php">Archived Newsletter</a></li>
                             <li><a href="#">Links</a></li>
                         </ul>
                     </li>
