@@ -810,7 +810,6 @@ class TaxonomyUpload{
 
 	private function setKingdom(){
 		$status = true;
-		//Seed taxaenumtree table
 		$sql = 'UPDATE taxa t INNER JOIN taxaenumtree AS te ON t.TID = te.tid '.
 			'INNER JOIN taxa t2 ON te.parenttid = t2.TID '.
 			'INNER JOIN taxonunits tu ON t2.SciName = tu.kingdomName '.
