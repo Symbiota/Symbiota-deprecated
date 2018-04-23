@@ -1258,7 +1258,7 @@ class SpecUploadBase extends SpecUpload{
 		if($recMap){
 			//Test images
 			$testUrl = '';
-			if(isset($recMap['originalurl']) && $recMap['originalurl'] && strpos($recMap['originalurl'],'processing') !== false){
+			if(isset($recMap['originalurl']) && $recMap['originalurl'] && substr($recMap['originalurl'],0,10) != 'processing'){
 				$testUrl = $recMap['originalurl'];
 			}
 			elseif(isset($recMap['url']) && $recMap['url'] && $recMap['url'] != 'empty'){
