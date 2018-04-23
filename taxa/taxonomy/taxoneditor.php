@@ -7,9 +7,12 @@ if(!$SYMB_UID) header('Location: '.$CLIENT_ROOT.'/profile/index.php?refurl=../ta
 
 $submitAction = array_key_exists('submitaction',$_REQUEST)?$_REQUEST['submitaction']:'';
 $tabIndex = array_key_exists('tabindex',$_REQUEST)?$_REQUEST['tabindex']:0;
-
 $tid = $_REQUEST["tid"];
 $taxAuthId = array_key_exists('taxauthid', $_REQUEST)?$_REQUEST["taxauthid"]:1;
+
+if(!is_numeric($tabIndex)) $tabIndex = 0;
+if(!is_numeric($tid)) $tid = 0;
+if(!is_numeric($taxAuthId)) $taxAuthId = 0;
 
 $taxonEditorObj = new TaxonomyEditorManager();
 $taxonEditorObj->setTid($tid);
@@ -188,10 +191,10 @@ if($editable){
 						<div style="clear:both;">
 							<div style="float:left;width:110px;font-weight:bold;">Author: </div>
 							<div class="editfield">
-								<?php echo $taxonEditorObj->getAuthor();?>
+								<?php echo htmlentities($taxonEditorObj->getAuthor());?>
 							</div>
 							<div class="editfield" style="display:none;">
-								<input type="text" id="author" name="author" style="width:400px;border-style:inset;" value="<?php echo $taxonEditorObj->getAuthor(); ?>" />
+								<input type="text" id="author" name="author" style="width:400px;border-style:inset;" value="<?php echo htmlspecialchars($taxonEditorObj->getAuthor()); ?>" />
 							</div>
 						</div>
 						<div id="kingdomdiv" style="clear:both;">
@@ -223,19 +226,25 @@ if($editable){
 						<div style="clear:both;">
 							<div style="float:left;width:110px;font-weight:bold;">Notes: </div>
 							<div class="editfield">
-								<?php echo $taxonEditorObj->getNotes();?>
+								<?php echo htmlspecialchars($taxonEditorObj->getNotes());?>
 							</div>
 							<div class="editfield" style="display:none;">
-								<input type="text" id="notes" name="notes" value="<?php echo $taxonEditorObj->getNotes(); ?>" style="width:475px;" />
+								<input type="text" id="notes" name="notes" value="<?php echo htmlspecialchars($taxonEditorObj->getNotes()); ?>" style="width:85%;" />
 							</div>
 						</div>
 						<div style="clear:both;">
 							<div style="float:left;width:110px;font-weight:bold;">Source: </div>
 							<div class="editfield">
-								<?php echo $taxonEditorObj->getSource();?>
+								<?php
+								$source = $taxonEditorObj->getSource();
+								if(!stripos($source, '<a ')){
+									$source = htmlspecialchars($source);
+								}
+								echo $source;
+								?>
 							</div>
 							<div class="editfield" style="display:none;">
-								<input type="text" id="source" name="source" style="width:475px;" value="<?php echo $taxonEditorObj->getSource(); ?>" />
+								<input type="text" id="source" name="source" style="width:85%;" value="<?php echo htmlspecialchars($taxonEditorObj->getSource()); ?>" />
 							</div>
 						</div>
 						<div style="clear:both;">
@@ -459,12 +468,12 @@ if($editable){
 										if($synArr["notes"] || $synArr["unacceptabilityreason"]){
 											if($synArr["unacceptabilityreason"]){
 												echo "<div style='margin-left:10px;'>";
-												echo "<u>Reason:</u> ".$synArr["unacceptabilityreason"];
+												echo "<u>Reason</u>: ".htmlspecialchars($synArr["unacceptabilityreason"]);
 												echo "</div>";
 											}
 											if($synArr["notes"]){
 												echo "<div style='margin-left:10px;'>";
-												echo "<u>Notes:</u> ".$synArr["notes"];
+												echo "<u>Notes</u>: ".htmlspecialchars($synArr["notes"]);
 												echo "</div>";
 											}
 										}
@@ -476,13 +485,13 @@ if($editable){
 												<div style="clear:both;">
 													<div style="float:left;width:200px;font-weight:bold;">Unacceptability Reason:</div>
 													<div>
-														<input id='unacceptabilityreason' name='unacceptabilityreason' type='text' style="width:240px;" value='<?php echo $synArr["unacceptabilityreason"]; ?>' />
+														<input id='unacceptabilityreason' name='unacceptabilityreason' type='text' style="width:240px;" value='<?php echo htmlspecialchars($synArr["unacceptabilityreason"]); ?>' />
 													</div>
 												</div>
 												<div style="clear:both;">
 													<div style="float:left;width:200px;font-weight:bold;">Notes:</div>
 													<div>
-														<input id='notes' name='notes' type='text' style="width:240px;" value='<?php echo $synArr["notes"]; ?>' />
+														<input id='notes' name='notes' type='text' style="width:240px;" value='<?php echo htmlspecialchars($synArr["notes"]); ?>' />
 													</div>
 												</div>
 												<div style="clear:both;">
