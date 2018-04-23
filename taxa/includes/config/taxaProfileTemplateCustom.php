@@ -63,24 +63,24 @@ $footerRowElements = Array(); //Bottom horizontal bar in taxon profile page
 if($taxonRank){
     if($taxonRank > 180){
         $topRowElements = Array($OSUtopSpacerDiv,$editButtonDiv,$OSUscinameHeaderDiv,$ambiguousDiv);
-        $leftColumnElements = Array($OSUspeciesNavDiv,$OSUfamilyDiv,$vernacularsDiv,$synonymsDiv,$centralImageDiv,$mapThumbDiv,$OSUwebLinksDiv);
-        $rightColumnElements = Array($descTabsDiv,$OSUobsImgDiv,$OSUspecImgDiv);
-        $bottomRowElements = Array($OSUimgBoxDiv);
-        $footerRowElements = Array();
+        $leftColumnElements = Array($OSUspeciesNavDiv,$OSUfamilyDiv,$vernacularsDiv,$synonymsDiv,$centralImageDiv);
+        $rightColumnElements = Array($descTabsDiv);
+        $bottomRowElements = Array($OSUimgBoxDiv,$OSUobsImgDiv,$OSUspecImgDiv);
+        $footerRowElements = Array($mapThumbDiv,$OSUwebLinksDiv);
     }
     elseif($taxonRank == 180){
         $topRowElements = Array($OSUtopSpacerDiv,$editButtonDiv,$OSUscinameHeaderDiv);
-        $leftColumnElements = Array($OSUspeciesNavDiv,$OSUfamilyDiv,$vernacularsDiv,$OSUwebLinksDiv);
+        $leftColumnElements = Array($OSUspeciesNavDiv,$OSUfamilyDiv,$vernacularsDiv,);
         $rightColumnElements = Array($descTabsDiv);
         $bottomRowElements = Array($OSUimgBoxDiv);
-        $footerRowElements = Array();
+        $footerRowElements = Array($OSUwebLinksDiv);
     }
     else{
         $topRowElements = Array($OSUtopSpacerDiv,$editButtonDiv,$OSUscinameHeaderDiv);
-        $leftColumnElements = Array($OSUspeciesNavDiv,$vernacularsDiv,$OSUwebLinksDiv);
+        $leftColumnElements = Array($OSUspeciesNavDiv,$vernacularsDiv);
         $rightColumnElements = Array($descTabsDiv);
         $bottomRowElements = Array($OSUimgBoxDiv);
-        $footerRowElements = Array();
+        $footerRowElements = Array($OSUwebLinksDiv);
     }
 }
 elseif($taxonValue){

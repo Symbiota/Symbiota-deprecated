@@ -243,6 +243,9 @@ img.image-right {
 .content-wrapper {
 	width: auto;
 }
+.content-wrapper > .inner-content {
+	padding-top: 30px;
+}
 .inner-content {
 	max-width: 1100px;
 	margin: 0 auto;
@@ -687,7 +690,9 @@ ul.square-bullets {
 	font-size: 17px;
 	padding: 7px 25px 7px 22px;
 }
-
+.main-navigation ul.nav-menu > li > a {
+	text-transform: uppercase;
+}
 .main-navigation ul ul {
 	float: left;
 	position: absolute;
@@ -1009,8 +1014,10 @@ button.menu-toggle {
 --------------------------------------------------------------*/
 /* content */
 .navpath {
-	padding-left: 15px;
-	padding-top: 5px;
+	padding-left: 0;
+	padding-top: 30px;
+	max-width: 1060px;
+	margin: 0 auto;
 }
 
 .native-banner-wrapper {
@@ -1530,7 +1537,7 @@ div.growthCol {
 .results-content {
 	max-width: 1100px;
 	margin: 0 auto;
-	color: white;
+	/*color: white;*/
 	padding: 20px;
 }
 .displaySettingDiv {
@@ -1575,6 +1582,7 @@ div.mf_container {
 .resultsDiv {
 	float: left;
 	font-size: 30px;
+	color: #ffffff;
 }
 .resetButtonDiv {
 	float: left;
@@ -1810,12 +1818,20 @@ a_authors {
 	}
 }
 
-#innertext {
-	/*width: 97%;*/
-	/*display: flex;*/
-	/*flex-wrap: wrap;*/
-	/*justify-content: space-between;*/
-	/*margin: 0 auto;*/
+#innertable, #innertext  {
+	max-width: 1060px;
+	margin-left: auto;
+	margin-right: auto;
 }
 
-
+#site-content .ui-widget-header {
+	border: 1px solid #aaa;
+	background: #4e1e97;
+	color: #ffffff;
+	font-weight: bold;
+}
+#site-content .ui-widget-content {
+	border: 1px solid #4e1e97;
+	background: #fff;
+	color: #000;
+}
