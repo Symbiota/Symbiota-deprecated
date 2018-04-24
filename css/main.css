@@ -1093,6 +1093,7 @@ button.menu-toggle {
 	height: 270px;
 	object-fit: cover;
 }
+
 @media screen and (max-width: 900px){
 	.searchResultTable .searchresultgridcell {
 		width: 33%;
@@ -1119,7 +1120,33 @@ button.menu-toggle {
 	padding: 10px;
 }
 
-
+/* list view */
+.searchResultTable.list-results {
+	display: block;
+}
+.searchResultListMainRow {
+	width: 100%;
+	display: flex;
+	justify-content: space-between;
+	padding: 20px;
+}
+.searchResultListMainRow:nth-child(4n+1) {
+	background: #EDE8F4;
+}
+.searchResultListHiddenRow {
+	width: 100%;
+}
+.searchResultListSciname {
+	font-style: italic;
+	font-weight: bold;
+	width: 33%;
+}
+.searchResultListToggle {
+	margin-left: auto;
+	cursor: pointer;
+	color: #502e91;
+	text-decoration: underline;
+}
 /* advanced search */
 
 .garden-name-search-box {

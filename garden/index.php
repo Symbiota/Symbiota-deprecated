@@ -345,7 +345,11 @@ include($serverRoot."/header.php");
 
     function buildResultHtml(res){
         var html = '';
-        html += '<div class="searchResultTable">';
+        if(display == "list") {
+            html += '<div class="searchResultTable list-results">';
+        }else{
+            html += '<div class="searchResultTable">';
+        }
         for(i in res){
             var sciname = res[i].sciname;
             if(display == "grid"){
@@ -357,23 +361,23 @@ include($serverRoot."/header.php");
                 html += '</div>';
             }
             if(display == "list"){
-                html += '<div class="divTableRow searchResultListMainRow">';
-                html += '<div class="divTableCell searchResultListSciname">';
+                html += '<div class="searchResultListMainRow">';
+                html += '<div class="searchResultListSciname">';
                 html += '<a href="../taxa/index.php?taxon='+i+'" target="_blank">'+sciname+'</a>';
                 html += '</div>';
-                html += '<div class="divTableCell searchResultListCommon">'+(res[i].common?res[i].common:"")+'</div>';
-                html += '<div class="divTableCell searchResultListToggle">';
+                html += '<div class="searchResultListCommon">'+(res[i].common?res[i].common:"")+'</div>';
+                html += '<div class="searchResultListToggle">';
                 html += '<div id="listShow'+i+'" class="searchResultListToggleShow" onclick="toggleListItem('+i+',1);">summary</div>';
                 html += '<div id="listHide'+i+'" class="searchResultListToggleHide" onclick="toggleListItem('+i+',0);">(hide summary)</div>';
                 html += '</div>';
                 html += '</div>';
-                html += '<div id="hiddenListDiv'+i+'" class="divTableRow searchResultListHiddenRow">';
-                html += '<div class="divTableCell searchResultListType">'+(res[i].type?res[i].type:"")+'</div>';
-                html += '<div class="divTableCell searchResultListLight">'+(res[i].light?res[i].light+" light":"")+'</div>';
-                html += '<div class="divTableCell searchResultListMoisture">'+(res[i].moisture?res[i].moisture+" moisture":"")+'</div>';
-                html += '<div class="divTableCell searchResultListMaxheight">'+(res[i].maxheight?res[i].maxheight+" ft. Max. Height":"")+'</div>';
-                html += '<div class="divTableCell searchResultListMaxwidth">'+(res[i].maxwidth?res[i].maxwidth+" ft. Max. Width":"")+'</div>';
-                html += '<div class="divTableCell searchResultListEase">'+(res[i].ease?res[i].ease:"")+'</div>';
+                html += '<div id="hiddenListDiv'+i+'" class="searchResultListHiddenRow">';
+                html += '<div class="searchResultListType">'+(res[i].type?res[i].type:"")+'</div>';
+                html += '<div class="dsearchResultListLight">'+(res[i].light?res[i].light+" light":"")+'</div>';
+                html += '<div class="searchResultListMoisture">'+(res[i].moisture?res[i].moisture+" moisture":"")+'</div>';
+                html += '<div class="searchResultListMaxheight">'+(res[i].maxheight?res[i].maxheight+" ft. Max. Height":"")+'</div>';
+                html += '<div class="searchResultListMaxwidth">'+(res[i].maxwidth?res[i].maxwidth+" ft. Max. Width":"")+'</div>';
+                html += '<div class="searchResultListEase">'+(res[i].ease?res[i].ease:"")+'</div>';
                 html += '</div>';
             }
         }
