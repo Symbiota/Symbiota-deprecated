@@ -275,7 +275,7 @@ if($action == 'search'){
 									}
 									elseif($imgArr['uid']){
 										$pName = $uidList[$imgArr['uid']];
-										if(strlen($pName) > 30){
+										if(strlen($pName) > 23){
 											$nameArr = explode(',',$pName);
 											$pName = array_shift($nameArr);
 										}
