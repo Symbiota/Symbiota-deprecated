@@ -1125,6 +1125,8 @@ h2 .fa.green {
 .garden-feature-search-text {
 	font-size: 20px;
 	color: #4e1e97;
+	text-align: center;
+	display: block;
 }
 div.gardenSearchTable {
 	border: 1px solid #75B04D;
@@ -1132,6 +1134,8 @@ div.gardenSearchTable {
 	text-align: center;
 	border-collapse: collapse;
 	margin: 20px auto;
+	width: 100%;
+	max-width: 800px;
 }
 .divTable.gardenSearchTable .divTableCell, .divTable.gardenSearchTable .divTableHead {
 	border: 1px solid #75B04D;
@@ -1166,8 +1170,8 @@ div.plantTypeCol {
 }
 .divTable.plantTypeCol .divTableBody .divTableCell {
 	font-size: 13px;
-	width: 150px;
-	height: 120px;
+	/*width: 150px;*/
+	/*height: 120px;*/
 }
 
 div.sunlightCol {
@@ -1181,8 +1185,8 @@ div.sunlightCol {
 }
 .divTable.sunlightCol .divTableBody .divTableCell {
 	font-size: 13px;
-	width: 150px;
-	height: 120px;
+	/*width: 150px;*/
+	/*height: 120px;*/
 }
 
 div.moistureCol {
@@ -1196,12 +1200,13 @@ div.moistureCol {
 }
 .divTable.moistureCol .divTableBody .divTableCell {
 	font-size: 13px;
-	width: 150px;
-	height: 120px;
+	/*width: 150px;*/
+	/*height: 120px;*/
 }
 
 div.sizeCol {
-	width: 100%;
+	width: 90%;
+	margin: 0 auto;
 	text-align: center;
 	border-collapse: collapse;
 }
@@ -1211,7 +1216,7 @@ div.sizeCol {
 }
 .divTable.sizeCol .divTableBody .divTableCell {
 	font-size: 13px;
-	width: 375px;
+	/*width: 375px;*/
 }
 
 div.growthCol {
@@ -1225,8 +1230,8 @@ div.growthCol {
 }
 .divTable.growthCol .divTableBody .divTableCell {
 	font-size: 20px;
-	width: 150px;
-	height: 70px;
+	/*width: 150px;*/
+	/*height: 70px;*/
 }
 
 .divTable{ display: table; }
@@ -1243,15 +1248,15 @@ div.growthCol {
 .featureCheckBoxLabel {
 	display: inline-block;
 	cursor: pointer;
-	width: 95px;
-	height: 95px;
+	width: 70px;
+	height: 70px;
 	margin: auto;
 	font-size: 0px;
 }
 .featureCheckBoxDiv {
 	background: white;
-	width: 110px;
-	height: 110px;
+	width: 70px;
+	height: 70px;
 	text-align: center;
 	margin: auto;
 }
@@ -1319,9 +1324,11 @@ div.growthCol {
 	top: -2px;
 	left: 7px;
 }
-
+.slider-cell {
+	padding: 0 15px;
+}
 .feature-slider-range {
-	width: 360px;
+	width: auto;
 	margin: 0 auto;
 	margin-bottom: 20px;
 }
@@ -1343,7 +1350,7 @@ div.growthCol {
 
 #heightSlider{
 	pointer-events: none;
-	width: 340px;
+	width: auto;
 	height: 15px;
 	display: block;
 	border: 1px solid #4e1e97;
@@ -1391,7 +1398,7 @@ div.growthCol {
 
 #widthSlider{
 	pointer-events: none;
-	width: 340px;
+	width: auto;
 	height: 15px;
 	display: block;
 	border: 1px solid #4e1e97;
@@ -1468,23 +1475,23 @@ div.growthCol {
 	outline: 0;
 }
 #characteristicsPane {
-	width: 1000px;
+	width: 100%;
 	margin: 20px auto 10px;
 }
 #usesPane {
-	width: 1000px;
+	width: 100%;
 	margin: 20px auto 10px;
 }
 #wildlifePane {
-	width: 1000px;
+	width: 100%;
 	margin: 20px auto 10px;
 }
 #morePane {
-	width: 1000px;
+	width: 100%;
 	margin: 20px auto 10px;
 }
 #availabilityPane {
-	width: 1000px;
+	width: 100%;
 	margin: 20px auto 10px;
 }
 .advSearchOptionWrapper {
@@ -1527,6 +1534,11 @@ div.growthCol {
 .wildlife4 {background: url("../images/wildlife_icon4.png") center; background-size: cover;}
 .wildlife5 {background: url("../images/wildlife_icon5.png") center; background-size: cover;}
 
+
+.garden-content .ui-accordion .ui-accordion-header {
+	background: #75B04D;
+	color: white;
+}
 .results-wrapper {
 	width: 100%;
 	background-color: #947AC0;

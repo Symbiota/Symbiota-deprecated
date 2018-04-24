@@ -185,22 +185,27 @@ include($serverRoot."/header.php");
 
         $("#characteristicsPane").accordion({
             collapsible: true,
+            active:false,
             heightStyle: "content"
         });
         $("#usesPane").accordion({
             collapsible: true,
+            active:false,
             heightStyle: "content"
         });
         $("#wildlifePane").accordion({
             collapsible: true,
+            active:false,
             heightStyle: "content"
         });
         $("#morePane").accordion({
             collapsible: true,
+            active:false,
             heightStyle: "content"
         });
         $("#availabilityPane").accordion({
             collapsible: true,
+            active:false,
             heightStyle: "content"
         });
         $('#searchCriteriaManifest').manifest({
