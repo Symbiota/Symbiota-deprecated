@@ -344,10 +344,7 @@ if($SYMB_UID){
 				}
 				if($collData['publishtoidigbio']){
 					$idigbioKey = $collManager->getIdigbioKey();
-					if(!$idigbioKey){
-						$idigbioKey = $collManager->findIdigbioKey($collData['guid']);
-					}
-
+					if(!$idigbioKey) $idigbioKey = $collManager->findIdigbioKey($collData['guid']);
 					if($idigbioKey){
 						$dataUrl = 'https://www.idigbio.org/portal/recordsets/'.$idigbioKey;
 						?>

@@ -735,16 +735,35 @@ class OccurrenceCollectionProfile {
 		return $retArr;
 	}
 
-	public function getTaxonomyStats(){
+	public function getTaxonomyStats($famStr){
 		$retArr = Array();
-		$sql = 'SELECT family, count(*) as cnt FROM omoccurrences o  WHERE o.family IS NOT NULL AND collid = '.$this->collid.' GROUP BY family';
+		$sql = 'SELECT IFNULL(ts.family,o.family) as taxon, count(DISTINCT o.occid) as cnt '.
+			'FROM omoccurrences o LEFT JOIN taxstatus ts ON o.tidinterpreted = ts.tid '.
+			'WHERE (o.collid = 1) AND (ts.taxauthid = 1 OR ts.taxauthid IS NULL) '.
+			'GROUP BY IFNULL(ts.family,o.family)';
+		/*
+		$sql = 'SELECT ts.family as taxon, count(o.occid) as cnt '.
+			'FROM omoccurrences o INNER JOIN taxstatus ts ON o.tidinterpreted = ts.tid '.
+			'WHERE (o.collid = '.$this->collid.') AND (ts.taxauthid = 1) AND (ts.family IS NOT NULL) GROUP BY ts.family';
+		*/
+		if($famStr){
+			$sql = 'SELECT t.unitname1 as taxon, count(o.occid) as cnt '.
+				'FROM omoccurrences o INNER JOIN taxa t ON o.tidinterpreted = t.tid '.
+				'WHERE (o.family = "'.$this->cleanInStr($famStr).'" OR o.sciname = "'.$this->cleanInStr($famStr).'") AND (o.collid = '.$this->collid.') AND (t.unitname1 IS NOT NULL) AND (t.rankid > 140) '.
+				'GROUP BY t.unitname1';
+			/*
+			$sql = 'SELECT t.unitname1 as taxon, count(o.occid) as cnt '.
+				'FROM omoccurrences o INNER JOIN taxa t ON o.tidinterpreted = t.tid '.
+				'INNER JOIN taxstatus ts ON t.tid = ts.tid '.
+				'WHERE (ts.family = "'.$this->cleanInStr($famStr).'") AND (o.collid = '.$this->collid.')  AND (ts.taxauthid = 1) AND (t.unitname1 IS NOT NULL) GROUP BY t.unitname1';
+			*/
+		}
 		//echo $sql; exit;
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
-			$retArr[ucwords($r->family)] = $r->cnt;
+			if($r->taxon) $retArr[ucwords($r->taxon)] = $r->cnt;
 		}
 		$rs->free();
-		//ksort($retArr);
 		return $retArr;
 	}
 
