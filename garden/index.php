@@ -345,26 +345,16 @@ include($serverRoot."/header.php");
 
     function buildResultHtml(res){
         var html = '';
-        html += '<div class="divTable searchResultTable">';
-        html += '<div class="divTableBody">';
-        var gi = 1;
+        html += '<div class="searchResultTable">';
         for(i in res){
             var sciname = res[i].sciname;
             if(display == "grid"){
-                if(gi == 1) html += '<div class="divTableRow">';
-                html += '<div class="divTableCell searchresultgridcell">';
+                html += '<div class="searchresultgridcell">';
                 html += '<a href="../taxa/index.php?taxon='+i+'" target="_blank">';
                 if(res[i].url) html += '<img class="searchresultgridimage" src="'+res[i].url+'" title="'+sciname+'" alt="'+sciname+' image" />';
                 html += '<div class="searchresultgridsciname">'+sciname+'</div>';
                 html += '</a>';
                 html += '</div>';
-                if(gi < 4){
-                    gi++;
-                }
-                else{
-                    gi = 1;
-                    html += '</div>';
-                }
             }
             if(display == "list"){
                 html += '<div class="divTableRow searchResultListMainRow">';

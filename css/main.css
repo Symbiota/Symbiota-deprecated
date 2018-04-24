@@ -1077,20 +1077,38 @@ button.menu-toggle {
 .searchResultTable {
 	padding: 5px;
 	background: #ffffff;
+	display: flex;
+	flex-wrap: wrap;
 }
 
-.searchResultTable .divTableCell {
+.searchResultTable .searchresultgridcell {
 	border: 5px solid white;
 	position: relative;
+	width: 25%;
 }
 
-.searchResultTable .divTableCell.searchresultgridcell img {
+
+.searchResultTable .searchresultgridcell img {
 	width: 270px;
 	height: 270px;
 	object-fit: cover;
 }
-
-.searchResultTable .divTableCell.searchresultgridcell .searchresultgridsciname {
+@media screen and (max-width: 900px){
+	.searchResultTable .searchresultgridcell {
+		width: 33%;
+	}
+}
+@media screen and (max-width: 600px){
+	.searchResultTable .searchresultgridcell {
+		width: 50%;
+	}
+}
+@media screen and (max-width: 400px){
+	.searchResultTable .searchresultgridcell {
+		width: 100%;
+	}
+}
+.searchResultTable .searchresultgridcell .searchresultgridsciname {
 	position: absolute;
 	bottom: 0px;
 	background: rgba(116, 177, 7, 0.751);
