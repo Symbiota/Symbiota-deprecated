@@ -501,7 +501,7 @@ class ImageLibraryManager extends OccurrenceTaxaManager{
 			'ORDER BY u.lastname, u.firstname ';
 		$rs = $this->conn->query($sql);
 		while ($r = $rs->fetch_object()) {
-			$retArr[$r->uid] = htmlentities($r->fullname);
+			$retArr[$r->uid] = $r->fullname;
 		}
 		$rs->free();
 		return $retArr;

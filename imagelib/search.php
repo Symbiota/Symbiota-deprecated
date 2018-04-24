@@ -275,8 +275,11 @@ if($action == 'search'){
 									}
 									elseif($imgArr['uid']){
 										$pName = $uidList[$imgArr['uid']];
-										if(strlen($pName) > 20) $pName = array_shift(explode(',',$pName));
-										echo $pName.'<br />';
+										if(strlen($pName) > 30){
+											$nameArr = explode(',',$pName);
+											$pName = array_shift($nameArr);
+										}
+										echo htmlspecialchars($pName).'<br />';
 									}
 									//if($imgArr['occid'] && $occArr[$imgArr['occid']]['state']) echo $occArr[$imgArr['occid']]['state'] . "<br />";
 									?>
