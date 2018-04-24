@@ -1133,8 +1133,16 @@ button.menu-toggle {
 .searchResultListMainRow:nth-child(4n+1) {
 	background: #EDE8F4;
 }
+.searchResultListMainRow:nth-child(4n+1)  + .searchResultListHiddenRow{
+	background: #EDE8F4;
+}
 .searchResultListHiddenRow {
 	width: 100%;
+	padding: 0 20px 20px 20px;
+}
+.searchResultListHiddenRow > div{
+	padding-right: 10px;
+	display: inline-block;
 }
 .searchResultListSciname {
 	font-style: italic;
