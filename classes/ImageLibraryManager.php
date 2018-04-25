@@ -488,7 +488,7 @@ class ImageLibraryManager extends OccurrenceTaxaManager{
 		}
 		$rs = $con->query($sql);
 		while ($r = $rs->fetch_object()) {
-			$retArr[$r->tid] = htmlentities($r->sciname);
+			$retArr[$r->tid] = htmlspecialchars($r->sciname);
 		}
 		$rs->free();
 		return $retArr;
@@ -520,12 +520,13 @@ class ImageLibraryManager extends OccurrenceTaxaManager{
 	}
 
 	public function getKeywordSuggest($queryString){
+		global $CHARSET;
 		$retArr = array();
 		$sql = 'SELECT DISTINCT keyword FROM imagekeywords WHERE keyword LIKE "'.$queryString.'%" LIMIT 10 ';
 		$rs = $this->conn->query($sql);
 		$i = 0;
 		while ($r = $rs->fetch_object()) {
-			$retArr[$i]['name'] = htmlentities($r->keyword);
+			$retArr[$i]['name'] = html($r->keyword, ENT_COMPAT | ENT_HTML401, $CHARSET);
 			$i++;
 		}
 		$rs->free();

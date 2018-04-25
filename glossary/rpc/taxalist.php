@@ -1,5 +1,6 @@
 <?php
-include_once('../../config/dbconnection.php');
+include_once('../../config/symbini.php');
+include_once($SERVER_ROOT.'/config/dbconnection.php');
 $con = MySQLiConnectionFactory::getCon("readonly");
 $returnArr = Array();
 $queryString = array_key_exists("term",$_REQUEST)?$con->real_escape_string($_REQUEST['term']):$con->real_escape_string($_REQUEST['q']);
@@ -17,20 +18,20 @@ if($queryString) {
 			if($row->VernacularName){
 				$sciName .= ' ('.$row->VernacularName.')';
 			}
-			$retArrRow['label'] = htmlentities($sciName);
+			$retArrRow['label'] = htmlentities($sciName, ENT_COMPAT | ENT_HTML401, $CHARSET);
 			$retArrRow['value'] = $row->tidaccepted;
 			array_push($returnArr, $retArrRow);
 		}
 	}
-	if($type == 'batch'){
+	elseif($type == 'batch'){
 		$i = 0;
 		while ($row = $result->fetch_object()) {
 			$sciName = $row->SciName;
 			if($row->VernacularName){
 				$sciName .= ' ('.$row->VernacularName.')';
 			}
-			$returnArr[$i]['name'] = htmlentities($sciName);
-			$returnArr[$i]['id'] = htmlentities($row->tidaccepted);
+			$returnArr[$i]['name'] = htmlentities($sciName, ENT_COMPAT | ENT_HTML401, $CHARSET);
+			$returnArr[$i]['id'] = $row->tidaccepted;
 			$i++;
 		}
 	}

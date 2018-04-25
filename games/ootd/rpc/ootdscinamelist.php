@@ -17,7 +17,7 @@ if($queryString) {
 	if($result = $con->query($sql)){
 		while ($row = $result->fetch_object()) {
 			$retArrRow['id'] = $row->SciName;
-			$retArrRow['label'] = htmlentities($row->SciName);
+			$retArrRow['label'] = htmlentities($row->SciName, ENT_COMPAT | ENT_HTML401, $CHARSET);
 			$retArrRow['value'] = $row->SciName;
 			array_push($retArr, $retArrRow);
 		}
