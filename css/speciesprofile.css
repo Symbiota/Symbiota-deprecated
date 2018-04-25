@@ -356,7 +356,6 @@ div.spptab{
 	clear:			both;
 	background-color: #C7E0B5;
 	overflow-x: scroll;
-	white-space:nowrap;
 }
 
 #specImgDiv{
@@ -365,7 +364,6 @@ div.spptab{
 	clear:			both;
 	background-color:			#EBF1DE;
 	overflow:auto;
-	white-space:nowrap;
 }
 
 #obsImgDiv img, #specImgDiv img{
