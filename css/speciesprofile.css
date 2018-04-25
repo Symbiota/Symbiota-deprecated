@@ -304,6 +304,7 @@
 
 #centralimage img{
 	border:		1px dotted black;
+	max-width: 100%;
 }
 
 #centralimage a{
@@ -324,7 +325,7 @@
 /*Text Description*/
 div.sptab{
 	height:		330px;
-	width:		94%;
+	width:		auto;
 	overflow: 	auto;
 }
 
