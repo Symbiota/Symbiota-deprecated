@@ -168,7 +168,7 @@ if($isEditor){
                     <table class="styledtable" style="font-family:Arial;font-size:12px;width:570px;margin-left:auto;margin-right:auto;">
                         <tr>
                             <th style="width:100px;">Date Initiated</th>
-                            <th style="width:100px;">Progress</th>
+                            <th style="width:100px;">Status</th>
                             <th style="width:250px;">Parent Taxon</th>
                             <th style="width:20px;">Cancel</th>
                         </tr>
