@@ -611,15 +611,15 @@ if($clValue || $dynClid){
 					}
 					$prevfam = ''; 
 					if($showImages){
-						echo '<div style="clear:both;">&nbsp;</div>';
+						echo '<div class="images-wrapper">';
 						foreach($taxaArray as $tid => $sppArr){
 							$family = $sppArr['family'];
 							$tu = (array_key_exists('tnurl',$sppArr)?$sppArr['tnurl']:'');
 							$u = (array_key_exists('url',$sppArr)?$sppArr['url']:'');
 							$imgSrc = ($tu?$tu:$u);
 							?>
-							<div class="tndiv">
-								<div class="tnimg" style="<?php echo ($imgSrc?"":"border:1px solid black;"); ?>">
+							<div class="grid-item">
+								<div class="image-item">
 									<?php 
 									$spUrl = "../taxa/index.php?taxauthid=1&taxon=$tid&cl=".$clid;
 									if($imgSrc){
@@ -637,29 +637,32 @@ if($clValue || $dynClid){
 									}
 									?>
 								</div>
-								<div>
-									<?php 
-									if(!$printMode) echo '<a href="'.$spUrl.'" target="_blank">'; 
-									echo '<b>'.$sppArr['sciname'].'</b>';
-									if(!$printMode) echo '</a>';
-									if(array_key_exists('vern',$sppArr)){
-										echo "<div style='font-weight:bold;'>".$sppArr["vern"]."</div>";
-									}
-									if(!$showAlphaTaxa){
-										if($family != $prevfam){
-											?>
-											<div class="familydiv" id="<?php echo $family; ?>">
-												[<?php echo $family; ?>]
-											</div>
-											<?php
-											$prevfam = $family;
-										}
-									}
-									?>
+								<div class="image-overlay">
+                                    <div class="centered">
+                                        <?php
+                                        if(!$printMode) echo '<a href="'.$spUrl.'" target="_blank">';
+                                        echo '<b>'.$sppArr['sciname'].'</b>';
+                                        if(!$printMode) echo '</a>';
+                                        if(array_key_exists('vern',$sppArr)){
+                                            echo "<div style='font-weight:bold;'>".$sppArr["vern"]."</div>";
+                                        }
+                                        if(!$showAlphaTaxa){
+                                            if($family != $prevfam){
+                                                ?>
+                                                <div class="familydiv" id="<?php echo $family; ?>">
+                                                    [<?php echo $family; ?>]
+                                                </div>
+                                                <?php
+                                                $prevfam = $family;
+                                            }
+                                        }
+                                        ?>
+                                    </div>
 								</div>
 							</div>
 							<?php 
 						}
+						echo "</div> <!-- .images-wrapper -->";
 					}
 					else{
 						$voucherArr = $clManager->getVoucherArr();
@@ -755,6 +758,18 @@ if($clValue || $dynClid){
 		}
 		?>
 	</div>
+<div class="metro-wrapper">
+    <div class="inner-content">
+        <hr />
+        <div class="metro-col1"> </div>
+        <div class="metro-col2">
+            <div class="col-content">
+                <p>Metro is a primary contributor to OregonFlora's Gardening with Native Plants and supports efforts to protect clean
+                    air, water and habitat in greater portland.</p>
+            </div>
+        </div>
+    </div>
+</div>
 	<?php
 	if(!$printMode) include($SERVER_ROOT.'/footer.php');
 
@@ -840,5 +855,13 @@ if($clValue || $dynClid){
         <?php
     }
     ?>
+<script src="https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.min.js"></script>
+<script>
+    $('.images-wrapper').masonry({
+        // options
+        itemSelector: '.grid-item',
+        columnWidth: 200
+    });
+</script>
 </body>
 </html>

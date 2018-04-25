@@ -107,7 +107,10 @@ figure {
 }
 hr {
 	box-sizing: content-box;
-	height: 0;
+	height: 1;
+	color: #4E1E97;
+	background: #4E1E97;
+	border: none;
 }
 pre {
 	overflow: auto;
@@ -156,7 +159,7 @@ input[type="search"]::-webkit-search-cancel-button, input[type="search"]::-webki
 	-webkit-appearance: none;
 }
 fieldset {
-	border: 1px solid #c0c0c0;
+	border: 1px solid #4e1e97;
 	margin: 0 2px;
 	padding: 0.35em 0.625em 0.75em;
 }
@@ -1009,6 +1012,42 @@ button.menu-toggle {
 	display: none;
 }
 
+
+/*--------------------------------------------------------------
+# Checklist
+--------------------------------------------------------------*/
+.images-wrapper {
+	clear: both;
+	background: #c7e0b5;
+	padding: 10px;
+}
+
+.grid-item {
+	width: 200px;
+	padding: 10px;
+}
+.image-item {
+
+}
+.grid-item  .image-overlay {
+	display: none;
+	margin: 10px;
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	background: rgba(131, 196, 75, 0.70);
+}
+.grid-item:hover .image-overlay {
+	display: block;
+	text-align: center;
+	padding: 10px;
+	color: #ffffff !important;
+}
+.grid-item .image-overlay * {
+	color: #ffffff !important;
+}
 /*--------------------------------------------------------------
 # Garden with Natives
 --------------------------------------------------------------*/
@@ -1674,26 +1713,24 @@ div.mf_container {
 /* metro */
 
 .metro-wrapper {
-	display: flex;
-	flex-wrap: wrap;
-	justify-content: space-between;
-	width: 100%;
-	margin: 0 auto 30px;
+	margin: 20px;
+}
+.metro-wrapper .inner-content {
+	padding: 20px;
+	overflow: hidden;
 }
 .metro-wrapper .metro-col1 {
-	flex: 1;
 	background: url("../images/metro_logo.png") no-repeat;
-	background-size: cover;
+	background-size: contain;
 	width: 105px;
 	height: 41px;
 	padding: 10px;
 	float: left;
 }
 .metro-wrapper .metro-col2 {
-	flex: 1;
-	max-width: 700px;
-	float: right;
 	padding: 10px 20px;
+	float: left;
+	width: calc(100% - 125px);
 }
 
 
@@ -1775,10 +1812,14 @@ a_authors {
 }
 
 /*--------------------------------------------------------------
-# Buttons
+# Buttons and links
 --------------------------------------------------------------*/
 .btn,
-.resetButtonDiv button{
+.resetButtonDiv button,
+button,
+html input[type="button"],
+input[type="reset"],
+input[type="submit"]{
 	display: inline-block;
 	background: #4E1E97;
 	color: #ffffff;
@@ -1791,7 +1832,11 @@ a_authors {
 	color: white;
 }
 .green-btn,
-.resetButtonDiv button {
+.resetButtonDiv button,
+button,
+html input[type="button"],
+input[type="reset"],
+input[type="submit"] {
 	background: #74B147;
 	border: none;
 }
@@ -1805,6 +1850,18 @@ a_authors {
 	width: 100%;
 	text-align: center;
 }
+
+/* links */
+a:link, a:active, a:hover, a:visited {
+	color: #4e1e97;
+	text-decoration: none;
+}
+a:hover {
+	text-decoration: underline;
+}
+
+
+
 @media screen and (max-width: 880px) {
 	.main-navigation {
 		margin-top: -20px;
