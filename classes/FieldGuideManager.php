@@ -41,6 +41,39 @@ class FieldGuideManager {
         return $retArr;
     }
 
+    public function processCurrentJobs($jobs){
+        global $FIELDGUIDE_API_KEY;
+        foreach($jobs as $job => $jArr){
+            $pArr["job_id"] = $job;
+            $headers = array(
+                'authorization: Token '.$FIELDGUIDE_API_KEY,
+                'Content-Type: application/x-www-form-urlencoded',
+                'Accept: application/json',
+                'Cache-Control: no-cache',
+                'Pragma: no-cache',
+                'Content-Length: '.strlen(http_build_query($pArr))
+            );
+            $ch = curl_init();
+            $options = array(
+                CURLOPT_URL => 'https://fieldguide.net/api2/symbiota/cv_job_status',
+                CURLOPT_POST => true,
+                CURLOPT_HTTPHEADER => $headers,
+                CURLOPT_TIMEOUT => 90,
+                CURLOPT_POSTFIELDS => http_build_query($pArr),
+                CURLOPT_RETURNTRANSFER => true
+            );
+            curl_setopt_array($ch, $options);
+            $result = curl_exec($ch);
+            curl_close($ch);
+            if($result){
+                $statArr = json_decode($result, true);
+                $jobs[$job]['status'] = ($statArr['status']?$statArr['status']:'');
+                $jobs[$job]['progress'] = ($statArr['progress']?$statArr['progress']:'');
+            }
+        }
+        return $jobs;
+    }
+
     public function initiateFGBatchProcess(){
         global $SERVER_ROOT, $CLIENT_ROOT, $FIELDGUIDE_API_KEY;
         $status = '';
