@@ -894,7 +894,7 @@ include($serverRoot."/header.php");
     if($propagationArr || $growthHabitArr || $nativeHabitatArr){
         ?>
         <div id="morePane" class="advSearchPane">
-            <h3>More</h3>
+            <h3>Growth & Maintenance</h3>
             <div>
                 <?php
                 if($propagationArr){

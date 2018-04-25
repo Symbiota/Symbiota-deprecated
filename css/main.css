@@ -1020,6 +1020,7 @@ button.menu-toggle {
 	clear: both;
 	background: #c7e0b5;
 	padding: 10px;
+	overflow: hidden;
 }
 
 .grid-item {
@@ -1714,6 +1715,7 @@ div.mf_container {
 
 .metro-wrapper {
 	margin: 20px;
+	clear: both;
 }
 .metro-wrapper .inner-content {
 	padding: 20px;
