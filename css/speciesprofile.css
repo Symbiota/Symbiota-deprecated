@@ -351,10 +351,10 @@ div.spptab{
 }
 
 #obsImgDiv{
-	height:			200px;
+	height:			auto;
 	padding:			15px;
 	clear:			both;
-	background-color:			#DCE6F2;
+	background-color: #C7E0B5;
 	overflow-x: scroll;
 	white-space:nowrap;
 }
