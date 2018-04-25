@@ -35,7 +35,7 @@ if($isEditor){
         $statusStr = $apiManager->deleteFGBatchResults($collId,$jobId);
     }
     $logData = $apiManager->checkFGLog($collId);
-    if(isset($logData['jobs'])) $currentJobs = $logData['jobs'];
+    if(isset($logData['jobs'])) $currentJobs = $apiManager->processCurrentJobs($logData['jobs']);
     if(isset($logData['results'])) $currentResults = $logData['results'];
     $currentCount = count($currentJobs);
 }
@@ -168,13 +168,19 @@ if($isEditor){
                     <table class="styledtable" style="font-family:Arial;font-size:12px;width:570px;margin-left:auto;margin-right:auto;">
                         <tr>
                             <th style="width:100px;">Date Initiated</th>
+                            <th style="width:200px;">Status</th>
                             <th style="width:250px;">Parent Taxon</th>
                             <th style="width:20px;">Cancel</th>
                         </tr>
                         <?php
                         foreach($currentJobs as $job => $jArr){
+                            $status = $jArr['status'];
+                            $progress = $jArr['progress'];
                             echo '<tr>';
                             echo '<td>'.$jArr['date'].'</td>';
+                            echo '<td>';
+                            if($status) echo $status.': '.$progress['processed'].' of '.$progress['total'].' complete';
+                            echo '</td>';
                             echo '<td>'.$jArr['taxon'].'</td>';
                             echo '<td>';
                             echo '<form action="fgbatch.php" method="post" style="" onsubmit="">';
