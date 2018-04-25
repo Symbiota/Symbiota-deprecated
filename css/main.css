@@ -243,6 +243,9 @@ img.image-right {
 .content-wrapper {
 	width: auto;
 }
+.content-wrapper > .inner-content {
+	padding-top: 30px;
+}
 .inner-content {
 	max-width: 1100px;
 	margin: 0 auto;
@@ -687,7 +690,9 @@ ul.square-bullets {
 	font-size: 17px;
 	padding: 7px 25px 7px 22px;
 }
-
+.main-navigation ul.nav-menu > li > a {
+	text-transform: uppercase;
+}
 .main-navigation ul ul {
 	float: left;
 	position: absolute;
@@ -1009,8 +1014,10 @@ button.menu-toggle {
 --------------------------------------------------------------*/
 /* content */
 .navpath {
-	padding-left: 15px;
-	padding-top: 5px;
+	padding-left: 0;
+	padding-top: 30px;
+	max-width: 1060px;
+	margin: 0 auto;
 }
 
 .native-banner-wrapper {
@@ -1070,20 +1077,39 @@ button.menu-toggle {
 .searchResultTable {
 	padding: 5px;
 	background: #ffffff;
+	display: flex;
+	flex-wrap: wrap;
 }
 
-.searchResultTable .divTableCell {
+.searchResultTable .searchresultgridcell {
 	border: 5px solid white;
 	position: relative;
+	width: 25%;
 }
 
-.searchResultTable .divTableCell.searchresultgridcell img {
+
+.searchResultTable .searchresultgridcell img {
 	width: 270px;
 	height: 270px;
 	object-fit: cover;
 }
 
-.searchResultTable .divTableCell.searchresultgridcell .searchresultgridsciname {
+@media screen and (max-width: 900px){
+	.searchResultTable .searchresultgridcell {
+		width: 33%;
+	}
+}
+@media screen and (max-width: 600px){
+	.searchResultTable .searchresultgridcell {
+		width: 50%;
+	}
+}
+@media screen and (max-width: 400px){
+	.searchResultTable .searchresultgridcell {
+		width: 100%;
+	}
+}
+.searchResultTable .searchresultgridcell .searchresultgridsciname {
 	position: absolute;
 	bottom: 0px;
 	background: rgba(116, 177, 7, 0.751);
@@ -1094,7 +1120,41 @@ button.menu-toggle {
 	padding: 10px;
 }
 
-
+/* list view */
+.searchResultTable.list-results {
+	display: block;
+}
+.searchResultListMainRow {
+	width: 100%;
+	display: flex;
+	justify-content: space-between;
+	padding: 20px;
+}
+.searchResultListMainRow:nth-child(4n+1) {
+	background: #EDE8F4;
+}
+.searchResultListMainRow:nth-child(4n+1)  + .searchResultListHiddenRow{
+	background: #EDE8F4;
+}
+.searchResultListHiddenRow {
+	width: 100%;
+	padding: 0 20px 20px 20px;
+}
+.searchResultListHiddenRow > div{
+	padding-right: 10px;
+	display: inline-block;
+}
+.searchResultListSciname {
+	font-style: italic;
+	font-weight: bold;
+	width: 33%;
+}
+.searchResultListToggle {
+	margin-left: auto;
+	cursor: pointer;
+	color: #502e91;
+	text-decoration: underline;
+}
 /* advanced search */
 
 .garden-name-search-box {
@@ -1118,6 +1178,8 @@ h2 .fa.green {
 .garden-feature-search-text {
 	font-size: 20px;
 	color: #4e1e97;
+	text-align: center;
+	display: block;
 }
 div.gardenSearchTable {
 	border: 1px solid #75B04D;
@@ -1125,6 +1187,8 @@ div.gardenSearchTable {
 	text-align: center;
 	border-collapse: collapse;
 	margin: 20px auto;
+	width: 100%;
+	max-width: 800px;
 }
 .divTable.gardenSearchTable .divTableCell, .divTable.gardenSearchTable .divTableHead {
 	border: 1px solid #75B04D;
@@ -1159,8 +1223,8 @@ div.plantTypeCol {
 }
 .divTable.plantTypeCol .divTableBody .divTableCell {
 	font-size: 13px;
-	width: 150px;
-	height: 120px;
+	/*width: 150px;*/
+	/*height: 120px;*/
 }
 
 div.sunlightCol {
@@ -1174,8 +1238,8 @@ div.sunlightCol {
 }
 .divTable.sunlightCol .divTableBody .divTableCell {
 	font-size: 13px;
-	width: 150px;
-	height: 120px;
+	/*width: 150px;*/
+	/*height: 120px;*/
 }
 
 div.moistureCol {
@@ -1189,12 +1253,13 @@ div.moistureCol {
 }
 .divTable.moistureCol .divTableBody .divTableCell {
 	font-size: 13px;
-	width: 150px;
-	height: 120px;
+	/*width: 150px;*/
+	/*height: 120px;*/
 }
 
 div.sizeCol {
-	width: 100%;
+	width: 90%;
+	margin: 0 auto;
 	text-align: center;
 	border-collapse: collapse;
 }
@@ -1204,7 +1269,7 @@ div.sizeCol {
 }
 .divTable.sizeCol .divTableBody .divTableCell {
 	font-size: 13px;
-	width: 375px;
+	/*width: 375px;*/
 }
 
 div.growthCol {
@@ -1218,8 +1283,8 @@ div.growthCol {
 }
 .divTable.growthCol .divTableBody .divTableCell {
 	font-size: 20px;
-	width: 150px;
-	height: 70px;
+	/*width: 150px;*/
+	/*height: 70px;*/
 }
 
 .divTable{ display: table; }
@@ -1236,15 +1301,15 @@ div.growthCol {
 .featureCheckBoxLabel {
 	display: inline-block;
 	cursor: pointer;
-	width: 95px;
-	height: 95px;
+	width: 70px;
+	height: 70px;
 	margin: auto;
 	font-size: 0px;
 }
 .featureCheckBoxDiv {
 	background: white;
-	width: 110px;
-	height: 110px;
+	width: 70px;
+	height: 70px;
 	text-align: center;
 	margin: auto;
 }
@@ -1312,9 +1377,11 @@ div.growthCol {
 	top: -2px;
 	left: 7px;
 }
-
+.slider-cell {
+	padding: 0 15px;
+}
 .feature-slider-range {
-	width: 360px;
+	width: auto;
 	margin: 0 auto;
 	margin-bottom: 20px;
 }
@@ -1336,7 +1403,7 @@ div.growthCol {
 
 #heightSlider{
 	pointer-events: none;
-	width: 340px;
+	width: auto;
 	height: 15px;
 	display: block;
 	border: 1px solid #4e1e97;
@@ -1384,7 +1451,7 @@ div.growthCol {
 
 #widthSlider{
 	pointer-events: none;
-	width: 340px;
+	width: auto;
 	height: 15px;
 	display: block;
 	border: 1px solid #4e1e97;
@@ -1461,23 +1528,23 @@ div.growthCol {
 	outline: 0;
 }
 #characteristicsPane {
-	width: 1000px;
+	width: 100%;
 	margin: 20px auto 10px;
 }
 #usesPane {
-	width: 1000px;
+	width: 100%;
 	margin: 20px auto 10px;
 }
 #wildlifePane {
-	width: 1000px;
+	width: 100%;
 	margin: 20px auto 10px;
 }
 #morePane {
-	width: 1000px;
+	width: 100%;
 	margin: 20px auto 10px;
 }
 #availabilityPane {
-	width: 1000px;
+	width: 100%;
 	margin: 20px auto 10px;
 }
 .advSearchOptionWrapper {
@@ -1520,6 +1587,11 @@ div.growthCol {
 .wildlife4 {background: url("../images/wildlife_icon4.png") center; background-size: cover;}
 .wildlife5 {background: url("../images/wildlife_icon5.png") center; background-size: cover;}
 
+
+.garden-content .ui-accordion .ui-accordion-header {
+	background: #75B04D;
+	color: white;
+}
 .results-wrapper {
 	width: 100%;
 	background-color: #947AC0;
@@ -1530,7 +1602,7 @@ div.growthCol {
 .results-content {
 	max-width: 1100px;
 	margin: 0 auto;
-	color: white;
+	/*color: white;*/
 	padding: 20px;
 }
 .displaySettingDiv {
@@ -1575,6 +1647,7 @@ div.mf_container {
 .resultsDiv {
 	float: left;
 	font-size: 30px;
+	color: #ffffff;
 }
 .resetButtonDiv {
 	float: left;
@@ -1583,6 +1656,7 @@ div.mf_container {
 }
 .displaySettingDiv {
 	font-size: 25px;
+	color: #ffffff;
 }
 .displaySettingDiv input[type='radio'] {
 	transform: scale(1.5);
@@ -1620,6 +1694,84 @@ div.mf_container {
 	max-width: 700px;
 	float: right;
 	padding: 10px 20px;
+}
+
+
+/*--------------------------------------------------------------
+# Newsletter Archives
+--------------------------------------------------------------*/
+
+.news-item-wrapper {
+	display: flex;
+}
+.news-vol {
+	width: 150px;
+	padding-left: 5px;
+}
+.news-title {
+
+}
+.news-authors {
+	margin-left: auto;
+	padding-right: 5px;
+}
+.inner-volume {
+	width: 150px;
+}
+.inner-wrapper {
+	display: flex;
+}
+.inner-title {
+	flex:1
+}
+.inner-author {
+	flex:1
+}
+.nl_block {
+	border: solid 1px #ccc;
+	background: #e8f0ea;
+	margin-bottom: 10px;
+	min-height: 30px;
+	display: flex;
+	align-items: center;
+}
+.nl_block_author {
+	margin-left: auto;
+	padding-right: 5px;
+}
+.nl_tips {
+	padding-left: 5px;
+}
+.nl_titleBlock {
+	height: 40px;
+	width: 150px;
+	padding-left: 5px;
+}
+
+.nl_title {
+	float: left;
+	font-weight: bold;
+	color: #694;
+}
+
+.a_editTitle {
+	font-size: 10px;
+}
+a_authors {
+	margin-left: auto;
+}
+
+.newsletter-content .inner {
+	position: relative;
+	left: 150px;
+	overflow: hidden;
+}
+
+.newsletter-content .outer {
+	overflow: hidden;
+	border: solid 1px #ccc;
+	background-color: #e8f0ea;
+	width: 100%;
 }
 
 /*--------------------------------------------------------------
@@ -1731,12 +1883,20 @@ div.mf_container {
 	}
 }
 
-#innertext {
-	/*width: 97%;*/
-	/*display: flex;*/
-	/*flex-wrap: wrap;*/
-	/*justify-content: space-between;*/
-	/*margin: 0 auto;*/
+#innertable, #innertext  {
+	max-width: 1060px;
+	margin-left: auto;
+	margin-right: auto;
 }
 
-
+#site-content .ui-widget-header {
+	border: 1px solid #aaa;
+	background: #4e1e97;
+	color: #ffffff;
+	font-weight: bold;
+}
+#site-content .ui-widget-content {
+	border: 1px solid #4e1e97;
+	background: #fff;
+	color: #000;
+}

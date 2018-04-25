@@ -1,7 +1,7 @@
 #innertable{
-	width:				90%;
-	margin-left: 		auto;
-	margin-right: 		auto;
+	width: 100%;
+	max-width: 960px;
+	margin: 0 auto;
 }
 
 #toprow{
@@ -18,11 +18,8 @@
 }
 
 #middlerow{
-	width:			100%;
-	margin-top:			15px;
-	margin-bottom:			15px;
-	display:		table;
-	clear:			both;
+	display: flex;
+	/*flex-direction: row-reverse;*/
 }
 
 #leftcolumn{
@@ -30,35 +27,33 @@
 }
 
 #leftcolumn.species{
-	width:			300px;
+	width:			33%;
 }
 
 #leftcolumn.genus{
-	width:			250px;
+	width:			auto;
 }
 
 #leftcolumn.higher{
-	width:			250px;
+	width:			auto;
 }
 
 #rightcolumn{
-	display:		table-cell;
+	display:		block;
 	vertical-align:	top;
-	width:			525px;
+	width:			66%;
 }
 
 #bottomrow{
 	width:			100%;
-	display:		table-row;
+	display:		block;
 	clear:			both;
 }
 
 #footerrow{
 	width:			100%;
-	display:		block;
+	display:		flex;
 	margin-top:		10px;
-	text-align:		center;
-	clear:			both;
 }
 
 #scinameheader{
@@ -75,6 +70,7 @@
 	width:		90%;
 	text-align:		center;
 	font-size:		25px;
+	color: #4e1e97;
 	margin-left:	auto;
 	margin-right:	auto;
 }
@@ -199,8 +195,8 @@
 }
 
 #desctabs{
-	height:			425px;
-	width:			750px;
+	height:			auto;
+	width:			auto;
 }
 
 #desctabs.species{
@@ -263,10 +259,10 @@
 }
 
 #links{
-	display:		block;
-	width:				200px;
+	width: 50%;
 	margin-left:		0;
 	margin-top:			10px;
+	text-align: left;
 }
 
 #links ul, li{
@@ -307,11 +303,8 @@
 }
 
 #centralimage img{
-	max-width:	450px;
-	max-height:	320px;
-	width: 		expression(this.width >= this.height ? 320: true);
-	height:		expression(this.height >= this.width ? 320: true);
 	border:		1px dotted black;
+	max-width: 100%;
 }
 
 #centralimage a{
@@ -332,7 +325,7 @@
 /*Text Description*/
 div.sptab{
 	height:		330px;
-	width:		94%;
+	width:		auto;
 	overflow: 	auto;
 }
 
@@ -344,7 +337,6 @@ div.spptab{
 
 #descsource{
 	text-align:	right;
-	width:		375px;
 	float:		right;
 	padding:	10px 20px 10px 10px;
 }
@@ -360,7 +352,6 @@ div.spptab{
 
 #obsImgDiv{
 	height:			200px;
-	width:			800px;
 	padding:			15px;
 	clear:			both;
 	background-color:			#DCE6F2;
@@ -370,7 +361,6 @@ div.spptab{
 
 #specImgDiv{
 	height:			200px;
-	width:			800px;
 	padding:			15px;
 	clear:			both;
 	background-color:			#EBF1DE;
@@ -397,8 +387,6 @@ div.imgthumb{
 div.imgthumb img{
 	display: 	inline-block;
 	max-height:	200px;
-	width: 		expression(this.width >= this.height ? 200: true);
-	height:		expression(this.height >= this.width ? 200: true);
 	margin: 	0px;
 	border:		1px dotted grey;
 }
@@ -416,19 +404,17 @@ div.imgthumb div.photographer{
 }
 
 div.mapthumb{
-	margin: 5px;
-	border: 0px;
-	width: 175px;
-	height: 220px;
+	width: 50%;
+	height: auto;
 	float: none;
-	margin-left: 0;
-	padding-left: 0;
+	text-align: left;
 }
-
-div.mapthumb img{
-	width: 165px;
+div.mapthumb img {
+	width: auto;
 	margin: 0px;
-	border: 1px dotted black;
+	border: none;
+}
+div.mapthumb img{
 }
 
 div.mapthumb a:hover img {
@@ -461,8 +447,6 @@ div.sppimg img{
 	border:			1px dotted gray;
 	max-width:		135px;
 	max-height:		135px;
-	width: 			expression(this.width >= this.height ? 135: true);
-	height:			expression(this.height >= this.width ? 135: true);
 }
 
 div.sppmap{
@@ -475,8 +459,6 @@ div.sppmap{
 }
 
 div.sppmap img{
-	margin-left: 	auto;
-	margin-right: 	auto;
 	width: 130px;
 	height:	120px;
 	margin: 0px;
