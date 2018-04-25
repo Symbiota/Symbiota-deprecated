@@ -19,7 +19,7 @@
 
 #middlerow{
 	display: flex;
-	flex-direction: row-reverse;
+	/*flex-direction: row-reverse;*/
 }
 
 #leftcolumn{
@@ -27,7 +27,7 @@
 }
 
 #leftcolumn.species{
-	width:			300px;
+	width:			33%;
 }
 
 #leftcolumn.genus{
@@ -41,7 +41,7 @@
 #rightcolumn{
 	display:		block;
 	vertical-align:	top;
-	width:			auto;
+	width:			66%;
 }
 
 #bottomrow{
@@ -52,10 +52,8 @@
 
 #footerrow{
 	width:			100%;
-	display:		block;
+	display:		flex;
 	margin-top:		10px;
-	text-align:		center;
-	clear:			both;
 }
 
 #scinameheader{
@@ -261,9 +259,10 @@
 }
 
 #links{
-	display:		block;
+	width: 50%;
 	margin-left:		0;
 	margin-top:			10px;
+	text-align: left;
 }
 
 #links ul, li{
@@ -404,19 +403,17 @@ div.imgthumb div.photographer{
 }
 
 div.mapthumb{
-	margin: 5px;
-	border: 0px;
-	width: 175px;
-	height: 220px;
+	width: 50%;
+	height: auto;
 	float: none;
-	margin-left: 0;
-	padding-left: 0;
+	text-align: left;
 }
-
-div.mapthumb img{
-	width: 165px;
+div.mapthumb img {
+	width: auto;
 	margin: 0px;
-	border: 1px dotted black;
+	border: none;
+}
+div.mapthumb img{
 }
 
 div.mapthumb a:hover img {
