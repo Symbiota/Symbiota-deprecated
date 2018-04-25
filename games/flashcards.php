@@ -4,11 +4,11 @@ include_once('../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/GamesManager.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 
-$clid = array_key_exists("clid",$_REQUEST)?$_REQUEST["clid"]:0; 
+$clid = array_key_exists("clid",$_REQUEST)?$_REQUEST["clid"]:0;
 $dynClid = array_key_exists("dynclid",$_REQUEST)?$_REQUEST["dynclid"]:0;
-$taxonFilter = array_key_exists("taxonfilter",$_REQUEST)?$_REQUEST["taxonfilter"]:0; 
-$showCommon = array_key_exists("showcommon",$_REQUEST)?$_REQUEST["showcommon"]:0; 
-$lang = array_key_exists("lang",$_REQUEST)?$_REQUEST["lang"]:$defaultLang; 
+$taxonFilter = array_key_exists("taxonfilter",$_REQUEST)?$_REQUEST["taxonfilter"]:0;
+$showCommon = array_key_exists("showcommon",$_REQUEST)?$_REQUEST["showcommon"]:0;
+$lang = array_key_exists("lang",$_REQUEST)?$_REQUEST["lang"]:$defaultLang;
 
 $fcManager = new GamesManager();
 $fcManager->setClid($clid);
@@ -39,7 +39,7 @@ $sciArr = array();
 		var firstTry = true;
 
 		function init(){
-			<?php 
+			<?php
 				$imagesArr = $fcManager->getFlashcardImages();
 				if($imagesArr){
 					foreach($imagesArr as $imgArr){
@@ -158,7 +158,7 @@ $sciArr = array();
 		<div style="width:420px;margin-left:auto;margin-right:auto;">
 			<div style="width:420px;height:420px;text-align:center;">
 				<div>
-					<a id="imageanchor" href="">
+					<a id="imageanchor" href="" target="_blank">
 						<img id="activeimage" src="" style="height:97%;max-width:450px" />
 					</a>
 				</div>
@@ -179,12 +179,12 @@ $sciArr = array();
 					<select id="scinameselect" onchange="checkId(this)">
 						<option value="0">Name of Above Organism</option>
 						<option value="0">-------------------------</option>
-						<?php 
+						<?php
 						asort($sciArr);
 						foreach($sciArr as $t => $s){
 							echo "<option value='".$t."'>".$s."</option>";
 						}
-					
+
 						?>
 					</select>
 				</div>
@@ -206,14 +206,14 @@ $sciArr = array();
 							<div>
 								<select name="taxonfilter" onchange="document.getElementById('taxonfilterform').submit();">
 									<option value="0">Filter Quiz by Taxonomic Group</option>
-									<?php 
+									<?php
 										$fcManager->echoFlashcardTaxonFilterList();
 									?>
 								</select>
 							</div>
 							<div style='margin-top:3px;'>
-								<?php 
-									//Display Common Names: 0 = false, 1 = true 
+								<?php
+									//Display Common Names: 0 = false, 1 = true
 									if($displayCommonNames){
 										echo '<input id="showcommon" name="showcommon" type="checkbox" value="1" '.($showCommon?"checked":"").' onchange="document.getElementById(\'taxonfilterform\').submit();"/> Display Common Names'."\n";
 									}
