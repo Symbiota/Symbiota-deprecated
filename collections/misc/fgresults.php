@@ -106,20 +106,34 @@ if($isEditor){
         if($isEditor){
             if($resultArr){
                 ?>
-                <form name="viewform" action="fgresults.php" method="post" onsubmit="">
-                    <div style="width:250px;height:10px;">
-                        <div style="float:left;">
-                            <input name="viewmode" type="radio" value="full" <?php echo ($viewMode == 'full'?'checked':''); ?> onchange="submitViewForm(this.form);" /> Full Results
-                        </div>
-                        <div style="float:right;">
-                            <input name="viewmode" type="radio" value="filtered" <?php echo ($viewMode == 'filtered'?'checked':''); ?> onchange="submitViewForm(this.form);" /> Filtered Results
-                        </div>
-                    </div>
-                    <input name="collid" type="hidden" value="<?php echo $collId; ?>" />
-                    <input name="resid" type="hidden" value="<?php echo $resultId; ?>" />
-                    <input name="start" type="hidden" value="<?php echo $start; ?>" />
-                </form>
                 <div style="">
+                    <div style='float:left;'>
+                        <form name="viewform" action="fgresults.php" method="post" onsubmit="">
+                            <div style="width:250px;height:10px;">
+                                <div style="float:left;">
+                                    <input name="viewmode" type="radio" value="full" <?php echo ($viewMode == 'full'?'checked':''); ?> onchange="submitViewForm(this.form);" /> Full Results
+                                </div>
+                                <div style="float:right;">
+                                    <input name="viewmode" type="radio" value="filtered" <?php echo ($viewMode == 'filtered'?'checked':''); ?> onchange="submitViewForm(this.form);" /> Filtered Results
+                                </div>
+                            </div>
+                            <input name="collid" type="hidden" value="<?php echo $collId; ?>" />
+                            <input name="resid" type="hidden" value="<?php echo $resultId; ?>" />
+                            <input name="start" type="hidden" value="<?php echo $start; ?>" />
+                        </form>
+                    </div>
+
+                    <div style='float:right;'>
+                        <form name="downloadcsv" id="downloadcsv" style="margin-bottom:0px" action="fgcsv.php" method="post" onsubmit="">
+                            <input type="hidden" name="collid" value='<?php echo $collId; ?>' />
+                            <input type="hidden" name="resid" value="<?php echo $resultId; ?>" />
+                            <input type="hidden" name="viewmode" value="<?php echo $viewMode; ?>" />
+                            <input type="submit" name="action" value="Download CSV" />
+                        </form>
+                    </div>
+                </div>
+
+                <div style="clear:both;">
                     <b>Use the checkboxes to select the records you would like to add determinations, and the radio buttons to select which determination to add.</b>
                 </div>
                 <form name="fgbatchidform" action="fgresults.php" method="post" onsubmit="return validateForm(this);">
@@ -144,6 +158,7 @@ if($isEditor){
                             <th style="width:40px;">Record ID</th>
                             <th style="width:20px;"><input name="selectall" type="checkbox" title="Select/Deselect All" onclick="selectAll(this.form)" /></th>
                             <th>Current Identification</th>
+                            <th>Family</th>
                             <th></th>
                             <th></th>
                             <th>Fieldguide Identification</th>
@@ -161,7 +176,9 @@ if($isEditor){
                                 $firstRadio = true;
                                 $recResults = false;
                                 $currID = $occArr['sciname'];
+                                $family = $occArr['family'];
                                 unset($occArr['sciname']);
+                                unset($occArr['family']);
                                 foreach($occArr as $imgId => $imgArr){
                                     if($imgArr['results']) $recResults = true;
                                 }
@@ -209,6 +226,9 @@ if($isEditor){
                                         if($firstOcc) echo '<a href="'.$CLIENT_ROOT.'/taxa/index.php?taxon='.$currID.'" target="_blank">'.$currID.'</a>'."\n";
                                         echo '</td>'."\n";
                                         echo '<td>'."\n";
+                                        if($firstOcc) echo $family."\n";
+                                        echo '</td>'."\n";
+                                        echo '<td>'."\n";
                                         if($firstImg) echo '<a href="'.$imgurl.'" target="_blank">View Image</a>'."\n";
                                         echo '</td>'."\n";
                                         echo '<td>'."\n";
@@ -234,6 +254,9 @@ if($isEditor){
                                     echo '</td>'."\n";
                                     echo '<td>'."\n";
                                     if($firstOcc) echo '<a href="'.$CLIENT_ROOT.'/taxa/index.php?taxon='.$currID.'" target="_blank">'.$currID.'</a>'."\n";
+                                    echo '</td>'."\n";
+                                    echo '<td>'."\n";
+                                    if($firstOcc) echo $family."\n";
                                     echo '</td>'."\n";
                                     echo '<td>'."\n";
                                     if($firstImg) echo '<a href="'.$imgurl.'" target="_blank">View Image</a>'."\n";

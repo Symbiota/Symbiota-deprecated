@@ -363,9 +363,10 @@ class FieldGuideManager {
     public function getFGResultImgArr(){
         $returnArr = Array();
         $fgOccIdStr = implode(",",$this->fgResOccArr);
-        $sql = 'SELECT i.imgid, o.occid, o.sciname, i.url '.
+        $sql = 'SELECT i.imgid, o.occid, o.sciname, IFNULL(ts.family,o.family) AS family, i.url '.
             'FROM images AS i LEFT JOIN omoccurrences AS o ON i.occid = o.occid '.
-            'WHERE o.occid IN('.$fgOccIdStr.') ';
+            'LEFT JOIN taxstatus AS ts ON o.tidinterpreted = ts.tid '.
+            'WHERE o.occid IN('.$fgOccIdStr.') AND ts.taxauthid = 1 ';
         //echo "<div>Sql: ".$sql."</div>";
         $result = $this->conn->query($sql);
         while($row = $result->fetch_object()){
@@ -381,6 +382,7 @@ class FieldGuideManager {
             if(substr($imgUrl,0,1) == '/') $imgUrl = $localDomain.$imgUrl;
             $returnArr[$imgId]["occid"] = $row->occid;
             $returnArr[$imgId]["sciname"] = $row->sciname;
+            $returnArr[$imgId]["family"] = $row->family;
             $returnArr[$imgId]["url"] = $imgUrl;
         }
         $result->free();
@@ -394,8 +396,8 @@ class FieldGuideManager {
         $sql = 'SELECT DISTINCT occid '.
             'FROM omoccurrences '.
             "WHERE occid IN(".$occIDStr.") ".
-            'ORDER BY occid '.
-            'LIMIT '.$this->recStart.','.$this->recLimit;
+            'ORDER BY occid ';
+        if($this->recLimit) $sql .= 'LIMIT '.$this->recStart.','.$this->recLimit;
         //echo "<div>Sql: ".$sql."</div>";
         $result = $this->conn->query($sql);
         while($row = $result->fetch_object()){
@@ -413,7 +415,7 @@ class FieldGuideManager {
         $prevOccid = 0;
         //echo json_encode($imgArr);
         foreach($this->fgResultArr as $occId => $oArr){
-            if(($i > $this->recLimit)){
+            if(($this->recLimit && $i > $this->recLimit)){
                 break;
             }
             if(in_array($occId,$limitArr)){
@@ -421,6 +423,7 @@ class FieldGuideManager {
                     if($imgArr[$imgId]){
                         $ifArr = $imgArr[$imgId];
                         $currID = $ifArr["sciname"];
+                        $family = $ifArr["family"];
                         $imgUrl = $ifArr["url"];
                         $fgStatus = $iArr["status"];
                         $fgResults = $iArr["result"];
@@ -429,6 +432,7 @@ class FieldGuideManager {
                             $i++;
                         }
                         $this->resultArr[$occId]["sciname"] = $currID;
+                        $this->resultArr[$occId]["family"] = $family;
                         $this->resultArr[$occId][$imgId]["url"] = $imgUrl;
                         $this->resultArr[$occId][$imgId]["status"] = $fgStatus;
                         $this->resultArr[$occId][$imgId]["results"] = $fgResults;
