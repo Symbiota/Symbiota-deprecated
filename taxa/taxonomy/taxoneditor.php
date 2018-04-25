@@ -191,7 +191,7 @@ if($editable){
 						<div style="clear:both;">
 							<div style="float:left;width:110px;font-weight:bold;">Author: </div>
 							<div class="editfield">
-								<?php echo htmlentities($taxonEditorObj->getAuthor());?>
+								<?php echo htmlspecialchars($taxonEditorObj->getAuthor());?>
 							</div>
 							<div class="editfield" style="display:none;">
 								<input type="text" id="author" name="author" style="width:400px;border-style:inset;" value="<?php echo htmlspecialchars($taxonEditorObj->getAuthor()); ?>" />
