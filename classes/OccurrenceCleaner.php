@@ -840,9 +840,9 @@ class OccurrenceCleaner extends Manager{
 	//General ranking functions
 	public function getCategoryList(){
 		$retArr = array();
-		$sql = 'SELECT DISTINCT category '.
-			'FROM omoccurverification '.
-			'WHERE (collid = '.$this->collid.')';
+		$sql = 'SELECT DISTINCT v.category '.
+			'FROM omoccurverification v INNER JOIN omoccurrences o ON v.occid = o.occid '.
+			'WHERE (o.collid = '.$this->collid.')';
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
 			$retArr[] = $r->category;
@@ -855,10 +855,10 @@ class OccurrenceCleaner extends Manager{
 	public function getRankingStats($category){
 		$retArr = array();
 		$category = $this->cleanInStr($category);
-		$sql = 'SELECT category, ranking, protocol, count(*) as cnt '.
-			'FROM omoccurverification '.
-			'WHERE category = "'.$category.'" '.
-			'GROUP BY category, ranking,protocol';
+		$sql = 'SELECT v.category, v.ranking, v.protocol, COUNT(v.occid) as cnt '.
+			'FROM omoccurverification v INNER JOIN omoccurrences o ON v.occid = o.occid '.
+			'WHERE (o.collid = '.$this->collid.') AND v.category = "'.$category.'" '.
+			'GROUP BY v.category, v.ranking, v.protocol';
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
 			$retArr[$r->category][$r->ranking][$r->protocol] = $r->cnt;
@@ -866,9 +866,9 @@ class OccurrenceCleaner extends Manager{
 		$rs->free();
 		if($category){
 			//Get unranked count
-			$sql = 'SELECT count(occid) AS cnt '.
+			$sql = 'SELECT COUNT(occid) AS cnt '.
 				'FROM omoccurrences '.
-				'WHERE (collid = '.$this->collid.') AND (occid NOT IN(SELECT occid FROM omoccurverification WHERE category = "'.$category.'"))';
+				'WHERE (collid = '.$this->collid.') AND (decimallatitude IS NOT NULL) AND (occid NOT IN(SELECT occid FROM omoccurverification WHERE category = "'.$category.'"))';
 			$rs = $this->conn->query($sql);
 			if($r = $rs->fetch_object()){
 				$retArr[$category]['unranked'][''] = $r->cnt;
@@ -881,16 +881,45 @@ class OccurrenceCleaner extends Manager{
 	public function getOccurList($category, $ceilingRank, $floorRank = 0){
 		$retArr = array();
 		if(is_numeric($ceilingRank) && is_numeric($floorRank)){
-			$sql = 'SELECT ovsid, occid, category, ranking, protocol, source, uid, notes, initialtimestamp '.
-				'FROM omoccurverification '.
-				'WHERE (collid = '.$this->collid.') AND (category = "'.$this->cleanInStr($category).'") '.
-				'AND (ranking BETWEEN '.$floorRank.' AND '.$ceilingRank.')';
+			$sql = 'SELECT v.ovsid, v.occid, v.category, v.ranking, v.protocol, v.source, v.uid, v.notes, v.initialtimestamp '.
+				'FROM omoccurverification v INNER JOIN omoccurrences o ON v.occid = o.occid '.
+				'WHERE (o.collid = '.$this->collid.') AND (v.category = "'.$this->cleanInStr($category).'") '.
+				'AND (v.ranking BETWEEN '.$floorRank.' AND '.$ceilingRank.')';
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
 
 			}
 			$rs->free();
 		}
+		return $retArr;
+	}
+
+	public function getOccurrenceRankingArr($category, $ranking){
+		$retArr = array();
+		if(is_numeric($ranking)){
+			$sql = 'SELECT DISTINCT v.occid, l.username, v.initialtimestamp '.
+				'FROM omoccurverification v INNER JOIN omoccurrences o ON v.occid = o.occid '.
+				'INNER JOIN userlogin l ON v.uid = l.uid '.
+				'WHERE (o.collid = '.$this->collid.') AND (v.category = "'.$this->cleanInStr($category).'") AND (ranking = '.$ranking.')';
+			$rs = $this->conn->query($sql);
+			while($r = $rs->fetch_object()){
+				$retArr[$r->occid]['username'] = $r->username;
+				$retArr[$r->occid]['ts'] = $r->initialtimestamp;
+			}
+			$rs->free();
+		}
+		return $retArr;
+	}
+
+	public function getRankList(){
+		$retArr = array();
+		$sql = 'SELECT DISTINCT v.ranking FROM omoccurverification v INNER JOIN omoccurrences o ON v.occid = o.occid WHERE (o.collid = '.$this->collid.')';
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			$retArr[] = $r->ranking;
+		}
+		$rs->free();
+		sort($retArr);
 		return $retArr;
 	}
 
