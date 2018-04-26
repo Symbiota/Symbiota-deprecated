@@ -13,6 +13,7 @@ class TaxonomyDisplayManager{
 	private $displayFullTree = false;
 	private $displaySubGenera = false;
 	private $isEditor = false;
+	private $nodeCnt = 0;
 
 	function __construct(){
 		$this->conn = MySQLiConnectionFactory::getCon("readonly");
@@ -29,6 +30,7 @@ class TaxonomyDisplayManager{
 	}
 
 	public function displayTaxonomyHierarchy(){
+		set_time_limit(300);
 		$hierarchyArr = $this->setTaxa();
 		$this->echoTaxonArray($hierarchyArr);
 	}
@@ -253,6 +255,11 @@ class TaxonomyDisplayManager{
 				}
 				if(is_array($value)){
 					$this->echoTaxonArray($value);
+				}
+				$this->nodeCnt++;
+				if($this->nodeCnt%500 == 0){
+					ob_flush();
+					flush();
 				}
 			}
 		}
