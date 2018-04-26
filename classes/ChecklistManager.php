@@ -564,7 +564,7 @@ class ChecklistManager {
 	public function getTaxonSearch($term, $clid, $deep=0){
 		$retArr = array();
 		$term = preg_replace('/\s{1}[\D]{1}\s{1}/i', ' _ ', trim($term));
-		$term = preg_replace('/[^a-zA-Z_\- ]+/', '', $term);
+		$term = preg_replace('/[^a-zA-Z_\-\. ]+/', '', $term);
 		if(!is_numeric($clid)) $clid = 0;
 		if($term && $clid){
 			$sql = '(SELECT t.sciname '.
@@ -589,7 +589,7 @@ class ChecklistManager {
 
 	public function getSpeciesSearch($term){
 		$retArr = array();
-		$term = preg_replace('/[^a-zA-Z\- ]+/', '', $term);
+		$term = preg_replace('/[^a-zA-Z\-\. ]+/', '', $term);
 		$term = preg_replace('/\s{1}x{1}\s{0,1}$/i', ' _ ', $term);
 		$term = preg_replace('/\s{1}[\D]{1}\s{1}/i', ' _ ', $term);
 		if($term){
@@ -630,7 +630,7 @@ class ChecklistManager {
 	}
 
 	public function setTaxonFilter($tFilter){
-		$term = preg_replace('/[^a-zA-Z\- ]+/', '', $tFilter);
+		$term = preg_replace('/[^a-zA-Z\-\. ]+/', '', $tFilter);
 		$this->taxonFilter = preg_replace('/\s{1}[\D]{1}\s{1}/i', ' _ ', $term);
 	}
 

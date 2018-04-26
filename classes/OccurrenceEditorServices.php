@@ -16,7 +16,7 @@ class OccurrenceEditorServices {
 	//AJAX query calls
 	public function getSpeciesSuggest($term){
 		$retArr = Array();
-		$term = preg_replace('/[^a-zA-Z\- ]+/', '', $term);
+		$term = preg_replace('/[^a-zA-Z\-. ]+/', '', $term);
 		$term = preg_replace('/\s{1}x{1}\s{0,1}$/i', ' _ ', $term);
 		$term = preg_replace('/\s{1}x{1}\s{1}/i', ' _ ', $term);
 		$sql = 'SELECT DISTINCT tid, sciname FROM taxa WHERE sciname LIKE "'.$term.'%" ';
