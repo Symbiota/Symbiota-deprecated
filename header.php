@@ -11,8 +11,8 @@
         <div class="top-menu-container">
             <div class="top-menu">
                 <ul>
-                    <li><a href="#">Contact Info</a></li>
-                    <li><a href="#">Donate</a></li>
+                    <li><a href="<?php echo $clientRoot; ?>/pages/contact.php">Contact Info</a></li>
+                    <li><a href="<?php echo $clientRoot; ?>/pages/donate.php">Donate</a></li>
 	                <?php
 	                if($userDisplayName){
 		                ?>
@@ -69,21 +69,21 @@
                         <ul>
                             <li><a href="#">What's New</a></li>
                             <li><a href="<?php echo $clientRoot; ?>/newsletters/index.php">Archived Newsletter</a></li>
-                            <li><a href="#">Links</a></li>
+                            <li><a href="<?php echo $clientRoot; ?>/pages/links.php">Links</a></li>
                         </ul>
                     </li>
                     <li class="menu-item-has-children"><a href="#">About</a>
                         <ul>
-                            <li><a href="#">Mission</a></li>
-                            <li><a href="#">Contact Info</a></li>
-                            <li><a href="#">Project Participants</a></li>
+                            <li><a href="<?php echo $clientRoot; ?>/pages/mission.php">Mission</a></li>
+                            <li><a href="<?php echo $clientRoot; ?>/pages/contact.php">Contact Info</a></li>
+                            <li><a href="<?php echo $clientRoot; ?>/pages/project-participants.php">Project Participants</a></li>
                         </ul>
                     </li>
                     <li class="menu-item-has-children"><a href="#">Support</a>
                         <ul>
-                            <li><a href="#">Donate</a></li>
-                            <li><a href="#">Volunteer</a></li>
-                            <li><a href="#">Merchandise</a></li>
+                            <li><a href="<?php echo $clientRoot; ?>/pages/donate.php">Donate</a></li>
+                            <li><a href="<?php echo $clientRoot; ?>/pages/volunteer.php">Volunteer</a></li>
+                            <li><a href="<?php echo $clientRoot; ?>/pages/merchandise.php">Merchandise</a></li>
                         </ul>
                     </li>
                 </ul><!-- .nav -->
