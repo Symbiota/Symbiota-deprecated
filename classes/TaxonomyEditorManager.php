@@ -518,27 +518,23 @@ class TaxonomyEditorManager{
 		if($this->rankid > 140){
 			//Update family in taxstatus table
 			$newFam = '';
-			$sqlFam1 = 'SELECT sciname FROM taxa WHERE (tid IN('.$trueHierarchyStr.')) AND rankid = 140';
+			$sqlFam1 = 'SELECT t.sciname FROM taxaenumtree e INNER JOIN taxa t ON e.parenttid = t.tid '.
+				'WHERE (e.taxauthid = '.$this->taxAuthId.') AND (e.tid = '.$tid.') AND (t.rankid = 140)';
 			$rsFam1 = $this->conn->query($sqlFam1);
 			if($r1 = $rsFam1->fetch_object()){
 				$newFam = $r1->sciname;
 			}
 			$rsFam1->free();
 
-			$sqlFam2 = 'SELECT family FROM taxstatus WHERE (taxauthid = '.$this->taxAuthId.') AND (tid = '.$tid.')';
-			$rsFam2 = $this->conn->query($sqlFam2);
-			if($rFam2 = $rsFam2->fetch_object()){
-				if($newFam <> $rFam2->family){
-					//reset family of target taxon and all it's children
-					$sql = 'UPDATE taxstatus ts INNER JOIN taxaenumtree e ON ts.tid = e.tid '.
-						'SET ts.family = '.($newFam?'"'.$this->cleanInStr($newFam).'"':'Not assigned').' '.
-						'WHERE (ts.taxauthid = '.$this->taxAuthId.') AND (e.taxauthid = '.$this->taxAuthId.') AND '.
-						'((ts.tid = '.$tid.') OR (e.parenttid = '.$tid.'))';
-					//echo $sql;
-					$this->conn->query($sql);
-				}
+			//reset family of target taxon and all it's children
+			$sql = 'UPDATE taxstatus ts INNER JOIN taxaenumtree e ON ts.tid = e.tid '.
+				'SET ts.family = '.($newFam?'"'.$this->cleanInStr($newFam).'"':'NULL').' '.
+				'WHERE (ts.taxauthid = '.$this->taxAuthId.') AND (e.taxauthid = '.$this->taxAuthId.') '.
+				'AND ((ts.tid = '.$tid.') OR (e.parenttid = '.$tid.'))';
+			if(!$this->conn->query($sql)){
+				$this->errorStr = 'ERROR attempting to reset family string: '.$this->conn->error;
+				echo $this->errorStr;
 			}
-			$rsFam2->free();
 		}
 	}
 
