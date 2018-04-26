@@ -53,7 +53,7 @@ if($collMap['colltype'] == 'General Observations'){
 		if($isEditor){
 			echo '<h2>'.$collMap['collectionname'].' ('.$collMap['code'].')</h2>';
 			?>
-			<div style="color:orange;margin:20px 0px">Downloading a backup of your collection data before running any batch updates is always recommended</div>
+			<div style="color:orange;margin:20px 0px">Downloading a backup of your collection data before running any batch updates is strongly recommended</div>
 			<?php
 			if($collMap['colltype'] != 'General Observations'){
 				?>
@@ -126,27 +126,51 @@ if($collMap['colltype'] == 'General Observations'){
 						$statsArr = $cleanManager->getCoordStats();
 						?>
 						<li>Georeferenced: <?php echo $statsArr['coord']; ?>
-							<a href="../editor/occurrencetabledisplay.php?collid=<?php echo $collid; ?>&q_customfield1=decimallatitude&q_customtype1=NOTNULL" style="margin-left:5px;" title="Open Editor" target="_blank">
-								<img src="../../images/edit.png" style="width:10px" />
-							</a>
+							<?php
+							if($statsArr['coord']){
+								?>
+								<a href="../editor/occurrencetabledisplay.php?collid=<?php echo $collid; ?>&occindex=0&q_catalognumber=&q_customfield1=decimallatitude&q_customtype1=NOTNULL" style="margin-left:5px;" title="Open Editor" target="_blank">
+									<img src="../../images/edit.png" style="width:10px" />
+								</a>
+								<?php
+							}
+							?>
 						</li>
 						<li>Lacking coordinates: <?php echo $statsArr['noCoord']; ?>
-							<a href="../editor/occurrencetabledisplay.php?collid=<?php echo $collid; ?>&q_customfield1=decimallatitude&q_customtype1=NULL" style="margin-left:5px;" title="Open Editor" target="_blank">
-								<img src="../../images/edit.png" style="width:10px" />
-							</a>
-							<a href="../georef/batchgeoreftool.php?collid=<?php echo $collid; ?>" style="margin-left:5px;" title="Open Batch Georeference Tool" target="_blank">
-								<img src="../../images/edit.png" style="width:10px" /><span style="font-size:70%;margin-left:-3;">b-geo</span>
-							</a>
+							<?php
+							if($statsArr['noCoord']){
+								?>
+								<a href="../editor/occurrencetabledisplay.php?collid=<?php echo $collid; ?>&occindex=0&q_catalognumber=&q_customfield1=decimallatitude&q_customtype1=NULL" style="margin-left:5px;" title="Open Editor" target="_blank">
+									<img src="../../images/edit.png" style="width:10px" />
+								</a>
+								<a href="../georef/batchgeoreftool.php?collid=<?php echo $collid; ?>" style="margin-left:5px;" title="Open Batch Georeference Tool" target="_blank">
+									<img src="../../images/edit.png" style="width:10px" /><span style="font-size:70%;margin-left:-3;">b-geo</span>
+								</a>
+								<?php
+							}
+							?>
 						</li>
 						<li style="margin-left:15px">Lacking coordinates with verbatim coordinates: <?php echo $statsArr['noCoord_verbatim']; ?>
-							<a href="../editor/occurrencetabledisplay.php?collid=<?php echo $collid; ?>&q_customfield1=decimallatitude&q_customtype1=NULL&q_customfield2=verbatimcoordinates&q_customtype2=NOTNULL" style="margin-left:5px;" title="Open Editor" target="_blank">
-								<img src="../../images/edit.png" style="width:10px" />
-							</a>
+							<?php
+							if($statsArr['noCoord_verbatim']){
+								?>
+								<a href="../editor/occurrencetabledisplay.php?collid=<?php echo $collid; ?>&occindex=0&q_catalognumber=&q_customfield1=decimallatitude&q_customtype1=NULL&q_customfield2=verbatimcoordinates&q_customtype2=NOTNULL" style="margin-left:5px;" title="Open Editor" target="_blank">
+									<img src="../../images/edit.png" style="width:10px" />
+								</a>
+								<?php
+							}
+							?>
 						</li>
 						<li style="margin-left:15px">Lacking coordinates without verbatim coordinates: <?php echo $statsArr['noCoord_noVerbatim']; ?>
-							<a href="../editor/occurrencetabledisplay.php?collid=<?php echo $collid; ?>&q_customfield1=decimallatitude&q_customtype1=NULL&q_customfield2=verbatimcoordinates&q_customtype2=NULL" style="margin-left:5px;" title="Open Editor" target="_blank">
-								<img src="../../images/edit.png" style="width:10px" />
-							</a>
+							<?php
+							if($statsArr['noCoord_noVerbatim']){
+								?>
+								<a href="../editor/occurrencetabledisplay.php?collid=<?php echo $collid; ?>&occindex=0&q_catalognumber=&q_customfield1=decimallatitude&q_customtype1=NULL&q_customfield2=verbatimcoordinates&q_customtype2=NULL" style="margin-left:5px;" title="Open Editor" target="_blank">
+									<img src="../../images/edit.png" style="width:10px" />
+								</a>
+								<?php
+							}
+							?>
 						</li>
 						<li>
 							<a href="coordinatevalidator.php?collid=<?php echo $collid; ?>">Check coordinates against political boundaries</a>
@@ -165,7 +189,11 @@ if($collMap['colltype'] == 'General Observations'){
 							echo '<tr>';
 							echo '<td>'.$rank.'</td>';
 							echo '<td>'.$protocol.'</td>';
-							echo '<td>'.$cnt.'</td>';
+							echo '<td>';
+							echo '<a href="coordinatevalidator.php?collid='.$collid.'&ranking='.($rank == 'unranked'?'':$rank).'">';
+							echo $cnt;
+							echo '</a>';
+							echo '</td>';
 							echo '</tr>';
 						}
 					}
