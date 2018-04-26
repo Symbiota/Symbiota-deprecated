@@ -25,6 +25,12 @@ include( $serverRoot . "/header.php" );
 <div class="inner-content">
     <!-- place static page content here. -->
 
+    <h1>What's New</h1>
+    <p>&nbsp;</p>
+    <p>&nbsp;</p>
+    <p>&nbsp;</p>
+    <p>&nbsp;</p>
+    <p>&nbsp;</p>
 </div> <!-- .inner-content -->
 
 <?php

@@ -2,7 +2,7 @@
     <div class="footer-nav-wrapper">
         <ul class="footer-nav">
             <li><a href="mailto:info@oregonflora.org" target="_blank">Contact</a></li>
-            <li><a href="#">Disclaimer</a></li>
+            <li><a href="http://main.oregonstate.edu/official-web-disclaimer" target="_blank">Disclaimer</a></li>
             <li><a href="<?php echo $clientRoot; ?>/sitemap.php">Sitemap</a></li>
             <li><a href="mailto:info@oregonflora.org" target="_blank">Site Feedback</a></li>
         </ul>

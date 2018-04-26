@@ -67,7 +67,7 @@
                     </li>
                     <li class="menu-item-has-children"><a href="#">Resources</a>
                         <ul>
-                            <li><a href="#">What's New</a></li>
+                            <li><a href="<?php echo $clientRoot; ?>/pages/whats-new.php">What's New</a></li>
                             <li><a href="<?php echo $clientRoot; ?>/newsletters/index.php">Archived Newsletter</a></li>
                             <li><a href="<?php echo $clientRoot; ?>/pages/links.php">Links</a></li>
                         </ul>
