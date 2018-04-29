@@ -4,8 +4,8 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	<title>For testing GeoLocate web services</title>
 	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
-	<script language="javascript">
-		var cogeUrl = "https://www.museum.tulane.edu/coge/symbiota/";
+	<script>
+		var cogeUrl = "https://coge.geo-locate.org/symbiota/";
 		var d;
 		function cogeCheckStatus(){
 			$.ajax({
@@ -70,7 +70,7 @@
 		<div style="clear:both;margin:15px">
 			<div style="float:left"><input type="button" name="cogeCheckStatusButton" value="Check Status" onclick="cogeCheckStatus()" /></div>
 			<div style="float:left;margin-left:30px;"><input type="button" name="resetButton" value="Reset" onclick="reset()" /></div>
-			<div style="float:left;margin-left:30px;"><a href="https://www.museum.tulane.edu/coge/" target="_blank">Login to CoGe</a></div>
+			<div style="float:left;margin-left:30px;"><a href="http://coge.geo-locate.org/" target="_blank">Login to CoGe</a></div>
 		</div> 
 	</div>
 </body>
