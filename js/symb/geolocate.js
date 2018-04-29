@@ -1,4 +1,4 @@
-var cogeUrl = "https://www.museum.tulane.edu/coge/symbiota/";
+var cogeUrl = "https://coge.geo-locate.org/symbiota/";
 var t;
 var t2;
 var datasetList = {};
