@@ -20,34 +20,37 @@ class OccurrenceChecklistManager extends OccurrenceManager{
 	public function getChecklist($taxonAuthorityId){
 		$returnVec = Array();
 		$this->checklistTaxaCnt = 0;
-		$sql = "";
 		$sqlWhere = $this->getSqlWhere();
-		if($taxonAuthorityId && is_numeric($taxonAuthorityId)){
-			$sql = 'SELECT DISTINCT ts2.family, t.sciname '.
-				'FROM omoccurrences o INNER JOIN taxstatus ts1 ON o.TidInterpreted = ts1.Tid '.
-				'INNER JOIN taxa t ON ts1.TidAccepted = t.Tid '.
-				'INNER JOIN taxstatus ts2 ON t.tid = ts2.tid ';
-			$sql .= $this->getTableJoins($sqlWhere);
-			$sql .= str_ireplace("o.sciname","t.sciname",str_ireplace("o.family","ts.family",$sqlWhere));
-			$sql .= ' AND ts1.taxauthid = '.$taxonAuthorityId.' AND ts2.taxauthid = '.$taxonAuthorityId.' AND t.RankId > 140 ';
-		}
-		else{
-			$sql = 'SELECT DISTINCT IFNULL(ts1.family,o.family) AS family, o.sciname '.
-				'FROM omoccurrences o LEFT JOIN taxa t ON o.tidinterpreted = t.tid '.
-				'LEFT JOIN taxstatus ts1 ON t.tid = ts1.tid ';
-			$sql .= $this->getTableJoins($sqlWhere);
-			$sql .= $sqlWhere." AND (t.rankid > 140) AND (ts1.taxauthid = 1) ";
-		}
-		//echo "<div>".$sql."</div>";
-		$result = $this->conn->query($sql);
-		while($row = $result->fetch_object()){
-			$family = strtoupper($row->family);
-			if(!$family) $family = 'undefined';
-			$sciName = $row->sciname;
-			if($sciName && substr($sciName,-5)!='aceae'){
-				$returnVec[$family][] = $sciName;
-				$this->checklistTaxaCnt++;
+		if($sqlWhere){
+			$sql = "";
+			if($taxonAuthorityId && is_numeric($taxonAuthorityId)){
+				$sql = 'SELECT DISTINCT ts2.family, t.sciname '.
+					'FROM omoccurrences o INNER JOIN taxstatus ts1 ON o.TidInterpreted = ts1.Tid '.
+					'INNER JOIN taxa t ON ts1.TidAccepted = t.Tid '.
+					'INNER JOIN taxstatus ts2 ON t.tid = ts2.tid ';
+				$sql .= $this->getTableJoins($sqlWhere);
+				$sql .= str_ireplace("o.sciname","t.sciname",str_ireplace("o.family","ts.family",$sqlWhere));
+				$sql .= ' AND ts1.taxauthid = '.$taxonAuthorityId.' AND ts2.taxauthid = '.$taxonAuthorityId.' AND t.RankId > 140 ';
 			}
+			else{
+				$sql = 'SELECT DISTINCT IFNULL(ts1.family,o.family) AS family, o.sciname '.
+					'FROM omoccurrences o LEFT JOIN taxa t ON o.tidinterpreted = t.tid '.
+					'LEFT JOIN taxstatus ts1 ON t.tid = ts1.tid ';
+				$sql .= $this->getTableJoins($sqlWhere);
+				$sql .= $sqlWhere." AND (t.rankid > 140) AND (ts1.taxauthid = 1) ";
+			}
+			//echo "<div>".$sql."</div>";
+			$result = $this->conn->query($sql);
+			while($row = $result->fetch_object()){
+				$family = strtoupper($row->family);
+				if(!$family) $family = 'undefined';
+				$sciName = $row->sciname;
+				if($sciName && substr($sciName,-5)!='aceae'){
+					$returnVec[$family][] = $sciName;
+					$this->checklistTaxaCnt++;
+				}
+			}
+			$result->free();
 		}
 		return $returnVec;
 	}
