@@ -120,6 +120,7 @@ class TaxonomyHarvester extends Manager{
 			$content = $retArr['str'];
 			$resultArr = json_decode($content,true);
 			$numResults = $resultArr['number_of_results_returned'];
+			//If number of results are greater than 1, we need to evaluate which result is best suited target (e.g. Panicum debile)
 			if($numResults){
 				$this->logOrEcho('Taxon found within Catalog of Life',2);
 				$tid = $this->addColTaxonByResult($resultArr, $sciName);

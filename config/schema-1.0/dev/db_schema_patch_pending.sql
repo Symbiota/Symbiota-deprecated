@@ -11,6 +11,21 @@ ALTER TABLE `uploadtaxa`
 ALTER TABLE `uploadspectemp` 
   CHANGE COLUMN `basisOfRecord` `basisOfRecord` VARCHAR(32) NULL DEFAULT NULL COMMENT 'PreservedSpecimen, LivingSpecimen, HumanObservation' ;
 
+
+ALTER TABLE `taxstatus` 
+  DROP INDEX `Index_hierarchy`;
+
+ALTER TABLE `taxstatus` 
+  DROP INDEX `Index_upper` ;
+
+ALTER TABLE `taxstatus` 
+  DROP PRIMARY KEY,
+  ADD PRIMARY KEY USING BTREE (`tid`, `taxauthid`);
+
+ALTER TABLE `taxstatus` 
+ADD INDEX `Index_tid` (`tid` ASC);
+
+
 ALTER TABLE `images` 
   ADD INDEX `Index_images_datelastmod` (`InitialTimeStamp` ASC);
 

@@ -739,7 +739,7 @@ class OccurrenceCollectionProfile {
 		$retArr = Array();
 		$sql = 'SELECT IFNULL(ts.family,o.family) as taxon, count(DISTINCT o.occid) as cnt '.
 			'FROM omoccurrences o LEFT JOIN taxstatus ts ON o.tidinterpreted = ts.tid '.
-			'WHERE (o.collid = 1) AND (ts.taxauthid = 1 OR ts.taxauthid IS NULL) '.
+			'WHERE (o.collid = '.$this->collid.') AND (ts.taxauthid = 1 OR ts.taxauthid IS NULL) '.
 			'GROUP BY IFNULL(ts.family,o.family)';
 		/*
 		$sql = 'SELECT ts.family as taxon, count(o.occid) as cnt '.
