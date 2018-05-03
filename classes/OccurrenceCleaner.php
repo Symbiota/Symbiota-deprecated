@@ -871,7 +871,7 @@ class OccurrenceCleaner extends Manager{
 				'WHERE (collid = '.$this->collid.') AND (decimallatitude IS NOT NULL) AND (occid NOT IN(SELECT occid FROM omoccurverification WHERE category = "'.$category.'"))';
 			$rs = $this->conn->query($sql);
 			if($r = $rs->fetch_object()){
-				$retArr[$category]['unranked'][''] = $r->cnt;
+				$retArr[$category]['unverified'][''] = $r->cnt;
 			}
 			$rs->free();
 		}

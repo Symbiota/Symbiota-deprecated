@@ -7,7 +7,7 @@ $collid = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
 $obsUid = array_key_exists('obsuid',$_REQUEST)?$_REQUEST['obsuid']:'';
 $queryCountry = array_key_exists('q_country',$_REQUEST)?$_REQUEST['q_country']:'';
 $ranking = array_key_exists('ranking',$_REQUEST)?$_REQUEST['ranking']:'';
-$action = array_key_exists('action',$_POST)?$_POST['action']:'';
+$action = array_key_exists('action',$_REQUEST)?$_REQUEST['action']:'';
 
 if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../collections/cleaning/coordinatevalidator.php?'.$_SERVER['QUERY_STRING']);
 
@@ -78,18 +78,35 @@ if($collMap['colltype'] == 'General Observations' && $obsUid !== 0){
 		if($isEditor){
 			?>
 			<div style="margin:15px">
-				This tool will loop through all unvalidated georeferenced specimens and verify that the coordinates actually fall within the defined political units.
+				Click "Validate Coordinates" button to loop through all unvalidated georeferenced specimens and verify that the coordinates actually fall within the defined political units.
+				Click on the list symbol to display specimens of that ranking.
+				If there was a mismatch between coordinates and county, this could be due to 1) cordinates fall outside of county limits, 2) wrong county was entered, or 3) county is misspelled.
 			</div>
 			<div style="margin:15px">
 				<?php
 				if($action){
 					echo '<fieldset>';
-					echo '<legend><b>Action Panel</b></legend>';
 					if($action == 'Validate Coordinates'){
+						echo '<legend><b>Validating Coordinates</b></legend>';
 						$cleanManager->verifyCoordAgainstPolitical($queryCountry);
 					}
 					elseif($action == 'displayranklist'){
-
+						echo '<legend><b>Specimen with rank of '.$ranking.'</b></legend>';
+						$occurList = array();
+						if($action == 'displayranklist'){
+							$occurList = $cleanManager->getOccurrenceRankingArr('coordinate', $ranking);
+						}
+						if($occurList){
+							foreach($occurList as $occid => $inArr){
+								echo '<div>';
+								echo '<a href="../editor/occurrenceeditor.php?occid='.$occid.'" target="_blank">'.$occid.'</a>';
+								echo ' - checked by '.$inArr['username'].' on '.$inArr['ts'];
+								echo '</div>';
+							}
+						}
+						else{
+							echo '<div style="margin:30xp;font-weight:bold;font-size:150%">Nothing to be displayed</div>';
+						}
 					}
 					echo '</fieldset>';
 				}
@@ -102,12 +119,16 @@ if($collMap['colltype'] == 'General Observations' && $obsUid !== 0){
 				$rankArr = current($coordRankingArr);
 				echo '<table class="styledtable">';
 				echo '<tr><th>Ranking</th><th>Protocol</th><th>Count</th></tr>';
+				$protocolMap = array('GoogleApiMatch:countryEqual'=>'Country only verified','GoogleApiMatch:stateEqual'=>'Country and State verified','GoogleApiMatch:countyEqual'=>'Country, State, and County verified');
 				foreach($rankArr as $rank => $protocolArr){
 					foreach($protocolArr as $protocolStr => $cnt){
+						if(array_key_exists($protocolStr, $protocolMap)) $protocolStr = $protocolMap[$protocolStr];
 						echo '<tr>';
 						echo '<td>'.$rank.'</td>';
 						echo '<td>'.$protocolStr.'</td>';
-						echo '<td>'.$cnt.'</td>';
+						echo '<td>'.$cnt;
+						if(is_numeric($cnt)) echo ' <a href="coordinatevalidator.php?collid='.$collid.'&ranking='.$rank.'&action=displayranklist" title="List specimens"><img src="'.$CLIENT_ROOT.'/images/list.png" style="width:12px" /></a>';
+						echo '</td>';
 						echo '</tr>';
 					}
 				}
@@ -115,9 +136,10 @@ if($collMap['colltype'] == 'General Observations' && $obsUid !== 0){
 				?>
 			</div>
 			<div style="margin:10px">
-				<div style="font-weight:bold">Non-verified by State/Province</div>
+				<div style="font-weight:bold">Non-verified listed by Country</div>
 				<?php
 				$countryArr = $cleanManager->getUnverifiedByCountry();
+				arsort($countryArr);
 				echo '<table class="styledtable">';
 				echo '<tr><th>Country</th><th>Count</th><th>Action</th></tr>';
 				foreach($countryArr as $country => $cnt){
@@ -138,47 +160,6 @@ if($collMap['colltype'] == 'General Observations' && $obsUid !== 0){
 				}
 				echo '</table>';
 				?>
-			</div>
-			<div style="margin:10px">
-				<fieldset style="width:400px;padding:20px">
-					<legend><b>Rank Listing</b></legend>
-					<div>
-						<form action="coordinatevalidator.php" method="post">
-							Select Rank:
-							<select name="ranking" onchange="this.form.submit()">
-								<option value="">Select Rank</option>
-								<option value="">----------------</option>
-								<?php
-								$rankList = $cleanManager->getRankList();
-								foreach($rankList as $rankId){
-									echo '<option value="'.$rankId.'" '.($ranking==$rankId?'SELECTED':'').'>'.$rankId.'</option>';
-								}
-								?>
-							</select>
-							<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
-							<input name="action" type="hidden" value="displayranklist" />
-						</form>
-					</div>
-					<div>
-						<?php
-						$occurList = array();
-						if($action == 'displayranklist'){
-							$occurList = $cleanManager->getOccurrenceRankingArr('coordinate', $ranking);
-						}
-						if($occurList){
-							foreach($occurList as $occid => $inArr){
-								echo '<div>';
-								echo '<a href="../editor/occurrenceeditor.php?occid='.$occid.'" target="_blank">'.$occid.'</a>';
-								echo '- checked by '.$inArr['username'].' on '.$inArr['ts'];
-								echo '</div>';
-							}
-						}
-						else{
-							echo '<div style="margin:30xp;font-weight:bold;font-size:150%">Nothing to be displayed</div>';
-						}
-						?>
-					</div>
-				</fieldset>
 			</div>
  			<?php
 		}

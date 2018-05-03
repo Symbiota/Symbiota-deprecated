@@ -116,9 +116,6 @@ if($collMap['colltype'] == 'General Observations'){
 				<div>
 					These tools are to aid collection managers in verifying, ranking, and managing coordinate information associated with occurrence records.
 				</div>
-				<div style="margin:15px 0px;color:orange">
-					-- IN DEVELOPMENT - more to come soon --
-				</div>
 				<fieldset style="margin:10px 0px;padding:5px;width:450px">
 					<legend style="font-weight:bold">Statistics and Action Panel</legend>
 					<ul>
@@ -173,33 +170,10 @@ if($collMap['colltype'] == 'General Observations'){
 							?>
 						</li>
 						<li>
-							<a href="coordinatevalidator.php?collid=<?php echo $collid; ?>">Check coordinates against political boundaries</a>
+							<a href="coordinatevalidator.php?collid=<?php echo $collid; ?>">Verify coordinates against political boundaries</a>
 						</li>
 					</ul>
 				</fieldset>
-				<div style="margin:10px 0px">
-					<div style="font-weight:bold">Ranking Statistics</div>
-					<?php
-					$coordRankingArr = $cleanManager->getRankingStats('coordinate');
-					$rankArr = current($coordRankingArr);
-					echo '<table class="styledtable">';
-					echo '<tr><th>Ranking</th><th>Protocol</th><th>Count</th></tr>';
-					foreach($rankArr as $rank => $protocolArr){
-						foreach($protocolArr as $protocol => $cnt){
-							echo '<tr>';
-							echo '<td>'.$rank.'</td>';
-							echo '<td>'.$protocol.'</td>';
-							echo '<td>';
-							echo '<a href="coordinatevalidator.php?collid='.$collid.'&ranking='.($rank == 'unranked'?'':$rank).'">';
-							echo $cnt;
-							echo '</a>';
-							echo '</td>';
-							echo '</tr>';
-						}
-					}
-					echo '</table>';
-					?>
-				</div>
 			</div>
 
 			<h3>Taxonomy</h3>
