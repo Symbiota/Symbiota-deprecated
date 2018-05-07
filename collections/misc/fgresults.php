@@ -14,6 +14,7 @@ $limit = array_key_exists('limit',$_REQUEST)?$_REQUEST['limit']:100;
 $apiManager = new FieldGuideManager();
 $cleanManager = new OccurrenceCleaner();
 $resultArr = array();
+$imageCntArr = array();
 $resultTot = 0;
 $statusStr = '';
 
@@ -41,6 +42,7 @@ if($isEditor){
         $apiManager->primeFGResults();
         $apiManager->processFGResults();
         $resultArr = $apiManager->getResults();
+        $imageCntArr = $apiManager->getImageCnts();
         $tidArr = $apiManager->getTids();
         $resultTot = $apiManager->getResultTot();
     }
@@ -162,6 +164,7 @@ if($isEditor){
                             <th></th>
                             <th></th>
                             <th>Fieldguide Identification</th>
+                            <th>Fieldguide Training Images</th>
                         </tr>
                         <?php
                         $setCnt = 0;
@@ -234,7 +237,13 @@ if($isEditor){
                                         echo '<td>'."\n";
                                         if($valid) echo '<input name="id'.$occId.'" type="radio" value="'.$tId.'" '.($firstRadio?'checked':'').'/>'."\n";
                                         echo '</td>'."\n";
-                                        echo '<td><a href="'.$CLIENT_ROOT.'/taxa/index.php?taxon='.$name.'" target="_blank">'.$displayName.'</a></td>'."\n";
+                                        if($note == 'Current determination' || $valid){
+                                            echo '<td><a href="'.$CLIENT_ROOT.'/taxa/index.php?taxon='.$name.'" target="_blank">'.$displayName.'</a></td>'."\n";
+                                        }
+                                        else{
+                                            echo '<td>'.$displayName.'</td>'."\n";
+                                        }
+                                        echo '<td>'.(($name && isset($imageCntArr[$name]))?$imageCntArr[$name]:'').'</td>'."\n";
                                         $firstOcc = false;
                                         $firstImg = false;
                                         if($valid) $firstRadio = false;
@@ -264,6 +273,7 @@ if($isEditor){
                                     echo '<td>'."\n";
                                     echo '</td>'."\n";
                                     echo '<td>'.$note.'</td>'."\n";
+                                    echo '<td></td>'."\n";
                                     $firstOcc = false;
                                     $firstImg = false;
                                 }

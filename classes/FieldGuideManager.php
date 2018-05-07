@@ -17,6 +17,7 @@ class FieldGuideManager {
     private $recLimit = 0;
     private $fgResultTot = 0;
     private $fgResultArr = array();
+    private $fgImageCntArr = array();
     private $fgResOccArr = array();
     private $fgResTidArr = array();
     private $resultArr = array();
@@ -292,6 +293,7 @@ class FieldGuideManager {
         $processDataArr["dateinitiated"] = $startDate;
         $processDataArr["datereceived"] = $dateReceived;
         $processDataArr["images"] = $resArr['images'];
+        if(isset($resArr['image_counts'])) $processDataArr["imagecnts"] = $resArr['image_counts'];
         $jsonFileName = $collid.'-r-'.$token.'.json';
         $fp = fopen($SERVER_ROOT.'/temp/data/fieldguide/'.$jsonFileName, 'w');
         fwrite($fp, json_encode($processDataArr));
@@ -332,6 +334,7 @@ class FieldGuideManager {
         $fileArr = json_decode(file_get_contents($SERVER_ROOT.'/temp/data/fieldguide/'.$resultFilename), true);
         $this->taxon = $fileArr["parenttaxon"];
         $this->fgResultArr = $fileArr["images"];
+        if(isset($fileArr["imagecnts"])) $this->fgImageCntArr = $fileArr["imagecnts"];
         foreach($this->fgResultArr as $imgId => $ifArr){
             if($ifArr["status"] == 'OK'){
                 if($ifArr["result"]){
@@ -551,6 +554,10 @@ class FieldGuideManager {
 
     public function getResults(){
         return $this->resultArr;
+    }
+
+    public function getImageCnts(){
+        return $this->fgImageCntArr;
     }
 
     public function getResultTot(){
