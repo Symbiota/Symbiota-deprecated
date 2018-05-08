@@ -64,7 +64,7 @@ if($collMap['colltype'] == 'General Observations'){
 						If duplicate records exist, this feature offers the ability to merge record values, images,
 						and data relationships into a single record.
 					</div>
-					<fieldset style="margin:10px 0px;padding:5px;width:450px">
+					<fieldset style="margin:10px 0px;padding:5px;width:550px">
 						<legend style="font-weight:bold"><b>List Duplicates based on...</b></legend>
 						<ul>
 							<li>
@@ -98,7 +98,7 @@ if($collMap['colltype'] == 'General Observations'){
 					They are also useful for locating and correcting misspelled geographical political units,
 					and even mismatched units, such as a state designation that does not match the wrong country.
 				</div>
-				<fieldset style="margin:10px 0px;padding:5px;width:450px">
+				<fieldset style="margin:10px 0px;padding:5px;width:550px">
 					<legend style="font-weight:bold">Statistics and Action Panel</legend>
 					<ul>
 						<li>
@@ -116,7 +116,7 @@ if($collMap['colltype'] == 'General Observations'){
 				<div>
 					These tools are to aid collection managers in verifying, ranking, and managing coordinate information associated with occurrence records.
 				</div>
-				<fieldset style="margin:10px 0px;padding:5px;width:450px">
+				<fieldset style="margin:10px 0px;padding:5px;width:550px">
 					<legend style="font-weight:bold">Statistics and Action Panel</legend>
 					<ul>
 						<?php
@@ -181,7 +181,7 @@ if($collMap['colltype'] == 'General Observations'){
 				<div>
 					These tools are meant to aid in locating and fixing taxonomic errors and inconsistencies.
 				</div>
-				<fieldset style="margin:10px 0px;padding:5px;width:450px">
+				<fieldset style="margin:10px 0px;padding:5px;width:550px">
 					<legend style="font-weight:bold">Statistics and Action panel</legend>
 					<ul>
 						<li><a href="taxonomycleaner.php?collid=<?php echo $collid; ?>">Analyze taxonomic names...</a></li>

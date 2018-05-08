@@ -85,7 +85,7 @@ if($collMap['colltype'] == 'General Observations' && $obsUid !== 0){
 			<div style="margin:15px">
 				<?php
 				if($action){
-					echo '<fieldset>';
+					echo '<fieldset style="padding:20px">';
 					if($action == 'Validate Coordinates'){
 						echo '<legend><b>Validating Coordinates</b></legend>';
 						$cleanManager->verifyCoordAgainstPolitical($queryCountry);
@@ -119,7 +119,7 @@ if($collMap['colltype'] == 'General Observations' && $obsUid !== 0){
 				$rankArr = current($coordRankingArr);
 				echo '<table class="styledtable">';
 				echo '<tr><th>Ranking</th><th>Protocol</th><th>Count</th></tr>';
-				$protocolMap = array('GoogleApiMatch:countryEqual'=>'Country only verified','GoogleApiMatch:stateEqual'=>'Country and State verified','GoogleApiMatch:countyEqual'=>'Country, State, and County verified');
+				$protocolMap = array('GoogleApiMatch:countryEqual'=>'Questionable State','GoogleApiMatch:stateEqual'=>'Questionable County','GoogleApiMatch:countyEqual'=>'Country, State, and County verified ');
 				foreach($rankArr as $rank => $protocolArr){
 					foreach($protocolArr as $protocolStr => $cnt){
 						if(array_key_exists($protocolStr, $protocolMap)) $protocolStr = $protocolMap[$protocolStr];
