@@ -1,15 +1,12 @@
-function processGbifOrgKey(){
-	var gbifInstOrgKey = document.getElementById("gbifInstOrgKey").value;
-	var gbifOrgKey = document.getElementById("gbifOrgKey").value;
-	var gbifInstKey = document.getElementById("gbifInstKey").value;
-	var gbifDatasetKey = document.getElementById("gbifDataKey").value;
-	var gbifEndpointKey = document.getElementById("gbifEndKey").value;
-	var dwcUri = document.getElementById("dwcUri").value;
-	var portalName = document.getElementById("portalname").value;
-	var collName = document.getElementById("collname").value;
-	if(!gbifInstKey){
-		gbifInstKey = findInstKey();
-	}
+function processGbifOrgKey(f){
+	var gbifInstOrgKey = f.gbifInstOrgKey.value;
+	var gbifOrgKey = f.gbifOrgKey.value;
+	var gbifInstKey = f.gbifInstKey.value;
+	var gbifDatasetKey = f.gbifDataKey.value;
+	var gbifEndpointKey = f.gbifEndKey.value;
+	var dwcUri = f.dwcUri.value;
+	var portalName = f.portalname.value;
+	var collName = f.collname.value;
 
 	if(gbifInstOrgKey && gbifOrgKey){
 		if(!gbifInstKey){
@@ -91,22 +88,6 @@ function startGbifCrawl(gbifDatasetKey){
 
 	callGbifCurl(type,url,data);
 	alert('Your data is being updated in GBIF. Please allow 5-10 minutes for completion.')
-}
-
-function findInstKey(){
-	var key;
-	$.ajax({
-		type: "POST",
-		url: "rpc/checkgbifinstall.php",
-		async: false,
-		success: function(response) {
-			key = response;
-		},
-		error: function(XMLHttpRequest, textStatus, errorThrown) {
-			alert(errorThrown);
-		}
-	});
-	return key;
 }
 
 function callGbifCurl(type,url,data){

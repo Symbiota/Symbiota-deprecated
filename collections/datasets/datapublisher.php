@@ -49,8 +49,6 @@ if($action){
 		$dwcaManager->setTargetPath($SERVER_ROOT . (substr($SERVER_ROOT, -1) == '/' ? '' : '/') . 'content/dwca/');
 	}
 }
-$installationKey = $collManager->getInstallationKey();
-$datasetKey = $collManager->getDatasetKey();
 $endpointKey = $collManager->getEndpointKey();
 $idigbioKey = $collManager->getIdigbioKey();
 if($publishIDIGBIO && !$idigbioKey){
@@ -80,7 +78,7 @@ if($isEditor){
 	</style>
 	<script type="text/javascript" src="../../js/jquery.js"></script>
 	<script type="text/javascript" src="../../js/jquery-ui.js"></script>
-	<script type="text/javascript" src="../../js/symb/collections.gbifpublisher.js"></script>
+	<script type="text/javascript" src="../../js/symb/collections.gbifpublisher.js?ver=1"></script>
 	<script type="text/javascript">
 		function toggle(target){
 			var objDiv = document.getElementById(target);
@@ -238,7 +236,7 @@ include($SERVER_ROOT. '/header.php');
 			$dwcaManager->writeRssFile();
 			echo '</ul>';
 			if($publishGBIF && $endpointKey){
-				$collManager->triggerGBIFCrawl($datasetKey);
+				$collManager->triggerGBIFCrawl($collManager->getDatasetKey());
 			}
 		}
 		$dwcUri = '';
@@ -310,8 +308,8 @@ include($SERVER_ROOT. '/header.php');
 				echo '<div style="margin:10px;font-weight:bold;color:red;">There are '.$recFlagArr['nullBasisRec'].' records missing basisOfRecord and will not be published. Please go to <a href="../editor/occurrencetabledisplay.php?q_recordedby=&q_recordnumber=&q_eventdate=&q_catalognumber=&q_othercatalognumbers=&q_observeruid=&q_recordenteredby=&q_dateentered=&q_datelastmodified=&q_processingstatus=&q_customfield1=basisOfRecord&q_customtype1=NULL&q_customvalue1=Something&q_customfield2=&q_customtype2=EQUALS&q_customvalue2=&q_customfield3=&q_customtype3=EQUALS&q_customvalue3=&collid='.$collid.'&csmode=0&occid=&occindex=0&orderby=&orderbydir=ASC">Edit Existing Occurrence Records</a> to correct this.</div>';
 			}
 			if($publishGBIF && $dwcUri && isset($GBIF_USERNAME) && isset($GBIF_PASSWORD) && isset($GBIF_ORG_KEY)){
-				if($datasetKey){
-					$dataUrl = 'http://www.gbif.org/dataset/'.$datasetKey;
+				if($collManager->getDatasetKey()){
+					$dataUrl = 'http://www.gbif.org/dataset/'.$collManager->getDatasetKey();
 					?>
 					<div style="margin:10px;">
 						<div><b>GBIF Dataset page:</b> <a href="<?php echo $dataUrl; ?>" target="_blank"><?php echo $dataUrl; ?></a></div>
@@ -331,16 +329,16 @@ include($SERVER_ROOT. '/header.php');
 						already published. Before activating your GBIF Key in this portal, you will also need to contact GBIF and
 						request that the user: <b><?php echo $GBIF_USERNAME; ?></b> has permissions to create and edit datatsets for your collection.
 						<form style="margin-top:10px;" name="gbifpubform" action="datapublisher.php" method="post" onsubmit="return processGbifOrgKey(this.form);">
-							GBIF Key <input type="text" name="gbifOrgKey" id="gbifOrgKey" value="" style="width:250px;"/>
+							GBIF Key <input type="text" id="gbifOrgKey" name="gbifOrgKey" value="" style="width:250px;"/>
 							<input type="hidden" name="collid" value="<?php echo $collid; ?>"/>
-							<input type="hidden" name="portalname" id="portalname" value='<?php echo $DEFAULT_TITLE; ?>'/>
-							<input type="hidden" name="collname" id="collname" value='<?php echo $collArr['collectionname']; ?>'/>
-							<input type="hidden" name="aggKeysStr" id="aggKeysStr" value=''/>
-							<input type="hidden" id="gbifInstOrgKey" value='<?php echo $GBIF_ORG_KEY; ?>'/>
-							<input type="hidden" id="gbifInstKey" value='<?php echo $installationKey; ?>'/>
-							<input type="hidden" id="gbifDataKey" value=''/>
-							<input type="hidden" id="gbifEndKey" value=''/>
-							<input type="hidden" name="dwcUri" id="dwcUri" value="<?php echo $dwcUri; ?>"/>
+							<input type="hidden" id="portalname" name="portalname" value='<?php echo $DEFAULT_TITLE; ?>'/>
+							<input type="hidden" id="collname" name="collname" value='<?php echo $collArr['collectionname']; ?>'/>
+							<input type="hidden" id="aggKeysStr" name="aggKeysStr" value=''/>
+							<input type="hidden" id="gbifInstOrgKey" name="gbifInstOrgKey" value='<?php echo $GBIF_ORG_KEY; ?>'/>
+							<input type="hidden" id="gbifInstKey" name="gbifInstKey" value='<?php echo $collManager->getInstallationKey(); ?>'/>
+							<input type="hidden" id="gbifDataKey" name="gbifDataKey" value=''/>
+							<input type="hidden" id="gbifEndKey" name="gbifEndKey" value=''/>
+							<input type="hidden" id="dwcUri" name="dwcUri" value="<?php echo $dwcUri; ?>"/>
 							<input type="submit" name="formsubmit" value="Save Key"/>
 						</form>
 					</div>

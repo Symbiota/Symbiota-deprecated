@@ -102,9 +102,7 @@ class OccurrenceCollectionProfile {
 				$conn->query($sql);
 			}
 			//Set keys
-			if($retArr[$this->collid]['aggkeysstr']){
-				$this->setAggKeys($retArr[$this->collid]['aggkeysstr']);
-			}
+			$this->setAggKeys($retArr[$this->collid]['aggkeysstr']);
 		}
 		return $retArr;
 	}
@@ -567,26 +565,32 @@ class OccurrenceCollectionProfile {
 	}
 
 	public function setAggKeys($aggKeyStr){
-		$aggKeyArr = json_decode($aggKeyStr,true);
-		if($aggKeyArr['organizationKey']){
-			$this->organizationKey = $aggKeyArr['organizationKey'];
-		}
-		if($aggKeyArr['installationKey']){
-			$this->installationKey = $aggKeyArr['installationKey'];
-		}
-		if($aggKeyArr['datasetKey']){
-			$this->datasetKey = $aggKeyArr['datasetKey'];
-		}
-		if($aggKeyArr['endpointKey']){
-			$this->endpointKey = $aggKeyArr['endpointKey'];
-		}
-		if($aggKeyArr['idigbioKey']){
-			$this->idigbioKey = $aggKeyArr['idigbioKey'];
+		if($aggKeyStr){
+			$aggKeyArr = json_decode($aggKeyStr,true);
+			if(isset($aggKeyArr['organizationKey']) && $aggKeyArr['organizationKey']) $this->organizationKey = $aggKeyArr['organizationKey'];
+			if(isset($aggKeyArr['installationKey']) && $aggKeyArr['installationKey']) $this->installationKey = $aggKeyArr['installationKey'];
+			if(isset($aggKeyArr['datasetKey']) && $aggKeyArr['datasetKey']) $this->datasetKey = $aggKeyArr['datasetKey'];
+			if(isset($aggKeyArr['endpointKey']) && $aggKeyArr['endpointKey']) $this->endpointKey = $aggKeyArr['endpointKey'];
+			if(isset($aggKeyArr['idigbioKey']) && $aggKeyArr['idigbioKey']) $this->idigbioKey = $aggKeyArr['idigbioKey'];
 		}
 	}
 
 	public function getInstallationKey(){
+		if(!$this->installationKey) $this->setGbifInstKey();
 		return $this->installationKey;
+	}
+
+	private function setGbifInstKey(){
+		$sql = 'SELECT aggKeysStr FROM omcollections WHERE aggKeysStr IS NOT NULL ';
+		$rs = $this->conn->query($sql);
+		while($row = $rs->fetch_object()){
+			$keyArr = json_decode($row->aggKeysStr,true);
+			if(isset($keyArr['installationKey']) && $keyArr['installationKey']){
+				$this->installationKey = $keyArr['installationKey'];
+				break;
+			}
+		}
+		$rs->free();
 	}
 
 	public function getDatasetKey(){
@@ -599,21 +603,6 @@ class OccurrenceCollectionProfile {
 
 	public function getIdigbioKey(){
 		return $this->idigbioKey;
-	}
-
-	public function getGbifInstKey(){
-		$returnArr = Array();
-		$sql = 'SELECT aggKeysStr FROM omcollections WHERE aggKeysStr IS NOT NULL ';
-		//echo $sql; exit;
-		$rs = $this->conn->query($sql);
-		while($row = $rs->fetch_object()){
-			$returnArr = json_decode($row->aggKeysStr,true);
-			if($returnArr['installationKey']){
-				return $returnArr['installationKey'];
-			}
-		}
-		$rs->free();
-		return '';
 	}
 
 	public function findIdigbioKey($guid){
