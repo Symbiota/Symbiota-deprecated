@@ -55,7 +55,6 @@ elseif( $action == "Add Voucher"){
 }
 $clArray = $vManager->getChecklistData();
 ?>
-
 <html>
 	<head>
 		<title>Species Details: <?php echo $vManager->getTaxonName()." of ".$vManager->getClName(); ?></title>

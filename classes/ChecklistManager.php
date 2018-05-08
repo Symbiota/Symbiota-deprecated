@@ -183,6 +183,8 @@ class ChecklistManager {
 				}
 				$this->taxaList[$tid]["sciname"] = $sciName;
 				$this->taxaList[$tid]["family"] = $family;
+				if(isset($this->taxaList[$tid]['clid'])) $this->taxaList[$tid]['clid'] = $this->taxaList[$tid]['clid'].','.$row->clid;
+				else $this->taxaList[$tid]['clid'] = $row->clid;
 				$tidReturn[] = $tid;
 				if($this->showAuthors){
 					$this->taxaList[$tid]["author"] = $this->cleanOutStr($row->author);
@@ -249,7 +251,7 @@ class ChecklistManager {
 					$collector .= ' ['.$row->institutioncode.']';
 					$this->voucherArr[$row->tid][$row->occid] = $collector;
 				}
-				$vResult->close();
+				$vResult->free();
 			}
 			if($this->showImages) $this->setImages($tidReturn);
 			if($this->showCommon) $this->setVernaculars($tidReturn);
@@ -441,22 +443,20 @@ class ChecklistManager {
 				$clidStr .= ','.implode(',',$this->childClidArr);
 			}
 			if($this->thesFilter){
-				$this->basicSql = 'SELECT t.tid, IFNULL(ctl.familyoverride,ts.family) AS family, '.
-					't.sciname, t.author, ctl.habitat, ctl.abundance, ctl.notes, ctl.source '.
+				$this->basicSql = 'SELECT t.tid, ctl.clid, IFNULL(ctl.familyoverride,ts.family) AS family, t.sciname, t.author, ctl.habitat, ctl.abundance, ctl.notes, ctl.source '.
 					'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tidaccepted '.
 					'INNER JOIN fmchklsttaxalink ctl ON ts.tid = ctl.tid '.
 			  		'WHERE (ts.taxauthid = '.$this->thesFilter.') AND (ctl.clid IN ('.$clidStr.')) ';
 			}
 			else{
-				$this->basicSql = 'SELECT t.tid, IFNULL(ctl.familyoverride,ts.family) AS family, '.
-					't.sciname, t.author, ctl.habitat, ctl.abundance, ctl.notes, ctl.source '.
+				$this->basicSql = 'SELECT t.tid, ctl.clid, IFNULL(ctl.familyoverride,ts.family) AS family, t.sciname, t.author, ctl.habitat, ctl.abundance, ctl.notes, ctl.source '.
 					'FROM taxa t INNER JOIN fmchklsttaxalink ctl ON t.tid = ctl.tid '.
 					'INNER JOIN taxstatus ts ON t.tid = ts.tid '.
 			  		'WHERE (ts.taxauthid = 1) AND (ctl.clid IN ('.$clidStr.')) ';
 			}
 		}
 		else{
-			$this->basicSql = 'SELECT t.tid, ts.family, t.sciname, t.author '.
+			$this->basicSql = 'SELECT t.tid, ctl.clid, ts.family, t.sciname, t.author '.
 				'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
 				'INNER JOIN fmdyncltaxalink ctl ON t.tid = ctl.tid '.
     	  		'WHERE (ts.taxauthid = '.($this->thesFilter?$this->thesFilter:'1').') AND (ctl.dynclid = '.$this->dynClid.') ';
