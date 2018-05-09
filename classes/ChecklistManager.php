@@ -456,7 +456,7 @@ class ChecklistManager {
 			}
 		}
 		else{
-			$this->basicSql = 'SELECT t.tid, ctl.clid, ts.family, t.sciname, t.author '.
+			$this->basicSql = 'SELECT t.tid, ctl.dynclid as clid, ts.family, t.sciname, t.author '.
 				'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
 				'INNER JOIN fmdyncltaxalink ctl ON t.tid = ctl.tid '.
     	  		'WHERE (ts.taxauthid = '.($this->thesFilter?$this->thesFilter:'1').') AND (ctl.dynclid = '.$this->dynClid.') ';

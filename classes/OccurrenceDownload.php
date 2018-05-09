@@ -450,9 +450,9 @@ class OccurrenceDownload{
 		if($this->schemaType == 'checklist'){
 			if($this->taxonFilter){
 				$sql = 'SELECT DISTINCT ts.family, t.sciname AS scientificName, CONCAT_WS(" ",t.unitind1,t.unitname1) AS genus, '.
-						'CONCAT_WS(" ",t.unitind2,t.unitname2) AS specificEpithet, t.unitind3 AS taxonRank, t.unitname3 AS infraSpecificEpithet, t.author AS scientificNameAuthorship '.
-						'FROM omoccurrences o INNER JOIN taxstatus ts ON o.TidInterpreted = ts.Tid '.
-						'INNER JOIN taxa t ON ts.TidAccepted = t.Tid ';
+					'CONCAT_WS(" ",t.unitind2,t.unitname2) AS specificEpithet, t.unitind3 AS taxonRank, t.unitname3 AS infraSpecificEpithet, t.author AS scientificNameAuthorship '.
+					'FROM omoccurrences o INNER JOIN taxstatus ts ON o.TidInterpreted = ts.Tid '.
+					'INNER JOIN taxa t ON ts.TidAccepted = t.Tid ';
 				$sql .= $this->setTableJoins($this->sqlWhere);
 				$sql .= $this->sqlWhere.'AND t.RankId > 140 AND (ts.taxauthid = '.$this->taxonFilter.') ';
 				if($this->redactLocalities){
@@ -467,8 +467,8 @@ class OccurrenceDownload{
 			}
 			else{
 				$sql = 'SELECT DISTINCT IFNULL(o.family,"not entered") AS family, o.sciname, CONCAT_WS(" ",t.unitind1,t.unitname1) AS genus, '.
-						'CONCAT_WS(" ",t.unitind2,t.unitname2) AS specificEpithet, t.unitind3 AS taxonRank, t.unitname3 AS infraSpecificEpithet, t.author AS scientificNameAuthorship '.
-						'FROM omoccurrences o LEFT JOIN taxa t ON o.tidinterpreted = t.tid ';
+					'CONCAT_WS(" ",t.unitind2,t.unitname2) AS specificEpithet, t.unitind3 AS taxonRank, t.unitname3 AS infraSpecificEpithet, t.author AS scientificNameAuthorship '.
+					'FROM omoccurrences o LEFT JOIN taxa t ON o.tidinterpreted = t.tid ';
 				$sql .= $this->setTableJoins($this->sqlWhere);
 				$sql .= $this->sqlWhere.'AND o.SciName NOT LIKE "%aceae" AND o.SciName NOT LIKE "%idea" AND o.SciName NOT IN ("Plantae","Polypodiophyta") ';
 				if($this->redactLocalities){
@@ -484,23 +484,23 @@ class OccurrenceDownload{
 		}
 		elseif($this->schemaType == 'georef'){
 			$sql = 'SELECT IFNULL(o.institutionCode,c.institutionCode) AS institutionCode, IFNULL(o.collectionCode,c.collectionCode) AS collectionCode, '.
-					'o.catalogNumber, o.occurrenceId, o.decimalLatitude, o.decimalLongitude, '.
-					'o.geodeticDatum, o.coordinateUncertaintyInMeters, o.verbatimCoordinates, ';
+				'o.catalogNumber, o.occurrenceId, o.decimalLatitude, o.decimalLongitude, '.
+				'o.geodeticDatum, o.coordinateUncertaintyInMeters, o.verbatimCoordinates, ';
 			if($this->extended){
 				$sql .= 'o.georeferencedBy, o.georeferenceProtocol, o.georeferenceSources, o.georeferenceVerificationStatus, '.
-						'o.georeferenceRemarks, o.minimumElevationInMeters, o.maximumElevationInMeters, o.verbatimElevation, '.
-						'o.localitySecurity, o.localitySecurityReason, IFNULL(o.modified,o.datelastmodified) AS modified, '.
-						'o.processingStatus, o.collId, o.dbpk AS sourcePrimaryKey, o.occid, CONCAT("urn:uuid:",g.guid) AS recordId ';
+					'o.georeferenceRemarks, o.minimumElevationInMeters, o.maximumElevationInMeters, o.verbatimElevation, '.
+					'o.localitySecurity, o.localitySecurityReason, IFNULL(o.modified,o.datelastmodified) AS modified, '.
+					'o.processingStatus, o.collId, o.dbpk AS sourcePrimaryKey, o.occid, CONCAT("urn:uuid:",g.guid) AS recordId ';
 			}
 			else{
 				$sql .= 'o.georeferenceProtocol, o.georeferenceSources, o.georeferenceVerificationStatus, '.
-						'o.georeferenceRemarks, o.minimumElevationInMeters, o.maximumElevationInMeters, o.verbatimElevation, '.
-						'IFNULL(o.modified,o.datelastmodified) AS modified, o.occid, CONCAT("urn:uuid:",g.guid) AS recordId ';
+					'o.georeferenceRemarks, o.minimumElevationInMeters, o.maximumElevationInMeters, o.verbatimElevation, '.
+					'IFNULL(o.modified,o.datelastmodified) AS modified, o.occid, CONCAT("urn:uuid:",g.guid) AS recordId ';
 			}
 
 			$sql .= 'FROM omcollections c INNER JOIN omoccurrences o ON c.collid = o.collid '.
-					'LEFT JOIN guidoccurrences g ON o.occid = g.occid '.
-					'LEFT JOIN taxa t ON o.tidinterpreted = t.tid ';
+				'LEFT JOIN guidoccurrences g ON o.occid = g.occid '.
+				'LEFT JOIN taxa t ON o.tidinterpreted = t.tid ';
 			$sql .= $this->setTableJoins($this->sqlWhere);
 			$this->applyConditions();
 			$sql .= $this->sqlWhere;
@@ -520,6 +520,7 @@ class OccurrenceDownload{
 
 	private function setTableJoins($sqlWhere){
 		$sqlJoin = '';
+		if(strpos($sqlWhere,'e.taxauthid')) $sqlJoin .= 'INNER JOIN taxaenumtree e ON o.tidinterpreted = e.tid ';
 		if(strpos($sqlWhere,'v.clid')) $sqlJoin .= 'INNER JOIN fmvouchers v ON o.occid = v.occid ';
 		if(strpos($sqlWhere,'MATCH(f.recordedby)') || strpos($sqlWhere,'MATCH(f.locality)')){
 			$sqlJoin .= 'INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ';

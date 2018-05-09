@@ -80,7 +80,7 @@ $occurArr = $collManager->getSpecimenMap($pageNumber,$cntPerPage);
 			});
 		}
 	</script>
-	<script src="../js/symb/collections.list.js?ver=5f" type="text/javascript"></script>
+	<script src="../js/symb/collections.list.js?ver=6" type="text/javascript"></script>
 </head>
 <body>
 <?php
@@ -126,7 +126,7 @@ $occurArr = $collManager->getSpecimenMap($pageNumber,$cntPerPage);
 		<div id="speclist">
 			<div id="queryrecords">
 				<div style="float:right;">
-					<form action="download/index.php" method="post" target="_blank" style="float:left">
+					<form action="download/index.php" method="post" style="float:left" onsubmit="targetPopup(this)">
 						<button class="ui-button ui-widget ui-corner-all" style="margin:5px;padding:5px;cursor: pointer" title="<?php echo $LANG['DOWNLOAD_SPECIMEN_DATA']; ?>">
 							<img src="../images/dl2.png" style="width:15px" />
 						</button>
@@ -284,7 +284,7 @@ $occurArr = $collManager->getSpecimenMap($pageNumber,$cntPerPage);
 			</div>
 		</div>
 		<div id="maps" style="min-height:400px;margin-bottom:10px;">
-			<form action="download/index.php" method="post" style="float:right" target="_blank" >
+			<form action="download/index.php" method="post" style="float:right" onsubmit="targetPopup(this)">
 				<button class="ui-button ui-widget ui-corner-all" style="margin:5px;padding:5px;cursor: pointer" title="<?php echo $LANG['DOWNLOAD_SPECIMEN_DATA']; ?>">
 					<img src="../images/dl2.png" style="width:15px" />
 				</button>

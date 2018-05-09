@@ -96,8 +96,7 @@ $searchVar = $_REQUEST['searchvar'];
 		}
 	}
 	?>
-
-	<div id="innertext">
+	<div id="innertext" style="width:660px">
 		<h2>Data Usage Guidelines</h2>
 	 	 <div style="margin:15px;">
 	 	 	By downloading data, the user confirms that he/she has read and agrees with the general

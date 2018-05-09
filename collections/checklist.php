@@ -14,7 +14,7 @@ $searchVarEncoded = urlencode($searchVar);
 
 ?>
 <div>
-	<form action="download/index.php" method="post" style="float:right" target="_blank">
+	<form action="download/index.php" method="post" style="float:right" onsubmit="targetPopup(this)">
 		<button class="ui-button ui-widget ui-corner-all" style="margin:5px;padding:5px;cursor: pointer" title="<?php echo $LANG['DOWNLOAD_TITLE']; ?>">
 			<img src="../images/dl2.png" style="width:15px" />
 		</button>
