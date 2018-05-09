@@ -320,14 +320,13 @@ include($SERVER_ROOT. '/header.php');
 					?>
 					<div style="margin:10px;">
 						You have selected to have this collection's DwC archives published to GBIF. Please go to the
-						<a href="http://www.gbif.org/publishing-data/request-endorsement#/intro" target="_blank">GBIF Endorsement Request page</a> to
-						register your collection with GBIF and enter the key provided by GBIF below. If your collection is found in the
-						<a href="http://www.gbif.org/publishing-data/request-endorsement#/eoi/lookup" target="_blank">GBIF Organization lookup</a>,
-						there is already a GBIF Key assigned. The key is the remaining part of
-						the url after the last backslash of your collection's GBIF Data Provider page. If your collection is found,
-						please ensure that your data is not already published in GBIF. DO NOT PUBLISH your data if there is any chance it is
-						already published. Before activating your GBIF Key in this portal, you will also need to contact GBIF and
-						request that the user: <b><?php echo $GBIF_USERNAME; ?></b> has permissions to create and edit datatsets for your collection.
+						<a href="https://www.gbif.org/become-a-publisher" target="_blank">GBIF Endorsement Request page</a> to
+						register your institution with GBIF and enter the Publisher Key provided by GBIF below. If your institution already exists within the
+						GBIF Organization lookup, a GBIF Publisher Key has already been assigned. The key is the remaining part of
+						the url after the last backslash of your institution's GBIF Data Provider page. If your data is already published in GBIF,
+						DO NOT REPUBLISH your data without first contacting GBIF (<a href="mailto:helpdesk@gbif.org">helpdesk@gbif.org</a>) to coordinate data versions.
+						Before activating your GBIF Key in this portal, you will also need to contact GBIF (<a href="mailto:helpdesk@gbif.org">helpdesk@gbif.org</a>) and
+						request that the user <b><?php echo $GBIF_USERNAME; ?></b> has permissions to create and update datatsets for your collection.
 						<form style="margin-top:10px;" name="gbifpubform" action="datapublisher.php" method="post" onsubmit="return processGbifOrgKey(this.form);">
 							GBIF Key <input type="text" id="gbifOrgKey" name="gbifOrgKey" value="" style="width:250px;"/>
 							<input type="hidden" name="collid" value="<?php echo $collid; ?>"/>
