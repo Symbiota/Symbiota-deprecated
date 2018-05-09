@@ -323,10 +323,10 @@ include($SERVER_ROOT. '/header.php');
 						<a href="https://www.gbif.org/become-a-publisher" target="_blank">GBIF Endorsement Request page</a> to
 						register your institution with GBIF and enter the Publisher Key provided by GBIF below. If your institution already exists within the
 						GBIF Organization lookup, a GBIF Publisher Key has already been assigned. The key is the remaining part of
-						the url after the last backslash of your institution's GBIF Data Provider page. If your data is already published in GBIF,
+						the URL after the last backslash of your institution's GBIF Data Provider page. If your data is already published in GBIF,
 						DO NOT REPUBLISH your data without first contacting GBIF (<a href="mailto:helpdesk@gbif.org">helpdesk@gbif.org</a>) to coordinate data versions.
 						Before activating your GBIF Key in this portal, you will also need to contact GBIF (<a href="mailto:helpdesk@gbif.org">helpdesk@gbif.org</a>) and
-						request that the user <b><?php echo $GBIF_USERNAME; ?></b> has permissions to create and update datatsets for your collection.
+						request that the user <b><?php echo $GBIF_USERNAME; ?></b> has permissions to create and update datasets for your collection.
 						<form style="margin-top:10px;" name="gbifpubform" action="datapublisher.php" method="post" onsubmit="return processGbifOrgKey(this.form);">
 							GBIF Key <input type="text" id="gbifOrgKey" name="gbifOrgKey" value="" style="width:250px;"/>
 							<input type="hidden" name="collid" value="<?php echo $collid; ?>"/>

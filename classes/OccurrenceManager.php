@@ -134,7 +134,7 @@ class OccurrenceManager extends OccurrenceTaxaManager {
 					$localArr[$k] = 'Locality IS NULL';
 				}
 				else{
-					if(strtolower($value) == 'best'){
+					if(strlen($value) < 4){
 						$tempArr[] = '(o.municipality LIKE "'.$this->cleanInStr($value).'%" OR o.Locality LIKE "%'.$this->cleanInStr($value).'%")';
 					}
 					else{
