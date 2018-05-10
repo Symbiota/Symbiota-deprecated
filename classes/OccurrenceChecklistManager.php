@@ -80,7 +80,7 @@ class OccurrenceChecklistManager extends OccurrenceManager{
 	}
 
 	public function buildSymbiotaChecklist($taxonAuthorityId,$tidArr = ''){
-		global $CLIENT_ROOT,$userId;
+		global $CLIENT_ROOT,$SYMB_UID;
 		$conn = $this->getConnection("write");
 		$sqlCreateCl = "";
 		$expirationTime = date('Y-m-d H:i:s',time()+259200);
@@ -94,49 +94,52 @@ class OccurrenceChecklistManager extends OccurrenceManager{
 		if($this->getDatasetSearchStr()) $searchStr .= "; ".$this->getDatasetSearchStr();
 		//$searchStr = substr($searchStr,2,250);
 		//$nameStr = substr($searchStr,0,35)."-".time();
-		$dynClid = 0;
-		$sqlCreateCl = "INSERT INTO fmdynamicchecklists ( name, details, uid, type, notes, expiration ) ".
-			"VALUES ('Specimen Checklist #".time()."', 'Generated ".date('d-m-Y H:i:s',time())."', '".$userId."', 'Specimen Checklist', '', '".$expirationTime."') ";
-		if($conn->query($sqlCreateCl)){
-			$dynClid = $conn->insert_id;
-			//Get checklist and append to dyncltaxalink
-			$sqlTaxaInsert = "INSERT IGNORE INTO fmdyncltaxalink ( tid, dynclid ) ";
-			if($tidStr){
-				if(is_numeric($taxonAuthorityId)){
-					$sqlTaxaInsert .= 'SELECT DISTINCT t.tid, '.$dynClid.' '.
-						'FROM taxstatus ts INNER JOIN taxa t ON ts.TidAccepted = t.Tid '.
-						'WHERE ts.tid IN('.$tidStr.') AND ts.taxauthid = '.$taxonAuthorityId.' AND t.RankId > 180';
-				}
-				else{
-					$sqlTaxaInsert .= 'SELECT DISTINCT t.tid, '.$dynClid.' FROM taxa t '.
-						'WHERE t.tid IN('.$tidStr.') AND t.RankId > 180 ';
-				}
+		$sqlTaxaInsert = '';
+		if($tidStr){
+			$sqlTaxaInsert = 'INSERT IGNORE INTO fmdyncltaxalink ( tid, dynclid ) ';
+			if(is_numeric($taxonAuthorityId)){
+				$sqlTaxaInsert .= 'SELECT DISTINCT t.tid, '.$dynClid.' '.
+					'FROM taxstatus ts INNER JOIN taxa t ON ts.TidAccepted = t.Tid '.
+					'WHERE ts.tid IN('.$tidStr.') AND ts.taxauthid = '.$taxonAuthorityId.' AND t.RankId > 180';
 			}
 			else{
-				$sqlWhere = $this->getSqlWhere();
-				if(is_numeric($taxonAuthorityId)){
-					$sqlTaxaInsert .= 'SELECT DISTINCT t.tid, '.$dynClid.' FROM omoccurrences o INNER JOIN taxstatus ts1 ON o.TidInterpreted = ts1.Tid '.
-						'INNER JOIN taxa t ON ts1.TidAccepted = t.Tid ';
-					$sqlTaxaInsert .= $this->getTableJoins($sqlWhere);
-					$sqlTaxaInsert .= str_ireplace("o.sciname","t.sciname",str_ireplace("o.family","ts1.family",$sqlWhere))."AND ts1.taxauthid = ".$taxonAuthorityId." AND t.RankId > 180";
-				}
-				else{
-					$sqlTaxaInsert .= "SELECT DISTINCT t.tid, ".$dynClid." FROM (omoccurrences o INNER JOIN taxa t ON o.TidInterpreted = t.tid) ";
-					$sqlTaxaInsert .= $this->getTableJoins($sqlWhere);
-					$sqlTaxaInsert .= $sqlWhere." AND t.RankId > 180";
-				}
+				$sqlTaxaInsert .= 'SELECT DISTINCT t.tid, '.$dynClid.' FROM taxa t WHERE t.tid IN('.$tidStr.') AND t.RankId > 180 ';
 			}
-			//echo "sqlTaxaInsert: ".$sqlTaxaInsert;
-			$conn->query($sqlTaxaInsert);
-
-			//Delete checklists that are greater than one week old
-			$conn->query('DELETE FROM fmdynamicchecklists WHERE expiration < now()');
 		}
 		else{
-			echo "ERROR: ".$conn->error;
-			echo "insertSql: ".$sqlCreateCl;
+			$sqlWhere = $this->getSqlWhere();
+			if($sqlWhere){
+				$sqlTaxaInsert = 'INSERT IGNORE INTO fmdyncltaxalink ( tid, dynclid ) ';
+				if(is_numeric($taxonAuthorityId)){
+					$sqlTaxaInsert .= 'SELECT DISTINCT t.tid, '.$dynClid.' FROM omoccurrences o INNER JOIN taxstatus ts1 ON o.TidInterpreted = ts1.Tid '.
+						'INNER JOIN taxa t ON ts1.TidAccepted = t.Tid '.$this->getTableJoins($sqlWhere).
+						str_ireplace("o.sciname","t.sciname",str_ireplace("o.family","ts1.family",$sqlWhere))."AND ts1.taxauthid = ".$taxonAuthorityId." AND t.RankId > 180";
+				}
+				else{
+					$sqlTaxaInsert .= "SELECT DISTINCT t.tid, ".$dynClid." FROM omoccurrences o INNER JOIN taxa t ON o.TidInterpreted = t.tid ".
+						$this->getTableJoins($sqlWhere).$sqlWhere." AND t.RankId > 180";
+				}
+			}
 		}
-		if($conn !== false) $conn->close();
+		//echo "sqlTaxaInsert: ".$sqlTaxaInsert;
+
+		$dynClid = 0;
+		if($sqlTaxaInsert){
+			$sqlCreateCl = "INSERT INTO fmdynamicchecklists ( name, details, uid, type, notes, expiration ) ".
+				"VALUES ('Specimen Checklist #".time()."', 'Generated ".date('Y-m-d H:i:s',time())."', '".$SYMB_UID."', 'Specimen Checklist', '', '".$expirationTime."') ";
+			if($conn->query($sqlCreateCl)){
+				$dynClid = $conn->insert_id;
+				$conn->query($sqlTaxaInsert);
+
+				//Delete checklists that are greater than one week old
+				$conn->query('DELETE FROM fmdynamicchecklists WHERE expiration < now()');
+			}
+			else{
+				echo "ERROR: ".$conn->error;
+				//echo "insertSql: ".$sqlCreateCl;
+			}
+			if($conn !== false) $conn->close();
+		}
 		return $dynClid;
 	}
 

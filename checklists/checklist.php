@@ -223,9 +223,9 @@ if($clValue || $dynClid){
 					    </li>
 					</ul>
 				</div>
-				<div style="clear:both;"></div>
 				<?php
 			}
+			echo '<div style="clear:both;"></div>';
 			//Do not show certain fields if Dynamic Checklist ($dynClid)
 			if($clValue){
 				if($clArray['type'] == 'rarespp'){
