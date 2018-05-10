@@ -1,4 +1,7 @@
 function processGbifOrgKey(f){
+	var status = true;
+	$("#workingcircle").show();
+
 	var gbifInstOrgKey = f.gbifInstOrgKey.value;
 	var gbifOrgKey = f.gbifOrgKey.value;
 	var gbifInstKey = f.gbifInstKey.value;
@@ -18,30 +21,23 @@ function processGbifOrgKey(f){
 		if(gbifDatasetKey){
 			if(dwcUri){
 				gbifEndpointKey = createGbifEndpoint(gbifDatasetKey, dwcUri);
-				if(gbifEndpointKey){
-					document.getElementById("aggKeysStr").value = JSON.stringify({
-						organizationKey: gbifOrgKey,
-						installationKey: gbifInstKey,
-						datasetKey: gbifDatasetKey,
-						endpointKey: gbifEndpointKey
-					});
-				}
 			}
 			else{
 				alert('Please create/refresh your Darwin Core Archive and try again.');
-				return false;
 			}
 		}
 		else{
 			alert('Invalid Organization Key or insufficient permissions. Please recheck your Organization Key and verify that this portal can create datasets for your organization with GBIF.');
-			return false;
 		}
-		return true;
+		f.aggKeysStr.value = JSON.stringify({ organizationKey: gbifOrgKey, installationKey: gbifInstKey, datasetKey: gbifDatasetKey, endpointKey: gbifEndpointKey });
+		status = true;
 	}
 	else{
 		alert('Please enter an Organization Key.');
-		return false;
+		status = false;
 	}
+	document.getElementById("workingcircle").style.display = "none";
+	return status;
 }
 
 function createGbifInstallation(gbifOrgKey,collName){
@@ -74,20 +70,10 @@ function createGbifEndpoint(gbifDatasetKey,dwcUri){
 	var url = 'http://api.gbif.org/v1/dataset/'+gbifDatasetKey+'/endpoint';
 	var data = JSON.stringify({
 		type: "DWC_ARCHIVE",
-		//url: "http://symbiota4.acis.ufl.edu/scan/portal/content/dwca/NAUF-CPMAB_DwC-A.zip"
 		url: dwcUri
 	});
 
 	return callGbifCurl(type,url,data);
-}
-
-function startGbifCrawl(gbifDatasetKey){
-	var type = 'POST';
-	var url = 'http://api.gbif.org/v1/dataset/'+gbifDatasetKey+'/crawl';
-	var data = '';
-
-	callGbifCurl(type,url,data);
-	alert('Your data is being updated in GBIF. Please allow 5-10 minutes for completion.')
 }
 
 function callGbifCurl(type,url,data){

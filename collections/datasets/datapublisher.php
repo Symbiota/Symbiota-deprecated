@@ -29,7 +29,7 @@ $includeDets = 1;
 $includeImgs = 1;
 $redactLocalities = 1;
 if($action){
-	if($action == 'Save Key'){
+	if($action == 'Submit Key' || $action == 'Update Key'){
 		$collManager->setAggKeys($_POST['aggKeysStr']);
 		$collManager->updateAggKeys();
 	}
@@ -78,7 +78,7 @@ if($isEditor){
 	</style>
 	<script type="text/javascript" src="../../js/jquery.js"></script>
 	<script type="text/javascript" src="../../js/jquery-ui.js"></script>
-	<script type="text/javascript" src="../../js/symb/collections.gbifpublisher.js?ver=1"></script>
+	<script type="text/javascript" src="../../js/symb/collections.gbifpublisher.js?ver=3"></script>
 	<script type="text/javascript">
 		function toggle(target){
 			var objDiv = document.getElementById(target);
@@ -327,18 +327,26 @@ include($SERVER_ROOT. '/header.php');
 						DO NOT REPUBLISH your data without first contacting GBIF (<a href="mailto:helpdesk@gbif.org">helpdesk@gbif.org</a>) to coordinate data versions.
 						Before activating your GBIF Key in this portal, you will also need to contact GBIF (<a href="mailto:helpdesk@gbif.org">helpdesk@gbif.org</a>) and
 						request that the user <b><?php echo $GBIF_USERNAME; ?></b> has permissions to create and update datasets for your collection.
-						<form style="margin-top:10px;" name="gbifpubform" action="datapublisher.php" method="post" onsubmit="return processGbifOrgKey(this.form);">
-							GBIF Key <input type="text" id="gbifOrgKey" name="gbifOrgKey" value="" style="width:250px;"/>
-							<input type="hidden" name="collid" value="<?php echo $collid; ?>"/>
-							<input type="hidden" id="portalname" name="portalname" value='<?php echo $DEFAULT_TITLE; ?>'/>
-							<input type="hidden" id="collname" name="collname" value='<?php echo $collArr['collectionname']; ?>'/>
-							<input type="hidden" id="aggKeysStr" name="aggKeysStr" value=''/>
-							<input type="hidden" id="gbifInstOrgKey" name="gbifInstOrgKey" value='<?php echo $GBIF_ORG_KEY; ?>'/>
-							<input type="hidden" id="gbifInstKey" name="gbifInstKey" value='<?php echo $collManager->getInstallationKey(); ?>'/>
-							<input type="hidden" id="gbifDataKey" name="gbifDataKey" value=''/>
-							<input type="hidden" id="gbifEndKey" name="gbifEndKey" value=''/>
-							<input type="hidden" id="dwcUri" name="dwcUri" value="<?php echo $dwcUri; ?>"/>
-							<input type="submit" name="formsubmit" value="Save Key"/>
+						<form style="margin-top:10px;" name="gbifpubform" action="datapublisher.php" method="post" onsubmit="return processGbifOrgKey(this);">
+							<b>GBIF Key:</b> <input type="text" id="gbifOrgKey" name="gbifOrgKey" value="<?php echo $collManager->getOrganizationKey(); ?>" style="width:275px;" onchange="this.form.formsubmit.disabled = false" />
+							<input type="hidden" name="collid" value="<?php echo $collid; ?>" />
+							<input type="hidden" id="portalname" name="portalname" value="<?php echo $DEFAULT_TITLE; ?>" />
+							<input type="hidden" id="collname" name="collname" value="<?php echo $collArr['collectionname']; ?>" />
+							<input type="hidden" id="aggKeysStr" name="aggKeysStr" value="" />
+							<input type="hidden" id="gbifInstOrgKey" name="gbifInstOrgKey" value="<?php echo $GBIF_ORG_KEY; ?>" />
+							<input type="hidden" id="gbifInstKey" name="gbifInstKey" value="<?php echo $collManager->getInstallationKey(); ?>" />
+							<input type="hidden" id="gbifDataKey" name="gbifDataKey" value="" />
+							<input type="hidden" id="gbifEndKey" name="gbifEndKey" value="" />
+							<input type="hidden" id="dwcUri" name="dwcUri" value="<?php echo $dwcUri; ?>" />
+							<input type="submit" name="formsubmit" value="<?php echo ($collManager->getOrganizationKey()?'Update':'Submit'); ?> Key" disabled />
+							<?php
+							if($collManager->getOrganizationKey()){
+								?>
+								<button type="button" onclick="processGbifOrgKey(this.form);">Submit Data</button>
+								<?php
+							}
+							?>
+							<img id="workingcircle" src="../../images/ajax-loader_sm.gif" style="margin-bottom:-4px;width:20px;display:none;" />
 						</form>
 					</div>
 					<?php

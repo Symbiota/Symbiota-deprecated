@@ -330,7 +330,7 @@ if($SYMB_UID){
 			<div style='margin:10px;'>
 				<?php
 				echo $collManager->getMetadataHtml($collData, $LANG);
-
+				$datasetKey = $collManager->getDatasetKey();
 				if($collData['publishtogbif'] && $datasetKey){
 					$datasetKey = $collManager->getDatasetKey();
 					if($datasetKey){
