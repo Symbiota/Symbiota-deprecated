@@ -9,6 +9,7 @@ $viewMode = array_key_exists("viewmode",$_REQUEST)?$_REQUEST["viewmode"]:'full';
 
 $apiManager = new FieldGuideManager();
 $resultArr = array();
+$imageCntArr = array();
 $fileName = '';
 $outputArr = array();
 $start = 0;
@@ -23,9 +24,10 @@ if($resultId){
     $apiManager->primeFGResults();
     $apiManager->processFGResults();
     $resultArr = $apiManager->getResults();
+    $imageCntArr = $apiManager->getImageCnts();
     $tidArr = $apiManager->getTids();
 
-    $headerArr = array('RecordID','CurrentIdentification','Family','ImageID','ImageURL','FieldguideIdentification','Note');
+    $headerArr = array('RecordID','CurrentIdentification','Family','ImageID','ImageURL','FieldguideIdentification','FieldguideTrainingImages','Note');
     $fileName = $resultId.'_fieldguide_results.csv';
 
     header ('Content-Type: text/csv');
@@ -94,6 +96,7 @@ if($resultId){
                             $outputArr[$i]['imgurl'] = '';
                         }
                         $outputArr[$i]['fgid'] = $name;
+                        $outputArr[$i]['fgimgnum'] = (($name && isset($imageCntArr[$name]))?$imageCntArr[$name]:'');
                         $outputArr[$i]['note'] = $note;
                         $firstOcc = false;
                         $firstImg = false;
@@ -109,7 +112,7 @@ if($resultId){
                     if($firstOcc) $outputArr[$i]['name'] = $occId;
                     else $outputArr[$i]['name'] = '';
                     if($firstOcc) $outputArr[$i]['currid'] = $currID;
-                    else $outputArr[$i]['name'] = '';
+                    else $outputArr[$i]['currid'] = '';
                     if($firstOcc) $outputArr[$i]['family'] = $family;
                     else $outputArr[$i]['family'] = '';
                     if($firstImg){
@@ -121,6 +124,7 @@ if($resultId){
                         $outputArr[$i]['imgurl'] = '';
                     }
                     $outputArr[$i]['fgid'] = '';
+                    $outputArr[$i]['fgimgnum'] = '';
                     $outputArr[$i]['note'] = $note;
                     $firstOcc = false;
                     $firstImg = false;
