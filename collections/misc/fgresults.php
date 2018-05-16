@@ -3,6 +3,7 @@ include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/FieldGuideManager.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceCleaner.php');
 header("Content-Type: text/html; charset=".$charset);
+ini_set('max_execution_time', 180); //180 seconds = 3 minutes
 
 $action = array_key_exists("action",$_POST)?$_POST["action"]:"";
 $collId = array_key_exists("collid",$_REQUEST)?$_REQUEST["collid"]:0;
