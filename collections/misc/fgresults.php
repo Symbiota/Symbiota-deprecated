@@ -159,6 +159,8 @@ if($isEditor){
                     <table class="styledtable" style="font-family:Arial;font-size:12px;">
                         <tr>
                             <th style="width:40px;">Record ID</th>
+                            <th style="width:40px;">Inst. Code</th>
+                            <th style="width:40px;">Coll. Code</th>
                             <th style="width:20px;"><input name="selectall" type="checkbox" title="Select/Deselect All" onclick="selectAll(this.form)" /></th>
                             <th>Current Identification</th>
                             <th>Family</th>
@@ -179,8 +181,12 @@ if($isEditor){
                                 $firstOcc = true;
                                 $firstRadio = true;
                                 $recResults = false;
+                                $instCode = $occArr['InstitutionCode'];
+                                $collCode = $occArr['CollectionCode'];
                                 $currID = $occArr['sciname'];
                                 $family = $occArr['family'];
+                                unset($occArr['InstitutionCode']);
+                                unset($occArr['CollectionCode']);
                                 unset($occArr['sciname']);
                                 unset($occArr['family']);
                                 foreach($occArr as $imgId => $imgArr){
@@ -223,6 +229,8 @@ if($isEditor){
                                         echo '<td>'."\n";
                                         if($firstOcc) echo '<a href="../editor/occurrenceeditor.php?occid='.$occId.'" target="_blank">'.$occId.'</a>'."\n";
                                         echo '</td>'."\n";
+                                        echo '<td>'.($firstOcc?$instCode:'').'</td>'."\n";
+                                        echo '<td>'.($firstOcc?$collCode:'').'</td>'."\n";
                                         echo '<td>'."\n";
                                         if($firstOcc && $recResults) echo '<input name="occid[]" type="checkbox" value="'.$occId.'" />'."\n";
                                         echo '</td>'."\n";
@@ -259,6 +267,8 @@ if($isEditor){
                                     echo '<td>'."\n";
                                     if($firstOcc) echo '<a href="../editor/occurrenceeditor.php?occid='.$occId.'" target="_blank">'.$occId.'</a>'."\n";
                                     echo '</td>'."\n";
+                                    echo '<td>'.($firstOcc?$instCode:'').'</td>'."\n";
+                                    echo '<td>'.($firstOcc?$collCode:'').'</td>'."\n";
                                     echo '<td>'."\n";
                                     if($firstOcc && $recResults) echo '<input name="occid[]" type="checkbox" value="'.$occId.'" />'."\n";
                                     echo '</td>'."\n";

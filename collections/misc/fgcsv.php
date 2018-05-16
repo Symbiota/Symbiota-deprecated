@@ -1,6 +1,7 @@
 <?php
 include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/FieldGuideManager.php');
+ini_set('max_execution_time', 180); //180 seconds = 3 minutes
 
 $action = array_key_exists("action",$_POST)?$_POST["action"]:"";
 $collId = array_key_exists("collid",$_REQUEST)?$_REQUEST["collid"]:0;
@@ -27,7 +28,7 @@ if($resultId){
     $imageCntArr = $apiManager->getImageCnts();
     $tidArr = $apiManager->getTids();
 
-    $headerArr = array('RecordID','CurrentIdentification','Family','ImageID','ImageURL','FieldguideIdentification','FieldguideTrainingImages','Note');
+    $headerArr = array('RecordID','InstitutionCode','CollectionCode','CurrentIdentification','Family','ImageID','ImageURL','FieldguideIdentification','FieldguideTrainingImages','Note');
     $fileName = $resultId.'_fieldguide_results.csv';
 
     header ('Content-Type: text/csv');
@@ -43,8 +44,12 @@ if($resultId){
                 $firstOcc = true;
                 $firstRadio = true;
                 $recResults = false;
+                $instCode = $occArr['InstitutionCode'];
+                $collCode = $occArr['CollectionCode'];
                 $currID = $occArr['sciname'];
                 $family = $occArr['family'];
+                unset($occArr['InstitutionCode']);
+                unset($occArr['CollectionCode']);
                 unset($occArr['sciname']);
                 unset($occArr['family']);
                 foreach($occArr as $imgId => $imgArr){
@@ -81,20 +86,13 @@ if($resultId){
                         else{
                             $note = 'Not valid in thesaurus';
                         }
-                        if($firstOcc) $outputArr[$i]['recid'] = $occId;
-                        else $outputArr[$i]['recid'] = '';
-                        if($firstOcc) $outputArr[$i]['currid'] = $currID;
-                        else $outputArr[$i]['currid'] = '';
-                        if($firstOcc) $outputArr[$i]['family'] = $family;
-                        else $outputArr[$i]['family'] = '';
-                        if($firstImg){
-                            $outputArr[$i]['imgid'] = $imgId;
-                            $outputArr[$i]['imgurl'] = $imgurl;
-                        }
-                        else{
-                            $outputArr[$i]['imgid'] = '';
-                            $outputArr[$i]['imgurl'] = '';
-                        }
+                        $outputArr[$i]['recid'] = $occId;
+                        $outputArr[$i]['instcode'] = $instCode;
+                        $outputArr[$i]['collcode'] = $collCode;
+                        $outputArr[$i]['currid'] = $currID;
+                        $outputArr[$i]['family'] = $family;
+                        $outputArr[$i]['imgid'] = $imgId;
+                        $outputArr[$i]['imgurl'] = $imgurl;
                         $outputArr[$i]['fgid'] = $name;
                         $outputArr[$i]['fgimgnum'] = (($name && isset($imageCntArr[$name]))?$imageCntArr[$name]:'');
                         $outputArr[$i]['note'] = $note;
@@ -109,20 +107,13 @@ if($resultId){
                     if($fgStatus == 'OK' && !$fgidarr){
                         $note = 'No results provided.';
                     }
-                    if($firstOcc) $outputArr[$i]['name'] = $occId;
-                    else $outputArr[$i]['name'] = '';
-                    if($firstOcc) $outputArr[$i]['currid'] = $currID;
-                    else $outputArr[$i]['currid'] = '';
-                    if($firstOcc) $outputArr[$i]['family'] = $family;
-                    else $outputArr[$i]['family'] = '';
-                    if($firstImg){
-                        $outputArr[$i]['imgid'] = $imgId;
-                        $outputArr[$i]['imgurl'] = $imgurl;
-                    }
-                    else{
-                        $outputArr[$i]['imgid'] = '';
-                        $outputArr[$i]['imgurl'] = '';
-                    }
+                    $outputArr[$i]['name'] = $occId;
+                    $outputArr[$i]['instcode'] = $instCode;
+                    $outputArr[$i]['collcode'] = $collCode;
+                    $outputArr[$i]['currid'] = $currID;
+                    $outputArr[$i]['family'] = $family;
+                    $outputArr[$i]['imgid'] = $imgId;
+                    $outputArr[$i]['imgurl'] = $imgurl;
                     $outputArr[$i]['fgid'] = '';
                     $outputArr[$i]['fgimgnum'] = '';
                     $outputArr[$i]['note'] = $note;
