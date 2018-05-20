@@ -3,40 +3,44 @@ function processGbifOrgKey(f){
 	$("#workingcircle").show();
 
 	var gbifInstOrgKey = f.gbifInstOrgKey.value;
-	var gbifOrgKey = f.gbifOrgKey.value;
-	var gbifInstKey = f.gbifInstKey.value;
-	var gbifDatasetKey = f.gbifDataKey.value;
-	var gbifEndpointKey = f.gbifEndKey.value;
-	var dwcUri = f.dwcUri.value;
 	var portalName = f.portalname.value;
 	var collName = f.collname.value;
+	var datasetKey = f.datasetKey.value;
+	var organizationKey = f.organizationKey.value;
+	var installationKey = f.installationKey.value;
+	var dwcUri = f.dwcUri.value;
 
-	if(gbifInstOrgKey && gbifOrgKey){
-		if(!gbifInstKey){
-			gbifInstKey = createGbifInstallation(gbifInstOrgKey,portalName);
+	if(gbifInstOrgKey && organizationKey){
+		var submitForm = false;
+		if(!installationKey){
+			installationKey = createGbifInstallation(gbifInstOrgKey,portalName);
+			f.installationKey.value = installationKey;
+			submitForm = true;
 		}
-		if(!gbifDatasetKey){
-			gbifDatasetKey = createGbifDataset(gbifInstKey,gbifOrgKey,collName);
+		if(!datasetKey){
+			datasetKey = createGbifDataset(installationKey, organizationKey, collName);
+			f.datasetKey.value = datasetKey;
 		}
-		if(gbifDatasetKey){
+		if(datasetKey){
 			if(dwcUri){
-				gbifEndpointKey = createGbifEndpoint(gbifDatasetKey, dwcUri);
+				f.endPointKey.value = createGbifEndpoint(datasetKey, dwcUri);
 			}
 			else{
 				alert('Please create/refresh your Darwin Core Archive and try again.');
 			}
+			submitForm = true;
 		}
 		else{
 			alert('Invalid Organization Key or insufficient permissions. Please recheck your Organization Key and verify that this portal can create datasets for your organization with GBIF.');
 		}
-		f.aggKeysStr.value = JSON.stringify({ organizationKey: gbifOrgKey, installationKey: gbifInstKey, datasetKey: gbifDatasetKey, endpointKey: gbifEndpointKey });
+		if(submitForm) f.submit();
 		status = true;
 	}
 	else{
 		alert('Please enter an Organization Key.');
 		status = false;
 	}
-	document.getElementById("workingcircle").style.display = "none";
+	$("#workingcircle").hide();
 	return status;
 }
 
@@ -91,4 +95,20 @@ function callGbifCurl(type,url,data){
 		}
 	});
 	return key;
+}
+
+function getOrganization(f){
+	var urlStr = "http://api.gbif.org/v1/organization/" + f.organizationKey.value;
+	$.ajax({
+		method: "GET",
+		dateType: "json",
+		url: urlStr
+	})
+	.done(function( retJson ) {
+		$("#validKeyMsg").show();
+		f.formsubmit.disabled = false;
+	})
+	.fail(function() {
+		alert("Key does not appear to be valid. Please contact your portal administrator for assistance.");
+	});
 }

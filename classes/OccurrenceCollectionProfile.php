@@ -101,8 +101,9 @@ class OccurrenceCollectionProfile {
 					'WHERE securitykey IS NULL AND collid = '.$this->collid;
 				$conn->query($sql);
 			}
-			//Set keys
-			$this->setAggKeys($retArr[$this->collid]['aggkeysstr']);
+			if(isset($retArr[$this->collid]['aggkeysstr']) && $retArr[$this->collid]['aggkeysstr']){
+				$this->setAggKeys(json_decode($retArr[$this->collid]['aggkeysstr'],true));
+			}
 		}
 		return $retArr;
 	}
@@ -564,9 +565,8 @@ class OccurrenceCollectionProfile {
 		$result = curl_exec($ch);
 	}
 
-	public function setAggKeys($aggKeyStr){
-		if($aggKeyStr){
-			$aggKeyArr = json_decode($aggKeyStr,true);
+	public function setAggKeys($aggKeyArr){
+		if($aggKeyArr){
 			if(isset($aggKeyArr['organizationKey']) && $aggKeyArr['organizationKey']) $this->organizationKey = $aggKeyArr['organizationKey'];
 			if(isset($aggKeyArr['installationKey']) && $aggKeyArr['installationKey']) $this->installationKey = $aggKeyArr['installationKey'];
 			if(isset($aggKeyArr['datasetKey']) && $aggKeyArr['datasetKey']) $this->datasetKey = $aggKeyArr['datasetKey'];
