@@ -15,7 +15,7 @@ $clArr = $gameManager->getChecklistArr($pid);
 
 $gameInfo = $gameManager->setOOTD($oodID,$ootdGameChecklist);
 $imageArr = $gameInfo['images'];
-$cacheRefresh = date('Ydm');
+$cacheRefresh = date('YdmH');
 foreach($imageArr as $k => $imgValue){
 	$imageArr[$k] = $imgValue.'?ver='.$cacheRefresh;
 }

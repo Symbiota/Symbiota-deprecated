@@ -209,8 +209,8 @@ class PluginsManager {
 	}
 
 	private function getImageList($ssid, $width){
+		global $LANG;
 		$CLIENT_ROOT = $GLOBALS['CLIENT_ROOT'];
-		$langArr = $GLOBALS['LANG'];
 
 		$windowHeight = $width + 75;
 		$imageHeight = $width + 50;
@@ -245,7 +245,7 @@ class PluginsManager {
 			$html .= '<div style="width:'.$width.'px;position:absolute;bottom:0;font-size:12px;background-color:rgba(255,255,255,0.8);">';
 			$hideCaptionClick = "$('#slidecaption".$imgId."').hide();$('#showcaption".$imgId."').hide();";
 			$html .= '<div id="slidecaption'.$imgId.'">';
-			$html .= '<a href="#" style="font-size:9px;text-decoration:none;float:right;clear:both;margin-right:5px;" onclick="'.$hideCaptionClick.'">'.(isset($langArr['HIDE_CAPTION'])?$langArr['HIDE_CAPTION']:'HIDE CAPTION').'</a>';
+			$html .= '<a href="#" style="font-size:9px;text-decoration:none;float:right;clear:both;margin-right:5px;" onclick="'.$hideCaptionClick.'">'.(isset($LANG['HIDE_CAPTION'])?$LANG['HIDE_CAPTION']:'HIDE CAPTION').'</a>';
 			$html .= '<div style="clear:both;padding-left:3px;padding-right:3px;"><b>';
 			if($imgIdArr["sciname"] || $imgIdArr["identifier"]){
 				$html .= '<a href="'.$linkUrl.'" target="_blank">';
@@ -253,15 +253,15 @@ class PluginsManager {
 				$html .= '</a>. ';
 			}
 			if($imgIdArr["photographer"] || $imgIdArr["photographerName"]){
-				$html .= (isset($langArr['IMAGE_BY'])?$langArr['IMAGE_BY']:'Image by').': '.($imgIdArr["photographer"]?$imgIdArr["photographer"]:$imgIdArr["photographerName"]).'. ';
+				$html .= (isset($LANG['IMAGE_BY'])?$LANG['IMAGE_BY']:'Image by').': '.($imgIdArr["photographer"]?$imgIdArr["photographer"]:$imgIdArr["photographerName"]).'. ';
 			}
 			if($imgIdArr["owner"]){
-				$html .= (isset($langArr['COURTESY_OF'])?$langArr['COURTESY_OF']:'Courtesy of').': '.$imgIdArr["owner"].'. ';
+				$html .= (isset($LANG['COURTESY_OF'])?$LANG['COURTESY_OF']:'Courtesy of').': '.$imgIdArr["owner"].'. ';
 			}
 			$html .= '</b></div>';
 			$html .= '</div>';
 			$showCaptionClick = "$('#slidecaption".$imgId."').show();$('#showcaption".$imgId."').show();";
-			$html .= '<a href="#" id="showcaption'.$imgId.'" style="font-size:9px;text-decoration:none;float:right;clear:both;margin-right:5px;display:none;" onclick="'.$showCaptionClick.'">'.(isset($langArr['SHOW_CAPTION'])?$langArr['SHOW_CAPTION']:'SHOW CAPTION').'</a>';
+			$html .= '<a href="#" id="showcaption'.$imgId.'" style="font-size:9px;text-decoration:none;float:right;clear:both;margin-right:5px;display:none;" onclick="'.$showCaptionClick.'">'.(isset($LANG['SHOW_CAPTION'])?$LANG['SHOW_CAPTION']:'SHOW CAPTION').'</a>';
 			$html .= '</div></div>';
 		}
 		$html .= '</div></div></div>';

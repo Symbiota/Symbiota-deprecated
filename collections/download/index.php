@@ -7,7 +7,7 @@ $downloadType = array_key_exists("dltype",$_REQUEST)?$_REQUEST["dltype"]:"specim
 $taxonFilterCode = array_key_exists("taxonFilterCode",$_REQUEST)?$_REQUEST["taxonFilterCode"]:0;
 $displayHeader = array_key_exists("displayheader",$_REQUEST)?$_REQUEST["displayheader"]:0;
 
-$searchVar = $_REQUEST['searchvar'];
+$searchVar = array_key_exists("searchvar",$_REQUEST)?$_REQUEST['searchvar']:'';
 ?>
 <html>
 <head>
