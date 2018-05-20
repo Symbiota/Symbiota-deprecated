@@ -441,7 +441,7 @@ if($action && $isEditor){
 															}
 															?>
 														</select>
-														<input name="locality" type="hidden" value="<?php echo htmlentities($localityName, ENT_COMPAT | ENT_HTML401, $CHARSET); ?>" />
+														<input name="locality" type="hidden" value="<?php echo htmlentities($localityName, ENT_COMPAT, $CHARSET); ?>" />
 														<input name="country" type="hidden" value="<?php echo $countryName; ?>" />
 														<input name="state" type="hidden" value="<?php echo $stateName; ?>" />
 														<input name="collid" type="hidden" value="<?php echo $collid; ?>" />

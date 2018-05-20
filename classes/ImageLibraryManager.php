@@ -86,7 +86,7 @@ class ImageLibraryManager extends OccurrenceTaxaManager{
 		if(array_key_exists("tags",$this->searchTermArr) && $this->searchTermArr["tags"]){
 			$sql .= 'INNER JOIN imagetag it ON i.imgid = it.imgid ';
 		}
-		if(array_key_exists("keywords",$this->searchTersArr) && $this->searchTermArr["keywords"]){
+		if(array_key_exists("keywords",$this->searchTermArr) && $this->searchTermArr["keywords"]){
 			$sql .= 'INNER JOIN imagekeywords ik ON i.imgid = ik.imgid ';
 		}
 		if($this->tidFocus) $sql .= 'INNER JOIN taxaenumtree e ON ts.tid = e.tid ';
@@ -526,7 +526,7 @@ class ImageLibraryManager extends OccurrenceTaxaManager{
 		$rs = $this->conn->query($sql);
 		$i = 0;
 		while ($r = $rs->fetch_object()) {
-			$retArr[$i]['name'] = html($r->keyword, ENT_COMPAT | ENT_HTML401, $CHARSET);
+			$retArr[$i]['name'] = html($r->keyword, ENT_COMPAT, $CHARSET);
 			$i++;
 		}
 		$rs->free();

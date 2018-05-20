@@ -18,7 +18,7 @@ if($queryString) {
 			if($row->VernacularName){
 				$sciName .= ' ('.$row->VernacularName.')';
 			}
-			$retArrRow['label'] = htmlentities($sciName, ENT_COMPAT | ENT_HTML401, $CHARSET);
+			$retArrRow['label'] = htmlentities($sciName, ENT_COMPAT, $CHARSET);
 			$retArrRow['value'] = $row->tidaccepted;
 			array_push($returnArr, $retArrRow);
 		}
@@ -30,7 +30,7 @@ if($queryString) {
 			if($row->VernacularName){
 				$sciName .= ' ('.$row->VernacularName.')';
 			}
-			$returnArr[$i]['name'] = htmlentities($sciName, ENT_COMPAT | ENT_HTML401, $CHARSET);
+			$returnArr[$i]['name'] = htmlentities($sciName, ENT_COMPAT, $CHARSET);
 			$returnArr[$i]['id'] = $row->tidaccepted;
 			$i++;
 		}

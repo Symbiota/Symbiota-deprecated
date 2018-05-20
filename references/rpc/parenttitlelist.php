@@ -31,7 +31,7 @@ if($queryString) {
 		if($row->edition){
 			$titleLine .= ' '.$row->edition.' Ed.';
 		}
-		$retArrRow['label'] = htmlentities($titleLine, ENT_COMPAT | ENT_HTML401, $CHARSET);
+		$retArrRow['label'] = htmlentities($titleLine, ENT_COMPAT, $CHARSET);
 		$retArrRow['value'] = $row->refid;
 		array_push($returnArr, $retArrRow);
 	}

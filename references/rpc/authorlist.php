@@ -14,7 +14,7 @@ if($queryString) {
 	$sql .= 'LIMIT 10';
 	$result = $con->query($sql);
 	while ($row = $result->fetch_object()) {
-		$retArrRow['label'] = htmlentities($row->authorName, ENT_COMPAT | ENT_HTML401, $CHARSET);
+		$retArrRow['label'] = htmlentities($row->authorName, ENT_COMPAT, $CHARSET);
 		$retArrRow['value'] = $row->refauthorid;
 		array_push($returnArr, $retArrRow);
 	 }
