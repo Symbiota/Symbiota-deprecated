@@ -14,6 +14,7 @@ var imagesExist = false;
 var tempImgArr = [];
 var imgDataArr = [];
 var contentArr = [];
+var titlePageContent = [];
 var leftColContent = [];
 var rightColContent = [];
 var priDescSource = '';
@@ -188,6 +189,7 @@ function createPDFGuides(){
     zipFile = new JSZip();
     zipFolder = zipFile.folder("files");
     contentArr = [];
+    createTitlePage(pdfFileNum);
     contentArr.push({
         toc: {
             title: {text: 'INDEX', alignment: 'left', style: 'TOCHeader'}
@@ -206,6 +208,7 @@ function createPDFGuides(){
                     savePDFFile(contentArr,pdfFileNum);
                     taxonNum = 0;
                     contentArr = [];
+                    createTitlePage(pdfFileNum);
                     contentArr.push({
                         toc: {
                             title: {text: 'INDEX', alignment: 'left', style: 'TOCHeader'}
@@ -222,6 +225,44 @@ function createPDFGuides(){
         }
     }
     savePDFFile(contentArr,pdfFileNum);
+}
+
+function createTitlePage(fileNum){
+    var titlePageHead = checklistName+' Vol. '+fileNum;
+    var titleTextArr = [];
+    titlePageContent = [];
+    titlePageContent.push({text: titlePageHead, style: 'titleHeader'});
+    if(checklistAuthors){
+        titleTextArr.push({text: 'Authors: ', style: 'descheadtext'});
+        titleTextArr.push({text: checklistAuthors, style: 'descstattext'});
+        titleTextArr.push('\n');
+    }
+    if(checklistCitation){
+        titleTextArr.push({text: 'Citation: ', style: 'descheadtext'});
+        titleTextArr.push({text: checklistCitation, style: 'descstattext'});
+        titleTextArr.push('\n');
+    }
+    if(checklistLocality){
+        titleTextArr.push({text: 'Locality: ', style: 'descheadtext'});
+        titleTextArr.push({text: checklistLocality, style: 'descstattext'});
+        titleTextArr.push('\n');
+    }
+    if(checklistAbstract){
+        titleTextArr.push({text: 'Abstract: ', style: 'descheadtext'});
+        titleTextArr.push({text: checklistAbstract, style: 'descstattext'});
+        titleTextArr.push('\n');
+    }
+    if(checklistNotes){
+        titleTextArr.push({text: 'Notes: ', style: 'descheadtext'});
+        titleTextArr.push({text: checklistNotes, style: 'descstattext'});
+        titleTextArr.push('\n');
+    }
+    titlePageContent.push({text: titleTextArr});
+    titlePageContent.push({text: fieldguideDisclaimer, style: 'titleDisclaimer'});
+    contentArr.push({
+        stack: titlePageContent,
+        pageBreak: 'after'
+    });
 }
 
 function createPDFPage(familyName,sciname){
@@ -361,6 +402,17 @@ function savePDFFile(content,fileNum){
             ];
         },
         styles: {
+            titleHeader: {
+                fontSize: 18,
+                bold: true,
+                alignment: 'center',
+                margin: [0, 190, 0, 150]
+            },
+            titleDisclaimer: {
+                fontSize: 10,
+                alignment: 'left',
+                margin: [0, 50, 0, 0]
+            },
             ordertext: {
                 fontSize: 11.5,
                 bold: true

@@ -26,6 +26,7 @@ $printMode = array_key_exists("printmode",$_REQUEST)?$_REQUEST["printmode"]:0;
 $exportDoc = array_key_exists("exportdoc",$_REQUEST)?$_REQUEST["exportdoc"]:0;
 
 $statusStr='';
+$locStr = '';
 
 //Search Synonyms is default
 if($action != "Rebuild List" && !array_key_exists('dllist_x',$_POST)) $searchSynonyms = 1;
@@ -119,6 +120,10 @@ if($clValue || $dynClid){
         $fgManager->primeDataArr();
     }
 }
+if($clArray["locality"]){
+    $locStr = $clArray["locality"];
+    if($clValue && $clArray["latcentroid"]) $locStr .= " (".$clArray["latcentroid"].", ".$clArray["longcentroid"].")";
+}
 ?>
 <html>
 <head>
@@ -138,6 +143,14 @@ if($clValue || $dynClid){
         <?php if($clid) echo 'var clid = '.$clid.';'; ?>
 
         <?php if($clManager->getClName()) echo 'var checklistName = "'.$clManager->getClName().'";'; ?>
+
+        var checklistName = "<?php echo $clManager->getClName(); ?>";
+        var checklistAuthors = "<?php echo $clArray["authors"]; ?>";
+        var checklistCitation = "<?php echo $clArray["publication"]; ?>";
+        var checklistLocality = "<?php echo $locStr; ?>";
+        var checklistAbstract = "<?php echo $clArray["abstract"]; ?>";
+        var checklistNotes = "<?php echo $clArray["notes"]; ?>";
+        var fieldguideDisclaimer = "This field guide was produced through the <?php echo $DEFAULT_TITLE; ?> portal. This field guide is intended for educational use only, no commercial uses are allowed. It is created under Fair Use copyright provisions supporting educational uses of information. All rights are reserved to authors and photographers unless otherwise specified.";
 
         function lazyLoadData(index,callback){
             var startindex = 0;
@@ -165,7 +178,7 @@ if($clValue || $dynClid){
         <script src="<?php echo $CLIENT_ROOT; ?>/js/vfs_fonts.js" type="text/javascript"></script>
         <script src="<?php echo $CLIENT_ROOT; ?>/js/jszip.min.js" type="text/javascript"></script>
         <script src="<?php echo $CLIENT_ROOT; ?>/js/FileSaver.min.js" type="text/javascript"></script>
-        <script src="<?php echo $CLIENT_ROOT; ?>/js/symb/checklists.fieldguideexport.js?ver=41" type="text/javascript"></script>
+        <script src="<?php echo $CLIENT_ROOT; ?>/js/symb/checklists.fieldguideexport.js?ver=42" type="text/javascript"></script>
         <?php
     }
     ?>
@@ -343,14 +356,12 @@ if($clValue || $dynClid){
 				}
 			}
 		
-			if(($clArray["locality"] || ($clValue && ($clArray["latcentroid"] || $clArray["abstract"])) || $clArray["notes"])){
+			if(($locStr || ($clValue && ($clArray["latcentroid"] || $clArray["abstract"])) || $clArray["notes"])){
 				?>
 				<div class="moredetails" style="<?php echo (($showDetails || $printMode)?'display:none;':''); ?>color:blue;cursor:pointer;" onclick="toggle('moredetails')"><?php echo $LANG['MOREDETS'];?></div>
 				<div class="moredetails" style="display:<?php echo (($showDetails && !$printMode)?'block':'none'); ?>;color:blue;cursor:pointer;" onclick="toggle('moredetails')"><?php echo $LANG['LESSDETS'];?></div>
 				<div class="moredetails" style="display:<?php echo (($showDetails || $printMode)?'block':'none'); ?>;">
 					<?php 
-					$locStr = $clArray["locality"];
-					if($clValue && $clArray["latcentroid"]) $locStr .= " (".$clArray["latcentroid"].", ".$clArray["longcentroid"].")";
 					if($locStr){
 						echo "<div><span style='font-weight:bold;'>".$LANG['LOC']."</span>".$locStr."</div>";
 					}
