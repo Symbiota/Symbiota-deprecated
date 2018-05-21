@@ -157,7 +157,7 @@ if($clValue || $dynClid){
             http.send(params);
         }
 	</script>
-	<script type="text/javascript" src="../js/symb/checklists.checklist.js?ver=201606"></script>
+	<script type="text/javascript" src="../js/symb/checklists.checklist.js?ver=201805"></script>
     <?php
     if($CHECKLIST_FG_EXPORT){
         ?>
@@ -165,7 +165,7 @@ if($clValue || $dynClid){
         <script src="<?php echo $CLIENT_ROOT; ?>/js/vfs_fonts.js" type="text/javascript"></script>
         <script src="<?php echo $CLIENT_ROOT; ?>/js/jszip.min.js" type="text/javascript"></script>
         <script src="<?php echo $CLIENT_ROOT; ?>/js/FileSaver.min.js" type="text/javascript"></script>
-        <script src="<?php echo $CLIENT_ROOT; ?>/js/symb/checklists.fieldguideexport.js?ver=19" type="text/javascript"></script>
+        <script src="<?php echo $CLIENT_ROOT; ?>/js/symb/checklists.fieldguideexport.js?ver=41" type="text/javascript"></script>
         <?php
     }
     ?>
@@ -833,7 +833,7 @@ if($clValue || $dynClid){
             </div>
         </div>
 
-        <div id="loadingOverlay" data-role="popup" style="width:100%;height:100%;position:relative;">
+        <div id="loadingOverlay" data-role="popup" style="width:100%;height:100%;position:relative;display:none;">
             <div id="loader"></div>
             <div id="loaderMessage">This may take several minutes...</div>
         </div>

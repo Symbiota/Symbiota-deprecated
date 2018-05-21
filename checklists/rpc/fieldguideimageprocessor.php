@@ -9,10 +9,19 @@ $imgID = array_key_exists("imgid",$_REQUEST)?$_REQUEST["imgid"]:0;
 $dataArr = array();
 
 $fgManager = new ChecklistFGExportManager();
+$returnStr = '';
 
 if($imgID){
-    $url = $fgManager->getImageUrl($imgID);
-    $dataUrl = $fgManager->getImageDataUrl($url);
-    echo $imgID.'-||-'.$dataUrl;
+    $imgIDArr = json_decode($imgID,true);
+    foreach($imgIDArr as $imId){
+        $tempStr = '';
+        $url = $fgManager->getImageUrl($imId);
+        $dataUrl = $fgManager->getImageDataUrl($url);
+        if($dataUrl){
+            $tempStr = $imId.'-||-'.$dataUrl;
+            $returnStr .= $tempStr.'-****-';
+        }
+    }
 }
+echo $returnStr;
 ?>

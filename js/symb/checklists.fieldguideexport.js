@@ -10,7 +10,8 @@ var loadIndex = 0;
 var procIndex = 0;
 var lastLoad = 0;
 var dataArr = [];
-var lastImage = 0;
+var imagesExist = false;
+var tempImgArr = [];
 var imgDataArr = [];
 var contentArr = [];
 var leftColContent = [];
@@ -26,15 +27,20 @@ var pdfFileNum = 0;
 var pdfFileTot = 0;
 var projFileName = '';
 var savedPDFs = 0;
+var t0 = 0;
+var t1 = 0;
 
 function hideWorking(){
     $('#loadingOverlay').popup('hide');
     $("#fieldguideexport").popup("show");
+    //t1 = performance.now();
+    //console.log("Total process took " + ((t1 - t0)/1000) + " seconds.");
 }
 
 function showWorking(){
     $("#fieldguideexport").popup("hide");
     $('#loadingOverlay').popup('show');
+    //t0 = performance.now();
 }
 
 function openFieldGuideExporter(){
@@ -52,6 +58,7 @@ function prepareFieldGuideExport(taxCnt){
     do{
         lazyLoadData(loadIndex,function(res){
             loadingComplete = true;
+            //console.log('load '+loadIndex+' loaded');
             processDataResponse(res);
         });
         processed = processed + lazyLoadCnt;
@@ -81,7 +88,7 @@ function processSettings(){
 
 function processDataResponse(res){
     var tempArr = JSON.parse(res);
-    var imagesExist = false;
+    //var imagesExist = false;
     for(i in tempArr) {
         var family = tempArr[i]['family'];
         if(!family) family = "Family Undefined";
@@ -114,20 +121,65 @@ function processDataResponse(res){
             imagesExist = true;
             for(im in tempArr[i]['img']){
                 var imgId = tempArr[i]['img'][im]['id'];
-                dataArr[family][sciname]['images'].push(tempArr[i]['img'][im]);
-                lastImage = imgId;
-                loadImageDataUri(imgId,function(res){
-                    var imgArr = res.split("-||-");
-                    var resId = imgArr[0];
-                    var resData = imgArr[1];
-                    if(resData) imgDataArr[resId] = resData;
-                    if(loadingComplete && (procIndex == lastLoad) && (lastImage == resId)) createPDFGuides();
-                });
+                var imgUrl = tempArr[i]['img'][im]['url'];
+                if(imgId && imgUrl){
+                    dataArr[family][sciname]['images'].push(tempArr[i]['img'][im]);
+                    tempImgArr.push(imgId);
+                }
             }
         }
     }
     procIndex++;
-    if(loadingComplete && (procIndex == lastLoad) && (!imagesExist)) createPDFGuides();
+    if(loadingComplete && (procIndex == lastLoad)) prepImageResponse();
+}
+
+function splitArray(arr,size){
+    var index = 0;
+    var arrLength = arr.length;
+    var tempArr = [];
+    for (index = 0; index < arrLength; index += size) {
+        var subArr = arr.slice(index,(index+size));
+        tempArr.push(subArr);
+    }
+
+    return tempArr;
+}
+
+function prepImageResponse(){
+    if(imagesExist){
+        tempImgArr = splitArray(tempImgArr,200);
+        processImageResponse();
+    }
+    else{
+        createPDFGuides();
+    }
+}
+
+function processImageResponse(){
+    //console.log(tempImgArr.length);
+    var reqArrStr = JSON.stringify(tempImgArr[0]);
+    loadImageDataUri(reqArrStr,function(res){
+        if(res){
+            var tempDataArr = res.split("-****-");
+            for(d in tempDataArr){
+                if(tempDataArr[d]){
+                    var imgArr = tempDataArr[d].toString().split("-||-");
+                    var resId = imgArr[0];
+                    var resData = imgArr[1];
+                    if(resData) imgDataArr[resId] = resData;
+                    //t1 = performance.now();
+                    //console.log(resId+" processed at " + ((t1 - t0)/1000) + " seconds.");
+                }
+            }
+        }
+        tempImgArr.splice(0,1);
+        if(tempImgArr.length > 0){
+            processImageResponse();
+        }
+        else{
+            createPDFGuides();
+        }
+    });
 }
 
 function createPDFGuides(){
@@ -173,6 +225,7 @@ function createPDFGuides(){
 }
 
 function createPDFPage(familyName,sciname){
+    //console.log(sciname);
     leftColContent = [];
     rightColContent = [];
     var taxonOrder = dataArr[familyName][sciname]['order'];
@@ -204,8 +257,10 @@ function createPDFPage(familyName,sciname){
                 leftColContent.push({text: descArr[d]['heading']+':', style: 'descheadtext'});
                 leftColContent.push(' ');
             }
-            leftColContent.push({text: descArr[d]['statement'], style: 'descstattext'});
-            leftColContent.push(' ');
+            if(descArr[d]['statement']){
+                leftColContent.push({text: descArr[d]['statement'], style: 'descstattext'});
+                leftColContent.push(' ');
+            }
         }
         if(source){
             leftColContent.push('\n');
