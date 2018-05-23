@@ -191,7 +191,7 @@ if($action == 'search'){
 				<div id="imagesdiv">
 					<div id="imagebox">
 						<?php
-						$lastPage = (int) ($recordCnt / $cntPerPage) + 1;
+						$lastPage = ceil($recordCnt / $cntPerPage);
 						$startPage = ($pageNumber > 4?$pageNumber - 4:1);
 						$endPage = ($lastPage > $startPage + 9?$startPage + 9:$lastPage);
 						$url = 'search.php?'.$imgLibManager->getQueryTermStr().'&submitaction=search';

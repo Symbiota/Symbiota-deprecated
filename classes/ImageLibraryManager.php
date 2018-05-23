@@ -290,7 +290,7 @@ class ImageLibraryManager extends OccurrenceTaxaManager{
 		if(isset($this->searchTermArr["imagetype"]) && ($this->searchTermArr["imagetype"] == 1 || $this->searchTermArr["imagetype"] == 2)){
 			$sql .= 'INNER JOIN omoccurrences o ON i.occid = o.occid INNER JOIN omcollections c ON o.collid = c.collid ';
 		}
-		elseif(isset($this->searchTermArr['db'])){
+		elseif(isset($this->searchTermArr['db']) && $this->searchTermArr['db'] != 'all'){
 			$sql .= 'INNER JOIN omoccurrences o ON i.occid = o.occid ';
 		}
 		/*
@@ -413,7 +413,7 @@ class ImageLibraryManager extends OccurrenceTaxaManager{
 		if($sqlWhere){
 			$this->sqlWhere = 'WHERE '.substr($sqlWhere,4);
 		}
-		//echo $sqlWhere;
+		//echo $this->sqlWhere;
 	}
 
 	private function setRecordCnt(){
@@ -451,7 +451,7 @@ class ImageLibraryManager extends OccurrenceTaxaManager{
 		if(isset($this->searchTermArr["imagetype"]) && ($this->searchTermArr["imagetype"] == 1 || $this->searchTermArr["imagetype"] == 2)){
 			$sql .= 'INNER JOIN omoccurrences o ON i.occid = o.occid INNER JOIN omcollections c ON o.collid = c.collid ';
 		}
-		elseif(isset($this->searchTermArr['db'])){
+		elseif(isset($this->searchTermArr['db']) && $this->searchTermArr['db'] != 'all'){
 			$sql .= 'INNER JOIN omoccurrences o ON i.occid = o.occid ';
 		}
 		$sql .= $this->sqlWhere;

@@ -372,11 +372,11 @@ include($SERVER_ROOT. '/header.php');
 									$collPath .= $_SERVER["SERVER_NAME"];
 									if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $collPath .= ':'.$_SERVER["SERVER_PORT"];
 									$collPath .= $CLIENT_ROOT.'/collections/misc/collprofiles.php?collid='.$collid;
-									$bodyStr = 'Please%20provide%20the%20following%20GBIF%20user%20permission%20to%20create%20and%20update%20datasets%20for%20the%20following%20GBIF%20publisher.%0A%0A'.
+									$bodyStr = 'Please%20provide%20the%20following%20GBIF%20user%20permission%20to%20create%20and%20update%20datasets%20for%20the%20following%20GBIF%20publisher.%0A'.
 										'Once%20these%20permissions%20are%20assigned,%20we%20will%20be%20pushing%20a%20DwC-Archive%20from%20the%20following%20Symbiota%20collection%20to%20GBIF.%0A%0A'.
-										'GBIF%20user:%20'.$GBIF_USERNAME.'%0A%0A'.
-										'GBIF%20publisher%20identifier:%20'.$collManager->getOrganizationKey().'%0A%0A'.
-										'GBIF%20publisher:%20https://www.gbif.org/publisher/'.$collManager->getOrganizationKey().'%0A%0A'.
+										'GBIF%20user:%20'.$GBIF_USERNAME.'%0A'.
+										'GBIF%20publisher%20identifier:%20'.$collManager->getOrganizationKey().'%0A'.
+										'GBIF%20publisher:%20https://www.gbif.org/publisher/'.$collManager->getOrganizationKey().'%0A'.
 										'Symbiota collection:%20'.$collPath.'%0A%0A'.
 										'Sincerely, %0A%0A%0A%0A%0A%0A';
 									?>
