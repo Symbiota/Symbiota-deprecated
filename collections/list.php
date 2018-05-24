@@ -33,6 +33,8 @@ if(isset($_REQUEST['db'])){
     if(!isset($_REQUEST['page']) || !$_REQUEST['page']) $resetPageNum = true;
 }
 
+$stArrSearchJson = str_replace(");","",$stArrSearchJson);
+$stArrCollJson = str_replace(");","",$stArrCollJson);
 ?>
 
 <html>

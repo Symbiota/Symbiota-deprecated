@@ -23,6 +23,8 @@ $catId = array_key_exists("catid",$_REQUEST)?$_REQUEST["catid"]:0;
 if(!$catId && isset($DEFAULTCATID) && $DEFAULTCATID) $catId = $DEFAULTCATID;
 $tabIndex = array_key_exists("tabindex",$_REQUEST)?$_REQUEST["tabindex"]:1;
 
+$stArrJson = str_replace(");","",$stArrJson);
+
 $mapManager = new MapInterfaceManager();
 $solrManager = new SOLRManager();
 $queryShape = '';

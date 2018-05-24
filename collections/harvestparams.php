@@ -25,6 +25,9 @@ if(isset($_REQUEST['db'])){
     $collArr['db'] = $collManager->getSearchTerm('db');
     $stArrCollJson = json_encode($collArr);
 }
+
+$stArrSearchJson = str_replace(");","",$stArrSearchJson);
+$stArrCollJson = str_replace(");","",$stArrCollJson);
 ?>
 
 <html>
