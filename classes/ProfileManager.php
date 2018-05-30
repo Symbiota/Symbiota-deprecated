@@ -229,19 +229,16 @@ class ProfileManager{
 			$result->free();
 
 			//Send email
-			$subject = "Your password";
-			$bodyStr = "Your ".$GLOBALS["defaultTitle"]." (<a href='http://".$_SERVER['SERVER_NAME'].$GLOBALS["CLIENT_ROOT"]."'>http://".$_SERVER['SERVER_NAME'].$GLOBALS["CLIENT_ROOT"]."</a>) password has been reset to: ".$newPassword." ";
-			$bodyStr .= "<br/><br/>After logging in, you can reset your password by clicking on <a href='http://".$_SERVER['SERVER_NAME'].$GLOBALS["CLIENT_ROOT"]."/profile/viewprofile.php'>View Profile</a> link and then click the Edit Profile tab.";
-			$bodyStr .= "<br/>If you have problems with the new password, contact the System Administrator ";
-			if(array_key_exists("adminEmail",$GLOBALS)){
-				$bodyStr .= "<".$GLOBALS["adminEmail"].">";
-			}
+			$subject = 'Your password';
+			$bodyStr = "Your ".$GLOBALS["DEFAULT_TITLE"]." (<a href='http://".$_SERVER['SERVER_NAME'].$GLOBALS["CLIENT_ROOT"]."'>http://".$_SERVER['SERVER_NAME'].$GLOBALS["CLIENT_ROOT"]."</a>) password has been reset to: ".$newPassword." ".
+				"<br/><br/>After logging in, you can reset your password by clicking on <a href='http://".$_SERVER['SERVER_NAME'].$GLOBALS["CLIENT_ROOT"]."/profile/viewprofile.php'>View Profile</a> link and then click the Edit Profile tab.".
+				"<br/>If you have problems with the new password, contact the System Administrator";
+			if(array_key_exists('ADMIN_EMAIL',$GLOBALS)) $bodyStr .= ': <'.$GLOBALS['ADMIN_EMAIL'].'>';
+
 			$headerStr = "MIME-Version: 1.0 \r\n".
 				"Content-type: text/html; charset=".$CHARSET." \r\n".
 				"To: ".$emailStr." \r\n";
-			if(array_key_exists("adminEmail",$GLOBALS)){
-				$headerStr .= "From: Admin <".$GLOBALS["adminEmail"]."> \r\n";
-			}
+			if(array_key_exists("ADMIN_EMAIL",$GLOBALS)) $headerStr .= "From: Admin <".$GLOBALS["ADMIN_EMAIL"]."> \r\n";
 			mail($emailStr,$subject,$bodyStr,$headerStr);
 
 			$returnStr = "Your new password was just emailed to: ".$emailStr;
