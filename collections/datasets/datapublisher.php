@@ -28,26 +28,24 @@ if($collid){
 $includeDets = 1;
 $includeImgs = 1;
 $redactLocalities = 1;
-if($action){
-	if($action == 'Save Key' || $action == 'Update Key'){
-		$collManager->setAggKeys($_POST);
-		$collManager->updateAggKeys();
+if($action == 'Save Key' || $action == 'Update Key' || (isset($_REQUEST['datasetKey']) && $_REQUEST['datasetKey'])){
+	$collManager->setAggKeys($_POST);
+	$collManager->updateAggKeys();
+}
+elseif($action){
+	if (!array_key_exists('dets', $_POST)) {
+		$includeDets = 0;
+		$dwcaManager->setIncludeDets(0);
 	}
-	else{
-		if (!array_key_exists('dets', $_POST)) {
-			$includeDets = 0;
-			$dwcaManager->setIncludeDets(0);
-		}
-		if (!array_key_exists('imgs', $_POST)) {
-			$includeImgs = 0;
-			$dwcaManager->setIncludeImgs(0);
-		}
-		if (!array_key_exists('redact', $_POST)) {
-			$redactLocalities = 0;
-			$dwcaManager->setRedactLocalities(0);
-		}
-		$dwcaManager->setTargetPath($SERVER_ROOT . (substr($SERVER_ROOT, -1) == '/' ? '' : '/') . 'content/dwca/');
+	if (!array_key_exists('imgs', $_POST)) {
+		$includeImgs = 0;
+		$dwcaManager->setIncludeImgs(0);
 	}
+	if (!array_key_exists('redact', $_POST)) {
+		$redactLocalities = 0;
+		$dwcaManager->setRedactLocalities(0);
+	}
+	$dwcaManager->setTargetPath($SERVER_ROOT . (substr($SERVER_ROOT, -1) == '/' ? '' : '/') . 'content/dwca/');
 }
 
 $idigbioKey = $collManager->getIdigbioKey();
@@ -78,7 +76,7 @@ if($isEditor){
 	</style>
 	<script type="text/javascript" src="../../js/jquery.js"></script>
 	<script type="text/javascript" src="../../js/jquery-ui.js"></script>
-	<script type="text/javascript" src="../../js/symb/collections.gbifpublisher.js?ver=3"></script>
+	<script type="text/javascript" src="../../js/symb/collections.gbifpublisher.js?ver=4"></script>
 	<script type="text/javascript">
 		function toggle(target){
 			var objDiv = document.getElementById(target);
@@ -357,7 +355,7 @@ include($SERVER_ROOT. '/header.php');
 							<input type="hidden" id="gbifInstOrgKey" name="gbifInstOrgKey" value="<?php echo $GBIF_ORG_KEY; ?>" />
 							<input type="hidden" id="installationKey" name="installationKey" value="<?php echo $collManager->getInstallationKey(); ?>" />
 							<input type="hidden" id="datasetKey" name="datasetKey" value="" />
-							<input type="hidden" id="endPointKey" name="endPointKey" value="" />
+							<input type="hidden" id="endpointKey" name="endpointKey" value="" />
 							<input type="hidden" id="dwcUri" name="dwcUri" value="<?php echo $dwcUri; ?>" />
 							<button type="button" onclick="validateKey(this.form)">Validate Key</button>
 							<input type="submit" name="formsubmit" value="<?php echo ($collManager->getOrganizationKey()?'Update':'Save'); ?> Key" disabled />
@@ -380,9 +378,10 @@ include($SERVER_ROOT. '/header.php');
 										'Symbiota collection:%20'.$collPath.'%0A%0A'.
 										'Sincerely, %0A%0A%0A%0A%0A%0A';
 									?>
-									Before submitting your data to GBIF, you will also need to contact GBIF
+									Before submitting your data to GBIF, you will need to contact GBIF
 									(<a href="mailto:helpdesk@gbif.org?subject=Publishing%20data%20from%20Symbiota%20portal%20to%20GBIF...&body=<?php echo $bodyStr; ?>">helpdesk@gbif.org</a>)
-									requesting that the <b><?php echo $GBIF_USERNAME; ?></b> GBIF user is given permission to create and update datasets for your collection.<br/><br/>
+									requesting that the <b><?php echo $GBIF_USERNAME; ?></b> GBIF user is given permission to create and update datasets for your collection.
+									Click on the email address above to automatically generate an email message within your email client.<br/><br/>
 									<button type="button" onclick="processGbifOrgKey(this.form);">Submit Data</button>
 									<img id="workingcircle" src="../../images/ajax-loader_sm.gif" style="margin-bottom:-4px;width:20px;display:none;" />
 								</div>

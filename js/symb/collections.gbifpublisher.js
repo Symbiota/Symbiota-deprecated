@@ -18,20 +18,27 @@ function processGbifOrgKey(f){
 			submitForm = true;
 		}
 		if(!datasetKey){
-			datasetKey = createGbifDataset(installationKey, organizationKey, collName);
-			f.datasetKey.value = datasetKey;
-		}
-		if(datasetKey){
-			if(dwcUri){
-				f.endPointKey.value = createGbifEndpoint(datasetKey, dwcUri);
+			datasetExists(f);
+			if(f.datasetKey.value){
+				alert("Dataset already appears to exist. Updating database.");
+				submitForm = true;
 			}
 			else{
-				alert('Please create/refresh your Darwin Core Archive and try again.');
+				datasetKey = createGbifDataset(installationKey, organizationKey, collName);
+				f.datasetKey.value = datasetKey;
+				if(datasetKey){
+					if(dwcUri){
+						f.endpointKey.value = createGbifEndpoint(datasetKey, dwcUri);
+					}
+					else{
+						alert('Please create/refresh your Darwin Core Archive and try again.');
+					}
+					submitForm = true;
+				}
+				else{
+					alert('Invalid Organization Key or insufficient permissions. Please recheck your Organization Key and verify that this portal can create datasets for your organization with GBIF.');
+				}
 			}
-			submitForm = true;
-		}
-		else{
-			alert('Invalid Organization Key or insufficient permissions. Please recheck your Organization Key and verify that this portal can create datasets for your organization with GBIF.');
 		}
 		if(submitForm) f.submit();
 		status = true;
@@ -53,7 +60,8 @@ function createGbifInstallation(gbifOrgKey,collName){
 		title: collName
 	});
 
-	return callGbifCurl(type,url,data);
+	alert("Creating new installation");
+	//return callGbifCurl(type,url,data);
 }
 
 function createGbifDataset(gbifInstKey,gbifOrgKey,collName){
@@ -65,8 +73,9 @@ function createGbifDataset(gbifInstKey,gbifOrgKey,collName){
 		title: collName,
 		type: "OCCURRENCE"
 	});
-
-	return callGbifCurl(type,url,data);
+alert("Creating new dataset");
+	return false;
+	//return callGbifCurl(type,url,data);
 }
 
 function createGbifEndpoint(gbifDatasetKey,dwcUri){
@@ -76,11 +85,11 @@ function createGbifEndpoint(gbifDatasetKey,dwcUri){
 		type: "DWC_ARCHIVE",
 		url: dwcUri
 	});
-
 	return callGbifCurl(type,url,data);
 }
 
 function callGbifCurl(type,url,data){
+	return false;
 	var key;
 	$.ajax({
 		type: "POST",
@@ -111,4 +120,33 @@ function getOrganization(f){
 	.fail(function() {
 		alert("Key does not appear to be valid. Please contact your portal administrator for assistance.");
 	});
+}
+
+function datasetExists(f){
+	if(f.dwcUri.value != ""){
+		var urlStr = f.dwcUri.value;
+		if(uri.indexOf("/content/") > 0){
+			urlStr = urlStr.substring(0,urlStr.indexOf("/content/"));
+			urlStr = "http://api.gbif.org/v1/dataset?identifier=" + urlStr + "/collections/misc/collprofiles.php?collid=" + f.collid.value;
+			$.ajax({
+				method: "GET",
+				async: false,
+				dateType: "json",
+				url: urlStr
+			})
+			.done(function( retJson ) {
+				if(retJson.count > 0){
+					f.datasetKey.value = retJson.results[0].key;
+					f.endpointKey.value = retJson.results[0].endpoints[0].key;
+					return true;
+				}
+				else{
+					return false;
+				}
+			})
+			.fail(function() {
+				alert("ERROR querying datasets");
+			});
+		}
+	}
 }
