@@ -140,7 +140,8 @@ function datasetExists(f){
 				}
 			})
 			.fail(function() {
-				alert("ERROR querying datasets");
+				alert("General error querying datasets. Is your connection to the network stable?");
+				return false;
 			});
 		}
 	}

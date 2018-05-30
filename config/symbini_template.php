@@ -46,7 +46,7 @@ $GBIF_ORG_KEY = '';                 //GBIF organization key for organization whi
 $FP_ENABLED = 0;					//Enable Filtered-Push modules
 
 //Misc variables
-$DEFAULT_TAXON_SEARCH = 1;			//Default taxonomic search type: 1 = Any Name, 2 = Scientific Name, 3 = Family, 4 = Taxonomic Group, 5 = Common Name
+$DEFAULT_TAXON_SEARCH = 2;			//Default taxonomic search type: 1 = Any Name, 2 = Scientific Name, 3 = Family, 4 = Taxonomic Group, 5 = Common Name
 $GOOGLE_MAP_KEY = '';				//Needed for Google Map; get from Google
 $MAPPING_BOUNDARIES = '';			//Project bounding box; default map centering; (e.g. 42.3;-100.5;18.0;-127)
 $ACTIVATE_GEOLOCATION = false;			//Activates HTML5 geolocation services in Map Search
