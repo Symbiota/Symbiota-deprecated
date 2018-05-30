@@ -619,7 +619,7 @@ class ImageProcessor {
 
 	private function updateLastRunDate($date){
 		if($this->spprid){
-			$sql = 'UPDATE specprocessorprojects SET source = "'.$date.'" WHERE spprid = '.$this->spprid;
+			$sql = 'UPDATE specprocessorprojects SET lastrundate = "'.$date.'" WHERE spprid = '.$this->spprid;
 			if(!$this->conn->query($sql)){
 				$this->logOrEcho('ERROR updating last run date: '.$this->conn->error);
 			}
