@@ -350,6 +350,7 @@ function deselectDsMarker(marker){
 	marker.selected = false;
 }
 
+/*
 function findSelections(c){
 	if(c.checked == true){
 		var activeTab = $('#tabs2').tabs("option","active");
@@ -373,7 +374,9 @@ function findSelections(c){
 		deselectPoints();
 	}
 }
+*/
 
+/*
 function findDsSelections(c){
 	if(c.checked == true){
 		var activeTab = $('#tabs3').tabs("option","active");
@@ -396,6 +399,7 @@ function findDsSelections(c){
 		deselectDSPoints();
 	}
 }
+*/
 
 function toggleLatLongDivs(){
 	var divs = document.getElementsByTagName("div");

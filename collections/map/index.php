@@ -95,7 +95,7 @@ if(!array_key_exists("pointlat",$_REQUEST)) $_REQUEST["pointlat"] = '';
 	<script src="../../js/jquery.popupoverlay.js" type="text/javascript"></script>
 	<script src="//maps.googleapis.com/maps/api/js?v=3.exp&libraries=drawing<?php echo (isset($GOOGLE_MAP_KEY) && $GOOGLE_MAP_KEY?'&key='.$GOOGLE_MAP_KEY:''); ?>" ></script>
 	<script src="../../js/jscolor/jscolor.js?ver=4" type="text/javascript"></script>
-	<script src="../../js/symb/collections.map.index.js?ver=1802" type="text/javascript"></script>
+	<script src="../../js/symb/collections.map.index.js?ver=1803" type="text/javascript"></script>
 	<script src="../../js/symb/markerclusterer.js?20170403" type="text/javascript"></script>
 	<script src="../../js/symb/oms.min.js" type="text/javascript"></script>
 	<script src="../../js/symb/keydragzoom.js" type="text/javascript"></script>
@@ -118,7 +118,7 @@ if(!array_key_exists("pointlat",$_REQUEST)) $_REQUEST["pointlat"] = '';
 		var oms;
 		var dsoms;
 		var selectedShape = null;
-		var gotCoords = <?php echo ($GEOLOCATION?'true':'false'); ?>;
+		var gotCoords = <?php echo ($ACTIVATE_GEOLOCATION?'true':'false'); ?>;
 		var mapSymbol = 'coll';
 		var selected = false;
 		var deselected = false;
@@ -184,7 +184,7 @@ if(!array_key_exists("pointlat",$_REQUEST)) $_REQUEST["pointlat"] = '';
 			}
 		}
 
-		function initialize(position){
+		function initialize(){
 			<?php
 			$latCen = 41.0;
 			$longCen = -95.0;
@@ -266,15 +266,15 @@ if(!array_key_exists("pointlat",$_REQUEST)) $_REQUEST["pointlat"] = '';
 				drawingControlOptions: {
 					position: google.maps.ControlPosition.TOP_CENTER,
 					drawingModes: [
+						<?php
+							if($spatial){
+								?>
+								google.maps.drawing.OverlayType.POLYGON,
+								<?php
+							}
+						?>
 						google.maps.drawing.OverlayType.RECTANGLE,
 						google.maps.drawing.OverlayType.CIRCLE
-						<?php
-						if($spatial){
-						?>
-						,google.maps.drawing.OverlayType.POLYGON
-						<?php
-						}
-						?>
 					]
 				},
 				markerOptions: {
@@ -361,8 +361,8 @@ if(!array_key_exists("pointlat",$_REQUEST)) $_REQUEST["pointlat"] = '';
 						document.getElementById(chbox).checked = false;
 						document.getElementById("selectallcheck").checked = false;
 					}
-					removeSelectionRecord(occid);
-					adjustSelectionsTab();
+					//removeSelectionRecord(occid);
+					//adjustSelectionsTab();
 					deselectMarker(marker);
 				}
 				else{
@@ -382,7 +382,7 @@ if(!array_key_exists("pointlat",$_REQUEST)) $_REQUEST["pointlat"] = '';
 							document.getElementById("selectallcheck").checked = true;
 						}
 					}
-					adjustSelectionsTab();
+					//adjustSelectionsTab();
 					selectMarker(marker);
 				}
 			});
@@ -467,6 +467,21 @@ if(!array_key_exists("pointlat",$_REQUEST)) $_REQUEST["pointlat"] = '';
 
 			setTimeout(function() {
 				afterEffects();
+			}, 500);
+		}
+
+		function afterEffects(){
+			setPanels(true);
+			$("#accordion").accordion("option",{active: 1});
+			buildCollKey();
+			buildTaxaKey();
+			jscolor.init();
+			if(pointBounds){
+				map.fitBounds(pointBounds);
+				map.panToBounds(pointBounds);
+			}
+			setTimeout(function() {
+				//hideWorking();
 			}, 500);
 		}
 
@@ -555,10 +570,77 @@ if(!array_key_exists("pointlat",$_REQUEST)) $_REQUEST["pointlat"] = '';
 									strokeWeight: 1
 								};
 							}
-							markerArr[occ] = getMarker(llArr[0], llArr[1], displayStr, iconColor, markerIcon, type, scinameStr, occ, 0);
-							addMarkerListners(markerArr[occ]);
-							oms.addMarker(markerArr[occ]);
-							var markerPos = markerArr[occ].getPosition();
+							//Create Marker
+							var m = new google.maps.Marker({
+								position: new google.maps.LatLng(llArr[0], llArr[1]),
+								text: displayStr,
+								<?php
+								if($clusterOff=="y"){
+									?>
+									map: map,
+									<?php
+								}
+								?>
+								icon: markerIcon,
+								selected: false,
+								color: iconColor,
+								customInfo: type,
+								taxatid: scinameStr,
+								occid: occ,
+								clid: 0
+							});
+							//Add marker listener
+							m.addListener('mouseover', function() {
+								var myOptions = {
+									content: '<div>'+this.text+'<br /><a href="#" onclick="closeAllInfoWins();openIndPopup('+this.occid+','+this.clid+');return false;"><span style="color:blue;">See Details</span></a></div>',
+									boxStyle: {
+										border: "1px solid black",
+										background: "#ffffff",
+										textAlign: "center",
+										padding: "2px",
+										fontSize: "12px"
+									},
+									disableAutoPan: true,
+									pixelOffset: new google.maps.Size(0,10),
+									position: this.getPosition(),
+									isHidden: false,
+									closeBoxURL: "",
+									pane: "floatPane",
+									enableEventPropagation: false
+								};
+
+								if(mouseoutTimeout){
+									if(ibLabel) {
+										ibLabel.close();
+									}
+									clearTimeout(mouseoutTimeout);
+									mouseoutTimeout = null;
+								}
+
+								mouseoverTimeout = setTimeout(
+									function(){
+										ibLabel = new InfoBox(myOptions);
+										ibLabel.open(map);
+									},1000
+								);
+							});
+
+							m.addListener('mouseout', function() {
+								if(mouseoverTimeout){
+									clearTimeout(mouseoverTimeout);
+									mouseoverTimeout = null;
+								}
+								mouseoutTimeout = setTimeout(
+									function(){
+										if(ibLabel){
+											ibLabel.close();
+										}
+									},3000
+								);
+							});
+
+							oms.addMarker(m);
+							var markerPos = m.getPosition();
 							pointBounds.extend(markerPos);
 							if (grpArr[fndGrpCnt]) {
 								var tempArr = grpArr[fndGrpCnt];
@@ -566,7 +648,8 @@ if(!array_key_exists("pointlat",$_REQUEST)) $_REQUEST["pointlat"] = '';
 							else {
 								var tempArr = [];
 							}
-							tempArr.push(markerArr[occ]);
+							tempArr.push(m);
+							markerArr[occ] = m;
 							grpArr[fndGrpCnt] = tempArr;
 						}
 						occArr.push(occ);
@@ -596,43 +679,6 @@ if(!array_key_exists("pointlat",$_REQUEST)) $_REQUEST["pointlat"] = '';
 
 				grpCnt++;
 			}
-		}
-
-		function getMarker(newLat, newLng, newTitle, color, newIcon, type, tid, occid, clid){
-			var m = new google.maps.Marker({
-				position: new google.maps.LatLng(newLat, newLng),
-				text: newTitle,
-				<?php
-				if($clusterOff=="y"){
-					?>
-					map: map,
-					<?php
-				}
-				?>
-				icon: newIcon,
-				selected: false,
-				color: color,
-				customInfo: type,
-				taxatid: tid,
-				occid: occid,
-				clid: clid
-			});
-			return m;
-		}
-
-		function afterEffects(){
-			setPanels(true);
-			$("#accordion").accordion("option",{active: 1});
-			buildCollKey();
-			buildTaxaKey();
-			jscolor.init();
-			if(pointBounds){
-				map.fitBounds(pointBounds);
-				map.panToBounds(pointBounds);
-			}
-			setTimeout(function() {
-				//hideWorking();
-			}, 500);
 		}
 
 		function setPanels(show){
@@ -855,62 +901,6 @@ if(!array_key_exists("pointlat",$_REQUEST)) $_REQUEST["pointlat"] = '';
 			mapSymbol = 'taxa';
 		}
 
-		function addMarkerListners(marker){
-			marker.addListener('mouseover', function() {
-				occid = marker.occid;
-				clid = marker.clid;
-				markerLabel = marker.text;
-				boxPosition = marker.getPosition();
-				boxText = '<div>'+markerLabel+'<br /><a href="#" onclick="closeAllInfoWins();openIndPopup('+occid+','+clid+');return false;"><span style="color:blue;">See Details</span></a></div>';
-				var myOptions = {
-					content: boxText,
-					boxStyle: {
-						border: "1px solid black",
-						background: "#ffffff",
-						textAlign: "center",
-						padding: "2px",
-						fontSize: "12px"
-					},
-					disableAutoPan: true,
-					pixelOffset: new google.maps.Size(0,10),
-					position: boxPosition,
-					isHidden: false,
-					closeBoxURL: "",
-					pane: "floatPane",
-					enableEventPropagation: false
-				};
-
-				if(mouseoutTimeout){
-					if(ibLabel) {
-						ibLabel.close();
-					}
-					clearTimeout(mouseoutTimeout);
-					mouseoutTimeout = null;
-				}
-
-				mouseoverTimeout = setTimeout(
-					function(){
-						ibLabel = new InfoBox(myOptions);
-						ibLabel.open(map);
-					},1000
-				);
-			});
-
-			marker.addListener('mouseout', function() {
-				if(mouseoverTimeout){
-					clearTimeout(mouseoverTimeout);
-					mouseoverTimeout = null;
-				}
-				mouseoutTimeout = setTimeout(
-					function(){
-						if(ibLabel){
-							ibLabel.close();
-						}
-					},3000
-				);
-			});
-		}
-
 		function changeTaxaKey(tid,newColor){
 			if(clusterTaxArr[tid]){
 				clusterTaxArr[tid].clearMarkers();
@@ -1006,6 +996,17 @@ if(!array_key_exists("pointlat",$_REQUEST)) $_REQUEST["pointlat"] = '';
 			document.getElementById("randomColorTaxa").disabled = false;
 		}
 
+		function resetSymbology(){
+			document.getElementById("symbolizeReset1").disabled = true;
+			document.getElementById("symbolizeReset2").disabled = true;
+			clearTaxaSymbology();
+			resetMainSymbology();
+			mapSymbol = 'coll';
+			document.getElementById("symbolizeReset1").disabled = false;
+			document.getElementById("symbolizeReset2").disabled = false;
+		}
+
+		/*
 		function selectPoints(){
 			var selectedpoints = document.getElementById("selectedpoints");
 			selected = false;
@@ -1026,7 +1027,30 @@ if(!array_key_exists("pointlat",$_REQUEST)) $_REQUEST["pointlat"] = '';
 			}
 			adjustSelectionsTab();
 		}
+		*/
 
+		/*
+		function deselectPoints(){
+			deselected = false;
+			var deselectedpoint = Number(deselectedpoints.value);
+			while (deselected == false) {
+				for(var gcnt in grpArr) {
+					findSelection(gcnt,deselectedpoint,'deselect');
+					if(clusterOff=="n"){
+						findGrpClusterSelection(gcnt,deselectedpoint);
+					}
+				}
+				if(clusterOff=="n"){
+					findTaxClusterSelection(deselectedpoint);
+				}
+			}
+			var index = selections.indexOf(deselectedpoint);
+			selections.splice(index, 1);
+			adjustSelectionsTab();
+		}
+		*/
+
+		/*
 		function selectDSPoints(){
 			selected = false;
 			var selectedpoint = Number(selecteddspoints.value);
@@ -1046,26 +1070,9 @@ if(!array_key_exists("pointlat",$_REQUEST)) $_REQUEST["pointlat"] = '';
 				dsselections.push(selectedpoint);
 			}
 		}
+		*/
 
-		function deselectPoints(){
-			deselected = false;
-			var deselectedpoint = Number(deselectedpoints.value);
-			while (deselected == false) {
-				for(var gcnt in grpArr) {
-					findSelection(gcnt,deselectedpoint,'deselect');
-					if(clusterOff=="n"){
-						findGrpClusterSelection(gcnt,deselectedpoint);
-					}
-				}
-				if(clusterOff=="n"){
-					findTaxClusterSelection(deselectedpoint);
-				}
-			}
-			var index = selections.indexOf(deselectedpoint);
-			selections.splice(index, 1);
-			adjustSelectionsTab();
-		}
-
+		/*
 		function deselectDSPoints(){
 			deselected = false;
 			var deselectedpoint = Number(deselecteddspoints.value);
@@ -1084,7 +1091,9 @@ if(!array_key_exists("pointlat",$_REQUEST)) $_REQUEST["pointlat"] = '';
 			var index = dsselections.indexOf(deselectedpoint);
 			dsselections.splice(index, 1);
 		}
+		*/
 
+		/*
 		function zoomToSelections(){
 			var selectZoomBounds = new google.maps.LatLngBounds();
 			for(var gcnt in grpArr) {
@@ -1103,21 +1112,12 @@ if(!array_key_exists("pointlat",$_REQUEST)) $_REQUEST["pointlat"] = '';
 			map.fitBounds(selectZoomBounds);
 			map.panToBounds(selectZoomBounds);
 		}
+		*/
 
-		function resetSymbology(){
-			document.getElementById("symbolizeReset1").disabled = true;
-			document.getElementById("symbolizeReset2").disabled = true;
-			clearTaxaSymbology();
-			resetMainSymbology();
-			mapSymbol = 'coll';
-			document.getElementById("symbolizeReset1").disabled = false;
-			document.getElementById("symbolizeReset2").disabled = false;
-		}
-
-		<?php echo ($GEOLOCATION?"google.maps.event.addDomListener(window, 'load', getCoords);":""); ?>
+		<?php echo ($ACTIVATE_GEOLOCATION?"google.maps.event.addDomListener(window, 'load', getCoords);":""); ?>
 	</script>
 </head>
-<body style='width:100%;max-width:100%;min-width:500px;' <?php echo (!$GEOLOCATION?'onload="initialize();"':''); ?>>
+<body style='width:100%;max-width:100%;min-width:500px;' <?php echo (!$ACTIVATE_GEOLOCATION?'onload="initialize();"':''); ?>>
 <div data-role="page" id="page1">
 	<div role="main" class="ui-content" style="height:400px;">
 		<a href="#defaultpanel" style="position:absolute;top:0;left:0;margin-top:0px;z-index:10;padding-top:3px;padding-bottom:3px;text-decoration:none;" data-role="button" data-inline="true" data-icon="bars">Open Search Panel</a>
@@ -1126,15 +1126,19 @@ if(!array_key_exists("pointlat",$_REQUEST)) $_REQUEST["pointlat"] = '';
 		<div class="panel-content">
 			<div id="mapinterface">
 				<div id="accordion" style="" >
-					<?php //echo "MySQL Version: ".$mysqlVersion; ?>
-					<?php //echo $spatial?"yes":"no"; ?>
-					<?php //echo "Request: ".json_encode($_REQUEST); ?>
-					<?php //echo "mapWhere: ".$mapWhere; ?>
-					<?php //echo "coordArr: ".json_encode($coordArr); ?>
-					<?php //echo "clusteringOff: ".$clusterOff; ?>
-					<?php //echo "coordArr: ".$coordArr; ?>
-					<?php //echo "tIdArr: ".json_encode($tIdArr); ?>
-					<?php //echo "minLat:".$minLat."maxLat:".$maxLat."minLng:".$minLng."maxLng:".$maxLng; ?>
+					<?php
+					/*
+					echo "MySQL Version: ".$mysqlVersion;
+					echo $spatial?"yes":"no";
+					echo "Request: ".json_encode($_REQUEST);
+					echo "mapWhere: ".$mapWhere;
+					echo "coordArr: ".json_encode($coordArr);
+					echo "clusteringOff: ".$clusterOff;
+					echo "coordArr: ".$coordArr;
+					echo "tIdArr: ".json_encode($tIdArr);
+					echo "minLat:".$minLat."maxLat:".$maxLat."minLng:".$minLng."maxLng:".$maxLng;
+					*/
+					?>
 					<h3 style="padding-left:30px;"><?php echo (isset($LANG['SEARCH_CRITERIA'])?$LANG['SEARCH_CRITERIA']:'Search Criteria and Options'); ?></h3>
 					<div id="tabs1" style="width:379px;padding:0px;">
 						<form name="mapsearchform" id="mapsearchform" data-ajax="false" action="index.php" method="post" onsubmit="return verifyCollForm(this);">
