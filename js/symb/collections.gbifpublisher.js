@@ -59,9 +59,7 @@ function createGbifInstallation(gbifOrgKey,collName){
 		type: "SYMBIOTA_INSTALLATION",
 		title: collName
 	});
-
-	alert("Creating new installation");
-	//return callGbifCurl(type,url,data);
+	return callGbifCurl(type,url,data);
 }
 
 function createGbifDataset(gbifInstKey,gbifOrgKey,collName){
@@ -73,9 +71,7 @@ function createGbifDataset(gbifInstKey,gbifOrgKey,collName){
 		title: collName,
 		type: "OCCURRENCE"
 	});
-alert("Creating new dataset");
-	return false;
-	//return callGbifCurl(type,url,data);
+	return callGbifCurl(type,url,data);
 }
 
 function createGbifEndpoint(gbifDatasetKey,dwcUri){
@@ -89,7 +85,6 @@ function createGbifEndpoint(gbifDatasetKey,dwcUri){
 }
 
 function callGbifCurl(type,url,data){
-	return false;
 	var key;
 	$.ajax({
 		type: "POST",
