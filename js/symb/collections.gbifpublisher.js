@@ -125,7 +125,7 @@ function getOrganization(f){
 function datasetExists(f){
 	if(f.dwcUri.value != ""){
 		var urlStr = f.dwcUri.value;
-		if(uri.indexOf("/content/") > 0){
+		if(urlStr.indexOf("/content/") > 0){
 			urlStr = urlStr.substring(0,urlStr.indexOf("/content/"));
 			urlStr = "http://api.gbif.org/v1/dataset?identifier=" + urlStr + "/collections/misc/collprofiles.php?collid=" + f.collid.value;
 			$.ajax({
