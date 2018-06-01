@@ -31,6 +31,7 @@ class OccurrenceMaintenance {
 		set_time_limit(600);
 		$status = true;
 
+		/*
 		if($this->verbose) $this->outputMsg('Updating null families of family rank identifications... ',1);
 		$sql1 = 'SELECT occid FROM omoccurrences WHERE (family IS NULL) AND (sciname LIKE "%aceae" OR sciname LIKE "%idae")';
 		$rs1 = $this->conn->query($sql1);
@@ -51,6 +52,7 @@ class OccurrenceMaintenance {
 			}
 		}
 		unset($occidArr1);
+		*/
 
 		if($this->verbose) $this->outputMsg('Updating null scientific names of family rank identifications... ',1);
 		$sql1 = 'SELECT occid FROM omoccurrences WHERE family IS NOT NULL AND sciname IS NULL';

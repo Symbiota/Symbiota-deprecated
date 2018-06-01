@@ -214,8 +214,8 @@ class SpecUploadFile extends SpecUploadBase{
 				$this->delimiter = "\t";
 			}
 		}
-		//Check to see if file is csv\
-		if(substr($this->ulFileName,-4) == ".csv" || strpos($headerData,$this->delimiter.'"') !== false){
+		//Check to see if file is csv
+		if(substr(strtolower($this->ulFileName),-4) == ".csv" || strpos($headerData,$this->delimiter.'"') !== false){
 			$this->isCsv = true;
 		}
 		//Grab header terms
