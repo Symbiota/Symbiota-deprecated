@@ -1628,7 +1628,10 @@ class DwcArchiverCore extends Manager{
 				//$typeArr = array('Other material', 'Holotype', 'Paratype', 'Hapantotype', 'Syntype', 'Isotype', 'Neotype', 'Lectotype', 'Paralectotype', 'Isoparatype', 'Isolectotype', 'Isoneotype', 'Isosyntype');
 			}
 			$statsManager = new OccurrenceAccessStats();
+			$previousOccid = 0;
 			while($r = $rs->fetch_assoc()){
+				if($previousOccid == $r['occid']) continue;
+				$previousOccid = $r['occid'];
 				//Set occurrence GUID based on GUID target
 				$guidTarget = $this->collArr[$r['collid']]['guidtarget'];
 				if($guidTarget == 'catalogNumber'){
@@ -1769,12 +1772,18 @@ class DwcArchiverCore extends Manager{
 			$this->determinationFieldArr = DwcArchiverDetermination::getDeterminationArr($this->schemaType,$this->extended);
 		}
 		//Output header
-		$this->writeOutRecord($fh,array_keys($this->determinationFieldArr['fields']));
+		$headerArr = array_keys($this->determinationFieldArr['fields']);
+		array_pop($headerArr);
+		$this->writeOutRecord($fh,$headerArr);
 
 		//Output records
 		$sql = DwcArchiverDetermination::getSqlDeterminations($this->determinationFieldArr['fields'],$this->conditionSql);
 		if($rs = $this->conn->query($sql,MYSQLI_USE_RESULT)){
+			$previousDetID = 0;
 			while($r = $rs->fetch_assoc()){
+				if($previousDetID == $r['detid']) continue;
+				$previousDetID = $r['detid'];
+				unset($r['detid']);
 				$r['recordId'] = 'urn:uuid:'.$r['recordId'];
 				$this->encodeArr($r);
 				$this->addcslashesArr($r);
@@ -1803,7 +1812,9 @@ class DwcArchiverCore extends Manager{
 		if(!$this->imageFieldArr) $this->imageFieldArr = DwcArchiverImage::getImageArr($this->schemaType);
 
 		//Output header
-		$this->writeOutRecord($fh,array_keys($this->imageFieldArr['fields']));
+		$headerArr = array_keys($this->imageFieldArr['fields']);
+		array_pop($headerArr);
+		$this->writeOutRecord($fh,$headerArr);
 
 		//Output records
 		$sql = DwcArchiverImage::getSqlImages($this->imageFieldArr['fields'], $this->conditionSql, $this->redactLocalities, $this->rareReaderArr);
@@ -1819,8 +1830,11 @@ class DwcArchiverCore extends Manager{
 			else{
 				$localDomain = $this->serverDomain;
 			}
-
+			$previousImgID = 0;
 			while($r = $rs->fetch_assoc()){
+				if($previousImgID == $r['imgid']) continue;
+				$previousImgID = $r['imgid'];
+				unset($r['imgid']);
 				if(substr($r['identifier'],0,1) == '/') $r['identifier'] = $localDomain.$r['identifier'];
 				if(substr($r['accessURI'],0,1) == '/') $r['accessURI'] = $localDomain.$r['accessURI'];
 				if(substr($r['thumbnailAccessURI'],0,1) == '/') $r['thumbnailAccessURI'] = $localDomain.$r['thumbnailAccessURI'];

@@ -35,6 +35,8 @@ class DwcArchiverDetermination{
 		$fieldArr['recordId'] = 'g.guid AS recordId';
 		$termArr['modified'] = 'http://purl.org/dc/terms/modified';
 		$fieldArr['modified'] = 'd.initialTimeStamp AS modified';
+		$termArr['detid'] = 'http://symbiota.org/terms/detid';
+		$fieldArr['detid'] = 'd.detid';
 
 		$retArr['terms'] = self::trimBySchemaType($termArr,$schemaType,$extended);
 		$retArr['fields'] = self::trimBySchemaType($fieldArr,$schemaType,$extended);
