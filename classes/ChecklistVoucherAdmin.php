@@ -300,7 +300,7 @@ class ChecklistVoucherAdmin {
 					'IFNULL(CONCAT(c.institutioncode,"-",c.collectioncode,"-",o.catalognumber),"[no catalog number]") AS collcode, '.
 					'o.tidinterpreted, o.sciname, o.recordedby, o.recordnumber, o.eventdate, '.
 					'CONCAT_WS("; ",o.country, o.stateprovince, o.county, o.locality) as locality '.
-					'FROM omoccurrences o INNER JOIN omcollections c ON o.collid = c.collid '.
+					'FROM omoccurrences o LEFT JOIN omcollections c ON o.collid = c.collid '.
 					'INNER JOIN taxstatus ts ON o.tidinterpreted = ts.tid '.
 					'INNER JOIN fmchklsttaxalink cl ON ts.tidaccepted = cl.tid '.
 					'INNER JOIN taxa t ON cl.tid = t.tid ';

@@ -1826,6 +1826,8 @@ class DwcArchiverCore extends Manager{
 				if(substr($r['thumbnailAccessURI'],0,1) == '/') $r['thumbnailAccessURI'] = $localDomain.$r['thumbnailAccessURI'];
 				if(substr($r['goodQualityAccessURI'],0,1) == '/') $r['goodQualityAccessURI'] = $localDomain.$r['goodQualityAccessURI'];
 
+				if($r['goodQualityAccessURI'] == 'empty' || substr($r['goodQualityAccessURI'],0,10) == 'processing') $r['goodQualityAccessURI'] = '';
+				if(substr($r['thumbnailAccessURI'],0,10) == 'processing') $r['thumbnailAccessURI'] = '';
 				if($this->schemaType != 'backup'){
 					if(stripos($r['rights'],'http://creativecommons.org') === 0){
 						$r['webstatement'] = $r['rights'];
