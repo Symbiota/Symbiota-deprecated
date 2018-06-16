@@ -695,7 +695,7 @@ class OccurrenceCleaner extends Manager{
 			'WHERE (collid IN('.$this->collid.')) AND (decimallatitude IS NOT NULL) AND (decimallongitude IS NOT NULL) AND (country = "'.$queryCountry.'") '.
 			'AND (occid NOT IN(SELECT occid FROM omoccurverification WHERE category = "coordinate")) '.
 			'ORDER BY decimallatitude, decimallongitude '.
-			'LIMIT 1000';
+			'LIMIT 10000';
 		//echo $sql; exit;
 		$rs = $this->conn->query($sql);
 		$previousCoordStr = '';
