@@ -694,9 +694,10 @@ class OccurrenceCleaner extends Manager{
 			'FROM omoccurrences '.
 			'WHERE (collid IN('.$this->collid.')) AND (decimallatitude IS NOT NULL) AND (decimallongitude IS NOT NULL) AND (country = "'.$queryCountry.'") '.
 			'AND (occid NOT IN(SELECT occid FROM omoccurverification WHERE category = "coordinate")) '.
-			'ORDER BY decimallatitude, decimallongitude';
+			'ORDER BY decimallatitude, decimallongitude '.
+			'LIMIT 1000';
 		//echo $sql; exit;
-		$rs = $this->conn->query($sql,MYSQLI_USE_RESULT);
+		$rs = $this->conn->query($sql);
 		$previousCoordStr = '';
 		while($r = $rs->fetch_object()){
 			echo '<li>Checking occurrence <a href="../editor/occurrenceeditor.php?occid='.$r->occid.'" target="_blank">'.$r->occid.'</a>...</li>';
