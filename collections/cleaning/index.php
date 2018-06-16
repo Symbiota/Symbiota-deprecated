@@ -12,7 +12,7 @@ if(!is_numeric($collid)) $collid = 0;
 
 $cleanManager = new OccurrenceCleaner();
 if($collid) $cleanManager->setCollId($collid);
-$collMap = $cleanManager->getCollMap();
+$collMap = current($cleanManager->getCollMap());
 
 $isEditor = 0;
 if($IS_ADMIN || (array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collid,$USER_RIGHTS["CollAdmin"])) || ($collMap['colltype'] == 'General Observations')){
@@ -110,7 +110,7 @@ if($collMap['colltype'] == 'General Observations'){
 					</ul>
 				</fieldset>
 			</div>
-
+<!--
 			<h3>Specimen Coordinates</h3>
 			<div style="margin:0px 0px 40px 15px;">
 				<div>
@@ -175,7 +175,7 @@ if($collMap['colltype'] == 'General Observations'){
 					</ul>
 				</fieldset>
 			</div>
-
+ -->
 			<h3>Taxonomy</h3>
 			<div style="margin:0px 0px 40px 15px;">
 				<div>

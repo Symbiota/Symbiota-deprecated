@@ -36,6 +36,7 @@ $LANG['USERPERM'] = 'Derechos de usuarios';
 $LANG['TAXINTER'] = 'Derechos de usuarios con inter&eacute;s taxon&oacute;mico';
 $LANG['TAXONOMIC_CLEANER'] = 'Limpiador global de taxonom&iacute;a';
 $LANG['CREATENEWCOLL'] = 'Crear nuevo perfil de colecci&oacute;n o observaci&oacute;n';
+$LANG['COORDVALIDATOR'] = 'Verificar las coordenadas contra los l&iacute;mites pol&iacute;ticos';
 $LANG['GUIDMAP'] = 'Mapeador de GUID para colecciones';
 $LANG['THUMBNAIL_BUILDER'] = 'Creador de miniaturas de im&aacute;genes';
 $LANG['SALIX'] = 'Gestor de SALIX WordStat';

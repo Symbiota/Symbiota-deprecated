@@ -20,7 +20,7 @@ if($action && !preg_match('/^[a-zA-Z\s]+$/',$action)) $action = '';
 
 $cleanManager = new OccurrenceCleaner();
 if($collid) $cleanManager->setCollId($collid);
-$collMap = $cleanManager->getCollMap();
+$collMap = current($cleanManager->getCollMap());
 
 $statusStr = '';
 $isEditor = 0;

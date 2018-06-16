@@ -630,7 +630,7 @@ class OccurrenceCleaner extends Manager{
 		//Get count georeferenced
 		$sql = 'SELECT count(*) AS cnt '.
 			'FROM omoccurrences '.
-			'WHERE (collid = '.$this->collid.') AND (decimallatitude IS NOT NULL) AND (decimallongitude IS NOT NULL)';
+			'WHERE (collid IN('.$this->collid.')) AND (decimallatitude IS NOT NULL) AND (decimallongitude IS NOT NULL)';
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
 			$retArr['coord'] = $r->cnt;
@@ -640,7 +640,7 @@ class OccurrenceCleaner extends Manager{
 		//Get count not georeferenced
 		$sql = 'SELECT count(*) AS cnt '.
 			'FROM omoccurrences '.
-			'WHERE (collid = '.$this->collid.') AND (decimallatitude IS NULL) AND (decimallongitude IS NULL)';
+			'WHERE (collid IN('.$this->collid.')) AND (decimallatitude IS NULL) AND (decimallongitude IS NULL)';
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
 			$retArr['noCoord'] = $r->cnt;
@@ -650,7 +650,7 @@ class OccurrenceCleaner extends Manager{
 		//Count not georeferenced with verbatimCoordinates info
 		$sql = 'SELECT count(*) AS cnt '.
 			'FROM omoccurrences '.
-			'WHERE (collid = '.$this->collid.') AND (decimallatitude IS NULL) AND (decimallongitude IS NULL) AND (verbatimcoordinates IS NOT NULL)';
+			'WHERE (collid IN('.$this->collid.')) AND (decimallatitude IS NULL) AND (decimallongitude IS NULL) AND (verbatimcoordinates IS NOT NULL)';
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
 			$retArr['noCoord_verbatim'] = $r->cnt;
@@ -659,8 +659,8 @@ class OccurrenceCleaner extends Manager{
 
 		//Count not georeferenced without verbatimCoordinates info
 		$sql = 'SELECT count(*) AS cnt '.
-				'FROM omoccurrences '.
-				'WHERE (collid = '.$this->collid.') AND (decimallatitude IS NULL) AND (decimallongitude IS NULL) AND (verbatimcoordinates IS NULL)';
+			'FROM omoccurrences '.
+			'WHERE (collid IN('.$this->collid.')) AND (decimallatitude IS NULL) AND (decimallongitude IS NULL) AND (verbatimcoordinates IS NULL)';
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
 			$retArr['noCoord_noVerbatim'] = $r->cnt;
@@ -673,7 +673,7 @@ class OccurrenceCleaner extends Manager{
 		$retArr = array();
 		$sql = 'SELECT country, count(occid) AS cnt '.
 			'FROM omoccurrences '.
-			'WHERE (collid = '.$this->collid.') AND (decimallatitude IS NOT NULL) AND (decimallongitude IS NOT NULL) AND country IS NOT NULL '.
+			'WHERE (collid IN('.$this->collid.')) AND (decimallatitude IS NOT NULL) AND (decimallongitude IS NOT NULL) AND country IS NOT NULL '.
 			'AND (occid NOT IN(SELECT occid FROM omoccurverification WHERE category = "coordinate")) '.
 			'GROUP BY country';
 		$rs = $this->conn->query($sql);
@@ -685,17 +685,27 @@ class OccurrenceCleaner extends Manager{
 	}
 
 	public function verifyCoordAgainstPolitical($queryCountry){
+		set_time_limit(3600);
+		$recCnt = 0;
+		$googleCallCnt = 0;
 		echo '<ul>';
 		echo '<li>Starting coordinate crawl...</li>';
 		$sql = 'SELECT occid, country, stateprovince, county, decimallatitude, decimallongitude '.
 			'FROM omoccurrences '.
-			'WHERE (collid = '.$this->collid.') AND (decimallatitude IS NOT NULL) AND (decimallongitude IS NOT NULL) AND (country = "'.$queryCountry.'") '.
+			'WHERE (collid IN('.$this->collid.')) AND (decimallatitude IS NOT NULL) AND (decimallongitude IS NOT NULL) AND (country = "'.$queryCountry.'") '.
 			'AND (occid NOT IN(SELECT occid FROM omoccurverification WHERE category = "coordinate")) '.
-			'LIMIT 500';
-		$rs = $this->conn->query($sql);
+			'ORDER BY decimallatitude, decimallongitude';
+		//echo $sql; exit;
+		$rs = $this->conn->query($sql,MYSQLI_USE_RESULT);
+		$previousCoordStr = '';
 		while($r = $rs->fetch_object()){
 			echo '<li>Checking occurrence <a href="../editor/occurrenceeditor.php?occid='.$r->occid.'" target="_blank">'.$r->occid.'</a>...</li>';
-			$googleUnits = $this->callGoogleApi($r->decimallatitude, $r->decimallongitude);
+			$recCnt++;
+			if($previousCoordStr != $r->decimallatitude.','.$r->decimallongitude){
+				$googleUnits = $this->callGoogleApi($r->decimallatitude, $r->decimallongitude);
+				$googleCallCnt++;
+				$previousCoordStr = $r->decimallatitude.','.$r->decimallongitude;
+			}
 			$ranking = 0;
 			$protocolStr = '';
 			if(isset($googleUnits['country'])){
@@ -741,6 +751,7 @@ class OccurrenceCleaner extends Manager{
 			else{
 				echo '<li style="margin-left:15px;">Unable to set verification status</li>';
 			}
+			if($recCnt%100 == 0) echo '<div><b>Processing count: '.$recCnt.' (Google calls '.$googleCallCnt.')</b></div>';
 			flush();
 			ob_flush();
 		}
@@ -803,8 +814,7 @@ class OccurrenceCleaner extends Manager{
 		$countryGoogle = strtolower(trim($countryGoogle));
 		$countryDb = strtolower(trim($countryDb));
 
-		$synonymArr = array();
-		$synonymArr[] = array('united states','usa','united states of america','u.s.a.');
+		$synonymArr = array(array('united states','usa','united states of america','u.s.a.'));
 
 		foreach($synonymArr as $synArr){
 			if(in_array($countryGoogle, $synArr)){
@@ -842,7 +852,7 @@ class OccurrenceCleaner extends Manager{
 		$retArr = array();
 		$sql = 'SELECT DISTINCT v.category '.
 			'FROM omoccurverification v INNER JOIN omoccurrences o ON v.occid = o.occid '.
-			'WHERE (o.collid = '.$this->collid.')';
+			'WHERE (o.collid IN('.$this->collid.'))';
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
 			$retArr[] = $r->category;
@@ -855,10 +865,10 @@ class OccurrenceCleaner extends Manager{
 	public function getRankingStats($category){
 		$retArr = array();
 		$category = $this->cleanInStr($category);
-		$sql = 'SELECT v.category, v.ranking, v.protocol, COUNT(v.occid) as cnt '.
+		$sql = 'SELECT o.collid, v.category, v.ranking, v.protocol, COUNT(v.occid) as cnt '.
 			'FROM omoccurverification v INNER JOIN omoccurrences o ON v.occid = o.occid '.
-			'WHERE (o.collid = '.$this->collid.') AND v.category = "'.$category.'" '.
-			'GROUP BY v.category, v.ranking, v.protocol';
+			'WHERE (o.collid IN('.$this->collid.')) AND v.category = "'.$category.'" '.
+			'GROUP BY o.collid, v.category, v.ranking, v.protocol';
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
 			$retArr[$r->category][$r->ranking][$r->protocol] = $r->cnt;
@@ -868,7 +878,7 @@ class OccurrenceCleaner extends Manager{
 			//Get unranked count
 			$sql = 'SELECT COUNT(occid) AS cnt '.
 				'FROM omoccurrences '.
-				'WHERE (collid = '.$this->collid.') AND (decimallatitude IS NOT NULL) AND (occid NOT IN(SELECT occid FROM omoccurverification WHERE category = "'.$category.'"))';
+				'WHERE (collid IN('.$this->collid.')) AND (decimallatitude IS NOT NULL) AND (occid NOT IN(SELECT occid FROM omoccurverification WHERE category = "'.$category.'"))';
 			$rs = $this->conn->query($sql);
 			if($r = $rs->fetch_object()){
 				$retArr[$category]['unverified'][''] = $r->cnt;
@@ -883,7 +893,7 @@ class OccurrenceCleaner extends Manager{
 		if(is_numeric($ceilingRank) && is_numeric($floorRank)){
 			$sql = 'SELECT v.ovsid, v.occid, v.category, v.ranking, v.protocol, v.source, v.uid, v.notes, v.initialtimestamp '.
 				'FROM omoccurverification v INNER JOIN omoccurrences o ON v.occid = o.occid '.
-				'WHERE (o.collid = '.$this->collid.') AND (v.category = "'.$this->cleanInStr($category).'") '.
+				'WHERE (o.collid IN('.$this->collid.')) AND (v.category = "'.$this->cleanInStr($category).'") '.
 				'AND (v.ranking BETWEEN '.$floorRank.' AND '.$ceilingRank.')';
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
@@ -900,7 +910,7 @@ class OccurrenceCleaner extends Manager{
 			$sql = 'SELECT DISTINCT v.occid, l.username, v.initialtimestamp '.
 				'FROM omoccurverification v INNER JOIN omoccurrences o ON v.occid = o.occid '.
 				'INNER JOIN userlogin l ON v.uid = l.uid '.
-				'WHERE (o.collid = '.$this->collid.') AND (v.category = "'.$this->cleanInStr($category).'") AND (ranking = '.$ranking.')';
+				'WHERE (o.collid IN('.$this->collid.')) AND (v.category = "'.$this->cleanInStr($category).'") AND (ranking = '.$ranking.')';
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
 				$retArr[$r->occid]['username'] = $r->username;
@@ -913,7 +923,7 @@ class OccurrenceCleaner extends Manager{
 
 	public function getRankList(){
 		$retArr = array();
-		$sql = 'SELECT DISTINCT v.ranking FROM omoccurverification v INNER JOIN omoccurrences o ON v.occid = o.occid WHERE (o.collid = '.$this->collid.')';
+		$sql = 'SELECT DISTINCT v.ranking FROM omoccurverification v INNER JOIN omoccurrences o ON v.occid = o.occid WHERE (o.collid IN('.$this->collid.'))';
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
 			$retArr[] = $r->ranking;
@@ -953,7 +963,7 @@ class OccurrenceCleaner extends Manager{
 
 	//Setters and getters
 	public function setCollId($collid){
-		if(is_numeric($collid)){
+		if(preg_match('/^[\d,]+$/', $collid)){
 			$this->collid = $collid;
 		}
 	}
@@ -971,22 +981,19 @@ class OccurrenceCleaner extends Manager{
 	//Misc fucntions
 	public function getCollMap(){
 		$retArr = Array();
-		if($this->collid){
-			$sql = 'SELECT CONCAT_WS("-",c.institutioncode, c.collectioncode) AS code, c.collectionname, '.
-				'c.icon, c.colltype, c.managementtype '.
-				'FROM omcollections c '.
-				'WHERE (c.collid = '.$this->collid.') ';
-			//echo $sql;
-			$rs = $this->conn->query($sql);
-			while($row = $rs->fetch_object()){
-				$retArr['code'] = $row->code;
-				$retArr['collectionname'] = $row->collectionname;
-				$retArr['icon'] = $row->icon;
-				$retArr['colltype'] = $row->colltype;
-				$retArr['managementtype'] = $row->managementtype;
-			}
-			$rs->free();
+		$sql = 'SELECT collid, CONCAT_WS("-",institutioncode, collectioncode) AS code, collectionname, icon, colltype, managementtype FROM omcollections ';
+		if($this->collid) $sql .= 'WHERE (collid IN('.$this->collid.')) ';
+		$sql .= 'ORDER BY collectionname,institutioncode,collectioncode';
+		//echo $sql;
+		$rs = $this->conn->query($sql);
+		while($row = $rs->fetch_object()){
+			$retArr[$row->collid]['code'] = $row->code;
+			$retArr[$row->collid]['collectionname'] = $row->collectionname;
+			$retArr[$row->collid]['icon'] = $row->icon;
+			$retArr[$row->collid]['colltype'] = $row->colltype;
+			$retArr[$row->collid]['managementtype'] = $row->managementtype;
 		}
+		$rs->free();
 		return $retArr;
 	}
 }

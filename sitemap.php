@@ -92,12 +92,12 @@ $smManager = new SiteMapManager();
 			<ul>
 				<li>
 					<a href="checklists/dynamicmap.php?interface=checklist">
-                        <?php echo $LANG['CHECKLIST'];?>
+						<?php echo $LANG['CHECKLIST'];?>
 					</a> - <?php echo $LANG['BUILDCHECK'];?>
 				</li>
 				<li>
 					<a href="checklists/dynamicmap.php?interface=key">
-                        <?php echo $LANG['DYNAMICKEY'];?>
+						<?php echo $LANG['DYNAMICKEY'];?>
 					</a> - <?php echo $LANG['BUILDDKEY'];?>
 				</li>
 			</ul>
@@ -118,22 +118,27 @@ $smManager = new SiteMapManager();
 							</li>
 							<li>
 								<a href="<?php echo $CLIENT_ROOT; ?>/collections/misc/collmetadata.php">
-                                    <?php echo $LANG['CREATENEWCOLL'];?>
+									<?php echo $LANG['CREATENEWCOLL'];?>
+								</a>
+							</li>
+							<li>
+								<a href="<?php echo $CLIENT_ROOT; ?>/collections/cleaning/coordinatevalidator.php">
+									<?php echo isset($LANG['COORDVALIDATOR'])?$LANG['COORDVALIDATOR']:'Verify coordinates against political boundaries';?>
 								</a>
 							</li>
 							<li>
 								<a href="<?php echo $CLIENT_ROOT; ?>/imagelib/admin/thumbnailbuilder.php">
-                                    <?php echo $LANG['THUMBNAIL_BUILDER'];?>
+									<?php echo $LANG['THUMBNAIL_BUILDER'];?>
 								</a>
 							</li>
 							<li>
 								<a href="<?php echo $CLIENT_ROOT; ?>/collections/admin/guidmapper.php">
-                                    <?php echo $LANG['GUIDMAP'];?>
+									<?php echo $LANG['GUIDMAP'];?>
 								</a>
 							</li>
 							<li>
 								<a href="<?php echo $CLIENT_ROOT; ?>/collections/specprocessor/salix/salixhandler.php">
-                                    <?php echo $LANG['SALIX'];?>
+									<?php echo $LANG['SALIX'];?>
 								</a>
 							</li>
 						</ul>
@@ -147,7 +152,7 @@ $smManager = new SiteMapManager();
 						if(!$KEY_MOD_IS_ACTIVE && array_key_exists("KeyAdmin",$USER_RIGHTS)){
 							?>
 							<div style="color:red;margin-left:10px;">
-                                <?php echo $LANG['KEYMODULE'];?>
+								<?php echo $LANG['KEYMODULE'];?>
 							</div>
 							<?php
 						}
@@ -157,20 +162,20 @@ $smManager = new SiteMapManager();
 							if($IS_ADMIN || array_key_exists("KeyAdmin",$USER_RIGHTS)){
 								?>
 								<li>
-                                    <?php echo $LANG['AUTHOKEY'];?> <a href="<?php echo $CLIENT_ROOT; ?>/ident/admin/index.php"><?php echo $LANG['CHARASTATES'];?></a>
+									<?php echo $LANG['AUTHOKEY'];?> <a href="<?php echo $CLIENT_ROOT; ?>/ident/admin/index.php"><?php echo $LANG['CHARASTATES'];?></a>
 								</li>
 								<?php
 							}
 							if($IS_ADMIN || array_key_exists("KeyEditor",$USER_RIGHTS) || array_key_exists("KeyAdmin",$USER_RIGHTS)){
 								?>
 								<li>
-                                    <?php echo $LANG['AUTHIDKEY'];?>
+									<?php echo $LANG['AUTHIDKEY'];?>
 								</li>
 								<li>
-                                    <?php
+									<?php
 									//Show Checklists that user has explicit editing rights
 									if($clAdmin){
-	                                    echo $LANG['CODINGCHARA'].'<br/>';
+										echo $LANG['CODINGCHARA'].'<br/>';
 										echo '<ul>';
 										foreach($clAdmin as $vClid => $name){
 											echo "<li><a href='".$CLIENT_ROOT."/ident/tools/massupdate.php?clid=".$vClid."'>".$name."</a></li>";
@@ -193,9 +198,9 @@ $smManager = new SiteMapManager();
 					?>
 					<h3><?php echo $LANG['IMAGES'];?></h3>
 					<div style="margin:10px;">
-                        <?php echo $LANG['SEESYMBDOC'];?>
+						<?php echo $LANG['SEESYMBDOC'];?>
 						<a href="http://symbiota.org/docs/image-submission-2/"><?php echo $LANG['IMGSUB'];?></a>
-                        <?php echo $LANG['FORANOVERVIEW'];?>
+						<?php echo $LANG['FORANOVERVIEW'];?>
 					</div>
 					<ul>
 						<?php
@@ -203,7 +208,7 @@ $smManager = new SiteMapManager();
 							?>
 							<li>
 								<a href="taxa/profile/tpeditor.php?tabindex=1" target="_blank">
-                                    <?php echo $LANG['BASICFIELD'];?>
+									<?php echo $LANG['BASICFIELD'];?>
 								</a>
 							</li>
 							<?php
@@ -212,7 +217,7 @@ $smManager = new SiteMapManager();
 							?>
 							<li>
 								<a href="collections/editor/observationsubmit.php">
-	                                <?php echo $LANG['IMGOBSER'];?>
+									<?php echo $LANG['IMGOBSER'];?>
 								</a>
 							</li>
 							<?php
@@ -248,7 +253,7 @@ $smManager = new SiteMapManager();
 					if($IS_ADMIN || array_key_exists("TaxonProfile",$USER_RIGHTS)){
 						?>
 						<div style="margin:10px;">
-                            <?php echo $LANG['THEFOLLOWINGSPEC'];?>
+							<?php echo $LANG['THEFOLLOWINGSPEC'];?>
 						</div>
 						<ul>
 							<li><a href="taxa/profile/tpeditor.php?taxon="><?php echo $LANG['SYN_COM'];?></a></li>
@@ -290,7 +295,7 @@ $smManager = new SiteMapManager();
 
 					<h3><?php echo $LANG['CHECKLISTS'];?></h3>
 					<div style="margin:10px;">
-                        <?php echo $LANG['TOOLSFORMANAGE'];?>.
+						<?php echo $LANG['TOOLSFORMANAGE'];?>.
 					</div>
 					<ul>
 						<?php
@@ -310,7 +315,7 @@ $smManager = new SiteMapManager();
 						?>
 						<h3><?php echo $LANG['EXSICCATII'];?></h3>
 						<div style="margin:10px;">
-                            <?php echo $LANG['ESCMOD'];?>.
+							<?php echo $LANG['ESCMOD'];?>.
 						</div>
 						<ul>
 							<li><a href="collections/exsiccati/index.php"><?php echo $LANG['EXSICC'];?></a></li>
@@ -321,11 +326,11 @@ $smManager = new SiteMapManager();
 
 					<h3><?php echo $LANG['COLLECTIONS'];?></h3>
 					<div style="margin:10px;">
-                        <?php echo $LANG['PARA1'];?>
+						<?php echo $LANG['PARA1'];?>
 					</div>
 					<div style="margin:10px;">
 						<div style="font-weight:bold;">
-                            <?php echo $LANG['COLLLIST'];?>
+							<?php echo $LANG['COLLLIST'];?>
 						</div>
 						<ul>
 						<?php
@@ -348,7 +353,7 @@ $smManager = new SiteMapManager();
 
 					<h3><?php echo $LANG['OBSERV'];?></h3>
 					<div style="margin:10px;">
-                        <?php echo $LANG['PARA2'];?>
+						<?php echo $LANG['PARA2'];?>
 						<a href="http://symbiota.org/docs/specimen-data-management/" target="_blank"><?php echo $LANG['SYMBDOCU'];?></a> <?php echo $LANG['FORMOREINFO'];?>.
 					</div>
 					<div style="margin:10px;">
@@ -358,7 +363,7 @@ $smManager = new SiteMapManager();
 						$obsManagementStr = '';
 						?>
 						<div style="font-weight:bold;">
-                            <?php echo $LANG['OIVS'];?>
+							<?php echo $LANG['OIVS'];?>
 						</div>
 						<ul>
 							<?php
@@ -393,7 +398,7 @@ $smManager = new SiteMapManager();
 						if($genObsList){
 							?>
 							<div style="font-weight:bold;">
-                                <?php echo $LANG['PERSONAL'];?>
+								<?php echo $LANG['PERSONAL'];?>
 							</div>
 							<ul>
 								<?php
@@ -413,7 +418,7 @@ $smManager = new SiteMapManager();
 						if($obsManagementStr){
 							?>
 							<div style="font-weight:bold;">
-                                <?php echo $LANG['OPM'];?>
+								<?php echo $LANG['OPM'];?>
 							</div>
 							<ul>
 								<?php echo $obsManagementStr; ?>
@@ -433,7 +438,7 @@ $smManager = new SiteMapManager();
 			<h2><?php echo $LANG['ABOUT'];?></h2>
 			<ul>
 				<li>
-                    <?php echo $LANG['SCHEMA'].' '.$smManager->getSchemaVersion(); ?>
+					<?php echo $LANG['SCHEMA'].' '.$smManager->getSchemaVersion(); ?>
 				</li>
 			</ul>
 		</div>

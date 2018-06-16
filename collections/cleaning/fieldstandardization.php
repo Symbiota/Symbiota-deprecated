@@ -1,5 +1,5 @@
 <?php
-include_once('../../config/symbini.php'); 
+include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceCleaner.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 
@@ -17,10 +17,10 @@ if($action && !preg_match('/^[a-zA-Z0-9\s_]+$/',$action)) $action = '';
 
 $cleanManager = new OccurrenceCleaner();
 if($collid) $cleanManager->setCollId($collid);
-$collMap = $cleanManager->getCollMap();
+$collMap = current($cleanManager->getCollMap());
 
 $statusStr = '';
-$isEditor = 0; 
+$isEditor = 0;
 if($IS_ADMIN || (array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collid,$USER_RIGHTS["CollAdmin"]))
 	|| ($collMap['colltype'] == 'General Observations')){
 	$isEditor = 1;
@@ -40,11 +40,11 @@ if($collMap['colltype'] == 'General Observations' && $obsUid !== 0){
 	<link href="../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
     <link href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 	<script type="text/javascript">
-	
+
 	</script>
 </head>
 <body>
-	<?php 	
+	<?php
 	$displayLeftMenu = false;
 	if(!$dupArr) include($SERVER_ROOT.'/header.php');
 	?>
@@ -64,17 +64,17 @@ if($collMap['colltype'] == 'General Observations' && $obsUid !== 0){
 				<?php echo $statusStr; ?>
 			</div>
 			<hr/>
-			<?php 
-		} 
+			<?php
+		}
 		echo '<h2>'.$collMap['collectionname'].' ('.$collMap['code'].')</h2>';
 		if($isEditor){
 			?>
 			<div>
 				Description...
 			</div>
-			<?php 
+			<?php
 			if($action){
-				
+
 			}
 			?>
 			<fieldset style="padding:20px;">
@@ -83,37 +83,37 @@ if($collMap['colltype'] == 'General Observations' && $obsUid !== 0){
 					<select name="country_old">
 						<option value="">Select Target Field</option>
 						<option value="">--------------------------------</option>
-						<?php 
-						
-						
-						
-						
+						<?php
+
+
+
+
 						?>
 					</select>
 					<select name="country_old">
 						<option value="">Select Target Value</option>
 						<option value="">--------------------------------</option>
-						<?php 
-						
-						
-						
-						
+						<?php
+
+
+
+
 						?>
 					</select>
 				</div>
 				<div style="margin:5px">
-					<b>Replacement Value:</b> 
-					<input name="country_new" type="text" value="" /> 
+					<b>Replacement Value:</b>
+					<input name="country_new" type="text" value="" />
 				</div>
 			</fieldset>
-			<?php 
+			<?php
 		}
 		else{
 			echo '<h2>You are not authorized to access this page</h2>';
 		}
 		?>
 	</div>
-<?php 	
+<?php
 if(!$dupArr){
 	include($SERVER_ROOT.'/footer.php');
 }
