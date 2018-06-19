@@ -4,11 +4,12 @@ $(document).ready(function() {
         scrolllock: true
     });
 });
-var loadingComplete = true;
-var lazyLoadCnt = 200;
+var pdfDocGenerator = '';
+var lazyLoadCnt = 100;
 var loadIndex = 0;
+var zipIndex = 1;
 var procIndex = 0;
-var lastLoad = 0;
+var processed = 0;
 var dataArr = [];
 var imagesExist = false;
 var tempImgArr = [];
@@ -52,20 +53,45 @@ function openFieldGuideExporter(){
 function prepareFieldGuideExport(taxCnt){
     showWorking();
     processSettings();
-    var processed = 0;
-    lastLoad = Math.ceil(taxCnt/lazyLoadCnt);
-    pdfFileTot = Math.ceil(taxCnt/100);
+    zipIndex = document.getElementById("zipindex").value;
+    if(taxCnt > 300){
+        if(zipIndex > 1){
+            taxCnt = taxCnt - ((zipIndex - 1) * 300);
+            loadIndex = ((zipIndex - 1) * 3);
+        }
+        else{
+            taxCnt = 300;
+        }
+    }
+    pdfFileTot = Math.ceil(taxCnt/lazyLoadCnt);
     projFileName = checklistName.replace(/ /g,"_");
-    do{
-        lazyLoadData(loadIndex,function(res){
-            loadingComplete = true;
-            //console.log('load '+loadIndex+' loaded');
-            processDataResponse(res);
-        });
+    pdfDocGenerator = '';
+    dataArr = [];
+    tempImgArr = [];
+    imgDataArr = [];
+    contentArr = [];
+    titlePageContent = [];
+    leftColContent = [];
+    rightColContent = [];
+    processed = 0;
+    savedPDFs = 0;
+    zipFile = '';
+    zipFolder = '';
+    callDataLoader(taxCnt);
+}
+
+function callDataLoader(taxCnt){
+    lazyLoadData(loadIndex,function(res){
+        processDataResponse(res);
         processed = processed + lazyLoadCnt;
         loadIndex++;
-    }
-    while(processed < taxCnt);
+        if(processed < taxCnt){
+            callDataLoader(taxCnt);
+        }
+        else{
+            prepImageResponse();
+        }
+    });
 }
 
 function processSettings(){
@@ -89,7 +115,6 @@ function processSettings(){
 
 function processDataResponse(res){
     var tempArr = JSON.parse(res);
-    //var imagesExist = false;
     for(i in tempArr) {
         var family = tempArr[i]['family'];
         if(!family) family = "Family Undefined";
@@ -131,7 +156,6 @@ function processDataResponse(res){
         }
     }
     procIndex++;
-    if(loadingComplete && (procIndex == lastLoad)) prepImageResponse();
 }
 
 function splitArray(arr,size){
@@ -205,10 +229,10 @@ function createPDFGuides(){
             scinameKeys.sort();
             for(s in scinameKeys){
                 if(taxonNum == 100){
-                    savePDFFile(contentArr,pdfFileNum);
+                    savePDFFile(contentArr);
                     taxonNum = 0;
                     contentArr = [];
-                    createTitlePage(pdfFileNum);
+                    createTitlePage();
                     contentArr.push({
                         toc: {
                             title: {text: 'INDEX', alignment: 'left', style: 'TOCHeader'}
@@ -224,11 +248,13 @@ function createPDFGuides(){
             }
         }
     }
-    savePDFFile(contentArr,pdfFileNum);
+    savePDFFile(contentArr);
 }
 
-function createTitlePage(fileNum){
-    var titlePageHead = checklistName+' Vol. '+fileNum;
+function createTitlePage(){
+    if(zipIndex > 1) var fileNumber = ((zipIndex * 3) + pdfFileNum);
+    else var fileNumber = pdfFileNum;
+    var titlePageHead = checklistName+' Vol. '+fileNumber;
     var titleTextArr = [];
     titlePageContent = [];
     titlePageContent.push({text: titlePageHead, style: 'titleHeader'});
@@ -369,7 +395,11 @@ function createPDFPage(familyName,sciname){
     contentArr.push(pageArr);
 }
 
-function savePDFFile(content,fileNum){
+function savePDFFile(content){
+    if(zipIndex > 1) var fileNumber = ((zipIndex * 3) + pdfFileNum);
+    else var fileNumber = pdfFileNum;
+    var filename = projFileName+'-'+fileNumber+'.pdf';
+    pdfFileNum++;
     var docDefinition = {
         content: content,
         footer: function(page){
@@ -379,7 +409,7 @@ function savePDFFile(content,fileNum){
                     columns: [
                         {
                             width: 400,
-                            text: checklistName, alignment: 'right', style: 'checkListName', margin: [20, 10, 20, 10]
+                            text: checklistName+' Vol. '+fileNumber, alignment: 'right', style: 'checkListName', margin: [20, 10, 20, 10]
                         },
                         {
                             width: 200,
@@ -463,15 +493,13 @@ function savePDFFile(content,fileNum){
             }
         }
     };
-    pdfFileNum++;
-    const pdfDocGenerator = pdfMake.createPdf(docDefinition);
+    pdfDocGenerator = pdfMake.createPdf(docDefinition);
     pdfDocGenerator.getBase64((data) => {
-        var filename = projFileName+'-'+fileNum+'.pdf';
         zipFolder.file(filename, data.substr(data.indexOf(',')+1), {base64: true});
         savedPDFs++;
         if(savedPDFs == pdfFileTot){
             zipFile.generateAsync({type:"blob"}).then(function(content) {
-                var zipfilename = projFileName+'.zip';
+                var zipfilename = projFileName+zipIndex+'.zip';
                 saveAs(content,zipfilename);
                 hideWorking();
             });

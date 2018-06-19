@@ -154,7 +154,6 @@ if($clArray["locality"]){
 
         function lazyLoadData(index,callback){
             var startindex = 0;
-            loadingComplete = false;
             if(index > 0) startindex = (index*lazyLoadCnt) + 1;
             var http = new XMLHttpRequest();
             var url = "rpc/fieldguideexporter.php";
@@ -178,7 +177,7 @@ if($clArray["locality"]){
         <script src="<?php echo $CLIENT_ROOT; ?>/js/vfs_fonts.js" type="text/javascript"></script>
         <script src="<?php echo $CLIENT_ROOT; ?>/js/jszip.min.js" type="text/javascript"></script>
         <script src="<?php echo $CLIENT_ROOT; ?>/js/FileSaver.min.js" type="text/javascript"></script>
-        <script src="<?php echo $CLIENT_ROOT; ?>/js/symb/checklists.fieldguideexport.js?ver=42" type="text/javascript"></script>
+        <script src="<?php echo $CLIENT_ROOT; ?>/js/symb/checklists.fieldguideexport.js?ver=59" type="text/javascript"></script>
         <?php
     }
     ?>
@@ -839,6 +838,30 @@ if($clArray["locality"]){
                 <input data-role="none" name="fgMaxImages" type="radio" value="2"/> 2
                 <input data-role="none" name="fgMaxImages" type="radio" value="3"/> 3
             </div>
+            <?php
+            if($clManager->getTaxaCount() > 300){
+                $highIndex = ceil(($clManager->getTaxaCount()/300));
+                ?>
+                <div style="margin-top:5px;">
+                    <b>File set:</b>
+                    <select data-role='none' id='zipindex'>
+                        <?php
+                        $optIndex = 1;
+                        while($optIndex <= $highIndex) {
+                            echo "<option value='".$optIndex."'>".$optIndex."</option>\n";
+                            $optIndex++;
+                        }
+                        ?>
+                    </select>
+                </div>
+                <?php
+            }
+            else{
+                ?>
+                <input type="hidden" id="zipindex" value="1" />
+                <?php
+            }
+            ?>
             <div style="margin-top:10px;float:right;">
                 <button data-role="none" type="button" onclick='prepareFieldGuideExport(<?php echo $clManager->getTaxaCount(); ?>);' >Export Field Guide</button>
             </div>

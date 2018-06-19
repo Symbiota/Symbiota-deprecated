@@ -94,7 +94,8 @@ class ChecklistFGExportManager {
         $sql = 'SELECT DISTINCT t.tid, ts.family, t.sciname, t.author '.
             'FROM '.$this->linkTable.' AS ctl LEFT JOIN taxstatus AS ts ON ctl.tid = ts.tid '.
             'LEFT JOIN taxa AS t ON ts.tidaccepted = t.TID '.
-            'WHERE (ts.taxauthid = '.$this->thesFilter.') AND '.$this->sqlWhereVar.' ';
+            'WHERE (ts.taxauthid = '.$this->thesFilter.') AND '.$this->sqlWhereVar.' '.
+            'ORDER BY ts.family, t.sciname ';
         if($this->index || $this->recLimit) $sql .= "LIMIT ".$this->index.",".$this->recLimit;
         //echo $sql; exit;
         $rs = $this->conn->query($sql);
