@@ -1,4 +1,4 @@
-<?php 
+<?php
 include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/SpecUploadDwca.php');
 
@@ -52,7 +52,7 @@ if(array_key_exists("sf",$_POST)){
 		}
 		//Set Source PK
  		$duManager->setFieldMap($fieldMap);
-		
+
  		//Set field map for identification history
 		if(array_key_exists("ID-sf",$_POST)){
 	 		$targetIdFields = $_POST["ID-tf"];
@@ -83,7 +83,7 @@ if(array_key_exists("sf",$_POST)){
 		}
 	}
 	if($action == "Save Mapping"){
-		$statusStr = $duManager->saveFieldMap(array_key_exists('profiletitle',$_POST)?$_POST['profiletitle']:'');
+		$statusStr = $duManager->saveFieldMap($_POST);
 	}
 }
 $duManager->loadFieldMap(true);
@@ -132,7 +132,7 @@ $duManager->loadFieldMap(true);
 				//alert("The file API isn't supported on this browser yet.");
 				return;
 			}
-			<?php 
+			<?php
 			$maxUpload = ini_get('upload_max_filesize');
 			$maxUpload = str_replace("M", "000000", $maxUpload);
 			if($maxUpload > 100000000) $maxUpload = 100000000;
@@ -153,9 +153,9 @@ $displayLeftMenu = false;
 include($SERVER_ROOT.'/header.php');
 ?>
 <div class="navpath">
-	<a href="../../index.php">Home</a> &gt;&gt; 
-	<a href="../misc/collprofiles.php?collid=<?php echo $collid; ?>&emode=1">Collection Management Panel</a> &gt;&gt; 
-	<b>Backup Restore Module</b> 
+	<a href="../../index.php">Home</a> &gt;&gt;
+	<a href="../misc/collprofiles.php?collid=<?php echo $collid; ?>&emode=1">Collection Management Panel</a> &gt;&gt;
+	<b>Backup Restore Module</b>
 </div>
 <!-- This is inner text! -->
 <div id="innertext">
@@ -179,11 +179,11 @@ include($SERVER_ROOT.'/header.php');
 								<input name="uploadfile" type="file" size="50" onchange="verifyFileSize(this)" />
 							</div>
 							<div class="ulfnoptions" style="display:none;margin:15px 0px">
-								<b>Resource Path or URL:</b> 
+								<b>Resource Path or URL:</b>
 								<input name="ulfnoverride" type="text" size="70" /><br/>
 								<div>
 									* This option is for pointing to a data file that was manually uploaded to a server
-									This option offers a workaround for importing files that are larger than what is allowed by 
+									This option offers a workaround for importing files that are larger than what is allowed by
 									server upload limitations (e.g. PHP configuration limits)
 								</div>
 							</div>
@@ -216,7 +216,7 @@ include($SERVER_ROOT.'/header.php');
 										<div style="margin:15px">
 											<div style="color:orange;font-weight:bold">Warnings exist:</div>
 											<div style="margin:10px">
-												<?php 
+												<?php
 												foreach($verificationResult as $warningStr){
 													echo '<div>'.$warningStr.'</div>';
 												}
@@ -250,7 +250,7 @@ include($SERVER_ROOT.'/header.php');
 		 				<fieldset style="margin:15px;">
 		 					<legend style=""><b>Final transfer</b></legend>
 		 					<div style="margin:5px;">
-		 						<?php 
+		 						<?php
 		 						$reportArr = $duManager->getTransferReport();
 								echo '<div>Occurrences pending transfer: '.$reportArr['occur'];
 								if($reportArr['occur']){
@@ -269,7 +269,7 @@ include($SERVER_ROOT.'/header.php');
 								if($reportArr['new']){
 									echo '<div>New records: ';
 									echo $reportArr['new'];
-									if($reportArr['new']){ 
+									if($reportArr['new']){
 										echo ' <a href="uploadviewer.php?collid='.$collid.'&searchvar=new" target="_blank" title="Preview 1st 1000 Records"><img src="../../images/list.png" style="width:12px;" /></a>';
 										echo ' <a href="uploadcsv.php?collid='.$collid.'&searchvar=new" target="_self" title="Download Records"><img src="../../images/dl.png" style="width:12px;" /></a>';
 									}
@@ -278,7 +278,7 @@ include($SERVER_ROOT.'/header.php');
 								if(isset($reportArr['exist']) && $reportArr['exist']){
 									echo '<div>Previous loaded records not matching incoming records: ';
 									echo $reportArr['exist'];
-									if($reportArr['exist']){  
+									if($reportArr['exist']){
 										echo ' <a href="uploadviewer.php?collid='.$collid.'&searchvar=exist" target="_blank" title="Preview 1st 1000 Records"><img src="../../images/list.png" style="width:12px;" /></a>';
 										echo ' <a href="uploadcsv.php?collid='.$collid.'&searchvar=exist" target="_self" title="Download Records"><img src="../../images/dl.png" style="width:12px;" /></a>';
 									}
@@ -296,16 +296,16 @@ include($SERVER_ROOT.'/header.php');
 								if(isset($reportArr['image'])){
 									echo '<div>Records with images: '.$reportArr['image'].'</div>';
 								}
-								
+
 								?>
 							</div>
 							<form name="finaltransferform" action="restorebackup.php" method="post" style="margin-top:10px;" onsubmit="return confirm('Are you sure you want to transfer records from temporary table to central specimen table?');">
-								<input type="hidden" name="collid" value="<?php echo $collid;?>" /> 
-								<div style="margin:5px;"> 
+								<input type="hidden" name="collid" value="<?php echo $collid;?>" />
+								<div style="margin:5px;">
 									<button name="action" type="submit" value="TransferRecords">Transfer Records to Central Specimen Table</button>
 								</div>
 							</form>
-						</fieldset>			
+						</fieldset>
 						<?php
 					}
 				}
@@ -319,14 +319,14 @@ include($SERVER_ROOT.'/header.php');
 		else{
 			?>
 			<div style="font-weight:bold;font-size:120%;">
-				ERROR: Either you have tried to reach this page without going through the collection management menu 
-				or you have tried to upload a file that is too large. 
-				You may want to breaking the upload file into smaller files or compressing the file into a zip archive (.zip extension). 
-				You may want to contact portal administrator to request assistance in uploading the file (hint to admin: increasing PHP upload limits may help,  
-				current upload_max_filesize = <?php echo ini_get("upload_max_filesize").'; post_max_size = '.ini_get("post_max_size"); ?>) 
+				ERROR: Either you have tried to reach this page without going through the collection management menu
+				or you have tried to upload a file that is too large.
+				You may want to breaking the upload file into smaller files or compressing the file into a zip archive (.zip extension).
+				You may want to contact portal administrator to request assistance in uploading the file (hint to admin: increasing PHP upload limits may help,
+				current upload_max_filesize = <?php echo ini_get("upload_max_filesize").'; post_max_size = '.ini_get("post_max_size"); ?>)
 				Use the back arrows to get back to the file upload page.
 			</div>
-			<?php 
+			<?php
 		}
 	}
 	else{
@@ -334,7 +334,7 @@ include($SERVER_ROOT.'/header.php');
 	}
 	?>
 </div>
-<?php 
+<?php
 include($SERVER_ROOT.'/footer.php');
 ?>
 </body>

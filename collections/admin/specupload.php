@@ -75,7 +75,7 @@ elseif($uploadType == $DWCAUPLOAD || $uploadType == $IPTUPLOAD){
 	$duManager->setIncludeImages($importImage);
 	for($i=0;$i<3;$i++){
 		if(isset($_POST['filter'.$i])){
-			$duManager->addFilterCondition($_POST['filter'.$i], $_POST['cont'.$i], $_POST['value'.$i]);
+			$duManager->addFilterCondition($_POST['filter'.$i], $_POST['condition'.$i], $_POST['value'.$i]);
 		}
 	}
 }
@@ -153,7 +153,7 @@ if(array_key_exists("sf",$_POST)){
 		}
 	}
 	if($action == "Save Mapping"){
-		$statusStr = $duManager->saveFieldMap(array_key_exists('profiletitle',$_POST)?$_POST['profiletitle']:'');
+		$statusStr = $duManager->saveFieldMap($_POST);
 		if(!$uspid) $uspid = $duManager->getUspid();
 	}
 }
@@ -652,32 +652,60 @@ $duManager->loadFieldMap();
 												<fieldset>
 													<legend><b>Custom Occurrence Record Import Filters</b></legend>
 													<?php
+													$qArr = json_decode($duManager->getQueryStr(),true);
+													$queryArr = array();
+													if($qArr){
+														foreach($qArr as $column => $aArr){
+															foreach($aArr as $cond => $bArr){
+																foreach($bArr as $v){
+																	$queryArr[] = array('col'=>$column,'cond'=>$cond,'val'=>$v);
+																}
+															}
+														}
+													}
 													$sourceFields = $duManager->getSourceArr();
 													sort($sourceFields);
 													for($x=0;$x<3;$x++){
+														$savedField = '';
+														$savedCondition = '';
+														$savedValue = '';
+														if($action != 'Reset Field Mapping'){
+															if(array_key_exists('filter'.$x, $_POST) && $_POST['filter'.$x]){
+																$savedField = strtolower($_POST['filter'.$x]);
+																$savedCondition = $_POST['condition'.$x];
+																$savedValue = $_POST['value'.$x];
+															}
+															elseif(isset($queryArr[$x])){
+																$savedField = $queryArr[$x]['col'];
+																$savedCondition = $queryArr[$x]['cond'];
+																$savedValue = $queryArr[$x]['val'];
+															}
+														}
+
 														?>
 														<div>
 															Field:
 															<select name="filter<?php echo $x; ?>" style="margin-right:10px">
 																<option value="">Select Field Name</option>
 																<?php
+																$setFilter = (isset($queryArr['filter'.$x])?$queryArr['filter'.$x]:'');
 																foreach($sourceFields as $f){
-																	echo '<option>'.$f.'</option>';
+																	echo '<option '.($savedField == strtolower($f)?'SELECTED':'').'>'.$f.'</option>';
 																}
 																?>
 															</select>
 															Condition:
-															<select name="cont<?php echo $x; ?>" style="margin-right:10px">
-																<option value="EQUALS">EQUALS</option>
-																<option value="STARTS">STARTS WITH</option>
-																<option value="LIKE">CONTAINS</option>
-																<option value="LESSTHAN">LESS THAN</option>
-																<option value="GREATERTHAN">GREATER THAN</option>
-																<option value="ISNULL">IS NULL</option>
-																<option value="NOTNULL">IS NOT NULL</option>
+															<select name="condition<?php echo $x; ?>" style="margin-right:10px">
+																<option value="EQUALS" <?php if($savedCondition == 'EQUALS') echo 'SELECTED'; ?>>EQUALS</option>
+																<option value="STARTS" <?php if($savedCondition == 'STARTS') echo 'SELECTED'; ?>>STARTS WITH</option>
+																<option value="LIKE" <?php if($savedCondition == 'LIKE') echo 'SELECTED'; ?>>CONTAINS</option>
+																<option value="LESSTHAN" <?php if($savedCondition == 'LESSTHAN') echo 'SELECTED'; ?>>LESS THAN</option>
+																<option value="GREATERTHAN" <?php if($savedCondition == 'GREATERTHAN') echo 'SELECTED'; ?>>GREATER THAN</option>
+																<option value="ISNULL" <?php if($savedCondition == 'ISNULL') echo 'SELECTED'; ?>>IS NULL</option>
+																<option value="NOTNULL" <?php if($savedCondition == 'NOTNULL') echo 'SELECTED'; ?>>IS NOT NULL</option>
 															</select>
 															Value:
-															<input name="value<?php echo $x; ?>" type="text" />
+															<input name="value<?php echo $x; ?>" type="text" value="<?php echo $savedValue; ?>" />
 														</div>
 														<?php
 													}

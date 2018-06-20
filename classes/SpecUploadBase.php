@@ -326,10 +326,10 @@ class SpecUploadBase extends SpecUpload{
 		return true;
 	}
 
-	public function saveFieldMap($newTitle = ''){
+	public function saveFieldMap($postArr){
 		$statusStr = '';
-		if(!$this->uspid && $newTitle){
-			$this->uspid = $this->createUploadProfile(array('uploadtype'=>$this->uploadType,'title'=>$newTitle));
+		if(!$this->uspid && array_key_exists('profiletitle',$postArr)){
+			$this->uspid = $this->createUploadProfile(array('uploadtype'=>$this->uploadType,'title'=>$postArr['profiletitle']));
 			$this->readUploadParameters();
 		}
 		if($this->uspid){
@@ -344,6 +344,14 @@ class SpecUploadBase extends SpecUpload{
 					$statusStr = 'ERROR saving field map: '.$this->conn->error;
 				}
 			}
+			//Save custom occurrence filter variables
+			if($this->filterArr){
+				$sql = 'UPDATE uploadspecparameters SET querystr = "'.$this->cleanInStr(json_encode($this->filterArr)).'" WHERE uspid = '.$this->uspid;
+				if(!$this->conn->query($sql)){
+					$statusStr = 'ERROR saving custom filter variables: '.$this->conn->error;
+				}
+			}
+
 			//Save identification field map
 			foreach($this->identFieldMap as $k => $v){
 				$sourceField = $v["field"];
@@ -372,6 +380,11 @@ class SpecUploadBase extends SpecUpload{
 		$statusStr = '';
 		if($this->uspid){
 			$sql = "DELETE FROM uploadspecmap WHERE (uspid = ".$this->uspid.") ";
+			//echo "<div>$sql</div>";
+			if(!$this->conn->query($sql)){
+				$statusStr = 'ERROR deleting field map: '.$this->conn->error;
+			}
+			$sql = "UPDATE uploadspecparameters SET querystr = NULL WHERE (uspid = ".$this->uspid.") ";
 			//echo "<div>$sql</div>";
 			if(!$this->conn->query($sql)){
 				$statusStr = 'ERROR deleting field map: '.$this->conn->error;
