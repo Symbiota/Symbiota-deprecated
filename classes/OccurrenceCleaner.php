@@ -47,7 +47,7 @@ class OccurrenceCleaner extends Manager{
 				$cnt++;
 				if($start < $cnt && !array_key_exists($cn,$dupArr)){
 					//Add dupe to array
-					$dupArr[$cn] = '';
+					$dupArr[$this->cleanInStr($cn)] = '';
 					if(count($dupArr) > $limit) break;
 				}
 			}
