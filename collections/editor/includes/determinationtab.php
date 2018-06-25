@@ -1,5 +1,5 @@
 <?php
-include_once('../../../config/symbini.php'); 
+include_once('../../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceEditorManager.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 
@@ -18,7 +18,7 @@ $institutioncode = $_GET['institutioncode'];
 
 $occManager = new OccurrenceEditorDeterminations();
 
-$occManager->setOccId($occId); 
+$occManager->setOccId($occId);
 $detArr = $occManager->getDetMap($identBy, $dateIdent, $sciName);
 $idRanking = $occManager->getIdentificationRanking();
 
@@ -30,24 +30,24 @@ $specImgArr = $occManager->getImageMap();  // find out if there are images in or
 		<div>
 			<b><u>Identification Confidence Ranking</u></b>
 			<?php
-			if($editMode < 3){ 
+			if($editMode < 3){
 				?>
 				<a href="#" title="Modify current identification ranking" onclick="toggle('idrankeditdiv');toggle('idrankdiv');return false;">
 					<img src="../../images/edit.png" style="border:0px;width:12px;" />
 				</a>
 				<?php
-			} 
+			}
 			?>
 		</div>
 		<?php
-		if($editMode < 3){ 
+		if($editMode < 3){
 			?>
 			<div id="idrankeditdiv" style="display:none;margin:15px;">
 				<form name="editidrankingform" action="occurrenceeditor.php" method="post">
 					<div style='margin:3px;'>
-						<b>Confidence of Determination:</b> 
+						<b>Confidence of Determination:</b>
 						<select name="confidenceranking">
-							<?php 
+							<?php
 							$currentRanking = 5;
 							if($idRanking) $currentRanking = $idRanking['ranking'];
 							?>
@@ -65,7 +65,7 @@ $specImgArr = $occManager->getImageMap();  // find out if there are images in or
 						</select>
 					</div>
 					<div style='margin:3px;'>
-						<b>Notes:</b> 
+						<b>Notes:</b>
 						<input name="notes" type="text" value="<?php echo ($idRanking?$idRanking['notes']:''); ?>" style="width:90%;" />
 					</div>
 					<div style='margin:15px;'>
@@ -78,10 +78,10 @@ $specImgArr = $occManager->getImageMap();  // find out if there are images in or
 				</form>
 			</div>
 			<?php
-		} 
+		}
 		?>
 		<div id="idrankdiv" style="margin:15px;">
-			<?php 
+			<?php
 			if($idRanking){
 				echo '<div>';
 				echo '<b>Rank: </b> '.$idRanking['ranking'];
@@ -104,19 +104,19 @@ $specImgArr = $occManager->getImageMap();  // find out if there are images in or
 			?>
 		</div>
 	</div>
-	<div>
+	<div style="clear:both">
 		<fieldset style="margin:15px;padding:15px;">
 			<legend><b>Determination History</b></legend>
 			<div style="float:right;">
 				<a href="#" onclick="toggle('newdetdiv');return false;" title="Add New Determination" ><img style="border:0px;width:12px;" src="../../images/add.png" /></a>
 			</div>
-			<?php 
+			<?php
 			if(!$detArr){
 				?>
 				<div style="font-weight:bold;margin:10px;font-size:120%;">
 					There are no historic annotations for this specimen
 				</div>
-				<?php 
+				<?php
 			}
 			?>
 			<div id="newdetdiv" style="display:<?php echo ($detArr?'none':''); ?>;">
@@ -125,51 +125,51 @@ $specImgArr = $occManager->getImageMap();  // find out if there are images in or
 						<legend><b>Add a New Determination</b></legend>
 						<div style="float:right;margin:-7px -4px 0px 0px;font-weight:bold;">
 							<span id="imgProcOnSpanDet" style="display:block;">
-								<?php 
-								if($specImgArr){  
+								<?php
+								if($specImgArr){
 									?>
 									<a href="#" onclick="toggleImageTdOn();return false;">&gt;&gt;</a>
-									<?php 
+									<?php
 								}
 								?>
 							</span>
 							<span id="imgProcOffSpanDet" style="display:none;">
-								<?php 
-								if($specImgArr){  
+								<?php
+								if($specImgArr){
 									?>
 									<a href="#" onclick="toggleImageTdOff();return false;">&lt;&lt;</a>
-									<?php 
-								} 
+									<?php
+								}
 								?>
 							</span>
 						</div>
-						<?php 
+						<?php
 						if($editMode == 3){
 							?>
 							<div style="color:red;margin:10px;">
-								While you are a Taxonomy Editor for this taxon, you have not been given explicit editing rights for this collection. 
-								You can submit new determinations, but they will need to be approved by the collection manager 
+								While you are a Taxonomy Editor for this taxon, you have not been given explicit editing rights for this collection.
+								You can submit new determinations, but they will need to be approved by the collection manager
 								before they are applied.
 							</div>
-							<?php 
+							<?php
 						}
-						?> 
+						?>
 						<div style='margin:3px;'>
 							<b>Identification Qualifier:</b>
 							<input type="text" name="identificationqualifier" title="e.g. cf, aff, etc" />
 						</div>
 						<div style='margin:3px;'>
-							<b>Scientific Name:</b> 
+							<b>Scientific Name:</b>
 							<input type="text" id="dafsciname" name="sciname" style="background-color:lightyellow;width:350px;" onfocus="initDetAutocomplete(this.form)" />
 							<input type="hidden" id="daftidtoadd" name="tidtoadd" value="" />
 							<input type="hidden" name="family" value="" />
 						</div>
 						<div style='margin:3px;'>
-							<b>Author:</b> 
+							<b>Author:</b>
 							<input type="text" name="scientificnameauthorship" style="width:200px;" />
 						</div>
 						<div style='margin:3px;'>
-							<b>Confidence of Determination:</b> 
+							<b>Confidence of Determination:</b>
 							<select name="confidenceranking">
 								<option value="8">High</option>
 								<option value="5" selected>Medium</option>
@@ -177,19 +177,19 @@ $specImgArr = $occManager->getImageMap();  // find out if there are images in or
 							</select>
 						</div>
 						<div style='margin:3px;'>
-							<b>Determiner:</b> 
+							<b>Determiner:</b>
 							<input type="text" name="identifiedby" style="background-color:lightyellow;width:200px;" />
 						</div>
 						<div style='margin:3px;'>
-							<b>Date:</b> 
+							<b>Date:</b>
 							<input type="text" name="dateidentified" style="background-color:lightyellow;" onchange="detDateChanged(this.form);" />
 						</div>
 						<div style='margin:3px;'>
-							<b>Reference:</b> 
+							<b>Reference:</b>
 							<input type="text" name="identificationreferences" style="width:350px;" />
 						</div>
 						<div style='margin:3px;'>
-							<b>Notes:</b> 
+							<b>Notes:</b>
 							<input type="text" name="identificationremarks" style="width:350px;" />
 						</div>
 						<div style='margin:3px;'>
@@ -198,7 +198,7 @@ $specImgArr = $occManager->getImageMap();  // find out if there are images in or
 						<div style='margin:3px;'>
 							<input type="checkbox" name="printqueue" value="1" /> Add to Annotation Queue
 						</div>
-						<?php 
+						<?php
 						global $fpEnabled;
 						if($fpEnabled){
 							echo '<div style="float:left;margin-left:30px;">';
@@ -209,17 +209,17 @@ $specImgArr = $occManager->getImageMap();  // find out if there are images in or
 						<div style='margin:15px;'>
 							<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
 							<input type="hidden" name="occindex" value="<?php echo $occIndex; ?>" />
-							
+
 							<input type="hidden" name="annotatorname" value="<?php echo $annotatorname; ?>" />
 							<input type="hidden" name="annotatoremail" value="<?php echo $annotatoremail; ?>" />
 							<input type="hidden" name="catalognumber" value="<?php echo $catalognumber; ?>" />
 							<input type="hidden" name="institutioncode" value="<?php echo $institutioncode; ?>" />
 							<input type="hidden" name="csmode" value="<?php echo $crowdSourceMode; ?>" />
-							<?php 
+							<?php
 							if (isset($_GET['collectioncode']))
-								echo '<input type="hidden" name="collectioncode" value="'.$_GET['collectioncode'].'" />'; 
+								echo '<input type="hidden" name="collectioncode" value="'.$_GET['collectioncode'].'" />';
 							?>
-							
+
 							<div style="float:left;">
 								<input type="submit" name="submitaction" value="Submit Determination" />
 							</div>
@@ -234,7 +234,7 @@ $specImgArr = $occManager->getImageMap();  // find out if there are images in or
 				?>
 				<div id="detdiv-<?php echo $detId;?>">
 					<div>
-						<?php 
+						<?php
 						if($detRec['identificationqualifier']) echo $detRec['identificationqualifier'].' ';
 						echo '<b><i>'.$detRec['sciname'].'</i></b> '.$detRec['scientificnameauthorship'];
 						if($detRec['iscurrent']){
@@ -252,7 +252,7 @@ $specImgArr = $occManager->getImageMap();  // find out if there are images in or
 							<span style="color:red;margin-left:15px;">
 								Applied Status Pending
 							</span>
-							<?php 
+							<?php
 						}
 						?>
 					</div>
@@ -262,25 +262,25 @@ $specImgArr = $occManager->getImageMap();  // find out if there are images in or
 							<b>Date:</b> <?php echo $detRec['dateidentified']; ?>
 						</span>
 					</div>
-					<?php 
+					<?php
 					if($detRec['identificationreferences']){
 						?>
 						<div style='margin:3px 0px 0px 15px;'>
 							<b>Reference:</b> <?php echo $detRec['identificationreferences']; ?>
 						</div>
-						<?php 
+						<?php
 					}
 					if($detRec['identificationremarks']){
 						?>
 						<div style='margin:3px 0px 0px 15px;'>
 							<b>Notes:</b> <?php echo $detRec['identificationremarks']; ?>
 						</div>
-						<?php 
+						<?php
 					}
 					?>
 				</div>
-				<?php 
-				if($canEdit){ 
+				<?php
+				if($canEdit){
 					?>
 					<div id="editdetdiv-<?php echo $detId;?>" style="display:none;margin:15px 5px;">
 						<fieldset>
@@ -291,33 +291,33 @@ $specImgArr = $occManager->getImageMap();  // find out if there are images in or
 									<input type="text" name="identificationqualifier" value="<?php echo $detRec['identificationqualifier']; ?>" title="e.g. cf, aff, etc" />
 								</div>
 								<div style='margin:3px;'>
-									<b>Scientific Name:</b> 
+									<b>Scientific Name:</b>
 									<input type="text" id="defsciname-<?php echo $detId;?>" name="sciname" value="<?php echo $detRec['sciname']; ?>" style="background-color:lightyellow;width:350px;" onfocus="initDetAutocomplete(this.form)" />
 									<input type="hidden" id="deftidtoadd" name="tidtoadd" value="" />
 									<input type="hidden" name="family" value="" />
 								</div>
 								<div style='margin:3px;'>
-									<b>Author:</b> 
+									<b>Author:</b>
 									<input type="text" name="scientificnameauthorship" value="<?php echo $detRec['scientificnameauthorship']; ?>" style="width:200px;" />
 								</div>
 								<div style='margin:3px;'>
-									<b>Determiner:</b> 
+									<b>Determiner:</b>
 									<input type="text" name="identifiedby" value="<?php echo $detRec['identifiedby']; ?>" style="background-color:lightyellow;width:200px;" />
 								</div>
 								<div style='margin:3px;'>
-									<b>Date:</b> 
+									<b>Date:</b>
 									<input type="text" name="dateidentified" value="<?php echo $detRec['dateidentified']; ?>" style="background-color:lightyellow;" />
 								</div>
 								<div style='margin:3px;'>
-									<b>Reference:</b> 
+									<b>Reference:</b>
 									<input type="text" name="identificationreferences" value="<?php echo $detRec['identificationreferences']; ?>" style="width:350px;" />
 								</div>
 								<div style='margin:3px;'>
-									<b>Notes:</b> 
+									<b>Notes:</b>
 									<input type="text" name="identificationremarks" value="<?php echo $detRec['identificationremarks']; ?>" style="width:350px;" />
 								</div>
 								<div style='margin:3px;'>
-									<b>Sort Sequence:</b> 
+									<b>Sort Sequence:</b>
 									<input type="text" name="sortsequence" value="<?php echo $detRec['sortsequence']; ?>" style="width:40px;" />
 								</div>
 								<div style='margin:3px;'>
@@ -331,7 +331,7 @@ $specImgArr = $occManager->getImageMap();  // find out if there are images in or
 									<input type="submit" name="submitaction" value="Submit Determination Edits" />
 								</div>
 							</form>
-							<?php 
+							<?php
 							if($editMode < 3 && !$detRec['iscurrent']){
 								?>
 								<div style="padding:15px;background-color:lightgreen;width:280px;margin:15px;">
@@ -340,7 +340,7 @@ $specImgArr = $occManager->getImageMap();  // find out if there are images in or
 										<input type="hidden" name="detid" value="<?php echo $detId; ?>" />
 										<input type="hidden" name="occindex" value="<?php echo $occIndex; ?>" />
 										<input type="hidden" name="csmode" value="<?php echo $crowdSourceMode; ?>" />
-										<?php 
+										<?php
 										if($detRec['appliedstatus']){
 											?>
 											<input type="submit" name="submitaction" value="Make Determination Current" />
@@ -355,7 +355,7 @@ $specImgArr = $occManager->getImageMap();  // find out if there are images in or
 										?>
 									</form>
 								</div>
-								<?php 
+								<?php
 							}
 							?>
 							<div style="padding:15px;background-color:lightblue;width:155px;margin:15px;">
@@ -369,11 +369,11 @@ $specImgArr = $occManager->getImageMap();  // find out if there are images in or
 							</div>
 						</fieldset>
 					</div>
-					<?php 
+					<?php
 				}
 				?>
 				<hr style='margin:10px 0px 10px 0px;' />
-				<?php 
+				<?php
 			}
 			?>
 		</fieldset>

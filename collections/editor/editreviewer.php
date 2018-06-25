@@ -75,7 +75,7 @@ if($isEditor){
 $recCnt = $reviewManager->getEditCnt();
 
 $subCnt = $limitCnt*($pageNum + 1);
-if($subCnt > $recCnt) $subCnt = $recCnt;  
+if($subCnt > $recCnt) $subCnt = $recCnt;
 $navPageBase = 'editreviewer.php?collid='.$collid.'&display='.$displayMode.'&fastatus='.$faStatus.'&frstatus='.$frStatus.'&editor='.$editor;
 
 $navStr = '<div class="navbarDiv" style="float:right;">';
@@ -86,7 +86,7 @@ else{
 	$navStr .= '&lt;&lt;';
 }
 $navStr .= ' | ';
-$navStr .= ($pageNum*$limitCnt).'-'.$subCnt.' of '.$recCnt.' records';
+$navStr .= ($pageNum*$limitCnt).'-'.$subCnt.' of '.$recCnt.' fields edited';
 $navStr .= ' | ';
 if($subCnt < $recCnt){
 	$navStr .= '<a href="'.$navPageBase.'&pagenum='.($pageNum+1).'&limitcnt='.$limitCnt.'" title="Next '.$limitCnt.' records">&gt;&gt;</a>';
@@ -188,17 +188,17 @@ $navStr .= '</div>';
 		?>
 		<!-- This is inner text! -->
 		<div id="innertext" style="min-width:1100px">
-			<?php 
+			<?php
 			if($collid && $isEditor){
 				?>
 				<div style="font-weight:bold;font-size:130%;"><?php echo $collName; ?></div>
-				<?php 
-				if($statusStr){ 
+				<?php
+				if($statusStr){
 					?>
 					<div style='margin:20px;font-weight:bold;color:red;'>
 						<?php echo $statusStr; ?>
 					</div>
-					<?php 
+					<?php
 				}
 				$retToMenuStr = '<div class="returnDiv" style="display:none"><b><a href="#" onclick="printFriendlyMode(false)">Exit Print Mode</a></b></div>';
 				echo $retToMenuStr;
@@ -208,7 +208,7 @@ $navStr .= '</div>';
 						<fieldset style="width:375px;text-align:left;">
 							<legend><b>Filter</b></legend>
 							<div style="margin:3px;">
-								Applied Status: 
+								Applied Status:
 								<select name="fastatus">
 									<option value="">All Records</option>
 									<option value="0" <?php echo ($faStatus=='0'?'SELECTED':''); ?>>Not Applied</option>
@@ -216,7 +216,7 @@ $navStr .= '</div>';
 								</select>
 							</div>
 							<div style="margin:3px;">
-								Review Status: 
+								Review Status:
 								<select name="frstatus">
 									<option value="0">All Records</option>
 									<option value="1,2" <?php echo ($frStatus=='1,2'?'SELECTED':''); ?>>Open/Pending</option>
@@ -226,11 +226,11 @@ $navStr .= '</div>';
 								</select>
 							</div>
 							<div style="margin:3px;">
-								Editor: 
+								Editor:
 								<select name="editor">
 									<option value="">All Editors</option>
 									<option value="">----------------------</option>
-									<?php 
+									<?php
 									$editorArr = $reviewManager->getEditorList();
 									foreach($editorArr as $id => $e){
 										echo '<option value="'.$id.'" '.($editor==$id?'SELECTED':'').'>'.$e.'</option>'."\n";
@@ -240,24 +240,24 @@ $navStr .= '</div>';
 							</div>
 							<div style="margin:3px;">
 								Date:
-								<input name="startdate" type="date" value="<?php echo $startDate; ?>" /> to 
-								<input name="enddate" type="date" value="<?php echo $endDate; ?>" /> 
+								<input name="startdate" type="date" value="<?php echo $startDate; ?>" /> to
+								<input name="enddate" type="date" value="<?php echo $endDate; ?>" />
 							</div>
 							<div style="margin:10px;float:right;">
 								<button name="submitbutton" type="submit" value="submitfilter">Submit Filter</button>
 								<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
 							</div>
-							<?php 
+							<?php
 							if($reviewManager->hasRevisionRecords() && !$reviewManager->getObsUid()){
 								?>
 								<div style="margin:3px;">
-									Editing Source: 
+									Editing Source:
 									<select name="display">
 										<option value="1">Internal</option>
 										<option value="2" <?php if($displayMode == 2) echo 'SELECTED'; ?>>External</option>
 									</select>
 								</div>
-								<?php 
+								<?php
 							}
 							?>
 						</fieldset>
@@ -316,7 +316,7 @@ $navStr .= '</div>';
 						</fieldset>
 					</div>
 					<?php
-					echo '<div style="clear:both">'.$navStr.'</div>'; 
+					echo '<div style="clear:both">'.$navStr.'</div>';
 					?>
 					<table class="styledtable" style="font-family:Arial;font-size:12px;">
 						<tr>
@@ -331,7 +331,7 @@ $navStr .= '</div>';
 							<th>Old Value</th>
 							<th>New Value</th>
 						</tr>
-						<?php 
+						<?php
 						$editArr = $reviewManager->getEditArr();
 						if($editArr){
 							$recCnt = 0;
@@ -344,20 +344,20 @@ $navStr .= '</div>';
 											?>
 											<tr <?php echo ($recCnt%2?'class="alt"':'') ?>>
 												<td>
-													<?php 
+													<?php
 													if($displayAll){
 														echo '<input name="id[]" type="checkbox" value="'.$id.'" />';
 													}
 													?>
 												</td>
 												<td>
-													<?php 
+													<?php
 													if($displayAll){
 														?>
 														<a href="#" onclick="openIndPU(<?php echo $occid; ?>);return false;">
 															<?php echo $occid; ?>
 														</a>
-														<?php 
+														<?php
 													}
 													?>
 												</td>
@@ -389,7 +389,7 @@ $navStr .= '</div>';
 												</td>
 												<td>
 													<div title="Applied Status">
-														<?php 
+														<?php
 														if($displayAll){
 															if($appliedStatus == 1){
 																echo 'APPLIED';
@@ -403,13 +403,13 @@ $navStr .= '</div>';
 												</td>
 												<td>
 													<div title="Editor">
-														<?php 
-														
+														<?php
+
 														if($displayAll){
 															$editorStr = $edObj['editor'];
 															if($displayMode == 2){
 																if(!$editorStr) $editorStr = $edObj['exeditor'];
-																if($edObj['exsource']) $editorStr = $edObj['exsource'].($editorStr?': '.$editorStr:''); 
+																if($edObj['exsource']) $editorStr = $edObj['exsource'].($editorStr?': '.$editorStr:'');
 															}
 															echo $editorStr;
 														}
@@ -452,19 +452,19 @@ $navStr .= '</div>';
 									<div style="font-weight:bold;font-size:150%;margin:20px;">There are no Edits matching search criteria.</div>
 								</td>
 							</tr>
-							<?php 
+							<?php
 						}
 						?>
 					</table>
-					<?php 
+					<?php
 					echo $retToMenuStr;
-					echo $navStr; 
+					echo $navStr;
 					?>
 				</form>
-				<?php 
+				<?php
 			}
 			else{
-				echo '<div>Error!</div>';						
+				echo '<div>Error!</div>';
 			}
 			?>
 		</div>

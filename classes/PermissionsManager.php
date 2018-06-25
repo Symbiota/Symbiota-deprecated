@@ -209,7 +209,7 @@ class PermissionsManager{
 					($secondaryVariable?'"'.$secondaryVariable.'"':'NULL').','.$SYMB_UID.')';
 				//$sql = 'INSERT INTO userpermissions(uid,pname,assignedby,secondaryVariable) '.
 				//	'VALUES('.$uid.',"'.$pname.'","'.$paramsArr['un'].'")';
-				//echo $sql;
+				//echo $sql1;
 				if(!$this->conn->query($sql1)){
 					$statusStr = 'ERROR adding user permission: '.$this->conn->error;
 				}
