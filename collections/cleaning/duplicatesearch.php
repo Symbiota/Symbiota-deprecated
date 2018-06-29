@@ -74,7 +74,21 @@ elseif($action == 'listdupsrecordedby'){
 			for(i = 0; i < dbElements.length; i++){
 				dbElements[i].checked = boxesChecked;
 			}
+		}
 
+		function batchSwitchTargetSpecimens(cbElem){
+			cbElem.checked = false;
+			var dbElements = document.getElementsByTagName("input");
+			//var dbElements = $("input[type='radio']").val();
+			var elemName = '';
+			for(i = 0; i < dbElements.length; i++){
+				if(dbElements[i].type == "radio"){
+					if(dbElements[i].checked == false && elemName != dbElements[i].name){
+						dbElements[i].checked = true;
+						elemName = dbElements[i].name;
+					}
+				}
+			}
 		}
 	</script>
 </head>
@@ -112,7 +126,7 @@ elseif($action == 'listdupsrecordedby'){
 							<tr>
 								<th style="width:40px;">ID</th>
 								<th style="width:20px;"><input name="selectalldupes" type="checkbox" title="Select/Deselect All" onclick="selectAllDuplicates(this.form)" /></th>
-								<th></th>
+								<th><input type="checkbox" name="batchswitch" onclick="batchSwitchTargetSpecimens(this)" title="Batch switch target specimens" /></th>
 								<th style="width:40px;">Catalog Number</th>
 								<th style="width:40px;">Other Catalog Numbers</th>
 								<th>Scientific Name</th>
