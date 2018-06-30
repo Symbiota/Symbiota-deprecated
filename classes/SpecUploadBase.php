@@ -1513,13 +1513,13 @@ class SpecUploadBase extends SpecUpload{
 			$tPath = ini_get('upload_tmp_dir');
 		}
 		if(!$tPath){
-			$tPath = $GLOBALS["serverRoot"]."/temp";
+			$tPath = $GLOBALS['SERVER_ROOT'].'/temp';
 		}
 		if(substr($tPath,-1) != '/' && substr($tPath,-1) != '\\'){
 			$tPath .= '/';
 		}
-		if(file_exists($tPath."downloads")){
-			$tPath .= "downloads/";
+		if(file_exists($tPath.'downloads')){
+			$tPath .= 'downloads/';
 		}
 		$this->uploadTargetPath = $tPath;
 	}

@@ -1,4 +1,12 @@
 <?php
+/*
+ * Handler can be used to automate DwC-Archive publishing
+ * PHP must be setup to run via command line. Automate by adding call to handler as a cron job, or scheduled task.
+ * Variables in order: collids (required, multiple ids delimited by commas are allowed), serverDomain (required), includeIdentificationHistory (optional, 0 or 1, 1 = default), includeImages (optional, 0 or 1, 1 = default), includeAttributes (optional, 0 or 1, 1 = default), redactLocalities (optional, 0 or 1, 1 = default)
+ * ex: php dwcahandler.php 1 http://swbiodiversity.org 0 0 0 1
+ * ex: php dwcahandler.php 160 http://nansh.org
+ */
+
 include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/DwcArchiverPublisher.php');
 

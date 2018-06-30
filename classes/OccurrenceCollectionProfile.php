@@ -544,7 +544,7 @@ class OccurrenceCollectionProfile {
 		while($row = $rs->fetch_object()){
 			if($row->publishToGbif && $row->aggKeysStr){
 				$gbifKeyArr = json_decode($row->aggKeysStr,true);
-				if($gbifKeyArr['endpointKey']) $this->triggerGBIFCrawl($gbifKeyArr['datasetKey']);
+				if(array_key_exists('endpointKey', $gbifKeyArr) && $gbifKeyArr['endpointKey']) $this->triggerGBIFCrawl($gbifKeyArr['datasetKey']);
 			}
 		}
 		$rs->free();

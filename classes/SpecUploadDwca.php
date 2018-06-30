@@ -25,6 +25,7 @@ class SpecUploadDwca extends SpecUploadBase{
 		$localFolder = $this->collMetadataArr["institutioncode"].($this->collMetadataArr["collectioncode"]?$this->collMetadataArr["collectioncode"].'_':'').time();
 		mkdir($this->uploadTargetPath.$localFolder);
 		$fullPath = $this->uploadTargetPath.$localFolder.'/dwca.zip';
+		$this->baseFolderName = $localFolder;
 
 		if(array_key_exists('ulfnoverride',$_POST) && $_POST['ulfnoverride'] && !$this->path){
 			$this->path = $_POST['ulfnoverride'];
@@ -40,20 +41,14 @@ class SpecUploadDwca extends SpecUploadBase{
 					$this->path = str_replace('/resource','/archive.do',$this->path);
 				}
 			}
-			if(copy($this->path,$fullPath)){
-				$this->baseFolderName = $localFolder;
-			}
-			else{
+			if(!copy($this->path,$fullPath)){
 				$this->outputMsg('<li>ERROR: unable to upload file (path: '.$fullPath.') </li>');
 				$this->errorStr = 'ERROR: unable to upload file (path: '.$fullPath.')';
 			}
 		}
 		elseif(array_key_exists("uploadfile",$_FILES)){
 			//File is delivered as a POST stream, probably from browser
-			if(move_uploaded_file($_FILES['uploadfile']['tmp_name'], $fullPath)){
-				$this->baseFolderName = $localFolder;
-			}
-			else{
+			if(!move_uploaded_file($_FILES['uploadfile']['tmp_name'], $fullPath)){
 				$msg = 'unknown';
 				$err = $_FILES['uploadfile']['error'];
 				if($err == 1) $msg = 'uploaded file exceeds the upload_max_filesize directive in php.ini';
@@ -437,6 +432,20 @@ class SpecUploadDwca extends SpecUploadBase{
 					foreach($this->metaArr['occur']['fields'] as $k => $v){
 						$this->sourceArr[$k] = strtolower($v);
 					}
+					//Set custom filters if they haven't yet been set
+					if($this->queryStr && !$this->filterArr){
+						$qArr = json_decode($this->queryStr,true);
+						if($qArr){
+							foreach($qArr as $qField => $aArr){
+								foreach($aArr as $qCond => $bArr){
+									foreach($bArr as $qValue){
+										$this->addFilterCondition($qField, $qCond, $qValue);
+									}
+								}
+							}
+						}
+					}
+
 					//Grab data
 					$this->transferCount = 0;
 					if($this->uploadType == $this->RESTOREBACKUP){
@@ -552,8 +561,10 @@ class SpecUploadDwca extends SpecUploadBase{
 					$this->conn->query('SET unique_checks=1');
 					$this->conn->query('SET foreign_key_checks=1');
 					$this->outputMsg('<li style="margin-left:10px;">Complete: '.$this->getTransferCount().' records loaded</li>');
-					ob_flush();
-					flush();
+					if($this->verboseMode){
+						ob_flush();
+						flush();
+					}
 
 					//Upload identification history
 					if($this->includeIdentificationHistory){
