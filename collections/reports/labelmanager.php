@@ -494,15 +494,17 @@ if($isEditor){
 								</table>
 								<fieldset style="margin-top:15px;">
 									<legend><b>Annotation Printing</b></legend>
-									<div style="float:left;">
+									<div>
 										<div style="margin:4px;">
 											<b>Header:</b>
-											<input type="text" name="lheading" value="<?php echo $datasetManager->getAnnoCollName(); ?>" style="width:450px" />
+											<input type="text" name="lheading" value="" style="width:450px" />
 										</div>
 										<div style="margin:4px;">
 											<b>Footer:</b>
-											<input type="text" name="lfooter" value="" style="width:450px" />
+											<input type="text" name="lfooter" value="<?php echo $datasetManager->getAnnoCollName(); ?>" style="width:450px" />
 										</div>
+									</div>
+									<div style="float:left">
 										<div style="margin:4px;">
 											<input type="checkbox" name="speciesauthors" value="1" onclick="" />
 											<b>Print species authors for infraspecific taxa</b>
@@ -512,14 +514,13 @@ if($isEditor){
 											<b>Remove selected annotations from queue</b>
 										</div>
 									</div>
-									<div style="float:right;">
+									<div style="float:left;margin-left:200px">
 										<input type="hidden" name="collid" value="<?php echo $collid; ?>" />
 										<input type="submit" name="submitaction" onclick="changeAnnoFormExport('defaultannotations.php','_blank');" value="Print in Browser" />
 										<?php
 										if($reportsWritable){
 											?>
-											<br/><br/>
-											<input type="submit" name="submitaction" onclick="changeAnnoFormExport('defaultannotationsexport.php','_self');" value="Export to DOCX" />
+											<div style="margin-top:5px"><input type="submit" name="submitaction" onclick="changeAnnoFormExport('defaultannotationsexport.php','_self');" value="Export to DOCX" /></div>
 											<?php
 										}
 										?>

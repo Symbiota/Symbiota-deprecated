@@ -47,10 +47,10 @@ class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 				}
 			}
 		}
-		
+
 		return $retArr;
 	}
-	
+
 	public function addDetermination($detArr,$isEditor){
 		$status = "Determination submitted successfully!";
 		if(!$this->occid) return 'ERROR: occid is null';
@@ -98,7 +98,7 @@ class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 			if(!$this->conn->query('INSERT INTO guidoccurdeterminations(guid,detid) VALUES("'.$guid.'",'.$detId.')')){
 				$status .= ' (Warning: Symbiota GUID mapping #1 failed)';
 			}
-			//If is current, move old determination from omoccurrences to omoccurdeterminations and then load new record into omoccurrences  
+			//If is current, move old determination from omoccurrences to omoccurdeterminations and then load new record into omoccurrences
 			if($isCurrent){
 				//If determination is already in omoccurdeterminations, INSERT will fail move omoccurrences determination to  table
 				$sqlInsert = 'INSERT INTO omoccurdeterminations(occid, identifiedBy, dateIdentified, sciname, scientificNameAuthorship, '.
@@ -118,7 +118,7 @@ class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 
 				$tidToAdd = $detArr['tidtoadd'];
 				if($tidToAdd && !is_numeric($tidToAdd)) $tidToAdd = 0;
-				
+
 				//Check to see if taxon has a locality security protection (rare, threatened, or sensitive species)
 				$sStatus = 0;
 				if($tidToAdd){
@@ -144,18 +144,20 @@ class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 						$rsSs2->free();
 					}
 				}
-				
+
 				//Load new determination into omoccurrences table
 				$sqlNewDet = 'UPDATE omoccurrences '.
-					'SET identifiedBy = "'.$this->cleanInStr($detArr['identifiedby']).'", dateIdentified = "'.$this->cleanInStr($detArr['dateidentified']).'",'.
-					'family = '.($detArr['family']?'"'.$this->cleanInStr($detArr['family']).'"':'NULL').','.
+					'SET family = '.($detArr['family']?'"'.$this->cleanInStr($detArr['family']).'"':'NULL').','.
 					'sciname = "'.$sciname.'",genus = NULL, specificEpithet = NULL, taxonRank = NULL, infraspecificepithet = NULL,'.
 					'scientificNameAuthorship = '.($detArr['scientificnameauthorship']?'"'.$this->cleanInStr($detArr['scientificnameauthorship']).'"':'NULL').','.
-					'identificationQualifier = '.($detArr['identificationqualifier']?'"'.$this->cleanInStr($detArr['identificationqualifier']).'"':'NULL').','.
-					'identificationReferences = '.($detArr['identificationreferences']?'"'.$this->cleanInStr($detArr['identificationreferences']).'"':'NULL').','.
-					'identificationRemarks = '.($detArr['identificationremarks']?'"'.$this->cleanInStr($detArr['identificationremarks']).'"':'NULL').', '.
-					'tidinterpreted = '.($tidToAdd?$tidToAdd:'NULL').', localitysecurity = '.$sStatus.
-					' WHERE (occid = '.$this->occid.')';
+					'tidinterpreted = '.($tidToAdd?$tidToAdd:'NULL').', localitysecurity = '.$sStatus;
+				if($detArr['identifiedby'] != 'Nomenclatural Adjustment'){
+					$sqlNewDet .= ',identifiedBy = "'.$this->cleanInStr($detArr['identifiedby']).'", dateIdentified = "'.$this->cleanInStr($detArr['dateidentified']).'",'.
+						'identificationQualifier = '.($detArr['identificationqualifier']?'"'.$this->cleanInStr($detArr['identificationqualifier']).'"':'NULL').','.
+						'identificationReferences = '.($detArr['identificationreferences']?'"'.$this->cleanInStr($detArr['identificationreferences']).'"':'NULL').','.
+						'identificationRemarks = '.($detArr['identificationremarks']?'"'.$this->cleanInStr($detArr['identificationremarks']).'"':'NULL');
+				}
+				$sqlNewDet .= ' WHERE (occid = '.$this->occid.')';
 				//echo "<div>".$sqlNewDet."</div>";
 				$this->conn->query($sqlNewDet);
 				//Add identification confidence
@@ -169,27 +171,6 @@ class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 				if(!$this->conn->query($sql)){
 					$status = 'ERROR: Annotation added but failed to remap images to new name';
 					$status .= ': '.$this->conn->error;
-				}
-			}
-			//FP code
-			global $fpEnabled;
-			if(isset($fpEnabled) && $fpEnabled && isset($detArr['fpsubmit']) && $detArr['fpsubmit']) {
-				$status = "Determination added successfully and submitted to Filtered Push!";
-				try {
-					// create an array that the annotation generator can understand from $detArr
-					$annotation = fpNewDetArr($detArr);
-			
-					// generate rdf/xml
-					$generator = FPNetworkFactory::getAnnotationGenerator();
-					$rdf = $generator->generateRdfXml($annotation);
-			
-					// inject annotation into fp
-					$network = FPNetworkFactory::getNetworkFacade();
-					$response = $network->injectIntoFP($rdf);
-				} 
-				catch (Exception $e) {
-					error_log($e->getFile() . '(' . $e->getLine() . '): ' . $e->getMessage());
-					$status = "Determination added successfully but there was an error during submission to Filtered Push!";
 				}
 			}
 		}
@@ -241,7 +222,7 @@ class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 			'WHERE (detid = '.$detId.')';
 			$this->conn->query($sqlArchive);
 		}
-		
+
 		if($isCurrent){
 			$prevDetId = 0;
 			$sql2 = 'SELECT detid FROM omoccurdeterminations WHERE occid = '.$occid.' AND detid <> '.$detId.' '.
@@ -254,7 +235,7 @@ class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 				$this->applyDetermination($prevDetId, 1);
 			}
 		}
-		
+
 		$sql = 'DELETE FROM omoccurdeterminations WHERE (detid = '.$detId.')';
 		if(!$this->conn->query($sql)){
 			$status = "ERROR - failed to delete determination: ".$this->conn->error;
@@ -262,7 +243,7 @@ class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 
 		return $status;
 	}
-	
+
 	public function applyDetermination($detId, $makeCurrent){
 		$statusStr = 'Determiantion has been applied';
 		//Get ConfidenceRanking value
@@ -273,11 +254,11 @@ class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 			$iqStr = $rcr->identificationremarks;
 			if(preg_match('/ConfidenceRanking: (\d{1,2})/',$iqStr,$m)){
 				if($makeCurrent) $this->editIdentificationRanking($m[1],'');
-				$iqStr = trim(str_replace('ConfidenceRanking: '.$m[1],'',$iqStr),' ;');				
+				$iqStr = trim(str_replace('ConfidenceRanking: '.$m[1],'',$iqStr),' ;');
 			}
 		}
 		$rscr->free();
-		
+
 		//Update applied status of det
 		$sql = 'UPDATE omoccurdeterminations '.
 			'SET appliedstatus = 1, iscurrent = '.$makeCurrent.', '.
@@ -338,7 +319,7 @@ class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 			}
 			$rsSs2->free();
 		}
-		
+
 		$sqlNewDet = 'UPDATE omoccurrences o INNER JOIN omoccurdeterminations d ON o.occid = d.occid '.
 			'SET o.identifiedBy = d.identifiedBy, o.dateIdentified = d.dateIdentified,o.family = '.($family?'"'.$family.'"':'NULL').','.
 			'o.sciname = d.sciname,o.genus = NULL,o.specificEpithet = NULL,o.taxonRank = NULL,o.infraspecificepithet = NULL,o.scientificname = NULL,'.
@@ -385,57 +366,48 @@ class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 		$detArr['dateidentified'] = date('F').' '.date('j').', '.date('Y');
 		$this->addDetermination($detArr,$isEditor);
 	}
-	
-	public function getBulkDetRows($collid,$catNum,$sciName,$occStr){
-		$retHtml = '';
-		$sql = 'SELECT occid, catalogNumber, sciname, CONCAT_WS(" ",recordedby,IFNULL(recordnumber,eventdate)) AS collector, '.
-			'CONCAT_WS(", ",country,stateprovince,county,locality) AS locality '.
-			'FROM omoccurrences '.
-			'WHERE collid = '.$collid.' ';
-		if($catNum){
-			$sql .= 'AND catalogNumber = "'.$catNum.'" ';
-		}
-		elseif($sciName){
-			$sql .= 'AND sciname = "'.$sciName.'" ';
-		}
-		elseif($occStr){
-			$sql .= 'AND occid IN('.$occStr.') ';
-		}
-		$sql .= 'LIMIT 400 ';
-		$rs = $this->conn->query($sql);
-		while($r = $rs->fetch_object()){
-			$loc = $r->locality;
-			if(strlen($loc) > 500) $loc = substr($loc,400);
-			$retHtml .= '<tr>';
-			$retHtml .= '<td><input type="checkbox" name="occid[]" value="'.$r->occid.'" checked /></td>';
-			$retHtml .= '<td>';
-			$retHtml .= '<a href="#" onclick="openIndPopup('.$r->occid.'); return false;">'.($r->catalogNumber?$r->catalogNumber:'[no catalog number]').'</a>';
-			$retHtml .= '<a href="#" onclick="openEditorPopup('.$r->occid.'); return false;"><img src="../../images/edit.png" /></a>';
-			$retHtml .= '</td>';
-			$retHtml .= '<td>'.$r->sciname.'</td>';
-			$retHtml .= '<td>'.$r->collector.'; '.$loc.'</td>';
-			$retHtml .= '</tr>';
-		}
-		$rs->free();
-		return $retHtml;
-	}
-	
-	public function getCatNumArr($occStr){
+
+	public function getNewDetItem($catNum,$sciName){
 		$retArr = array();
-		$sql = 'SELECT catalogNumber '.
-			'FROM omoccurrences '.
-			'WHERE occid IN('.$occStr.') ';
-		$rs = $this->conn->query($sql);
-		while($r = $rs->fetch_object()){
-			$retArr[] = $r->catalogNumber;
+		if($catNum || $sciName){
+			$sql = 'SELECT occid, catalogNumber, sciname, CONCAT_WS(" ",recordedby,IFNULL(recordnumber,eventdate)) AS collector, '.
+				'CONCAT_WS(", ",country,stateprovince,county,locality) AS locality '.
+				'FROM omoccurrences '.
+				'WHERE collid = '.$this->collId.' ';
+			if($catNum){
+				$catNumArr = explode(',',$catNum);
+				foreach($catNumArr as $k => $u){
+					$u = trim($u);
+					if($u){
+						$catNumArr[$k] = $this->cleanInStr($u);
+					}
+					else{
+						unset($catNumArr[$k]);
+					}
+				}
+				$sql .= 'AND catalogNumber IN("'.implode('","',$catNumArr).'") ';
+			}
+			elseif($sciName){
+				$sql .= 'AND sciname = "'.$this->cleanInStr($sciName).'" ';
+			}
+			$sql .= 'LIMIT 400 ';
+			//echo $sql;
+			$rs = $this->conn->query($sql);
+			while($r = $rs->fetch_object()){
+				$loc = $r->locality;
+				if(strlen($loc) > 500) $loc = substr($loc,400);
+				$retArr[$r->occid]['cn'] = $r->catalogNumber;
+				$retArr[$r->occid]['sn'] = $r->sciname;
+				$retArr[$r->occid]['coll'] = $r->collector;
+				$retArr[$r->occid]['loc'] = $loc;
+			}
+			$rs->free();
 		}
-		$rs->free();
 		return $retArr;
 	}
-	
+
 	public function getCollName(){
 		return $this->collMap['collectionname'].' ('.$this->collMap['institutioncode'].($this->collMap['collectioncode']?':'.$this->collMap['collectioncode']:'').')';
 	}
-
 }
 ?>
