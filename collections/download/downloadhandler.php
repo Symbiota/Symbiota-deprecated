@@ -21,7 +21,7 @@ $solrManager = new SOLRManager();
 
 $occWhereStr = '';
 
-if($stArrCollJson && $stArrSearchJson){
+if($stArrSearchJson){
 	$stArrSearchJson = str_replace("%apos;","'",$stArrSearchJson);
 	$collStArr = json_decode($stArrCollJson, true);
 	$searchStArr = json_decode($stArrSearchJson, true);
