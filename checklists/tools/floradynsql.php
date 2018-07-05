@@ -1,7 +1,7 @@
 <?php
 	include_once('../../config/symbini.php');
-	include_once($serverRoot.'/classes/InventoryDynSqlManager.php');
-	header("Content-Type: text/html; charset=".$charset);
+	include_once($SERVER_ROOT.'/classes/InventoryDynSqlManager.php');
+	header("Content-Type: text/html; charset=".$CHARSET);
 	header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
 	header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
 	$action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:""; 
@@ -11,7 +11,7 @@
 	$dynSqlManager = new InventoryDynSqlManager($clid);
 	$isEditable = false;
 	$statusStr = "";
-	if($isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid(),$userRights["ClAdmin"]))){
+	if($IS_ADMIN || (array_key_exists("ClAdmin",$USER_RIGHTS) && in_array($clid(),$USER_RIGHTS["ClAdmin"]))){
 		$isEditable = true;
 		
 		//Submit checklist MetaData edits
@@ -35,8 +35,8 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en_US" xml:lang="en_US">
 
 <head>
-	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>"/>
-	<title><?php echo $defaultTitle; ?> Flora Linkage Builder </title>
+	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET; ?>"/>
+	<title><?php echo $DEFAULT_TITLE; ?> Flora Linkage Builder </title>
 	<link href="../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 	<script language=javascript>
@@ -81,7 +81,7 @@
 <body>
 <?php
 	$displayLeftMenu = (isset($checklists_tools_floradynsqlMenu)?$checklists_tools_floradynsqlMenu:"true");
-	include($serverRoot.'/header.php');
+	include($SERVER_ROOT.'/header.php');
 	if(isset($checklists_tools_floradynsqlCrumbs)){
 		echo "<div class='navpath'>";
 		echo "<a href='../index.php'>Home</a> &gt; ";
@@ -179,7 +179,7 @@
 		<?php } ?>
 	</div>
 	<?php
- 	include($serverRoot.'/footer.php');
+ 	include($SERVER_ROOT.'/footer.php');
 	?>
 
 </body>

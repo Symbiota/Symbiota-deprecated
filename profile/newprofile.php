@@ -70,19 +70,18 @@ if($action == "Create Login"){
 <html>
 <head>
 	<title><?php echo $DEFAULT_TITLE; ?> - New User Profile</title>
-	<meta http-equiv="X-Frame-Options" content="deny">
 	<link href="../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 	<script type="text/javascript">
 		function validateform(f){
-			<?php 
+			<?php
 			if($useRecaptcha){
 				?>
 				if(grecaptcha.getResponse() == ""){
 					alert("You must first check the reCAPTCHA checkbox (I'm not a robot)");
 					return false;
 				}
-				<?php 
+				<?php
 			}
 			?>
 			var pwd1 = f.pwd.value;
@@ -110,8 +109,8 @@ if($action == "Create Login"){
 				window.alert("User Name must contain a value");
 				return false;
 			}
-			if( /[^0-9A-Za-z_!@#$-+]/.test( f.login.value ) ) {
-		        alert("Login name should only contain 0-9A-Za-z_!@ (spaces are not allowed)");
+			if( /[^0-9A-Za-z_!@#$-+.]/.test( f.login.value ) ) {
+		        alert("Login name should only contain 0-9A-Za-z_.!@ (spaces are not allowed)");
 		        return false;
 		    }
 			if(f.emailaddr.value.replace(/\s/g, "") == "" ){
@@ -126,11 +125,11 @@ if($action == "Create Login"){
 				window.alert("Last Name must contain a value");
 				return false;
 			}
-	
+
 			return true;
 		}
 	</script>
-	<?php 
+	<?php
 	if($useRecaptcha) echo '<script src="https://www.google.com/recaptcha/api.js"></script>';
 	?>
 </head>
@@ -147,7 +146,7 @@ if($action == "Create Login"){
 	?>
 	<div id="innertext">
 	<h1>Create New Profile</h1>
-	
+
 	<?php
 	if($displayStr){
 		echo '<div style="margin:10px;font-size:110%;font-weight:bold;color:red;">';
@@ -158,7 +157,7 @@ if($action == "Create Login"){
 		elseif($displayStr == 'email_registered'){
 			?>
 			<div>
-				A different login is already registered to this email address.<br/> 
+				A different login is already registered to this email address.<br/>
 				Use button below to have login emailed to <?php echo $emailAddr; ?>
 				<div style="margin:15px">
 					<form name="retrieveLoginForm" method="post" action="index.php">
@@ -167,7 +166,7 @@ if($action == "Create Login"){
 					</form>
 				</div>
 			</div>
-			<?php 
+			<?php
 		}
 		elseif($displayStr == 'email_invalid'){
 			echo 'Email address not valid';
@@ -188,7 +187,7 @@ if($action == "Create Login"){
 							<b>Login:</b>
 						</td>
 						<td>
-							<input name="login" value="<?php echo $login; ?>" size="20" /> 
+							<input name="login" value="<?php echo $login; ?>" size="20" />
 							<span style="color:red;">*</span>
 							<br/>&nbsp;
 						</td>
@@ -198,38 +197,38 @@ if($action == "Create Login"){
 							<b>Password:</b>
 						</td>
 						<td>
-							<input name="pwd" id="pwd" value="" size="20" type="password" autocomplete="off" /> 
+							<input name="pwd" id="pwd" value="" size="20" type="password" autocomplete="off" />
 							<span style="color:red;">*</span>
-						</td> 
+						</td>
 					</tr>
 					<tr>
 						<td>
-							<b>Password Again:</b> 
+							<b>Password Again:</b>
 						</td>
 						<td>
-							<input id="pwd2" name="pwd2" value="" size="20" type="password" autocomplete="off" /> 
+							<input id="pwd2" name="pwd2" value="" size="20" type="password" autocomplete="off" />
 							<span style="color:red;">*</span>
 							<br/>&nbsp;
-						</td> 
+						</td>
 					</tr>
 					<tr>
 						<td><span style="font-weight:bold;">First Name:</span></td>
 						<td>
-							<input id="firstname" name="firstname" size="40" value="<?php echo (isset($_POST['firstname'])?htmlspecialchars($_POST['firstname']):''); ?>"> 
+							<input id="firstname" name="firstname" size="40" value="<?php echo (isset($_POST['firstname'])?htmlspecialchars($_POST['firstname']):''); ?>">
 							<span style="color:red;">*</span>
 						</td>
 					</tr>
 					<tr>
 						<td><span style="font-weight:bold;">Last Name:</span></td>
 						<td>
-							<input id="lastname" name="lastname" size="40" value="<?php echo (isset($_POST['lastname'])?htmlspecialchars($_POST['lastname']):''); ?>"> 
+							<input id="lastname" name="lastname" size="40" value="<?php echo (isset($_POST['lastname'])?htmlspecialchars($_POST['lastname']):''); ?>">
 							<span style="color:red;">*</span>
 						</td>
 					</tr>
 					<tr>
 						<td><span style="font-weight:bold;">Email Address:</span></td>
 						<td>
-							<span class="profile"><input name="emailaddr"  size="40" value="<?php echo $emailAddr; ?>"></span> 
+							<span class="profile"><input name="emailaddr"  size="40" value="<?php echo $emailAddr; ?>"></span>
 							<span style="color:red;">*</span>
 						</td>
 					</tr>
@@ -300,7 +299,7 @@ if($action == "Create Login"){
 					<tr>
 						<td colspan="2">
 							<div style="margin:10px;">
-								<?php 
+								<?php
 								if($useRecaptcha) echo '<div class="g-recaptcha" data-sitekey="'.$RECAPTCHA_PUBLIC_KEY.'"></div>';
 								?>
 							</div>

@@ -1,5 +1,7 @@
 <?php
-include_once('../../config/dbconnection.php');
+include_once('../../config/symbini.php');
+include_once($SERVER_ROOT.'/config/dbconnection.php');
+
 $con = MySQLiConnectionFactory::getCon("readonly");
 $returnArr = Array();
 $retArrRow = Array();
@@ -18,7 +20,7 @@ if($queryString) {
 		if($row->edition){
 			$titleLine .= ' '.$row->edition.' Ed.';
 		}
-		$retArrRow['label'] = htmlentities($titleLine);
+		$retArrRow['label'] = htmlentities($titleLine, ENT_COMPAT, $CHARSET);
 		$retArrRow['value'] = $row->refid;
 		array_push($returnArr, $retArrRow);
 	}

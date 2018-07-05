@@ -215,6 +215,8 @@ ALTER TABLE `fmprojects`
   ADD COLUMN `headerUrl` VARCHAR(150) NULL AFTER `iconUrl`,
   ADD COLUMN `dynamicProperties` TEXT NULL AFTER `ispublic`;
 
+ALTER TABLE `fmprojects` 
+  CHANGE COLUMN `fulldescription` `fulldescription` VARCHAR(5000) NULL DEFAULT NULL ;
 
 #Identification key
 ALTER TABLE `kmcharacterlang` DROP FOREIGN KEY `FK_characterlang_1`;

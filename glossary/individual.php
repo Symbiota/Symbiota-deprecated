@@ -8,7 +8,7 @@ $glimgId = array_key_exists('glimgid',$_REQUEST)?$_REQUEST['glimgid']:0;
 $formSubmit = array_key_exists('formsubmit',$_POST)?$_POST['formsubmit']:'';
 
 $isEditor = false;
-if($isAdmin || array_key_exists("Taxonomy",$USER_RIGHTS)){
+if($IS_ADMIN || array_key_exists("Taxonomy",$USER_RIGHTS)){
 	$isEditor = true;
 }
 
@@ -54,8 +54,8 @@ if($glossId){
 		<?php include_once($SERVER_ROOT.'/config/googleanalytics.php'); ?>
 	</script>
 	<!-- This is inner text! -->
-	<div id="innertext" style="width:680px;margin-left:0px;margin-right:0px;">
-		<div id="tabs" style="padding:10px;margin:0px;">
+	<div id="innertext" style="width:680px;">
+		<div id="tabs" style="padding:10px">
 			<div style="clear:both;">
 				<?php
 				if($isEditor){
@@ -77,14 +77,14 @@ if($glossId){
 					<div style="clear:both;">
 						<div style='' >
 							<div style='margin-top:8px;width:95%' >
-								<b>Definition:</b> 
+								<b>Definition:</b>
 								<?php echo $termArr['definition']; ?>
 							</div>
 							<?php
 							if($termArr['author']){
 								?>
 								<div style='margin-top:8px;' >
-									<b>Author:</b> 
+									<b>Author:</b>
 									<?php echo $termArr['author']; ?>
 								</div>
 								<?php
@@ -92,7 +92,7 @@ if($glossId){
 							if($termArr['translator']){
 								?>
 								<div style='margin-top:8px;' >
-									<b>Translator:</b> 
+									<b>Translator:</b>
 									<?php echo $termArr['translator']; ?>
 								</div>
 								<?php
@@ -138,7 +138,7 @@ if($glossId){
 							if($termArr['notes']){
 								?>
 								<div style='margin-top:8px;' >
-									<b>Notes:</b> 
+									<b>Notes:</b>
 									<?php echo $termArr['notes']; ?>
 								</div>
 								<?php
@@ -153,7 +153,7 @@ if($glossId){
 								}
 								?>
 								<div style='margin-top:8px;' >
-									<b>Resource URL:</b> 
+									<b>Resource URL:</b>
 									<?php echo $resource; ?>
 								</div>
 								<?php
@@ -161,7 +161,7 @@ if($glossId){
 							if($termArr['source']){
 								?>
 								<div style='margin-top:8px;' >
-									<b>Source:</b> 
+									<b>Source:</b>
 									<?php echo $termArr['source']; ?>
 								</div>
 								<?php
@@ -169,7 +169,7 @@ if($glossId){
 							?>
 						</div>
 						<div style="clear:both;margin:15px 0px;">
-							<b>Relevant Taxa:</b> 
+							<b>Relevant Taxa:</b>
 							<?php
 							$sourceArr = $glosManager->getTaxonSources();
 							foreach($sourceArr as $tid => $arr){
@@ -203,10 +203,10 @@ if($glossId){
 							?>
 							<fieldset style='clear:both;border:0px;padding:0px;margin-top:10px;'>
 								<div style='width:250px;'>
-									<?php 
+									<?php
 									$imgWidth = 0;
 									$imgHeight = 0;
-									$size = getimagesize($imgUrl);
+									$size = getimagesize(str_replace(' ', '%20', $imgUrl));
 									if($size[0] > 240){
 										$imgWidth = 240;
 										$imgHeight = 0;
@@ -230,7 +230,7 @@ if($glossId){
 									if($imgArr['structures']){
 										?>
 										<div style='overflow:hidden;width:250px;margin-top:8px;' >
-											<b>Structures:</b> 
+											<b>Structures:</b>
 											<?php echo wordwrap($imgArr["structures"], 370, "<br />\n"); ?>
 										</div>
 										<?php
@@ -238,7 +238,7 @@ if($glossId){
 									if($imgArr['notes']){
 										?>
 										<div style='overflow:hidden;width:250px;margin-top:8px;' >
-											<b>Notes:</b> 
+											<b>Notes:</b>
 											<?php echo wordwrap($imgArr["notes"], 370, "<br />\n"); ?>
 										</div>
 										<?php

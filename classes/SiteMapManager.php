@@ -1,5 +1,5 @@
 <?php
-include_once($serverRoot.'/config/dbconnection.php');
+include_once($SERVER_ROOT.'/config/dbconnection.php');
 
 class SiteMapManager{
 	
@@ -17,17 +17,17 @@ class SiteMapManager{
 	}
 
 	public function setCollectionList(){
-		global $userRights, $isAdmin;
+		global $USER_RIGHTS, $IS_ADMIN;
 		$adminArr = array();
 		$editorArr = array();
 		$sql = 'SELECT c.collid, CONCAT_WS(":",c.institutioncode, c.collectioncode) AS ccode, c.collectionname, c.colltype '.
 			'FROM omcollections c ';
-		if(!$isAdmin){
-			if(array_key_exists("CollAdmin",$userRights)){
-				$adminArr = $userRights['CollAdmin'];
+		if(!$IS_ADMIN){
+			if(array_key_exists("CollAdmin",$USER_RIGHTS)){
+				$adminArr = $USER_RIGHTS['CollAdmin'];
 			}
-			if(array_key_exists("CollEditor",$userRights)){
-				$editorArr = $userRights['CollEditor'];
+			if(array_key_exists("CollEditor",$USER_RIGHTS)){
+				$editorArr = $USER_RIGHTS['CollEditor'];
 			}
 			if($adminArr || $editorArr){
 				$sql .= 'WHERE (c.collid IN('.implode(',',array_merge($adminArr,$editorArr)).')) ';
@@ -43,7 +43,7 @@ class SiteMapManager{
 			if($rs){
 				while($row = $rs->fetch_object()){
 					$name = $row->collectionname.($row->ccode?" (".$row->ccode.")":"");
-					$isCollAdmin = ($isAdmin||in_array($row->collid,$adminArr)?1:0);
+					$isCollAdmin = ($IS_ADMIN||in_array($row->collid,$adminArr)?1:0);
 					if($row->colltype == 'Observations'){
 						$this->obsArr[$row->collid]['name'] = $name;
 						$this->obsArr[$row->collid]['isadmin'] = $isCollAdmin; 

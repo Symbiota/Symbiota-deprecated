@@ -1,6 +1,5 @@
 <?php
 include_once($SERVER_ROOT.'/config/dbconnection.php');
-include_once($SERVER_ROOT.'/classes/SOLRManager.php');
 
 class OccurrenceMaintenance {
 
@@ -27,11 +26,12 @@ class OccurrenceMaintenance {
 		}
  	}
 
-	//General cleaning functions 
+	//General cleaning functions
 	public function generalOccurrenceCleaning($collId){
 		set_time_limit(600);
 		$status = true;
 
+		/*
 		if($this->verbose) $this->outputMsg('Updating null families of family rank identifications... ',1);
 		$sql1 = 'SELECT occid FROM omoccurrences WHERE (family IS NULL) AND (sciname LIKE "%aceae" OR sciname LIKE "%idae")';
 		$rs1 = $this->conn->query($sql1);
@@ -52,7 +52,8 @@ class OccurrenceMaintenance {
 			}
 		}
 		unset($occidArr1);
-		
+		*/
+
 		if($this->verbose) $this->outputMsg('Updating null scientific names of family rank identifications... ',1);
 		$sql1 = 'SELECT occid FROM omoccurrences WHERE family IS NOT NULL AND sciname IS NULL';
 		$rs1 = $this->conn->query($sql1);
@@ -71,7 +72,7 @@ class OccurrenceMaintenance {
 			}
 		}
 		unset($occidArr2);
-		
+
 		if($this->verbose) $this->outputMsg('Indexing valid scientific names (e.g. populating tidinterpreted)... ',1);
 		$sql1 = 'SELECT o.occid FROM omoccurrences o INNER JOIN taxa t ON o.sciname = t.sciname '.
 			'WHERE o.collid IN('.$collId.') AND o.TidInterpreted IS NULL';
@@ -83,7 +84,7 @@ class OccurrenceMaintenance {
 		$rs1->free();
 		if($occidArr3){
 			$sql = 'UPDATE omoccurrences o INNER JOIN taxa t ON o.sciname = t.sciname '.
-				'SET o.TidInterpreted = t.tid '. 
+				'SET o.TidInterpreted = t.tid '.
 				'WHERE o.occid IN('.implode(',',$occidArr3).') ';
 			if(!$this->conn->query($sql)){
 				$errStr = 'WARNING: unable to update tidinterpreted; '.$this->conn->error;
@@ -93,7 +94,7 @@ class OccurrenceMaintenance {
 			}
 		}
 		unset($occidArr3);
-		
+
 		if($this->verbose) $this->outputMsg('Updating and indexing occurrence images... ',1);
 		$sql1 = 'SELECT o.occid FROM omoccurrences o INNER JOIN images i ON o.occid = i.occid '.
 			'WHERE o.collid IN('.$collId.') AND (i.tid IS NULL) AND (o.tidinterpreted IS NOT NULL)';
@@ -104,8 +105,8 @@ class OccurrenceMaintenance {
 		}
 		$rs1->free();
 		if($occidArr4){
-			$sql = 'UPDATE omoccurrences o INNER JOIN images i ON o.occid = i.occid '. 
-				'SET i.tid = o.tidinterpreted '. 
+			$sql = 'UPDATE omoccurrences o INNER JOIN images i ON o.occid = i.occid '.
+				'SET i.tid = o.tidinterpreted '.
 				'WHERE o.occid IN('.implode(',',$occidArr4).')';
 			if(!$this->conn->query($sql)){
 				$errStr = 'WARNING: unable to update image tid field; '.$this->conn->error;
@@ -115,7 +116,7 @@ class OccurrenceMaintenance {
 			}
 		}
 		unset($occidArr4);
-		
+
 		if($this->verbose) $this->outputMsg('Updating null families using taxonomic thesaurus... ',1);
 		$sql1 = 'SELECT o.occid FROM omoccurrences o INNER JOIN taxstatus ts ON o.tidinterpreted = ts.tid '.
 			'WHERE o.collid IN('.$collId.') AND (ts.taxauthid = 1) AND (ts.family IS NOT NULL) AND (o.family IS NULL)';
@@ -126,8 +127,8 @@ class OccurrenceMaintenance {
 		}
 		$rs1->free();
 		if($occidArr5){
-			$sql = 'UPDATE omoccurrences o INNER JOIN taxstatus ts ON o.tidinterpreted = ts.tid '. 
-				'SET o.family = ts.family '. 
+			$sql = 'UPDATE omoccurrences o INNER JOIN taxstatus ts ON o.tidinterpreted = ts.tid '.
+				'SET o.family = ts.family '.
 				'WHERE o.occid IN('.implode(',',$occidArr5).')';
 			if(!$this->conn->query($sql)){
 				$errStr = 'WARNING: unable to update family in omoccurrence table; '.$this->conn->error;
@@ -149,8 +150,8 @@ class OccurrenceMaintenance {
 		}
 		$rs1->free();
 		if($occidArr6){
-			$sql = 'UPDATE omoccurrences o INNER JOIN taxa t ON o.tidinterpreted = t.tid '. 
-				'SET o.scientificNameAuthorship = t.author '. 
+			$sql = 'UPDATE omoccurrences o INNER JOIN taxa t ON o.tidinterpreted = t.tid '.
+				'SET o.scientificNameAuthorship = t.author '.
 				'WHERE (o.occid IN('.implode(',',$occidArr6).'))';
 			if(!$this->conn->query($sql)){
 				$errStr = 'WARNING: unable to update author; '.$this->conn->error;
@@ -160,14 +161,14 @@ class OccurrenceMaintenance {
 			}
 		}
 		unset($occidArr6);
-		
+
 		/*
 		if($this->verbose) $this->outputMsg('Updating georeference index... ',1);
 		$sql = 'INSERT IGNORE INTO omoccurgeoindex(tid,decimallatitude,decimallongitude) '.
-			'SELECT DISTINCT o.tidinterpreted, round(o.decimallatitude,3), round(o.decimallongitude,3) '.
+			'SELECT DISTINCT o.tidinterpreted, round(o.decimallatitude,2), round(o.decimallongitude,2) '.
 			'FROM omoccurrences o '.
-			'WHERE o.tidinterpreted IS NOT NULL AND o.decimallatitude IS NOT NULL '.
-			'AND o.decimallongitude IS NOT NULL ';
+			'WHERE (o.tidinterpreted IS NOT NULL) AND (o.decimallatitude between -180 and 180) AND (o.decimallongitude between -180 and 180) '.
+			'AND (o.cultivationStatus IS NULL OR o.cultivationStatus = 0) AND (o.coordinateUncertaintyInMeters IS NULL OR o.coordinateUncertaintyInMeters < 10000) ';
 		if(!$this->conn->query($sql)){
 			$errStr = 'WARNING: unable to update georeference index; '.$this->conn->error;
 			$this->errorArr[] = $errStr;
@@ -175,27 +176,27 @@ class OccurrenceMaintenance {
 			$status = false;
 		}
 		*/
-		
+
 		return $status;
 	}
-	
+
 	//Protect Rare species data
 	public function protectRareSpecies($collid = 0){
 		$this->protectGloballyRareSpecies($collid);
 		$this->protectStateRareSpecies($collid);
 	}
-	
+
 	public function protectGloballyRareSpecies($collid = 0){
 		$status = true;
 		//protect globally rare species
 		if($this->verbose) $this->outputMsg('Protecting globally rare species... ',1);
 		$sensitiveArr = array();
-		//Only protect names on list and synonym of accepted names 
+		//Only protect names on list and synonym of accepted names
 		//Get names on list
 		$sql = 'SELECT DISTINCT tid FROM taxa WHERE (SecurityStatus > 0)';
-		$rs = $this->conn->query($sql); 
+		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
-			$sensitiveArr[] = $r->tid; 
+			$sensitiveArr[] = $r->tid;
 		}
 		$rs->free();
 		//Get synonyms of names on list
@@ -207,7 +208,7 @@ class OccurrenceMaintenance {
 			$sensitiveArr[] = $r2->tid;
 		}
 		$rs2->free();
-		
+
 		if($sensitiveArr){
 			$sql2 = 'UPDATE omoccurrences o '.
 				'SET o.LocalitySecurity = 1 '.
@@ -228,7 +229,7 @@ class OccurrenceMaintenance {
 		if($this->verbose) $this->outputMsg('Protecting state level rare species... ',1);
 		$sql = 'SELECT o.occid FROM omoccurrences o INNER JOIN taxstatus ts1 ON o.tidinterpreted = ts1.tid '.
 			'INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '.
-			'INNER JOIN fmchecklists c ON o.stateprovince = c.locality '. 
+			'INNER JOIN fmchecklists c ON o.stateprovince = c.locality '.
 			'INNER JOIN fmchklsttaxalink cl ON c.clid = cl.clid AND ts2.tid = cl.tid '.
 			'WHERE (o.localitysecurity IS NULL OR o.localitysecurity = 0) AND (o.localitySecurityReason IS NULL) AND (c.type = "rarespp") '.
 			'AND (ts1.taxauthid = 1) AND (ts2.taxauthid = 1) ';
@@ -239,7 +240,7 @@ class OccurrenceMaintenance {
 			$occArr[] = $r->occid;
 		}
 		$rs->free();
-		
+
 		if($occArr){
 			$sql2 = 'UPDATE omoccurrences '.
 				'SET localitysecurity = 1 '.
@@ -256,9 +257,8 @@ class OccurrenceMaintenance {
 
 	//Update statistics
 	public function updateCollectionStats($collid, $full = false){
-        global $SOLR_MODE;
-	    set_time_limit(600);
-		
+		set_time_limit(600);
+
 		$recordCnt = 0;
 		$georefCnt = 0;
 		$familyCnt = 0;
@@ -338,7 +338,7 @@ class OccurrenceMaintenance {
 				}
 			}
 			$rs->free();
-			
+
 			if($this->verbose) $this->outputMsg('Calculating counts per country... ',1);
 			$sql = 'SELECT o.country, COUNT(o.occid) AS CountryCount, COUNT(o.decimalLatitude) AS GeorefSpecimensPerCountry, '.
 				'COUNT(CASE WHEN t.RankId >= 220 THEN o.occid ELSE NULL END) AS IDSpecimensPerCountry, '.
@@ -384,7 +384,7 @@ class OccurrenceMaintenance {
 				$speciesCnt = $r->SpeciesCount;
 			}
 		}
-		
+
 		$sql = 'UPDATE omcollectionstats cs '.
 			'SET cs.recordcnt = '.$recordCnt.',cs.georefcnt = '.$georefCnt.',cs.familycnt = '.$familyCnt.',cs.genuscnt = '.$genusCnt.
 			',cs.speciescnt = '.$speciesCnt.', cs.datelastmodified = CURDATE() '.
@@ -394,12 +394,8 @@ class OccurrenceMaintenance {
 			$this->errorArr[] = $errStr;
 			if($this->verbose) $this->outputMsg($errStr,2);
 		}
-		if($SOLR_MODE){
-            $solrManager = new SOLRManager();
-            $solrManager->updateSOLR();
-        }
 	}
-	
+
 	//Misc support functions
 	public function getCollectionMetadata($collid){
 		$retArr = array();
@@ -419,7 +415,7 @@ class OccurrenceMaintenance {
 		}
 		return $retArr;
 	}
-	
+
 	public function setVerbose($v){
 		if($v){
 			$this->verbose = true;

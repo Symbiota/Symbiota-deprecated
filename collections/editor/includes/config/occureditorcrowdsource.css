@@ -259,6 +259,10 @@ body{
 	display:none;
 }
 
+#localityExtraToggle{
+	display:none;
+}
+
 #decimalLatitudeDiv{
 	float:left;
 	margin-right: 2px;
@@ -371,11 +375,31 @@ body{
 	width:	150px;
 }
 
-#locExtraToggleDiv{
+#depthDiv{
+	float: left;
+	margin-right: 2px;
+	margin-top:2px;
+}
+
+#depthDiv input{
+	width:55px;
+}
+
+#verbatimDepthDiv{
+	float: left;
+	margin-right: 2px;
+	margin-top:2px;
+}
+
+#verbatimDepthDiv input{
+	width:	150px;
+}
+
+#georefExtraToggleDiv{
 	display:none;
 }
 
-#locExtraDiv{
+#georefExtraDiv{
 	display:block;
 }
 
@@ -436,7 +460,12 @@ body{
 }
 
 #verbatimAttributesDiv{
-	display:none;
+	float: left;
+	margin-top:2px;
+}
+
+#verbatimAttributesDiv input{
+	width: 550px;
 }
 
 #occurrenceRemarksDiv{
@@ -494,7 +523,8 @@ body{
 }
 
 #cultivationStatusDiv{
-	display:none;
+	float: left;
+	margin-top:2px;
 }
 
 #typeStatusDiv{
@@ -510,6 +540,14 @@ body{
 }
 
 #fieldNumberDiv{
+	display:none;
+}
+
+#institutionCodeDiv{
+	display:none;
+}
+
+#collectionCodeDiv{
 	display:none;
 }
 

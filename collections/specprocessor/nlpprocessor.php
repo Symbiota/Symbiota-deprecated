@@ -1,10 +1,10 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/SpecProcessorManager.php');
-include_once($serverRoot.'/classes/SpecProcNlpBryophyte.php');
-include_once($serverRoot.'/classes/SpecProcNlpLichen.php');
-include_once($serverRoot.'/classes/SpecProcNlpSalix.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/SpecProcessorManager.php');
+include_once($SERVER_ROOT.'/classes/SpecProcNlpBryophyte.php');
+include_once($SERVER_ROOT.'/classes/SpecProcNlpLichen.php');
+include_once($SERVER_ROOT.'/classes/SpecProcNlpSalix.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../collections/specprocessor/index.php?'.$_SERVER['QUERY_STRING']);
 
 $collid = $_REQUEST['collid'];
@@ -24,7 +24,7 @@ else{
 //$nlpManager->setCollId($collid);
 
 $isEditor = false;
-if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collid,$userRights["CollAdmin"]))){
+if($IS_ADMIN || (array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collid,$USER_RIGHTS["CollAdmin"]))){
  	$isEditor = true;
 }
 

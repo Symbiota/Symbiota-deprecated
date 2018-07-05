@@ -4,7 +4,8 @@ var voucherAssocCleared = false;
 var abortFormVerification = false;
 
 $(document).ready(function() {
-
+	
+	var editForm = document.fullform;
 	function split( val ) {
 		return val.split( /,\s*/ );
 	}
@@ -20,7 +21,7 @@ $(document).ready(function() {
 	$("#occedittabs").tabs({
 		select: function(event, ui) {
 			if(verifyLeaveForm()){
-				document.fullform.submitaction.disabled = true;
+				editForm.submitaction.disabled = true;
 			}
 			else{
 				return false;
@@ -91,12 +92,6 @@ $(document).ready(function() {
 			if($( "#ffsciname" ).val()){
 				verifyFullFormSciName();
 			}
-			else{
-				$( "#tidinterpreted" ).val("");
-				$( 'input[name=scientificnameauthorship]' ).val("");
-				$( 'input[name=family]' ).val("");
-				$( 'input[name=localitysecurity]' ).prop('checked', false);
-			}
 		}
 	});
 
@@ -132,7 +127,6 @@ $(document).ready(function() {
 			},
 			minLength: 4,
 			select: function( event, ui ) {
-				var editForm = document.fullform;
 				$.each(ui.item, function(k, v) {
 					if($( "input[name="+k+"]" ).val() == ""){
 						$( "input[name="+k+"]" ).val(v);
@@ -162,7 +156,7 @@ $(document).ready(function() {
 
 	$("#ffstate").autocomplete({
 		source: function( request, response ) {
-			$.getJSON( "rpc/lookupState.php", { term: request.term, "country": document.fullform.country.value }, response );
+			$.getJSON( "rpc/lookupState.php", { term: request.term, "country": editForm.country.value }, response );
 		},
 		minLength: 2,
 		autoFocus: true,
@@ -173,7 +167,7 @@ $(document).ready(function() {
 
 	$("#ffcounty").autocomplete({ 
 		source: function( request, response ) {
-			$.getJSON( "rpc/lookupCounty.php", { term: request.term, "state": document.fullform.stateprovince.value }, response );
+			$.getJSON( "rpc/lookupCounty.php", { term: request.term, "state": editForm.stateprovince.value }, response );
 		},
 		minLength: 2,
 		autoFocus: true,
@@ -184,7 +178,7 @@ $(document).ready(function() {
 
 	$("#ffmunicipality").autocomplete({ 
 		source: function( request, response ) {
-			$.getJSON( "rpc/lookupMunicipality.php", { term: request.term, "state": document.fullform.stateprovince.value }, response );
+			$.getJSON( "rpc/lookupMunicipality.php", { term: request.term, "state": editForm.stateprovince.value }, response );
 		},
 		minLength: 2,
 		autoFocus: true,
@@ -239,9 +233,12 @@ $(document).ready(function() {
 	
 	//Remember Auto Processing Status
 	var apstatus = getCookie("autopstatus");
-	if(getCookie("autopstatus")) document.fullform.autoprocessingstatus.value = apstatus;
+	if(getCookie("autopstatus")){
+		editForm.autoprocessingstatus.value = apstatus;
+		if(editForm.occid.value == 0) editForm.processingstatus.value = apstatus;
+	}
 	//Remember Auto Duplicate search status 
-	if(getCookie("autodupe") == 1) document.fullform.autodupe.checked = true; 
+	if(getCookie("autodupe") == 1) editForm.autodupe.checked = true; 
 });
 
 function toggleStyle(){
@@ -294,7 +291,7 @@ function verifyFullFormSciName(){
 		}
 		else{
 			$( 'select[name=confidenceranking]' ).val(5);
-            alert("WARNING: Taxon not found. It may be misspelled or needs to be added to taxonomic thesaurus by a taxonomic editor.");
+            alert("WARNING: Taxon not found. It may be misspelled or needs to be added to taxonomic thesaurus by a taxonomic editor. You can continue entering this specimen using this name and the name will be resolved at a later date.");
 		}
 	});
 }
@@ -372,6 +369,7 @@ function coordinateUncertaintyInMetersChanged(f){
 
 function footPrintWktChanged(formObj){
 	fieldChanged('footprintwkt');
+	formObj.value = validatePolygon(formObj.value);
 	if(formObj.value.length > 65000){
 		formObj.value = "";
 		alert("WKT footprint is too large to save in the database");
@@ -436,6 +434,22 @@ function parseVerbatimElevation(f){
 			}
 		}
 	}
+}
+
+function minimumDepthInMetersChanged(f){
+	if(!isNumeric(f.minimumdepthinmeters.value)){
+		alert("Depth values must be numeric only");
+		return false;
+	}
+	fieldChanged('minimumdepthinmeters');
+}
+
+function maximumDepthInMetersChanged(f){
+	if(!isNumeric(f.maximumdepthinmeters.value)){
+		alert("Depth values must be numeric only");
+		return false;
+	}
+	fieldChanged('maximumdepthinmeters');
 }
 
 function verbatimCoordinatesChanged(f){
@@ -1087,7 +1101,7 @@ function verifyDetSciName(f){
 			f.tidtoadd.value = data.tid;
 		}
 		else{
-            alert("WARNING: Taxon not found. It may be misspelled or needs to be added to taxonomic thesaurus by a taxonomic editor.");
+            alert("WARNING: Taxon not found. It may be misspelled or needs to be added to taxonomic thesaurus by a taxonomic editor. Continue entering this specimen using this name and the name will be resolved at a later date.");
 			f.scientificnameauthorship.value = "";
 			f.family.value = "";
 			f.tidtoadd.value = "";
@@ -1190,7 +1204,7 @@ function dwcDoc(dcTag){
 
 function openOccurrenceSearch(target) {
 	collId = document.fullform.collid.value;
-	occWindow=open("../misc/occurrencesearch.php?targetid="+target+"&collid="+collId,"occsearch","resizable=1,scrollbars=1,toolbar=1,width=750,height=600,left=20,top=20");
+	occWindow=open("../misc/occurrencesearch.php?targetid="+target+"&collid="+collId,"occsearch","resizable=1,scrollbars=1,toolbar=0,width=750,height=600,left=20,top=20");
 	occWindow.focus();
 	if (occWindow.opener == null) occWindow.opener = self;
 }
@@ -1224,6 +1238,8 @@ function autoProcessingStatusChanged(selectObj){
 	var selValue = selectObj.value;
 	if(selValue){
 		document.cookie = "autopstatus=" + selValue;
+		var editForm = document.fullform;
+		if(editForm.occid.value == 0) editForm.processingstatus.value = selValue;
 	}
 	else{
 		document.cookie = "autopstatus=;expires=Thu, 01 Jan 1970 00:00:01 GMT;";

@@ -1,6 +1,6 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/DwcArchiverExpedition.php');
+include_once($SERVER_ROOT.'/classes/DwcArchiverExpedition.php');
 
 $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:'';
 $collid = array_key_exists("collid",$_REQUEST)?$_REQUEST["collid"]:0;
@@ -51,6 +51,6 @@ else{
 	header('Expires: 0');
 	header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
 	header('Pragma: public');
-	echo 'Error: collectoin identifier is not defined';
+	echo 'Error: collection identifier is not defined';
 }
 ?>

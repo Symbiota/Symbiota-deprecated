@@ -1,6 +1,6 @@
 <?php
 	include_once('../../../config/symbini.php');
-	include_once($serverRoot.'/classes/OccurrenceActionManager.php');
+	include_once($SERVER_ROOT.'/classes/OccurrenceActionManager.php');
 	
 	$occid = array_key_exists('occid',$_REQUEST)             ? $_REQUEST['occid']        : null;
 	$requesttype = array_key_exists('requesttype',$_REQUEST) ? $_REQUEST['requesttype']  : null ;

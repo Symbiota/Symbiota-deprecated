@@ -1,6 +1,6 @@
 <?php
 include_once('../../config/symbini.php');
-header("Content-Type: text/html; charset=".$charset);
+header("Content-Type: text/html; charset=".$CHARSET);
 
 $locality = $_REQUEST['locality'];
 $country = array_key_exists('country',$_REQUEST)?$_REQUEST['country']:'';
@@ -22,7 +22,7 @@ elseif(preg_match('/R\d{1,2}[EW]{1}\sS\d{1,2}/i',$locality)){
 	$locality = preg_replace('/\sS(\d{1,2})/', ' Sec$1', $locality);
 }
 //Convert latin1 character sets to utf-8
-if(strtolower($charset) == "iso-8859-1"){
+if(strtolower($CHARSET) == "iso-8859-1"){
 	if(mb_detect_encoding($country,'UTF-8,ISO-8859-1') == "UTF-8"){
 		$country = utf8_encode($country);
 	}
@@ -49,10 +49,10 @@ if(isset($PORTAL_GUID) && $PORTAL_GUID){
 ?>
 <html>
 <head>
-	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>">
+	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET; ?>">
 	<title>GEOLocate Tool</title>
-	<link href="<?php echo $clientRoot; ?>/css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
-	<link href="<?php echo $clientRoot; ?>/css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
+	<link href="<?php echo $CLIENT_ROOT; ?>/css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+	<link href="<?php echo $CLIENT_ROOT; ?>/css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 	<style>
 		iframe {
 			width: 1020px;
@@ -63,7 +63,7 @@ if(isset($PORTAL_GUID) && $PORTAL_GUID){
 	</style>
 	<script type="text/javascript">
 	    function transferCoord(evt) {
-	        if(evt.origin.indexOf("museum.tulane.edu") < 0) {
+	        if(evt.origin.indexOf('geo-locate.org') < 0) {
 				alert("iframe url does not have permision to interact with me");
 	        }
 	        else {//alert(evt.data);
@@ -91,9 +91,8 @@ if(isset($PORTAL_GUID) && $PORTAL_GUID){
 
 <body>
 	<div id="container">
-		<div >
-			<!--<iframe id="da-iframe" src="http://www.museum.tulane.edu/nelson/gravier2.html"></iframe>-->
-			<iframe id="Iframe1" src="//www.museum.tulane.edu/geolocate/web/webgeoreflight.aspx?v=1&georef=run&tab=locality&<?php echo $urlVariables; ?>"></iframe>
+		<div>
+			<iframe id="Iframe1" src="//www.geo-locate.org/web/WebGeoreflight.aspx?v=1&georef=run&tab=locality&<?php echo $urlVariables; ?>"></iframe>
 		</div>
 	</div>
 </body>

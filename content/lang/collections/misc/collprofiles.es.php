@@ -5,9 +5,9 @@ Language: Español (Spanish)
 ------------------
 */
 
-$LANG['COLLECTION_DETAILS'] = 'Seleccione una colecci&oacute;n para ver todos los detalles.';
-$LANG['CONTACT'] = 'Contacto:';
-$LANG['HOMEPAGE'] = 'Sitio Web:';
+$LANG['RSS_FEED'] = 'RSS Feed';
+$LANG['CONTACT'] = 'Contacto';
+$LANG['HOMEPAGE'] = 'Sitio Web';
 $LANG['MORE_INFO'] = 'M&aacute;s Informaci&oacute;n';
 $LANG['COLLECTION_SEARCH'] = 'P&aacute;gina de B&uacute;squeda de Colecci&oacute;n';
 $LANG['UPDATE_STATISTICS'] = 'Actualizando las estad&iacute;sticas relacionadas con esta colecci&oacute;n...';
@@ -38,17 +38,24 @@ $LANG['DATA_CLEANING'] = 'Herramientas de Limpieza de Datos';
 $LANG['DUP_CLUSTER'] = 'Duplicar Agrupamiento';
 $LANG['MAINTENANCE_TASKS'] = 'Tareas de Mantenimiento';
 $LANG['BACKUP_DATA_FILE'] = 'Descargar Archivo de Respaldo de Datos';
+$LANG['RESTORE_BACKUP'] = 'Restaurar archivo de respaldo';
 $LANG['GUIDMAP'] = 'Mapeador de GUIDs';
-$LANG['THUMBNAIL_BUILDER'] = 'Herramientas de Limpieza las miniaturas';
+$LANG['THUMBNAIL_MAINTENANCE'] = 'Herramientas de Limpieza las miniaturas';
 $LANG['UPDATE_STATS'] = 'Actualizar Estad&iacute;sticas';
-$LANG['COLLECTION_TYPE'] = 'Tipo de Colecci&oacute;n:';
-$LANG['MANAGEMENT'] = 'Administraci&oacute;n:';
-$LANG['LAST_UPDATE'] = '&uacute;ltima Actualizaci&oacute;n:';
-$LANG['GLOBAL_UNIQUE_ID'] = 'Identificador &uacute;nico Global:';
-$LANG['USAGE_RIGHTS'] = 'Derechos de Uso:';
-$LANG['RIGHTS_HOLDER'] = 'Propietario de Derechos:';
-$LANG['ACCESS_RIGHTS'] = 'Derechos de Acceso:';
-$LANG['COLL_STATISTICS'] = 'Estad&iacute;sticas de Colecci&oacute;n:';
+$LANG['COLLECTION_TYPE'] = 'Tipo de Colecci&oacute;n';
+$LANG['MANAGEMENT'] = 'Administraci&oacute;n';
+$LANG['LAST_UPDATE'] = '&uacute;ltima Actualizaci&oacute;n';
+$LANG['GLOBAL_UNIQUE_ID'] = 'Identificador &uacute;nico Global';
+$LANG['DWCA_PUB'] = 'DwC-Archive Publishing';
+$LANG['LIVE_DOWNLOAD'] = 'Live Data Download';
+$LANG['FULL_DATA'] = 'DwC-Archive File';
+$LANG['LOGIN_TO_ACCESS'] = 'Login for access';
+$LANG['IPT_SOURCE'] = 'IPT / DwC-A Source';
+$LANG['DIGITAL_METADATA'] = 'Metadata Digital';
+$LANG['USAGE_RIGHTS'] = 'Derechos de Uso';
+$LANG['RIGHTS_HOLDER'] = 'Propietario de Derechos';
+$LANG['ACCESS_RIGHTS'] = 'Derechos de Acceso';
+$LANG['COLL_STATISTICS'] = 'Estad&iacute;sticas de Colecci&oacute;n';
 $LANG['SPECIMEN_RECORDS'] = 'registros de espec&iacute;menes';
 $LANG['FAMILIES'] = 'familias';
 $LANG['GENERA'] = 'g&eacute;neros';
@@ -60,7 +67,7 @@ $LANG['SHOW_GEOG_DIST'] = 'Mostrar Distribuci&oacute;n Geogr&aacute;fica';
 $LANG['HIDE_GEOG_DIST'] = 'Ocultar Distribuci&oacute;n Geogr&aacute;fica';
 $LANG['GEO_DIST'] = 'Distribuci&oacute;n Geogr&aacute;fica';
 $LANG['CLICK_ON_SPEC_REC'] = 'Haga clic en los recuentos de registros de espec&iacute;menes dentro de los par&eacute;ntesis para mostrar los registros para ese t&eacute;rmino';
-$LANG['FAMILY_DIST'] = 'Distribuci&oacute;n de la Familia';
+$LANG['TAXON_DIST'] = 'Distribuci&oacute;n de Taxon';
 $LANG['CLICK_ON_SPEC_FAM'] = 'Haga clic en los recuentos de registros de espec&iacute;menes dentro de los par&eacute;ntesis para mostrar los registros para esa familia';
 $LANG['GEOG_DIST_COUNTRIES'] = 'Distribuci&oacute;n Geogr&aacute;fica - Pa&iacute;ses';
 ?>

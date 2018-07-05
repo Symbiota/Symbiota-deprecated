@@ -1,6 +1,6 @@
 <?php
 include_once('../config/symbini.php');
-include_once($serverRoot.'/classes/ReferenceManager.php');
+include_once($SERVER_ROOT.'/classes/ReferenceManager.php');
 
 $refId = array_key_exists('refid',$_REQUEST)?$_REQUEST['refid']:0;
 $formSubmit = array_key_exists('formsubmit',$_POST)?$_POST['formsubmit']:'';
@@ -32,15 +32,15 @@ if(!$formSubmit || $formSubmit != 'Search References'){
 	}
 }
 
-header("Content-Type: text/html; charset=".$charset);
+header("Content-Type: text/html; charset=".$CHARSET);
 ?>
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
    "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset;?>">
-	<title><?php echo $defaultTitle; ?> Reference Management</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET;?>">
+	<title><?php echo $DEFAULT_TITLE; ?> Reference Management</title>
     <link href="../css/base.css?ver=<?php echo $CSS_VERSION; ?>" rel="stylesheet" type="text/css" />
     <link href="../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" rel="stylesheet" type="text/css" />
 	<link href="../css/jquery-ui.css" rel="stylesheet" type="text/css" />
@@ -51,38 +51,38 @@ header("Content-Type: text/html; charset=".$charset);
 <body>
 	<?php
 	$displayLeftMenu = (isset($reference_indexMenu)?$reference_indexMenu:false);
-	include($serverRoot."/header.php");
+	include($SERVER_ROOT."/header.php");
 	if(isset($reference_indexCrumbs)){
 		if($reference_indexCrumbs){
 			?>
 			<div class='navpath'>
-				<a href='../index.php'>Home</a> &gt;&gt; 
+				<a href='../index.php'>Home</a> &gt;&gt;
 				<?php echo $reference_indexCrumbs; ?>
 				<a href='index.php'> <b>Reference Management</b></a>
 			</div>
-			<?php 
+			<?php
 		}
 	}
 	else{
 		?>
 		<div class='navpath'>
-			<a href='../index.php'>Home</a> &gt;&gt; 
+			<a href='../index.php'>Home</a> &gt;&gt;
 			<a href='index.php'> <b>Reference Management</b></a>
 		</div>
-		<?php 
+		<?php
 	}
 	?>
 	<!-- This is inner text! -->
 	<div id="innertext">
-		<?php 
-		if($symbUid){
+		<?php
+		if($SYMB_UID){
 			if($statusStr){
 				?>
 				<hr/>
 				<div style="margin:15px;color:red;">
 					<?php echo $statusStr; ?>
 				</div>
-				<?php 
+				<?php
 			}
 			?>
 			<div id="" style="float:right;width:240px;">
@@ -91,11 +91,11 @@ header("Content-Type: text/html; charset=".$charset);
 					    <legend><b>Filter List</b></legend>
 				    	<div>
 							<div>
-								<b>Title Keyword:</b> 
+								<b>Title Keyword:</b>
 								<input type="text" autocomplete="off" name="searchtitlekeyword" id="searchtitlekeyword" size="25" value="<?php echo ($formSubmit == 'Search References'?$_POST['searchtitlekeyword']:''); ?>" />
 							</div>
 							<div>
-								<b>Author's Last Name:</b> 
+								<b>Author's Last Name:</b>
 								<input type="text" name="searchauthor" id="searchauthor" size="25" value="<?php echo ($formSubmit == 'Search References'?$_POST['searchauthor']:''); ?>" />
 							</div>
 							<div style="padding-top:8px;float:right;">
@@ -128,7 +128,7 @@ header("Content-Type: text/html; charset=".$charset);
 									<b>Reference Type: </b><select name="newreftype" id="newreftype" style="width:400px;">
 										<option value="">Select Reference Type</option>
 										<option value="">------------------------------------------</option>
-										<?php 
+										<?php
 										$typeArr = $refManager->getRefTypeArr();
 										foreach($typeArr as $k => $v){
 											echo '<option value="'.$k.'">'.$v.'</option>';
@@ -177,10 +177,10 @@ header("Content-Type: text/html; charset=".$charset);
 				}
 				?>
 			</div>
-			<?php 
+			<?php
 		}
 		else{
-			if(!$symbUid){
+			if(!$SYMB_UID){
 				echo 'Please <a href="../profile/index.php?refurl=../references/index.php">login</a>';
 			}
 			else{
@@ -190,7 +190,7 @@ header("Content-Type: text/html; charset=".$charset);
 		?>
 	</div>
 	<?php
-	include($serverRoot."/footer.php");
+	include($SERVER_ROOT."/footer.php");
 	?>
 </body>
 </html>

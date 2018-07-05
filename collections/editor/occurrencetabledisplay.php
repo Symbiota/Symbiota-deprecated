@@ -1,8 +1,7 @@
 <?php
-include_once('../../config/symbini.php'); 
-include_once($serverRoot.'/classes/OccurrenceEditorManager.php');
-include_once($SERVER_ROOT.'/classes/SOLRManager.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once('../../config/symbini.php');
+include_once($SERVER_ROOT.'/classes/OccurrenceEditorManager.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 
 $collId = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
 $recLimit = array_key_exists('reclimit',$_REQUEST)?$_REQUEST['reclimit']:1000;
@@ -15,14 +14,14 @@ $action = array_key_exists('submitaction',$_REQUEST)?$_REQUEST['submitaction']:'
 $occManager = new OccurrenceEditorManager();
 
 if($crowdSourceMode) $occManager->setCrowdSourceMode(1);
-if($SOLR_MODE) $solrManager = new SOLRManager();
 
-$isEditor = 0;		//If not editor, edits will be submitted to omoccuredits table but not applied to omoccurrences 
+$isEditor = 0;		//If not editor, edits will be submitted to omoccuredits table but not applied to omoccurrences
 $displayQuery = 0;
 $isGenObs = 0;
 $collMap = array();
 $recArr = array();
-$headerMapBase = array('dbpk' => 'dbpk','catalognumber' => 'Catalog Number',
+$headerMapBase = array('dbpk' => 'dbpk','institutioncode'=>'Institution Code (override)','collectioncode'=>'Collection Code (override)',
+	'ownerinstitutioncode'=>'Owner Code (override)','catalognumber' => 'Catalog Number',
 	'othercatalognumbers' => 'Other Catalog #','family' => 'Family','identificationqualifier' => 'ID Qualifier',
 	'sciname' => 'Scientific Name','scientificnameauthorship'=>'Author','recordedby' => 'Collector','recordnumber' => 'Number',
 	'associatedcollectors' => 'Associated Collectors','eventdate' => 'Event Date','verbatimeventdate' => 'Verbatim Date',
@@ -33,9 +32,10 @@ $headerMapBase = array('dbpk' => 'dbpk','catalognumber' => 'Catalog Number',
 	'coordinateuncertaintyinmeters' => 'Uncertainty In Meters','verbatimcoordinates' => 'Verbatim Coordinates',
 	'georeferencedby' => 'Georeferenced By','georeferenceprotocol' => 'Georeference Protocol','georeferencesources' => 'Georeference Sources',
 	'georeferenceverificationstatus' => 'Georef Verification Status','georeferenceremarks' => 'Georef Remarks',
-	'minimumelevationinmeters' => 'Min. Elev. (m)','maximumelevationinmeters' => 'Max. Elev. (m)','verbatimelevation' => 'Verbatim Elev.',
+	'minimumelevationinmeters' => 'Elev. Min. (m)','maximumelevationinmeters' => 'Elev. Max. (m)','verbatimelevation' => 'Verbatim Elev.',
+	'minimumdepthinmeters' => 'Depth. Min. (m)','maximumdepthinmeters' => 'Depth. Max. (m)','verbatimdepth' => 'Verbatim Depth',
 	'habitat' => 'Habitat','substrate' => 'Substrate','occurrenceremarks' => 'Notes (Occurrence Remarks)','associatedtaxa' => 'Associated Taxa',
-	'verbatimattributes' => 'Description','lifestage' => 'Life Stage', 'sex' => 'Sex', 'individualcount' => 'Individual Count', 
+	'verbatimattributes' => 'Description','lifestage' => 'Life Stage', 'sex' => 'Sex', 'individualcount' => 'Individual Count',
 	'samplingprotocol' => 'Sampling Protocol', 'preparations' => 'Preparations', 'reproductivecondition' => 'Reproductive Condition',
 	'typestatus' => 'Type Status','cultivationstatus' => 'Cultivation Status','establishmentmeans' => 'Establishment Means',
 	'disposition' => 'Disposition','duplicatequantity' => 'Duplicate Qty','datelastmodified' => 'Date Last Modified',
@@ -56,7 +56,7 @@ if($SYMB_UID){
 
 	if($collMap && $collMap['colltype']=='General Observations') $isGenObs = 1;
 	if(!$isEditor){
-		if($isGenObs){ 
+		if($isGenObs){
 			if(array_key_exists("CollEditor",$USER_RIGHTS) && in_array($collId,$USER_RIGHTS["CollEditor"])){
 				//Approved General Observation editors can add records
 				$isEditor = 2;
@@ -70,7 +70,7 @@ if($SYMB_UID){
 				$isEditor = 2;
 			}
 		}
-		elseif(array_key_exists("CollEditor",$userRights) && in_array($collId,$userRights["CollEditor"])){
+		elseif(array_key_exists("CollEditor",$USER_RIGHTS) && in_array($collId,$USER_RIGHTS["CollEditor"])){
 			$isEditor = 2;
 		}
 	}
@@ -84,7 +84,6 @@ if($SYMB_UID){
 		}
 		$occManager->setSqlWhere();
 		$statusStr = $occManager->batchUpdateField($_POST['bufieldname'],$_POST['buoldvalue'],$_POST['bunewvalue'],$_POST['bumatch']);
-        if($SOLR_MODE) $solrManager->updateSOLR();
 	}
 
 	if($ouid){
@@ -93,7 +92,7 @@ if($SYMB_UID){
 		$qryCnt = $occManager->getQueryRecordCount();
 	}
 	elseif($occIndex !== false){
-		//Query Form has been activated 
+		//Query Form has been activated
 		if(!$reset) $occManager->setQueryVariables();
 		$occManager->setSqlWhere($occIndex,$recLimit);
 		$qryCnt = $occManager->getQueryRecordCount(1);
@@ -102,7 +101,7 @@ if($SYMB_UID){
 		//Make sure query is null
 		unset($_SESSION['editorquery']);
 	}
-	
+
 	$recArr = $occManager->getOccurMap();
 	$navStr = '<div style="float:right;">';
 	if($occIndex >= $recLimit){
@@ -133,12 +132,12 @@ else{
     <link href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 	<script src="../../js/jquery.js" type="text/javascript"></script>
 	<script src="../../js/jquery-ui.js" type="text/javascript"></script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditorshare.js?var=201703"></script>
+	<script src="../../js/symb/collections.occureditorshare.js?ver=20180308" type="text/javascript" ></script>
 </head>
 <body style="margin-left: 0px; margin-right: 0px;background-color:white;">
 	<!-- inner text -->
 	<div id="">
-		<?php 
+		<?php
 		if($collMap){
 			echo '<div>';
 			echo '<h2>'.$collMap['collectionname'].' ('.$collMap['institutioncode'].($collMap['collectioncode']?':'.$collMap['collectioncode']:'').')</h2>';
@@ -153,10 +152,10 @@ else{
 					?>
 					<a href="#" title="Batch Update Tool" onclick="toggleBatchUpdate();return false;"><img src="../../images/editplus.png" style="width:14px;" /></a>
 					<?php
-				} 
+				}
 				?>
 			</div>
-			<?php 
+			<?php
 			if(!$recArr) $displayQuery = 1;
 			include 'includes/queryform.php';
 			//Setup header map
@@ -170,13 +169,13 @@ else{
 					}
 				}
 				if($qCustomField1 && !array_key_exists(strtolower($qCustomField1),$headerArr)){
-					$headerArr[strtolower($qCustomField1)] = strtolower($qCustomField1); 
+					$headerArr[strtolower($qCustomField1)] = strtolower($qCustomField1);
 				}
 				if(isset($qCustomField2) && !array_key_exists(strtolower($qCustomField2),$headerArr)){
-					$headerArr[strtolower($qCustomField2)] = strtolower($qCustomField2); 
+					$headerArr[strtolower($qCustomField2)] = strtolower($qCustomField2);
 				}
 				if(isset($qCustomField3) && !array_key_exists(strtolower($qCustomField3),$headerArr)){
-					$headerArr[strtolower($qCustomField3)] = strtolower($qCustomField3); 
+					$headerArr[strtolower($qCustomField3)] = strtolower($qCustomField3);
 				}
 				$headerMap = array_intersect_key($headerMapBase, $headerArr);
 			}
@@ -189,19 +188,23 @@ else{
 							<legend><b>Batch Update</b></legend>
 							<div style="float:left;">
 								<div style="margin:2px;">
-									Field name: 
+									Field name:
 									<select name="bufieldname" id="bufieldname" onchange="detectBatchUpdateField();">
 										<option value="">Select Field Name</option>
 										<option value="">----------------------</option>
-										<?php 
+										<?php
 										foreach($headerMapBase as $k => $v){
-											echo '<option value="'.$k.'" '.($buFieldName==$k?'SELECTED':'').'>'.$v.'</option>';
+											//Scientific name fields are excluded because batch updates will not update tidinterpreted index and authors
+											//Scientific name updates should happen within
+											if($k != 'scientificnameauthorship' && $k != 'sciname'){
+												echo '<option value="'.$k.'" '.($buFieldName==$k?'SELECTED':'').'>'.$v.'</option>';
+											}
 										}
 										?>
 									</select>
 								</div>
 								<div style="margin:2px;">
-									Current Value: 
+									Current Value:
 									<input name="buoldvalue" type="text" value="<?php echo (array_key_exists('buoldvalue',$_REQUEST)?$_REQUEST['buoldvalue']:''); ?>" />
 								</div>
 								<div style="margin:2px;">
@@ -221,6 +224,7 @@ else{
 												<option value="expert required" <?php echo (array_key_exists('bunewvalue',$_REQUEST)&&$_REQUEST['bunewvalue']=='expert required'?'SELECTED':''); ?>>Expert Required</option>
 												<option value="reviewed" <?php echo (array_key_exists('bunewvalue',$_REQUEST)&&$_REQUEST['bunewvalue']=='reviewed'?'SELECTED':''); ?>>Reviewed</option>
 												<option value="closed" <?php echo (array_key_exists('bunewvalue',$_REQUEST)&&$_REQUEST['bunewvalue']=='closed'?'SELECTED':''); ?>>Closed</option>
+												<option value="" <?php echo (array_key_exists('bunewvalue',$_REQUEST)&&$_REQUEST['bunewvalue']=='no set status'?'SELECTED':''); ?>>No Set Status</option>
 											</select>
 											<?php
 										}
@@ -236,7 +240,7 @@ else{
 							<div style="float:left;margin-left:30px;">
 								<div style="margin:2px;">
 									<input name="bumatch" type="radio" value="0" checked />
-									Match Whole Field<br/> 
+									Match Whole Field<br/>
 									<input name="bumatch" type="radio" value="1" />
 									Match Any Part of Field
 								</div>
@@ -251,8 +255,8 @@ else{
 						</fieldset>
 					</form>
 				</div>
-				<?php 
-			}					
+				<?php
+			}
 			?>
 			<div style="width:790px;clear:both;">
 				<?php
@@ -260,30 +264,30 @@ else{
 					if($collections_editor_occurrencetableviewCrumbs){
 						?>
 						<div class='navpath'>
-							<a href='../../index.php'>Home</a> &gt;&gt; 
+							<a href='../../index.php'>Home</a> &gt;&gt;
 							<?php echo $collections_editor_occurrencetableviewCrumbs; ?>
 							<b>Occurrence Record Table View</b>
 						</div>
-						<?php 
+						<?php
 					}
 				}
 				else{
-				?>
+					?>
 					<span class='navpath'>
 						<a href="../../index.php">Home</a> &gt;&gt;
 						<?php
 						if($crowdSourceMode){
 							?>
-							<a href="../specprocessor/crowdsource/central.php">Crowd Sourcing Central</a> &gt;&gt;
+							<a href="../specprocessor/crowdsource/index.php">Crowd Sourcing Central</a> &gt;&gt;
 							<?php
 						}
 						else{
-							if(!$isGenObs || $isAdmin){ 
+							if(!$isGenObs || $IS_ADMIN){
 								?>
 								<a href="../misc/collprofiles.php?collid=<?php echo $collId; ?>&emode=1">Collection Management</a> &gt;&gt;
 								<?php
 							}
-							if($isGenObs){ 
+							if($isGenObs){
 								?>
 								<a href="../../profile/viewprofile.php?tabindex=1">Personal Management</a> &gt;&gt;
 								<?php
@@ -292,28 +296,28 @@ else{
 						?>
 						<b>Occurrence Record Table View</b>
 					</span>
-				<?php
+					<?php
 				}
 				echo $navStr; ?>
 			</div>
-			<?php 
+			<?php
 			if($recArr){
 				?>
 				<table class="styledtable" style="font-family:Arial;font-size:12px;">
 					<tr>
 						<th>Symbiota ID</th>
-						<?php 
+						<?php
 						foreach($headerMap as $k => $v){
 							echo '<th>'.$v.'</th>';
 						}
 						?>
 					</tr>
-					<?php 
+					<?php
 					$recCnt = 0;
 					foreach($recArr as $id => $occArr){
 						if($occArr['sciname']){
 							$occArr['sciname'] = '<i>'.$occArr['sciname'].'</i> ';
-						}							
+						}
 						echo "<tr ".($recCnt%2?'class="alt"':'').">\n";
 						echo '<td>';
 						echo '<a href="occurrenceeditor.php?csmode='.$crowdSourceMode.'&occindex='.($recCnt+$occIndex).'&occid='.$id.'&collid='.$collId.'" title="open in same window">'.$id.'</a> ';
@@ -337,15 +341,15 @@ else{
 				<div style="width:790px;">
 					<?php echo $navStr; ?>
 				</div>
-				*Click on the Symbiota identifier in the first column to open the editor.    
-				<?php 
+				*Click on the Symbiota identifier in the first column to open the editor.
+				<?php
 			}
 			else{
 				?>
 				<div style="font-weight:bold;font-size:120%;">
 					No records found matching the query
 				</div>
-				<?php 
+				<?php
 			}
 		}
 		else{

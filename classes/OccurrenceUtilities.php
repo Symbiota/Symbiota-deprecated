@@ -10,15 +10,15 @@ class OccurrenceUtilities {
 
  	public function __construct(){
  	}
- 	
+
  	public function __destruct(){
  	}
-	
+
 	/*
-	 * INPUT: String representing a verbatim date 
+	 * INPUT: String representing a verbatim date
 	 * OUTPUT: String representing the date in MySQL format (YYYY-MM-DD)
-	 *         Time is appended to end if present 
-	 * 
+	 *         Time is appended to end if present
+	 *
 	 */
 	public static function formatDate($inStr){
 		$retDate = '';
@@ -121,7 +121,7 @@ class OccurrenceUtilities {
 				$d = '00';
 			}
 			//Do some cleaning
-			if(strlen($y) == 2){ 
+			if(strlen($y) == 2){
 				if($y < 20) $y = '20'.$y;
 				else $y = '19'.$y;
 			}
@@ -138,10 +138,10 @@ class OccurrenceUtilities {
 	}
 
 	/*
-	 * INPUT: String representing a verbatim scientific name 
-	 *        Name may have imbedded authors, cf, aff, hybrid  
-	 * OUTPUT: Array containing parsed values 
-	 *         Keys: unitind1, unitname1, unitind2, unitname2, unitind3, unitname3, author, identificationqualifier 
+	 * INPUT: String representing a verbatim scientific name
+	 *        Name may have imbedded authors, cf, aff, hybrid
+	 * OUTPUT: Array containing parsed values
+	 *         Keys: unitind1, unitname1, unitind2, unitname2, unitind3, unitname3, author, identificationqualifier
 	 */
 	public static function parseScientificName($inStr, $conn = null, $rankId = 0){
 		$taxonArr = TaxonomyUtilities::parseScientificName($inStr, $conn, $rankId);
@@ -157,10 +157,10 @@ class OccurrenceUtilities {
 	}
 
 	/*
-	 * INPUT: String representing verbatim elevation 
-	 *        Verbatim string represent feet or meters   
-	 * OUTPUT: Array containing minimum and maximun elevation in meters  
-	 *         Keys: minelev, maxelev 
+	 * INPUT: String representing verbatim elevation
+	 *        Verbatim string represent feet or meters
+	 * OUTPUT: Array containing minimum and maximun elevation in meters
+	 *         Keys: minelev, maxelev
 	 */
 	public static function parseVerbatimElevation($inStr){
 		$retArr = array();
@@ -206,10 +206,10 @@ class OccurrenceUtilities {
 	}
 
 	/*
-	 * INPUT: String representing verbatim coordinates 
-	 *        Verbatim string can be UTM, DMS   
-	 * OUTPUT: Array containing decimal values of latitude and longitude 
-	 *         Keys: lat, lng 
+	 * INPUT: String representing verbatim coordinates
+	 *        Verbatim string can be UTM, DMS
+	 * OUTPUT: Array containing decimal values of latitude and longitude
+	 *         Keys: lat, lng
 	 */
 	public static function parseVerbatimCoordinates($inStr,$target=''){
 		$retArr = array();
@@ -286,7 +286,7 @@ class OccurrenceUtilities {
 		}
 		if((!$target && !$retArr) || $target == 'UTM'){
 			//UTM parsing
-			$d = ''; 
+			$d = '';
 			if(preg_match('/NAD\s*27/i',$inStr)) $d = 'NAD27';
 			if(preg_match('/\D*(\d{1,2}\D{0,1})\s+(\d{6,7})m{0,1}E\s+(\d{7})m{0,1}N/i',$inStr,$m)){
 				$z = $m[1];
@@ -297,7 +297,7 @@ class OccurrenceUtilities {
 					if(isset($llArr['lat'])) $retArr['lat'] = $llArr['lat'];
 					if(isset($llArr['lng'])) $retArr['lng'] = $llArr['lng'];
 				}
-				
+
 			}
 			elseif(preg_match('/UTM/',$inStr) || preg_match('/\d{1,2}[\D\s]+\d{6,7}[\D\s]+\d{6,7}/',$inStr)){
 				//UTM
@@ -309,33 +309,33 @@ class OccurrenceUtilities {
 					if(preg_match('/(\d{6,7})m{0,1}E{1}[\D\s]+(\d{7})m{0,1}N{1}/i',$inStr,$m)){
 						$e = $m[1];
 						$n = $m[2];
-					} 
+					}
 					elseif(preg_match('/m{0,1}E{1}(\d{6,7})[\D\s]+m{0,1}N{1}(\d{7})/i',$inStr,$m)){
 						$e = $m[1];
 						$n = $m[2];
-					} 
+					}
 					elseif(preg_match('/(\d{7})m{0,1}N{1}[\D\s]+(\d{6,7})m{0,1}E{1}/i',$inStr,$m)){
 						$e = $m[2];
 						$n = $m[1];
-					} 
+					}
 					elseif(preg_match('/m{0,1}N{1}(\d{7})[\D\s]+m{0,1}E{1}(\d{6,7})/i',$inStr,$m)){
 						$e = $m[2];
 						$n = $m[1];
-					} 
+					}
 					elseif(preg_match('/(\d{6})[\D\s]+(\d{7})/',$inStr,$m)){
 						$e = $m[1];
 						$n = $m[2];
-					} 
+					}
 					elseif(preg_match('/(\d{7})[\D\s]+(\d{6})/',$inStr,$m)){
 						$e = $m[2];
 						$n = $m[1];
-					} 
+					}
 					if($e && $n){
 						$llArr = self::convertUtmToLL($e,$n,$z,$d);
 						if(isset($llArr['lat'])) $retArr['lat'] = $llArr['lat'];
 						if(isset($llArr['lng'])) $retArr['lng'] = $llArr['lng'];
 					}
-				}				
+				}
 			}
 		}
 		//Clean
@@ -606,7 +606,17 @@ class OccurrenceUtilities {
 			if(isset($recMap['trssectiondetails'])) $vCoord .= $recMap['trssectiondetails'];
 			$recMap['verbatimcoordinates'] = trim($vCoord);
 		}
-			
+		//coordinate uncertainity
+		if(isset($recMap['coordinateuncertaintyinmeters']) && $recMap['coordinateuncertaintyinmeters'] && !is_numeric($recMap['coordinateuncertaintyinmeters'])){
+			if(preg_match('/([\d.-]+)\s*([a-z\']+)/i', $recMap['coordinateuncertaintyinmeters'], $m)){
+				$unitStr = strtolower($m[2]);
+				if($unitStr == 'mi' || $unitStr == 'mile' || $unitStr == 'miles') $recMap['coordinateuncertaintyinmeters'] = round($m[1]*1609);
+				elseif($unitStr == 'km' || $unitStr == 'kilometers') $recMap['coordinateuncertaintyinmeters'] = round($m[1]*1000);
+				elseif($unitStr == 'm' || $unitStr == 'meter' || $unitStr == 'meters') $recMap['coordinateuncertaintyinmeters'] = $m[1];
+				elseif($unitStr == 'ft' || $unitStr == 'f' || $unitStr == 'feet' || $unitStr == "'") $recMap['coordinateuncertaintyinmeters'] = round($m[1]*0.3048);
+				else $recMap['coordinateuncertaintyinmeters'] = '';
+			}
+		}
 		//Check to see if evelation are valid numeric values
 		if((isset($recMap['minimumelevationinmeters']) && $recMap['minimumelevationinmeters'] && !is_numeric($recMap['minimumelevationinmeters']))
 				|| (isset($recMap['maximumelevationinmeters']) && $recMap['maximumelevationinmeters'] && !is_numeric($recMap['maximumelevationinmeters']))){
@@ -650,9 +660,9 @@ class OccurrenceUtilities {
 			if(isset($recMap['collectorinitials']) && $recMap['collectorinitials']) $recordedBy .= ', '.$recMap['collectorinitials'];
 			$recMap['recordedby'] = $recordedBy;
 			//Need to add code that maps to collector table
-		
+
 		}
-		
+
 		if(array_key_exists("specificepithet",$recMap)){
 			if($recMap["specificepithet"] == 'sp.' || $recMap["specificepithet"] == 'sp') $recMap["specificepithet"] = '';
 		}
@@ -663,15 +673,15 @@ class OccurrenceUtilities {
 			if($tr == 'variety') $recMap["taxonrank"] = 'var.';
 			if($tr == 'forma') $recMap["taxonrank"] = 'f.';
 		}
-		
+
 		//Populate sciname if null
 		if(array_key_exists('sciname',$recMap) && $recMap['sciname']){
 			if(substr($recMap['sciname'],-4) == ' sp.') $recMap['sciname'] = substr($recMap['sciname'],0,-4);
 			if(substr($recMap['sciname'],-3) == ' sp') $recMap['sciname'] = substr($recMap['sciname'],0,-3);
-		
+
 			$recMap['sciname'] = str_replace(array(' ssp. ',' ssp '),' subsp. ',$recMap['sciname']);
 			$recMap['sciname'] = str_replace(' var ',' var. ',$recMap['sciname']);
-		
+
 			$pattern = '/\b(cf\.|cf|aff\.|aff)\s{1}/';
 			if(preg_match($pattern,$recMap['sciname'],$m)){
 				$recMap['identificationqualifier'] = $m[1];

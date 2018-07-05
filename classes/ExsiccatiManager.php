@@ -34,7 +34,7 @@ class ExsiccatiManager {
 					$retArr['notes'] = $this->cleanOutStr($r->notes);
 					$retArr['lasteditedby'] = $r->lasteditedby;
 				}
-				$rs->close();
+				$rs->free();
 			}
 		}
 		return $retArr;
@@ -47,21 +47,17 @@ class ExsiccatiManager {
 		if($specimenOnly){
 			if($imagesOnly){
 				$sql .= 'FROM omexsiccatititles et INNER JOIN omexsiccatinumbers en ON et.ometid = en.ometid '.
-					'INNER JOIN omexsiccatiocclink ol ON en.omenid = ol.omenid '.
-					'INNER JOIN images i ON ol.occid = i.occid ';
-				if($collId){
-					$sql .= 'INNER JOIN omoccurrences o ON ol.occid = o.occid ';
-					$sqlWhere = 'WHERE o.collid = '.$collId.' ';
-				}
+						'INNER JOIN omexsiccatiocclink ol ON en.omenid = ol.omenid '.
+						'INNER JOIN images i ON ol.occid = i.occid ';
 			}
 			else{
 				//Display only exsiccati that have linked specimens
 				$sql .= 'FROM omexsiccatititles et INNER JOIN omexsiccatinumbers en ON et.ometid = en.ometid '.
-					'INNER JOIN omexsiccatiocclink ol ON en.omenid = ol.omenid ';
-				if($collId){
-					$sql .= 'INNER JOIN omoccurrences o ON ol.occid = o.occid ';
-					$sqlWhere = 'WHERE o.collid = '.$collId.' ';
-				}
+						'INNER JOIN omexsiccatiocclink ol ON en.omenid = ol.omenid ';
+			}
+			if($collId){
+				$sql .= 'INNER JOIN omoccurrences o ON ol.occid = o.occid ';
+				$sqlWhere = 'WHERE o.collid = '.$collId.' ';
 			}
 		}
 		else{
@@ -69,17 +65,9 @@ class ExsiccatiManager {
 			$sql .= 'FROM omexsiccatititles et ';
 		}
 		if($searchTerm){
-			if($sqlWhere){
-				$sqlWhere .= 'AND ';
-			}
-			else{
-				$sqlWhere = 'WHERE ';
-			}
-			$sqlWhere .= 'et.title LIKE "%'.$searchTerm.'%" OR et.abbreviation LIKE "%'.$searchTerm.'%" OR et.editor LIKE "%'.$searchTerm.'%"';
+			$sqlWhere .= ($sqlWhere?'AND ':'WHERE ').'et.title LIKE "%'.$searchTerm.'%" OR et.abbreviation LIKE "%'.$searchTerm.'%" OR et.editor LIKE "%'.$searchTerm.'%" ';
 		}
-		$sSortBy = ($sortBy == 1?"et.abbreviation":"et.title");
-		$sql = $sql.$sqlWhere.'ORDER BY '.$sSortBy.', et.startdate';
-		//$sql = $sql.$sqlWhere.'ORDER BY et.title, et.startdate';
+		$sql .= $sqlWhere.'ORDER BY '.($sortBy?"IFNULL(et.abbreviation,et.title)":"et.title").', et.startdate';
 		//echo $sql;
 		if($rs = $this->conn->query($sql)){
 			while($r = $rs->fetch_object()){
@@ -96,7 +84,7 @@ class ExsiccatiManager {
 				if($r->exsrange) $titleStr .= ' ['.$r->exsrange.']';
 				$retArr[$r->ometid] = $this->cleanOutStr($titleStr);
 			}
-			$rs->close();
+			$rs->free();
 		}
 		return $retArr;
 	}
@@ -123,7 +111,7 @@ class ExsiccatiManager {
 						$retArr[$r->omenid]['notes'] = $this->cleanOutStr($r->notes);
 					}
 				}
-				$rs->close();
+				$rs->free();
 			}
 		}
 		return $retArr;
@@ -147,7 +135,7 @@ class ExsiccatiManager {
 					$retArr['exsnumber'] = $this->cleanOutStr($r->exsnumber);
 					$retArr['notes'] = $this->cleanOutStr($r->notes);
 				}
-				$rs->close();
+				$rs->free();
 			}
 		}
 		return $retArr;
@@ -201,9 +189,52 @@ class ExsiccatiManager {
 					$retArr[$r->omenid][$r->occid]['img'][$r->imgid]['tnurl'] = ($r->thumbnailurl?$r->thumbnailurl:$r->url);
 				}
 			}
-			$rs->close();
+			$rs->free();
 		}
 		return $retArr;
+	}
+
+	public function exportExsiccatiAsCsv($searchTerm, $specimenOnly, $imagesOnly, $collId){
+		$fieldArr = array('et.ometid' => 'titleID', 'et.title' => 'exsiccatiTitle', 'et.abbreviation' => 'abbreviation', 'et.editor' => 'editors', 'et.exsrange' => 'range',
+			'et.startdate' => 'startDate', 'et.enddate' => 'endDate', 'et.source' => 'source', 'et.notes' => 'titleNotes', 'en.exsnumber' => 'exsiccatiNumber');
+		$fileName = 'exsiccatiOutput_'.time().'.csv';
+		header ('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+		header ('Content-Type: text/csv');
+		header ('Content-Disposition: attachment; filename="'.$fileName.'"');
+		$sqlInsert = '';
+		if($collId || $specimenOnly){
+			$sqlInsert .= 'INNER JOIN omexsiccatiocclink ol ON en.omenid = ol.omenid '.
+				'INNER JOIN omoccurrences o ON ol.occid = o.occid ';
+			if($imagesOnly) $sqlInsert .= 'INNER JOIN images i ON o.occid = i.occid ';
+			if($collId) $sqlInsert .= 'WHERE o.collid = '.$collId.' ';
+			$fieldArr['o.occid'] = 'occid';
+			$fieldArr['o.catalognumber'] = 'catalogNumber';
+			$fieldArr['o.othercatalognumbers'] = 'otherCatalogNumbers';
+			$fieldArr['o.dbpk'] = 'sourceIdentifier_dbpk';
+			$fieldArr['o.recordedby'] = 'collector';
+			$fieldArr['o.recordnumber'] = 'collectorNumber';
+			$fieldArr['ol.notes'] = 'occurrenceNotes';
+		}
+		if($searchTerm){
+			$sqlInsert .= ($sqlInsert?'AND ':'WHERE ').'et.title LIKE "%'.$searchTerm.'%" OR et.abbreviation LIKE "%'.$searchTerm.'%" OR et.editor LIKE "%'.$searchTerm.'%" ';
+		}
+		$sql = 'SELECT '.implode(',',array_keys($fieldArr)).' '.
+			'FROM omexsiccatititles et INNER JOIN omexsiccatinumbers en ON et.ometid = en.ometid '.
+			$sqlInsert.'ORDER BY et.title, et.startdate';
+		//echo $sql; exit;
+		$rs = $this->conn->query($sql);
+		if($rs->num_rows){
+			$out = fopen('php://output', 'w');
+			fputcsv($out, $fieldArr);
+			while($r = $rs->fetch_assoc()){
+				fputcsv($out, $r);
+			}
+			fclose($out);
+		}
+		else{
+			echo "Recordset is empty.\n";
+		}
+		$rs->free();
 	}
 
 	//Exsiccati edit functions

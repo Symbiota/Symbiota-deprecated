@@ -1,7 +1,7 @@
 <?php
 	include_once('../config/symbini.php');
-	include_once($serverRoot.'/classes/ChecklistManager.php');
-	header("Content-Type: text/html; charset=".$charset);
+	include_once($SERVER_ROOT.'/classes/ChecklistManager.php');
+	header("Content-Type: text/html; charset=".$CHARSET);
 	$action = array_key_exists("submitaction",$_REQUEST)?$_REQUEST["submitaction"]:""; 
 	$tabIndex = array_key_exists("tabindex",$_REQUEST)?$_REQUEST["tabindex"]:0; 
 	$clValue = array_key_exists("cl",$_REQUEST)?$_REQUEST["cl"]:0; 
@@ -45,8 +45,8 @@
 
 <html>
 <head>
-	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>"/>
-	<title><?php echo $defaultTitle; ?> Research Checklist: <?php echo $clManager->getClName(); ?> print friendly</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET; ?>"/>
+	<title><?php echo $DEFAULT_TITLE; ?> Research Checklist: <?php echo $clManager->getClName(); ?> print friendly</title>
 	<link href="../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 </head>

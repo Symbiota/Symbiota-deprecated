@@ -25,6 +25,7 @@ $LANG['REMOVEUSERCHECK'] = 'Antes de que una lista de comprobaci&oacute;n se pue
 							Las asignaciones del proyecto de inventario s&oacute;lo pueden ser eliminados por el administrador activo del proyecto o un administrador del sistema. ';
 $LANG['WARNINGNOUN'] = 'ADVERTENCIA: La acci&oacute;n no se puede deshacer.';
 $LANG['CONFIRMDELETE'] = '¿Est&aacute; seguro de que desea eliminar permanentemente el Listado de Comprobaci&oacute;n? ¡Esta acci&oacute;n no se puede deshacer!';
+$LANG['CREATECHECKDET'] = 'Crear Nueva Lista';
 $LANG['EDITCHECKDET'] = 'Editar detalles del Listado de Comprobaci&oacute;n';
 $LANG['CHECKNAME'] = 'Nombre del Listado de Comprobaci&oacute;n';
 $LANG['CHECKTYPE'] = 'Tipo de Listado de Comprobaci&oacute;n';
@@ -43,9 +44,9 @@ $LANG['LATCENT'] = 'Latitud';
 $LANG['LONGCENT'] = 'Longitud';
 $LANG['POINTRAD'] = 'Punto Radio (metros)';
 $LANG['POLYFOOT'] = 'Huella de Pol&iacute;gono';
-$LANG['POLYFOOTSAVE'] = 'Huella de pol&iacute;gono guardada.';
-$LANG['CREATEPOLYFOOT'] = 'Crear Huella de Pol&iacute;gono.';
-$LANG['POLYFOOTRDYSAVE'] = 'Coordenadas de pol&iacute;gono listas para guardar.';
+$LANG['POLYGON_DEFINED'] = 'Pol&iacute;gono definida<br/>Haga clic en globo para ver / editar';
+$LANG['POLYGON_NOT_DEFINED'] = 'Pol&iacute;gono definida<br/>Haga clic en globo para crear';
+$LANG['POLYGON_READY'] = 'Pol&iacute;gono cambiado y listas para guardar';
 $LANG['DEFAULTDISPLAY'] = 'Ajustes de Vista por Defecto';
 $LANG['SHOWDETAILS'] = 'Mostrar Detalles';
 $LANG['COMMON'] = ' Nombres comunes';
@@ -58,7 +59,7 @@ $LANG['PRIVATE'] = 'Privado';
 $LANG['PUBLIC'] = 'P&uacute;blico';
 $LANG['ADDIMGVOUC'] = 'Agregar Im&aacute;gen Voucher y V&iacute;nculo a Listado de Comprobaci&oacute;n';
 $LANG['FORMADDVOUCH'] = 'Este formulario le permitir&aacute; a&ntilde;adir un voucher de im&aacute;gen vinculado a este listado de comprobaci&oacute;n.<br/>
-								Si no est&aacute; ya presente, el nombre cient&iacute;fico se a&ntilde;adir&aacute; al listado de comprobaci&oacute;n.';
+						Si no est&aacute; ya presente, el nombre cient&iacute;fico se a&ntilde;adir&aacute; al listado de comprobaci&oacute;n.';
 $LANG['SELECTVOUCPROJ'] = 'Seleccione el proyecto al que desea a&ntilde;adir el voucher.';
 $LANG['ADDIMGVOUCH'] = 'Agregar Voucher de Im&aacute;gen';
 $LANG['IDNOTSET'] = ' Identificador de listado de Comprobaci&oacute;n no se ha establecido';
@@ -68,6 +69,7 @@ $LANG['REMOVEEDITPRIVCONFIRM'] = '¿Est&aacute; seguro de que desea eliminar los
 $LANG['MASSUPDATEED'] = 'Editar Detalles del Listado de Comprobaci&oacute;n';
 $LANG['ADDEDITOR'] = 'Agregar Editor';
 $LANG['DELETECHECK'] = 'Borrar Listado de Comprobaci&oacute;n';
-$LANG['SUBMITCHANG'] = 'Someter Cambios';
+$LANG['EDITCHECKLIST'] = 'Someter Cambios';
+$LANG['ADDCHECKLIST'] = 'Crear Lista Nueva';
 $LANG['DELETETHISU'] = 'Borrar este usuario';
 ?>

@@ -369,7 +369,7 @@ class KeyCharAdmin{
 		$webFileSizeLimit = 300000;
 		$qualityRating= 100;
 		
-		list($width, $height) = getimagesize($path);
+		list($width, $height) = getimagesize(str_replace(' ', '%20', $path));
 		$fileSize = filesize($path);
 		
 		$imgHeight = ($imgWidth*($height/$width));

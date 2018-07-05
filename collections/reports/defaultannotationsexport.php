@@ -1,17 +1,12 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/OccurrenceLabel.php');
-require_once $serverRoot.'/classes/PhpWord/Autoloader.php';
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/OccurrenceLabel.php');
+require_once $SERVER_ROOT.'/vendor/phpoffice/phpword/bootstrap.php';
+
+header("Content-Type: text/html; charset=".$CHARSET);
 ini_set('max_execution_time', 180); //180 seconds = 3 minutes
 
-$ses_id = session_id();
-
 $labelManager = new OccurrenceLabel();
-use PhpOffice\PhpWord\Autoloader;
-use PhpOffice\PhpWord\Settings;
-Autoloader::register();
-Settings::loadConfig();
 
 $collid = $_POST["collid"];
 $lHeader = $_POST['lheading'];
@@ -21,13 +16,6 @@ $speciesAuthors = ((array_key_exists('speciesauthors',$_POST) && $_POST['species
 $clearQueue = ((array_key_exists('clearqueue',$_POST) && $_POST['clearqueue'])?1:0);
 $action = array_key_exists('submitaction',$_POST)?$_POST['submitaction']:'';
 $rowsPerPage = 3;
-
-$exportEngine = '';
-$exportExtension = '';
-if($action == 'Export to DOCX'){
-	$exportEngine = 'Word2007';
-	$exportExtension = 'docx';
-}
 
 $sectionStyle = array();
 if($rowsPerPage==1){
@@ -46,8 +34,8 @@ if($rowsPerPage==3){
 $labelManager->setCollid($collid);
 
 $isEditor = 0;
-if($symbUid){
-	if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collid,$userRights["CollAdmin"])) || (array_key_exists("CollEditor",$userRights) && in_array($collid,$userRights["CollEditor"]))){
+if($SYMB_UID){
+	if($IS_ADMIN || (array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collid,$USER_RIGHTS["CollAdmin"])) || (array_key_exists("CollEditor",$USER_RIGHTS) && in_array($collid,$USER_RIGHTS["CollEditor"]))){
 		$isEditor = 1;
 	}
 }
@@ -82,7 +70,7 @@ $section = $phpWord->addSection($sectionStyle);
 foreach($labelArr as $occid => $occArr){
 	$headerStr = trim($lHeader);
 	$footerStr = trim($lFooter);
-	
+
 	$dupCnt = $_POST['q-'.$occid];
 	for($i = 0;$i < $dupCnt;$i++){
 		$section->addText(htmlspecialchars(' '),'dividerFont','firstLine');
@@ -198,8 +186,8 @@ foreach($labelArr as $occid => $occArr){
 	}
 }
 
-$targetFile = $serverRoot.'/temp/report/'.$paramsArr['un'].'_'.date('Ymd').'_annotations_'.$ses_id.'.'.$exportExtension;
-$phpWord->save($targetFile, $exportEngine);
+$targetFile = $SERVER_ROOT.'/temp/report/'.$paramsArr['un'].'_'.date('Ymd').'_annotations_'.session_id().'.docx';
+$phpWord->save($targetFile, 'Word2007');
 
 header('Content-Description: File Transfer');
 header('Content-type: application/force-download');

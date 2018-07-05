@@ -1,7 +1,7 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/OccurrenceLabel.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/OccurrenceLabel.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 
 $collid = $_POST["collid"];
 $lHeader = $_POST['lheading'];
@@ -16,15 +16,15 @@ $labelManager = new OccurrenceLabel();
 $labelManager->setCollid($collid);
 
 $isEditor = 0;
-if($symbUid){
-	if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collid,$userRights["CollAdmin"])) || (array_key_exists("CollEditor",$userRights) && in_array($collid,$userRights["CollEditor"]))){
+if($SYMB_UID){
+	if($IS_ADMIN || (array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collid,$USER_RIGHTS["CollAdmin"])) || (array_key_exists("CollEditor",$USER_RIGHTS) && in_array($collid,$USER_RIGHTS["CollEditor"]))){
 		$isEditor = 1;
 	}
 }
 ?>
 <html>
 	<head>
-		<title><?php echo $defaultTitle; ?> Default Annotations</title>
+		<title><?php echo $DEFAULT_TITLE; ?> Default Annotations</title>
 		<style type="text/css">
 			body {font-family:arial,sans-serif;}
 			table.labels {page-break-before:auto;page-break-inside:avoid;border-spacing:5px;}

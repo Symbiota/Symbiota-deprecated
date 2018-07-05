@@ -1,6 +1,6 @@
 ﻿<?php
-include_once($serverRoot.'/classes/SalixUtilities.php');
-include_once($serverRoot.'/classes/OccurrenceUtilities.php');
+include_once($SERVER_ROOT.'/classes/SalixUtilities.php');
+include_once($SERVER_ROOT.'/classes/OccurrenceUtilities.php');
 
 /* This class extends the SpecProcNlp class and thus inherits all public and protected variables and functions 
  * The general idea is to that the SpecProcNlp class will cover all shared Symbiota functions (e.g. batch processor, resolve state, resolve collector, test output, etc)

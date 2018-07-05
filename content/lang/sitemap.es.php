@@ -1,123 +1,123 @@
 <?php
 /*
 ------------------
-Language: Espa�ol (Spanish)
+Language: Espa�ol (Spanish)
 ------------------
 */
 
-$LANG['SITEMAP'] = 'Site Map';
-$LANG['HOME'] = 'Home';
-$LANG['COLLECTIONS'] = 'Collections';
-$LANG['SEARCHENGINE'] = 'Search Engine';
-$LANG['SEARCH_COLL'] = ' - search collections';
-$LANG['LISTOFCOLL'] = ' - list of collection participating in project';
-$LANG['COLLSTATS'] = 'Collection Statistics';
-$LANG['EXSICC'] = 'Exsiccati Index';
-$LANG['DARWINCORE'] = 'Darwin Core Archives';
-$LANG['PUBDATA'] = ' - published datasets of selected collections';
-$LANG['IMGLIB'] = 'Image Library';
-$LANG['IMAGE_SEARCH'] = 'Interactive Search Tool';
-$LANG['CONTRIB'] = 'Contributing Photographers';
-$LANG['USAGEPOLICY'] = 'Usage Policy and Copyright Information';
-$LANG['RARESPEC'] = 'Rare Species';
-$LANG['LISTOFTAXA'] = ' - list of taxa where locality information is hidden due to rare/threatened/endangered status';
-$LANG['BIOINV'] = 'Biotic Inventory Projects';
-$LANG['DYNAMIC'] = 'Dynamic Species Lists';
-$LANG['CHECKLIST'] = 'Checklist';
-$LANG['BUILDCHECK'] = '- dynamically build a checklist using georeferenced specimen records';
-$LANG['DYNAMICKEY'] = 'Dynamic Key';
-$LANG['BUILDDKEY'] = '- dynamically build a key using georeferenced specimen records';
-$LANG['MANAGTOOL'] = 'Data Management Tools';
-$LANG['ADMIN'] = 'Administrative Functions (Super Admins only)';
-$LANG['USERPERM'] = 'User Permissions';
-$LANG['TAXINTER'] = 'Taxonomic Interest User Permissions';
-$LANG['CREATENEWCOLL'] = 'Create a New Collection or Observation Profile';
-$LANG['GUIDMAP'] = 'Collection GUID Mapper';
-$LANG['THUMBNAIL_BUILDER'] = 'Thumbnail Builder Tool';
-$LANG['SALIX'] = 'SALIX WordStat Manager';
-$LANG['IDKEYS'] = 'Identification Keys';
-$LANG['KEYMODULE'] = 'Note: The Identification Key module is deactivated within this portal. However, you can override by activating idividual keys within the checklist administration page.';
-$LANG['AUTHOKEY'] = 'You are authorized to access the ';
-$LANG['CHARASTATES'] = 'Characters and Character States Editor';
-$LANG['AUTHIDKEY'] = 'You are authorized to edit Identification Keys.';
-$LANG['CODINGCHARA'] = 'For coding characters in a table format, open the Mass-Update Editor for the following checklists';
-$LANG['NOTAUTHIDKEY'] = 'You are not authorized to edit Identification Keys';
-$LANG['IMAGES'] = 'Images';
-$LANG['SEESYMBDOC'] = 'See the Symbiota documentation on ';
-$LANG['IMGSUB'] = 'Image Submission';
-$LANG['FORANOVERVIEW'] = 'for an overview of how images are managed within a Symbiota data portal. Field images without
-						detailed locality information can be uploaded using the Taxon Species Profile page.
-						Specimen images are loaded through the Specimen Editing page or through a batch upload process
-						established by a portal manager. Image Observations (Image Vouchers) with detailed locality information can be
-						uploaded using the link below. Note that you will need the necessary permission assignments to use this
-						feature. ';
-$LANG['BASICFIELD'] = 'Basic Field Image Submission ';
-$LANG['IMGOBSER'] = 'Image Observation Submission Module';
-$LANG['TAXANOIMG'] = 'Taxa without images:';
-$LANG['TAXANOFIELD'] = 'Taxa without field images:';
-$LANG['SELECTCHECK'] = 'Select a Checklist';
-$LANG['ADDNEWPROJ'] = 'Add a New Project';
-$LANG['LISTOFCURR'] = 'List of Current Projects';
-$LANG['CLICKEDIT'] = ' (click to edit)';
-$LANG['NOPROJ'] = 'There are no projects in the system';
-$LANG['NOTEDITPROJ'] = 'You are not authorized to edit any of the Projects';
-$LANG['TAXONPROF'] = 'Taxon Profile Page';
-$LANG['THEFOLLOWINGSPEC'] = 'The following Species Profile page editing features are also available to editors via an
-							editing link located in the upper right of each Species Profile page.';
-$LANG['NOTAUTHOTAXONPAGE'] = 'You are not yet authorized to edit the Taxon Profile';
-$LANG['TAXONOMY'] = 'Taxonomy';
-$LANG['TAXANOFIELD'] = 'Taxa without field images:';
-$LANG['TAXTREE'] = 'Taxonomic Tree Viewer';
-$LANG['DYNTAXTREE'] = 'Taxonomy Explorer';
-$LANG['EDITTAXPL'] = 'Edit Taxonomic Placement (use ';
-$LANG['TAXTREEVIEW'] = 'Taxonomic Tree Viewer)';
-$LANG['ADDTAXANAME'] = 'Add New Taxonomic Name';
-$LANG['BATCHTAXA'] = 'Batch Upload a Taxonomic Data File';
-$LANG['EOLLINK'] = 'Encyclopedia of Life Linkage Manager';
-$LANG['NOTEDITTAXA'] = 'You are not authorized to edit taxonomy';
-$LANG['CHECKLISTS'] = 'Checklists';
-$LANG['TOOLSFORMANAGE'] = 'Tools for managing Checklists are available from each checklist display page.
-						Editing symbols located in the upper right of the page will display
-						editing options for that checklist.
-						Below is a list of the checklists you are authorized to edit. ';
+$LANG['SITEMAP'] = 'Mapa del Sitio';
+$LANG['HOME'] = 'Inicio';
+$LANG['COLLECTIONS'] = 'Colecciones';
+$LANG['SEARCHENGINE'] = 'B&uacute;squeda';
+$LANG['SEARCH_COLL'] = 'B&uacute;squeda de colecciones';
+$LANG['LISTOFCOLL'] = 'Listado de colecciones participando en el proyecto';
+$LANG['COLLSTATS'] = 'Estad&iacute;stica de colecciones';
+$LANG['EXSICC'] = '&Iacute;ndice de Exsiccati';
+$LANG['DATA_PUBLISHING'] = 'Publicar Datos';
+$LANG['COLLECTIONS_RSS'] = 'Lector de RSS para colecciones de historia natural y proyectos de observaciones';
+$LANG['DARWINCORE'] = 'Archivos de Darwin Core (DwC-A)';
+$LANG['RSS'] = 'Lector RSS de DwC-A';
+$LANG['PUBDATA'] = 'datos publicadas de colecciones especificas';
+$LANG['IMGLIB'] = 'Librar&iacute;a de im&aacute;genes';
+$LANG['IMAGE_SEARCH'] = 'Herramienta de b&uacute;squeda interactiva';
+$LANG['CONTRIB'] = 'Contribuyentes de imagenes';
+$LANG['USAGEPOLICY'] = 'Normas para usuarios y informaci&oacute;n sobre los derechos de la propiedad intelectual';
+$LANG['RARESPEC'] = 'Especies raras';
+$LANG['LISTOFTAXA'] = 'Listado de taxones raras y/o amenazadas para cuales se ha ocultado sus sitios de distribuci&oacute;n por razones de conservaci&oacute;n';
+$LANG['BIOINV'] = 'Inventarios de biodiversidad';
+$LANG['DYNAMIC'] = 'Listados din&aacute;micos de especies';
+$LANG['CHECKLIST'] = 'Listados de especies';
+$LANG['BUILDCHECK'] = 'Listados din&aacute;micos de especies utilizando reportes de especimenes georeferenciadas';
+$LANG['DYNAMICKEY'] = 'Clave din&aacute;mica';
+$LANG['BUILDDKEY'] = 'Construir clave de identificaci&oacute;n utilizando reportes de especimenes georeferenciadas';
+$LANG['MANAGTOOL'] = 'Herramientas para el manejo de datos';
+$LANG['ADMIN'] = 'Herramientas administrativas (solo super admins)';
+$LANG['USERPERM'] = 'Derechos de usuarios';
+$LANG['TAXINTER'] = 'Derechos de usuarios con inter&eacute;s taxon&oacute;mico';
+$LANG['TAXONOMIC_CLEANER'] = 'Limpiador global de taxonom&iacute;a';
+$LANG['CREATENEWCOLL'] = 'Crear nuevo perfil de colecci&oacute;n o observaci&oacute;n';
+$LANG['COORDVALIDATOR'] = 'Verificar las coordenadas contra los l&iacute;mites pol&iacute;ticos';
+$LANG['GUIDMAP'] = 'Mapeador de GUID para colecciones';
+$LANG['THUMBNAIL_BUILDER'] = 'Creador de miniaturas de im&aacute;genes';
+$LANG['SALIX'] = 'Gestor de SALIX WordStat';
+$LANG['IDKEYS'] = 'Claves de identificaci&oacute;n';
+$LANG['KEYMODULE'] = 'Aviso: el modulo para generar Claves de Identificaci&oacute;n es desactivado para este portal. No obstante es posible evitar esta restricci&oacute;n activando esta funcionalidad para claves individuales desde de la pagina administrativa para listas de especies.';
+$LANG['AUTHOKEY'] = 'Usted es autorizado/a de utilizar los siguientes partes';
+$LANG['CHARASTATES'] = 'Editor de caracteres y editor del estado de caracteres';
+$LANG['AUTHIDKEY'] = 'Usted esta autorizado de editar Claves de Identificaci&oacute;n.';
+$LANG['CODINGCHARA'] = 'Para codificar caracteres en formato de tabla hay que abrir el Editor de Actualizaci&oacute;n Masivo para los siguientes listas de especies';
+$LANG['NOTAUTHIDKEY'] = 'Usted no es autorizado para editar Claves de Identificaci&oacute;n';
+$LANG['IMAGES'] = 'Im&aacute;genes';
+$LANG['SEESYMBDOC'] = 'Revisa la documentaci&oacute;n de Symbiota para';
+$LANG['IMGSUB'] = 'Subir im&aacute;genes';
+$LANG['FORANOVERVIEW'] = 'para una explicaci&oacute;n general como manejar im&aacute;genes dentro de un portal de Symbiota. Im&aacute;genes de campo sin
+informaci&oacute;n detallada se puede subir por la pagina del perfil de una especie.
+Im&aacute;genes de muestras individuales hay que subir por la pagina de Editar Especimenes utilizando el proceso de subir lotes de im&aacute;genes en conjunto
+establecido por el gestor principal de un portal. Im&aacute;genes de observaciones (im&aacute;genes de referencia) con datos de localidad detallada se puede
+subir con el enlace abajo. Por favor toma en cuenta que usted necesite los derechos necesarios para utilizar esta
+funcionalidad. ';
+$LANG['BASICFIELD'] = 'Procedimiento b&aacute;sico para subir im&aacute;genes del campo';
+$LANG['IMGOBSER'] = 'Modulo para subir Im&aacute;genes de Observaci&oacute;n';
+$LANG['SELECTCHECK'] = 'Seleccionar lista de especies';
+$LANG['ADDNEWPROJ'] = 'A&‌ntilde;adir nuevo proyecto';
+$LANG['LISTOFCURR'] = 'Listado de proyectos actuales';
+$LANG['CLICKEDIT'] = '(hace clic aqu&iacute; para editar)';
+$LANG['NOPROJ'] = 'No hay proyectos en el sistema';
+$LANG['NOTEDITPROJ'] = 'Usted no esta autorizado/a editar ning&uacute;n proyecto';
+$LANG['TAXONPROF'] = 'Pagina del perfil de un taxon';
+$LANG['THEFOLLOWINGSPEC'] = 'Los siguientes funciones para editar paginas de perfiles de especies tambi&eacute;n est&aacute;n disponibles a editores por
+el enlace de editar ubicado en la esquina derecha arriba de cada pagina de perfil de una especie.';
+$LANG['NOTAUTHOTAXONPAGE'] = 'Usted no esta autorizado/a editar el perfil del taxon';
+$LANG['TAXONOMY'] = 'Taxonom&iacute;a';
+$LANG['TAXTREE'] = 'Visualizador del &aacute;rbol taxon&oacute;mico';
+$LANG['DYNTAXTREE'] = 'Navegador de Taxonom&iacute;a';
+$LANG['EDITTAXPL'] = 'Editar ubicaci&oacute;n taxon&oacute;mica (hay que usar';
+$LANG['TAXTREEVIEW'] = 'visualizador del &aacute;rbol taxon&oacute;mico)';
+$LANG['ADDTAXANAME'] = 'A&‌ntilde;adir nuevo nombre de un taxon';
+$LANG['BATCHTAXA'] = 'Subir masivo de un archivo taxon&oacute;mico';
+$LANG['EOLLINK'] = 'Gesti&oacute;n de enlaces al Encyclopedia of Life';
+$LANG['NOTEDITTAXA'] = 'Usted no esta autorizado/a de editar la taxonom&iacute;a';
+$LANG['CHECKLISTS'] = 'Listados de especies';
+$LANG['TOOLSFORMANAGE'] = 'Herramientas para gestionar listados de especies est&aacute;n disponibles directamente de las paginas individuales de cada lista.
+Con el s&iacute;mbolo de editar ubicado en la esquina derecha encima de cada pagina se puede ver
+las opciones disponibles para editar esta lista de especies.
+A bajo hay un listado con todos sus derechos individuales de las listas de especies que usted esta autorizado/a de modificar';
 $LANG['EXSICCATII'] = 'Exsiccati';
-$LANG['ESCMOD'] = 'The Exsiccati module is activated for this portal.
-							The exsiccati index (listed below) can be browsed or searched by everyone.
-							However, to add or modify exsiccati titles or series,
-							the user must be an administrator for at least one collection. ';
-$LANG['NOTEDITCHECK'] = 'You are not authorized to edit any of the Checklists';
-$LANG['COLLECTIONS'] = 'Collections';
-$LANG['PARA1'] = 'Tools for managing data specific to a particular collection are available through the collection&#39;s profile page.
-Clicking on a collection name in the list below will take you to this page for that given collection.
-An additional method to reach this page is by clicking on the collection name within the specimen search engine.
-The editing symbol located in the upper right of Collection Profile page will open
-						the editing pane and display a list of editing options.';
-$LANG['COLLLIST'] = 'List of collections you have permissions to edit';
-$LANG['OBSERV'] = 'Observations';
-$LANG['NOEDITCOLL'] = 'You have no explicit editing permissions for a particular collections';
-$LANG['PARA2'] = 'Data management for observation projects is handled in a similar manner to what is described in the Collections paragraph above.
-						One difference is the General Observation project. This project serves two central purposes:
-						1) Allows registered users to submit a image voucherd field observation.
-						2) Allows collectors to enter their own collection data for label printing and to make the data available
-						to the collections obtaining the physical specimens through donations or exchange. Visit the ';
-$LANG['SYMBDOCU'] = 'Symbiota Documentation';
-$LANG['FORMOREINFO'] = ' for more information on specimen processing capabilities.
-						Note that observation projects are not activated on all Symbiota data portals. ';
-$LANG['OIVS'] = 'Observation Image Voucher Submission';
-$LANG['NOOBSPROJ'] = 'There are no Observation Projects to which you have permissions';
-$LANG['PERSONAL'] = 'Personal Specimen Management and Label Printing Features';
-$LANG['OPM'] = 'Observation Project Management';
-$LANG['PLEASE'] = 'Please';
-$LANG['LOGIN'] = 'login';
-$LANG['TOACCESS'] = ' to access editing tools.';
-$LANG['CONTACTPORTAL'] = 'Contact a portal administrator for obtaining editing permissions.';
-$LANG['ABOUT'] = 'About Symbiota';
-$LANG['SCHEMA'] = 'Schema Version ';
-$LANG['AUTHO'] = 'You are authorized to access the';
-$LANG['RSS'] = 'RSS Feed';
-$LANG['SYN_COM'] = 'Synonyms / Common Names';
-$LANG['TEXTDESC'] = 'Text Descriptions';
-$LANG['PERSONAL'] = 'Personal Specimen Management and Label Printing Features';
-$LANG['EDITIMG'] = 'Edit Images';
-$LANG['IMGSORTORD'] = 'Edit Image Sorting Order';
-$LANG['ADDNEWIMG'] = 'Add a new image';
+$LANG['ESCMOD'] = 'El modulo de Exsiccati es activado para este portal.
+Cualquier usuario puede ver o navegar el &iacute;ndice de exsiccati (listado abajo) The exsiccati index (listed below).
+No es posible aunque anadir o modificar el titulo del exsiccati o de la serie,
+por lo menos el usuario tiene que ser administrador para una colecci&oacute;n especifica para tener estos derechos';
+$LANG['NOTEDITCHECK'] = 'Usted no esta autorizado/a para editar ninguna de las listas de especies.';
+$LANG['PARA1'] = 'Herramientas para manejar datos espec&iacute;ficos para una colecci&oacute;n particular est&aacute;n disponibles por la pagina del perfil de esta colecci&oacute;n.
+Hacer clic en el nombre en el listado abajo va a llevarse directamente a la pagina principal de esta colecci&oacute;n.
+Alternativamente se puede acceder esta pagina es por el clic del nombre de la colecci&oacute;n desde de la pagina de b&uacute;squeda.
+Con el s&iacute;mbolo de editar ubicado en la esquina derecha encima de cada pagina se puede abrir
+una ventana para modificar esta pagina con diferentes opciones disponibles.';
+$LANG['COLLLIST'] = 'Listado de colecciones para los cuales usted tiene derechos de modificarlos';
+$LANG['OBSERV'] = 'Observaciones';
+$LANG['NOEDITCOLL'] = 'Usted no tiene derecho explicito para editar una colecci&oacute;n especifico';
+$LANG['PARA2'] = 'El manejo de datos de observaciones generalmente sigue las mismas reglas como el manejo de datos de colecciones (ver las instrucciones anteriores).
+Algo diferente es el Proyecto de Observaciones Generales. Este proyecto tiene dos objetivos principales:
+1) Permite a los usuarios registrados subir im&aacute;genes de referencia para compartir una observaci&oacute;n del campo.
+2) Permite a los colectores ingresar sus propios datos de colecciones para imprimir etiquetas y tambi&eacute;n para compartir estos datos
+con las coleccione que &uacute;ltimamente van a recibir las muestras f&iacute;sicas como donaci&oacute;n o intercambio de especimenes. Revisa la';
+$LANG['SYMBDOCU'] = 'documentaci&oacute;n de Symbiota ';
+$LANG['FORMOREINFO'] = 'para m&aacute;s informaci&oacute;n detallada como manejar la informaci&oacute;n de muestras. Aviso importante: la funcionalidad de manejar proyectos de observaciones no es necesariamente activado para cada portal de Symbiota';
+$LANG['OIVS'] = 'Subir im&aacute;genes de referencia para observaciones';
+$LANG['NOOBSPROJ'] = 'No hay proyectos de observaci&oacute;n para que usted tiene derechos de manejarlos';
+$LANG['PERSONAL'] = 'Gestion de manejar muestras personales y imprimir etiquetas';
+$LANG['OPM'] = 'Manejo de proyectos de observaciones';
+$LANG['PLEASE'] = 'Por favor';
+$LANG['LOGIN'] = 'hay que iniciar su sesion';
+$LANG['TOACCESS'] = 'para acceder las herramientas de editar.';
+$LANG['CONTACTPORTAL'] = 'Hay que ponerse en contacto con el administrador del portal para obtener sus derechos individuales para editar paginas especificas.';
+$LANG['ABOUT'] = 'Sobre Symbiota';
+$LANG['SCHEMA'] = 'Versi&oacute;n del esquema';
+$LANG['AUTHO'] = 'Usted esta autorizado/a para el acceso a los siguientes paginas';
+$LANG['SYN_COM'] = 'Sinonimia / Nombres Comunes';
+$LANG['TEXTDESC'] = 'Descripciones textuales';
+$LANG['PERSONAL'] = 'Gesti&oacute;n del manejo personal de especimenes y imprimir etiquetas';
+$LANG['EDITIMG'] = 'Modificar Im&aacute;genes';
+$LANG['IMGSORTORD'] = 'Modificar la secuencia de im&aacute;genes';
+$LANG['ADDNEWIMG'] = 'A&‌ntilde;adir nuevo imagen';
+?>

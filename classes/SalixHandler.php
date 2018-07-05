@@ -1,17 +1,17 @@
 <?php
-include_once($serverRoot.'/classes/SpecProcNlpSalix.php');
+include_once($SERVER_ROOT.'/classes/SpecProcNlpSalix.php');
 
 class SalixHandler{
-	
+
 	private $returnFormat = 'json';
 	private $charset = 'utf-8';
-	
+
 	private $instanceTS;
 	private $timeout = 30;
 	private $logHandler;
 	private $verbose = false;
 	private $errorStr;
-	
+
 	function __construct() {
 		$this->instanceTS = time();
 	}
@@ -20,10 +20,10 @@ class SalixHandler{
 		$this->logMsg('Instance closed ('.date('Y-m-d H:i:s').')');
 		if($this->logHandler) fclose($this->logHandler);
 	}
-	
+
 	public function parse($ocrInput){
 		$ocrInput = $this->cleanOcrInput($ocrInput);
-		if(!$ocrInput){ 
+		if(!$ocrInput){
 			$this->errorStr = 'FATAL ERROR: Input string is null';
 			$this->logMsg($this->errorStr);
 			return false;
@@ -44,7 +44,7 @@ class SalixHandler{
 			$this->logMsg($this->errorStr);
 			return false;
 		}
-		
+
 		//Format return
 		$retStr = '';
 		if($this->returnFormat == 'json'){
@@ -68,46 +68,46 @@ class SalixHandler{
 			$retStr = implode(',',$dwcArr);
 		}
 		$this->logMsg($retStr);
-		
+
 		return $retStr;
 	}
 
 	public function setCharset($cs){
 		$this->charset = strtolower($cs);
 	}
-	
+
 	public function setReturnFormat($rFormat){
 		$this->returnFormat = strtolower($rFormat);
 	}
-	
+
 	public function getErrorStr(){
 		return $errorStr;
 	}
-	
+
 	public function setVerbose($v){
 		$this->verbose = $v;
 		if($v){
 			//Create log handler
-			if($this->logHandler = fopen('../temp/logs/salix_webservice_'.date('Ymd').'.log', 'a')) {
+			if($this->logHandler = fopen('../content/logs/salix_webservice_'.date('Ymd').'.log', 'a')) {
 				$this->logMsg('New instance created ('.date('Y-m-d H:i:s').')');
 			}
 		}
 	}
-	
+
 	//Misc functions
 	private function logMsg($msg) {
 		if($this->verbose){
 			fwrite($this->logHandler, $this->instanceTS.': '.$msg."\n");
 		}
 	}
-	
+
 	private function cleanOcrInput($ocrInput){
 		$retStr = trim($ocrInput);
 		//Get rid of Windows curly (smart) quotes
 		$search = array(chr(145),chr(146),chr(147),chr(148),chr(149),chr(150),chr(151));
 		$replace = array("'","'",'"','"','*','-','-');
 		$retStr = str_replace($search, $replace, $retStr);
-		//Get rid of UTF-8 curly smart quotes and dashes 
+		//Get rid of UTF-8 curly smart quotes and dashes
 		$badwordchars=array("\xe2\x80\x98", // left single quote
 							"\xe2\x80\x99", // right single quote
 							"\xe2\x80\x9c", // left double quote

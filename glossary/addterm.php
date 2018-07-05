@@ -19,7 +19,7 @@ if($relatedLanguage == 'en') $relatedLanguage = 'English';
 if($relatedLanguage == 'es') $relatedLanguage = 'Spanish';
 
 $isEditor = false;
-if($isAdmin || array_key_exists("Taxonomy",$USER_RIGHTS)){
+if($IS_ADMIN || array_key_exists("Taxonomy",$USER_RIGHTS)){
 	$isEditor = true;
 }
 

@@ -1,64 +1,19 @@
 <?php
 include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceDownload.php');
-include_once($SERVER_ROOT.'/classes/OccurrenceManager.php');
-include_once($SERVER_ROOT.'/classes/DwcArchiverOccurrence.php');
-include_once($SERVER_ROOT.'/classes/SOLRManager.php');
-header("Cache-Control: no-cache, must-revalidate");
-header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
-ini_set('max_execution_time', 300); //180 seconds = 5 minutes
+include_once($SERVER_ROOT.'/classes/OccurrenceMapManager.php');
+include_once($SERVER_ROOT.'/classes/DwcArchiverCore.php');
 
-$schema = array_key_exists("schema",$_POST)?$_POST["schema"]:"symbiota"; 
+$sourcePage = array_key_exists("sourcepage",$_REQUEST)?$_REQUEST["sourcepage"]:"specimen";
+$schema = array_key_exists("schema",$_REQUEST)?$_REQUEST["schema"]:"symbiota";
 $cSet = array_key_exists("cset",$_POST)?$_POST["cset"]:'';
-$taxonFilterCode = array_key_exists("taxonFilterCode",$_POST)?$_POST["taxonFilterCode"]:0;
-$stArrCollJson = array_key_exists("jsoncollstarr",$_REQUEST)?$_REQUEST["jsoncollstarr"]:'';
-$stArrSearchJson = array_key_exists("starr",$_REQUEST)?$_REQUEST["starr"]:'';
-
-$dlManager = new OccurrenceDownload();
-$dwcaHandler = new DwcArchiverOccurrence();
-$occurManager = new OccurrenceManager();
-$solrManager = new SOLRManager();
-
-$occWhereStr = '';
-
-if($stArrCollJson && $stArrSearchJson){
-	$stArrSearchJson = str_replace("%apos;","'",$stArrSearchJson);
-	$collStArr = json_decode($stArrCollJson, true);
-	$searchStArr = json_decode($stArrSearchJson, true);
-	$stArr = array_merge($searchStArr,$collStArr);
-	$occurManager->setSearchTermsArr($stArr);
-
-    if($SOLR_MODE){
-        $solrManager->setSearchTermsArr($stArr);
-        if($schema == 'checklist'){
-            if($taxonFilterCode){
-                $solrArr = $solrManager->getTaxaArr();
-                $tidArr = $solrManager->getSOLRTidList($solrArr);
-                $dlManager->setTidArr($tidArr);
-            }
-            else{
-                $occArr = $solrManager->getOccArr();
-                $dlManager->setOccArr($occArr);
-            }
-        }
-        elseif($schema == 'georef'){
-            $occArr = $solrManager->getOccArr(true);
-            $dlManager->setOccArr($occArr);
-        }
-        elseif(array_key_exists("publicsearch",$_POST) && $_POST["publicsearch"]){
-            $occArr = $solrManager->getOccArr();
-            if($occArr){
-                $occWhereStr = 'WHERE o.occid IN('.implode(',',$occArr).') ';
-            }
-        }
-    }
-}
 
 if($schema == "backup"){
-    $collid = $_POST["collid"];
+	$collid = $_POST["collid"];
 	if($collid && is_numeric($collid)){
 		//check permissions due to sensitive localities not being redacted
 		if($IS_ADMIN || (array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collid,$USER_RIGHTS["CollAdmin"]))){
+			$dwcaHandler = new DwcArchiverCore();
 			$dwcaHandler->setSchemaType('backup');
 			$dwcaHandler->setCharSetOut($cSet);
 			$dwcaHandler->setVerboseMode(0);
@@ -67,9 +22,9 @@ if($schema == "backup"){
 			$dwcaHandler->setIncludeAttributes(1);
 			$dwcaHandler->setRedactLocalities(0);
 			$dwcaHandler->setCollArr($collid);
-			
+
 			$archiveFile = $dwcaHandler->createDwcArchive();
-			
+
 			if($archiveFile){
 				//ob_start();
 				header('Content-Description: Symbiota Occurrence Backup File (DwC-Archive data package)');
@@ -92,7 +47,7 @@ if($schema == "backup"){
 }
 else{
 	$zip = (array_key_exists('zip',$_POST)?$_POST['zip']:0);
-	$format = $_POST['format'];
+	$format = (array_key_exists('format',$_POST)?$_POST['format']:'csv');
 	$extended = (array_key_exists('extended',$_POST)?$_POST['extended']:0);
 
 	$redactLocalities = 1;
@@ -111,7 +66,16 @@ else{
 			$rareReaderArr = array_unique(array_merge($rareReaderArr,$USER_RIGHTS['RareSppReader']));
 		}
 	}
+	$occurManager = null;
+	if($sourcePage == 'specimen'){
+		$occurManager = new OccurrenceManager();
+	}
+	else{
+		$occurManager = new OccurrenceMapManager();
+	}
 	if($schema == "georef"){
+		$dlManager = new OccurrenceDownload();
+		if(array_key_exists("publicsearch",$_POST)) $dlManager->setIsPublicDownload();
 		if(array_key_exists("publicsearch",$_POST) && $_POST["publicsearch"]){
 			$dlManager->setSqlWhere($occurManager->getSqlWhere());
 		}
@@ -134,6 +98,7 @@ else{
 		$dlManager->downloadData();
 	}
 	elseif($schema == 'checklist'){
+		$dlManager = new OccurrenceDownload();
 		if(array_key_exists("publicsearch",$_POST) && $_POST["publicsearch"]){
 			$dlManager->setSqlWhere($occurManager->getSqlWhere());
 		}
@@ -141,10 +106,11 @@ else{
 		$dlManager->setCharSetOut($cSet);
 		$dlManager->setDelimiter($format);
 		$dlManager->setZipFile($zip);
-		$dlManager->setTaxonFilter($taxonFilterCode);
+		$dlManager->setTaxonFilter(array_key_exists("taxonFilterCode",$_POST)?$_POST["taxonFilterCode"]:0);
 		$dlManager->downloadData();
 	}
 	else{
+		$dwcaHandler = new DwcArchiverCore();
 		$dwcaHandler->setVerboseMode(0);
 		if($schema == "coge"){
 			$dwcaHandler->setCollArr($_POST["collid"]);
@@ -171,21 +137,17 @@ else{
 			}
 		}
 		else{
-			//Is an occurrence download 
+			//Is an occurrence download
+			if(array_key_exists("publicsearch",$_POST)) $dwcaHandler->setIsPublicDownload();
 			$dwcaHandler->setCharSetOut($cSet);
 			$dwcaHandler->setSchemaType($schema);
 			$dwcaHandler->setExtended($extended);
 			$dwcaHandler->setDelimiter($format);
 			$dwcaHandler->setRedactLocalities($redactLocalities);
 			if($rareReaderArr) $dwcaHandler->setRareReaderArr($rareReaderArr);
-				
+
 			if(array_key_exists("publicsearch",$_POST) && $_POST["publicsearch"]){
-                if($SOLR_MODE && $occWhereStr){
-                    $dwcaHandler->setCustomWhereSql($occWhereStr);
-                }
-                else{
-                    $dwcaHandler->setCustomWhereSql($occurManager->getSqlWhere());
-                }
+				$dwcaHandler->setCustomWhereSql($occurManager->getSqlWhere());
 			}
 			else{
 				//Request is coming from exporter.php for collection manager tools
@@ -224,8 +186,8 @@ else{
 			$includeAttributes = (array_key_exists('attributes',$_POST)?1:0);
 			$dwcaHandler->setIncludeAttributes($includeAttributes);
 
-			$outputFile = $dwcaHandler->createDwcArchive('webreq');
-			
+			$outputFile = $dwcaHandler->createDwcArchive();
+
 		}
 		else{
 			//Output file is a flat occurrence file (not a zip file)
@@ -246,7 +208,7 @@ else{
 			}
 			$contentDesc .= 'File';
 			header('Content-Description: '.$contentDesc);
-			
+
 			if($zip){
 				header('Content-Type: application/zip');
 			}
@@ -256,7 +218,7 @@ else{
 			else{
 				header('Content-Type: text/html; charset='.$CHARSET);
 			}
-			
+
 			header('Content-Disposition: attachment; filename='.basename($outputFile));
 			header('Content-Transfer-Encoding: binary');
 			header('Expires: 0');

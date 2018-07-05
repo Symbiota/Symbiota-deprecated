@@ -439,7 +439,14 @@ if($traitID){
 								<input name="reviewuid" type="hidden" value="<?php echo $reviewUid; ?>" /> 
 								<input name="reviewdate" type="hidden" value="<?php echo $reviewDate; ?>" /> 
 								<input name="reviewstatus" type="hidden" value="<?php echo $reviewStatus; ?>" /> 
-								<input name="submitform" type="submit" value="<?php echo ($mode == 2?'Set Status and Save':'Save and Next') ?>" disabled />
+								<?php 
+								if($mode == 2){
+									echo '<input name="submitform" type="submit" value="Set Status and Save" />';
+								}
+								else{
+									echo '<input name="submitform" type="submit" value="Save and Next" disabled />';
+								}
+								?>
 							</div>
 						</form>
 					</fieldset>

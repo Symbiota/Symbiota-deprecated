@@ -1,14 +1,14 @@
 <?php
 //error_reporting(E_ALL);
 include_once('../config/symbini.php');
-include_once($serverRoot.'/classes/GamesManager.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/GamesManager.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 
-$clid = array_key_exists("clid",$_REQUEST)?$_REQUEST["clid"]:0; 
+$clid = array_key_exists("clid",$_REQUEST)?$_REQUEST["clid"]:0;
 $dynClid = array_key_exists("dynclid",$_REQUEST)?$_REQUEST["dynclid"]:0;
-$taxonFilter = array_key_exists("taxonfilter",$_REQUEST)?$_REQUEST["taxonfilter"]:0; 
-$showCommon = array_key_exists("showcommon",$_REQUEST)?$_REQUEST["showcommon"]:0; 
-$lang = array_key_exists("lang",$_REQUEST)?$_REQUEST["lang"]:$defaultLang; 
+$taxonFilter = array_key_exists("taxonfilter",$_REQUEST)?$_REQUEST["taxonfilter"]:0;
+$showCommon = array_key_exists("showcommon",$_REQUEST)?$_REQUEST["showcommon"]:0;
+$lang = array_key_exists("lang",$_REQUEST)?$_REQUEST["lang"]:$defaultLang;
 
 $fcManager = new GamesManager();
 $fcManager->setClid($clid);
@@ -21,11 +21,11 @@ $sciArr = array();
 ?>
 <html>
 <head>
-	<title><?php echo $defaultTitle; ?> Flash Cards</title>
+	<title><?php echo $DEFAULT_TITLE; ?> Flash Cards</title>
 	<link href="../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 	<script type="text/javascript">
-		<?php include_once($serverRoot.'/config/googleanalytics.php'); ?>
+		<?php include_once($SERVER_ROOT.'/config/googleanalytics.php'); ?>
 	</script>
 	<script type="text/javascript">
 		var imageArr = new Array();
@@ -39,7 +39,7 @@ $sciArr = array();
 		var firstTry = true;
 
 		function init(){
-			<?php 
+			<?php
 				$imagesArr = $fcManager->getFlashcardImages();
 				if($imagesArr){
 					foreach($imagesArr as $imgArr){
@@ -129,7 +129,7 @@ $sciArr = array();
 			else if(document.body.offsetWidth){
 				wWidth = document.body.offsetWidth*0.9;
 			}
-			newWindow = window.open("../taxa/index.php?taxon="+activeIndex,"activetaxon",'scrollbars=1,toolbar=1,resizable=1,width='+(wWidth)+',height=600,left=20,top=20');
+			newWindow = window.open("../taxa/index.php?taxon="+activeIndex,"activetaxon",'scrollbars=1,toolbar=0,resizable=1,width='+(wWidth)+',height=600,left=20,top=20');
 			if (newWindow.opener == null) newWindow.opener = self;
 			firstTry = false;
 		}
@@ -138,21 +138,27 @@ $sciArr = array();
 
 <body onload="init();">
 <?php
-	$displayLeftMenu = (isset($checklists_flashcardsMenu)?$checklists_flashcardsMenu:"true");
-	include($serverRoot.'/header.php');
-	if(isset($checklists_flashcardsCrumbs)){
-		echo "<div class='navpath'>";
+	$displayLeftMenu = (isset($checklists_flashcardsMenu)?$checklists_flashcardsMenu:'true');
+	include($SERVER_ROOT.'/header.php');
+	echo '<div class="navpath">';
+	echo '<a href="../index.php">Home</a> &gt;&gt; ';
+	if(isset($checklists_flashcardsCrumbs) && $checklists_flashcardsCrumbs){
 		echo $checklists_flashcardsCrumbs;
-		echo " <b>".$defaultTitle." Flashcard</b>";
-		echo "</div>";
 	}
+	else{
+		echo '<a href="../checklists/checklist.php?cl='.$clid.'">';
+		echo $fcManager->getClName();
+		echo '</a> &gt;&gt; ';
+	}
+	echo ' <b>Flashcard Game</b>';
+	echo '</div>';
 	?>
 	<!-- This is inner text! -->
 	<div id='innertext'>
 		<div style="width:420px;margin-left:auto;margin-right:auto;">
 			<div style="width:420px;height:420px;text-align:center;">
 				<div>
-					<a id="imageanchor" href="">
+					<a id="imageanchor" href="" target="_blank">
 						<img id="activeimage" src="" style="height:97%;max-width:450px" />
 					</a>
 				</div>
@@ -173,12 +179,12 @@ $sciArr = array();
 					<select id="scinameselect" onchange="checkId(this)">
 						<option value="0">Name of Above Organism</option>
 						<option value="0">-------------------------</option>
-						<?php 
+						<?php
 						asort($sciArr);
 						foreach($sciArr as $t => $s){
 							echo "<option value='".$t."'>".$s."</option>";
 						}
-					
+
 						?>
 					</select>
 				</div>
@@ -200,14 +206,14 @@ $sciArr = array();
 							<div>
 								<select name="taxonfilter" onchange="document.getElementById('taxonfilterform').submit();">
 									<option value="0">Filter Quiz by Taxonomic Group</option>
-									<?php 
+									<?php
 										$fcManager->echoFlashcardTaxonFilterList();
 									?>
 								</select>
 							</div>
 							<div style='margin-top:3px;'>
-								<?php 
-									//Display Common Names: 0 = false, 1 = true 
+								<?php
+									//Display Common Names: 0 = false, 1 = true
 									if($displayCommonNames){
 										echo '<input id="showcommon" name="showcommon" type="checkbox" value="1" '.($showCommon?"checked":"").' onchange="document.getElementById(\'taxonfilterform\').submit();"/> Display Common Names'."\n";
 									}
@@ -221,7 +227,7 @@ $sciArr = array();
 		</div>
 	</div>
 	<?php
-		include($serverRoot.'/footer.php');
+	include($SERVER_ROOT.'/footer.php');
 	?>
 </body>
 </html>

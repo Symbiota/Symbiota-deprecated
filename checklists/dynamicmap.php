@@ -49,7 +49,7 @@ elseif($coordRange > 40){
         $(document).ready(function() {
         	$( "#taxa" ).autocomplete({
         		source: function( request, response ) {
-        			$.getJSON( "rpc/speciessuggest.php", { term: request.term, level: 'high' }, response );
+        			$.getJSON( "rpc/uppertaxasuggest.php", { term: request.term }, response );
         		},
         		minLength: 2,
         		autoFocus: true,
@@ -59,7 +59,7 @@ elseif($coordRange > 40){
         			}
 				}
         	});
-			
+
         });
 
 	    function initialize(){
@@ -71,14 +71,14 @@ elseif($coordRange > 40){
 			};
 
 	    	map = new google.maps.Map(document.getElementById("map_canvas"), dmOptions);
-	    	
+
 			google.maps.event.addListener(map, 'click', function(event) {
 	            mapZoom = map.getZoom();
 	            startLocation = event.latLng;
 	            setTimeout("placeMarker()", 500);
 	        });
 	    }
-	
+
 	    function placeMarker() {
 			if(currentMarker) currentMarker.setMap();
 	        if(mapZoom == map.getZoom()){
@@ -106,9 +106,9 @@ elseif($coordRange > 40){
 			return false;
 		}
 	</script>
-</head> 
+</head>
 <body style="background-color:#ffffff;" onload="initialize()">
-	<?php 
+	<?php
 		$displayLeftMenu = false;
 		include($SERVER_ROOT.'/header.php');
 		if(isset($checklists_dynamicmapCrumbs)){
@@ -123,22 +123,22 @@ elseif($coordRange > 40){
 		else{
 			?>
 			<div class='navpath'>
-				<a href='../index.php'>Home</a> &gt; 
+				<a href='../index.php'>Home</a> &gt;
 				<b>Dynamic Map</b>
 			</div>
-			<?php 
+			<?php
 		}
 		?>
 		<div id='innertext'>
 			<div>
-				Pan, zoom and click on map to capture coordinates, then submit coordinates to build a species list. 
+				Pan, zoom and click on map to capture coordinates, then submit coordinates to build a species list.
 				<span id="moredetails" style="cursor:pointer;color:blue;font-size:80%;" onclick="this.style.display='none';document.getElementById('moreinfo').style.display='inline';document.getElementById('lessdetails').style.display='inline';">
 					More Details
 				</span>
 				<span id="moreinfo" style="display:none;">
-					If a radius is defined, species lists are generated using specimen data collected within the defined area. 
-					If a radius is not supplied, the area is sampled in concentric rings until the sample size is determined to 
-					best represent the local species diversity. In other words, poorly collected areas will have a larger radius sampled. 
+					If a radius is defined, species lists are generated using specimen data collected within the defined area.
+					If a radius is not supplied, the area is sampled in concentric rings until the sample size is determined to
+					best represent the local species diversity. In other words, poorly collected areas will have a larger radius sampled.
 					Setting the taxon filter will limit the return to species found within that taxonomic group.
 				</span>
 				<span id="lessdetails" style="cursor:pointer;color:blue;font-size:80%;display:none;" onclick="this.style.display='none';document.getElementById('moreinfo').style.display='none';document.getElementById('moredetails').style.display='inline';">
@@ -155,7 +155,7 @@ elseif($coordRange > 40){
 							<input type="hidden" id="lngbox" name="lng" value="" />
 						</div>
 						<div>
-							<b>Point (Lat, Long):</b> 
+							<b>Point (Lat, Long):</b>
 							<span id="latlngspan"> &lt; Click on map &gt; </span>
 						</div>
 					</div>
@@ -164,9 +164,9 @@ elseif($coordRange > 40){
 							<b>Taxon Filter:</b> <input id="taxa" name="taxa" type="text" value="<?php echo $taxa; ?>" />
 							<input id="tid" name="tid" type="hidden" value="<?php echo $tid; ?>" />
 						</div>
-						<div> 
-							<b>Radius:</b> 
-							<input name="radius" value="(optional)" type="text" style="width:140px;" onfocus="this.value = ''" /> 
+						<div>
+							<b>Radius:</b>
+							<input name="radius" value="(optional)" type="text" style="width:140px;" onfocus="this.value = ''" />
 							<select name="radiusunits">
 								<option value="km">Kilometers</option>
 								<option value="mi">Miles</option>

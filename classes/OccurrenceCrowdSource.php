@@ -1,6 +1,6 @@
 <?php
 include_once($SERVER_ROOT.'/config/dbconnection.php');
- 
+
 class OccurrenceCrowdSource {
 
 	private $conn;
@@ -25,7 +25,7 @@ class OccurrenceCrowdSource {
 	public function getProjectDetails(){
 		$retArr = array();
 		//Currently returns one first CS project associated with collection
-		//we could support multiple CS projects per collection each with different instructions, training, and data entry personnel  
+		//we could support multiple CS projects per collection each with different instructions, training, and data entry personnel
 		if($this->collid){
 			$sql = 'SELECT CONCAT_WS(":",c.institutioncode,c.collectioncode) AS collcode, c.collectionname, '.
 				'csc.omcsid, csc.instructions, csc.trainingurl '.
@@ -44,7 +44,7 @@ class OccurrenceCrowdSource {
 		}
 		return $retArr;
 	}
-	
+
 	public function editProject($omcsid,$instr,$url){
 		$statusStr = '';
 		if(is_numeric($omcsid)){
@@ -86,7 +86,7 @@ class OccurrenceCrowdSource {
 				$retArr[$r->reviewstatus] = $r->cnt;
 			}
 			$rs->free();
-			
+
 			//Get record count for those available for adding to queue
 			$sql = 'SELECT count(o.occid) as cnt '.
 				'FROM omoccurrences o INNER JOIN images i ON o.occid = i.occid '.
@@ -106,43 +106,29 @@ class OccurrenceCrowdSource {
 	public function getProcessingStats(){
 		$retArr = array();
 		if($this->collid){
-			//Users to exclude because they are not volunteers 
-			$editorUidArr = array();
-			$sql1 = 'SELECT DISTINCT uid FROM userroles '.
-				'WHERE ((role = "CollAdmin" OR role = "CollEditor") AND tablepk = '.$this->collid.') OR (role = "SuperAdmin")';
-			//$sql1 = 'SELECT DISTINCT uid FROM userpermissions '.
-			//	'WHERE (pname = "CollAdmin-'.$this->collid.'" OR pname = "CollEditor-'.$this->collid.'" OR pname = "SuperAdmin")';
-			$rs1 = $this->conn->query($sql1);
-			while($r1 = $rs1->fetch_object()){
-				$editorUidArr[] = $r1->uid;
-			}
-			$rs1->free();
-			
 			//Processing scores by user
-			$sql = 'SELECT CONCAT_WS(", ", u.lastname, u.firstname) as username, u.uid, sum(IFNULL(q.points,0)) as usersum '.
+			$sql = 'SELECT CONCAT_WS(", ", u.lastname, u.firstname) as username, u.uid, q.isvolunteer, sum(IFNULL(q.points,0)) as usersum '.
 				'FROM omcrowdsourcequeue q INNER JOIN omcrowdsourcecentral c ON q.omcsid = c.omcsid '.
 				'INNER JOIN users u ON q.uidprocessor = u.uid '.
 				'WHERE c.collid = '.$this->collid.' '.
-				'GROUP BY username ORDER BY usersum DESC ';
+				'GROUP BY username, u.uid, q.isvolunteer ORDER BY usersum DESC ';
 			//echo $sql;
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
-				$tag = 'v';
-				if(in_array($r->uid,$editorUidArr)) $tag = 'e';
+				$tag = ($r->isvolunteer==1?'v':'e');
 				$retArr[$tag][$r->uid]['score'] = $r->usersum;
 				$retArr[$tag][$r->uid]['name'] = $r->username;
 			}
 			$rs->free();
 
 			//Processing counts by user
-			$sql = 'SELECT q.uidprocessor, q.reviewstatus, count(q.occid) as cnt '.
+			$sql = 'SELECT q.uidprocessor, q.reviewstatus, q.isvolunteer, count(q.occid) as cnt '.
 				'FROM omcrowdsourcequeue q INNER JOIN omcrowdsourcecentral c ON q.omcsid = c.omcsid '.
 				'WHERE c.collid = '.$this->collid.' AND q.uidprocessor IS NOT NULL '.
-				'GROUP BY q.uidprocessor, q.reviewstatus';
+				'GROUP BY q.uidprocessor, q.reviewstatus, q.isvolunteer';
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
-				$tag = 'v';
-				if(in_array($r->uidprocessor,$editorUidArr)) $tag = 'e';
+				$tag = ($r->isvolunteer==1?'v':'e');
 				$retArr[$tag][$r->uidprocessor][$r->reviewstatus] = $r->cnt;
 			}
 			$rs->free();
@@ -150,69 +136,77 @@ class OccurrenceCrowdSource {
 		return $retArr;
 	}
 
-	public function getTopScores(){
+	public function getTopScores($catid){
 		$retArr = array();
-		//Users to exclude because they are not volunteers 
-		$excludeUidArr = array();
-		$sql1 = 'SELECT DISTINCT uid FROM userroles '.
-			'WHERE (role = "CollAdmin") OR (role = "CollEditor") OR (role = "SuperAdmin")';
-		//$sql1 = 'SELECT DISTINCT uid FROM userpermissions '.
-		//	'WHERE (pname LIKE "CollAdmin-%" OR pname LIKE "CollEditor-%" OR pname = "SuperAdmin")';
-		$rs1 = $this->conn->query($sql1);
-		while($r1 = $rs1->fetch_object()){
-			$excludeUidArr[] = $r1->uid;
-		}
-		$rs1->free();
 		//Get users
 		$sql = 'SELECT u.uid, CONCAT_WS(", ",u.lastname,u.firstname) as user, sum(q.points) AS toppoints '.
-			'FROM omcrowdsourcequeue q INNER JOIN users u ON q.uidprocessor = u.uid '.
-			'WHERE q.reviewstatus = 10 AND q.points is not null '.
-			'GROUP BY firstname,u.lastname '.
-			'ORDER BY sum(q.points) DESC ';
+			'FROM omcrowdsourcequeue q INNER JOIN users u ON q.uidprocessor = u.uid ';
+		if($catid){
+			$sql .= 'INNER JOIN omcrowdsourcecentral c ON q.omcsid = c.omcsid INNER JOIN omcollcatlink cat ON c.collid = cat.collid ';
+		}
+		$sql .= 'WHERE q.reviewstatus = 10 AND q.points is not null AND q.isvolunteer = 1 ';
+		if($catid){
+			$sql .= 'AND (cat.ccpk = '.$catid.') ';
+		}
+		$sql .= 'GROUP BY u.firstname, u.lastname ORDER BY sum(q.points) DESC ';
 		$rs = $this->conn->query($sql);
 		$cnt = 0;
 		while($r = $rs->fetch_object()){
-			if(!in_array($r->uid,$excludeUidArr)){
-				$topPoints = $r->toppoints;
-				if(!$topPoints) $topPoints = 0;
-				$retArr[$topPoints] = $r->user;
-				$cnt++;
-				if($cnt > 10) break;
-			}
+			$topPoints = $r->toppoints;
+			if(!$topPoints) $topPoints = 0;
+			$retArr[$topPoints] = $r->user;
+			$cnt++;
+			if($cnt > 10) break;
 		}
 		$rs->free();
 		return $retArr;
 	}
 
-	public function getUserStats($symbUid){
+	public function getUserStats($catid){
 		$retArr = array();
 		$sql = 'SELECT c.collid, CONCAT_WS(":",c.institutioncode,c.collectioncode) as collcode, c.collectionname, '.
-			'q.reviewstatus, COUNT(q.occid) AS cnt, SUM(IFNULL(q.points,2)) AS points '.
+			'q.reviewstatus, q.isvolunteer, COUNT(q.occid) AS cnt, SUM(IFNULL(q.points,2)) AS points '.
 			'FROM omcrowdsourcequeue q INNER JOIN omcrowdsourcecentral csc ON q.omcsid = csc.omcsid '.
-			'INNER JOIN omcollections c ON csc.collid = c.collid '.
-			'GROUP BY c.collid,q.reviewstatus,q.uidprocessor '.
-			'HAVING (q.uidprocessor = '.$symbUid.' OR q.uidprocessor IS NULL) '.
+			'INNER JOIN omcollections c ON csc.collid = c.collid ';
+		if($catid){
+			$sql .= 'INNER JOIN omcollcatlink cat ON c.collid = cat.collid WHERE (cat.ccpk = '.$catid.') ';
+		}
+		$sql .= 'GROUP BY c.collid,q.reviewstatus,q.uidprocessor,q.isvolunteer '.
+			'HAVING (q.uidprocessor = '.$GLOBALS['SYMB_UID'].' OR q.uidprocessor IS NULL) '.
 			'ORDER BY c.institutioncode,c.collectioncode,q.reviewstatus';
 		//echo $sql;
 		$rs = $this->conn->query($sql);
 		$pPoints = 0;
 		$aPoints = 0;
+		$nonVolunteerCnt = 0;
 		$totalCnt = 0;
 		while($r = $rs->fetch_object()){
 			$retArr[$r->collid]['name'] = $r->collectionname.' ('.$r->collcode.')';
 			$retArr[$r->collid]['cnt'][$r->reviewstatus] = $r->cnt;
-			$retArr[$r->collid]['points'][$r->reviewstatus] = $r->points;
+			if($r->isvolunteer) $retArr[$r->collid]['points'][$r->reviewstatus] = $r->points;
 			if($r->reviewstatus >= 10){
-				$aPoints += $r->points;
+				if($r->isvolunteer){
+					$aPoints += $r->points;
+				}
 			}
-			elseif($r->reviewstatus==5){
-				$pPoints += $r->points;
+			elseif($r->reviewstatus == 5){
+				if($r->isvolunteer){
+					$pPoints += $r->points;
+				}
 			}
-			if($r->reviewstatus > 0) $totalCnt += $r->cnt;
+			if($r->reviewstatus > 0){
+				if($r->isvolunteer){
+					$totalCnt += $r->cnt;
+				}
+				else{
+					$nonVolunteerCnt += $r->cnt;
+				}
+			}
 		}
 		$retArr['ppoints'] = $pPoints;
 		$retArr['apoints'] = $aPoints;
 		$retArr['totalcnt'] = $totalCnt;
+		$retArr['nonvolcnt'] = $nonVolunteerCnt;
 		$rs->free();
 		return $retArr;
 	}
@@ -226,16 +220,16 @@ class OccurrenceCrowdSource {
 			'LEFT JOIN omcrowdsourcequeue q ON o.occid = q.occid '.
 			'WHERE o.collid = '.$this->collid.' AND q.occid IS NULL AND (o.processingstatus = "unprocessed") ';
 		if($family){
-			$sqlFrag .= 'AND (o.family = "'.$this->cleanInStr($family).'") '; 
+			$sqlFrag .= 'AND (o.family = "'.$this->cleanInStr($family).'") ';
 		}
 		if($taxon){
-			$sqlFrag .= 'AND (o.sciname LIKE "'.$this->cleanInStr($taxon).'%") '; 
+			$sqlFrag .= 'AND (o.sciname LIKE "'.$this->cleanInStr($taxon).'%") ';
 		}
 		if($country){
-			$sqlFrag .= 'AND (o.country = "'.$this->cleanInStr($country).'") '; 
+			$sqlFrag .= 'AND (o.country = "'.$this->cleanInStr($country).'") ';
 		}
 		if($stateProvince){
-			$sqlFrag .= 'AND (o.stateprovince = "'.$this->cleanInStr($stateProvince).'") '; 
+			$sqlFrag .= 'AND (o.stateprovince = "'.$this->cleanInStr($stateProvince).'") ';
 		}
 		//Get count
 		$sqlCnt = 'SELECT COUNT(DISTINCT o.occid) AS cnt '.$sqlFrag;
@@ -258,7 +252,7 @@ class OccurrenceCrowdSource {
 		$con->close();
 		return $statusStr;
 	}
-	
+
 	public function deleteQueue(){
 		$statusStr = 'SUCCESS: all specimens removed from queue';
 		if(!$this->omcsid) return 'ERROR adding to queue, omcsid is null';
@@ -273,7 +267,7 @@ class OccurrenceCrowdSource {
 		$con->close();
 		return $statusStr;
 	}
-	
+
 	public function getQueueLimitCriteria(){
 		$country = array();
 		$state = array();
@@ -340,8 +334,8 @@ class OccurrenceCrowdSource {
 			}
 			$rs->free();
 			//Remove fields from $this->headArr that are not in $headerArr
-			$this->headArr = array_intersect($this->headArr,$headerArr); 
-			
+			$this->headArr = array_intersect($this->headArr,$headerArr);
+
 			//Get count
 			$sqlCnt = 'SELECT COUNT(o.occid) AS cnt '.$sql;
 			//echo $sqlCnt;
@@ -355,7 +349,7 @@ class OccurrenceCrowdSource {
 		}
 		return $retArr;
 	}
-	
+
 	public function submitReviews($postArr){
 		$statusStr = '';
 		$occidArr = $postArr['occid'];
@@ -373,7 +367,7 @@ class OccurrenceCrowdSource {
 				}
 				else{
 					$statusStr = 'ERROR submitting reviews; '.$con->error.'<br/>SQL = '.$sql;
-				} 
+				}
 			}
 			if($successArr && isset($postArr['updateProcessingStatus']) && $postArr['updateProcessingStatus']){
 				//Change status to reviewed
@@ -411,7 +405,7 @@ class OccurrenceCrowdSource {
 			$this->omcsid = $id;
 		}
 	}
-	
+
 	public function getOmcsid(){
 		return $this->omcsid;
 	}
@@ -440,7 +434,7 @@ class OccurrenceCrowdSource {
 		$newStr = $this->conn->real_escape_string($newStr);
 		return $newStr;
 	}
-	
+
 	public function getHeaderArr(){
     	return $this->headArr;
     }

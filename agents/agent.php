@@ -1,9 +1,9 @@
 <?php
 
 include_once('../config/symbini.php');
-include_once($serverRoot.'/classes/AgentManager.php');
-include_once($serverRoot.'/classes/RdfUtility.php');
-include_once($serverRoot.'/classes/UuidFactory.php');
+include_once($SERVER_ROOT.'/classes/AgentManager.php');
+include_once($SERVER_ROOT.'/classes/RdfUtility.php');
+include_once($SERVER_ROOT.'/classes/UuidFactory.php');
 
 // Find out what media types the client would like, in order.
 $accept = RdfUtility::parseHTTPAcceptHeader($_SERVER['HTTP_ACCEPT']);
@@ -45,7 +45,7 @@ while (!$done && list($key, $mediarange) = each($accept)) {
     } 
 }
 if (!$done) { 
-  Header("Content-Type: text/html; charset=".$charset);
+  Header("Content-Type: text/html; charset=".$CHARSET);
   $spDisplay = " Agent: ". $agent->getMinimalName();
   pageheader($agent);
   $am = new AgentManager();
@@ -56,7 +56,7 @@ if (!$done) {
         $('#editLink').click(function () {
             $.ajax({
                type: 'GET',
-               url: '$clientRoot/agents/rpc/handler.php',
+               url: '$CLIENT_ROOT/agents/rpc/handler.php',
                data: 'mode=edit&table=Agent&agentid=".$agent->getagentid()."',
                dataType : 'html',
                success: function(data){
@@ -74,7 +74,7 @@ if (!$done) {
         $('#viewLink').click(function () {
             $.ajax({
                type: 'GET',
-               url: '$clientRoot/agents/rpc/handler.php',
+               url: '$CLIENT_ROOT/agents/rpc/handler.php',
                data: 'mode=show&table=Agent&agentid=".$agent->getagentid()."',
                dataType : 'html',
                success: function(data){
@@ -92,7 +92,7 @@ if (!$done) {
         $('#createLink').click(function () {
             $.ajax({
                type: 'GET',
-               url: '$clientRoot/agents/rpc/handler.php',
+               url: '$CLIENT_ROOT/agents/rpc/handler.php',
                data: 'mode=create&table=Agent',
                dataType : 'html',
                success: function(data){
@@ -124,23 +124,23 @@ if (!$done) {
  */
 function deliverTurtle() {
    global $agent, $agentview, $charset;
-   Header("Content-Type: text/turtle; charset=".$charset);
+   Header("Content-Type: text/turtle; charset=".$CHARSET);
    echo $agentview->getAsTurtle();
 }
 
 function deliverRdfXml() { 
    global $agent, $agentview, $charset;
-   Header("Content-Type: application/rdf+xml; charset=".$charset);
+   Header("Content-Type: application/rdf+xml; charset=".$CHARSET);
    echo $agentview->getAsRdfXml();
 }
 
 function pageheader($agent) { 
-   global $serverRoot, $defaultTitle, $spDisplay, $clientRoot, $agent_indexCrumbs, $charset;
+   global $SERVER_ROOT, $DEFAULT_TITLE, $spDisplay, $CLIENT_ROOT, $agent_indexCrumbs, $charset;
 echo '<!DOCTYPE HTML>
 <html>
 <head>
-	<title>'.$defaultTitle.' - '.$spDisplay. '</title>
-	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>"/>
+	<title>'.$DEFAULT_TITLE.' - '.$spDisplay. '</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET; ?>"/>
 	<meta name="keywords" content='. $spDisplay .' />
 	<link href="../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
@@ -148,7 +148,7 @@ echo '<!DOCTYPE HTML>
 	<script type="text/javascript" src="../js/jquery.js"></script>
 	<script type="text/javascript" src="../js/jquery-ui.js"></script>
 	<script type="text/javascript">';
-    // include_once($serverRoot.'/config/googleanalytics.php'); 
+    // include_once($SERVER_ROOT.'/config/googleanalytics.php'); 
 echo '</script>
 	<script type="text/javascript">
 		var currentLevel = ' . ($descrDisplayLevel?$descrDisplayLevel:"1"). ';
@@ -157,18 +157,18 @@ echo '</script>
 </head>
 <body>';
    $displayLeftMenu = FALSE;
-   include($serverRoot.'/header.php');
+   include($SERVER_ROOT.'/header.php');
    if(!isset($agent_indexCrumbs)){
       $agent_indexCrumbs = array();
-      array_push($agent_indexCrumbs,"<a href='$clientRoot/index.php'>Home</a>");
-      array_push($agent_indexCrumbs,"<a href='$clientRoot/agents/index.php'>Agents</a>");
+      array_push($agent_indexCrumbs,"<a href='$CLIENT_ROOT/index.php'>Home</a>");
+      array_push($agent_indexCrumbs,"<a href='$CLIENT_ROOT/agents/index.php'>Agents</a>");
    }
    if (isset($agent)) { 
       $name = $agent->getMinimalName();
       $queryname = $agent->getMinimalName(false);
    } 
    if (strlen($name)>0) {
-      array_push($agent_indexCrumbs,"<a href='$clientRoot/agents/index.php?name=$queryname'>Search</a>");
+      array_push($agent_indexCrumbs,"<a href='$CLIENT_ROOT/agents/index.php?name=$queryname'>Search</a>");
       array_push($agent_indexCrumbs,$name);
    } 
    echo "<div class='navpath'>";
@@ -183,8 +183,8 @@ echo '</script>
 
 
 function footer() { 
-   global $serverRoot,$clientRoot;
-  include($serverRoot.'/footer.php');
+   global $SERVER_ROOT,$CLIENT_ROOT;
+  include($SERVER_ROOT.'/footer.php');
   echo "</body>\n</html>";
 }
 ?>

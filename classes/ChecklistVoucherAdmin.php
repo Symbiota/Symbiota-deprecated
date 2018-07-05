@@ -1,12 +1,13 @@
 <?php
 include_once($SERVER_ROOT.'/config/dbconnection.php');
- 
+
 class ChecklistVoucherAdmin {
 
-	private $conn;
-	private $clid;
-	private $childClidArr = array();
+	protected $conn;
+	protected $clid;
+	protected $childClidArr = array();
 	private $clName;
+	private $footprintWkt;
 	private $queryVariablesArr = array();
 	private $missingTaxaCount = 0;
 	private $closeConnOnDestroy = true;
@@ -31,10 +32,11 @@ class ChecklistVoucherAdmin {
 
 	public function setCollectionVariables(){
 		if($this->clid){
-			$sql = 'SELECT name, dynamicsql FROM fmchecklists WHERE (clid = '.$this->clid.')';
+			$sql = 'SELECT name, dynamicsql, footprintwkt FROM fmchecklists WHERE (clid = '.$this->clid.')';
 			$result = $this->conn->query($sql);
 			if($row = $result->fetch_object()){
 				$this->clName = $this->cleanOutStr($row->name);
+				$this->footprintWkt = $row->footprintwkt;
 				$sqlFrag = $row->dynamicsql;
 				$varArr = json_decode($sqlFrag,true);
 				if(json_last_error() != JSON_ERROR_NONE){
@@ -66,9 +68,12 @@ class ChecklistVoucherAdmin {
 		return $this->clName;
 	}
 
+	public function getClFootprintWkt(){
+		return $this->footprintWkt;
+	}
+
 	public function saveQueryVariables($postArr){
-		$fieldArr = array('country','state','county','locality','taxon','collid','recordedby',
-			'latnorth','latsouth','lngeast','lngwest','latlngor','excludecult','onlycoord');
+		$fieldArr = array('country','state','county','locality','taxon','collid','recordedby','latnorth','latsouth','lngeast','lngwest','latlngor','onlycoord','includewkt','excludecult');
 		$jsonArr = array();
 		foreach($fieldArr as $fieldName){
 			if(isset($postArr[$fieldName]) && $postArr[$fieldName]) $jsonArr[$fieldName] = $postArr[$fieldName];
@@ -97,29 +102,29 @@ class ChecklistVoucherAdmin {
 			}
 			if(preg_match('/parenttid = (\d+)\)/',$sqlFrag,$m)){
 				$retArr['taxon'] = $this->getSciname($m[1]);
-			} 
+			}
 			if(preg_match_all('/AGAINST\("([^()"]+)"\)/',$sqlFrag,$m)){
 				$retArr['recordedby'] = implode(',',$m[1]);
 			}
 			if(preg_match('/decimallatitude BETWEEN ([-\.\d]+) AND ([-\.\d]+)\D+/',$sqlFrag,$m)){
 				$retArr['latsouth'] = $m[1];
 				$retArr['latnorth'] = $m[2];
-			} 
+			}
 			if(preg_match('/decimallongitude BETWEEN ([-\.\d]+) AND ([-\.\d]+)\D+/',$sqlFrag,$m)){
 				$retArr['lngwest'] = $m[1];
 				$retArr['lngeast'] = $m[2];
-			} 
+			}
 			if(preg_match('/collid = (\d+)\D/',$sqlFrag,$m)){
 				$retArr['collid'] = $m[1];
 			}
 			if(preg_match('/ OR \(\(o.decimallatitude/',$sqlFrag) || preg_match('/ OR \(\(o.decimallongitude/',$sqlFrag)){
 				$retArr['latlngor'] = 1;
 			}
-			if(preg_match('/cultivationStatus/',$sqlFrag)){
-				$retArr['excludecult'] = 1;
-			}
 			if(preg_match('/decimallatitude/',$sqlFrag)){
 				$retArr['onlycoord'] = 1;
+			}
+			if(preg_match('/cultivationStatus/',$sqlFrag)){
+				$retArr['excludecult'] = 1;
 			}
 		}
 		return $retArr;
@@ -149,7 +154,14 @@ class ChecklistVoucherAdmin {
 			$locArr = explode(',', $localityStr);
 			$locStr = '';
 			foreach($locArr as $str){
-				$locStr .= 'OR (o.locality LIKE "%'.$this->cleanInStr($str).'%") ';
+				$str = $this->cleanInStr($str);
+				if(strlen($str) > 4){
+					$locStr .= 'OR (MATCH(f.locality) AGAINST(\'"'.$str.'"\' IN BOOLEAN MODE)) ';
+				}
+				else{
+					$locStr .= 'OR (o.locality LIKE "%'.$str.'%") ';
+				}
+				//$locStr .= 'OR (o.locality LIKE "%'.$this->cleanInStr($str).'%") ';
 			}
 			$sqlFrag .= 'AND ('.substr($locStr, 2).') ';
 		}
@@ -162,7 +174,7 @@ class ChecklistVoucherAdmin {
 			}
 			/*
 			if(strpos($tStr,'aceae') || strpos($tStr,'idae')){
-				$sqlFrag .= 'AND (o.family LIKE "'.$tStr.'") '; 
+				$sqlFrag .= 'AND (o.family LIKE "'.$tStr.'") ';
 			}
 			else{
 				$sqlFrag .= 'AND (o.sciname LIKE "'.$tStr.'%") ';
@@ -177,13 +189,20 @@ class ChecklistVoucherAdmin {
 		if(isset($this->queryVariablesArr['lngwest']) && isset($this->queryVariablesArr['lngeast']) && is_numeric($this->queryVariablesArr['lngwest']) && is_numeric($this->queryVariablesArr['lngeast'])){
 			$llStr .= 'AND (o.decimallongitude BETWEEN '.$this->queryVariablesArr['lngwest'].' AND '.$this->queryVariablesArr['lngeast'].') ';
 		}
-		if($llStr){
-			if(array_key_exists('latlngor',$this->queryVariablesArr)) $llStr = 'OR ('.trim(substr($llStr,3)).') ';
-			$sqlFrag .= $llStr;
+		if(isset($this->queryVariablesArr['latlngor']) && $this->queryVariablesArr['latlngor']){
+			//Query coordinates or locality string
+			if($llStr){
+				$llStr = 'OR ('.trim(substr($llStr,3)).') ';
+				$sqlFrag .= $llStr;
+			}
 		}
-		//Use occurrences only with decimallatitude
-		if(!$llStr && isset($this->queryVariablesArr['onlycoord']) && $this->queryVariablesArr['onlycoord']){
+		elseif(isset($this->queryVariablesArr['onlycoord']) && $this->queryVariablesArr['onlycoord']){
+			//Use occurrences only with decimallatitude
 			$sqlFrag .= 'AND (o.decimallatitude IS NOT NULL) ';
+		}
+		elseif(isset($this->queryVariablesArr['includewkt']) && $this->queryVariablesArr['includewkt']){
+			//Searh based on polygon
+			if($this->footprintWkt) $sqlFrag .= 'AND (ST_Within(p.point,GeomFromText("'.$this->footprintWkt.'"))) ';
 		}
 		//Exclude taxonomy
 		if(isset($this->queryVariablesArr['excludecult']) && $this->queryVariablesArr['excludecult']){
@@ -276,26 +295,24 @@ class ChecklistVoucherAdmin {
 	public function getNewVouchers($startLimit = 500,$includeAll = 1){
 		$retArr = Array();
 		if($sqlFrag = $this->getSqlFrag()){
-			$clidStr = $this->clid;
-			if($this->childClidArr){
-				$clidStr .= ','.implode(',',$this->childClidArr);
-			}
 			if($includeAll == 1 || $includeAll == 2){
-				$sql = 'SELECT DISTINCT cl.tid AS cltid, t.sciname AS clsciname, o.occid, '. 
-					'IFNULL(CONCAT(c.institutioncode,"-",c.collectioncode,"-",o.catalognumber),"[no catalog number]") AS collcode, '. 
+				$sql = 'SELECT DISTINCT cl.tid AS cltid, t.sciname AS clsciname, o.occid, '.
+					'IFNULL(CONCAT(c.institutioncode,"-",c.collectioncode,"-",o.catalognumber),"[no catalog number]") AS collcode, '.
 					'o.tidinterpreted, o.sciname, o.recordedby, o.recordnumber, o.eventdate, '.
 					'CONCAT_WS("; ",o.country, o.stateprovince, o.county, o.locality) as locality '.
-					'FROM omoccurrences o INNER JOIN omcollections c ON o.collid = c.collid '.
+					'FROM omoccurrences o LEFT JOIN omcollections c ON o.collid = c.collid '.
 					'INNER JOIN taxstatus ts ON o.tidinterpreted = ts.tid '.
 					'INNER JOIN fmchklsttaxalink cl ON ts.tidaccepted = cl.tid '.
 					'INNER JOIN taxa t ON cl.tid = t.tid ';
-				if(strpos($sqlFrag,'MATCH(f.recordedby)')) $sql .= 'INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ';
+				$sql .= $this->getTableJoinFrag($sqlFrag);
 				$sql .= 'WHERE ('.$sqlFrag.') AND (cl.clid = '.$this->clid.') AND (ts.taxauthid = 1) ';
 				if($includeAll == 1){
-					$sql .= 'AND cl.tid NOT IN(SELECT tid FROM fmvouchers WHERE clid IN('.$clidStr.')) ';
+					$idArr = $this->getVoucherIDs('tid');
+					if($idArr) $sql .= 'AND cl.tid NOT IN('.implode(',',$idArr).') ';
 				}
 				elseif($includeAll == 2){
-					$sql .= 'AND o.occid NOT IN(SELECT occid FROM fmvouchers WHERE clid IN('.$clidStr.')) '; 
+					$idArr = $this->getVoucherIDs('occid');
+					if($idArr) $sql .= 'AND o.occid NOT IN('.implode(',',$idArr).') ';
 				}
 				$sql .= 'ORDER BY ts.family, o.sciname LIMIT '.$startLimit.', 500';
 				//echo '<div>'.$sql.'</div>';
@@ -313,16 +330,17 @@ class ChecklistVoucherAdmin {
 				}
 			}
 			elseif($includeAll == 3){
-				$sql = 'SELECT DISTINCT t.tid AS cltid, t.sciname AS clsciname, o.occid, '. 
-					'IFNULL(CONCAT(c.institutioncode,"-",c.collectioncode,"-",o.catalognumber),"[no catalog number]") AS collcode, '. 
+				$sql = 'SELECT DISTINCT t.tid AS cltid, t.sciname AS clsciname, o.occid, '.
+					'IFNULL(CONCAT(c.institutioncode,"-",c.collectioncode,"-",o.catalognumber),"[no catalog number]") AS collcode, '.
 					'o.tidinterpreted, o.sciname, o.recordedby, o.recordnumber, o.eventdate, '.
 					'CONCAT_WS("; ",o.country, o.stateprovince, o.county, o.locality) as locality '.
 					'FROM omcollections AS c INNER JOIN omoccurrences AS o ON c.collid = o.collid '.
 					'LEFT JOIN taxa AS t ON o.tidinterpreted = t.TID '.
 					'LEFT JOIN taxstatus AS ts ON t.TID = ts.tid ';
-				if(strpos($sqlFrag,'MATCH(f.recordedby)')) $sql .= 'LEFT JOIN omoccurrencesfulltext f ON o.occid = f.occid ';
-				$sql .= 'WHERE ('.$sqlFrag.') AND ((t.RankId < 220)) '.
-					'AND (o.occid NOT IN(SELECT occid FROM fmvouchers WHERE CLID IN('.$clidStr.'))) ';
+				$sql .= $this->getTableJoinFrag($sqlFrag);
+				$sql .= 'WHERE ('.$sqlFrag.') AND ((t.RankId < 220)) ';
+				$idArr = $this->getVoucherIDs('occid');
+				if($idArr) $sql .= 'AND (o.occid NOT IN('.implode(',',$idArr).')) ';
 				$sql .= 'ORDER BY o.family, o.sciname LIMIT '.$startLimit.', 500';
 				//echo '<div>'.$sql.'</div>';
 				$rs = $this->conn->query($sql);
@@ -343,50 +361,11 @@ class ChecklistVoucherAdmin {
 		return $retArr;
 	}
 
-	public function getConflictVouchers(){
-		$retArr = Array();
-		$clidStr = $this->clid;
-		if($this->childClidArr){
-			$clidStr .= ','.implode(',',$this->childClidArr);
-		}
-		$sql = 'SELECT DISTINCT t.tid, v.clid, t.sciname AS listid, o.recordedby, o.recordnumber, o.sciname, o.identifiedby, o.dateidentified, o.occid '.
-			'FROM taxstatus ts1 INNER JOIN omoccurrences o ON ts1.tid = o.tidinterpreted '. 
-			'INNER JOIN fmvouchers v ON o.occid = v.occid '. 
-			'INNER JOIN taxstatus ts2 ON v.tid = ts2.tid '. 
-			'INNER JOIN taxa t ON v.tid = t.tid '. 
-			'INNER JOIN taxstatus ts3 ON ts1.tidaccepted = ts3.tid '. 
-			'WHERE (v.clid IN('.$clidStr.')) AND ts1.taxauthid = 1 AND ts2.taxauthid = 1 AND ts1.tidaccepted <> ts2.tidaccepted '.
-			'AND ts1.parenttid <> ts2.tidaccepted AND v.tid <> o.tidinterpreted AND ts3.parenttid <> v.tid '.
-			'ORDER BY t.sciname ';
-		//echo $sql;
-		$rs = $this->conn->query($sql);
-		$cnt = 0;
-		while($row = $rs->fetch_object()){
-			$clSciname = $row->listid;
-			$voucherSciname = $row->sciname;
-			//if(str_replace($voucherSciname)) continue;
-			$retArr[$cnt]['tid'] = $row->tid;
-			$retArr[$cnt]['clid'] = $row->clid;
-			$retArr[$cnt]['occid'] = $row->occid;
-			$retArr[$cnt]['listid'] = $clSciname;
-			$collStr = $row->recordedby;
-			if($row->recordnumber) $collStr .= ' ('.$row->recordnumber.')';
-			$retArr[$cnt]['recordnumber'] = $this->cleanOutStr($collStr);
-			$retArr[$cnt]['specid'] = $this->cleanOutStr($voucherSciname);
-			$idBy = $row->identifiedby;
-			if($row->dateidentified) $idBy .= ' ('.$this->cleanOutStr($row->dateidentified).')';
-			$retArr[$cnt]['identifiedby'] = $this->cleanOutStr($idBy);
-			$cnt++;
-		}
-		$rs->free();
-		return $retArr;
-	}
-
 	public function getMissingTaxa(){
 		$retArr = Array();
 		if($sqlFrag = $this->getSqlFrag()){
 			$sql = 'SELECT DISTINCT t.tid, t.sciname '.$this->getMissingTaxaBaseSql($sqlFrag);
-			//echo '<div>'.$sql.'</div>'; 
+			//echo '<div>'.$sql.'</div>';
 			$rs = $this->conn->query($sql);
 			while($row = $rs->fetch_object()){
 				$retArr[$row->tid] = $this->cleanOutStr($row->sciname);
@@ -431,39 +410,115 @@ class ChecklistVoucherAdmin {
 		return $retArr;
 	}
 
+	public function getConflictVouchers(){
+		$retArr = Array();
+		$clidStr = $this->clid;
+		if($this->childClidArr){
+			$clidStr .= ','.implode(',',$this->childClidArr);
+		}
+		$sql = 'SELECT DISTINCT t.tid, v.clid, t.sciname AS listid, o.recordedby, o.recordnumber, o.sciname, o.identifiedby, o.dateidentified, o.occid '.
+				'FROM taxstatus ts1 INNER JOIN omoccurrences o ON ts1.tid = o.tidinterpreted '.
+				'INNER JOIN fmvouchers v ON o.occid = v.occid '.
+				'INNER JOIN taxstatus ts2 ON v.tid = ts2.tid '.
+				'INNER JOIN taxa t ON v.tid = t.tid '.
+				'INNER JOIN taxstatus ts3 ON ts1.tidaccepted = ts3.tid '.
+				'WHERE (v.clid IN('.$clidStr.')) AND ts1.taxauthid = 1 AND ts2.taxauthid = 1 AND ts1.tidaccepted <> ts2.tidaccepted '.
+				'AND ts1.parenttid <> ts2.tidaccepted AND v.tid <> o.tidinterpreted AND ts3.parenttid <> v.tid '.
+				'ORDER BY t.sciname ';
+		//echo $sql;
+		$rs = $this->conn->query($sql);
+		$cnt = 0;
+		while($row = $rs->fetch_object()){
+			$clSciname = $row->listid;
+			$voucherSciname = $row->sciname;
+			//if(str_replace($voucherSciname)) continue;
+			$retArr[$cnt]['tid'] = $row->tid;
+			$retArr[$cnt]['clid'] = $row->clid;
+			$retArr[$cnt]['occid'] = $row->occid;
+			$retArr[$cnt]['listid'] = $clSciname;
+			$collStr = $row->recordedby;
+			if($row->recordnumber) $collStr .= ' ('.$row->recordnumber.')';
+			$retArr[$cnt]['recordnumber'] = $this->cleanOutStr($collStr);
+			$retArr[$cnt]['specid'] = $this->cleanOutStr($voucherSciname);
+			$idBy = $row->identifiedby;
+			if($row->dateidentified) $idBy .= ' ('.$this->cleanOutStr($row->dateidentified).')';
+			$retArr[$cnt]['identifiedby'] = $this->cleanOutStr($idBy);
+			$cnt++;
+		}
+		$rs->free();
+		return $retArr;
+	}
+
+	public function batchAdjustChecklist($postArr){
+		$occidArr = $postArr['occid'];
+		foreach($occidArr as $occid){
+			//Get checklist tid
+			$tidChecklist = 0;
+			$sql = 'SELECT tid FROM fmvouchers WHERE (clid = '.$this->clid.') AND (occid = '.$occid.')';
+			$rs = $this->conn->query($sql);
+			if($r = $rs->fetch_object()){
+				$tidChecklist = $r->tid;
+			}
+			$rs->free();
+			//Get voucher tid
+			$tidVoucher = 0;
+			$sql1 = 'SELECT tidinterpreted FROM omoccurrences WHERE (occid = '.$occid.')';
+			$rs1 = $this->conn->query($sql1);
+			if($r1 = $rs1->fetch_object()){
+				$tidVoucher = $r1->tidinterpreted;
+			}
+			$rs1->free();
+			//Make sure
+			$sql2 = 'INSERT IGNORE INTO fmchklsttaxalink(tid, clid, morphospecies, familyoverride, habitat, abundance, notes, explicitExclude, source, internalnotes, dynamicProperties) '.
+				'SELECT '.$tidVoucher.' as tid, c.clid, c.morphospecies, c.familyoverride, c.habitat, c.abundance, c.notes, c.explicitExclude, c.source, c.internalnotes, c.dynamicProperties '.
+				'FROM fmchklsttaxalink c INNER JOIN fmvouchers v ON c.tid = v.tid AND c.clid = v.clid '.
+				'WHERE (c.clid = '.$this->clid.') AND (v.occid = '.$occid.')';
+			$this->conn->query($sql2);
+			//Transfer voucher to new name
+			$sql3 = 'UPDATE fmvouchers SET tid = '.$tidVoucher.' WHERE (clid = '.$this->clid.') AND (occid = '.$occid.')';
+			$this->conn->query($sql3);
+			if(array_key_exists('removeOldIn',$postArr)){
+				$sql4 = 'DELETE c.* FROM fmchklsttaxalink c LEFT JOIN fmvouchers v ON c.clid = v.clid AND c.tid = v.tid '.
+					'WHERE (c.clid = '.$this->clid.') AND (c.tid = '.$tidChecklist.') AND (v.clid IS NULL)';
+				$this->conn->query($sql4);
+			}
+		}
+	}
+
 	//Export functions used within voucherreporthandler.php
 	public function exportMissingOccurCsv(){
 		if($sqlFrag = $this->getSqlFrag()){
-			$fileName = 'Missing_'.$this->getExportFileName();
-	
-			$fieldArr = $this->getFieldArr();
+			$fileName = 'Missing_'.$this->getExportFileName().'.csv';
+
+			$fieldArr = $this->getOccurrenceFieldArr();
 			$localitySecurityFields = $this->getLocalitySecurityArr();
-			
+
 			$exportSql = 'SELECT '.implode(',',$fieldArr).', o.localitysecurity, o.collid '.
 				$this->getMissingTaxaBaseSql($sqlFrag);
 			//echo $exportSql;
 			$this->exportCsv($fileName,$exportSql,$localitySecurityFields);
 		}
 	}
-	
+
 	private function getMissingTaxaBaseSql($sqlFrag){
 		$clidStr = $this->clid;
 		if($this->childClidArr) $clidStr .= ','.implode(',',$this->childClidArr);
 		$retSql = 'FROM omoccurrences o LEFT JOIN omcollections c ON o.collid = c.collid '.
 			'INNER JOIN taxstatus ts ON o.tidinterpreted = ts.tid '.
-			'INNER JOIN taxa t ON ts.tidaccepted = t.tid ';
-		if(strpos($sqlFrag,'MATCH(f.recordedby)')) $retSql .= 'INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ';
-		$retSql .= 'WHERE ('.$sqlFrag.') '.
-			'AND (t.rankid IN(220,230,240,260,230)) AND (ts.taxauthid = 1) '.
-			'AND (o.occid NOT IN(SELECT occid FROM fmvouchers WHERE clid IN('.$clidStr.'))) '.
-			'AND (ts.tidaccepted NOT IN(SELECT ts.tidaccepted FROM fmchklsttaxalink cl INNER JOIN taxstatus ts ON cl.tid = ts.tid WHERE ts.taxauthid = 1 AND cl.clid IN('.$clidStr.'))) ';
+			'INNER JOIN taxa t ON ts.tidaccepted = t.tid '.
+			'LEFT JOIN guidoccurrences g ON o.occid = g.occid ';
+		$retSql .= $this->getTableJoinFrag($sqlFrag);
+		$retSql .= 'WHERE ('.$sqlFrag.') AND (t.rankid IN(220,230,240,260,230)) AND (ts.taxauthid = 1) ';
+		$idArr = $this->getVoucherIDs('occid');
+		if($idArr) $retSql .= 'AND (o.occid NOT IN('.implode(',',$idArr).')) ';
+		$retSql .= 'AND (ts.tidaccepted NOT IN(SELECT ts.tidaccepted FROM fmchklsttaxalink cl INNER JOIN taxstatus ts ON cl.tid = ts.tid WHERE ts.taxauthid = 1 AND cl.clid IN('.$clidStr.'))) ';
 		return $retSql;
 	}
 
 	public function getMissingProblemTaxa(){
 		$retArr = Array();
 		if($sqlFrag = $this->getSqlFrag()){
-			//Make sure tidinterpreted are valid 
+			//Make sure tidinterpreted are valid
 			//$this->conn->query('UPDATE omoccurrences o INNER JOIN taxa t ON o.sciname = t.sciname SET o.tidinterpreted = t.tid WHERE o.tidinterpreted IS NULL');
 			//Grab records
 			$sql = 'SELECT DISTINCT o.occid, IFNULL(CONCAT(c.institutioncode,"-",c.collectioncode,"-",o.catalognumber),"[no catalog number]") AS collcode, '.
@@ -487,12 +542,12 @@ class ChecklistVoucherAdmin {
 		$this->missingTaxaCount = count($retArr);
 		return $retArr;
 	}
-	
+
 	public function exportProblemTaxaCsv(){
-		$fileName = 'ProblemTaxa_'.$this->getExportFileName();
+		$fileName = 'ProblemTaxa_'.$this->getExportFileName().'.csv';
 
 		if($sqlFrag = $this->getSqlFrag()){
-			$fieldArr = $this->getFieldArr();
+			$fieldArr = $this->getOccurrenceFieldArr();
 			$localitySecurityFields = $this->getLocalitySecurityArr();
 			$sql = 'SELECT DISTINCT '.implode(',',$fieldArr).', o.localitysecurity, o.collid '.
 				$this->getProblemTaxaSql($sqlFrag);
@@ -503,49 +558,104 @@ class ChecklistVoucherAdmin {
 	private function getProblemTaxaSql($sqlFrag){
 		$clidStr = $this->clid;
 		if($this->childClidArr) $clidStr .= ','.implode(',',$this->childClidArr);
-		$retSql = 'FROM omoccurrences o LEFT JOIN omcollections c ON o.collid = c.CollID ';
-		if(strpos($sqlFrag,'MATCH(f.recordedby)')) $retSql .= 'INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ';
-		$retSql .= 'WHERE ('.$sqlFrag.') AND (o.tidinterpreted IS NULL) AND (o.sciname IS NOT NULL) '.
-			'AND (o.occid NOT IN(SELECT occid FROM fmvouchers WHERE clid IN('.$clidStr.'))) ';
+		$retSql = 'FROM omoccurrences o LEFT JOIN omcollections c ON o.collid = c.CollID LEFT JOIN guidoccurrences g ON o.occid = g.occid ';
+		$retSql .= $this->getTableJoinFrag($sqlFrag);
+		$retSql .= 'WHERE ('.$sqlFrag.') AND (o.tidinterpreted IS NULL) AND (o.sciname IS NOT NULL) ';
+		$idArr = $this->getVoucherIDs('occid');
+		if($idArr) $retSql .= 'AND (o.occid NOT IN('.implode(',',$idArr).')) ';
 		return $retSql;
 	}
 
-	public function downloadDatasetCsv(){
+	private function getVoucherIDs($idType){
+		$retArr = array();
+		$clidStr = $this->clid;
+		if($this->childClidArr){
+			$clidStr .= ','.implode(',',$this->childClidArr);
+		}
+		$sql = 'SELECT '.$idType.' as id FROM fmvouchers WHERE CLID IN('.$clidStr.')';
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			$retArr[] = $r->id;
+		}
+		$rs->free();
+		return $retArr;
+	}
+
+	private function getTableJoinFrag($sqlFrag){
+		$retSql = '';
+		if(strpos($sqlFrag,'MATCH(f.recordedby)') || strpos($sqlFrag,'MATCH(f.locality)')){
+			$retSql .= 'INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ';
+		}
+		if(strpos($sqlFrag,'p.point')){
+			$retSql .= 'INNER JOIN omoccurpoints p ON o.occid = p.occid ';
+		}
+		return $retSql;
+	}
+
+	public function downloadChecklistCsv(){
 		if($this->clid){
-			$fileName = $this->getExportFileName();
-			
-			$fieldArr = array('tid'=>'t.tid', 'family'=>'IFNULL(ctl.familyoverride,ts.family) AS family', 'scientificName'=>'t.sciname', 'author'=>'t.author');
+			$fieldArr = array('tid'=>'t.tid AS Taxon_Local_ID');
+			$fieldArr['clhabitat'] = 'ctl.habitat AS habitat';
+			$fieldArr['clabundance'] = 'ctl.abundance';
+			$fieldArr['clNotes'] = 'ctl.notes';
+			$fieldArr['clSource'] = 'ctl.source';
+			$fieldArr['editorNotes'] = 'ctl.internalnotes';
+			$fieldArr['family'] = 'IFNULL(ctl.familyoverride,ts.family) AS family';
+			$fieldArr['scientificName'] = 't.sciName AS scientificName';
+			$fieldArr['author'] = 't.author AS scientificNameAuthorship';
+
+			$clidStr = $this->clid;
+			if($this->childClidArr){
+				$clidStr .= ','.implode(',',$this->childClidArr);
+			}
+
+			$fileName = $this->getExportFileName().'.csv';
+			$sql = 'SELECT DISTINCT '.implode(',',$fieldArr).' '.
+				'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
+				'INNER JOIN fmchklsttaxalink ctl ON ctl.tid = t.tid '.
+				'WHERE (ts.taxauthid = 1) AND (ctl.clid IN('.$clidStr.')) ';
+			$this->exportCsv($fileName,$sql);
+		}
+	}
+
+	public function downloadVoucherCsv(){
+		if($this->clid){
+			$fileName = $this->getExportFileName().'.csv';
+
+			$fieldArr = array('tid'=>'t.tid AS taxonID', 'family'=>'IFNULL(ctl.familyoverride,ts.family) AS family', 'scientificName'=>'t.sciname', 'author'=>'t.author AS scientificNameAuthorship');
 			$fieldArr['clhabitat'] = 'ctl.habitat AS cl_habitat';
 			$fieldArr['clabundance'] = 'ctl.abundance';
 			$fieldArr['clNotes'] = 'ctl.notes';
 			$fieldArr['clSource'] = 'ctl.source';
 			$fieldArr['editorNotes'] = 'ctl.internalnotes';
-			$fieldArr = array_merge($fieldArr,$this->getFieldArr());
+			$fieldArr = array_merge($fieldArr,$this->getOccurrenceFieldArr());
 			$fieldArr['family'] = 'ts.family';
-			$fieldArr['scientificName'] = 't.sciName';
-			
+			$fieldArr['scientificName'] = 't.sciName AS scientificName';
+
 			$localitySecurityFields = $this->getLocalitySecurityArr();
-			
+
 			$clidStr = $this->clid;
 			if($this->childClidArr){
 				$clidStr .= ','.implode(',',$this->childClidArr);
 			}
-			
+
 			$sql = 'SELECT DISTINCT '.implode(',',$fieldArr).', o.localitysecurity, o.collid '.
 				'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
 				'INNER JOIN fmchklsttaxalink ctl ON ctl.tid = t.tid '.
 				'LEFT JOIN fmvouchers v ON ctl.clid = v.clid AND ctl.tid = v.tid '.
 				'LEFT JOIN omoccurrences o ON v.occid = o.occid '.
 				'LEFT JOIN omcollections c ON o.collid = c.collid '.
+				'LEFT JOIN guidoccurrences g ON o.occid = g.occid '.
 				'WHERE (ts.taxauthid = 1) AND (ctl.clid IN('.$clidStr.')) ';
 			$this->exportCsv($fileName,$sql,$localitySecurityFields);
 		}
 	}
 
-	private function exportCsv($fileName,$sql,$localitySecurityFields){
+	private function exportCsv($fileName,$sql,$localitySecurityFields = null){
 		header ('Cache-Control: must-revalidate, post-check=0, pre-check=0');
 		header ('Content-Type: text/csv');
-		header ('Content-Disposition: attachment; filename="'.$fileName.'"'); 
+		header ('Content-Disposition: attachment; filename="'.$fileName.'"');
+		//echo $sql; exit;
 		$rs = $this->conn->query($sql);
 		if($rs->num_rows){
 			$headerArr = array();
@@ -557,14 +667,17 @@ class ChecklistVoucherAdmin {
 			$out = fopen('php://output', 'w');
 			fputcsv($out, $headerArr);
 			while($row = $rs->fetch_assoc()){
-				$localSecurity = ($row["localitysecurity"]?$row["localitysecurity"]:0); 
-				if(!$rareSpeciesReader && $localSecurity != 1 && (!array_key_exists('RareSppReader', $GLOBALS['USER_RIGHTS']) || !in_array($row['collid'],$GLOBALS['USER_RIGHTS']['RareSppReader']))){
-					$redactStr = '';
-					foreach($localitySecurityFields as $fieldName){
-						if($row[$fieldName]) $redactStr .= ','.$fieldName;
+				if($localitySecurityFields){
+					$localSecurity = ($row["localitysecurity"]?$row["localitysecurity"]:0);
+					if(!$rareSpeciesReader && $localSecurity != 1 && (!array_key_exists('RareSppReader', $GLOBALS['USER_RIGHTS']) || !in_array($row['collid'],$GLOBALS['USER_RIGHTS']['RareSppReader']))){
+						$redactStr = '';
+						foreach($localitySecurityFields as $fieldName){
+							if($row[$fieldName]) $redactStr .= ','.$fieldName;
+						}
+						if($redactStr) $row['informationWithheld'] = 'Fields with redacted values (e.g. rare species localities):'.trim($redactStr,', ');
 					}
-					if($redactStr) $row['informationWithheld'] = 'Fields with redacted values (e.g. rare species localities):'.trim($redactStr,', ');
 				}
+				$this->encodeArr($row);
 				fputcsv($out, $row);
 			}
 			$rs->free();
@@ -575,9 +688,10 @@ class ChecklistVoucherAdmin {
 		}
 	}
 
-	private function getExportFileName(){
+	protected function getExportFileName(){
 		$fileName = $this->clName;
 		if($fileName){
+			$fileName = str_replace(Array('.',' ',':','&','"',"'",'(',')','[',']'),'',$fileName);
 			if(strlen($fileName) > 20){
 				$nameArr = explode(' ',$fileName);
 				foreach($nameArr as $k => $w){
@@ -589,23 +703,38 @@ class ChecklistVoucherAdmin {
 		else{
 			$fileName = 'symbiota';
 		}
-		$fileName = str_replace(Array('.',' ',':'),'',$fileName);
-		$fileName .= '_'.time().'.csv';
+		$fileName .= '_'.time();
 		return $fileName;
 	}
-	
-	private function getFieldArr(){
-		return array('family'=>'o.family','scientificName'=>'o.sciName','institutionCode'=>'IFNULL(o.institutionCode,c.institutionCode) AS institutionCode',
-			'collectionCode'=>'IFNULL(o.collectionCode,c.collectionCode) AS collectionCode',
+
+	private function getOccurrenceFieldArr(){
+		$retArr = array('o.family AS family_occurrence', 'o.sciName AS scientificName_occurrence', 'IFNULL(o.institutionCode,c.institutionCode) AS institutionCode','IFNULL(o.collectionCode,c.collectionCode) AS collectionCode',
+			'CASE guidTarget WHEN "symbiotaUUID" THEN IFNULL(o.occurrenceID,g.guid) WHEN "occurrenceId" THEN o.occurrenceID WHEN "catalogNumber" THEN o.catalogNumber ELSE "" END AS occurrenceID',
+			'o.catalogNumber', 'o.otherCatalogNumbers', 'o.identifiedBy', 'o.dateIdentified',
+ 			'o.recordedBy', 'o.recordNumber', 'o.eventDate', 'o.country', 'o.stateProvince', 'o.county', 'o.municipality', 'o.locality',
+ 			'o.decimalLatitude', 'o.decimalLongitude', 'o.coordinateUncertaintyInMeters', 'o.minimumElevationInMeters', 'o.maximumelevationinmeters',
+			'o.verbatimelevation', 'o.habitat', 'o.occurrenceRemarks', 'o.associatedTaxa', 'o.reproductivecondition', 'o.informationWithheld', 'o.occid');
+		$retArr[] = 'g.guid AS recordID';
+		$serverDomain = "http://";
+		if((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || $_SERVER['SERVER_PORT'] == 443) $serverDomain = "https://";
+		$serverDomain .= $_SERVER["SERVER_NAME"];
+		if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $serverDomain .= ':'.$_SERVER["SERVER_PORT"];
+		$retArr[] = 'CONCAT("'.$serverDomain.$GLOBALS['CLIENT_ROOT'].'/collections/individual/index.php?occid=",o.occid) as `references`';
+		return $retArr;
+
+		/*
+		return array('family'=>'o.family','scientificName'=>'o.sciName AS scientificName_occurrence','institutionCode'=>'IFNULL(o.institutionCode,c.institutionCode) AS institutionCode',
+			'collectionCode'=>'IFNULL(o.collectionCode,c.collectionCode) AS collectionCode','occurrenceID'=>'o.occurrenceID',
 			'catalogNumber'=>'o.catalogNumber','identifiedBy'=>'o.identifiedBy','dateIdentified'=>'o.dateIdentified',
- 			'recordedBy'=>'o.recordedBy','recordNumber'=>'o.recordNumber','eventDate'=>'o.eventDate','country'=>'o.country',
- 			'stateProvince'=>'o.stateProvince','county'=>'o.county','municipality'=>'o.municipality','locality'=>'o.locality',
- 			'decimalLatitude'=>'o.decimalLatitude','decimalLongitude'=>'o.decimalLongitude','minimumElevationInMeters'=>'o.minimumElevationInMeters',
- 			'maximumElevationInMeters'=>'o.maximumelevationinmeters','verbatimElevation'=>'o.verbatimelevation',
- 			'habitat'=>'o.habitat','occurrenceRemarks'=>'o.occurrenceRemarks','associatedTaxa'=>'o.associatedTaxa',
- 			'reproductivecondition'=>'o.reproductivecondition','informationWithheld'=>'o.informationWithheld','occid'=>'o.occid');
+			'recordedBy'=>'o.recordedBy','recordNumber'=>'o.recordNumber','eventDate'=>'o.eventDate','country'=>'o.country',
+			'stateProvince'=>'o.stateProvince','county'=>'o.county','municipality'=>'o.municipality','locality'=>'o.locality',
+			'decimalLatitude'=>'o.decimalLatitude','decimalLongitude'=>'o.decimalLongitude','coordinateUncertaintyInMeters'=>'o.coordinateUncertaintyInMeters','minimumElevationInMeters'=>'o.minimumElevationInMeters',
+			'maximumElevationInMeters'=>'o.maximumelevationinmeters','verbatimElevation'=>'o.verbatimelevation',
+			'habitat'=>'o.habitat','occurrenceRemarks'=>'o.occurrenceRemarks','associatedTaxa'=>'o.associatedTaxa',
+			'reproductiveCondition'=>'o.reproductivecondition','informationWithheld'=>'o.informationWithheld','occid'=>'o.occid');
+		*/
 	}
-	
+
 	private function getLocalitySecurityArr(){
 		return array('recordNumber','eventDate','locality','decimalLatitude','decimalLongitude','minimumElevationInMeters',
 			'minimumElevationInMeters','habitat','occurrenceRemarks');
@@ -619,14 +748,14 @@ class ChecklistVoucherAdmin {
 			$vArr = explode('-',$v);
 			if(count($vArr) == 2 && $vArr[0] && $vArr[1]) $sqlFrag .= ',('.$this->clid.','.$vArr[0].','.$vArr[1].')';
 		}
-		$sql = 'INSERT INTO fmvouchers(clid,occid,tid) VALUES '.substr($sqlFrag,1);
+		$sql = 'INSERT IGNORE INTO fmvouchers(clid,occid,tid) VALUES '.substr($sqlFrag,1);
 		//echo $sql;
 		if(!$this->conn->query($sql)){
 			trigger_error('Unable to link voucher; '.$this->conn->error,E_USER_WARNING);
 		}
 		return $retStatus;
 	}
-	
+
 	public function linkVoucher($taxa,$occid){
 		if(!is_numeric($taxa)){
 			$rs = $this->conn->query('SELECT tid FROM taxa WHERE (sciname = "'.$this->conn->real_escape_string($taxa).'")');
@@ -634,8 +763,7 @@ class ChecklistVoucherAdmin {
 				$taxa = $r->tid;
 			}
 		}
-		$sql = 'INSERT INTO fmvouchers(clid,tid,occid) '.
-			'VALUES ('.$this->clid.','.$taxa.','.$occid.')';
+		$sql = 'INSERT INTO fmvouchers(clid,tid,occid) VALUES ('.$this->clid.','.$taxa.','.$occid.')';
 		if($this->conn->query($sql)){
 			return 1;
 		}
@@ -703,7 +831,7 @@ class ChecklistVoucherAdmin {
 	public function getQueryVariablesArr(){
 		return $this->queryVariablesArr;
 	}
-	
+
 	public function getQueryVariableStr(){
 		$retStr = '';
 		if(isset($this->queryVariablesArr['collid'])){
@@ -718,6 +846,7 @@ class ChecklistVoucherAdmin {
 		if(isset($this->queryVariablesArr['recordedby'])) $retStr .= $this->queryVariablesArr['recordedby'].'; ';
 		if(isset($this->queryVariablesArr['latsouth']) && isset($this->queryVariablesArr['latnorth'])) $retStr .= 'Lat between '.$this->queryVariablesArr['latsouth'].' and '.$this->queryVariablesArr['latnorth'].'; ';
 		if(isset($this->queryVariablesArr['lngwest']) && isset($this->queryVariablesArr['lngeast'])) $retStr .= 'Long between '.$this->queryVariablesArr['lngwest'].' and '.$this->queryVariablesArr['lngeast'].'; ';
+		if(isset($this->queryVariablesArr['includewkt'])) $retStr .= 'Search based on polygon; ';
 		if(isset($this->queryVariablesArr['latlngor'])) $retStr .= 'Include Lat/Long and locality as an "OR" condition; ';
 		if(isset($this->queryVariablesArr['excludecult'])) $retStr .= 'Exclude cultivated species; ';
 		if(isset($this->queryVariablesArr['onlycoord'])) $retStr .= 'Only include occurrences with coordinates; ';
@@ -727,11 +856,11 @@ class ChecklistVoucherAdmin {
 	public function getMissingTaxaCount(){
 		return $this->missingTaxaCount;
 	}
-		
+
 	private function isRareSpeciesReader(){
 		$canReadRareSpp = false;
-		if($GLOBALS['IS_ADMIN'] 
-			|| array_key_exists("CollAdmin", $GLOBALS['USER_RIGHTS']) 
+		if($GLOBALS['IS_ADMIN']
+			|| array_key_exists("CollAdmin", $GLOBALS['USER_RIGHTS'])
 			|| array_key_exists("RareSppAdmin", $GLOBALS['USER_RIGHTS']) || array_key_exists("RareSppReadAll", $GLOBALS['USER_RIGHTS'])){
 			$canReadRareSpp = true;
 		}
@@ -754,7 +883,7 @@ class ChecklistVoucherAdmin {
 	private function getSciname($tid){
 		$retStr = '';
 		if(is_numeric($tid)){
-			$sql = 'SELECT sciname FROM taxa WHERE tid = '.$tid; 
+			$sql = 'SELECT sciname FROM taxa WHERE tid = '.$tid;
 			$rs = $this->conn->query($sql);
 			if($r = $rs->fetch_object()){
 				$retStr = $r->sciname;
@@ -763,7 +892,7 @@ class ChecklistVoucherAdmin {
 		}
 		return $retStr;
 	}
-	
+
 	private function getTid($sciname){
 		$tidRet = 0;
 		$sql = 'SELECT tid FROM taxa WHERE sciname = ("'.$sciname.'")';
@@ -774,26 +903,40 @@ class ChecklistVoucherAdmin {
 		$rs->free();
 		return $tidRet;
 	}
-	
+
 	public function getChildClidArr(){
 		return $this->childClidArr;
 	}
-	
-	private function arrayToCsv( $arrIn, $delimiter = ',', $enclosure = '"', $encloseAll = false) {
-		$delimiterEsc = preg_quote($delimiter, '/');
-		$enclosureEsc = preg_quote($enclosure, '/');
-		$output = array();
-		foreach ( $arrIn as $field ) {
-			$field = str_replace(array("\r", "\r\n", "\n"),'',$field);
-			if ( $encloseAll || preg_match( "/(?:${delimiterEsc}|${enclosureEsc}|\s)/", $field ) ) {
-				//$field = str_replace($delimiter,'\\'.$delimiter,$field);
-				$output[] = $enclosure . str_replace($enclosure, $enclosure . $enclosure, $field) . $enclosure;
-			}
-			else {
-				$output[] = $field;
+
+	private function encodeArr(&$inArr){
+		$charSetOut = 'ISO-8859-1';
+		$charSetSource = strtoupper($GLOBALS['CHARSET']);
+		if($charSetSource && $charSetOut != $charSetSource){
+			foreach($inArr as $k => $v){
+				$inArr[$k] = $this->encodeStr($v);
 			}
 		}
-		return implode( $delimiter, $output )."\n";
+	}
+
+	protected function encodeStr($inStr){
+		$charSetSource = strtoupper($GLOBALS['CHARSET']);
+		$charSetOut = 'ISO-8859-1';
+		$retStr = $inStr;
+		if($inStr && $charSetSource){
+			if($charSetOut == 'UTF-8' && $charSetSource == 'ISO-8859-1'){
+				if(mb_detect_encoding($inStr,'UTF-8,ISO-8859-1',true) == 'ISO-8859-1'){
+					$retStr = utf8_encode($inStr);
+					//$retStr = iconv("ISO-8859-1//TRANSLIT","UTF-8",$inStr);
+				}
+			}
+			elseif($charSetOut == "ISO-8859-1" && $charSetSource == 'UTF-8'){
+				if(mb_detect_encoding($inStr,'UTF-8,ISO-8859-1') == 'UTF-8'){
+					$retStr = utf8_decode($inStr);
+					//$retStr = iconv("UTF-8","ISO-8859-1//TRANSLIT",$inStr);
+				}
+			}
+		}
+		return $retStr;
 	}
 
 	private function cleanOutStr($str){

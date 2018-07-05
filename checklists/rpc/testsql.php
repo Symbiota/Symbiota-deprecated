@@ -1,7 +1,7 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/config/dbconnection.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/config/dbconnection.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 header("Cache-Control: no-cache, must-revalidate");
 header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
 
@@ -11,7 +11,7 @@ $sqlFrag = $con->real_escape_string($_REQUEST['sql']);
 $clid = $con->real_escape_string($_REQUEST['clid']); 
 
 $responseStr = '-1';
-if($sqlFrag && $clid && $isAdmin || (array_key_exists("ClAdmin",$userRights) && in_array($clid,$userRights["ClAdmin"]))){
+if($sqlFrag && $clid && $IS_ADMIN || (array_key_exists("ClAdmin",$USER_RIGHTS) && in_array($clid,$USER_RIGHTS["ClAdmin"]))){
 	$responseStr = '0';
 	$sql = "SELECT * FROM omoccurrences o WHERE ".$sqlFrag." limit 1";
 	$result = $con->query($sql);

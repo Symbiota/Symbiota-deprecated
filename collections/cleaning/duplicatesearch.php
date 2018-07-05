@@ -1,7 +1,6 @@
 <?php
-include_once('../../config/symbini.php'); 
+include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceCleaner.php');
-include_once($SERVER_ROOT.'/classes/SOLRManager.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 
 $collid = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
@@ -18,12 +17,11 @@ if(!is_numeric($start)) $start = 0;
 if(!is_numeric($limit)) $limit = 0;
 
 $cleanManager = new OccurrenceCleaner();
-if($SOLR_MODE) $solrManager = new SOLRManager();
 if($collid) $cleanManager->setCollId($collid);
-$collMap = $cleanManager->getCollMap();
+$collMap = current($cleanManager->getCollMap());
 
 $statusStr = '';
-$isEditor = 0; 
+$isEditor = 0;
 if($IS_ADMIN || (array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collid,$USER_RIGHTS["CollAdmin"])) || ($collMap['colltype'] == 'General Observations')){
 	$isEditor = 1;
 }
@@ -33,13 +31,13 @@ if($collMap['colltype'] == 'General Observations'){
 	$cleanManager->setObsUid($SYMB_UID);
 }
 
-if($action == 'listdupscatalog') $limit = 500;
-
 $dupArr = array();
 if($action == 'listdupscatalog'){
+	$limit = 1000;
 	$dupArr = $cleanManager->getDuplicateCatalogNumber('cat',$start,$limit);
 }
 if($action == 'listdupsothercatalog'){
+	$limit = 1000;
 	$dupArr = $cleanManager->getDuplicateCatalogNumber('other',$start,$limit);
 }
 elseif($action == 'listdupsrecordedby'){
@@ -76,7 +74,21 @@ elseif($action == 'listdupsrecordedby'){
 			for(i = 0; i < dbElements.length; i++){
 				dbElements[i].checked = boxesChecked;
 			}
+		}
 
+		function batchSwitchTargetSpecimens(cbElem){
+			cbElem.checked = false;
+			var dbElements = document.getElementsByTagName("input");
+			//var dbElements = $("input[type='radio']").val();
+			var elemName = '';
+			for(i = 0; i < dbElements.length; i++){
+				if(dbElements[i].type == "radio"){
+					if(dbElements[i].checked == false && elemName != dbElements[i].name){
+						dbElements[i].checked = true;
+						elemName = dbElements[i].name;
+					}
+				}
+			}
 		}
 	</script>
 </head>
@@ -84,7 +96,7 @@ elseif($action == 'listdupsrecordedby'){
 	<div class='navpath'>
 		<a href="../../index.php">Home</a> &gt;&gt;
 		<a href="../misc/collprofiles.php?collid=<?php echo $collid; ?>&emode=1">Collection Management</a> &gt;&gt;
-		<a href="index.php?collid=<?php echo $collid; ?>">Cleaning Module Index</a> &gt;&gt; 
+		<a href="index.php?collid=<?php echo $collid; ?>">Cleaning Module Index</a> &gt;&gt;
 		<b>Duplicate Occurrences</b>
 	</div>
 
@@ -94,7 +106,7 @@ elseif($action == 'listdupsrecordedby'){
 		echo '<h2>'.$collMap['collectionname'].' ('.$collMap['code'].')</h2>';
 		if($isEditor){
 			if($action == 'listdupscatalog' || $action == 'listdupsothercatalog' || $action == 'listdupsrecordedby'){
-				//Look for duplicate catalognumbers 
+				//Look for duplicate catalognumbers
 				if($dupArr){
 					$recCnt = count($dupArr);
 					//Build table
@@ -103,9 +115,9 @@ elseif($action == 'listdupsrecordedby'){
 						<b>Use the checkboxes to select the records you would like to merge, and the radio buttons to select which target record to merge into.</b>
 					</div>
 					<form name="mergeform" action="duplicatesearch.php" method="post" onsubmit="return validateMergeForm(this);">
-						<?php 
+						<?php
 						if($recCnt > $limit){
-							$href = 'duplicatesearch.php?collid='.$collid.'&action='.$action.'&start='.($start+$limit); 
+							$href = 'duplicatesearch.php?collid='.$collid.'&action='.$action.'&start='.($start+$limit);
 							echo '<div style="float:right;"><a href="'.$href.'"><b>NEXT '.$limit.' RECORDS &gt;&gt;</b></a></div>';
 						}
 						echo '<div><b>'.($start+1).' to '.($start+$recCnt).' Duplicate Clusters </b></div>';
@@ -114,7 +126,7 @@ elseif($action == 'listdupsrecordedby'){
 							<tr>
 								<th style="width:40px;">ID</th>
 								<th style="width:20px;"><input name="selectalldupes" type="checkbox" title="Select/Deselect All" onclick="selectAllDuplicates(this.form)" /></th>
-								<th></th>
+								<th><input type="checkbox" name="batchswitch" onclick="batchSwitchTargetSpecimens(this)" title="Batch switch target specimens" /></th>
 								<th style="width:40px;">Catalog Number</th>
 								<th style="width:40px;">Other Catalog Numbers</th>
 								<th>Scientific Name</th>
@@ -129,7 +141,7 @@ elseif($action == 'listdupsrecordedby'){
 								<th>Locality</th>
 								<th>Date Last Modified</th>
 							</tr>
-							<?php 
+							<?php
 							$setCnt = 0;
 							foreach($dupArr as $dupKey => $occArr){
 								$setCnt++;
@@ -163,21 +175,21 @@ elseif($action == 'listdupsrecordedby'){
 							<input name="action" type="submit" value="Merge Duplicate Records" />
 						</div>
 					</form>
-					<?php 
+					<?php
 				}
 				else{
 					?>
 					<div style="margin:25px;font-weight:bold;font-size:120%;">
 						There are no duplicate catalog numbers!
 					</div>
-					<?php 
+					<?php
 				}
 			}
 			elseif($action == 'Merge Duplicate Records'){
 				?>
 				<ul>
 					<li>Duplicate merging process started</li>
-					<?php 
+					<?php
 					$dupArr = array();
 					foreach($_POST['dupid'] as $v){
 						$vArr = explode(':',$v);
@@ -187,17 +199,16 @@ elseif($action == 'listdupsrecordedby'){
 						}
 					}
 					$cleanManager->mergeDupeArr($dupArr);
-                    if($SOLR_MODE) $solrManager->updateSOLR();
 					?>
 					<li>Done!</li>
 				</ul>
-				<?php 
+				<?php
 			}
 			?>
 			<div>
 				<a href="index.php?collid=<?php echo $collid; ?>">Return to main menu</a>
-			</div> 
-			<?php 
+			</div>
+			<?php
 		}
 		else{
 			echo '<h2>You are not authorized to access this page</h2>';

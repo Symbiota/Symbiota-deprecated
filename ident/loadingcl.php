@@ -1,6 +1,6 @@
 <?php
 include_once('../config/symbini.php');
-header("Content-Type: text/html; charset=".$charset);
+header("Content-Type: text/html; charset=".$CHARSET);
 Header("Cache-Control: must-revalidate");
 $offset = 60 * 60 * 24 * 7;
 $ExpStr = "Expires: " . gmdate("D, d M Y H:i:s", time() + $offset) . " GMT";
@@ -43,7 +43,7 @@ Header($ExpStr);
 <body>
 	<?php
 	$displayLeftMenu = (isset($ident_loadingclMenu)?$ident_loadingclMenu:"true");
-	include($serverRoot.'/header.php');
+	include($SERVER_ROOT.'/header.php');
 	if(isset($ident_loadingclCrumbs)) echo "<div class='navpath'>".$ident_loadingclCrumbs."</div>";
 	
 	?>
@@ -79,7 +79,7 @@ Header($ExpStr);
 		</table>
 	</div>
 	<?php
-		include($serverRoot.'/footer.php');
+		include($SERVER_ROOT.'/footer.php');
 	?>
   
   </body>

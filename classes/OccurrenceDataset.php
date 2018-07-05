@@ -1,11 +1,11 @@
 <?php
-include_once($serverRoot.'/config/dbconnection.php');
-include_once($serverRoot.'/classes/DwcArchiverOccurrence.php');
+include_once($SERVER_ROOT.'/config/dbconnection.php');
+include_once($SERVER_ROOT.'/classes/DwcArchiverCore.php');
 
 class OccurrenceDataset {
 
 	private $conn;
-	private $symbUid;
+	private $SYMB_UID;
 	private $collArr = array();
 	private $isAdmin = 0;
 	private $newDatasetId = 0;
@@ -119,7 +119,7 @@ class OccurrenceDataset {
 			$dsArr[$r->datasetid] = $r->name;
 		}
 		$rs->free();
-		
+
 		$targetDsid = array_shift($targetArr);
 		$newName = '';
 		//Rename target
@@ -128,7 +128,7 @@ class OccurrenceDataset {
 			//Push occurrences to target
 			$sql3 = 'UPDATE IGNORE omoccurdatasetlink SET datasetid = '.$targetDsid.' WHERE datasetid IN('.implode(',',$targetArr).')';
 			if($this->conn->query($sql3)){
-				//Delete occurrences that failed to transfer due to already being present   
+				//Delete occurrences that failed to transfer due to already being present
 				$sql4 = 'DELETE FROM omoccurdatasets WHERE datasetid IN('.implode(',',$targetArr).')';
 				if(!$this->conn->query($sql4)){
 					$this->errorArr[] = 'WARNING: Unable to remove extra datasets: '.$this->conn->error;
@@ -186,7 +186,7 @@ class OccurrenceDataset {
 				$this->errorArr[] = 'ERROR: Unable to create new dataset within clone method: '.$this->conn->error;
 				$status = false;
 			}
-			
+
 			$dsArr[$r->datasetid] = $r->name;
 		}
 		$rs->free();
@@ -202,7 +202,7 @@ class OccurrenceDataset {
 			$this->errorArr[] = 'ERROR deleting user: '.$this->conn->error;
 			return false;
 		}
-		
+
 		//Delete datasets
 		$sql2 = 'DELETE FROM omoccurdatasets WHERE datasetid = '.$dsid;
 		if(!$this->conn->query($sql2)){
@@ -210,7 +210,7 @@ class OccurrenceDataset {
 			return false;
 		}
 		return true;
-		
+
 		//Delete dataset records
 		$sql3 = 'DELETE FROM omoccurdatasetlink WHERE datasetid = '.$dsid;
 		if(!$this->conn->query($sql3)){
@@ -267,7 +267,7 @@ class OccurrenceDataset {
 		}
 		return $status;
 	}
-	
+
 	public function deleteUser($dsid,$uid,$role){
 		$status = true;
 		$sql = 'DELETE FROM userroles '.
@@ -279,7 +279,7 @@ class OccurrenceDataset {
 		}
 		return $status;
 	}
-	
+
 	public function getOccurrences($datasetId){
 		$retArr = array();
 		if($datasetId){
@@ -304,7 +304,7 @@ class OccurrenceDataset {
 			}
 			$rs->free();
 		}
-		return $retArr; 
+		return $retArr;
 	}
 
 	public function removeSelectedOccurrences($datasetId, $occArr){
@@ -319,7 +319,7 @@ class OccurrenceDataset {
 		}
 		return $status;
 	}
-	
+
 	public function addSelectedOccurrences($datasetId, $occArr){
 		$status = true;
 		if($datasetId && $occArr){
@@ -340,24 +340,24 @@ class OccurrenceDataset {
 		$zip = (array_key_exists('zip',$_POST)?$_POST['zip']:0);
 		$format = $_POST['format'];
 		$extended = (array_key_exists('extended',$_POST)?$_POST['extended']:0);
-	
+
 		$redactLocalities = 1;
 		$rareReaderArr = array();
-		if($IS_ADMIN || array_key_exists("CollAdmin", $userRights)){
+		if($IS_ADMIN || array_key_exists("CollAdmin", $USER_RIGHTS)){
 			$redactLocalities = 0;
 		}
-		elseif(array_key_exists("RareSppAdmin", $userRights) || array_key_exists("RareSppReadAll", $userRights)){
+		elseif(array_key_exists("RareSppAdmin", $USER_RIGHTS) || array_key_exists("RareSppReadAll", $USER_RIGHTS)){
 			$redactLocalities = 0;
 		}
 		else{
-			if(array_key_exists('CollEditor', $userRights)){
-				$rareReaderArr = $userRights['CollEditor'];
+			if(array_key_exists('CollEditor', $USER_RIGHTS)){
+				$rareReaderArr = $USER_RIGHTS['CollEditor'];
 			}
-			if(array_key_exists('RareSppReader', $userRights)){
-				$rareReaderArr = array_unique(array_merge($rareReaderArr,$userRights['RareSppReader']));
+			if(array_key_exists('RareSppReader', $USER_RIGHTS)){
+				$rareReaderArr = array_unique(array_merge($rareReaderArr,$USER_RIGHTS['RareSppReader']));
 			}
 		}
-		$dwcaHandler = new DwcArchiverOccurrence();
+		$dwcaHandler = new DwcArchiverCore();
 		$dwcaHandler->setCharSetOut($cSet);
 		$dwcaHandler->setSchemaType($schema);
 		$dwcaHandler->setExtended($extended);
@@ -378,9 +378,9 @@ class OccurrenceDataset {
 			$dwcaHandler->setIncludeImgs($includeImages);
 			$includeAttributes = (array_key_exists('attributes',$_POST)?1:0);
 			$dwcaHandler->setIncludeAttributes($includeAttributes);
-				
-			$outputFile = $dwcaHandler->createDwcArchive('webreq');
-			
+
+			$outputFile = $dwcaHandler->createDwcArchive();
+
 		}
 		else{
 			//Output file is a flat occurrence file (not a zip file)
@@ -400,17 +400,17 @@ class OccurrenceDataset {
 		}
 		$contentDesc .= 'File';
 		header('Content-Description: '.$contentDesc);
-		
+
 		if($zip){
 			header('Content-Type: application/zip');
 		}
 		elseif($format == 'csv'){
-			header('Content-Type: text/csv; charset='.$charset);
+			header('Content-Type: text/csv; charset='.$CHARSET);
 		}
 		else{
-			header('Content-Type: text/html; charset='.$charset);
+			header('Content-Type: text/html; charset='.$CHARSET);
 		}
-		
+
 		header('Content-Disposition: attachment; filename='.basename($outputFile));
 		header('Content-Transfer-Encoding: binary');
 		header('Expires: 0');
@@ -422,7 +422,7 @@ class OccurrenceDataset {
 		//od_end_clean();
 		readfile($outputFile);
 		unlink($outputFile);
-		
+
 	}
 
 	//General setters and getters
@@ -452,15 +452,15 @@ class OccurrenceDataset {
 	public function setSymbUid($uid){
 		$this->symbUid = $uid;
 	}
-	
+
 	public function setIsAdmin($isAdmin){
 		$this->isAdmin = $isAdmin;
 	}
-	
+
 	public function getErrorArr(){
 		return $this->errorArr;
 	}
-	
+
 	public function getDsId(){
 		return $this->newDatasetId;
 	}

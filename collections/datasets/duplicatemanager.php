@@ -1,7 +1,7 @@
 <?php
 include_once('../../config/symbini.php'); 
-include_once($serverRoot.'/classes/OccurrenceDuplicate.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/OccurrenceDuplicate.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 
 $collId = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
 $dupeDepth = array_key_exists('dupedepth',$_REQUEST)?$_REQUEST['dupedepth']:0;
@@ -10,7 +10,7 @@ $limit = array_key_exists('limit',$_REQUEST)?$_REQUEST['limit']:1000;
 $action = array_key_exists('action',$_REQUEST)?$_REQUEST['action']:'';
 $formSubmit = array_key_exists('formsubmit',$_POST)?$_POST['formsubmit']:'';
 
-if(!$symbUid){
+if(!$SYMB_UID){
 	header('Location: ../../profile/index.php?refurl=../collections/datasets/duplicatemanager.php?'.$_SERVER['QUERY_STRING']);
 }
 
@@ -19,14 +19,14 @@ $collMap = $dupManager->getCollMap($collId);
 
 $statusStr = '';
 $isEditor = 0; 
-if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights["CollAdmin"]))
+if($IS_ADMIN || (array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collId,$USER_RIGHTS["CollAdmin"]))
 	|| ($collMap['colltype'] == 'General Observations')){
 	$isEditor = 1;
 }
 
 //If collection is a general observation project, limit to User
 if($collMap['colltype'] == 'General Observations'){
-	$dupManager->setObsUid($symbUid);
+	$dupManager->setObsUid($SYMB_UID);
 }
 
 if($isEditor && $formSubmit){
@@ -43,8 +43,8 @@ if($isEditor && $formSubmit){
 ?>
 <html>
 <head>
-	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>">
-	<title><?php echo $defaultTitle; ?> Occurrence Cleaner</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET; ?>">
+	<title><?php echo $DEFAULT_TITLE; ?> Occurrence Cleaner</title>
 	<link href="../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
     <link href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
     <style type="text/css">
@@ -60,7 +60,7 @@ if($isEditor && $formSubmit){
 		}
 
 		function openOccurPopup(occid) {
-			occWindow=open("../individual/index.php?occid="+occid,"occwin"+occid,"resizable=1,scrollbars=1,toolbar=1,width=750,height=600,left=20,top=20");
+			occWindow=open("../individual/index.php?occid="+occid,"occwin"+occid,"resizable=1,scrollbars=1,toolbar=0,width=750,height=600,left=20,top=20");
 			if(occWindow.opener == null) occWindow.opener = self;
 		}
 
@@ -94,7 +94,7 @@ if($isEditor && $formSubmit){
 <body>
 	<?php 	
 	$displayLeftMenu = true;
-	include($serverRoot.'/header.php');
+	include($SERVER_ROOT.'/header.php');
 	?>
 	<div class='navpath'>
 		<a href="../../index.php">Home</a> &gt;&gt;
@@ -289,7 +289,7 @@ if($isEditor && $formSubmit){
 		?>
 	</div>
 <?php 	
-include($serverRoot.'/footer.php');
+include($SERVER_ROOT.'/footer.php');
 ?>
 
 </body>

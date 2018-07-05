@@ -1,32 +1,25 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/CollectionProfileManager.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/OccurrenceCollectionProfile.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 
 if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../collections/misc/collmetadata.php?'.$_SERVER['QUERY_STRING']);
 
-$action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:""; 
+$action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:"";
 $collid = array_key_exists("collid",$_REQUEST)?$_REQUEST["collid"]:0;
 
 $statusStr = '';
 
-$collManager = new CollectionProfileManager();
+$collManager = new OccurrenceCollectionProfile();
 if(!$collManager->setCollid($collid)) $collid = '';
 
 $isEditor = 0;
-$collPubArr = array();
-$publishGBIF = false;
-$publishIDIGBIO = false;
 
 if($IS_ADMIN){
 	$isEditor = 1;
 }
 elseif($collid){
-	if(array_key_exists("CollAdmin",$userRights) && in_array($collid,$userRights["CollAdmin"])){
-		$isEditor = 1;
-		$isAdmin = 1;
-	}
-	elseif(array_key_exists("CollEditor",$userRights) && in_array($collid,$userRights["CollEditor"])){
+	if(array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collid,$USER_RIGHTS["CollAdmin"])){
 		$isEditor = 1;
 	}
 }
@@ -61,26 +54,18 @@ if($isEditor){
 		}
 	}
 }
-if(isset($GBIF_USERNAME) && isset($GBIF_PASSWORD) && isset($GBIF_ORG_KEY) && $collid){
-	$collPubArr = $collManager->getCollPubArr($collid);
-	if($collPubArr[$collid]['publishToGbif']){
-		$publishGBIF = true;
-	}
-	if($collPubArr[$collid]['publishToIdigbio']){
-		$publishIDIGBIO = true;
-	}
-}
-$collData = $collManager->getCollectionData(true);
+$collData = current($collManager->getCollectionMetadata());
+$collManager->cleanOutArr($collData);
 ?>
 <html>
 <head>
-	<title><?php echo $defaultTitle." ".($collid?$collData["collectionname"]:"") ; ?> Collection Profiles</title>
+	<title><?php echo $DEFAULT_TITLE." ".($collid?$collData["collectionname"]:"") ; ?> Collection Profiles</title>
 	<link href="../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 	<link href="../../css/jquery-ui.css" type="text/css" rel="stylesheet" />
 	<script src="../../js/jquery.js" type="text/javascript"></script>
 	<script src="../../js/jquery-ui.js" type="text/javascript"></script>
-	<script language=javascript>
+	<script>
 
 		$(function() {
 			var dialogArr = new Array("instcode","collcode","pedits","pubagg","rights","rightsholder","accessrights","guid","colltype","management","icon","collectionguid","sourceurl","sort");
@@ -99,10 +84,10 @@ $collData = $collManager->getCollectionData(true);
 			}
 
 		});
-	
+
 		function openMappingAid() {
-		    mapWindow=open("../../tools/mappointaid.php?formname=colleditform&latname=latitudedecimal&longname=longitudedecimal","mappointaid","resizable=0,width=800,height=700,left=20,top=20");
-		    if (mapWindow.opener == null) mapWindow.opener = self;
+			mapWindow=open("../tools/mappointaid.php?formname=colleditform&latname=latitudedecimal&longname=longitudedecimal","mappointaid","resizable=0,width=800,height=700,left=20,top=20");
+			if (mapWindow.opener == null) mapWindow.opener = self;
 		}
 
 		function verifyCollEditForm(f){
@@ -148,7 +133,7 @@ $collData = $collManager->getCollectionData(true);
 				f.publishToGbif.checked = false;
 			}
 		}
-		
+
 		function checkGUIDSource(f){
 			if(f.publishToGbif.checked == true){
 				if(!f.guidtarget.value){
@@ -165,7 +150,7 @@ $collData = $collManager->getCollectionData(true);
 			}
 			return true;
 		}
-		
+
 		function toggle(target){
 			var objDiv = document.getElementById(target);
 			if(objDiv){
@@ -191,7 +176,7 @@ $collData = $collManager->getCollectionData(true);
 				}
 			}
 		}
-		
+
 		function verifyIconImage(f){
 			var iconImageFile = document.getElementById("iconfile").value;
 			if(iconImageFile){
@@ -218,7 +203,7 @@ $collData = $collManager->getCollectionData(true);
 				}
 			}
 		}
-		
+
 		function verifyIconURL(f){
 			var iconImageFile = document.getElementById("iconurl").value;
 			if((iconImageFile.substr(iconImageFile.length-4) != '.jpg') && (iconImageFile.substr(iconImageFile.length-4) != '.png') && (iconImageFile.substr(iconImageFile.length-4) != '.gif')){
@@ -231,13 +216,13 @@ $collData = $collManager->getCollectionData(true);
 		   	var ValidChars = "0123456789-.";
 		   	var IsNumber = true;
 		   	var Char;
-		 
-		   	for(var i = 0; i < sText.length && IsNumber == true; i++){ 
-			   Char = sText.charAt(i); 
+
+		   	for(var i = 0; i < sText.length && IsNumber == true; i++){
+			   Char = sText.charAt(i);
 				if(ValidChars.indexOf(Char) == -1){
 					IsNumber = false;
 					break;
-		      	}
+			  	}
 		   	}
 			return IsNumber;
 		}
@@ -246,7 +231,7 @@ $collData = $collManager->getCollectionData(true);
 <body>
 	<?php
 	$displayLeftMenu = (isset($collections_misc_collmetadataMenu)?$collections_misc_collmetadataMenu:true);
-	include($serverRoot.'/header.php');
+	include($SERVER_ROOT.'/header.php');
 	echo '<div class="navpath">';
 	if(isset($collections_misc_collmetadataCrumbs)){
 		if($collections_misc_collmetadataCrumbs){
@@ -271,15 +256,15 @@ $collData = $collManager->getCollectionData(true);
 	<!-- This is inner text! -->
 	<div id="innertext">
 		<?php
-		if($statusStr){ 
+		if($statusStr){
 			?>
 			<hr />
 			<div style="margin:20px;font-weight:bold;color:red;">
 				<?php echo $statusStr; ?>
 			</div>
 			<hr />
-			<?php 
-		} 
+			<?php
+		}
 		if($isEditor){
 			if($collid){
 				echo '<h1>'.$collData['collectionname'].(array_key_exists('institutioncode',$collData)?' ('.$collData['institutioncode'].')':'').'</h1>';
@@ -300,7 +285,7 @@ $collData = $collManager->getCollectionData(true);
 										<img src="../../images/info.png" style="width:15px;" />
 									</a>
 									<div id="instcodeinfodialog">
-										The name (or acronym) in use by the institution having custody of the occurrence records. This field is required. 
+										The name (or acronym) in use by the institution having custody of the occurrence records. This field is required.
 										For more details, see <a href="http://darwincore.googlecode.com/svn/trunk/terms/index.htm#institutionCode" target="_blank">Darwin Core definition</a>.
 									</div>
 								</td>
@@ -315,14 +300,14 @@ $collData = $collManager->getCollectionData(true);
 										<img src="../../images/info.png" style="width:15px;" />
 									</a>
 									<div id="collcodeinfodialog">
-										The name, acronym, or code identifying the collection or data set from which the record was derived. This field is optional. 
+										The name, acronym, or code identifying the collection or data set from which the record was derived. This field is optional.
 										For more details, see <a href="http://darwincore.googlecode.com/svn/trunk/terms/index.htm#collectionCode" target="_blank">Darwin Core definition</a>.
 									</div>
 								</td>
 							</tr>
 							<tr>
 								<td>
-									Collection Name: 
+									Collection Name:
 								</td>
 								<td>
 									<input type="text" name="collectionname" value="<?php echo ($collid?$collData["collectionname"]:'');?>" style="width:95%;" title="Required field" />
@@ -331,7 +316,7 @@ $collData = $collManager->getCollectionData(true);
 							<tr>
 								<td>
 									Description<br/>
-									(2000 character max): 
+									(2000 character max):
 								</td>
 								<td>
 									<textarea name="fulldescription" style="width:95%;height:90px;"><?php echo ($collid?$collData["fulldescription"]:'');?></textarea>
@@ -347,7 +332,7 @@ $collData = $collManager->getCollectionData(true);
 							</tr>
 							<tr>
 								<td>
-								Contact: 
+								Contact:
 									</td>
 								<td>
 									<input type="text" name="contact" value="<?php echo ($collid?$collData["contact"]:'');?>" style="width:90%;" />
@@ -380,9 +365,9 @@ $collData = $collManager->getCollectionData(true);
 									<input id="lngdec" type="text" name="longitudedecimal" value="<?php echo ($collid?$collData["longitudedecimal"]:'');?>" />
 								</td>
 							</tr>
-							<?php 
-							$collCatArr = $collManager->getCategoryArr();
-							if($collCatArr){
+							<?php
+							$fullCatArr = $collManager->getCategoryArr();
+							if($fullCatArr){
 								?>
 								<tr>
 									<td>
@@ -392,9 +377,10 @@ $collData = $collManager->getCollectionData(true);
 										<select name="ccpk">
 											<option value="">No Category</option>
 											<option value="">-------------------------------------------</option>
-											<?php 
-											foreach($collCatArr as $ccpk => $category){
-												echo '<option value="'.$ccpk.'" '.($collid && $ccpk==$collData['ccpk']?'SELECTED':'').'>'.$category.'</option>';
+											<?php
+											$catArr = $collManager->getCollectionCategories();
+											foreach($fullCatArr as $ccpk => $category){
+												echo '<option value="'.$ccpk.'" '.($collid && array_key_exists($ccpk, $catArr)?'SELECTED':'').'>'.$category.'</option>';
 											}
 											?>
 										</select>
@@ -413,9 +399,9 @@ $collData = $collManager->getCollectionData(true);
 										<img src="../../images/info.png" style="width:15px;" />
 									</a>
 									<div id="peditsinfodialog">
-										Checking public edits will allow any user logged into the system to modify specimen records 
-										and resolve errors found within the collection. However, if the user does not have explicit 
-										authorization for the given collection, edits will not be applied until they are 
+										Checking public edits will allow any user logged into the system to modify specimen records
+										and resolve errors found within the collection. However, if the user does not have explicit
+										authorization for the given collection, edits will not be applied until they are
 										reviewed and approved by collection administrator.
 									</div>
 								</td>
@@ -425,12 +411,12 @@ $collData = $collManager->getCollectionData(true);
 									License:
 								</td>
 								<td>
-									<?php 
+									<?php
 									if(isset($rightsTerms)){
 										?>
 										<select name="rights">
 											<?php
-											$hasOrphanTerm = true; 
+											$hasOrphanTerm = true;
 											foreach($rightsTerms as $k => $v){
 												$selectedTerm = '';
 												if($collid && strtolower($collData["rights"])==strtolower($v)){
@@ -444,19 +430,19 @@ $collData = $collManager->getCollectionData(true);
 											}
 											?>
 										</select>
-										<?php 
+										<?php
 									}
 									else{
 										?>
 										<input type="text" name="rights" value="<?php echo ($collid?$collData["rights"]:'');?>" style="width:90%;" />
-										<?php 
+										<?php
 									}
 									?>
 									<a id="rightsinfo" href="#" onclick="return false" title="More information about Rights">
 										<img src="../../images/info.png" style="width:15px;" />
 									</a>
 									<div id="rightsinfodialog">
-										A legal document giving official permission to do something with the resource. 
+										A legal document giving official permission to do something with the resource.
 										This field can be limited to a set of values by modifying the portal's central configuration file.
 										For more details, see <a href="http://darwincore.googlecode.com/svn/trunk/terms/index.htm#dcterms:license" target="_blank">Darwin Core definition</a>.
 									</div>
@@ -487,14 +473,14 @@ $collData = $collManager->getCollectionData(true);
 										<img src="../../images/info.png" style="width:15px;" />
 									</a>
 									<div id="accessrightsinfodialog">
-										Informations or a URL link to page with details explaining how one can use the data.   
+										Informations or a URL link to page with details explaining how one can use the data.
 										See <a href="http://darwincore.googlecode.com/svn/trunk/terms/index.htm#dcterms:accessRights" target="_blank">Darwin Core definition</a>.
 									</div>
 								</td>
 							</tr>
 							<tr>
 								<td>
-									<span title="Source of Global Unique Identifier">GUID source:</span> 
+									<span title="Source of Global Unique Identifier">GUID source:</span>
 								</td>
 								<td>
 									<select name="guidtarget" onchange="mtypeguidChanged(this.form)">
@@ -508,45 +494,47 @@ $collData = $collManager->getCollectionData(true);
 										<img src="../../images/info.png" style="width:15px;" />
 									</a>
 									<div id="guidinfodialog">
-										Occurrence Id is generally used for Snapshot datasets when a Global Unique Identifier (GUID) field  
-										is supplied by the source database (e.g. Specify database) and the GUID is mapped to the 
+										Occurrence Id is generally used for Snapshot datasets when a Global Unique Identifier (GUID) field
+										is supplied by the source database (e.g. Specify database) and the GUID is mapped to the
 										<a href="http://darwincore.googlecode.com/svn/trunk/terms/index.htm#occurrenceID" target="_blank">occurrenceId</a> field.
-										The use of the Occurrence Id as the GUID is not recommended for live datasets. 
+										The use of the Occurrence Id as the GUID is not recommended for live datasets.
 										Catalog Number can be used when the value within the catalog number field is globally unique.
-										The Symbiota Generated GUID (UUID) option will trigger the Symbiota data portal to automatically 
-										generate UUID GUIDs for each record. This option is recommended for many for Live Datasets 
+										The Symbiota Generated GUID (UUID) option will trigger the Symbiota data portal to automatically
+										generate UUID GUIDs for each record. This option is recommended for many for Live Datasets
 										but not allowed for Snapshot collections that are managed in local management system.
 									</div>
 								</td>
 							</tr>
-                            <tr>
-                                <td>
-                                    Publish to Aggregators:
-                                </td>
-                                <td>
-                                    <?php
-                                    if(isset($GBIF_USERNAME) && isset($GBIF_PASSWORD) && isset($GBIF_ORG_KEY)) {
-                                        ?>
-                                        <div>
-                                            GBIF <input type="checkbox" name="publishToGbif" value="1"
-                                                        onchange="checkGUIDSource(this.form);" <?php echo($publishGBIF ? 'CHECKED' : ''); ?> />
-                                            <a id="pubagginfo" href="#" onclick="return false"
-                                               title="More information about Publishing to Aggregators">
-                                                <img src="../../images/info.png" style="width:15px;"/>
-                                            </a>
-                                        </div>
-                                        <?php
-                                    }
-                                    ?>
-                                    <div>
-                                        iDigBio <input type="checkbox" name="publishToIdigbio" value="1" onchange="checkGUIDSource(this.form);" <?php echo($publishIDIGBIO?'CHECKED':''); ?> />
-                                    </div>
-                                    <div id="pubagginfodialog">
-                                        Check boxes to make Darwin Core Archives published from this collection
-                                        available to iDigBio and/or GBIF (if activated in this portal).
-                                    </div>
-                                </td>
-                            </tr>
+							<?php
+							if(isset($GBIF_USERNAME) && isset($GBIF_PASSWORD) && isset($GBIF_ORG_KEY)) {
+								?>
+								<tr>
+									<td>
+										Publish to Aggregators:
+									</td>
+									<td>
+										<div>
+											GBIF <input type="checkbox" name="publishToGbif" value="1"
+														onchange="checkGUIDSource(this.form);" <?php echo($collData['publishtogbif'] ? 'CHECKED' : ''); ?> />
+											<a id="pubagginfo" href="#" onclick="return false"
+											   title="More information about Publishing to Aggregators">
+												<img src="../../images/info.png" style="width:15px;"/>
+											</a>
+										</div>
+										<!--
+										<div>
+											iDigBio <input type="checkbox" name="publishToIdigbio" value="1" onchange="checkGUIDSource(this.form);" <?php echo($collData['publishtoidigbio']?'CHECKED':''); ?> />
+										</div>
+										<div id="pubagginfodialog">
+											Check boxes to make Darwin Core Archives published from this collection
+											available to iDigBio and/or GBIF (if activated in this portal).
+										</div>
+										 -->
+									</td>
+								</tr>
+								<?php
+							}
+							?>
 							<tr>
 								<td>
 									Source Record URL:
@@ -557,11 +545,11 @@ $collData = $collManager->getCollectionData(true);
 										<img src="../../images/info.png" style="width:15px;" />
 									</a>
 									<div id="sourceurlinfodialog">
-										Adding a URL template here will dynamically generate and add the specimen details page a link to the 
+										Adding a URL template here will dynamically generate and add the specimen details page a link to the
 										source record. For example, &quot;http://sweetgum.nybg.org/vh/specimen.php?irn=--DBPK--&quot;
-										will generate a url to the NYBG collection with &quot;--DBPK--&quot; being replaced with the 
-										NYBG's Primary Key (dbpk data field within the ommoccurrence table). 
-										Template pattern --CATALOGNUMBER-- can also be used in place of --DBPK-- 
+										will generate a url to the NYBG collection with &quot;--DBPK--&quot; being replaced with the
+										NYBG's Primary Key (dbpk data field within the ommoccurrence table).
+										Template pattern --CATALOGNUMBER-- can also be used in place of --DBPK--
 									</div>
 								</td>
 							</tr>
@@ -596,13 +584,13 @@ $collData = $collManager->getCollectionData(true);
 										<img src="../../images/info.png" style="width:15px;" />
 									</a>
 									<div id="iconinfodialog">
-										Upload an icon image file or enter the URL of an image icon that represents the collection. If entering the URL of an image already located 
+										Upload an icon image file or enter the URL of an image icon that represents the collection. If entering the URL of an image already located
 										on a server, click on &quot;Enter URL&quot;. The URL path can be absolute or relative. The use of icons are optional.
 									</div>
 								</td>
 							</tr>
-							<?php 
-							if($isAdmin){ 
+							<?php
+							if($IS_ADMIN){
 								?>
 								<tr>
 									<td>
@@ -618,14 +606,14 @@ $collData = $collManager->getCollectionData(true);
 											<img src="../../images/info.png" style="width:15px;" />
 										</a>
 										<div id="colltypeinfodialog">
-											Preserve Specimens means that physical samples exist and can be inspected by researchers. 
-											Use Observations when the record is not based on a physical specimen. 
+											Preserve Specimens means that physical samples exist and can be inspected by researchers.
+											Use Observations when the record is not based on a physical specimen.
 											General Observations are used for setting up group projects where registered users
-											can independently manage their own dataset directly within the single collection. General Observation 
-											collections are typically used by field researchers to manage their collection data and print labels 
-											prior to depositing the physical material within a collection. Even though personal collections 
-											are represented by a physical sample, they are classified as &quot;observations&quot; until the 
-											physical material is deposited within a publicly available collection with active curation.     
+											can independently manage their own dataset directly within the single collection. General Observation
+											collections are typically used by field researchers to manage their collection data and print labels
+											prior to depositing the physical material within a collection. Even though personal collections
+											are represented by a physical sample, they are classified as &quot;observations&quot; until the
+											physical material is deposited within a publicly available collection with active curation.
 										</div>
 									</td>
 								</tr>
@@ -643,9 +631,9 @@ $collData = $collManager->getCollectionData(true);
 											<img src="../../images/info.png" style="width:15px;" />
 										</a>
 										<div id="managementinfodialog">
-											Use Snapshot when there is a separate in-house database maintained in the collection and the dataset 
-											within the Symbiota portal is only a periodically updated snapshot of the central database. 
-											A Live dataset is when the data is managed directly within the portal and the central database is the portal data. 
+											Use Snapshot when there is a separate in-house database maintained in the collection and the dataset
+											within the Symbiota portal is only a periodically updated snapshot of the central database.
+											A Live dataset is when the data is managed directly within the portal and the central database is the portal data.
 										</div>
 									</td>
 								</tr>
@@ -659,30 +647,30 @@ $collData = $collManager->getCollectionData(true);
 											<img src="../../images/info.png" style="width:15px;" />
 										</a>
 										<div id="sortinfodialog">
-											Leave this field empty if you want the collections to sort alphabetically (default) 
+											Leave this field empty if you want the collections to sort alphabetically (default)
 										</div>
 									</td>
 								</tr>
-								<?php 
-							} 
-							if($collid){ 
+								<?php
+							}
+							if($collid){
 								?>
 								<tr>
 									<td>
 										Global Unique ID:
 									</td>
 									<td>
-										<?php 
+										<?php
 										echo $collData["guid"];
-										?> 
+										?>
 										<a id="collectionguidinfo" href="#" onclick="return false" title="More information">
 											<img src="../../images/info.png" style="width:15px;" />
 										</a>
 										<div id="collectionguidinfodialog">
-											Global Unique Identifier for this collection.  
-											If your collection already has a GUID (e.g. previously assigned by a  
+											Global Unique Identifier for this collection.
+											If your collection already has a GUID (e.g. previously assigned by a
 											collection management application such as Specify), that identifier should be represented here.
-											If you need to change this value, contact your portal manager.  
+											If you need to change this value, contact your portal manager.
 										</div>
 									</td>
 								</tr>
@@ -697,7 +685,7 @@ $collData = $collManager->getCollectionData(true);
 								<?php
 							}
 							else{
-								//New collection 
+								//New collection
 								?>
 								<tr>
 									<td>
@@ -709,11 +697,11 @@ $collData = $collManager->getCollectionData(true);
 											<img src="../../images/info.png" style="width:15px;" />
 										</a>
 										<div id="collectionguidinfodialog">
-											Global Unique Identifier for this collection. 
-											If your collection already has a GUID (e.g. previously assigned by a  
+											Global Unique Identifier for this collection.
+											If your collection already has a GUID (e.g. previously assigned by a
 											collection management application such as Specify), that identifier should be entered here.
-											If you leave blank, the portal will automatically 
-											generate a UUID for this collection (recommended if GUID is not known to already exist).  
+											If you leave blank, the portal will automatically
+											generate a UUID for this collection (recommended if GUID is not known to already exist).
 										</div>
 									</td>
 								</tr>
@@ -723,12 +711,12 @@ $collData = $collManager->getCollectionData(true);
 							<tr>
 								<td colspan="2">
 									<div style="margin:20px;">
-										<?php 
+										<?php
 										if($collid){
 											?>
 											<input type="hidden" name="collid" value="<?php echo $collid;?>" />
 											<input type="submit" name="action" value="Save Edits" />
-											<?php 
+											<?php
 										}
 										else{
 											?>
@@ -747,40 +735,33 @@ $collData = $collManager->getCollectionData(true);
 				<fieldset style="background-color:#FFF380;">
 					<legend><b>Mailing Address</b></legend>
 					<?php
-					$instArr = $collManager->getAddresses();
-					if($instArr){
-						//Edit or remove address
-						$cnt = 0;
-						foreach($instArr as $iid => $iArr){
+					if($instArr = $collManager->getAddress()){
+						?>
+						<div style="margin:25px;">
+							<?php
+							echo '<div>';
+							echo $instArr['institutionname'].($instArr['institutioncode']?' ('.$instArr['institutioncode'].')':'');
 							?>
-							<div style="margin:25px;">
-								<?php 
-								echo '<div>';
-								echo $iArr['institutionname'].($iArr['institutioncode']?' ('.$iArr['institutioncode'].')':'');
-								?>
-								<a href="../admin/institutioneditor.php?emode=1&targetcollid=<?php echo $collid.'&iid='.$iid; ?>" title="Edit institution address">
-									<img src="../../images/edit.png" style="width:14px;" />
-								</a>
-								<a href="collmetadata.php?collid=<?php echo $collid.'&removeiid='.$iid; ?>" title="Unlink institution address">
-									<img src="../../images/drop.png" style="width:14px;" />
-								</a>
-								<?php 
-								echo '</div>';
-								if($iArr['address1']) echo '<div>'.$iArr['address1'].'</div>';
-								if($iArr['address2']) echo '<div>'.$iArr['address2'].'</div>';
-								if($iArr['city'] || $iArr['stateprovince']) echo '<div>'.$iArr['city'].', '.$iArr['stateprovince'].' '.$iArr['postalcode'].'</div>';
-								if($iArr['country']) echo '<div>'.$iArr['country'].'</div>';
-								if($iArr['phone']) echo '<div>'.$iArr['phone'].'</div>';
-								if($iArr['contact']) echo '<div>'.$iArr['contact'].'</div>';
-								if($iArr['email']) echo '<div>'.$iArr['email'].'</div>';
-								if($iArr['url']) echo '<div><a href="'.$iArr['url'].'">'.$iArr['url'].'</a></div>';
-								if($iArr['notes']) echo '<div>'.$iArr['notes'].'</div>';
-								?>
-							</div>
-							<?php 
-							if($cnt) echo '<hr/>';
-							$cnt++;
-						}
+							<a href="../admin/institutioneditor.php?emode=1&targetcollid=<?php echo $collid.'&iid='.$instArr['iid']; ?>" title="Edit institution address">
+								<img src="../../images/edit.png" style="width:14px;" />
+							</a>
+							<a href="collmetadata.php?collid=<?php echo $collid.'&removeiid='.$instArr['iid']; ?>" title="Unlink institution address">
+								<img src="../../images/drop.png" style="width:14px;" />
+							</a>
+							<?php
+							echo '</div>';
+							if($instArr['address1']) echo '<div>'.$instArr['address1'].'</div>';
+							if($instArr['address2']) echo '<div>'.$instArr['address2'].'</div>';
+							if($instArr['city'] || $instArr['stateprovince']) echo '<div>'.$instArr['city'].', '.$instArr['stateprovince'].' '.$instArr['postalcode'].'</div>';
+							if($instArr['country']) echo '<div>'.$instArr['country'].'</div>';
+							if($instArr['phone']) echo '<div>'.$instArr['phone'].'</div>';
+							if($instArr['contact']) echo '<div>'.$instArr['contact'].'</div>';
+							if($instArr['email']) echo '<div>'.$instArr['email'].'</div>';
+							if($instArr['url']) echo '<div><a href="'.$instArr['url'].'">'.$instArr['url'].'</a></div>';
+							if($instArr['notes']) echo '<div>'.$instArr['notes'].'</div>';
+							?>
+						</div>
+						<?php
 					}
 					else{
 						//Link new institution
@@ -791,7 +772,7 @@ $collData = $collManager->getCollectionData(true);
 								<select name="iid" style="width:425px;">
 									<option value="">Select Institution Address</option>
 									<option value="">------------------------------------</option>
-									<?php 
+									<?php
 									$addrArr = $collManager->getInstitutionArr();
 									foreach($addrArr as $iid => $name){
 										echo '<option value="'.$iid.'">'.$name.'</option>';
@@ -807,7 +788,7 @@ $collData = $collManager->getCollectionData(true);
 								</a>
 							</div>
 						</div>
-						<?php 
+						<?php
 					}
 					?>
 				</fieldset>
@@ -817,7 +798,7 @@ $collData = $collManager->getCollectionData(true);
 		?>
 	</div>
 	<?php
-		include($serverRoot.'/footer.php');
+	include($SERVER_ROOT.'/footer.php');
 	?>
 </body>
 </html>

@@ -38,67 +38,25 @@ if($isEditor){
 ?>
 <html>
 	<head>
-	    <meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET;?>">
+		<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET;?>">
 		<title><?php echo $DEFAULT_TITLE; ?> Specimen Label Manager</title>
 		<link href="../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
-	    <link href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
+		<link href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 		<link href="../../css/jquery-ui.css" type="text/css" rel="Stylesheet" />
 		<script src="../../js/jquery.js" type="text/javascript"></script>
 		<script src="../../js/jquery-ui.js" type="text/javascript"></script>
 		<script type="text/javascript">
+
 			$(document).ready(function() {
 				if(!navigator.cookieEnabled){
 					alert("Your browser cookies are disabled. To be able to login and access your profile, they must be enabled for this domain.");
 				}
-				
-				function split( val ) {
-					return val.split( /,\s*/ );
-				}
-				function extractLast( term ) {
-					return split( term ).pop();
-				}
-				
+
 				$("#tabs").tabs({
 					active: <?php echo (is_numeric($tabTarget)?$tabTarget:'0'); ?>
 				});
-				
-				$( "#taxa" )
-				// don't navigate away from the field on tab when selecting an item
-				.bind( "keydown", function( event ) {
-					if ( event.keyCode === $.ui.keyCode.TAB &&
-							$( this ).data( "autocomplete" ).menu.active ) {
-						event.preventDefault();
-					}
-				})
-				.autocomplete({
-					source: function( request, response ) {
-						$.getJSON( "../rpc/taxalist.php", {
-							term: extractLast( request.term )
-						}, response );
-					},
-					search: function() {
-						// custom minLength
-						var term = extractLast( this.value );
-						if ( term.length < 4 ) {
-							return false;
-						}
-					},
-					focus: function() {
-						// prevent value inserted on focus
-						return false;
-					},
-					select: function( event, ui ) {
-						var terms = split( this.value );
-						// remove the current input
-						terms.pop();
-						// add the selected item
-						terms.push( ui.item.value );
-						this.value = terms.join( ", " );
-						return false;
-					}
-				},{});
 			});
-			
+
 			function selectAll(cb){
 				boxesChecked = true;
 				if(!cb.checked){
@@ -110,7 +68,7 @@ if($isEditor){
 					dbElement.checked = boxesChecked;
 				}
 			}
-			
+
 			function selectAllAnno(cb){
 				boxesChecked = true;
 				if(!cb.checked){
@@ -146,9 +104,9 @@ if($isEditor){
 					if(dbElement.checked) return true;
 				}
 			   	alert("Please select at least one specimen!");
-		      	return false;
+			  	return false;
 			}
-			
+
 			function validateAnnoSelectForm(f){
 				var dbElements = document.getElementsByName("detid[]");
 				for(i = 0; i < dbElements.length; i++){
@@ -156,7 +114,7 @@ if($isEditor){
 					if(dbElement.checked) return true;
 				}
 			   	alert("Please select at least one specimen!");
-		      	return false;
+			  	return false;
 			}
 
 			function openIndPopup(occid){
@@ -175,21 +133,28 @@ if($isEditor){
 				else if(document.body.offsetWidth){
 					wWidth = document.body.offsetWidth*0.9;
 				}
-				newWindow = window.open(urlStr,'popup','scrollbars=1,toolbar=1,resizable=1,width='+(wWidth)+',height=600,left=20,top=20');
+				newWindow = window.open(urlStr,'popup','scrollbars=1,toolbar=0,resizable=1,width='+(wWidth)+',height=600,left=20,top=20');
 				if (newWindow.opener == null) newWindow.opener = self;
 				return false;
 			}
-			
+
 			function changeFormExport(action,target){
-				document.selectform.action = action;
-				document.selectform.target = target;
+				var f = document.selectform;
+				if(action == "labelsword.php" && document.getElementById('packetradio').checked == true){
+					alert("Packet labels are not yet available as a Word document");
+					return false;
+				}
+				f.action = action;
+				f.target = target;
+				return true;
 			}
-			
+
 			function changeAnnoFormExport(action,target){
-				document.annoselectform.action = action;
-				document.annoselectform.target = target;
+				var f = document.annoselectform;
+				f.action = action;
+				f.target = target;
 			}
-			
+
 			function checkPrintOnlyCheck(f){
 				if(f.bconly.checked){
 					f.speciesauthors.checked = false;
@@ -198,7 +163,7 @@ if($isEditor){
 					f.symbbc.checked = false;
 				}
 			}
-			
+
 			function checkBarcodeCheck(f){
 				if(f.bc.checked || f.symbbc.checked || f.speciesauthors.checked || f.catalognumbers.checked){
 					f.bconly.checked = false;
@@ -206,6 +171,7 @@ if($isEditor){
 			}
 
 		</script>
+		<script src="../../js/symb/api.taxonomy.taxasuggest.js" type="text/javascript"></script>
 	</head>
 	<body>
 	<?php
@@ -213,7 +179,7 @@ if($isEditor){
 	include($SERVER_ROOT."/header.php");
 	?>
 	<div class='navpath'>
-		<a href='../../index.php'>Home</a> &gt;&gt; 
+		<a href='../../index.php'>Home</a> &gt;&gt;
 		<?php
 		if(isset($collections_reports_labelmanagerCrumbs)){
 			echo $collections_reports_labelmanagerCrumbs;
@@ -231,14 +197,14 @@ if($isEditor){
 	</div>
 	<!-- This is inner text! -->
 	<div id="innertext">
-		<?php 
+		<?php
 		if($isEditor){
 			if(!$reportsWritable){
 				?>
 				<div style="padding:5px;">
 					<span style="color:red;">Please contact the site administrator to make temp/report folder writable in order to export to docx files.</span>
 				</div>
-				<?php 
+				<?php
 			}
 			$isGeneralObservation = (($datasetManager->getMetaDataTerm('colltype') == 'General Observations')?true:false);
 			echo '<h2>'.$datasetManager->getCollName().'</h2>';
@@ -248,39 +214,39 @@ if($isEditor){
 					<li><a href="#labels">Labels</a></li>
 					<li><a href="#annotations">Annotations</a></li>
 				</ul>
-				
+
 				<div id="labels">
 					<form name="datasetqueryform" action="labelmanager.php" method="post" onsubmit="return validateQueryForm(this)">
 						<fieldset>
 							<legend><b>Define Specimen Recordset</b></legend>
 							<div style="margin:3px;">
 								<div title="Scientific name as entered in database.">
-									Scientific Name: 
+									Scientific Name:
 									<input type="text" name="taxa" id="taxa" size="60" value="<?php echo (array_key_exists('taxa',$_REQUEST)?$_REQUEST['taxa']:''); ?>" />
 								</div>
 							</div>
 							<div style="margin:3px;clear:both;">
 								<div style="float:left;" title="Full or last name of collector as entered in database.">
-									Collector: 
+									Collector:
 									<input type="text" name="recordedby" style="width:150px;" value="<?php echo (array_key_exists('recordedby',$_REQUEST)?$_REQUEST['recordedby']:''); ?>" />
 								</div>
 								<div style="float:left;margin-left:20px;" title="Separate multiple terms by comma and ranges by ' - ' (space before and after dash required), e.g.: 3542,3602,3700 - 3750">
-									Record Number(s): 
+									Record Number(s):
 									<input type="text" name="recordnumber" style="width:150px;" value="<?php echo (array_key_exists('recordnumber',$_REQUEST)?$_REQUEST['recordnumber']:''); ?>" />
 								</div>
 								<div style="float:left;margin-left:20px;" title="Separate multiple terms by comma and ranges by ' - ' (space before and after dash required), e.g.: 3542,3602,3700 - 3750">
-									Catalog Number(s): 
+									Catalog Number(s):
 									<input type="text" name="identifier" style="width:150px;" value="<?php echo (array_key_exists('identifier',$_REQUEST)?$_REQUEST['identifier']:''); ?>" />
 								</div>
 							</div>
 							<div style="margin:3px;clear:both;">
 								<div style="float:left;">
-									Entered by: 
+									Entered by:
 									<input type="text" name="recordenteredby" value="<?php echo (array_key_exists('recordenteredby',$_REQUEST)?$_REQUEST['recordenteredby']:''); ?>" style="width:100px;" title="login name of data entry person" />
 								</div>
 								<div style="margin-left:20px;float:left;" title="">
-									Date range: 
-									<input type="text" name="date1" style="width:100px;" value="<?php echo (array_key_exists('date1',$_REQUEST)?$_REQUEST['date1']:''); ?>" onchange="validateDateFields(this.form)" /> to 
+									Date range:
+									<input type="text" name="date1" style="width:100px;" value="<?php echo (array_key_exists('date1',$_REQUEST)?$_REQUEST['date1']:''); ?>" onchange="validateDateFields(this.form)" /> to
 									<input type="text" name="date2" style="width:100px;" value="<?php echo (array_key_exists('date2',$_REQUEST)?$_REQUEST['date2']:''); ?>" onchange="validateDateFields(this.form)" />
 									<select name="datetarget">
 										<option value="dateentered">Date Entered</option>
@@ -290,21 +256,21 @@ if($isEditor){
 								</div>
 							</div>
 							<div style="margin:3px;clear:both;">
-								Label Projects: 
+								Label Projects:
 								<select name="labelproject" >
-									<option value=""></option>
+									<option value="">All Projects</option>
 									<option value="">-------------------------</option>
-									<?php 
+									<?php
 									$lProj = '';
 									if(array_key_exists('labelproject',$_REQUEST)) $lProj = $_REQUEST['labelproject'];
 									$lProjArr = $datasetManager->getLabelProjects();
 									foreach($lProjArr as $projStr){
 										echo '<option '.($lProj==$projStr?'SELECTED':'').'>'.$projStr.'</option>'."\n";
-									} 
+									}
 									?>
 								</select>
-								<!-- 
-								Dataset Projects: 
+								<!--
+								Dataset Projects:
 								<select name="datasetproject" >
 									<option value=""></option>
 									<option value="">-------------------------</option>
@@ -320,9 +286,9 @@ if($isEditor){
 									?>
 								</select>
 								-->
-								<?php 
+								<?php
 								echo '<span style="margin-left:15px;"><input name="extendedsearch" type="checkbox" value="1" '.(array_key_exists('extendedsearch', $_POST)?'checked':'').' /></span> ';
-								if($isGeneralObservation) 
+								if($isGeneralObservation)
 									echo 'Search outside user profile';
 								else echo 'Search within all collections';
 								?>
@@ -339,11 +305,11 @@ if($isEditor){
 						</fieldset>
 					</form>
 					<div style="clear:both;">
-						<?php 
+						<?php
 						if($action == "Filter Specimen Records"){
 							if($occArr){
 								?>
-								<form name="selectform" id="selectform" action="defaultlabels.php" method="post" onsubmit="return validateSelectForm(this);">
+								<form name="selectform" id="selectform" action="labels.php" method="post" onsubmit="return validateSelectForm(this);">
 									<div style="margin-top: 15px; margin-left: 15px;">
 										<input name="" value="" type="checkbox" onclick="selectAll(this);" />
 										Select/Deselect all Specimens
@@ -356,7 +322,7 @@ if($isEditor){
 											<th>Scientific Name</th>
 											<th>Locality</th>
 										</tr>
-										<?php 
+										<?php
 										$trCnt = 0;
 										foreach($occArr as $occId => $recArr){
 											$trCnt++;
@@ -391,7 +357,7 @@ if($isEditor){
 													<?php echo $recArr["l"]; ?>
 												</td>
 											</tr>
-											<?php 
+											<?php
 										}
 										?>
 									</table>
@@ -401,76 +367,77 @@ if($isEditor){
 											<b>Heading Prefix:</b>
 											<input type="text" name="lhprefix" value="" style="width:450px" /> (e.g. Plants of, Insects of, Vertebrates of)
 											<div style="margin:3px 0px 3px 0px;">
-												<b>Heading Mid-Section:</b> 
-												<input type="radio" name="lhmid" value="1" />Country 
-												<input type="radio" name="lhmid" value="2" checked />State 
-												<input type="radio" name="lhmid" value="3" />County 
-												<input type="radio" name="lhmid" value="4" />Family 
+												<b>Heading Mid-Section:</b>
+												<input type="radio" name="lhmid" value="1" />Country
+												<input type="radio" name="lhmid" value="2" checked />State
+												<input type="radio" name="lhmid" value="3" />County
+												<input type="radio" name="lhmid" value="4" />Family
 												<input type="radio" name="lhmid" value="0" />Blank
 											</div>
-											<b>Heading Suffix:</b> 
+											<b>Heading Suffix:</b>
 											<input type="text" name="lhsuffix" value="" style="width:450px" /><br/>
 										</div>
 										<div style="margin:4px;">
-											<b>Label Footer:</b> 
+											<b>Label Footer:</b>
 											<input type="text" name="lfooter" value="" style="width:450px" />
 										</div>
 										<div style="margin:4px;">
 											<input type="checkbox" name="speciesauthors" value="1" onclick="checkBarcodeCheck(this.form);" />
-											<b>Print species authors for infraspecific taxa</b> 
+											<b>Print species authors for infraspecific taxa</b>
 										</div>
 										<div style="margin:4px;">
 											<input type="checkbox" name="catalognumbers" value="1" onclick="checkBarcodeCheck(this.form);" />
-											<b>Print Catalog Numbers</b> 
+											<b>Print Catalog Numbers</b>
 										</div>
 										<?php
 										if(class_exists('Image_Barcode2') || class_exists('Image_Barcode')){
 											?>
 											<div style="margin:4px;">
 												<input type="checkbox" name="bc" value="1" onclick="checkBarcodeCheck(this.form);" />
-												<b>Include barcode of Catalog Number</b> 
+												<b>Include barcode of Catalog Number</b>
 											</div>
 											<div style="margin:4px;">
 												<input type="checkbox" name="symbbc" value="1" onclick="checkBarcodeCheck(this.form);" />
-												<b>Include barcode of Symbiota Identifier</b> 
+												<b>Include barcode of Symbiota Identifier</b>
 											</div>
 											<div style="margin:4px;">
 												<input type="checkbox" name="bconly" value="1" onclick="checkPrintOnlyCheck(this.form);" />
-												<b>Print only Barcode</b> 
+												<b>Print only Barcode</b>
 											</div>
 											<?php
 										}
 										?>
 										<fieldset style="float:left;margin:10px;width:150px;">
-											<legend><b>Rows Per Page</b></legend>
-											<input type="radio" name="rpp" value="1" /> 1<br/>
-											<input type="radio" name="rpp" value="2" checked /> 2<br/>
-											<input type="radio" name="rpp" value="3" /> 3<br/>
+											<legend><b>Label Format</b></legend>
+											<input type="radio" name="labelformat" value="1" /> 1 row per page<br/>
+											<input type="radio" name="labelformat" value="2" checked /> 2 row per page<br/>
+											<input type="radio" name="labelformat" value="3" /> 3 row per page<br/>
+											<input id="packetradio" type="radio" name="labelformat" value="packet" /> packet labels<br/>
 										</fieldset>
 										<div style="float:left;margin: 15px 50px;">
 											<input type="hidden" name="collid" value="<?php echo $collid; ?>" />
-											<input type="submit" name="submitaction" onclick="changeFormExport('defaultlabels.php','_blank');" value="Print in Browser" />
-											<br/><br/> 
-											<input type="submit" name="submitaction" onclick="changeFormExport('defaultlabels.php','_self');" value="Export to CSV" />
+											<input type="submit" name="submitaction" onclick="changeFormExport('labels.php','_blank');" value="Print in Browser" />
+											<br/><br/>
+											<input type="submit" name="submitaction" onclick="changeFormExport('labels.php','_self');" value="Export to CSV" />
 											<?php
 											if($reportsWritable){
 												?>
 												<br/><br/>
-												<input type="submit" name="submitaction" onclick="changeFormExport('defaultlabelsexport.php','_self');" value="Export to DOCX" />
+												<input type="submit" name="submitaction" onclick="return changeFormExport('labelsword.php','_self');" value="Export to DOCX" />
 												<?php
 											}
 											?>
 										</div>
-									</fieldset>					
+									</fieldset>
 								</form>
-								<?php 
+								<?php
 							}
 							else{
 								?>
 								<div style="font-weight:bold;margin:20px;font-weight:150%;">
 									Query returned no data!
 								</div>
-								<?php 
+								<?php
 							}
 						}
 						?>
@@ -478,7 +445,7 @@ if($isEditor){
 				</div>
 				<div id="annotations">
 					<div>
-						<?php 
+						<?php
 						if($annoArr){
 							?>
 							<form name="annoselectform" id="annoselectform" action="defaultannotations.php" method="post" onsubmit="return validateAnnoSelectForm(this);">
@@ -494,7 +461,7 @@ if($isEditor){
 										<th style="width:300px;text-align:center;">Scientific Name</th>
 										<th style="width:400px;text-align:center;">Determination</th>
 									</tr>
-									<?php 
+									<?php
 									$trCnt = 0;
 									foreach($annoArr as $detId => $recArr){
 										$trCnt++;
@@ -521,52 +488,53 @@ if($isEditor){
 												<?php echo $recArr['determination']; ?>
 											</td>
 										</tr>
-										<?php 
+										<?php
 									}
 									?>
 								</table>
 								<fieldset style="margin-top:15px;">
 									<legend><b>Annotation Printing</b></legend>
-									<div style="float:left;">
+									<div>
 										<div style="margin:4px;">
 											<b>Header:</b>
-											<input type="text" name="lheading" value="<?php echo $datasetManager->getAnnoCollName(); ?>" style="width:450px" />
+											<input type="text" name="lheading" value="" style="width:450px" />
 										</div>
 										<div style="margin:4px;">
-											<b>Footer:</b> 
-											<input type="text" name="lfooter" value="" style="width:450px" />
+											<b>Footer:</b>
+											<input type="text" name="lfooter" value="<?php echo $datasetManager->getAnnoCollName(); ?>" style="width:450px" />
 										</div>
+									</div>
+									<div style="float:left">
 										<div style="margin:4px;">
 											<input type="checkbox" name="speciesauthors" value="1" onclick="" />
-											<b>Print species authors for infraspecific taxa</b> 
+											<b>Print species authors for infraspecific taxa</b>
 										</div>
 										<div style="margin:4px;">
 											<input type="checkbox" name="clearqueue" value="1" onclick="" />
-											<b>Remove selected annotations from queue</b> 
+											<b>Remove selected annotations from queue</b>
 										</div>
 									</div>
-									<div style="float:right;">
+									<div style="float:left;margin-left:200px">
 										<input type="hidden" name="collid" value="<?php echo $collid; ?>" />
 										<input type="submit" name="submitaction" onclick="changeAnnoFormExport('defaultannotations.php','_blank');" value="Print in Browser" />
 										<?php
 										if($reportsWritable){
 											?>
-											<br/><br/>
-											<input type="submit" name="submitaction" onclick="changeAnnoFormExport('defaultannotationsexport.php','_self');" value="Export to DOCX" />
+											<div style="margin-top:5px"><input type="submit" name="submitaction" onclick="changeAnnoFormExport('defaultannotationsexport.php','_self');" value="Export to DOCX" /></div>
 											<?php
 										}
 										?>
 									</div>
-								</fieldset>					
+								</fieldset>
 							</form>
-							<?php 
+							<?php
 						}
 						else{
 							?>
 							<div style="font-weight:bold;margin:20px;font-weight:150%;">
 								There are no annotations queued to be printed.
 							</div>
-							<?php 
+							<?php
 						}
 						?>
 					</div>
@@ -577,10 +545,10 @@ if($isEditor){
 		else{
 			?>
 			<div style="font-weight:bold;margin:20px;font-weight:150%;">
-				You do not have permissions to print labels for this collection. 
+				You do not have permissions to print labels for this collection.
 				Please contact the site administrator to obtain the necessary permissions.
 			</div>
-			<?php 
+			<?php
 		}
 		?>
 	</div>

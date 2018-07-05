@@ -1,8 +1,8 @@
 <?php
 include_once('../config/symbini.php');
-include_once($serverRoot.'/classes/AgentManager.php');
+include_once($SERVER_ROOT.'/classes/AgentManager.php');
 
-Header("Content-Type: text/html; charset=".$charset);
+Header("Content-Type: text/html; charset=".$CHARSET);
 
 $lang = array_key_exists("lang",$_REQUEST)?$_REQUEST["lang"]:$defaultLang;
 
@@ -45,7 +45,7 @@ function browse() {
 }
 
 function searchform($name="") { 
-   global $clientRoot;
+   global $CLIENT_ROOT;
    $result  = "<div id='formDiv'>";
    $result .= "<form method='GET' id='queryForm' style='display:inline;' >\n";
    $result .= "<input type='text' name='name' value='$name'>";
@@ -57,14 +57,14 @@ function searchform($name="") {
    frm.submit(function(event) {
       $("#statusDiv").html("Searching...");
       $.ajax({
-         url: "'.$clientRoot.'/agents/rpc/handler.php",
+         url: "'.$CLIENT_ROOT.'/agents/rpc/handler.php",
          data: frm.serialize(),
          type: "GET",
          dataType : "html",
          success: function( data ) {
             $("#responseDiv").html(data);
             $("#loadedWithPage").html("");
-            var permalink = "&nbsp;<a href=\''.$clientRoot.'/agents/index.php?" + frm.serialize() +"\'>Permalink</a>";
+            var permalink = "&nbsp;<a href=\''.$CLIENT_ROOT.'/agents/index.php?" + frm.serialize() +"\'>Permalink</a>";
             $("#plinkSpan").html(permalink);
          },
          error: function( xhr, status, errorThrown ) {
@@ -88,12 +88,12 @@ function searchform($name="") {
 }
 
 function pageheader($name) { 
-   global $serverRoot, $defaultTitle, $spDisplay, $clientRoot, $agents_indexMenu, $agents_indexCrumbs;
+   global $SERVER_ROOT, $DEFAULT_TITLE, $spDisplay, $CLIENT_ROOT, $agents_indexMenu, $agents_indexCrumbs;
 echo '<!DOCTYPE HTML>
 <html>
 <head>
-	<title>'.$defaultTitle.' - '.$spDisplay. '</title>
-	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>"/>
+	<title>'.$DEFAULT_TITLE.' - '.$spDisplay. '</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET; ?>"/>
 	<meta name="keywords" content='. $spDisplay .' />
 	<link href="../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
@@ -101,7 +101,7 @@ echo '<!DOCTYPE HTML>
 	<script type="text/javascript" src="../js/jquery.js"></script>
 	<script type="text/javascript" src="../js/jquery-ui.js"></script>
 	<script type="text/javascript">';
-    // include_once($serverRoot.'/config/googleanalytics.php'); 
+    // include_once($SERVER_ROOT.'/config/googleanalytics.php'); 
 echo '</script>
 	<script type="text/javascript">
 		var currentLevel = ' . ($descrDisplayLevel?$descrDisplayLevel:"1"). ';
@@ -110,14 +110,14 @@ echo '</script>
 </head>
 <body>';
    $displayLeftMenu = (isset($agents_indexMenu)?$agents_indexMenu:false);
-   include($serverRoot.'/header.php');
+   include($SERVER_ROOT.'/header.php');
    if(!isset($agent_indexCrumbs)){
       $agent_indexCrumbs = array();
-      array_push($agent_indexCrumbs,"<a href='$clientRoot/index.php'>Home</a>");
-      array_push($agent_indexCrumbs,"<a href='$clientRoot/agents/index.php'>Agents</a>");
+      array_push($agent_indexCrumbs,"<a href='$CLIENT_ROOT/index.php'>Home</a>");
+      array_push($agent_indexCrumbs,"<a href='$CLIENT_ROOT/agents/index.php'>Agents</a>");
    }
    if (strlen($name)>0) { 
-      array_push($agent_indexCrumbs,"<a href='$clientRoot/agents/index.php?name=$name'>Search</a>");
+      array_push($agent_indexCrumbs,"<a href='$CLIENT_ROOT/agents/index.php?name=$name'>Search</a>");
    }
    echo "<div class='navpath'>";
    $last = array_pop($agent_indexCrumbs);
@@ -129,8 +129,8 @@ echo '</script>
   
 
 function footer() { 
-   global $serverRoot,$clientRoot;
-  include($serverRoot.'/footer.php');
+   global $SERVER_ROOT,$CLIENT_ROOT;
+  include($SERVER_ROOT.'/footer.php');
   echo "</body>\n</html>";
 }
 

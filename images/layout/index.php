@@ -1,8 +1,8 @@
 <?php
 //error_reporting(E_ALL);
 include_once('../../config/symbini.php');
-header("Content-Type: text/html; charset=".$charset);
-header("Location: ".$clientRoot."/index.php");
+header("Content-Type: text/html; charset=".$CHARSET);
+header("Location: ".$CLIENT_ROOT."/index.php");
  
 ?>
 <html>
@@ -13,7 +13,7 @@ header("Location: ".$clientRoot."/index.php");
 	<body>
 		<?php
 		$displayLeftMenu = true;
-		include($serverRoot.'/header.php');
+		include($SERVER_ROOT.'/header.php');
 		?>
 		<!-- This is inner text! -->
 		<div id="innertext">
@@ -26,7 +26,7 @@ header("Location: ".$clientRoot."/index.php");
 			</div>
 		</div>
 		<?php
-			include($serverRoot.'/config/footer.php');
+			include($SERVER_ROOT.'/config/footer.php');
 		?>
 	</body>
 </html>

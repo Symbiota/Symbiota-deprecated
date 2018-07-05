@@ -70,7 +70,7 @@ if(!$cid) header('Location: index.php');
 	<title>Character Admin</title>
     <link href="../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
     <link href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
-	<link type="text/css" href="../../css/jquery-ui.css" rel="Stylesheet" />	
+	<link type="text/css" href="../../css/jquery-ui.css" rel="Stylesheet" />
 	<script type="text/javascript" src="../../js/jquery.js"></script>
 	<script type="text/javascript" src="../../js/jquery-ui.js"></script>
 	<script type="text/javascript" src="../../js/symb/shared.js"></script>
@@ -78,7 +78,7 @@ if(!$cid) header('Location: index.php');
 		var tabIndex = <?php echo $tabIndex; ?>;
 
 		$(document).ready(function() {
-			$('#tabs').tabs({ 
+			$('#tabs').tabs({
 				active: tabIndex,
 				beforeLoad: function( event, ui ) {
 					$(ui.panel).html("<p>Loading...</p>");
@@ -98,22 +98,22 @@ if(!$cid) header('Location: index.php');
 			}
 			else{
 				unitObj.style.display = "none";
-			}				
+			}
 		}
 
 		function validateCharEditForm(f){
 			if(f.charname.value == ""){
 				alert("Character name must not be null");
 				return false;
-			} 
+			}
 			if(f.chartype.value == ""){
 				alert("Character type must not be null");
 				return false;
-			} 
+			}
 			if(f.sortsequence.value && !isNumeric(f.sortsequence.value)){
 				alert("Sort Sequence can only be a numeric value");
 				return false;
-			} 
+			}
 			return true;
 		}
 
@@ -121,14 +121,14 @@ if(!$cid) header('Location: index.php');
 			if(f.charstatename.value == ""){
 				alert("Character state must not be null");
 				return false;
-			} 
+			}
 			if(f.sortsequence.value && !isNumeric(f.sortsequence.value)){
 				alert("Sort sequence can only be a numeric value");
 				return false;
-			} 
+			}
 			return true;
 		}
-		
+
 		function validateStateEditForm(f){
 			if(f.sortsequence.value && !isNumeric(f.sortsequence.value)){
 				alert("Sort Sequence field must be numeric");
@@ -144,7 +144,7 @@ if(!$cid) header('Location: index.php');
 			}
 			return true;
 		}
-		
+
 		function verifyCharStateDeletion(f){
 			var cid = f.cid.value;
 			var cs = f.cs.value;
@@ -221,7 +221,7 @@ if(!$cid) header('Location: index.php');
 		}
 
 		function openHeadingAdmin(){
-			newWindow = window.open("headingadmin.php","headingWin","scrollbars=1,toolbar=1,resizable=1,width=800,height=600,left=50,top=50");
+			newWindow = window.open("headingadmin.php","headingWin","scrollbars=1,toolbar=0,resizable=1,width=800,height=600,left=50,top=50");
 			if (newWindow.opener == null) newWindow.opener = self;
 		}
 	</script>
@@ -231,12 +231,12 @@ if(!$cid) header('Location: index.php');
 	include($SERVER_ROOT."/header.php");
 	?>
 	<div class='navpath'>
-		<a href='../../index.php'>Home</a> &gt;&gt; 
+		<a href='../../index.php'>Home</a> &gt;&gt;
 		<a href='index.php'> <b>Character Management</b></a>
 	</div>
 	<!-- This is inner text! -->
 	<div id="innertext">
-		<?php 
+		<?php
 		if($SYMB_UID){
 			if($statusStr){
 				?>
@@ -245,7 +245,7 @@ if(!$cid) header('Location: index.php');
 					<?php echo $statusStr; ?>
 				</div>
 				<hr/>
-				<?php 
+				<?php
 			}
 			$charStateArr = $keyManager->getCharStateArr($cid);
 			$charArr = $keyManager->getCharDetails($cid);
@@ -270,7 +270,7 @@ if(!$cid) header('Location: index.php');
 								<div style="float:left;">
 									<b>Type</b><br />
 									<select id="type" name="chartype" style="width:180px;" onchange="updateUnits(this);">
-										<option value="UM">Unordered Multi-state</option>
+										<option value="UM">Multi-state</option>
 										<option value="IN" <?php echo ($charArr['chartype']=='IN'?'SELECTED':'');?>>Integer</option>
 										<option value="RN" <?php echo ($charArr['chartype']=='RN'?'SELECTED':'');?>>Real Number</option>
 									</select>
@@ -293,14 +293,14 @@ if(!$cid) header('Location: index.php');
 									<select name="hid" style="width:125px;">
 										<option value="">Select Heading</option>
 										<option value="">---------------------</option>
-										<?php 
+										<?php
 										$headingArr = $keyManager->getHeadingArr();
 										asort($headingArr);
 										foreach($headingArr as $k => $v){
 											echo '<option value="'.$k.'" '.($k==$charArr['hid']?'SELECTED':'').'>'.$v['name'].'</option>';
 										}
 										?>
-									</select> 
+									</select>
 									<a href="#" onclick="openHeadingAdmin(); return false;"><img src="../../images/edit.png" /></a>
 								</div>
 							</div>
@@ -366,7 +366,7 @@ if(!$cid) header('Location: index.php');
 							</fieldset>
 						</form>
 					</div>
-					<?php 
+					<?php
 					if($charStateArr){
 						echo '<h3>Character States</h3>';
 						foreach($charStateArr as $cs => $stateArr){
@@ -419,7 +419,7 @@ if(!$cid) header('Location: index.php');
 									</form>
 									<fieldset style="margin:15px;padding:15px;">
 										<legend><b>Illustration</b></legend>
-										<?php 
+										<?php
 										if(isset($stateArr['csimgid'])){
 											?>
 											<div style="padding-top:2px;">
@@ -433,7 +433,7 @@ if(!$cid) header('Location: index.php');
 													<button name="formsubmit" type="submit" value="Delete Image">Delete Image</button>
 												</div>
 											</form>
-											<?php 
+											<?php
 										}
 										else{
 											?>
@@ -444,11 +444,11 @@ if(!$cid) header('Location: index.php');
 													<input name="MAX_FILE_SIZE" type="hidden" value="1000000" />
 												</div>
 												<div style="padding-top:2px;">
-													<b>Notes:</b> 
+													<b>Notes:</b>
 													<input name="notes" type="text" style="width:90%" />
 												</div>
 												<div style="padding-top:2px;">
-													<b>Sort:</b> 
+													<b>Sort:</b>
 													<input name="sortsequence" type="text" />
 												</div>
 												<div style="padding-top:2px;">
@@ -464,9 +464,9 @@ if(!$cid) header('Location: index.php');
 									<form name="statedelform-<?php echo $cs; ?>" action="chardetails.php" method="post" onsubmit="return confirm('Are you sure you want to permanently delete this character state?')">
 										<fieldset style="margin:15px;padding:15px;">
 											<legend><b>Delete Character State</b></legend>
-											Record first needs to be evaluated before it can be deleted from the system. 
-											The evaluation ensures that the deletion will not interfer with 
-											the integrity of linked data.      
+											Record first needs to be evaluated before it can be deleted from the system.
+											The evaluation ensures that the deletion will not interfer with
+											the integrity of linked data.
 											<div style="margin:15px;">
 												<input name="verifycsdelete" type="button" value="Evaluate record for deletion" onclick="verifyCharStateDeletion(this.form);return false;" />
 											</div>
@@ -474,39 +474,39 @@ if(!$cid) header('Location: index.php');
 												<b>Image Links: </b>
 												<span id="delvercsimgspan-<?php echo $cs; ?>" style="color:orange;display:none;">checking image links...</span>
 												<div id="delcsimgfaildiv-<?php echo $cs; ?>" style="display:none;style:0px 10px 10px 10px;">
-													<span style="color:red;">Warning:</span> 
-													One or more images are linked to this charcter state. 
-													Deleting this character state will also permanently remove these images.  
+													<span style="color:red;">Warning:</span>
+													One or more images are linked to this charcter state.
+													Deleting this character state will also permanently remove these images.
 												</div>
 												<div id="delcsimgappdiv-<?php echo $cs; ?>" style="display:none;">
 													<span style="color:green;">Approved for deletion.</span>
-													No images are directly associated with this character state.  
+													No images are directly associated with this character state.
 												</div>
 											</div>
 											<div id="delverlangdiv" style="margin:15px;">
 												<b>Language Links: </b>
 												<span id="delvercslangspan-<?php echo $cs; ?>" style="color:orange;display:none;">checking language links...</span>
 												<div id="delcslangfaildiv-<?php echo $cs; ?>" style="display:none;style:0px 10px 10px 10px;">
-													<span style="color:red;">Warning:</span> 
-													Charcter state has links to langauge records. 
-													Deleting this character state will also permanently remove this data.  
+													<span style="color:red;">Warning:</span>
+													Charcter state has links to langauge records.
+													Deleting this character state will also permanently remove this data.
 												</div>
 												<div id="delcslangappdiv-<?php echo $cs; ?>" style="display:none;">
 													<span style="color:green;">Approved for deletion.</span>
-													No langage mappings are directly associated with this character state.  
+													No langage mappings are directly associated with this character state.
 												</div>
 											</div>
 											<div id="delverdescrdiv" style="margin:15px;">
 												<b>Description Links: </b>
 												<span id="delverdescrspan-<?php echo $cs; ?>" style="color:orange;display:none;">checking description links...</span>
 												<div id="deldescrfaildiv-<?php echo $cs; ?>" style="display:none;style:0px 10px 10px 10px;">
-													<span style="color:red;">Warning:</span> 
-													One or more descriptions are linked to this charcter state. 
-													Delete this character state will also permanently remove these descriptions.  
+													<span style="color:red;">Warning:</span>
+													One or more descriptions are linked to this charcter state.
+													Delete this character state will also permanently remove these descriptions.
 												</div>
 												<div id="deldescrappdiv-<?php echo $cs; ?>" style="display:none;">
 													<span style="color:green;">Approved for deletion.</span>
-													No descriptions are directly associated with this character state.  
+													No descriptions are directly associated with this character state.
 												</div>
 											</div>
 											<div style="margin:15px;">
@@ -527,7 +527,7 @@ if(!$cid) header('Location: index.php');
 					<form name="delcharform" action="chardetails.php" method="post" onsubmit="return confirm('Are you sure you want to permanently delete this character?')">
 						<fieldset style="width:350px;margin:20px;padding:20px;">
 							<legend><b>Delete Character</b></legend>
-							<?php 
+							<?php
 							if($charStateArr){
 								echo '<div style="font-weight:bold;margin-bottom:15px;">';
 								echo 'Character cannot be deleted until all character states are removed';
@@ -539,8 +539,8 @@ if(!$cid) header('Location: index.php');
 						</fieldset>
 					</form>
 				</div>
-			</div>	
-			<?php 
+			</div>
+			<?php
 		}
 		else{
 			if(!$isEditor){
@@ -552,7 +552,7 @@ if(!$cid) header('Location: index.php');
 		}
 		?>
 	</div>
-	<?php 
+	<?php
 	include($SERVER_ROOT.'/footer.php');
 	?>
 </body>

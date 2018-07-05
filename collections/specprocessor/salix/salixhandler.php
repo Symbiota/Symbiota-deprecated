@@ -1,7 +1,7 @@
 <?php
 include_once('../../../config/symbini.php');
-include_once($serverRoot.'/classes/SalixUtilities.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/SalixUtilities.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 if(!$SYMB_UID){
 	header('Location: ../../../profile/index.php?refurl=../collections/specprocessor/salix/salixhandler.php?'.$_SERVER['QUERY_STRING']);
 }
@@ -28,23 +28,23 @@ if($SYMB_UID){
 <html>
 	<head>
 		<title>SALIX Wordstat Manager</title>
-		<link href="<?php echo $clientRoot; ?>/css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
-		<link href="<?php echo $clientRoot; ?>/css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
-		<link href="<?php echo $clientRoot; ?>/css/jquery-ui.css" type="text/css" rel="stylesheet" />
-		<script src="<?php echo $clientRoot; ?>/js/jquery.js" type="text/javascript"></script>
-		<script src="<?php echo $clientRoot; ?>/js/jquery-ui.js" type="text/javascript"></script>
+		<link href="<?php echo $CLIENT_ROOT; ?>/css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+		<link href="<?php echo $CLIENT_ROOT; ?>/css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
+		<link href="<?php echo $CLIENT_ROOT; ?>/css/jquery-ui.css" type="text/css" rel="stylesheet" />
+		<script src="<?php echo $CLIENT_ROOT; ?>/js/jquery.js" type="text/javascript"></script>
+		<script src="<?php echo $CLIENT_ROOT; ?>/js/jquery-ui.js" type="text/javascript"></script>
 		<script type="text/javascript">
 			function verifySalixManagerForm(this){
 
 				return true;
 			}
 		</script>
-		<script src="<?php echo $clientRoot; ?>/js/symb/shared.js?ver=140310" type="text/javascript"></script>
+		<script src="<?php echo $CLIENT_ROOT; ?>/js/symb/shared.js?ver=140310" type="text/javascript"></script>
 	</head>
 	<body>
 		<?php
 		$displayLeftMenu = true;
-		include($serverRoot.'/header.php');
+		include($SERVER_ROOT.'/header.php');
 		?>
 		<div class='navpath'>
 			<a href="../../../index.php">Home</a> &gt;&gt;
@@ -102,7 +102,7 @@ if($SYMB_UID){
 			?> 
 		</div>
 		<?php
-			include($serverRoot.'/footer.php');
+			include($SERVER_ROOT.'/footer.php');
 		?>
 	</body>
 </html>

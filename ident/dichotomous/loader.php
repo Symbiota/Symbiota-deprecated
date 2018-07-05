@@ -1,7 +1,7 @@
 <?php 
 include_once('../config/symbini.php');
-include_once($serverRoot.'/config/dbconnection.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/config/dbconnection.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 
 $nodeId = array_key_exists("nodeid",$_REQUEST)?$_REQUEST["nodeid"]:0;
 $stmtId = array_key_exists("stmtid",$_REQUEST)?$_REQUEST["stmtid"]:0;
@@ -34,14 +34,14 @@ if($action){
 }
 
 $editable = false;
-if($isAdmin || array_key_exists("KeyEditor",$userRights)){
+if($IS_ADMIN || array_key_exists("KeyEditor",$USER_RIGHTS)){
  	$editable = true;
 }
 
 ?>
 <html>
 <head>
-<title><?php echo $defaultTitle; ?> Dichotomous Key Loader</title>
+<title><?php echo $DEFAULT_TITLE; ?> Dichotomous Key Loader</title>
 	<link href="../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 	<meta name='keywords' content='' />
@@ -133,7 +133,7 @@ if($isAdmin || array_key_exists("KeyEditor",$userRights)){
 
 	<?php
 	$displayLeftMenu = (isset($ident_dichotomous_loaderMenu)?$ident_dichotomous_loaderMenu:"true");
-	include($serverRoot.'/header.php');
+	include($SERVER_ROOT.'/header.php');
 	if(isset($ident_dichotomous_loaderCrumbs)) echo "<div class='navpath'>".$ident_dichotomous_loaderCrumbs."</div>";
 	?> 
 	<!-- This is inner text! -->
@@ -266,7 +266,7 @@ if($isAdmin || array_key_exists("KeyEditor",$userRights)){
 		</ul>
 	</div>
 	<?php 
-		include($serverRoot.'/footer.php');
+		include($SERVER_ROOT.'/footer.php');
 	?>
 	
 </body>

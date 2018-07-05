@@ -1,7 +1,7 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/OccurrenceDataset.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/OccurrenceDataset.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 
 if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../collections/datasets/index.php?'.$_SERVER['QUERY_STRING']);
 
@@ -22,8 +22,8 @@ if($action == 'Create New Dataset'){
 ?>
 <html>
 	<head>
-		<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset;?>">
-		<title><?php echo $defaultTitle; ?> Occurrence Dataset Manager</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET;?>">
+		<title><?php echo $DEFAULT_TITLE; ?> Occurrence Dataset Manager</title>
 		<link href="../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 		<link href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 		<link href="../../css/jquery-ui.css" type="text/css" rel="Stylesheet" />
@@ -63,10 +63,10 @@ if($action == 'Create New Dataset'){
 	<body>
 	<?php
 	$displayLeftMenu = (isset($collections_datasets_indexMenu)?$collections_datasets_indexMenu:false);
-	include($serverRoot."/header.php");
+	include($SERVER_ROOT."/header.php");
 	?>
 	<div class='navpath'>
-		<a href='../../index.php'>Home</a> &gt;&gt; 
+		<a href='../../index.php'>Home</a> &gt;&gt;
 		<?php
 		if(isset($collections_datasets_indexCrumbs)){
 			echo $collections_datasets_indexCrumbs;
@@ -81,7 +81,7 @@ if($action == 'Create New Dataset'){
 	</div>
 	<!-- This is inner text! -->
 	<div id="innertext">
-		<?php 
+		<?php
 		if($statusStr){
 			$color = 'green';
 			if(strpos($statusStr,'ERROR') !== false) $color = 'red';
@@ -115,19 +115,19 @@ if($action == 'Create New Dataset'){
 				</form>
 			</fieldset>
 		</div>
-		<?php 
+		<?php
 		if($dataSetArr){
 			?>
 			<fieldset style="padding:15px;margin:15px;">
 				<legend><b>Owned by You</b></legend>
-				<?php 
+				<?php
 				if(array_key_exists('owner',$dataSetArr)){
 					$ownerArr = $dataSetArr['owner'];
 					unset($dataSetArr['owner']);
 					foreach($ownerArr as $dsid => $dsArr){
 						?>
 						<div>
-							<?php 
+							<?php
 							echo '<b>'.$dsArr['name'].' (#'.$dsid.')</b>';
 							?>
 							<a href="datasetmanager.php?datasetid=<?php echo $dsid; ?>" title="Manage and edit dataset">
@@ -135,12 +135,12 @@ if($action == 'Create New Dataset'){
 							</a>&nbsp;&nbsp;
 						</div>
 						<div style="margin-left:15px;">
-							<?php 
+							<?php
 							echo ($dsArr["notes"]?$dsArr["notes"].'<br/>':'');
-							echo 'Created: '.$dsArr["ts"]; 
+							echo 'Created: '.$dsArr["ts"];
 							?>
 						</div>
-						<?php 
+						<?php
 					}
 				}
 				else{
@@ -150,13 +150,13 @@ if($action == 'Create New Dataset'){
 			</fieldset>
 			<fieldset style="padding:15px;margin:15px;">
 				<legend><b>Shared with You</b></legend>
-				<?php 
+				<?php
 				if(array_key_exists('other',$dataSetArr)){
 					$otherArr = $dataSetArr['other'];
 					foreach($otherArr as $dsid => $dsArr){
 						?>
 						<div>
-							<?php 
+							<?php
 							$role = 'Dataset reader';
 							if($dsArr['role'] == 'DatasetAdmin'){
 								$role = 'Dataset Administator';
@@ -171,20 +171,20 @@ if($action == 'Create New Dataset'){
 							</a>
 						</div>
 						<div style="margin-left:15px;">
-							<?php 
+							<?php
 							echo ($dsArr["notes"]?$dsArr["notes"].'<br/>':'');
-							echo 'Created: '.$dsArr["ts"]; 
+							echo 'Created: '.$dsArr["ts"];
 							?>
 						</div>
 						<?php
-					} 
+					}
 				}
 				else{
 					echo '<div style="font-weight:bold;">There are no datasets shared with you</div>';
 				}
 				?>
 			</fieldset>
-			<?php 	
+			<?php
 		}
 		else{
 			echo '<div style="margin:15px;font-weight:bold;">There are no datasets linked to your login</div>';
@@ -193,7 +193,7 @@ if($action == 'Create New Dataset'){
 		</div>
 	</div>
 	<?php
-	include($serverRoot."/footer.php");
+	include($SERVER_ROOT."/footer.php");
 	?>
 	</body>
 </html>

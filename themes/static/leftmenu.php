@@ -1,46 +1,46 @@
 <div class="menu">
 	<div class="menuheader">
-		<a href="<?php echo $clientRoot; ?>/index.php">
-			<?php echo $defaultTitle; ?> Homepage
+		<a href="<?php echo $CLIENT_ROOT; ?>/index.php">
+			<?php echo $DEFAULT_TITLE; ?> Homepage
 		</a>
 	</div>
 	<div class="menuitem">
-		<a href="<?php echo $clientRoot; ?>/collections/index.php">
+		<a href="<?php echo $CLIENT_ROOT; ?>/collections/index.php">
 			Search Collections
 		</a>
 	</div>
 	<div class="menuitem">
-		<a href="<?php echo $clientRoot; ?>/collections/map/mapinterface.php" target="_blank">
+		<a href="<?php echo $CLIENT_ROOT; ?>/collections/map/index.php" target="_blank">
 			Map Search
 		</a>
 	</div>
 	<div class="menuitem">
-		<a href="<?php echo $clientRoot; ?>/projects/index.php">
+		<a href="<?php echo $CLIENT_ROOT; ?>/projects/index.php">
 			Flora Projects
 		</a>
 	</div>
 	<div class="menuitem">
-		<a href="<?php echo $clientRoot; ?>/projects/index.php?pid=1">
+		<a href="<?php echo $CLIENT_ROOT; ?>/projects/index.php?pid=1">
 			Blabla Flora
 		</a>
 	</div>
 	<div class="menuitem">
-		<a href="<?php echo $clientRoot; ?>/checklists/dynamicmap.php?interface=checklist">
+		<a href="<?php echo $CLIENT_ROOT; ?>/checklists/dynamicmap.php?interface=checklist">
 			Dynamic Checklist
 		</a>
 	</div>
 	<div class="menuitem">
-		<a href="<?php echo $clientRoot; ?>/checklists/dynamicmap.php?interface=key">
+		<a href="<?php echo $CLIENT_ROOT; ?>/checklists/dynamicmap.php?interface=key">
 			Dynamic Key
 		</a>
 	</div>
 	<div class="menuitem">
-		<a href="<?php echo $clientRoot; ?>/imagelib/index.php">
+		<a href="<?php echo $CLIENT_ROOT; ?>/imagelib/index.php">
 			Image Library
 		</a>
 	</div>
 	<div class="menuitem">
-		<a href="<?php echo $clientRoot; ?>/imagelib/imgsearch.php">
+		<a href="<?php echo $CLIENT_ROOT; ?>/imagelib/search.php">
 			Search Images
 		</a>
 	</div>
@@ -54,22 +54,22 @@
 			Welcome <?php echo $userDisplayName; ?>!
 		</div>
 		<div class="menuitem">
-			<a href="<?php echo $clientRoot; ?>/profile/viewprofile.php">My Profile</a>
+			<a href="<?php echo $CLIENT_ROOT; ?>/profile/viewprofile.php">My Profile</a>
 		</div>
 		<div class="menuitem">
-			<a href="<?php echo $clientRoot; ?>/profile/index.php?submit=logout">Logout</a>
+			<a href="<?php echo $CLIENT_ROOT; ?>/profile/index.php?submit=logout">Logout</a>
 		</div>
 	<?php
 	}
 	else{
 	?>
 		<div class="menuitem">
-			<a href="<?php echo $clientRoot."/profile/index.php?refurl=".$_SERVER['PHP_SELF']."?".$_SERVER['QUERY_STRING']; ?>">
+			<a href="<?php echo $CLIENT_ROOT."/profile/index.php?refurl=".$_SERVER['PHP_SELF']."?".$_SERVER['QUERY_STRING']; ?>">
 				Log In
 			</a>
 		</div>
 		<div class="menuitem">
-			<a href="<?php echo $clientRoot; ?>/profile/newprofile.php">
+			<a href="<?php echo $CLIENT_ROOT; ?>/profile/newprofile.php">
 				New Account
 			</a>
 		</div>
@@ -77,7 +77,7 @@
 	}
 	?>
 	<div class='menuitem'>
-		<a href='<?php echo $clientRoot; ?>/sitemap.php'>Sitemap</a>
+		<a href='<?php echo $CLIENT_ROOT; ?>/sitemap.php'>Sitemap</a>
 	</div>
 </div>
 

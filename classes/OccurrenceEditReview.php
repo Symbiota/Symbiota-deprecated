@@ -13,6 +13,8 @@ class OccurrenceEditReview extends Manager{
 	private $reviewStatusFilter;
 	private $editorUidFilter;
 	private $queryOccidFilter;
+	private $startDateFilter;
+	private $endDateFilter;
 	private $pageNumber = 0;
 	private $limitNumber;
 	private $sqlBase;
@@ -118,6 +120,12 @@ class OccurrenceEditReview extends Manager{
 			if($this->queryOccidFilter){
 				$sqlBase .= 'AND (e.occid = '.$this->queryOccidFilter.') ';
 			}
+			if($this->startDateFilter){
+				$sqlBase .= 'AND (e.initialtimestamp >= "'.$this->startDateFilter.'") ';
+			}
+			if($this->endDateFilter){
+				$sqlBase .= 'AND (e.initialtimestamp <= "'.$this->endDateFilter.'") ';
+			}
 			if($this->obsUid){
 				$sqlBase .= 'AND (o.observeruid = '.$this->obsUid.') ';
 			}
@@ -192,6 +200,12 @@ class OccurrenceEditReview extends Manager{
 				else{
 					$sqlBase .= 'AND (r.externaleditor = "'.$this->editorFilter.'") ';
 				}
+			}
+			if($this->startDateFilter){
+				$sqlBase .= 'AND (r.initialtimestamp >= "'.$this->startDateFilter.'") ';
+			}
+			if($this->endDateFilter){
+				$sqlBase .= 'AND (r.initialtimestamp <= "'.$this->endDateFilter.'") ';
 			}
 			if($this->queryOccidFilter){
 				$sqlBase .= 'AND (r.occid = '.$this->queryOccidFilter.') ';
@@ -463,6 +477,18 @@ class OccurrenceEditReview extends Manager{
 	public function setQueryOccidFilter($num){
 		if(is_numeric($num)){
 			$this->queryOccidFilter = $num;
+		}
+	}
+
+	public function setStartDateFilter($d){
+		if(preg_match('/^[\d-]+$/', $d)){
+			$this->startDateFilter = $d;
+		}
+	}
+
+	public function setEndDateFilter($d){
+		if(preg_match('/^[\d-]+$/', $d)){
+			$this->endDateFilter = $d;
 		}
 	}
 

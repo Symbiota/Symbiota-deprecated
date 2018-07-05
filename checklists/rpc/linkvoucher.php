@@ -1,7 +1,7 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/ChecklistVoucherAdmin.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/ChecklistVoucherAdmin.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 
 $sciname = $_POST['sciname'];
 $occid = $_POST['occid'];

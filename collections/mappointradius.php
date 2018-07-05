@@ -48,12 +48,15 @@ else{
         }
 
         function updateParentForm() {
-            opener.document.getElementById("pointlat").value = document.getElementById("latbox").value;
-            opener.document.getElementById("pointlong").value = document.getElementById("lonbox").value;
-            if(opener.document.getElementById("radiustemp").value == ""){
-            	opener.document.getElementById("radiustemp").value = 30;
+            opener.document.getElementById("pointlat").value = Math.abs(parseFloat(document.getElementById("latbox").value));
+            opener.document.getElementById("pointlong").value = Math.abs(parseFloat(document.getElementById("lonbox").value));
+            if(opener.document.getElementById("radius").value == ""){
             	opener.document.getElementById("radius").value = 30;
             } 
+            if(document.getElementById("latbox").value < 0) opener.document.getElementById('pointlat_NS').value = 'S';
+            else opener.document.getElementById('pointlat_NS').value = 'N';
+            if(document.getElementById("lonbox").value < 0) opener.document.getElementById('pointlong_EW').value = 'W';
+            else opener.document.getElementById('pointlong_EW').value = 'E';
             self.close();
             return false;
         }

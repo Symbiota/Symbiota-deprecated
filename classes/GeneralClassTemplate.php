@@ -1,5 +1,5 @@
 <?php 
-include_once($serverRoot.'/classes/Manager.php');
+include_once($SERVER_ROOT.'/classes/Manager.php');
 
 /**
  * Controler class for /misc/generaltemplate.php

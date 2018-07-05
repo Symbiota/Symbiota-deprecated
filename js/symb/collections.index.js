@@ -1,17 +1,7 @@
+//Used in /collections/index.php and /imagelib/index.php
 $('html').hide();
 $(document).ready(function() {
 	$('html').show();
-});
-
-
-$(document).ready(function() {
-	if(!navigator.cookieEnabled){
-		alert("Your browser cookies are disabled. To be able to login and access your profile, they must be enabled for this domain.");
-	}
-
-	$("#tabs").tabs();
-
-	//document.collections.onkeydown = checkKey;
 });
 
 function toggle(target){

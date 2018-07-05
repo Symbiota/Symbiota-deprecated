@@ -1,5 +1,5 @@
 <?php
-include_once($serverRoot.'/config/dbconnection.php');
+include_once($SERVER_ROOT.'/config/dbconnection.php');
 
 class TaxonProfileMap {
 	
@@ -86,15 +86,15 @@ class TaxonProfileMap {
 	}
 	
 	private function getTaxaWhere(){
-		global $userRights, $mappingBoundaries;
+		global $USER_RIGHTS, $mappingBoundaries;
 		$sql = "";
 		$sql .= 'WHERE (o.tidinterpreted IN('.implode(',',array_keys($this->synMap)).')) '.
 			'AND (o.decimallatitude IS NOT NULL AND o.decimallongitude IS NOT NULL) ';
-		if(array_key_exists("SuperAdmin",$userRights) || array_key_exists("CollAdmin",$userRights) || array_key_exists("RareSppAdmin",$userRights) || array_key_exists("RareSppReadAll",$userRights)){
+		if(array_key_exists("SuperAdmin",$USER_RIGHTS) || array_key_exists("CollAdmin",$USER_RIGHTS) || array_key_exists("RareSppAdmin",$USER_RIGHTS) || array_key_exists("RareSppReadAll",$USER_RIGHTS)){
 			//Is global rare species reader, thus do nothing to sql and grab all records
 		}
-		elseif(array_key_exists("RareSppReader",$userRights)){
-			$sql .= 'AND ((o.CollId IN ('.implode(',',$userRights["RareSppReader"]).')) OR (o.LocalitySecurity = 0 OR o.LocalitySecurity IS NULL)) ';
+		elseif(array_key_exists("RareSppReader",$USER_RIGHTS)){
+			$sql .= 'AND ((o.CollId IN ('.implode(',',$USER_RIGHTS["RareSppReader"]).')) OR (o.LocalitySecurity = 0 OR o.LocalitySecurity IS NULL)) ';
 		}
 		return $sql;
 	}

@@ -9,7 +9,6 @@ $clid = array_key_exists("clid",$_REQUEST)?$_REQUEST["clid"]:0;
 $pid = array_key_exists("pid",$_REQUEST)?$_REQUEST["pid"]:"";
 $startPos = (array_key_exists('start',$_REQUEST)?(int)$_REQUEST['start']:0);
 $tabIndex = array_key_exists("tabindex",$_REQUEST)?$_REQUEST["tabindex"]:0;
-$sqlFrag = array_key_exists("sqlfrag",$_REQUEST)?$_REQUEST["sqlfrag"]:"";
 $action = array_key_exists("submitaction",$_REQUEST)?$_REQUEST["submitaction"]:"";
 
 $displayMode = (array_key_exists('displaymode',$_REQUEST)?$_REQUEST['displaymode']:0);
@@ -21,12 +20,11 @@ $statusStr = "";
 $isEditor = 0;
 if($IS_ADMIN || (array_key_exists("ClAdmin",$USER_RIGHTS) && in_array($clid,$USER_RIGHTS["ClAdmin"]))){
 	$isEditor = 1;
-
 	if($action == "SaveSearch"){
 		$statusStr = $clManager->saveQueryVariables($_POST);
 	}
-	elseif($action == 'DeleteSql'){
-		$statusStr = $clManager->deleteSql();
+	elseif($action == 'DeleteVariables'){
+		$statusStr = $clManager->deleteQueryVariables();
 	}
 	elseif($action == 'Add Vouchers'){
 		$clManager->linkVouchers($_POST['occids']);
@@ -34,7 +32,11 @@ if($IS_ADMIN || (array_key_exists("ClAdmin",$USER_RIGHTS) && in_array($clid,$USE
 	elseif($action == 'Add Taxa and Vouchers'){
 		$clManager->linkTaxaVouchers($_POST['occids'],(array_key_exists('usecurrent',$_POST)?$_POST['usecurrent']:0));
 	}
+	elseif($action == 'resolveconflicts'){
+		$clManager->batchAdjustChecklist($_POST);
+	}
 }
+$clManager->setCollectionVariables();
 ?>
 
 <html>
@@ -49,8 +51,9 @@ if($IS_ADMIN || (array_key_exists("ClAdmin",$USER_RIGHTS) && in_array($clid,$USE
 	<script type="text/javascript">
 		var clid = <?php echo $clid; ?>;
 		var tabIndex = <?php echo $tabIndex; ?>;
+		var footprintwktExists = <?php echo ($clManager->getClFootprintWkt()?'true':'false') ?>;
 	</script>
-	<script type="text/javascript" src="../js/symb/checklists.voucheradmin.js?ver=130330"></script>
+	<script type="text/javascript" src="../js/symb/checklists.voucheradmin.js?ver=180411"></script>
 	<style type="text/css">
 		li{margin:5px;}
 	</style>
@@ -86,7 +89,6 @@ if($statusStr){
 }
 
 if($clid && $isEditor){
-	$clManager->setCollectionVariables();
 	$termArr = $clManager->getQueryVariablesArr();
 	$collList = $clManager->getCollectionList();
 	if($termArr){
@@ -152,32 +154,38 @@ if($clid && $isEditor){
 							<div style="float:left;">
 								<div>
 									<b><?php echo $LANG['LATN'];?>:</b>
-									<input id="upperlat" type="text" name="latnorth" style="width:70px;" value="<?php echo isset($termArr['latnorth'])?$termArr['latnorth']:''; ?>" title="Latitude North" />
-									<a href="#" onclick="openPopup('../collections/mapboundingbox.php','boundingbox')"><img src="../images/world.png" width="15px" title="Find Coordinate" /></a>
+									<input id="upperlat" type="text" name="latnorth" style="width:80px;" value="<?php echo isset($termArr['latnorth'])?$termArr['latnorth']:''; ?>" title="Latitude North" />
+									<a href="#" onclick="openPopup('tools/mapboundingbox.php','boundingbox')"><img src="../images/world.png" style="width:12px" title="Find Coordinate" /></a>
 								</div>
 								<div>
 									<b><?php echo $LANG['LATS'];?>:</b>
-									<input id="bottomlat" type="text" name="latsouth" style="width:70px;" value="<?php echo isset($termArr['latsouth'])?$termArr['latsouth']:''; ?>" title="Latitude South" />
+									<input id="bottomlat" type="text" name="latsouth" style="width:80px;" value="<?php echo isset($termArr['latsouth'])?$termArr['latsouth']:''; ?>" title="Latitude South" />
 								</div>
 								<div>
 									<b><?php echo $LANG['LONGE'];?>:</b>
-									<input id="rightlong" type="text" name="lngeast" style="width:70px;" value="<?php echo isset($termArr['lngeast'])?$termArr['lngeast']:''; ?>" title="Longitude East" />
+									<input id="rightlong" type="text" name="lngeast" style="width:80px;" value="<?php echo isset($termArr['lngeast'])?$termArr['lngeast']:''; ?>" title="Longitude East" />
 								</div>
 								<div>
 									<b><?php echo $LANG['LONGW'];?>:</b>
-									<input id="leftlong" type="text" name="lngwest" style="width:70px;" value="<?php echo isset($termArr['lngwest'])?$termArr['lngwest']:''; ?>" title="Longitude West" />
+									<input id="leftlong" name="lngwest" type="text" style="width:80px;" value="<?php echo isset($termArr['lngwest'])?$termArr['lngwest']:''; ?>" title="Longitude West" />
 								</div>
 								<div>
-									<input type="checkbox" name="latlngor" value="1" <?php if(isset($termArr['latlngor'])) echo 'CHECKED'; ?> />
-									<?php echo $LANG['INCLUDELATLONG'];?>
+									<input name="latlngor" type="checkbox" value="1" <?php if(isset($termArr['latlngor'])) echo 'CHECKED'; ?> onclick="coordInputSelected(this)" />
+									<?php echo (isset($LANG['INCLUDELATLONG']) && $LANG['INCLUDELATLONG']?$LANG['INCLUDELATLONG']:'Match on lat/long OR locality (include non-georeferenced occurrences)');?>
 								</div>
 								<div>
-									<input name="onlycoord" value="1" type="checkbox" <?php if(isset($termArr['onlycoord'])) echo 'CHECKED'; ?> />
-									<?php echo $LANG['ONLYCOORD'];?>
+									<input name="onlycoord" value="1" type="checkbox" <?php if(isset($termArr['onlycoord'])) echo 'CHECKED'; ?> onclick="coordInputSelected(this)" />
+									<?php echo (isset($LANG['ONLYCOORD'])?$LANG['ONLYCOORD']:'Only include occurrences with coordinates');?>
+								</div>
+								<div>
+									<input name="includewkt" value="1" type="checkbox" <?php if(isset($termArr['includewkt'])) echo 'CHECKED'; ?> onclick="coordInputSelected(this)" />
+									<?php echo (isset($LANG['POLYGON_SEARCH'])?$LANG['POLYGON_SEARCH']:'Search based on polygon defining checklist research boundaries'); ?>
+									<a href="#" onclick="openPopup('tools/mappolyaid.php?clid=<?php echo $clid; ?>&emode=0','mappopup');return false;" target="_blank" title="View Polygon"><img src="../images/world.png" style="width:12px" /></a>
+									<a href="checklistadmin.php?clid=<?php echo $clid; ?>&tabindex=1" target="_blank" title="Edit Metadata and polygon"><img src="../images/edit.png" style="width:12px" /></a>
 								</div>
 								<div>
 									<input name="excludecult" value="1" type="checkbox" <?php if(isset($termArr['excludecult'])) echo 'CHECKED'; ?> />
-									<?php echo $LANG['EXCLUDE'];?>
+									<?php echo (isset($LANG['EXCLUDE'])?$LANG['EXCLUDE']:'Exclude cultivated species');?>
 								</div>
 							</div>
 						</td>
@@ -200,10 +208,10 @@ if($clid && $isEditor){
 			?>
 			<fieldset>
 				<legend><b><?php echo $LANG['REMOVESEARCH'];?></b></legend>
-				<form name="sqldeleteform" action="voucheradmin.php" method="post" onsubmit="return confirm('Are you sure you want to delete current SQL statement?');">
+				<form name="sqldeleteform" action="voucheradmin.php" method="post" onsubmit="return confirm('Are you sure you want to delete query variables?');">
 					<div style="margin:20px">
-						<input type="submit" name="submit" value="<?php echo $LANG['DELETESQL'];?>" />
-						<input type="hidden" name="submitaction" value="DeleteSql" />
+						<input type="submit" name="submit" value="<?php echo $LANG['DELETEVARIABLES'];?>" />
+						<input type="hidden" name="submitaction" value="DeleteVariables" />
 					</div>
 					<input type="hidden" name="clid" value="<?php echo $clid; ?>" />
 					<input type="hidden" name="pid" value="<?php echo $pid; ?>" />
@@ -368,8 +376,19 @@ if($clid && $isEditor){
 			<div id="reportDiv">
 				<div style="margin:25px;height:400px;">
 					<ul>
-						<li><a href="voucherreporthandler.php?rtype=fullvoucherscsv&clid=<?php echo $clid; ?>"><?php echo $LANG['FULLSPECLIST'];?></a></li>
-						<li><a href="checklist.php?printmode=1&showvouchers=1&cl=<?php echo $clid; ?>" target="_blank"><?php echo $LANG['FULLPRINT'];?></a></li>
+						<li><a href="voucherreporthandler.php?rtype=fullcsv&clid=<?php echo $clid; ?>"><?php echo $LANG['FULLSPECLIST'];?></a></li>
+						<li><a href="checklist.php?printmode=1&showvouchers=0&defaultoverride=1&cl=<?php echo $clid; ?>" target="_blank"><?php echo $LANG['FULLPRINT'];?></a></li>
+						<li><a href="voucherreporthandler.php?rtype=fullvoucherscsv&clid=<?php echo $clid; ?>"><?php echo $LANG['FULLSPECLISTVOUCHER'];?></a></li>
+						<li><a href="checklist.php?printmode=1&showvouchers=1&defaultoverride=1&cl=<?php echo $clid; ?>" target="_blank"><?php echo $LANG['FULLPRINTVOUCHER'];?></a></li>
+						<li><a href="voucherreporthandler.php?rtype=pensoftxlsx&clid=<?php echo $clid; ?>" target="_blank"><?php echo (isset($LANG['PENSOFT_XLSX_EXPORT'])?$LANG['PENSOFT_XLSX_EXPORT']:'Pensoft Excel Export');?></a></li>
+						<li>
+							<a href="#" onclick="openPopup('../collections/download/index.php?searchvar=<?php echo urlencode('clid='.$clid); ?>&noheader=1','repvouchers');return false;">
+								<?php echo (isset($LANG['VOUCHERONLY'])?$LANG['VOUCHERONLY']:'Occurrence vouchers only (DwC-A, CSV, Tab-delimited)'); ?>
+							</a>
+						</li>
+						<li><?php echo $LANG['SPECMISSINGTITLE'];?></li>
+					</ul>
+					<ul style="margin:-10 0px 0px 25px;list-style-type:circle">
 						<li><a href="voucherreporthandler.php?rtype=missingoccurcsv&clid=<?php echo $clid; ?>"><?php echo $LANG['SPECMISSTAXA'];?></a></li>
 						<li><a href="voucherreporthandler.php?rtype=problemtaxacsv&clid=<?php echo $clid; ?>"><?php echo $LANG['SPECMISSPELLED'];?></a></li>
 					</ul>
@@ -393,4 +412,4 @@ else{
 include($SERVER_ROOT.'/footer.php');
 ?>
 </body>
-</html> 
+</html>

@@ -2,9 +2,8 @@
 //TODO: add code to automatically select hide locality details when taxon/state match name on list
 include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/ObservationSubmitManager.php');
-include_once($SERVER_ROOT.'/classes/SOLRManager.php');
 header("Content-Type: text/html; charset=".$CHARSET);
-if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../collections/editor/observatoinsubmit.php?'.$_SERVER['QUERY_STRING']);
+if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../collections/editor/observationsubmit.php?'.$_SERVER['QUERY_STRING']);
 
 $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:"";
 $collId  = array_key_exists("collid",$_REQUEST)?$_REQUEST["collid"]:0;
@@ -15,15 +14,14 @@ $recordedBy = array_key_exists("recordedby",$_REQUEST)?$_REQUEST["recordedby"]:0
 if(!is_numeric($clid)) $clid = 0;
 
 $obsManager = new ObservationSubmitManager();
-if($SOLR_MODE) $solrManager = new SOLRManager();
 $obsManager->setCollid($collId);
-$collMap = $obsManager->getCollMap(); 
-if(!$collId && $collMap) $collId = $collMap['collid']; 
+$collMap = $obsManager->getCollMap();
+if(!$collId && $collMap) $collId = $collMap['collid'];
 
 $isEditor = 0;
 $occid = 0;
 if($collMap){
-	if($isAdmin){
+	if($IS_ADMIN){
 		$isEditor = 1;
 	}
 	elseif(array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collId,$USER_RIGHTS['CollAdmin'])){
@@ -34,7 +32,6 @@ if($collMap){
 	}
 	if($isEditor && $action == "Submit Observation"){
 		$occid = $obsManager->addObservation($_POST);
-        if($SOLR_MODE) $solrManager->updateSOLR();
 	}
 	if(!$recordedBy) $recordedBy = $obsManager->getUserName();
 }
@@ -46,9 +43,9 @@ if($collMap){
 	<title><?php echo $DEFAULT_TITLE; ?> Observation Submission</title>
 	<link href="../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
     <link href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
-	<link type="text/css" href="../../css/jquery-ui.css" rel="Stylesheet" />	
+	<link type="text/css" href="../../css/jquery-ui.css" rel="Stylesheet" />
 	<script type="text/javascript">
-		<?php 
+		<?php
 		$maxUpload = ini_get('upload_max_filesize');
 		$maxUpload = str_replace("M", "000000", $maxUpload);
 		if($maxUpload > 4000000) $maxUpload = 4000000;
@@ -87,8 +84,8 @@ if($collMap){
 						SUCCESS: Image loaded successfully!
 					</div>
 					<div style="font:weight;font-size:120%;margin-top:10px;">
-						Open  
-						<a href="../individual/index.php?occid=<?php echo $occid; ?>" target="_blank">Occurrence Details Viewer</a> to see the new record 
+						Open
+						<a href="../individual/index.php?occid=<?php echo $occid; ?>" target="_blank">Occurrence Details Viewer</a> to see the new record
 					</div>
 					<?php
 				}
@@ -245,20 +242,20 @@ if($collMap){
 					</div>
 					<div id="dmsdiv" style="display:none;float:left;padding:15px;background-color:lightyellow;border:1px solid yellow;width:270px;">
 						<div>
-							Latitude: 
-							<input id="latdeg" style="width:35px;" title="Latitude Degree" />&deg; 
-							<input id="latmin" style="width:50px;" title="Latitude Minutes" />' 
-							<input id="latsec" style="width:50px;" title="Latitude Seconds" />&quot; 
+							Latitude:
+							<input id="latdeg" style="width:35px;" title="Latitude Degree" />&deg;
+							<input id="latmin" style="width:50px;" title="Latitude Minutes" />'
+							<input id="latsec" style="width:50px;" title="Latitude Seconds" />&quot;
 							<select id="latns">
 								<option>N</option>
 								<option>S</option>
 							</select>
 						</div>
 						<div>
-							Longitude: 
-							<input id="lngdeg" style="width:35px;" title="Longitude Degree" />&deg; 
-							<input id="lngmin" style="width:50px;" title="Longitude Minutes" />' 
-							<input id="lngsec" style="width:50px;" title="Longitude Seconds" />&quot; 
+							Longitude:
+							<input id="lngdeg" style="width:35px;" title="Longitude Degree" />&deg;
+							<input id="lngmin" style="width:50px;" title="Longitude Minutes" />'
+							<input id="lngsec" style="width:50px;" title="Longitude Seconds" />&quot;
 							<select id="lngew">
 								<option>E</option>
 								<option SELECTED>W</option>
@@ -269,7 +266,7 @@ if($collMap){
 						</div>
 					</div>
 					<div id="elevftdiv" style="display:none;float:right;padding:15px;background-color:lightyellow;border:1px solid yellow;width:180px;margin:0px 160px 10px 0px;">
-						Elevation: 
+						Elevation:
 						<input id="elevft" style="width:45px;" /> feet
 						<div style="margin:5px;">
 							<input type="button" value="Insert Elevation" onclick="insertElevFt(this.form)" />
@@ -313,17 +310,17 @@ if($collMap){
 						</span>
 					</div>
 				</fieldset>
-				<?php 
-				$clArr = $obsManager->getChecklists(); 
+				<?php
+				$clArr = $obsManager->getChecklists();
 				if($clArr){
 					?>
 					<fieldset>
 						<legend><b>Link to Checklist as Voucher</b></legend>
-						Species List: 
+						Species List:
 						<select name='clid'>
 							<option value="0">Select Checklist</option>
 							<option value="0">------------------------------</option>
-							<?php 
+							<?php
 							foreach($clArr as $id => $clName){
 								echo '<option value="'.$id.'" '.($id==$clid?'SELECTED':'').'>'.$clName.'</option>';
 							}
@@ -331,7 +328,7 @@ if($collMap){
 						</select>
 					</fieldset>
 					<?php
-				} 
+				}
 				?>
 				<fieldset>
 					<legend><b>Images</b></legend>
@@ -343,10 +340,10 @@ if($collMap){
 							<input type="button" value="Reset" onclick="document.obsform.imgfile1.value = ''">
 						</div>
 						<div style="margin:5px;">
-							Caption: 
+							Caption:
 							<input name="caption1" type="text" style="width:200px;" />
 							<span style="margin-left:20px;">
-								Image Remarks: 
+								Image Remarks:
 								<input name="notes1" type="text" style="width:275px;" />
 							</span>
 						</div>
@@ -360,10 +357,10 @@ if($collMap){
 							<input type="button" value="Reset" onclick="document.obsform.imgfile2.value = ''">
 						</div>
 						<div style="margin:5px;">
-							Caption: 
+							Caption:
 							<input name="caption2" type="text" style="width:200px;" />
 							<span style="margin-left:20px;">
-								Image Remarks: 
+								Image Remarks:
 								<input name="notes2" type="text" style="width:275px;" />
 							</span>
 						</div>
@@ -377,10 +374,10 @@ if($collMap){
 							<input type="button" value="Reset" onclick="document.obsform.imgfile3.value = ''">
 						</div>
 						<div style="margin:5px;">
-							Caption: 
+							Caption:
 							<input name="caption3" type="text" style="width:200px;" />
 							<span style="margin-left:20px;">
-								Image Remarks: 
+								Image Remarks:
 								<input name="notes3" type="text" style="width:275px;" />
 							</span>
 						</div>
@@ -394,10 +391,10 @@ if($collMap){
 							<input type="button" value="Reset" onclick="document.obsform.imgfile4.value = ''">
 						</div>
 						<div style="margin:5px;">
-							Caption: 
+							Caption:
 							<input name="caption4" type="text" style="width:200px;" />
 							<span style="margin-left:20px;">
-								Image Remarks: 
+								Image Remarks:
 								<input name="notes4" type="text" style="width:275px;" />
 							</span>
 						</div>
@@ -411,10 +408,10 @@ if($collMap){
 							<input type="button" value="Reset" onclick="document.obsform.imgfile5.value = ''">
 						</div>
 						<div style="margin:5px;">
-							Caption: 
+							Caption:
 							<input name="caption5" type="text" style="width:200px;" />
 							<span style="margin-left:20px;">
-								Image Remarks: 
+								Image Remarks:
 								<input name="notes5" type="text" style="width:275px;" />
 							</span>
 						</div>
@@ -424,10 +421,10 @@ if($collMap){
 				<div style="margin:10px;">
 					<input type="hidden" name="collid" value="<?php echo $collId; ?>" />
 					<input type="submit" name="action" value="Submit Observation" />
-					* Fields with background color are required  
+					* Fields with background color are required
 				</div>
 			</form>
-			<?php 
+			<?php
 		}
 		else{
 			echo 'You are authorized to submit to an observation. ';
@@ -435,7 +432,7 @@ if($collMap){
 		}
 		?>
 	</div>
-<?php 	
+<?php
 	include($SERVER_ROOT.'/footer.php');
 ?>
 </body>

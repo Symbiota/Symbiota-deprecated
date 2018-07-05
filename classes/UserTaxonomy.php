@@ -1,11 +1,11 @@
 <?php
-include_once($serverRoot.'/config/dbconnection.php');
-include_once($serverRoot.'/classes/ProfileManager.php');
+include_once($SERVER_ROOT.'/config/dbconnection.php');
+include_once($SERVER_ROOT.'/classes/ProfileManager.php');
 
 class UserTaxonomy {
 
 	private $conn;
-	
+
 	function __construct() {
 		$this->conn = MySQLiConnectionFactory::getCon("write");
 	}

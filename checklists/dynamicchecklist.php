@@ -1,8 +1,8 @@
 <?php
 //error_reporting(E_ALL);
 include_once('../config/symbini.php');
-include_once($serverRoot.'/classes/DynamicChecklistManager.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/DynamicChecklistManager.php');
+header("Content-Type: text/html; charset=".$CHARSET);
  
 $lat = $_POST["lat"];
 $lng = $_POST["lng"];
@@ -22,10 +22,10 @@ else{
 }
 
 if($interface == "key"){
-	header("Location: ".$clientRoot."/ident/key.php?dynclid=".$dynClid."&taxon=All Species");
+	header("Location: ".$CLIENT_ROOT."/ident/key.php?dynclid=".$dynClid."&taxon=All Species");
 }
 else{
-	header("Location: ".$clientRoot."/checklists/checklist.php?dynclid=".$dynClid);
+	header("Location: ".$CLIENT_ROOT."/checklists/checklist.php?dynclid=".$dynClid);
 }
 ob_flush();
 flush();

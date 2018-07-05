@@ -2,7 +2,6 @@
 include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceEditorManager.php');
 include_once($SERVER_ROOT.'/classes/ProfileManager.php');
-include_once($SERVER_ROOT.'/classes/SOLRManager.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../collections/editor/occurdataentry.php?'.$_SERVER['QUERY_STRING']);
 
@@ -10,7 +9,6 @@ $collid = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
 $action = array_key_exists('submitaction',$_POST)?$_POST['submitaction']:'';
 
 $occManager = new OccurrenceEditorManager();
-if($SOLR_MODE) $solrManager = new SOLRManager();
 
 $isEditor = 0;		//If not editor, edits will be submitted to omoccuredits table but not applied to omoccurrences
 
@@ -25,8 +23,8 @@ if($SYMB_UID){
 	$collMap = $occManager->getCollMap();
 
 	if($collMap && $collMap['colltype']=='General Observations') $isGenObs = 1;
-	
-	if($isAdmin || ($collid && array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collid,$USER_RIGHTS["CollAdmin"]))){
+
+	if($IS_ADMIN || ($collid && array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collid,$USER_RIGHTS["CollAdmin"]))){
 		$isEditor = 1;
 	}
 	else{
@@ -37,14 +35,13 @@ if($SYMB_UID){
 	if($isEditor){
 		if($action == 'Add Record'){
 			$statusStr = $occManager->addOccurrence($_POST);
-            if($SOLR_MODE) $solrManager->updateSOLR();
 		}
 	}
 }
 ?>
 <html>
 <head>
-	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>">
+	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET; ?>">
 	<title><?php echo $DEFAULT_TITLE; ?> Occurrence Editor</title>
 	<link href="../../css/jquery-ui.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../../css/occureditor.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" id="editorCssLink" />
@@ -55,7 +52,7 @@ if($SYMB_UID){
 	</script>
 	<script type="text/javascript" src="../../js/symb/collections.occureditormain.js"></script>
 	<script type="text/javascript" src="../../js/symb/collections.occureditortools.js"></script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditorshare.js"></script>
+	<script type="text/javascript" src="../../js/symb/collections.occureditorshare.js?ver=201803"></script>
 </head>
 <body>
 	<!-- inner text -->
@@ -83,7 +80,7 @@ if($SYMB_UID){
 				}
 				?>
 			</div>
-			<?php 
+			<?php
 			if($statusStr){
 				?>
 				<div id="statusdiv" style="margin:5px 0px 5px 15px;">
@@ -254,33 +251,33 @@ if($SYMB_UID){
 										<input type="text" name="verbatimelevation" tabindex="62" maxlength="255" value="<?php echo array_key_exists('verbatimelevation',$occArr)?$occArr['verbatimelevation']:''; ?>" onchange="verbatimElevationChanged(this.form);" title="" />
 									</div>
 								</div>
-								<div id="locExtraToggleDiv" onclick="toggle('locExtraDiv');">
+								<div id="georefExtraToggleDiv" onclick="toggle('georefExtraDiv');">
 									<img src="../../images/editplus.png" style="width:15px;" />
 								</div>
 							</div>
 							<?php
 							include_once('includes/geotools.php');
-							$locExtraDiv = 'display:';
+							$georefExtraDiv = 'display:';
 							if(array_key_exists("georeferencedby",$occArr) && $occArr["georeferencedby"]){
-								$locExtraDiv .= "block";
+								$georefExtraDiv .= "block";
 							}
 							elseif(array_key_exists("footprintwkt",$occArr) && $occArr["footprintwkt"]){
-								$locExtraDiv .= "block";
+								$georefExtraDiv .= "block";
 							}
 							elseif(array_key_exists("georeferenceprotocol",$occArr) && $occArr["georeferenceprotocol"]){
-								$locExtraDiv .= "block";
+								$georefExtraDiv .= "block";
 							}
 							elseif(array_key_exists("georeferencesources",$occArr) && $occArr["georeferencesources"]){
-								$locExtraDiv .= "block";
+								$georefExtraDiv .= "block";
 							}
 							elseif(array_key_exists("georeferenceverificationstatus",$occArr) && $occArr["georeferenceverificationstatus"]){
-								$locExtraDiv .= "block";
+								$georefExtraDiv .= "block";
 							}
 							elseif(array_key_exists("georeferenceremarks",$occArr) && $occArr["georeferenceremarks"]){
-								$locExtraDiv .= "block";
+								$georefExtraDiv .= "block";
 							}
 							?>
-							<div id="locExtraDiv" style="<?php echo $locExtraDiv; ?>;">
+							<div id="georefExtraDiv" style="<?php echo $georefExtraDiv; ?>;">
 								<div style="clear:both;">
 									<div id="georeferencedByDiv">
 										<?php echo (defined('GEOREFERENCEDBY')?GEOREFERENCEDBY:'Georeferenced By'); ?>

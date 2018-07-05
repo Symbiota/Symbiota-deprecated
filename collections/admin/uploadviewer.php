@@ -1,7 +1,7 @@
 <?php
 include_once('../../config/symbini.php'); 
-include_once($serverRoot.'/classes/SpecUpload.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/SpecUpload.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 
 $collid = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
 $recLimit = array_key_exists('reclimit',$_REQUEST)?$_REQUEST['reclimit']:1000;
@@ -39,7 +39,7 @@ $isEditor = 0;
 //$navStr = '<div style="float:right;">';
 if($SYMB_UID){
 	//Set variables
-	if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collid,$userRights["CollAdmin"]))){
+	if($IS_ADMIN || (array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collid,$USER_RIGHTS["CollAdmin"]))){
 		$isEditor = 1;
 	}
 /*
@@ -67,7 +67,7 @@ if($SYMB_UID){
 ?>
 <html>
 <head>
-	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>">
+	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET; ?>">
 	<title>Record Upload Preview</title>
     <style type="text/css">
 		table.styledtable td {
@@ -117,12 +117,10 @@ if($SYMB_UID){
 							if(strlen($displayStr) > 60){
 								$displayStr = substr($displayStr,0,60).'...';
 							}
-							if($displayStr) {
-								if($k == 'occid') $displayStr = '<a href="../editor/occurrenceeditor.php?occid='.$displayStr.'" target="_blank">'.$displayStr.'</a>';
+							if($k == 'occid' && $displayStr && $searchVar != 'new') {
+								$displayStr = '<a href="../editor/occurrenceeditor.php?occid='.$displayStr.'" target="_blank">'.$displayStr.'</a>';
 							}
-							else{
-								$displayStr = '&nbsp;';
-							}
+							if(!$displayStr) $displayStr = '&nbsp;';
 							echo '<td>'.$displayStr.'</td>'."\n";
 						}
 						echo "</tr>\n";

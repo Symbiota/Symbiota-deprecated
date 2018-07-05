@@ -202,7 +202,7 @@ $duManager->readUploadParameters();
 						<legend style="font-weight:bold;font-size:120%;">Upload Options</legend>
 						<div style="float:right;">
 							<?php 
-							echo '<a href="specuploadmanagement.php?collid='.$collid.'&action=addprofile"><img src="'.$clientRoot.'/images/add.png" style="width:15px;border:0px;" title="Add a New Upload Profile" /></a>';
+							echo '<a href="specuploadmanagement.php?collid='.$collid.'&action=addprofile"><img src="'.$CLIENT_ROOT.'/images/add.png" style="width:15px;border:0px;" title="Add a New Upload Profile" /></a>';
 							?>
 						</div>
 						<?php 

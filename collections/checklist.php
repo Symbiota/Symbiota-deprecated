@@ -2,96 +2,76 @@
 include_once('../config/symbini.php');
 include_once($SERVER_ROOT.'/content/lang/collections/checklist.'.$LANG_TAG.'.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceChecklistManager.php');
-include_once($SERVER_ROOT.'/classes/SOLRManager.php');
 
-$checklistManager = new OccurrenceChecklistManager();
 $taxonFilter = array_key_exists("taxonfilter",$_REQUEST)?$_REQUEST["taxonfilter"]:'';
-$stArrCollJson = array_key_exists("jsoncollstarr",$_REQUEST)?$_REQUEST["jsoncollstarr"]:'';
-$stArrSearchJson = array_key_exists("starr",$_REQUEST)?$_REQUEST["starr"]:'';
 
 //Sanitation
 if(!is_numeric($taxonFilter)) $taxonFilter = 1;
 
-$checklistArr = Array();
-$taxaCnt = 0;
-
-$solrManager = new SOLRManager();
 $checklistManager = new OccurrenceChecklistManager();
+$searchVar = $checklistManager->getQueryTermStr();
+$searchVarEncoded = urlencode($searchVar);
 
-if($stArrCollJson && $stArrSearchJson){
-	$stArrSearchJson = str_replace("%apos;","'",$stArrSearchJson);
-	$collStArr = json_decode($stArrCollJson, true);
-	$searchStArr = json_decode($stArrSearchJson, true);
-	$stArr = array_merge($searchStArr,$collStArr);
-
-    if($SOLR_MODE){
-        $solrManager->setSearchTermsArr($stArr);
-        $solrArr = $solrManager->getTaxaArr();
-        if($taxonFilter && is_numeric($taxonFilter)){
-            $tidArr = $solrManager->getSOLRTidList($solrArr);
-            $checklistArr = $checklistManager->getTidChecklist($tidArr,$taxonFilter);
-            $taxaCnt = $checklistManager->getChecklistTaxaCnt();
-        }
-        else{
-            $checklistArr = $solrManager->translateSOLRTaxaList($solrArr);
-            $taxaCnt = $solrManager->getChecklistTaxaCnt();
-        }
-    }
-    else{
-        $checklistManager->setSearchTermsArr($stArr);
-        $checklistArr = $checklistManager->getChecklist($taxonFilter);
-        $taxaCnt = $checklistManager->getChecklistTaxaCnt();
-    }
-}
 ?>
 <div>
-	<div class='button' style='margin:10px;float:right;width:13px;height:13px;' title='<?php echo $LANG['DOWNLOAD_TITLE']; ?>'>
-		<a href='download/index.php?starr=<?php echo $stArrSearchJson; ?>&jsoncollstarr=<?php echo $stArrCollJson; ?>&dltype=checklist&taxonFilterCode=<?php echo $taxonFilter; ?>'>
-			<img width="15px" src="../images/dl.png" />
-		</a>
-	</div>
-	<?php 
+	<form action="download/index.php" method="post" style="float:right" onsubmit="targetPopup(this)">
+		<button class="ui-button ui-widget ui-corner-all" style="margin:5px;padding:5px;cursor: pointer" title="<?php echo $LANG['DOWNLOAD_TITLE']; ?>">
+			<img src="../images/dl2.png" style="width:15px" />
+		</button>
+		<input name="searchvar" type="hidden" value="<?php echo $searchVar; ?>" />
+		<input name="dltype" type="hidden" value="checklist" />
+		<input name="taxonFilterCode" type="hidden" value="<?php echo $taxonFilter; ?>" />
+	</form>
+	<?php
 	if($KEY_MOD_IS_ACTIVE){
-	?>
-		<div class='button' style='margin:10px;float:right;width:13px;height:13px;' title='<?php echo $LANG['OPEN_KEY']; ?>'>
-			<a href='checklistsymbiota.php?starr=<?php echo $stArrSearchJson; ?>&jsoncollstarr=<?php echo $stArrCollJson; ?>&taxonfilter=<?php echo $taxonFilter; ?>&interface=key'>
-				<img width='15px' src='../images/key.png'/>
-			</a>
-		</div>
-	<?php 
+		?>
+		<form action="checklistsymbiota.php" method="post" style="float:right">
+			<button class="ui-button ui-widget ui-corner-all" style="margin:5px;padding:5px;cursor: pointer" title="<?php echo $LANG['OPEN_KEY']; ?>">
+				<img src="../images/key.png" style="width:15px" />
+			</button>
+			<input name="searchvar" type="hidden" value="<?php echo $searchVar; ?>" />
+			<input name="taxonfilter" type="hidden" value="<?php echo $taxonFilter; ?>" />
+			<input name="interface" type="hidden" value="key" />
+		</form>
+		<?php
 	}
 	if($FLORA_MOD_IS_ACTIVE){
-	?>
-		<div class='button' style='margin:10px;float:right;width:13px;height:13px;' title='<?php echo $LANG['OPEN_CHECKLIST_EXPLORER']; ?>'>
-			<a href='checklistsymbiota.php?starr=<?php echo $stArrSearchJson; ?>&jsoncollstarr=<?php echo $stArrCollJson; ?>&taxonfilter=<?php echo $taxonFilter; ?>&interface=checklist'>
-				<img width='15px' src='../images/list.png'/>
-			</a>
-		</div>
-	<?php
+		?>
+		<form action="checklistsymbiota.php" method="post" style="float:right">
+			<button class="ui-button ui-widget ui-corner-all" style="margin:5px;padding:5px;cursor: pointer" title="<?php echo $LANG['OPEN_CHECKLIST_EXPLORER']; ?>">
+				<img src="../images/list.png" style="width:15px" />
+			</button>
+			<input name="searchvar" type="hidden" value="<?php echo $searchVar; ?>" />
+			<input name="taxonfilter" type="hidden" value="<?php echo $taxonFilter; ?>" />
+			<input name="interface" type="hidden" value="checklist" />
+		</form>
+		<?php
 	}
 	?>
 	<div style='margin:10px;float:right;'>
 		<form name="changetaxonomy" id="changetaxonomy" action="list.php" method="post">
 			<?php echo $LANG['TAXONOMIC_FILTER']; ?>:
-            <select id="taxonfilter" name="taxonfilter" onchange="document.changetaxonomy.submit();">
-                <option value="0"><?php echo $LANG['RAW_DATA'];?></option>
-                <?php
-                    $taxonAuthList = $checklistManager->getTaxonAuthorityList();
-                    foreach($taxonAuthList as $taCode => $taValue){
-                        echo "<option value='".$taCode."' ".($taCode == $taxonFilter?"SELECTED":"").">".$taValue."</option>";
-                    }
-                    ?>
-            </select>
-            <input type="hidden" name="tabindex" value="0" />
-        </form>
+			<select id="taxonfilter" name="taxonfilter" onchange="this.form.submit();">
+				<option value="0"><?php echo $LANG['RAW_DATA'];?></option>
+				<?php
+					$taxonAuthList = $checklistManager->getTaxonAuthorityList();
+					foreach($taxonAuthList as $taCode => $taValue){
+						echo "<option value='".$taCode."' ".($taCode == $taxonFilter?"SELECTED":"").">".$taValue."</option>";
+					}
+					?>
+			</select>
+			<input name="tabindex" type="hidden" value="0" />
+			<input name="searchvar" type="hidden" value='<?php echo $searchVar; ?>' />
+		</form>
 	</div>
 	<div style="clear:both;"><hr/></div>
-	<?php
-		echo '<div style="font-weight:bold;font-size:125%;">'.$LANG['TAXA_COUNT'].': '.$taxaCnt.'</div>';
+		<?php
+		$checklistArr = $checklistManager->getChecklist($taxonFilter);
+		echo '<div style="font-weight:bold;font-size:125%;">'.$LANG['TAXA_COUNT'].': '.$checklistManager->getChecklistTaxaCnt().'</div>';
 		$undFamilyArray = Array();
 		if(array_key_exists("undefined",$checklistArr)){
 			$undFamilyArray = $checklistArr["undefined"];
-			unset($checklistArr["undefined"]); 
+			unset($checklistArr["undefined"]);
 		}
 		ksort($checklistArr);
 		foreach($checklistArr as $family => $sciNameArr){

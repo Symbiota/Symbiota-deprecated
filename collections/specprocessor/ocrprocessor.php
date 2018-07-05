@@ -1,7 +1,7 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/SpecProcessorManager.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/SpecProcessorManager.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 
 $collid = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
 $spprid = array_key_exists('spprid',$_REQUEST)?$_REQUEST['spprid']:0;
@@ -150,30 +150,27 @@ $procManager->setProjVariables('OCR Harvest');
 	</fieldset>
 
 	<fieldset style="padding:20px;margin-top:20px;">
-		<legend><b>OCR Batch Processing</b></legend>
+		<legend><b>OCR Batch Import Tool</b></legend>
 		<form name="ocruploadform" action="processor.php" method="post" enctype="multipart/form-data" onsubmit="return validateOcrUploadForm(this);">
-			<div style="float:right;margin:10px;" onclick="toggle('editdiv');toggle('imgprocessdiv')" title="Close Editor">
-				<img src="../../images/edit.png" style="border:0px" />
-			</div>
 			<div style="margin:15px">
-				This interface will process and load OCR text files. 
-				ABBYY FineReader has the ability to OCR multiple specimen images at once and output the results as separate text files (.txt) with the same name as the images. 
-				The Corporate Edition also includes the ABBYY HotFolder tool that provides the ability to schedule batch processing jobs.
-				This tool will also upload OCR text obtained by other processes.   
+				This interface will upload OCR text files generated outside of the portal environment. 
+				For instance, ABBYY FineReader has the ability to batch OCR specimen images and output the results as separate text files (.txt) named after the source image. 
+				OCR text files are linked to specimen records by matching catalog numbers extracted from the file name and comparing OCR and iamge file names.   
 			</div>
 			<div style="margin:15px">
 				<b>Requirements:</b>
 				<ul>
-					<li>OCR files must be in a text format with a .txt extension. When using ABBYY, use the &quot;Create a separate document for each file&quot; and &quot;Save as: Text (*.txt)&quot; settings.</li>
-					<li>Files must be named using the Catalog Number</li>
-					<li>Since OCR text is linked directly to image, source image must have been previously loaded into database</li>
-					<li>If there are more than one image linked to a specimen, the full file name will be used to identify which image to link the OCR</li>
+					<li>OCR files must be in a text format with a .txt extension. When using ABBYY, use the setting: &quot;Create a separate document for each file&quot;, &quot;Save as Text (*.txt)&quot;, and &quot;Name as source file&quot;</li>
+					<li>Compress multiple OCR text files into a single zip file to be uploaded into the portal</li>
+					<li>Files must be named using the Catalog Number. The regular expression below will be used to extract catalog number from file name. Click information symbol for more information.</li>
+					<li>Since OCR text needs to be linked to source image, images must have been previously uploaded into portal</li>
+					<li>If there are more than one image linked to a specimen, the full file name will be used to determine which image to link the OCR</li>
 				</ul> 
 			</div>
 			<div style="margin:15px">
 				<table style="width:100%;">
 					<tr>
-						<td>
+						<td style="width:200px">
 							<b>Regular Expression:</b>
 						</td>
 						<td>
@@ -182,7 +179,7 @@ $procManager->setProjVariables('OCR Harvest');
 								<img src="../../images/info.png" style="width:15px;" />
 							</a>
 							<div id="speckeypatterninfodialog">
-								Regular expression (PHP version) needed to extract the unique identifier from source text.
+								Regular expression needed to extract the unique identifier from source text.
 								For example, regular expression /^(WIS-L-\d{7})\D*/ will extract catalog number WIS-L-0001234 
 								from image file named WIS-L-0001234_a.jpg. For more information on creating regular expressions,
 								Google &quot;Regular Expression PHP Tutorial&quot;. It is recommended to have the portal manager
@@ -192,7 +189,7 @@ $procManager->setProjVariables('OCR Harvest');
 					</tr>
 					<tr>
 						<td>
-							<b>OCR Text Files:</b> 
+							<b>Zip file containing OCR:</b> 
 						</td>
 						<td>
 							<div style="float:right;"><a href="#" onclick="toggle('pathElem');return false;" title="toggle option to enter full path">full path option</a></div>

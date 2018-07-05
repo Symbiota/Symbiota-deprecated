@@ -1,5 +1,5 @@
 <?php
-include_once('../../../config/symbini.php'); 
+include_once('../../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceEditorManager.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceDuplicate.php');
 header("Content-Type: text/html; charset=".$CHARSET);
@@ -33,7 +33,7 @@ $dupClusterArr = $dupManager->getClusterArr($occid);
 
 	function openDupeWindow(){
 		$url = "rpc/dupelist.php?curoccid=<?php echo $occid.'&recordedby='.urlencode($occArr['recordedby']).'&recordnumber='.$occArr['recordnumber'].'&eventdate='.$occArr['eventdate']; ?>";
-		dupeWindow=open($url,"dupelist","resizable=1,scrollbars=1,toolbar=1,width=900,height=600,left=20,top=20");
+		dupeWindow=open($url,"dupelist","resizable=1,scrollbars=1,toolbar=0,width=900,height=600,left=20,top=20");
 		if (dupeWindow.opener == null) dupeWindow.opener = self;
 	}
 
@@ -56,7 +56,7 @@ $dupClusterArr = $dupManager->getClusterArr($occid);
 	}
 
 	function openIndividual(target) {
-		occWindow=open("../individual/index.php?occid="+target,"occdisplay","resizable=1,scrollbars=1,toolbar=1,width=900,height=600,left=20,top=20");
+		occWindow=open("../individual/index.php?occid="+target,"occdisplay","resizable=1,scrollbars=1,toolbar=0,width=900,height=600,left=20,top=20");
 		if (occWindow.opener == null) occWindow.opener = self;
 	}
 
@@ -68,13 +68,13 @@ $dupClusterArr = $dupManager->getClusterArr($occid);
 			f.submit();
 		}
 	}
-	
+
 	function submitDeleteGeneticResource(f){
 		if(confirm("Are you sure you want to premently remove this resource?")){
 			f.submit();
 		}
 	}
-	
+
 	function submitAddGeneticResource(f){
 		if(f.resourcename.value == ""){
 			alert("Genetic resource name must not be blank");
@@ -86,13 +86,13 @@ $dupClusterArr = $dupManager->getClusterArr($occid);
 </script>
 
 <div id="voucherdiv" style="width:795px;">
-	<?php 
+	<?php
 	$userChecklists = $occManager->getUserChecklists();
 	$checklistArr = $occManager->getVoucherChecklists();
 	?>
 	<fieldset style="padding:20px">
 		<legend><b>Checklist Voucher Linkages</b></legend>
-		<?php 
+		<?php
 		if($userChecklists){
 			?>
 			<div style="float:right;margin-right:15px;">
@@ -103,7 +103,7 @@ $dupClusterArr = $dupManager->getClusterArr($occid);
 					<select name="clidvoucher">
 						<option value="">Select a Checklist</option>
 						<option value="">---------------------------------------------</option>
-						<?php 
+						<?php
 						foreach($userChecklists as $clid => $clName){
 							echo '<option value="'.$clid.'">'.$clName.'</option>';
 						}
@@ -147,7 +147,7 @@ $dupClusterArr = $dupManager->getClusterArr($occid);
 				<input name="occid" type="hidden" value="<?php echo $occid; ?>" />
 			</form>
 			<?php
-			if($dupClusterArr){ 
+			if($dupClusterArr){
 				foreach($dupClusterArr as $dupid => $dupArr){
 					echo '<div id="dupediv-'.$occid.'">';
 					echo '<div style="padding:15px;"><b>Cluster Title:</b> '.$dupArr['title'];
@@ -169,7 +169,7 @@ $dupClusterArr = $dupManager->getClusterArr($occid);
 								<div style="float:right;">
 									<button name="unlinkdupebut" onclick="deleteDuplicateLink(<?php echo $dupid.','.$dupeOccid; ?>)">Unlink</button>
 								</div>
-								<?php 
+								<?php
 								echo '<div style="float:left;margin:5px 15px">';
 								if($dArr['recordedby']) echo '<div>'.$dArr['recordedby'].' '.$dArr['recordnumber'].'<span style="margin-left:40px;">'.$dArr['eventdate'].'</span></div>';
 								if($dArr['catnum']) echo '<div><b>Catalog Number:</b> '.$dArr['catnum'].'</div>';
@@ -188,7 +188,7 @@ $dupClusterArr = $dupManager->getClusterArr($occid);
 										if(substr($tnUrl,0,1) == '/') $tnUrl = $IMAGE_DOMAIN.$tnUrl;
 									}
 									echo '<div style="float:left;margin:10px;">';
-									echo '<a href="'.$url.'">';
+									echo '<a href="'.$url.'" target="_blank">';
 									echo '<img src="'.$tnUrl.'" style="width:100px;border:1px solid grey" />';
 									echo '</a>';
 									echo '</div>';
@@ -255,7 +255,7 @@ $dupClusterArr = $dupManager->getClusterArr($occid);
 			</fieldset>
 		</div>
 		<div style="clear:both;">
-			<?php 
+			<?php
 			foreach($genticArr as $genId => $gArr){
 				?>
 				<div style="float:right;">
@@ -301,7 +301,7 @@ $dupClusterArr = $dupManager->getClusterArr($occid);
 								<input name="occid" type="hidden" value="<?php echo $occid; ?>" />
 								<input name="csmode" type="hidden" value="<?php echo $crowdSourceMode; ?>" />
 								<input name="tabtarget" type="hidden" value="3" />
-							</div>								
+							</div>
 						</form>
 					</fieldset>
 					<fieldset>
@@ -314,7 +314,7 @@ $dupClusterArr = $dupManager->getClusterArr($occid);
 								<input name="occid" type="hidden" value="<?php echo $occid; ?>" />
 								<input name="csmode" type="hidden" value="<?php echo $crowdSourceMode; ?>" />
 								<input name="tabtarget" type="hidden" value="3" />
-							</div>								
+							</div>
 						</form>
 					</fieldset>
 				</div>

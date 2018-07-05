@@ -1,7 +1,7 @@
 <?php
 include_once('../config/symbini.php');
-include_once($serverRoot.'/classes/UserTaxonomy.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/UserTaxonomy.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 
 $action = array_key_exists("action",$_POST)?$_POST["action"]:""; 
 
@@ -38,7 +38,6 @@ $editorArr = $utManager->getTaxonomyEditors();
 <html>
 <head>
 	<title>Taxonomic Interest User permissions</title>
-	<meta http-equiv="X-Frame-Options" content="deny">
 	<link href="../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 	<link type="text/css" href="../css/jquery-ui.css" rel="stylesheet" />
@@ -74,7 +73,7 @@ $editorArr = $utManager->getTaxonomyEditors();
 <body>
 	<?php
 	$displayLeftMenu = (isset($profile_usertaxonomymanagerMenu)?$profile_usertaxonomymanagerMenu:true);
-	include($serverRoot.'/header.php');
+	include($SERVER_ROOT.'/header.php');
 	if(isset($profile_usertaxonomymanagerCrumbs)){
 		if($profile_usertaxonomymanagerCrumbs){
 			echo "<div class='navpath'>";
@@ -208,6 +207,6 @@ $editorArr = $utManager->getTaxonomyEditors();
 	else{
 		echo '<div style="color:red;">You are not authorized to access this page</div>';
 	}
-	include($serverRoot.'/footer.php');
+	include($SERVER_ROOT.'/footer.php');
 	?>
 </body>

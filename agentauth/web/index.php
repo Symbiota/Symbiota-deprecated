@@ -2,8 +2,8 @@
 require_once __DIR__ . '../vendor/autoload.php';
 
 include_once('../config/symbini.php');
-include_once($serverRoot.'/classes/AgentManager.php');
-include_once($serverRoot.'/classes/UuidFactory.php');
+include_once($SERVER_ROOT.'/classes/AgentManager.php');
+include_once($SERVER_ROOT.'/classes/UuidFactory.php');
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;

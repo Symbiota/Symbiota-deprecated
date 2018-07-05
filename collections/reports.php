@@ -1,6 +1,6 @@
 <?php
 include_once('../config/symbini.php');
-include_once($serverRoot.'/classes/ReportsManager.php');
+include_once($SERVER_ROOT.'/classes/ReportsManager.php');
 
 $rm = new ReportsManager();
 

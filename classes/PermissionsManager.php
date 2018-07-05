@@ -1,5 +1,5 @@
 <?php
-include_once($serverRoot.'/config/dbconnection.php');
+include_once($SERVER_ROOT.'/config/dbconnection.php');
 
 /*
 SuperAdmin			Edit all data and assign new permissions
@@ -9,20 +9,20 @@ RareSppReadAll		View and map rare species collection data for all collections
 RareSppReader-#		View and map rare species collecton data for specific collections
 CollAdmin-#			Upload records; modify metadata
 CollEditor-#		Edit collection records
-CollTaxon-#:#		Edit collection records within taxonomic speciality 
+CollTaxon-#:#		Edit collection records within taxonomic speciality
 
 ClAdmin-#			Checklist write access
 ProjAdmin-#			Project admin access
 KeyAdmin			Edit identification key characters and character states
 KeyEditor			Edit identification key data
-TaxonProfile		Modify decriptions; add images; 
+TaxonProfile		Modify decriptions; add images;
 Taxonomy			Add names; edit name; change taxonomy
 */
 
 class PermissionsManager{
-	
+
 	private $conn;
-	
+
 	function __construct() {
 		$this->conn = MySQLiConnectionFactory::getCon("write");
 	}
@@ -60,7 +60,7 @@ class PermissionsManager{
 		}
 		return $returnArr;
 	}
-	
+
 	public function getUserPermissions($uid){
 		$perArr = Array();
 		if(is_numeric($uid)){
@@ -81,7 +81,7 @@ class PermissionsManager{
 					$perArr[$row->role]['aby'] = $assignedBy;
 					$perArr[$row->role]['role'] = $row->role;
 				}
-				
+
 				/*
 				$pName = $row->pname;
 				$assignedBy = 'assigned by: '.($row->assignedby?$row->assignedby.' ('.$row->initialtimestamp.')':'unknown');
@@ -112,7 +112,7 @@ class PermissionsManager{
 				*/
 			}
 			$result->free();
-			
+
 			//If there are collections, get names
 			if(array_key_exists("CollAdmin",$perArr)){
 				$sql = "SELECT c.collid, c.collectionname FROM omcollections c ".
@@ -147,7 +147,7 @@ class PermissionsManager{
 				uasort($perArr["RareSppReader"], array($this,'sortByName'));
 				$result->free();
 			}
-	
+
 			//If there are checklist, fetch names
 			if(array_key_exists("ClAdmin",$perArr)){
 				$sql = "SELECT cl.clid, cl.name FROM fmchecklists cl ".
@@ -160,7 +160,7 @@ class PermissionsManager{
 				uasort($perArr["ClAdmin"], array($this,'sortByName'));
 				$result->free();
 			}
-			
+
 			//If there are project admins, fetch project names
 			if(array_key_exists("ProjAdmin",$perArr)){
 				$sql = "SELECT pid, projname FROM fmprojects ".
@@ -193,14 +193,14 @@ class PermissionsManager{
 		}
 		return $statusStr;
 	}
-	
+
 	public function addPermission($uid,$role,$tablePk,$secondaryVariable = ''){
 		global $SYMB_UID;
 		$statusStr = '';
 		if(is_numeric($uid)){
 			$sql = 'SELECT uid,role,tablepk,secondaryVariable,uidassignedby '.
 				'FROM userroles WHERE (uid = '.$uid.') AND (role = "'.$role.'") ';
-			if($tablePk) $sql .= 'AND (tablepk = '.$tablePk.') '; 
+			if($tablePk) $sql .= 'AND (tablepk = '.$tablePk.') ';
 			if($secondaryVariable) $sql .= 'AND (secondaryVariable = '.$secondaryVariable.') ';
 			$rs = $this->conn->query($sql);
 			if(!$rs->num_rows){
@@ -209,7 +209,7 @@ class PermissionsManager{
 					($secondaryVariable?'"'.$secondaryVariable.'"':'NULL').','.$SYMB_UID.')';
 				//$sql = 'INSERT INTO userpermissions(uid,pname,assignedby,secondaryVariable) '.
 				//	'VALUES('.$uid.',"'.$pname.'","'.$paramsArr['un'].'")';
-				//echo $sql;
+				//echo $sql1;
 				if(!$this->conn->query($sql1)){
 					$statusStr = 'ERROR adding user permission: '.$this->conn->error;
 				}
@@ -222,7 +222,7 @@ class PermissionsManager{
 	public function getTaxonEditorArr($collid, $limitByColl = 0){
 		//grab the current permissions
 		$pArr = array();
-		$sql2 = 'SELECT uid, role, tablepk, secondaryvariable '. 
+		$sql2 = 'SELECT uid, role, tablepk, secondaryvariable '.
 			'FROM userroles WHERE role = ("CollTaxon") AND (tablepk = '.$collid.') ';
 		//$sql2 = 'SELECT uid, pname FROM userpermissions WHERE pname LIKE "CollTaxon-'.$collid.':%" ';
 		//echo $sql2;
@@ -285,7 +285,7 @@ class PermissionsManager{
 
 		return $retArr;
 	}
-	
+
 	//General get list functions
 	public function getCollectionMetadata($targetCollid = 0, $collTypeLimit = ''){
 		$retArr = Array();
@@ -313,7 +313,7 @@ class PermissionsManager{
 		}
 		$rs->free();
 		return $retArr;
-	} 
+	}
 
 	public function getCollectionEditors($collid){
 		$returnArr = Array();
@@ -322,13 +322,13 @@ class PermissionsManager{
 				'CONCAT_WS(", ",u2.lastname,u2.firstname) AS assignedby, ur.initialtimestamp '.
 				'FROM userroles ur INNER JOIN users u ON ur.uid = u.uid '.
 				'LEFT JOIN users u2 ON ur.uidassignedby = u2.uid '.
-				'WHERE (ur.role = "CollAdmin" AND ur.tablepk = '.$collid.') OR (ur.role = "CollEditor" AND ur.tablepk = '.$collid.') '. 
+				'WHERE (ur.role = "CollAdmin" AND ur.tablepk = '.$collid.') OR (ur.role = "CollEditor" AND ur.tablepk = '.$collid.') '.
 				'OR (ur.role = "RareSppReader" AND ur.tablepk = '.$collid.') '.
 				'ORDER BY u.lastname,u.firstname';
 			/*
 			$sql = 'SELECT up.uid, up.pname, CONCAT_WS(", ",u.lastname,u.firstname) AS uname, up.assignedby, up.initialtimestamp '.
 				'FROM userpermissions up INNER JOIN users u ON up.uid = u.uid '.
-				'WHERE up.pname = "CollAdmin-'.$collid.'" OR up.pname = "CollEditor-'.$collid.'" '. 
+				'WHERE up.pname = "CollAdmin-'.$collid.'" OR up.pname = "CollEditor-'.$collid.'" '.
 				'OR up.pname = "RareSppReader-'.$collid.'" '.
 				'ORDER BY u.lastname,u.firstname';
 			*/
@@ -353,7 +353,7 @@ class PermissionsManager{
 		return $returnArr;
 	}
 
-	public function getUsers($searchTerm){
+	public function getUsers($searchTerm=''){
 		$retArr = Array();
 		$sql = 'SELECT u.uid, CONCAT_WS(", ",u.lastname,u.firstname) AS uname, l.username '.
 			'FROM users u LEFT JOIN userlogin l ON u.uid = l.uid ';
@@ -385,7 +385,7 @@ class PermissionsManager{
 		}
 		$result->free();
 		return $returnArr;
-	} 
+	}
 
 	public function getChecklistArr($clKeys){
 		$returnArr = Array();

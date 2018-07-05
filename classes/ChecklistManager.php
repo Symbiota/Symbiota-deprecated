@@ -86,11 +86,11 @@ class ChecklistManager {
 		$retArr = array();
 		$sql = "";
 		if($this->clid){
-			$sql = "SELECT c.clid, c.name, c.locality, c.publication, ".
-				"c.abstract, c.authors, c.parentclid, c.notes, ".
-				"c.latcentroid, c.longcentroid, c.pointradiusmeters, c.access, c.defaultSettings, ".
-				"c.dynamicsql, c.datelastmodified, c.uid, c.type, c.initialtimestamp ".
-				"FROM fmchecklists c WHERE (c.clid = ".$this->clid.')';
+			$sql = 'SELECT c.clid, c.name, c.locality, c.publication, '.
+				'c.abstract, c.authors, c.parentclid, c.notes, '.
+				'c.latcentroid, c.longcentroid, c.pointradiusmeters, c.footprintwkt, c.access, c.defaultSettings, '.
+				'c.dynamicsql, c.datelastmodified, c.uid, c.type, c.initialtimestamp '.
+				'FROM fmchecklists c WHERE (c.clid = '.$this->clid.')';
 		}
 		elseif($this->dynClid){
 			$sql = "SELECT c.dynclid AS clid, c.name, c.details AS locality, c.notes, c.uid, c.type, c.initialtimestamp ".
@@ -113,6 +113,7 @@ class ChecklistManager {
 						$retArr["latcentroid"] = $row->latcentroid;
 						$retArr["longcentroid"] = $row->longcentroid;
 						$retArr["pointradiusmeters"] = $row->pointradiusmeters;
+						$retArr['footprintwkt'] = $row->footprintwkt;
 						$retArr["access"] = $row->access;
 						$retArr["defaultSettings"] = $row->defaultSettings;
 						$retArr["dynamicsql"] = $row->dynamicsql;
@@ -127,7 +128,7 @@ class ChecklistManager {
 		}
 		return $retArr;
 	}
-	
+
 	public function echoFilterList(){
 		echo "'".implode("','",$this->filterArr)."'";
 	}
@@ -182,6 +183,8 @@ class ChecklistManager {
 				}
 				$this->taxaList[$tid]["sciname"] = $sciName;
 				$this->taxaList[$tid]["family"] = $family;
+				if(isset($this->taxaList[$tid]['clid'])) $this->taxaList[$tid]['clid'] = $this->taxaList[$tid]['clid'].','.$row->clid;
+				else $this->taxaList[$tid]['clid'] = $row->clid;
 				$tidReturn[] = $tid;
 				if($this->showAuthors){
 					$this->taxaList[$tid]["author"] = $this->cleanOutStr($row->author);
@@ -220,11 +223,18 @@ class ChecklistManager {
 				if($this->childClidArr){
 					$clidStr .= ','.implode(',',$this->childClidArr);
 				}
-				$vSql = 'SELECT DISTINCT v.tid, v.occid, c.institutioncode, v.notes, '.
-					'o.catalognumber, o.recordedby, o.recordnumber, o.eventdate '.
+				$vSql = 'SELECT DISTINCT v.tid, v.occid, c.institutioncode, v.notes, o.catalognumber, o.recordedby, o.recordnumber, o.eventdate '.
 					'FROM fmvouchers v INNER JOIN omoccurrences o ON v.occid = o.occid '.
 					'INNER JOIN omcollections c ON o.collid = c.collid '.
 					'WHERE (v.clid IN ('.$clidStr.')) AND v.tid IN('.implode(',',array_keys($this->taxaList)).')';
+				if($this->thesFilter){
+					$vSql = 'SELECT DISTINCT ts.tidaccepted AS tid, v.occid, c.institutioncode, v.notes, o.catalognumber, o.recordedby, o.recordnumber, o.eventdate '.
+						'FROM fmvouchers v INNER JOIN omoccurrences o ON v.occid = o.occid '.
+						'INNER JOIN omcollections c ON o.collid = c.collid '.
+						'INNER JOIN taxstatus ts ON v.tid = ts.tid '.
+						'WHERE (ts.taxauthid = '.$this->thesFilter.') AND (v.clid IN ('.$clidStr.')) '.
+						'AND (ts.tidaccepted IN('.implode(',',array_keys($this->taxaList)).')) ';
+				}
 				//echo $vSql; exit;
 		 		$vResult = $this->conn->query($vSql);
 				while ($row = $vResult->fetch_object()){
@@ -241,7 +251,7 @@ class ChecklistManager {
 					$collector .= ' ['.$row->institutioncode.']';
 					$this->voucherArr[$row->tid][$row->occid] = $collector;
 				}
-				$vResult->close();
+				$vResult->free();
 			}
 			if($this->showImages) $this->setImages($tidReturn);
 			if($this->showCommon) $this->setVernaculars($tidReturn);
@@ -252,7 +262,7 @@ class ChecklistManager {
 	private function setImages($tidReturn){
 		if($tidReturn){
 			$sql = 'SELECT i2.tid, i.url, i.thumbnailurl FROM images i INNER JOIN '.
-				'(SELECT ts1.tid, SUBSTR(MIN(CONCAT(LPAD(i.sortsequence,6,"0"),i.imgid)),7) AS imgid '. 
+				'(SELECT ts1.tid, SUBSTR(MIN(CONCAT(LPAD(i.sortsequence,6,"0"),i.imgid)),7) AS imgid '.
 				'FROM taxstatus ts1 INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '.
 				'INNER JOIN images i ON ts2.tid = i.tid '.
 				'WHERE i.sortsequence < 500 AND ts1.taxauthid = 1 AND ts2.taxauthid = 1 '.
@@ -269,9 +279,9 @@ class ChecklistManager {
 			$rs->free();
 			$missingArr = array_diff(array_keys($this->taxaList),$matchedArr);
 			if($missingArr){
-				//Get children images  
+				//Get children images
 				$sql2 = 'SELECT i2.tid, i.url, i.thumbnailurl FROM images i INNER JOIN '.
-					'(SELECT ts1.parenttid AS tid, SUBSTR(MIN(CONCAT(LPAD(i.sortsequence,6,"0"),i.imgid)),7) AS imgid '. 
+					'(SELECT ts1.parenttid AS tid, SUBSTR(MIN(CONCAT(LPAD(i.sortsequence,6,"0"),i.imgid)),7) AS imgid '.
 					'FROM taxstatus ts1 INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '.
 					'INNER JOIN images i ON ts2.tid = i.tid '.
 					'WHERE i.sortsequence < 500 AND ts1.taxauthid = 1 AND ts2.taxauthid = 1 '.
@@ -292,7 +302,7 @@ class ChecklistManager {
 		if($tidReturn){
 			$tempVernArr = array();
 			$sql = 'SELECT ts1.tid, v.vernacularname '.
-				'FROM taxstatus ts1 INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '. 
+				'FROM taxstatus ts1 INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '.
 				'INNER JOIN taxavernaculars v ON ts2.tid = v.tid '.
 				'WHERE ts1.taxauthid = 1 AND ts2.taxauthid = 1 AND (ts1.tid IN('.implode(',',$tidReturn).')) ';
 			if($this->language) $sql .= 'AND v.language = "'.$this->language.'" ';
@@ -315,27 +325,23 @@ class ChecklistManager {
 			if($this->childClidArr){
 				$clidStr .= ','.implode(',',$this->childClidArr);
 			}
-			
-			$maxLat = -90;
-			$minLat = 90;
-			$maxLng = -180;
-			$minLng = 180;
+
 			$retCnt = 0;
 			//Grab general points
 			try{
 				$sql1 = '';
 				if($tid){
-					$sql1 = 'SELECT DISTINCT cc.tid, t.sciname, cc.decimallatitude, cc.decimallongitude, cc.notes '. 
+					$sql1 = 'SELECT DISTINCT cc.tid, t.sciname, cc.decimallatitude, cc.decimallongitude, cc.notes '.
 						'FROM fmchklstcoordinates cc INNER JOIN taxa t ON cc.tid = t.tid '.
 						'WHERE cc.tid = '.$tid.' AND cc.clid IN ('.$clidStr.') AND cc.decimallatitude IS NOT NULL AND cc.decimallongitude IS NOT NULL ';
 				}
 				else{
-					$sql1 = 'SELECT DISTINCT cc.tid, t.sciname, cc.decimallatitude, cc.decimallongitude, cc.notes '. 
+					$sql1 = 'SELECT DISTINCT cc.tid, t.sciname, cc.decimallatitude, cc.decimallongitude, cc.notes '.
 						'FROM fmchklstcoordinates cc INNER JOIN ('.$this->basicSql.') t ON cc.tid = t.tid '.
 						'WHERE cc.clid IN ('.$clidStr.') AND cc.decimallatitude IS NOT NULL AND cc.decimallongitude IS NOT NULL ';
 				}
 				if($abbreviated){
-					$sql1 .= 'ORDER BY RAND() LIMIT 50'; 
+					$sql1 .= 'ORDER BY RAND() LIMIT 50';
 				}
 				//echo $sql1;
 				$rs1 = $this->conn->query($sql1);
@@ -346,10 +352,6 @@ class ChecklistManager {
 						}
 						else{
 							$retArr[$r1->tid][] = array('ll'=>$r1->decimallatitude.','.$r1->decimallongitude,'sciname'=>$this->cleanOutStr($r1->sciname),'notes'=>$this->cleanOutStr($r1->notes));
-							if($minLat > $r1->decimallatitude) $minLat = $r1->decimallatitude;
-							if($maxLat < $r1->decimallatitude) $maxLat = $r1->decimallatitude;
-							if($minLng > $r1->decimallongitude) $minLng = $r1->decimallongitude;
-							if($maxLng < $r1->decimallongitude) $maxLng = $r1->decimallongitude;
 						}
 						$retCnt++;
 					}
@@ -360,19 +362,19 @@ class ChecklistManager {
 				echo 'Caught exception getting general coordinates: ',  $e->getMessage(), "\n";
 			}
 
-			if(!$abbreviated || $retCnt < 50){ 
+			if(!$abbreviated || $retCnt < 50){
 				try{
 					//Grab voucher points
 					$sql2 = '';
 					if($tid){
-						$sql2 = 'SELECT DISTINCT v.tid, o.occid, o.decimallatitude, o.decimallongitude, '. 
+						$sql2 = 'SELECT DISTINCT v.tid, o.occid, o.decimallatitude, o.decimallongitude, '.
 							'CONCAT(o.recordedby," (",IFNULL(o.recordnumber,o.eventdate),")") as notes '.
 							'FROM omoccurrences o INNER JOIN fmvouchers v ON o.occid = v.occid '.
 							'WHERE v.tid = '.$tid.' AND v.clid IN ('.$clidStr.') AND o.decimallatitude IS NOT NULL AND o.decimallongitude IS NOT NULL '.
 							'AND (o.localitysecurity = 0 OR o.localitysecurity IS NULL) ';
 					}
 					else{
-						$sql2 = 'SELECT DISTINCT v.tid, o.occid, o.decimallatitude, o.decimallongitude, '. 
+						$sql2 = 'SELECT DISTINCT v.tid, o.occid, o.decimallatitude, o.decimallongitude, '.
 							'CONCAT(o.recordedby," (",IFNULL(o.recordnumber,o.eventdate),")") as notes '.
 							'FROM omoccurrences o INNER JOIN fmvouchers v ON o.occid = v.occid '.
 							'INNER JOIN ('.$this->basicSql.') t ON v.tid = t.tid '.
@@ -380,7 +382,7 @@ class ChecklistManager {
 							'AND (o.localitysecurity = 0 OR o.localitysecurity IS NULL) ';
 					}
 					if($abbreviated){
-						$sql2 .= 'ORDER BY RAND() LIMIT 50'; 
+						$sql2 .= 'ORDER BY RAND() LIMIT 50';
 					}
 					//echo $sql2;
 					$rs2 = $this->conn->query($sql2);
@@ -391,10 +393,6 @@ class ChecklistManager {
 							}
 							else{
 								$retArr[$r2->tid][] = array('ll'=>$r2->decimallatitude.','.$r2->decimallongitude,'notes'=>$this->cleanOutStr($r2->notes),'occid'=>$r2->occid);
-								if($minLat > $r2->decimallatitude) $minLat = $r2->decimallatitude;
-								if($maxLat < $r2->decimallatitude) $maxLat = $r2->decimallatitude;
-								if($minLng > $r2->decimallongitude) $minLng = $r2->decimallongitude;
-								if($maxLng < $r2->decimallongitude) $maxLng = $r2->decimallongitude;
 							}
 						}
 						$rs2->free();
@@ -403,10 +401,6 @@ class ChecklistManager {
 				catch(Exception $e){
 					//echo 'Caught exception getting voucher coordinates: ',  $e->getMessage(), "\n";
 				}
-			}
-			if(!$abbreviated){
-				$retArr['sw'] = $minLat.','.$minLng;
-				$retArr['ne'] = $maxLat.','.$maxLng;
 			}
 		}
 		return $retArr;
@@ -421,21 +415,21 @@ class ChecklistManager {
 		header ("Content-Disposition: attachment; filename=\"$fileName\"");
 		$this->showAuthors = 1;
 		if($taxaArr = $this->getTaxaList(1,0)){
-			echo "Family,ScientificName,ScientificNameAuthorship,";
-			if($this->showCommon) echo "CommonName,";
-			echo "TaxonId\n";
+			$fh = fopen('php://output', 'w');
+			$headerArr = array('Family','ScientificName','ScientificNameAuthorship');
+			if($this->showCommon) $headerArr[] = 'CommonName';
+			$headerArr[] = 'Notes';
+			$headerArr[] = 'TaxonId';
+			fputcsv($fh,$headerArr);
 			foreach($taxaArr as $tid => $tArr){
-				echo '"'.$tArr['family'].'","'.$tArr['sciname'].'","'.$tArr['author'].'"';
-				if($this->showCommon){
-					if(array_key_exists('vern',$tArr)){
-						echo ',"'.$tArr['vern'].'"';
-					}
-					else{
-						echo ',""';
-					}
-				}
-				echo ',"'.$tid.'"'."\n";
+				unset($outArr);
+				$outArr = array($tArr['family'],$tArr['sciname'],$tArr['author']);
+				if($this->showCommon) $outArr[] = (array_key_exists('vern',$tArr)?$tArr['vern']:'');
+				$outArr[] = (array_key_exists('notes',$tArr)?strip_tags($tArr['notes']):'');
+				$outArr[] = $tid;
+				fputcsv($fh,$outArr);
 			}
+			fclose($fh);
 		}
 		else{
 			echo "Recordset is empty.\n";
@@ -449,22 +443,20 @@ class ChecklistManager {
 				$clidStr .= ','.implode(',',$this->childClidArr);
 			}
 			if($this->thesFilter){
-				$this->basicSql = 'SELECT t.tid, IFNULL(ctl.familyoverride,ts.family) AS family, '. 
-					't.sciname, t.author, ctl.habitat, ctl.abundance, ctl.notes, ctl.source '.
+				$this->basicSql = 'SELECT t.tid, ctl.clid, IFNULL(ctl.familyoverride,ts.family) AS family, t.sciname, t.author, ctl.habitat, ctl.abundance, ctl.notes, ctl.source '.
 					'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tidaccepted '.
 					'INNER JOIN fmchklsttaxalink ctl ON ts.tid = ctl.tid '.
 			  		'WHERE (ts.taxauthid = '.$this->thesFilter.') AND (ctl.clid IN ('.$clidStr.')) ';
 			}
 			else{
-				$this->basicSql = 'SELECT t.tid, IFNULL(ctl.familyoverride,ts.family) AS family, '. 
-					't.sciname, t.author, ctl.habitat, ctl.abundance, ctl.notes, ctl.source '.
+				$this->basicSql = 'SELECT t.tid, ctl.clid, IFNULL(ctl.familyoverride,ts.family) AS family, t.sciname, t.author, ctl.habitat, ctl.abundance, ctl.notes, ctl.source '.
 					'FROM taxa t INNER JOIN fmchklsttaxalink ctl ON t.tid = ctl.tid '.
 					'INNER JOIN taxstatus ts ON t.tid = ts.tid '.
 			  		'WHERE (ts.taxauthid = 1) AND (ctl.clid IN ('.$clidStr.')) ';
 			}
 		}
 		else{
-			$this->basicSql = 'SELECT t.tid, ts.family, t.sciname, t.author '.
+			$this->basicSql = 'SELECT t.tid, ctl.dynclid as clid, ts.family, t.sciname, t.author '.
 				'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
 				'INNER JOIN fmdyncltaxalink ctl ON t.tid = ctl.tid '.
     	  		'WHERE (ts.taxauthid = '.($this->thesFilter?$this->thesFilter:'1').') AND (ctl.dynclid = '.$this->dynClid.') ';
@@ -486,7 +478,7 @@ class ChecklistManager {
 				}
 				//Include parents
 				$sqlWhere .= 'OR (t.tid IN(SELECT e.tid '.
-					'FROM taxa t3 INNER JOIN taxaenumtree e ON t3.tid = e.parenttid '.  
+					'FROM taxa t3 INNER JOIN taxaenumtree e ON t3.tid = e.parenttid '.
 					'WHERE (e.taxauthid = '.($this->thesFilter?$this->thesFilter:'1').') AND (t3.sciname = "'.$this->taxonFilter.'")))';
 				if($sqlWhere) $this->basicSql .= 'AND ('.substr($sqlWhere,2).') ';
 			}
@@ -568,6 +560,66 @@ class ChecklistManager {
 		$result->free();
 	}
 
+	//Taxon suggest functions
+	public function getTaxonSearch($term, $clid, $deep=0){
+		$retArr = array();
+		$term = preg_replace('/\s{1}[\D]{1}\s{1}/i', ' _ ', trim($term));
+		$term = preg_replace('/[^a-zA-Z_\-\. ]+/', '', $term);
+		if(!is_numeric($clid)) $clid = 0;
+		if($term && $clid){
+			$sql = '(SELECT t.sciname '.
+				'FROM taxa t INNER JOIN fmchklsttaxalink cl ON t.tid = cl.tid '.
+				'WHERE t.sciname LIKE "'.$term.'%" AND cl.clid = '.$clid.') ';
+			if($deep){
+				$sql .= 'UNION DISTINCT '.
+					'(SELECT DISTINCT t.sciname '.
+					'FROM fmchklsttaxalink cl INNER JOIN taxaenumtree e ON cl.tid = e.tid '.
+					'INNER JOIN taxa t ON e.parenttid = t.tid '.
+					'WHERE e.taxauthid = 1 AND t.sciname LIKE "'.$term.'%" AND cl.clid = '.$clid.')';
+			}
+			$rs = $this->conn->query($sql);
+			while($r = $rs->fetch_object()){
+				$retArr[] = $r->sciname;
+			}
+			$rs->free();
+			sort($retArr);
+		}
+		return $retArr;
+	}
+
+	public function getSpeciesSearch($term){
+		$retArr = array();
+		$term = preg_replace('/[^a-zA-Z\-\. ]+/', '', $term);
+		$term = preg_replace('/\s{1}x{1}\s{0,1}$/i', ' _ ', $term);
+		$term = preg_replace('/\s{1}[\D]{1}\s{1}/i', ' _ ', $term);
+		if($term){
+			$sql = 'SELECT tid, sciname FROM taxa WHERE (rankid > 179) AND (sciname LIKE "'.$term.'%") ORDER BY sciname';
+			$rs = $this->conn->query($sql);
+			while($r = $rs->fetch_object()){
+				$retArr[$r->tid]['id'] = $r->tid;
+				$retArr[$r->tid]['value'] = $r->sciname;
+			}
+			$rs->free();
+		}
+		return $retArr;
+	}
+
+	public function getUpperTaxa($term){
+		$retArr = array();
+		$param = "{$term}%";
+		$sql = 'SELECT tid, sciname FROM taxa WHERE (rankid < 180) AND (sciname LIKE ?) ORDER BY sciname';
+		$stmt = $this->conn->prepare($sql);
+		$stmt->bind_param('s', $param);
+		$stmt->execute();
+		$stmt->bind_result($tid,$sciname);
+		while ($stmt->fetch()) {
+			$retArr[$tid]['id'] = $tid;
+			$retArr[$tid]['value'] = $sciname;
+		}
+		$stmt->close();
+		return $retArr;
+	}
+
 	//Setters and getters
     public function setThesFilter($filt){
 		$this->thesFilter = $filt;
@@ -578,9 +630,10 @@ class ChecklistManager {
 	}
 
 	public function setTaxonFilter($tFilter){
-		$this->taxonFilter = $this->cleanInStr(strtolower($tFilter));
+		$term = preg_replace('/[^a-zA-Z\-\. ]+/', '', $tFilter);
+		$this->taxonFilter = preg_replace('/\s{1}[\D]{1}\s{1}/i', ' _ ', $term);
 	}
-	
+
 	public function setShowAuthors($value = 1){
 		$this->showAuthors = $value;
 	}
@@ -596,7 +649,7 @@ class ChecklistManager {
 	public function setShowVouchers($value = 1){
 		$this->showVouchers = $value;
 	}
-	
+
 	public function setShowAlphaTaxa($value = 1){
 		$this->showAlphaTaxa = $value;
 	}
@@ -624,7 +677,7 @@ class ChecklistManager {
 	public function getClName(){
 		return $this->clName;
 	}
-	
+
 	public function setProj($pValue){
 		$sql = 'SELECT pid, projname FROM fmprojects ';
 		if(is_numeric($pValue)){
@@ -650,11 +703,11 @@ class ChecklistManager {
 	public function getProjName(){
 		return $this->projName;
 	}
-	
+
 	public function getPid(){
 		return $this->pid;
 	}
-	
+
 	public function setLanguage($l){
 		$l = strtolower($l);
 		if($l == "en"){
@@ -667,23 +720,23 @@ class ChecklistManager {
 			$this->language = $l;
 		}
 	}
-	
+
 	public function setImageLimit($cnt){
 		$this->imageLimit = $cnt;
 	}
-	
+
 	public function getImageLimit(){
 		return $this->imageLimit;
 	}
-	
+
 	public function setTaxaLimit($cnt){
 		$this->taxaLimit = $cnt;
 	}
-	
+
 	public function getTaxaLimit(){
 		return $this->taxaLimit;
 	}
-	
+
 	public function getTaxaCount(){
 		return $this->taxaCount;
 	}
@@ -700,6 +753,7 @@ class ChecklistManager {
 		return $this->speciesCount;
 	}
 
+	//Misc functions
 	private function cleanOutStr($str){
 		$str = str_replace('"',"&quot;",$str);
 		$str = str_replace("'","&apos;",$str);

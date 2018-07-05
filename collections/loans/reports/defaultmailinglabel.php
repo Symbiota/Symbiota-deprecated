@@ -1,13 +1,9 @@
 <?php
 include_once('../../../config/symbini.php');
-include_once($serverRoot.'/classes/SpecLoans.php');
-require_once $serverRoot.'/classes/PhpWord/Autoloader.php';
+include_once($SERVER_ROOT.'/classes/SpecLoans.php');
+require_once $SERVER_ROOT.'/vendor/phpoffice/phpword/bootstrap.php';
 
 $loanManager = new SpecLoans();
-use PhpOffice\PhpWord\Autoloader;
-use PhpOffice\PhpWord\Settings;
-Autoloader::register();
-Settings::loadConfig();
 
 $collId = $_REQUEST['collid'];
 $printMode = $_POST['print'];
@@ -22,13 +18,7 @@ $displayAll = array_key_exists('displayall',$_POST)?$_POST['displayall']:0;
 $formSubmit = array_key_exists('formsubmit',$_POST)?$_POST['formsubmit']:'';
 
 $export = false;
-$exportEngine = '';
-$exportExtension = '';
-if($printMode == 'doc'){
-	$export = true;
-	$exportEngine = 'Word2007';
-	$exportExtension = 'docx';
-}
+if($printMode == 'doc') $export = true;
 
 if($collId) $loanManager->setCollId($collId);
 
@@ -54,9 +44,9 @@ if($export){
 	$phpWord->addFontStyle('fromAddressFont', array('size'=>10,'name'=>'Arial'));
 	$phpWord->addParagraphStyle('toAddress', array('align'=>'left','indent'=>2,'lineHeight'=>1.0,'spaceAfter'=>0,'keepNext'=>true,'keepLines'=>true));
 	$phpWord->addFontStyle('toAddressFont', array('size'=>14,'name'=>'Arial'));
-	
+
 	$section = $phpWord->addSection(array('pageSizeW'=>12240,'pageSizeH'=>15840,'marginLeft'=>360,'marginRight'=>360,'marginTop'=>360,'marginBottom'=>360,'headerHeight'=>0,'footerHeight'=>0));
-	
+
 	$textrun = $section->addTextRun('fromAddress');
 	$textrun->addText(htmlspecialchars($addressArr['institutionname'].' ('.$addressArr['institutioncode'].')'),'fromAddressFont');
 	$textrun->addTextBreak(1);
@@ -104,9 +94,9 @@ if($export){
 		$textrun->addTextBreak(1);
 		$textrun->addText(htmlspecialchars($invoiceArr['country']),'toAddressFont');
 	}
-	
-	$targetFile = $serverRoot.'/temp/report/'.$paramsArr['un'].'_mailing_label.'.$exportExtension;
-	$phpWord->save($targetFile, $exportEngine);
+
+	$targetFile = $SERVER_ROOT.'/temp/report/'.$paramsArr['un'].'_mailing_label.docx';
+	$phpWord->save($targetFile, 'Word2007');
 
 	header('Content-Description: File Transfer');
 	header('Content-type: application/force-download');
@@ -122,8 +112,8 @@ else{
 		<head>
 			<title>Mailing Label</title>
 			<style type="text/css">
-				<?php 
-					include_once($serverRoot.'/css/main.css');
+				<?php
+					include_once($SERVER_ROOT.'/css/main.css');
 				?>
 				body {font-family:arial,sans-serif;}
 				p.printbreak {page-break-after:always;}
@@ -136,9 +126,9 @@ else{
 				<table style="width:8in;">
 					<tr>
 						<td></td>
-						<td> 
+						<td>
 							<div class="fromaddress">
-								<?php 
+								<?php
 								echo $addressArr['institutionname'].' ('.$addressArr['institutioncode'].')<br />';
 								if($addressArr['institutionname2']){
 									echo $addressArr['institutionname2'].'<br />';
@@ -162,7 +152,7 @@ else{
 							<br />
 							<br />
 							<div class="toaddress">
-								<?php 
+								<?php
 								echo $invoiceArr['contact'].'<br />';
 								echo $invoiceArr['institutionname'].' ('.$invoiceArr['institutioncode'].')<br />';
 								if($invoiceArr['institutionname2']){

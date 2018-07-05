@@ -1,7 +1,7 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/SpecProcNlpLbccLichen.php');
-include_once($serverRoot.'/classes/SpecProcNlpLbccBryophyte.php');
+include_once($SERVER_ROOT.'/classes/SpecProcNlpLbccLichen.php');
+include_once($SERVER_ROOT.'/classes/SpecProcNlpLbccBryophyte.php');
 
 $collTarget = array_key_exists("colltarget",$_REQUEST)?$_REQUEST["colltarget"]:42;
 //$processingStatus = array_key_exists("processingstatus",$_REQUEST)?$_REQUEST["processingstatus"]:'';

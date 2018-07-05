@@ -1,7 +1,7 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/PermissionsManager.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/PermissionsManager.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 
 $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:""; 
 $collId = array_key_exists("collid",$_REQUEST)?$_REQUEST["collid"]:0;
@@ -90,7 +90,7 @@ if($collMetadata['colltype'] == 'General Observations') $isGenObs = 1;
 <body>
 	<?php
 	$displayLeftMenu = (isset($collections_misc_collpermissionsMenu)?$collections_misc_collpermissionsMenu:true);
-	include($serverRoot.'/header.php');
+	include($SERVER_ROOT.'/header.php');
 	if(isset($collections_misc_collpermissionsCrumbs)){
 		if($collections_misc_collpermissionsCrumbs){
 			echo "<div class='navpath'>";
@@ -371,7 +371,7 @@ if($collMetadata['colltype'] == 'General Observations') $isGenObs = 1;
 		?>
 	</div>
 	<?php
-		include($serverRoot.'/footer.php');
+		include($SERVER_ROOT.'/footer.php');
 	?>
 
 </body>

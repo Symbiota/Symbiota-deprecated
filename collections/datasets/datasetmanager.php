@@ -1,7 +1,7 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/OccurrenceDataset.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/OccurrenceDataset.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 
 if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../collections/datasets/datasetmanager.php?'.$_SERVER['QUERY_STRING']);
 
@@ -113,8 +113,8 @@ if($isEditor){
 ?>
 <html>
 	<head>
-		<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset;?>">
-		<title><?php echo $defaultTitle; ?> Occurrence Dataset Manager</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET;?>">
+		<title><?php echo $DEFAULT_TITLE; ?> Occurrence Dataset Manager</title>
 		<link href="../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 		<link href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 		<link href="../../css/jquery-ui.css" type="text/css" rel="Stylesheet" />
@@ -132,7 +132,7 @@ if($isEditor){
 						modal: true,
 						position: { my: "left top", at: "center", of: "#"+dialogStr }
 					});
-		
+
 					$( "#"+dialogStr ).click(function() {
 						$( "#"+this.id+"dialog" ).dialog( "open" );
 					});
@@ -150,7 +150,7 @@ if($isEditor){
 					minLength: 3,
 					autoFocus: true
 				});
-				
+
 			});
 
 			function selectAll(cb){
@@ -217,7 +217,7 @@ if($isEditor){
 				else if(document.body.offsetWidth){
 					wWidth = document.body.offsetWidth*0.9;
 				}
-				newWindow = window.open(urlStr,'popup','scrollbars=1,toolbar=1,resizable=1,width='+(wWidth)+',height=600,left=20,top=20');
+				newWindow = window.open(urlStr,'popup','scrollbars=1,toolbar=0,resizable=1,width='+(wWidth)+',height=600,left=20,top=20');
 				if (newWindow.opener == null) newWindow.opener = self;
 				newWindow.focus();
 				return false;
@@ -230,7 +230,7 @@ if($isEditor){
 	include($SERVER_ROOT."/header.php");
 	?>
 	<div class='navpath'>
-		<a href='../../index.php'>Home</a> &gt;&gt; 
+		<a href='../../index.php'>Home</a> &gt;&gt;
 		<?php
 		if(isset($collections_datasets_indexCrumbs)){
 			echo $collections_datasets_indexCrumbs;
@@ -240,13 +240,13 @@ if($isEditor){
 		}
 		?>
 		<a href="index.php">
-			Return to Dataset Listing 
+			Return to Dataset Listing
 		</a> &gt;&gt;
-		<b>Dataset Manager</b> 
+		<b>Dataset Manager</b>
 	</div>
 	<!-- This is inner text! -->
 	<div id="innertext">
-		<?php 
+		<?php
 		if($statusStr){
 			$color = 'green';
 			if(strpos($statusStr,'ERROR') !== false) $color = 'red';
@@ -265,7 +265,7 @@ if($isEditor){
 					<ul>
 						<li><a href="#occurtab"><span>Occurrence List</span></a></li>
 						<?php
-						if($isEditor == 1){ 
+						if($isEditor == 1){
 							?>
 							<li><a href="#admintab"><span>General Management</span></a></li>
 							<li><a href="#accesstab"><span>User Access</span></a></li>
@@ -274,7 +274,7 @@ if($isEditor){
 						?>
 					</ul>
 					<div id="occurtab">
-						<?php 
+						<?php
 						$occArr = $datasetManager->getOccurrences($datasetId);
 						?>
 						<form name="occurform" action="datasetmanager.php" method="post" onsubmit="return validateOccurForm(this)">
@@ -289,7 +289,7 @@ if($isEditor){
 									<th>Scientific Name</th>
 									<th>Locality</th>
 								</tr>
-								<?php 
+								<?php
 								$trCnt = 0;
 								foreach($occArr as $occid => $recArr){
 									$trCnt++;
@@ -314,18 +314,18 @@ if($isEditor){
 											<?php echo $recArr['loc']; ?>
 										</td>
 									</tr>
-									<?php 
+									<?php
 								}
 								?>
 							</table>
 							<div style="margin: 15px 50px;">
 								<input name="datasetid" type="hidden" value="<?php echo $datasetId; ?>" />
-								<?php 
+								<?php
 								if($isEditor < 3){
 									?>
 									<div style="margin:5px"><input type="submit" name="submitaction" value="Remove Selected Occurrences" /></div>
 									<?php
-								} 
+								}
 								?>
 								<div style="margin:5px"><input type="submit" name="submitaction" value="Export Selected Occurrences" /></div>
 								<div id='showoptdiv'><a href="#" onclick="toggle('optdiv');toggle('showoptdiv');return false;">Show Options</a></div>
@@ -337,11 +337,11 @@ if($isEditor){
 												<td valign="top">
 													<div style="margin:10px;">
 														<b>Structure:</b>
-													</div> 
+													</div>
 												</td>
 												<td>
 													<div style="margin:10px 0px;">
-														<input type="radio" name="schema" value="symbiota" onclick="georefRadioClicked(this)" CHECKED /> 
+														<input type="radio" name="schema" value="symbiota" onclick="georefRadioClicked(this)" CHECKED />
 														Symbiota Native
 														<a id="schemanativeinfo" href="#" onclick="return false" title="More Information">
 															<img src="../../images/info.png" style="width:13px;" />
@@ -350,14 +350,14 @@ if($isEditor){
 															Symbiota native is very similar to Darwin Core except with the addtion of a few fields
 															such as substrate, associated collectors, verbatim description.
 														</div>
-														<input type="radio" name="schema" value="dwc" onclick="georefRadioClicked(this)" /> 
+														<input type="radio" name="schema" value="dwc" onclick="georefRadioClicked(this)" />
 														Darwin Core
 														<a id="schemadwcinfo" href="#" target="" title="More Information">
 															<img src="../../images/info.png" style="width:13px;" />
 														</a><br/>
 														<div id="schemadwcinfodialog">
-															Darwin Core (DwC) is a TDWG endorsed exchange standard specifically for biodiversity datasets. 
-															For more information on what data fields are included in DwC, visit the 
+															Darwin Core (DwC) is a TDWG endorsed exchange standard specifically for biodiversity datasets.
+															For more information on what data fields are included in DwC, visit the
 															<a href="http://rs.tdwg.org/dwc/index.htm"target='_blank'>DwC Quick Reference Guide</a>.
 														</div>
 														*<a href='http://rs.tdwg.org/dwc/index.htm' class='bodylink' target='_blank'>What is Darwin Core?</a>
@@ -368,39 +368,39 @@ if($isEditor){
 												<td valign="top">
 													<div style="margin:10px;">
 														<b>File Format:</b>
-													</div> 
+													</div>
 												</td>
 												<td>
 													<div style="margin:10px 0px;">
 														<input type="radio" name="format" value="csv" CHECKED /> Comma Delimited (CSV)<br/>
 														<input type="radio" name="format" value="tab" /> Tab Delimited<br/>
-													</div> 
+													</div>
 												</td>
 											</tr>
 											<tr>
 												<td valign="top">
 													<div style="margin:10px;">
 														<b>Character Set:</b>
-													</div> 
+													</div>
 												</td>
 												<td>
 													<div style="margin:10px 0px;">
-														<?php 
-														$cSet = strtolower($charset);
+														<?php
+														$cSet = strtolower($CHARSET);
 														?>
 														<input type="radio" name="cset" value="iso-8859-1" <?php echo ($cSet=='iso-8859-1'?'checked':''); ?> /> ISO-8859-1 (western)<br/>
 														<input type="radio" name="cset" value="utf-8" <?php echo ($cSet=='utf-8'?'checked':''); ?> /> UTF-8 (unicode)
 													</div>
 												</td>
 											</tr>
-										</table>							
+										</table>
 									</fieldset>
 								</div>
 							</div>
 						</form>
 					</div>
 					<?php
-					if($isEditor == 1){ 
+					if($isEditor == 1){
 						?>
 						<div id="admintab">
 							<fieldset style="padding:15px;margin:15px;">
@@ -433,14 +433,14 @@ if($isEditor){
 						</div>
 						<div id="accesstab">
 							<div style="margin:25px 10px;">
-								<?php 
+								<?php
 								$userArr = $datasetManager->getUsers($datasetId);
 								$roleArr = array('DatasetAdmin' => 'Full Access Users','DatasetEditor' => 'Read/Write Users','DatasetReader' => 'Read Only Users');
 								foreach($roleArr as $roleStr => $labelStr){
 									?>
 									<div style="margin:0px 15px;"><b><u><?php echo $labelStr; ?></u></b></div>
 									<div style="margin:15px;">
-										<?php 
+										<?php
 										if(array_key_exists($roleStr,$userArr)){
 											echo '<ul>';
 											$uArr = $userArr[$roleStr];
@@ -454,10 +454,10 @@ if($isEditor){
 														<input name="uid" type="hidden" value="<?php echo $uid; ?>" />
 														<input name="datasetid" type="hidden" value="<?php echo $datasetId; ?>" />
 														<input name="tabindex" type="hidden" value="2" />
-														<input name="submitimage" type="image" src="../../images/drop.png" /> 
+														<input name="submitimage" type="image" src="../../images/drop.png" />
 													</form>
 												</li>
-												<?php 
+												<?php
 											}
 											echo '</ul>';
 										}
@@ -467,16 +467,16 @@ if($isEditor){
 										?>
 									</div>
 									<?php
-								} 
+								}
 								?>
 							</div>
 							<div style="margin:15px;">
 								<fieldset>
 									<legend><b>Add User</b></legend>
 									<form name="addform" action="datasetmanager.php" method="post" onsubmit="return validateAddForm(this)">
-										Login: 
+										Login:
 										<input id="userinput" name="adduser" type="text" style="width:250px;" /><br />
-										Role: 
+										Role:
 										<select name="role">
 											<option value="DatasetAdmin">Full Access</option>
 											<option value="DatasetEditor">Read/Write Access</option>
@@ -492,7 +492,7 @@ if($isEditor){
 							</div>
 						</div>
 						<?php
-					} 
+					}
 					?>
 				</div>
 				<?php
@@ -507,7 +507,7 @@ if($isEditor){
 		?>
 	</div>
 	<?php
-	include($serverRoot."/footer.php");
+	include($SERVER_ROOT."/footer.php");
 	?>
 	</body>
 </html>

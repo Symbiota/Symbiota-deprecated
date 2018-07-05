@@ -1,5 +1,5 @@
 <?php
-include_once($serverRoot.'/config/dbconnection.php');
+include_once($SERVER_ROOT.'/config/dbconnection.php');
  
 /**
  * AgentManager.php 
@@ -50,10 +50,10 @@ class AgentManager{
 	}
 
 	public function reset(){
-		global $clientRoot;
-		setCookie("colltaxa","",time()-3600,($clientRoot?$clientRoot:'/'));
-		setCookie("collsearch","",time()-3600,($clientRoot?$clientRoot:'/'));
-		setCookie("collvars","",time()-3600,($clientRoot?$clientRoot:'/'));
+		global $CLIENT_ROOT;
+		setCookie("colltaxa","",time()-3600,($CLIENT_ROOT?$CLIENT_ROOT:'/'));
+		setCookie("collsearch","",time()-3600,($CLIENT_ROOT?$CLIENT_ROOT:'/'));
+		setCookie("collvars","",time()-3600,($CLIENT_ROOT?$CLIENT_ROOT:'/'));
  		$this->reset = 1;
 		if(array_key_exists("db",$this->searchTermsArr) || array_key_exists("oic",$this->searchTermsArr)){
 			//reset all other search terms except maintain the db terms 
@@ -132,10 +132,10 @@ class AgentManager{
      *  @return true if authorized, otherwise false.
      */ 
     public function isAgentEditor() { 
-        global $SYMB_UID, $IS_ADMIN, $userRights;
+        global $SYMB_UID, $IS_ADMIN, $USER_RIGHTS;
         $isAgentEditor = FALSE;
         if($SYMB_UID){
-	        if($IS_ADMIN || array_key_exists("CollEditor",$userRights) || array_key_exists("CollAdmin",$userRights)) { 
+	        if($IS_ADMIN || array_key_exists("CollEditor",$USER_RIGHTS) || array_key_exists("CollAdmin",$USER_RIGHTS)) { 
                $isAgentEditor = TRUE;
             }
         }
@@ -184,7 +184,7 @@ class AgentManager{
      * @return string list of query results as agent names, formated for html display.
      */
     public function agentSearch($text,$regexsearch=false) {
-        global $clientRoot;
+        global $CLIENT_ROOT;
 
         $agents = array();
         // attempt to recognize a request to do a regex search
@@ -239,7 +239,7 @@ class AgentManager{
      * @return string list of query results as agent names, formated for html display. 
      */
     public function agentNameSearch($text,$regexsearch=false) { 
-	   global $clientRoot;
+	   global $CLIENT_ROOT;
        $result = "Searched for $text ";
        $agents = array();
        // attempt to recognize a request to do a regex search
@@ -285,7 +285,7 @@ class AgentManager{
                 $curationstate = "*"; 
              }
              if (strlen($score)>0) { $displayscore = " at $score"; } else { $displayscore = ''; }
-             $agent = "<a href='$clientRoot/agents/agent.php?agentid=$agentid&findobjects=1'>$name</a> $dates $curationstate [$matchednamevariant$displayscore] ";
+             $agent = "<a href='$CLIENT_ROOT/agents/agent.php?agentid=$agentid&findobjects=1'>$name</a> $dates $curationstate [$matchednamevariant$displayscore] ";
              if (array_key_exists($agentid,$agents)) { 
                 $agents[$agentid] .= "[$matchednamevariant$displayscore] ";
              } else { 
@@ -315,7 +315,7 @@ class AgentManager{
      * @return string list of query results as json of id, label, value triplets.
      */
     public function agentNameSearchJSON($text,$type,$regexsearch=false) { 
-	   global $clientRoot;
+	   global $CLIENT_ROOT;
        $agents = array();
        $agentsjson = array();
        switch ($type) {
@@ -523,7 +523,7 @@ class AgentManager{
      *  @return html list of letters linked to agent name searches.
      */
     public function getLastNameLinks($letters=1) { 
-	   global $clientRoot;
+	   global $CLIENT_ROOT;
        $result = "<ul>";
        $sql = 'select count(*), left(familyname,?) from agents where familyname is not null and familyname <> \'\' group by left(familyname,?) order by left(familyname,?)';
        if ($statement = $this->conn->prepare($sql)) {
@@ -532,7 +532,7 @@ class AgentManager{
           $statement->bind_result($count,$letter);
           $statement->store_result();
           while ($statement->fetch()) {
-             $result .= "<li><a href='$clientRoot/agents/index.php?name=familyname%3d^$letter'>$letter ($count)</a></li>";
+             $result .= "<li><a href='$CLIENT_ROOT/agents/index.php?name=familyname%3d^$letter'>$letter ($count)</a></li>";
           } 
           $statement->close();
        } else {  
@@ -543,7 +543,7 @@ class AgentManager{
     }
 
     public function getNameStats() { 
-	   global $clientRoot;
+	   global $CLIENT_ROOT;
        $result = "<ul>";
        $sql = 'select count(*) as ct, type from agents group by type';
        if ($statement = $this->conn->prepare($sql)) {
@@ -561,7 +561,7 @@ class AgentManager{
        return $result;
     }
     public function getTeamLinks($letters=1) { 
-	   global $clientRoot;
+	   global $CLIENT_ROOT;
        $result = "<ul>";
        $sql = 'select count(*), left(namestring,?) from agents where type =\'Team\' and namestring is not null and namestring <> \'\' group by left(namestring,?) order by left(namestring,?)';
        if ($statement = $this->conn->prepare($sql)) {
@@ -570,7 +570,7 @@ class AgentManager{
           $statement->bind_result($count,$letter);
           $statement->store_result();
           while ($statement->fetch()) {
-             $result .= "<li><a href='$clientRoot/agents/index.php?name=namestring%3d^$letter'>$letter ($count)</a></li>";
+             $result .= "<li><a href='$CLIENT_ROOT/agents/index.php?name=namestring%3d^$letter'>$letter ($count)</a></li>";
           } 
           $statement->close();
        } else {  
@@ -580,7 +580,7 @@ class AgentManager{
        return $result;
     }
     public function getOrganizationLinks($letters=1) {
-	   global $clientRoot;
+	   global $CLIENT_ROOT;
        $result = "<ul>";
        $sql = 'select count(*), left(namestring,?) from agents where type =\'Organization\' and namestring is not null and namestring <> \'\' group by left(namestring,?) order by left(namestring,?)';
        if ($statement = $this->conn->prepare($sql)) {
@@ -589,7 +589,7 @@ class AgentManager{
           $statement->bind_result($count,$letter);
           $statement->store_result();
           while ($statement->fetch()) {
-             $result .= "<li><a href='$clientRoot/agents/index.php?name=namestring%3d^$letter'>$letter ($count)</a></li>";
+             $result .= "<li><a href='$CLIENT_ROOT/agents/index.php?name=namestring%3d^$letter'>$letter ($count)</a></li>";
           } 
           $statement->close();
        } else {  
@@ -646,10 +646,10 @@ class AgentManager{
     }
 
     public function saveAgent($toSave) { 
-       global $clientRoot;
+       global $CLIENT_ROOT;
        $result = "";
        if ($toSave->save()) { 
-          $result .= "Saved. <a href='$clientRoot/agents/agent.php?agentid=".$toSave->getagentid()."'>View [". $toSave->getagentid() ."]</a>";
+          $result .= "Saved. <a href='$CLIENT_ROOT/agents/agent.php?agentid=".$toSave->getagentid()."'>View [". $toSave->getagentid() ."]</a>";
        } else { 
           $result .=  "Error in saving agent record [".$toSave->getagentid()."]: " . $toSave->errorMessage();
        }
@@ -657,7 +657,7 @@ class AgentManager{
     }
 
     public function saveNewAgent($toSave,$forceaka=FALSE) { 
-       global $clientRoot;
+       global $CLIENT_ROOT;
        $result = "";
        if ($toSave->save()) { 
               switch ($toSave->gettype()) { 
@@ -775,7 +775,7 @@ class AgentManager{
                 default :
                   throw new Exception("Error: Unable to create name for agent without a recognized type.");
               } 
-              $result .= "Saved. <a href='$clientRoot/agents/agent.php?agentid=".$toSave->getagentid()."'>View [". $toSave->getagentid() ."]</a>";
+              $result .= "Saved. <a href='$CLIENT_ROOT/agents/agent.php?agentid=".$toSave->getagentid()."'>View [". $toSave->getagentid() ."]</a>";
        } else { 
             $result .=  "Error in saving agent record [".$toSave->getagentid()."]: " . $toSave->errorMessage();
        }
@@ -784,7 +784,7 @@ class AgentManager{
 
 
     public function saveNewAgentName($toSave) { 
-       global $clientRoot;
+       global $CLIENT_ROOT;
        $result = "";
          if ($toSave->save()) { 
             $id = "_".$toSave->getagentid()."_".$toSave->getagentnamesid(); 
@@ -797,7 +797,7 @@ class AgentManager{
     }
 
     public function saveNewAgentNumberPattern($toSave) { 
-       global $clientRoot;
+       global $CLIENT_ROOT;
        $result = "";
          if ($toSave->save()) { 
             $id = "_".$toSave->getagentid()."_".$toSave->getagentnumberpatternid(); 
@@ -810,7 +810,7 @@ class AgentManager{
     }
 
     public function saveNewAgentLinks($toSave) { 
-       global $clientRoot;
+       global $CLIENT_ROOT;
        $result = "";
          if ($toSave->save()) { 
             $id = "_".$toSave->getagentid()."_".$toSave->getagentlinksid(); 
@@ -822,7 +822,7 @@ class AgentManager{
        return $result;
     }
     public function saveNewAgentRelations($toSave) { 
-       global $clientRoot;
+       global $CLIENT_ROOT;
        $result = "";
          if ($toSave->save()) { 
             $id = "_".$toSave->getfromagentid()."_".$toSave->getagentrelationsid(); 
@@ -833,7 +833,7 @@ class AgentManager{
        return $result;
     }
     public function saveNewAgentTeams($toSave) { 
-       global $clientRoot;
+       global $CLIENT_ROOT;
        $result = "";
          if ($toSave->save()) { 
             $id = "_".$toSave->getagentteamid(); 
@@ -852,7 +852,7 @@ class AgentManager{
      * @return an html list of agent names
      */ 
     public function getAgentNamesForAgent($agentid) { 
-	   global $clientRoot; 
+	   global $CLIENT_ROOT; 
        $editable = false;
        if ($this->isAgentEditor()) {
          $editable = true;
@@ -870,7 +870,7 @@ class AgentManager{
         function handlerAddName () {
             $.ajax({
                type: 'GET',
-               url: '$clientRoot/agents/rpc/handler.php',
+               url: '$CLIENT_ROOT/agents/rpc/handler.php',
                data: 'mode=create&table=AgentName&agentid=".$agentid."',
                dataType : 'html',
                success: function(data){
@@ -908,7 +908,7 @@ class AgentManager{
         function handlerEdit$id () {
             $.ajax({
                type: 'GET',
-               url: '$clientRoot/agents/rpc/handler.php',
+               url: '$CLIENT_ROOT/agents/rpc/handler.php',
                data: 'mode=edit&table=AgentName&agentnamesid=".$agentnamesid."',
                dataType : 'html',
                success: function(data){
@@ -927,7 +927,7 @@ class AgentManager{
         function handlerDelete$id () {
             $.ajax({
                type: 'GET',
-               url: '$clientRoot/agents/rpc/handler.php',
+               url: '$CLIENT_ROOT/agents/rpc/handler.php',
                data: 'mode=delete&table=AgentName&agentnamesid=".$agentnamesid."',
                dataType : 'html',
                success: function(data){
@@ -962,7 +962,7 @@ class AgentManager{
      * @return html list of team members or an empty string.
      */
     public function getTeamMembersForAgent($agentid) { 
-	   global $clientRoot;
+	   global $CLIENT_ROOT;
        $count = 0;
        $editable = false;
        if ($this->isAgentEditor()) {
@@ -989,7 +989,7 @@ class AgentManager{
         function handlerAddTeamMember() {
             $.ajax({
                type: 'GET',
-               url: '$clientRoot/agents/rpc/handler.php',
+               url: '$CLIENT_ROOT/agents/rpc/handler.php',
                data: 'mode=create&table=AgentTeams&teamagentid=".$agentid."',
                dataType : 'html',
                success: function(data){
@@ -1028,7 +1028,7 @@ class AgentManager{
         function handlerATDelete$agentteamid () {
             $.ajax({
                type: 'GET',
-               url: '$clientRoot/agents/rpc/handler.php',
+               url: '$CLIENT_ROOT/agents/rpc/handler.php',
                data: 'mode=delete&table=AgentTeams&agentteamid=".$agentteamid."',
                dataType : 'html',
                success: function(data){
@@ -1047,7 +1047,7 @@ class AgentManager{
      </script>
                    ";
                 }
-                $result .= "<li><div id='ATDetailDiv$agentteamid'><a href='$clientRoot/agents/agent.php?agentid=$memberagentid'>$name</a>$delete</div></li>";
+                $result .= "<li><div id='ATDetailDiv$agentteamid'><a href='$CLIENT_ROOT/agents/agent.php?agentid=$memberagentid'>$name</a>$delete</div></li>";
              }
           } else { 
               throw new Exception("Error preparing statement $sql");
@@ -1063,7 +1063,7 @@ class AgentManager{
      * @return html list of teams.
      */
     public function getTeamMembershipForAgent($agentid) { 
-	   global $clientRoot;
+	   global $CLIENT_ROOT;
           $result = "<li><h3>Member of Teams</h3></li><ul>";
           $sql = "select teamagentid from agentteams where memberagentid = ? order by ordinal asc ";
           if ($statement = $this->conn->prepare($sql)) {
@@ -1077,7 +1077,7 @@ class AgentManager{
                 $count ++;
                 $member->load($teamagentid);
                 $name = $member->getAssembledName();
-                $result .= "<li><a href='$clientRoot/agents/agent.php?agentid=$teamagentid'>$name</a></li>";
+                $result .= "<li><a href='$CLIENT_ROOT/agents/agent.php?agentid=$teamagentid'>$name</a></li>";
              }
           } else { 
               throw new Exception("Error preparing statement $sql");
@@ -1087,7 +1087,7 @@ class AgentManager{
     }
 
     public function getLinksForAgent($agentid) { 
-	   global $clientRoot;
+	   global $CLIENT_ROOT;
        $result  = "";
        $result .= "<li><h3>Links</h3></li>";
        $link = "";
@@ -1102,7 +1102,7 @@ class AgentManager{
         function handlerAddLink () {
             $.ajax({
                type: 'GET',
-               url: '$clientRoot/agents/rpc/handler.php',
+               url: '$CLIENT_ROOT/agents/rpc/handler.php',
                data: 'mode=create&table=AgentLinks&agentid=".$agentid."',
                dataType : 'html',
                success: function(data){
@@ -1142,7 +1142,7 @@ class AgentManager{
      * @return an html list of agent relationships.
      */ 
     public function getRelationsForAgent($agentid) { 
-	   global $clientRoot;
+	   global $CLIENT_ROOT;
        $result  = "";
        $result .= "<li><h3>Relationships</h3></li>";
        $link = "";
@@ -1157,7 +1157,7 @@ class AgentManager{
         function handlerAddRelation () {
             $.ajax({
                type: 'GET',
-               url: '$clientRoot/agents/rpc/handler.php',
+               url: '$CLIENT_ROOT/agents/rpc/handler.php',
                data: 'mode=create&table=AgentRelations&fromagentid=".$agentid."',
                dataType : 'html',
                success: function(data){
@@ -1208,7 +1208,7 @@ class AgentManager{
      * @return an html list of agent number patterns.
      */ 
     public function getNumberPatternsForAgent($agentid) { 
-	   global $clientRoot;
+	   global $CLIENT_ROOT;
        $result  = "";
        $result .= "<li><h3>Collector Number Patterns</h3></li>";
        $link = "";
@@ -1223,7 +1223,7 @@ class AgentManager{
         function handlerAddName () {
             $.ajax({
                type: 'GET',
-               url: '$clientRoot/agents/rpc/handler.php',
+               url: '$CLIENT_ROOT/agents/rpc/handler.php',
                data: 'mode=create&table=AgentNumberPattern&agentid=".$agentid."',
                dataType : 'html',
                success: function(data){
@@ -1535,7 +1535,7 @@ class AgentManager{
      * records possibly collected by that collector.
      */
     public function getPrettyListOfCollectionObjectsForCollector($agentid) { 
-       global $clientRoot;
+       global $CLIENT_ROOT;
        $result = "";
        $array = $this->getListOfCollectionObjectsForCollector($agentid);
        $hits = count($array);
@@ -1547,7 +1547,7 @@ class AgentManager{
           $matchstart = '';  $matchend = '';
           if ($row['matchespattern']==1) { $matchstart = "<strong>";  $matchend = "</strong>"; } 
           $coll = $row['datecollected'] . " " . $row['collector'] . " $matchstart" . $row['collectornumber'] . $matchend;
-          $result .= "<a href='$clientRoot/collections/individual/index.php?occid=$occid' >$dwctriplet</a> $coll<br>";
+          $result .= "<a href='$CLIENT_ROOT/collections/individual/index.php?occid=$occid' >$dwctriplet</a> $coll<br>";
        }
        return $result;
     }
@@ -1642,7 +1642,7 @@ class AgentManager{
      *  @return html listing the bad duplicates for this agent, if any.
      */
     function getBadDuplicatesForAgent($agentid) {
-       global $clientRoot;
+       global $CLIENT_ROOT;
        $result = "";
        $agent = new Agent();
        $agent->load($agentid);
@@ -1652,7 +1652,7 @@ class AgentManager{
        }
        $result .= '<ul>';
        foreach ($baddups as $keyagentid => $valueagent) { 
-          $result .= "<li><a href='$clientRoot/agents/agent.php?agentid=$keyagentid'>".$valueagent->getAssembledName()."</a>";
+          $result .= "<li><a href='$CLIENT_ROOT/agents/agent.php?agentid=$keyagentid'>".$valueagent->getAssembledName()."</a>";
        } 
        $result .= '</ul>';
        return $result;
@@ -1669,12 +1669,12 @@ class AgentManager{
      * @returns html with javascript. 
      */
     public function createAgentPicker($fieldname,$label,$currentagentid=''){ 
-       global $clientRoot;
+       global $CLIENT_ROOT;
        $id = rand(1,100000);
        $returnvalue .= "
        <script type='text/javascript'>
           $('#agentselect$id').autocomplete({
-              source: '".$clientRoot."/agents/rpc/handler.php?mode=listjson',
+              source: '".$CLIENT_ROOT."/agents/rpc/handler.php?mode=listjson',
               minLength: 2,
               select: function( event, ui ) { 
                     $('#$fieldname').val(ui.item.value);
@@ -2741,7 +2741,7 @@ class AgentView {
    // @param $includeRelated default true shows rows from other tables through foreign key relationships.
    // @param $editLinkURL default '' allows adding a link to show this record in an editing form.
    public function getDetailsView($includeRelated=true, $editLinkURL='') {
-       global $clientRoot;
+       global $CLIENT_ROOT;
        $editLinkURL=trim($editLinkURL);
        $model = $this->model;
        $returnvalue  = "<h3>".$model->getAssembledName()."</h3>\n";
@@ -2785,7 +2785,7 @@ class AgentView {
        $returnvalue .= "<li>".Agent::TAXONOMICGROUPS.": ".$model->gettaxonomicgroups()."</li>\n";
        $returnvalue .= "<li>".Agent::COLLECTIONSAT.": ".$model->getcollectionsat()."</li>\n";
        $returnvalue .= "<li>".Agent::MBOX_SHA1SUM.": ".$model->getmbox_sha1sum()."</li>\n";
-       $returnvalue .= "<li>".Agent::UUID.": <a href='$clientRoot/agents/agent.php?uuid=".$model->getuuid()."'>".$model->getuuid()."</a></li>\n";
+       $returnvalue .= "<li>".Agent::UUID.": <a href='$CLIENT_ROOT/agents/agent.php?uuid=".$model->getuuid()."'>".$model->getuuid()."</a></li>\n";
        $returnvalue .= "<li>".Agent::DATELASTMODIFIED.": ".$model->getdatelastmodified()."</li>\n";
        $returnvalue .= "<li>".Agent::LASTMODIFIEDBYUID.": ".$model->getlastmodifiedbyuid()."</li>\n";
        $returnvalue .= "<div id='statusDiv'></div>";
@@ -2803,7 +2803,7 @@ class AgentView {
                $dupid = $model->getpreferredrecbyid();
                $dup->load($model->getpreferredrecbyid());
                $dupof = $dup->getAssembledName(TRUE);
-               $returnvalue .= "<li><h3>Bad Duplicate Of</h3> <a href='$clientRoot/agents/agent.php?agentid=$dupid'>$dupof</a></li>";
+               $returnvalue .= "<li><h3>Bad Duplicate Of</h3> <a href='$CLIENT_ROOT/agents/agent.php?agentid=$dupid'>$dupof</a></li>";
            }
            $returnvalue .= $am->getBadDuplicatesForAgent($model->getagentid());
            $returnvalue .= $am->getNumberPatternsForAgent($model->getagentid());
@@ -3025,11 +3025,11 @@ class AgentView {
        return  $returnvalue;
    }
    public function getShortTableRowView() {
-       global $clientRoot;
+       global $CLIENT_ROOT;
        $returnvalue = '<tr>';
        $model = $this->model;
        $dates = "(".$model->getyearofbirth()."-".$model->getyearofdeath().")";
-       $returnvalue .= "<td><a href='$clientRoot/agents/agent.php?agentid=".$model->getagentid()."'>".$model->getMinimalName()."</a></td>\n";
+       $returnvalue .= "<td><a href='$CLIENT_ROOT/agents/agent.php?agentid=".$model->getagentid()."'>".$model->getMinimalName()."</a></td>\n";
        $returnvalue .= "<td>$dates</td>\n";
        $returnvalue .= "<td>".$model->gettype()."</td>\n";
        $returnvalue .= '</tr>';
@@ -3045,7 +3045,7 @@ class AgentView {
    }
 
    public function getEditFormView($includeRelated=true) {
-       global $clientRoot;
+       global $CLIENT_ROOT;
        $model = $this->model;
        if (strlen($model->getagentid())==0) { 
           $new = TRUE;
@@ -3060,7 +3060,7 @@ class AgentView {
             $('#resultDiv').html('');
             $.ajax({
                type: 'GET',
-               url: '$clientRoot/agents/rpc/handler.php',
+               url: '$CLIENT_ROOT/agents/rpc/handler.php',
                data: frm.serialize(),
                dataType : 'html',
                success: function(data){
@@ -3079,7 +3079,7 @@ class AgentView {
      </script>
 ";
        $returnvalue .= "<div id='statusDiv'></div>";
-       $returnvalue .= '<form method="POST" id="saveRecordForm" action='.$clientRoot.'/agents/rpc/handler.php>';
+       $returnvalue .= '<form method="POST" id="saveRecordForm" action='.$CLIENT_ROOT.'/agents/rpc/handler.php>';
        if ($new) {
           $returnvalue .= '<input type=hidden name=mode id=mode value=savenew>';
        } else {
@@ -3133,7 +3133,7 @@ class AgentView {
        $returnvalue .= "
        <script type='text/javascript'>
           $('#bdagentselect').autocomplete({
-              source: '".$clientRoot."/agents/rpc/handler.php?mode=listjson&type=$type',
+              source: '".$CLIENT_ROOT."/agents/rpc/handler.php?mode=listjson&type=$type',
               minLength: 2,
               select: function( event, ui ) { 
                     $('#".Agent::PREFERREDRECBYID."').val(ui.item.value);
@@ -3773,7 +3773,7 @@ class agentteamsView {
        return  $returnvalue;
    }
    public function getEditFormView() {
-       global $clientRoot;
+       global $CLIENT_ROOT;
        $model = $this->model;
        if (strlen($model->getagentteamid())==0) {
           $new = TRUE;
@@ -3789,7 +3789,7 @@ class agentteamsView {
             $('#saveATeamResultDiv').html('');
             $.ajax({
                type: 'POST',
-               url: '$clientRoot/agents/rpc/handler.php',
+               url: '$CLIENT_ROOT/agents/rpc/handler.php',
                data: frm.serialize(),
                dataType : 'html',
                success: function(data){
@@ -4443,7 +4443,7 @@ class agentnamesView
    }
 
    public function getEditFormView() {
-       global $clientRoot;
+       global $CLIENT_ROOT;
        $model = $this->model;
        if (strlen($model->getagentnamesid())==0) { 
           $new = TRUE;
@@ -4458,7 +4458,7 @@ class agentnamesView
             $('#nameResultDiv".$model->getagentnamesid()."').html('');
             $.ajax({
                type: 'GET',
-               url: '$clientRoot/agents/rpc/handler.php',
+               url: '$CLIENT_ROOT/agents/rpc/handler.php',
                data: frm.serialize(),
                dataType : 'html',
                success: function(data){
@@ -4477,7 +4477,7 @@ class agentnamesView
      </script>
 ";
        $returnvalue .= "<div id='nameStatusDiv".$model->getagentnamesid()."'></div>";
-       $returnvalue .= '<form method="POST" id="saveNameRecordForm" action='.$clientRoot.'/agents/rpc/handler.php>';
+       $returnvalue .= '<form method="POST" id="saveNameRecordForm" action='.$CLIENT_ROOT.'/agents/rpc/handler.php>';
        if ($new) {
           $returnvalue .= '<input type=hidden name=mode id=mode value=savenew>';
        } else {
@@ -5189,7 +5189,7 @@ class agentnumberpatternView
    }
 
    public function getSummaryLine($editable=false) { 
-       global $clientRoot;
+       global $CLIENT_ROOT;
        $model = $this->model;
        $id = $model->getagentnumberpatternid();
        $returnvalue = "<span id='numpatDetailDiv$id'>";
@@ -5205,7 +5205,7 @@ class agentnumberpatternView
         function handlerNPEdit$id () {
             $.ajax({
                type: 'GET',
-               url: '$clientRoot/agents/rpc/handler.php',
+               url: '$CLIENT_ROOT/agents/rpc/handler.php',
                data: 'mode=edit&table=AgentNumberPattern&agentnumberpatternid=".$id."',
                dataType : 'html',
                success: function(data){
@@ -5224,7 +5224,7 @@ class agentnumberpatternView
         function handlerNPDelete$id () {
             $.ajax({
                type: 'GET',
-               url: '$clientRoot/agents/rpc/handler.php',
+               url: '$CLIENT_ROOT/agents/rpc/handler.php',
                data: 'mode=delete&table=AgentNumberPattern&agentnumberpatternid=".$id."',
                dataType : 'html',
                success: function(data){
@@ -5249,7 +5249,7 @@ class agentnumberpatternView
    }
 
    public function getShortTableRowView() {
-       global $clientRoot;
+       global $CLIENT_ROOT;
        $model = $this->model;
        $id = $model->getagentnumberpatternid();
        $returnvalue = "<tr><div id='numpatDetailDiv$id'>";
@@ -5264,7 +5264,7 @@ class agentnumberpatternView
         function handlerNPEdit$id () {
             $.ajax({
                type: 'GET',
-               url: '$clientRoot/agents/rpc/handler.php',
+               url: '$CLIENT_ROOT/agents/rpc/handler.php',
                data: 'mode=edit&table=AgentNumberPattern&agentnumberpatternid=".$id."',
                dataType : 'html',
                success: function(data){
@@ -5283,7 +5283,7 @@ class agentnumberpatternView
         function handlerNPDelete$id () {
             $.ajax({
                type: 'GET',
-               url: '$clientRoot/agents/rpc/handler.php',
+               url: '$CLIENT_ROOT/agents/rpc/handler.php',
                data: 'mode=delete&table=AgentNumberPattern&agentnumberpatternid=".$id."',
                dataType : 'html',
                success: function(data){
@@ -5317,7 +5317,7 @@ class agentnumberpatternView
        return  $returnvalue;
    }
    public function getEditFormView($includeRelated=false) {
-       global $clientRoot;
+       global $CLIENT_ROOT;
        $model = $this->model;
 
        if (strlen($model->getagentid())==0) {
@@ -5333,7 +5333,7 @@ class agentnumberpatternView
             $('#saveANresultDiv').html('');
             $.ajax({
                type: 'POST',
-               url: '$clientRoot/agents/rpc/handler.php',
+               url: '$CLIENT_ROOT/agents/rpc/handler.php',
                data: frm.serialize(),
                dataType : 'html',
                success: function(data){
@@ -5969,7 +5969,7 @@ class agentlinksView
    }
 
    public function getSummaryLine($editable=false) { 
-       global $clientRoot;
+       global $CLIENT_ROOT;
        $model = $this->model;
        $id = $model->getagentlinksid();
        $returnvalue  = "<span id='agentlinksDiv$id'>";
@@ -5991,7 +5991,7 @@ class agentlinksView
         function handlerALinkEdit$id () {
             $.ajax({
                type: 'GET',
-               url: '$clientRoot/agents/rpc/handler.php',
+               url: '$CLIENT_ROOT/agents/rpc/handler.php',
                data: 'mode=edit&table=AgentLinks&agentlinksid=".$id."',
                dataType : 'html',
                success: function(data){
@@ -6010,7 +6010,7 @@ class agentlinksView
         function handlerALinkDelete$id () {
             $.ajax({
                type: 'GET',
-               url: '$clientRoot/agents/rpc/handler.php',
+               url: '$CLIENT_ROOT/agents/rpc/handler.php',
                data: 'mode=delete&table=AgentLinks&agentlinksid=".$id."',
                dataType : 'html',
                success: function(data){
@@ -6044,7 +6044,7 @@ class agentlinksView
         function handlerALEdit$id () {
             $.ajax({
                type: 'GET',
-               url: '$clientRoot/agents/rpc/handler.php',
+               url: '$CLIENT_ROOT/agents/rpc/handler.php',
                data: 'mode=edit&table=AgentLinks&agentlinksid=".$id."',
                dataType : 'html',
                success: function(data){
@@ -6063,7 +6063,7 @@ class agentlinksView
         function handlerALDelete$id () {
             $.ajax({
                type: 'GET',
-               url: '$clientRoot/agents/rpc/handler.php',
+               url: '$CLIENT_ROOT/agents/rpc/handler.php',
                data: 'mode=delete&table=AgentLinks&agentlinksid=".$id."',
                dataType : 'html',
                success: function(data){
@@ -6143,7 +6143,7 @@ class agentlinksView
        return  $returnvalue;
    }
    public function getEditFormView() {
-       global $clientRoot;
+       global $CLIENT_ROOT;
        $model = $this->model;
        if (strlen($model->getagentlinksid())==0) { 
           $new = TRUE;
@@ -6158,7 +6158,7 @@ class agentlinksView
             $('#saveALinkResultDiv').html('');
             $.ajax({
                type: 'POST',
-               url: '$clientRoot/agents/rpc/handler.php',
+               url: '$CLIENT_ROOT/agents/rpc/handler.php',
                data: frm.serialize(),
                dataType : 'html',
                success: function(data){
@@ -7113,7 +7113,7 @@ class agentrelationsView
        return  $returnvalue;
    }
    public function getSummaryLine($editable, $inverse = false) { 
-      global $clientRoot;
+      global $CLIENT_ROOT;
       $result = "";
       $model = $this->model;
       $from = new Agent();
@@ -7138,7 +7138,7 @@ class agentrelationsView
         function handlerARelEdit$id () {
             $.ajax({
                type: 'GET',
-               url: '$clientRoot/agents/rpc/handler.php',
+               url: '$CLIENT_ROOT/agents/rpc/handler.php',
                data: 'mode=edit&table=AgentRelations&agentrelationsid=".$id."',
                dataType : 'html',
                success: function(data){
@@ -7157,7 +7157,7 @@ class agentrelationsView
         function handlerARelDelete$id () {
             $.ajax({
                type: 'GET',
-               url: '$clientRoot/agents/rpc/handler.php',
+               url: '$CLIENT_ROOT/agents/rpc/handler.php',
                data: 'mode=delete&table=AgentRelations&agentrelationsid=".$id."',
                dataType : 'html',
                success: function(data){
@@ -7223,7 +7223,7 @@ class agentrelationsView
        return  $returnvalue;
    }
    public function getEditFormView() {
-       global $clientRoot;
+       global $CLIENT_ROOT;
        $model = $this->model;
        if (strlen($model->getagentrelationsid())==0) { 
           $new = TRUE;
@@ -7239,7 +7239,7 @@ class agentrelationsView
             $('#saveARelResultDiv').html('');
             $.ajax({
                type: 'POST',
-               url: '$clientRoot/agents/rpc/handler.php',
+               url: '$CLIENT_ROOT/agents/rpc/handler.php',
                data: frm.serialize(),
                dataType : 'html',
                success: function(data){
@@ -7277,7 +7277,7 @@ class agentrelationsView
           $returnvalue .= "
           <script type='text/javascript'>
              $('#fagentselect').autocomplete({
-                 source: '".$clientRoot."/agents/rpc/handler.php?mode=listjson',
+                 source: '".$CLIENT_ROOT."/agents/rpc/handler.php?mode=listjson',
                  minLength: 2,
                  select: function( event, ui ) { 
                        $('#".agentrelations::FROMAGENTID."').val(ui.item.value);
@@ -7311,7 +7311,7 @@ class agentrelationsView
        $returnvalue .= "
        <script type='text/javascript'>
           $('#tagentselect').autocomplete({
-              source: '".$clientRoot."/agents/rpc/handler.php?mode=listjson',
+              source: '".$CLIENT_ROOT."/agents/rpc/handler.php?mode=listjson',
               minLength: 2,
               select: function( event, ui ) { 
                     $('#".agentrelations::TOAGENTID."').val(ui.item.value);

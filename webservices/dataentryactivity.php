@@ -1,6 +1,6 @@
 <?php
 include_once('../config/symbini.php');
-include_once($serverRoot.'/classes/OccurrenceDownload.php');
+include_once($SERVER_ROOT.'/classes/OccurrenceDownload.php');
 
 $format = isset($_REQUEST['format'])&&$_REQUEST['format']?$_REQUEST['format']:'rss';
 $days = isset($_REQUEST['days'])?$_REQUEST['days']:0;

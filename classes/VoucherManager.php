@@ -1,6 +1,6 @@
 <?php
-include_once($serverRoot.'/config/dbconnection.php');
- 
+include_once($SERVER_ROOT.'/config/dbconnection.php');
+
 class VoucherManager {
 
 	private $conn;
@@ -9,71 +9,44 @@ class VoucherManager {
 	private $clid;
 	private $clName;
 	private $voucherData;
-	
+
 	function __construct() {
 		$this->conn = MySQLiConnectionFactory::getCon("write");
  	}
-	
+
  	function __destruct(){
  		if(!($this->conn === false)) $this->conn->close();
 	}
 
- 	public function setTid($t){
-		if(is_numeric($t)){
-			$this->tid = $this->conn->real_escape_string($t);
-		}
- 	}
-	
-	public function getTid(){
-		return $this->tid;
-	}
-	
-	public function getTaxonName(){
-		return $this->taxonName;
-	}
-	
-	public function setClid($id){
-		if(is_numeric($id)){
-			$this->clid = $this->conn->real_escape_string($id);
-		}
-	}
-	
-	public function getClid(){
-		return $this->clid;
-	}
-	
-	public function getClName(){
-		return $this->clName;
-	}
-	
 	public function getChecklistData(){
  		$checklistData = Array();
- 		if(!$this->tid || !$this->clid) return $checklistData; 
-		$sql = "SELECT t.SciName, cllink.Habitat, cllink.Abundance, cllink.Notes, cllink.internalnotes, cllink.source, cllink.familyoverride, ".
-			"cl.Name, cl.type, cl.locality ".
-			"FROM (fmchecklists cl INNER JOIN fmchklsttaxalink cllink ON cl.CLID = cllink.CLID) ".
-			"INNER JOIN taxa t ON cllink.TID = t.TID ".
-			"WHERE ((cllink.TID = ".$this->tid.") AND (cllink.CLID = ".$this->clid."))";
- 		$result = $this->conn->query($sql);
-		if($row = $result->fetch_object()){
-			$checklistData["habitat"] = $this->cleanOutStr($row->Habitat);
-			$checklistData["abundance"] = $this->cleanOutStr($row->Abundance);
-			$checklistData["notes"] = $this->cleanOutStr($row->Notes);
-			$checklistData["internalnotes"] = $this->cleanOutStr($row->internalnotes);
-			$checklistData["source"] = $this->cleanOutStr($row->source);
-			$checklistData["familyoverride"] = $this->cleanOutStr($row->familyoverride);
-			$checklistData["cltype"] = $row->type;
-			$checklistData["locality"] = $row->locality;
-			if(!$this->clName) $this->clName = $this->cleanOutStr($row->Name);
-			if(!$this->taxonName) $this->taxonName = $this->cleanOutStr($row->SciName);
-		}
-		$result->close();
+ 		if($this->tid && $this->clid){
+			$sql = 'SELECT t.SciName, cllink.Habitat, cllink.Abundance, cllink.Notes, cllink.internalnotes, cllink.source, cllink.familyoverride, cl.Name, cl.type, cl.locality '.
+				'FROM fmchecklists cl INNER JOIN fmchklsttaxalink cllink ON cl.CLID = cllink.CLID '.
+				'INNER JOIN taxa t ON cllink.TID = t.TID '.
+				'WHERE (cllink.TID = '.$this->tid.') AND (cllink.CLID = '.$this->clid.')';
+	 		$result = $this->conn->query($sql);
+			if($row = $result->fetch_object()){
+				$checklistData['habitat'] = $this->cleanOutStr($row->Habitat);
+				$checklistData['abundance'] = $this->cleanOutStr($row->Abundance);
+				$checklistData['notes'] = $this->cleanOutStr($row->Notes);
+				$checklistData['internalnotes'] = $this->cleanOutStr($row->internalnotes);
+				$checklistData['source'] = $this->cleanOutStr($row->source);
+				$checklistData['familyoverride'] = $this->cleanOutStr($row->familyoverride);
+				$checklistData['cltype'] = $row->type;
+				$checklistData['locality'] = $row->locality;
+				if(!$this->clName) $this->clName = $this->cleanOutStr($row->Name);
+				if(!$this->taxonName) $this->taxonName = $this->cleanOutStr($row->SciName);
+			}
+			$result->free();
+ 		}
 		return $checklistData;
 	}
 
+	//Editing functions
 	public function editClData($eArr){
 		$retStr = '';
-		$innerSql = "";
+		$innerSql = '';
 		foreach($eArr as $k => $v){
 			$valStr = trim($v);
 			$innerSql .= ",".$k."=".($valStr?'"'.$this->cleanInStr($valStr).'" ':'NULL');
@@ -107,7 +80,7 @@ class VoucherManager {
 					$internalNotesTarget = $this->cleanInStr($row->internalnotes);
 					$sourceTarget = $this->cleanInStr($row->source);
 					$nativeTarget = $this->cleanInStr($row->Nativity);
-				
+
 					//Move all vouchers to new name
 					$sqlVouch = "UPDATE IGNORE fmvouchers SET TID = ".$nTaxon." ".
 						"WHERE (TID = ".$this->tid.") AND (CLID = ".$this->clid.')';
@@ -120,7 +93,7 @@ class VoucherManager {
 					if(!$this->conn->query($sqlVouchDel)){
 						$statusStr = "ERROR removing vouchers during taxon transfer: ".$this->conn->error;
 					}
-					
+
 					//Merge chklsttaxalink data
 					//Harvest source (unwanted) chklsttaxalink data
 					$sqlSourceCl = "SELECT ctl.Habitat, ctl.Abundance, ctl.Notes, ctl.internalnotes, ctl.source, ctl.Nativity ".
@@ -142,7 +115,7 @@ class VoucherManager {
 					$internalNotesStr = $internalNotesTarget.(($internalNotesTarget && $internalNotesSource)?"; ":"").$internalNotesSource;
 					$sourceStr = $sourceTarget.(($sourceTarget && $sourceSource)?"; ":"").$sourceSource;
 					$nativeStr = $nativeTarget.(($nativeTarget && $nativeSource)?"; ":"").$nativeSource;
-					$sqlCl = 'UPDATE fmchklsttaxalink SET Habitat = "'.$this->cleanInStr($habitatStr).'", '. 
+					$sqlCl = 'UPDATE fmchklsttaxalink SET Habitat = "'.$this->cleanInStr($habitatStr).'", '.
 						'Abundance = "'.$this->cleanInStr($abundStr).'", Notes = "'.$this->cleanInStr($notesStr).
 						'", internalnotes = "'.$this->cleanInStr($internalNotesStr).'", source = "'.
 						$this->cleanInStr($sourceStr).'", Nativity = "'.$this->cleanInStr($nativeStr).'" '.
@@ -170,13 +143,13 @@ class VoucherManager {
 		}
 		return $statusStr;
 	}
-	
+
 	public function deleteTaxon($rareLocality = ''){
 		$statusStr = '';
 		//Delete vouchers
 		$vSql = "DELETE v.* FROM fmvouchers v WHERE (v.tid = ".$this->tid.") AND (v.clid = ".$this->clid.')';
 		$this->conn->query($vSql);
-		//Delete checklist record 
+		//Delete checklist record
 		$sql = 'DELETE ctl.* FROM fmchklsttaxalink ctl WHERE (ctl.tid = '.$this->tid.') AND (ctl.clid = '.$this->clid.')';
 		if($this->conn->query($sql)){
 			if($rareLocality){
@@ -188,7 +161,7 @@ class VoucherManager {
 		}
 		return $statusStr;
 	}
-	
+
 	private function setStateRare($rareLocality){
 		//Remove state based security protection only if name is not on global list
 		$sql = 'SELECT IFNULL(securitystatus,0) as securitystatus FROM taxa WHERE tid = '.$this->tid;
@@ -211,32 +184,33 @@ class VoucherManager {
 		$rs->free();
 	}
 
+	//Voucher functions
 	public function getVoucherData(){
 		$voucherData = Array();
- 		if(!$this->tid || !$this->clid) return $voucherData;
-		$sql = 'SELECT v.occid, CONCAT_WS(" ",o.recordedby,o.recordnumber) AS collector, o.catalognumber, '.
-			'o.sciname, o.eventdate, v.notes, v.editornotes '.
-			'FROM fmvouchers v INNER JOIN omoccurrences o ON v.occid = o.occid '.
-			'WHERE (v.TID = '.$this->tid.') AND (v.CLID = '.$this->clid.')';
-		$result = $this->conn->query($sql);
-		while($row = $result->fetch_object()){
-			$occId = $row->occid;
-			$voucherData[$occId]["collector"] = $row->collector;
-			$voucherData[$occId]["catalognumber"] = $row->catalognumber;
-			$voucherData[$occId]["sciname"] = $row->sciname;
-			$voucherData[$occId]["eventdate"] = $row->eventdate;
-			$voucherData[$occId]["notes"] = $row->notes;
-			$voucherData[$occId]["editornotes"] = $row->editornotes;
-		}
-		$result->close();
+ 		if($this->tid && $this->clid){
+			$sql = 'SELECT v.occid, CONCAT_WS(" ",o.recordedby,o.recordnumber) AS collector, o.catalognumber, '.
+				'o.sciname, o.eventdate, v.notes, v.editornotes '.
+				'FROM fmvouchers v INNER JOIN omoccurrences o ON v.occid = o.occid '.
+				'WHERE (v.TID = '.$this->tid.') AND (v.CLID = '.$this->clid.')';
+			$result = $this->conn->query($sql);
+			while($row = $result->fetch_object()){
+				$occId = $row->occid;
+				$voucherData[$occId]["collector"] = $row->collector;
+				$voucherData[$occId]["catalognumber"] = $row->catalognumber;
+				$voucherData[$occId]["sciname"] = $row->sciname;
+				$voucherData[$occId]["eventdate"] = $row->eventdate;
+				$voucherData[$occId]["notes"] = $row->notes;
+				$voucherData[$occId]["editornotes"] = $row->editornotes;
+			}
+			$result->free();
+ 		}
 		return $voucherData;
 	}
-	
+
 	public function editVoucher($occid, $notes, $editorNotes){
 		$statusStr = '';
 		if($this->tid && $this->clid && is_numeric($occid)){
-			$sql = 'UPDATE fmvouchers SET '.
-				'notes = '.($notes?'"'.$this->cleanInStr($notes).'"':'NULL').
+			$sql = 'UPDATE fmvouchers SET notes = '.($notes?'"'.$this->cleanInStr($notes).'"':'NULL').
 				',editornotes = '.($editorNotes?'"'.$this->cleanInStr($editorNotes).'"':'NULL').
 				' WHERE (occid = '.$occid.') AND (tid = '.$this->tid.') AND (clid = '.$this->clid.')';
 			//echo $sql;
@@ -246,21 +220,19 @@ class VoucherManager {
 		}
 		return $statusStr;
 	}
-	
+
 	public function addVoucher($vOccId, $vNotes, $vEditNotes){
 		$vNotes = $this->cleanInStr($vNotes);
 		$vEditNotes = $this->cleanInStr($vEditNotes);
-		if(is_numeric($vOccId)){
-			if($vOccId && $this->clid){
-				$status = $this->addVoucherRecord($vOccId, $vNotes, $vEditNotes);
-				if($status){
-					$sqlInsertCl = 'INSERT INTO fmchklsttaxalink ( clid, TID ) '.
-						'SELECT '.$this->clid.' AS clid, o.TidInterpreted '.
-						'FROM omoccurrences o WHERE (o.occid = '.$vOccId.')';
-					//echo "<div>sqlInsertCl: ".$sqlInsertCl."</div>";
-					if($this->conn->query($sqlInsertCl)){
-						return $this->addVoucherRecord($vOccId, $vNotes, $vEditNotes);
-					}
+		if(is_numeric($vOccId) && $this->clid){
+			$status = $this->addVoucherRecord($vOccId, $vNotes, $vEditNotes);
+			if($status){
+				$sqlInsertCl = 'INSERT INTO fmchklsttaxalink ( clid, TID ) '.
+					'SELECT '.$this->clid.' AS clid, o.TidInterpreted '.
+					'FROM omoccurrences o WHERE (o.occid = '.$vOccId.')';
+				//echo "<div>sqlInsertCl: ".$sqlInsertCl."</div>";
+				if($this->conn->query($sqlInsertCl)){
+					return $this->addVoucherRecord($vOccId, $vNotes, $vEditNotes);
 				}
 			}
 		}
@@ -274,8 +246,7 @@ class VoucherManager {
 			'FROM ((omoccurrences o INNER JOIN taxstatus ts1 ON o.TidInterpreted = ts1.tid) '.
 			'INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted) '.
 			'INNER JOIN fmchklsttaxalink ctl ON ts2.tid = ctl.tid '.
-			'WHERE (ctl.clid = '.$this->clid.') AND (o.occid = '.
-			$vOccId.') AND ts1.taxauthid = 1 AND ts2.taxauthid = 1 '.
+			'WHERE (ctl.clid = '.$this->clid.') AND (o.occid = '.$vOccId.') AND ts1.taxauthid = 1 AND ts2.taxauthid = 1 '.
 			'LIMIT 1';
 		//echo "addVoucherSql: ".$sql."<br/>";
 		$rs = $this->conn->query($sql);
@@ -284,19 +255,18 @@ class VoucherManager {
 			$recNum = $this->cleanInStr($row->recordnumber);
 			$notes = $this->cleanInStr($row->Notes);
 			$editNotes = $this->cleanInStr($row->editnotes);
-			
+
 			$sqlInsert = 'INSERT INTO fmvouchers ( occid, TID, CLID, Notes, editornotes ) '.
 				'VALUES ('.$occId.','.$row->tid.','.$row->clid.',"'.
 				$notes.'","'.$editNotes.'") ';
 			//echo "<div>".$sqlInsert."</div>";
 			if(!$this->conn->query($sqlInsert)){
-				$rs->close();
 				return "ERROR - Voucher insert failed: ".$this->conn->error;
 			}
 			else{
 				$this->tid = $row->tid;
 			}
-			$rs->close();
+			$rs->free();
 			return "";
 		}
 		return "ERROR: Neither the target taxon nor a sysnonym is present in this checklists. Taxon needs to be added.";
@@ -313,6 +283,36 @@ class VoucherManager {
 		return $statusStr;
 	}
 
+	//Setters and getters
+	public function setTid($t){
+		if(is_numeric($t)){
+			$this->tid = $t;
+		}
+	}
+
+	public function getTid(){
+		return $this->tid;
+	}
+
+	public function getTaxonName(){
+		return $this->taxonName;
+	}
+
+	public function setClid($id){
+		if(is_numeric($id)){
+			$this->clid = $id;
+		}
+	}
+
+	public function getClid(){
+		return $this->clid;
+	}
+
+	public function getClName(){
+		return $this->clName;
+	}
+
+	//Misc functions
 	private function cleanOutStr($str){
 		$newStr = str_replace('"',"&quot;",$str);
 		$newStr = str_replace("'","&apos;",$newStr);
@@ -327,4 +327,4 @@ class VoucherManager {
 		return $newStr;
 	}
  }
-?> 
+?>

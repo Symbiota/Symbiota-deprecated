@@ -1,7 +1,7 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/OccurrenceDuplicate.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/OccurrenceDuplicate.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 
 $occidQuery = array_key_exists('occidquery',$_REQUEST)?$_REQUEST['occidquery']:'';
 $curOccid = (array_key_exists('curoccid',$_GET)?$_REQUEST["curoccid"]:0);
@@ -25,8 +25,8 @@ $statusStr = '';
 if($submitAction){
 	$isEditor = 0;
 	if($IS_ADMIN
-		|| (array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights["CollAdmin"]))
-		|| (array_key_exists("CollEditor",$userRights) && in_array($collId,$userRights["CollEditor"]))){
+		|| (array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collId,$USER_RIGHTS["CollAdmin"]))
+		|| (array_key_exists("CollEditor",$USER_RIGHTS) && in_array($collId,$USER_RIGHTS["CollEditor"]))){
 		$isEditor = 1;
 	}
 	if($isEditor){
@@ -41,17 +41,17 @@ if($submitAction){
 //Get list of collections user can edit
 $collRightsArr = array();
 if(!$IS_ADMIN){
-	if(array_key_exists('CollAdmin',$userRights)){
-		$collRightsArr = $userRights['CollAdmin'];
+	if(array_key_exists('CollAdmin',$USER_RIGHTS)){
+		$collRightsArr = $USER_RIGHTS['CollAdmin'];
 	}
-	if(array_key_exists('CollEditor',$userRights)){
-		$collRightsArr = array_merge($collRightsArr,$userRights['CollEditor']);
+	if(array_key_exists('CollEditor',$USER_RIGHTS)){
+		$collRightsArr = array_merge($collRightsArr,$USER_RIGHTS['CollEditor']);
 	}
 }
 ?>
 <html>
 	<head>
-		<title><?php echo $defaultTitle; ?> - Duplicate Record Search</title>
+		<title><?php echo $DEFAULT_TITLE; ?> - Duplicate Record Search</title>
 		<link href="../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	    <link href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 	    <style type="text/css">
@@ -65,6 +65,9 @@ if(!$IS_ADMIN){
 					echo 'var oArr = new Array();'."\n";
 					$tempOcc = array_change_key_case($oArr);
 					unset($tempOcc['occid']);
+					unset($tempOcc['institutioncode']);
+					unset($tempOcc['collectioncode']);
+					unset($tempOcc['ownerinstitutioncode']);
 					unset($tempOcc['catalognumber']);
 					unset($tempOcc['othercatalognumbers']);
 					if($dupeType == 'event'){

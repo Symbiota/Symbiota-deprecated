@@ -1,7 +1,7 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/SpecProcNlpProfiles.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/SpecProcNlpProfiles.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 
 $action = array_key_exists('formsubmit',$_REQUEST)?$_REQUEST['formsubmit']:'';
 $collId = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
@@ -11,7 +11,7 @@ $nlpManager = new SpecProcNlpProfiles();
 //$nlpManager->setCollId($collId);
 
 $isEditor = false;
-if($isAdmin || (array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights["CollAdmin"]))){
+if($IS_ADMIN || (array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collId,$USER_RIGHTS["CollAdmin"]))){
  	$isEditor = true;
 }
 
@@ -41,8 +41,8 @@ if($isEditor){
 <html>
 	<head>
 		<title>Specimen NLP Profile Manager</title>
-		<link href="<?php echo $clientRoot; ?>/css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
-		<link href="<?php echo $clientRoot; ?>/css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
+		<link href="<?php echo $CLIENT_ROOT; ?>/css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+		<link href="<?php echo $CLIENT_ROOT; ?>/css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 		<script language="javascript">
 			function toggle(target){
 				divObj = document.getElementById(target);
@@ -76,7 +76,7 @@ if($isEditor){
 	<body>
 		<?php
 		$displayLeftMenu = true;
-		include($serverRoot.'/header.php');
+		include($SERVER_ROOT.'/header.php');
 		?>
 		<!-- This is inner text! -->
 		<div id="innertext">
@@ -91,7 +91,7 @@ if($isEditor){
 				</div>
 				<?php 
 			}
-			if($isEditor && $symbUid && $collId){
+			if($isEditor && $SYMB_UID && $collId){
 				$profileArr = $nlpManager->getProfileArr($spNlpId);
 				if(!$spNlpId){
 					?>
@@ -309,10 +309,10 @@ if($isEditor){
 				}
 			}
 			else{
-				if(!$symbUid){
+				if(!$SYMB_UID){
 					?>
 					<div style='font-weight:bold;'>
-						Please <a href='../../profile/index.php?refurl=<?php echo $clientRoot; ?>/collections/specprocessor/index.php'>login</a>!
+						Please <a href='../../profile/index.php?refurl=<?php echo $CLIENT_ROOT; ?>/collections/specprocessor/index.php'>login</a>!
 					</div>
 					<?php
 				}
@@ -334,7 +334,7 @@ if($isEditor){
 			?>
 		</div>
 		<?php
-			include($serverRoot.'/footer.php');
+			include($SERVER_ROOT.'/footer.php');
 		?>
 	</body>
 </html>

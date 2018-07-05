@@ -1,11 +1,11 @@
 <?php
 //error_reporting(E_ALL);
 include_once("config/symbini.php");
-header("Content-Type: text/html; charset=".$charset);
+header("Content-Type: text/html; charset=".$CHARSET);
 ?>
 <html>
 <head>
-	<title><?php echo $defaultTitle?> Home</title>
+	<title><?php echo $DEFAULT_TITLE?> Home</title>
 	<link href="css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 	<meta name='keywords' content='' />
@@ -15,7 +15,7 @@ header("Content-Type: text/html; charset=".$charset);
 </head>
 <body>
 	<?php
-	include($serverRoot."/header.php");
+	include($SERVER_ROOT."/header.php");
 	?> 
         <!-- This is inner text! -->
         <div  id="innertext">
@@ -27,7 +27,7 @@ header("Content-Type: text/html; charset=".$charset);
         </div>
 
 	<?php
-	include($serverRoot."/footer.php");
+	include($SERVER_ROOT."/footer.php");
 	?> 
 
 </body>

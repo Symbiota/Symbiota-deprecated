@@ -1,7 +1,7 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/GamesManager.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/GamesManager.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 
 $pid = array_key_exists("pid",$_REQUEST)?$_REQUEST["pid"]:0;
 $submitAction = array_key_exists("submitaction",$_POST)?$_POST["submitaction"]:'';
@@ -15,6 +15,10 @@ $clArr = $gameManager->getChecklistArr($pid);
 
 $gameInfo = $gameManager->setOOTD($oodID,$ootdGameChecklist);
 $imageArr = $gameInfo['images'];
+$cacheRefresh = date('YdmH');
+foreach($imageArr as $k => $imgValue){
+	$imageArr[$k] = $imgValue.'?ver='.$cacheRefresh;
+}
 
 if($submitAction){
 	$scinameAnswerArr = explode(' ',trim($_POST['sciname_answer']));
@@ -30,7 +34,7 @@ if($submitAction){
 	<script type="text/javascript" src="../../js/jquery.js"></script>
 	<script type="text/javascript" src="../../js/jquery-ui.js"></script>
 	<script type="text/javascript" src="../../js/symb/games.ootd.js"></script>
-	
+
 	<script type="text/javascript">
 		$(function() {
 			var dialogArr = new Array("game");
@@ -49,7 +53,7 @@ if($submitAction){
 			}
 
 		});
-		
+
 		function toggleById(target){
 			var obj = document.getElementById(target);
 			if(obj.style.display=="none"){
@@ -63,12 +67,12 @@ if($submitAction){
 		//<!-------------cycles the images-->
 		var ImgNum = 0;
 		var ImgLength = NewImg.length - 1;
-		var delay = 3000; // Time delay between Slides in milliseconds 
+		var delay = 3000; // Time delay between Slides in milliseconds
 		var lock = false;
 		var run;
 
 		var ImgNum = 0;
-			
+
 		function chgImg(direction){
 			var NewImg = <?php echo json_encode($imageArr); ?>;
 			var ImgLength = NewImg.length - 1;
@@ -86,12 +90,12 @@ if($submitAction){
 
 	<?php
 	$displayLeftMenu = (isset($indexMenu)?$indexMenu:"true");
-	include($serverRoot."/header.php");
-	?> 
+	include($SERVER_ROOT."/header.php");
+	?>
 	<!-- This is inner text! -->
 	<div id="innertext" style="">
 		<!-- This is inner text! -->
-		<div style="width:80%;margin-left:auto;margin-right:auto;">	
+		<div style="width:80%;margin-left:auto;margin-right:auto;">
 			<div style="text-align:center;margin-bottom:20px;">
 				<h1><?php echo (isset($ootdGameTitle)?$ootdGameTitle:'Organism of the Day'); ?></h1>
 			</div>
@@ -103,7 +107,7 @@ if($submitAction){
 					<div class = "dailypicture" align = "center">
 						<div>
 							<div style="vertical-align:middle;">
-								<a href="javascript:chgImg(1)"><img src="../../temp/ootd/<?php echo $oodID; ?>_organism300_1.jpg" name="slideshow" id="slideshow" style="width:500px;" ></a><br />
+								<a href="javascript:chgImg(1)"><img src="../../temp/ootd/<?php echo $oodID; ?>_organism300_1.jpg?ver=<?php echo $cacheRefresh; ?>" name="slideshow" id="slideshow" style="width:500px;" ></a><br />
 							</div><br />
 							<a href="javascript:chgImg(-1)">Previous</a> &nbsp;|&nbsp;
 							<a href="javascript:chgImg(1)">Next</a>
@@ -115,7 +119,7 @@ if($submitAction){
 							<img src="../../images/games/ootd/qmark.png" style="height:20px;"/>
 						</a>
 						<div id="gameinfodialog" title="How to Play">
-							Look at the picture, and see if you can figure out what the <?php echo (isset($ootdGameType)?$ootdGameType:'organism'); ?> is. If you get completely stumped, you can 
+							Look at the picture, and see if you can figure out what the <?php echo (isset($ootdGameType)?$ootdGameType:'organism'); ?> is. If you get completely stumped, you can
 							click the "I give up" button. A new <?php echo (isset($ootdGameType)?$ootdGameType:'organism'); ?> is updated daily, so make sure you check back every day to test your knowledge!
 						</div>
 					</div>
@@ -135,14 +139,14 @@ if($submitAction){
 										<input name="submitaction" type="submit" value="Submit" style="height:7em; width:10em;"/>
 									</div>
 									<div style="margin-top:20px;float:right;clear:right;" >
-										<button name="submitaction" type="submit" value="giveup" style="height:2em; width:8em;" onClick="window.open('../../taxa/index.php?taxauthid=1&taxon=<?php echo $gameInfo['tid']; ?>','plantwindow','width=900,height=650')" >I give up!</button>
+										<button name="submitaction" type="submit" value="giveup" style="height:2em; width:8em;" onClick="window.open('../../taxa/index.php?taxauthid=1&taxon=<?php echo $gameInfo['tid']; ?>','plantwindow','width=1000,height=650')" >I give up!</button>
 									</div>
 								</div>
 								<div>
 									<input name="oodid" type="hidden" value="<?php echo $oodID; ?>" />
-									<input name="cl" type="hidden" value="<?php echo $ootdGameChecklist; ?>" /> 
-									<input name="title" type="hidden" value="<?php echo $ootdGameTitle; ?>" /> 
-									<input name="type" type="hidden" value="<?php echo $ootdGameType; ?>" /> 
+									<input name="cl" type="hidden" value="<?php echo $ootdGameChecklist; ?>" />
+									<input name="title" type="hidden" value="<?php echo $ootdGameTitle; ?>" />
+									<input name="type" type="hidden" value="<?php echo $ootdGameType; ?>" />
 								</div>
 							</div>
 						</form>
@@ -171,13 +175,13 @@ if($submitAction){
 							<i><?php echo $gameInfo['sciname']; ?></i>
 						</div>
 						<div style="margin-top:30px;font-size:16px;" >
-							<a href = "#" onClick="window.open('../../taxa/index.php?taxon=<?php echo $gameInfo['tid']; ?>','plantwindow','width=900,height=650')" >-Click here to learn more about this <?php echo (isset($ootdGameType)?$ootdGameType:'organism'); ?>-</a>
+							<a href = "#" onClick="window.open('../../taxa/index.php?taxon=<?php echo $gameInfo['tid']; ?>','plantwindow','width=1100,height=650')" >-Click here to learn more about this <?php echo (isset($ootdGameType)?$ootdGameType:'organism'); ?>-</a>
 						</div>
 					</div>
 				</div>
 				<?php
 			}
-			
+
 			elseif(($submitAction != 'giveup') && (strtolower($_POST['family_answer']) != strtolower($gameInfo['family'])) && (strtolower($_POST['sciname_answer']) != strtolower($gameInfo['sciname'])) && ($genusAnswer != strtolower($gameInfo['genus']))){
 				?>
 				<div id="incorrect_both" class="middlecenter">
@@ -187,7 +191,7 @@ if($submitAction){
 							<b>Sorry, that is not correct</b>
 						</div>
 						<div style="margin-top:25px;font-size:18px;" >
-							<b>Hint:</b> The family is <u>not</u> 
+							<b>Hint:</b> The family is <u>not</u>
 							<?php echo $_POST['family_answer']; ?>.
 						</div>
 						<div style="margin-top:40px;font-size:16px;" >
@@ -201,7 +205,7 @@ if($submitAction){
 				</div>
 				<?php
 			}
-			
+
 			elseif(($submitAction != 'giveup') && (strtolower($_POST['family_answer']) == strtolower($gameInfo['family'])) && (strtolower($_POST['sciname_answer']) != strtolower($gameInfo['sciname'])) && ($genusAnswer != strtolower($gameInfo['genus']))){
 				?>
 				<div id="incorrect_sciname" class="middlecenter">
@@ -211,7 +215,7 @@ if($submitAction){
 							<b>Sorry, that is not correct</b>
 						</div>
 						<div style="margin-top:25px;font-size:18px;" >
-							On the bright side, <b>you did get the family right</b>; it's 
+							On the bright side, <b>you did get the family right</b>; it's
 							<?php echo $gameInfo['family']; ?>.
 						</div>
 						<div style="margin-top:40px;font-size:16px;" >
@@ -225,7 +229,7 @@ if($submitAction){
 				</div>
 				<?php
 			}
-			
+
 			elseif(($submitAction != 'giveup') && (strtolower($_POST['family_answer']) != strtolower($gameInfo['family'])) && (strtolower($_POST['sciname_answer']) == strtolower($gameInfo['sciname']))){
 				?>
 				<div id="incorrect_sciname" class="middlecenter">
@@ -235,7 +239,7 @@ if($submitAction){
 							<b>Sorry, that is not correct</b>
 						</div>
 						<div style="margin-top:25px;font-size:18px;" >
-							<b>You did get the scientific name right</b>; it's 
+							<b>You did get the scientific name right</b>; it's
 							<?php echo $gameInfo['sciname']; ?>, but the family is not <?php echo $_POST['family_answer']; ?>.
 						</div>
 						<div style="margin-top:40px;font-size:16px;" >
@@ -249,7 +253,7 @@ if($submitAction){
 				</div>
 				<?php
 			}
-			
+
 			elseif(($submitAction != 'giveup') && (strtolower($_POST['family_answer']) != strtolower($gameInfo['family'])) && (strtolower($_POST['sciname_answer']) != strtolower($gameInfo['sciname'])) && ($genusAnswer == strtolower($gameInfo['genus']))){
 				?>
 				<div id="incorrect_sciname" class="middlecenter">
@@ -259,7 +263,7 @@ if($submitAction){
 							<b>Sorry, that is not correct</b>
 						</div>
 						<div style="margin-top:25px;font-size:18px;" >
-							On the bright side, <b>you did get the genus right</b>; it's 
+							On the bright side, <b>you did get the genus right</b>; it's
 							<?php echo $gameInfo['genus']; ?>.
 						</div>
 						<div style="margin-top:40px;font-size:16px;" >
@@ -273,7 +277,7 @@ if($submitAction){
 				</div>
 				<?php
 			}
-			
+
 			elseif(($submitAction != 'giveup') && (strtolower($_POST['family_answer']) == strtolower($gameInfo['family'])) && (strtolower($_POST['sciname_answer']) != strtolower($gameInfo['sciname'])) && ($genusAnswer == strtolower($gameInfo['genus']))){
 				?>
 				<div id="incorrect_sciname" class="middlecenter">
@@ -283,7 +287,7 @@ if($submitAction){
 							<b>Sorry, that is not correct</b>
 						</div>
 						<div style="margin-top:25px;font-size:18px;" >
-							On the bright side, <b>you did get the family and genus right</b>; The family 
+							On the bright side, <b>you did get the family and genus right</b>; The family
 							is <?php echo $gameInfo['family']; ?>, and the genus is <?php echo $gameInfo['genus']; ?>.
 						</div>
 						<div style="margin-top:40px;font-size:16px;" >
@@ -297,7 +301,7 @@ if($submitAction){
 				</div>
 				<?php
 			}
-			
+
 			elseif($submitAction == 'giveup'){
 				?>
 				<div id="giveup" class="middlecenter">
@@ -327,7 +331,7 @@ if($submitAction){
 	</div>
 
 	<?php
-	include($serverRoot."/footer.php");
-	?> 
+	include($SERVER_ROOT."/footer.php");
+	?>
 </body>
 </html>

@@ -6,15 +6,15 @@ class SpecUploadDirect extends SpecUploadBase {
  	public function __construct(){
 		parent::__construct();
  	}
- 	
+
 	public function __destruct(){
  		parent::__destruct();
 	}
-	
+
  	public function analyzeUpload(){
 		if($sourceConn = $this->getSourceConnection()){
 			$sql = trim($this->queryStr);
-			if(substr($sql,-1) == ";") $sql = substr($sql,0,strlen($sql)-1); 
+			if(substr($sql,-1) == ";") $sql = substr($sql,0,strlen($sql)-1);
 			if(strlen($sql) > 20 && stripos(substr($sql,-20)," limit ") === false) $sql .= " LIMIT 10";
 			$rs = $sourceConn->query($sql);
 			if($rs){
@@ -42,16 +42,16 @@ class SpecUploadDirect extends SpecUploadBase {
 	}
 
  	public function uploadData($finalTransfer){
- 		global $charset;
-		
+ 		global $CHARSET;
+
 		$sourceConn = $this->getSourceConnection();
 		if($sourceConn){
 			//Delete all records in uploadspectemp table
 			$this->prepUploadData();
-			
+
 			echo "<li style='font-weight:bold;'>Connected to Source Database</li>";
 			set_time_limit(800);
-			$sourceConn->query("SET NAMES ".str_replace('-','',strtolower($charset)).";");
+			$sourceConn->query("SET NAMES ".str_replace('-','',strtolower($CHARSET)).";");
 			//echo "<div>".$this->queryStr."</div><br/>";
 			if($result = $sourceConn->query($this->queryStr)){
 				echo "<li style='font-weight:bold;'>Results obtained from Source Connection, now reading Resultset... </li>";
@@ -67,7 +67,7 @@ class SpecUploadDirect extends SpecUploadBase {
 					unset($recMap);
 				}
 				$result->close();
-				
+
 				$this->cleanUpload();
 
 				if($finalTransfer){
@@ -82,7 +82,7 @@ class SpecUploadDirect extends SpecUploadBase {
 			$sourceConn->close();
 		}
 	}
-	
+
 	private function getSourceConnection() {
 		if(!$this->server || !$this->username || !$this->password || !$this->schemaName){
 			echo "<div style='color:red;'>One of the required connection variables are null. Please resolve.</div>";

@@ -1,5 +1,5 @@
 <?php
-include_once($serverRoot.'/classes/SpecProcNlpLbcc.php');
+include_once($SERVER_ROOT.'/classes/SpecProcNlpLbcc.php');
 
 class SpecProcNlpLbccBryophyte extends SpecProcNlpLbcc {
 
@@ -939,43 +939,43 @@ class SpecProcNlpLbccBryophyte extends SpecProcNlpLbcc {
 			$stateProvince = "British Columbia";
 			$s = trim(trim($mats[1])." ".trim($mats[2]));
 		}
-		if(preg_match("/^(.*?)(\\d+)[-—](\\d+) ?(?:d|\(3)\\. ?w(?:\\.|\\n)(.*)$/is", $s, $mats)) {
+		if(preg_match("/^(.*?)(\\d+)[-ï¿½](\\d+) ?(?:d|\(3)\\. ?w(?:\\.|\\n)(.*)$/is", $s, $mats)) {
 			$substrate = "decaying wood";
 			$recordNumber = trim($mats[2])."-".trim($mats[3]);
 			$s = trim($mats[1])."\n".trim($mats[4]);
 		} else if(preg_match("/^(.*?)\\b([A-Za-z]+ on )?d\\. ?w\\.\\n(.*)$/is", $s, $mats)) {
 			$substrate = trim(trim($mats[2])." decaying wood");
 			$s = trim($mats[1])."\n".trim($mats[3]);
-		} else if(preg_match("/^(.*?)(\\d+)[-—](\\d+) ?s(?:\\.|oil)? on r(?:\\.|ock|\\n)(.*)$/is", $s, $mats)) {
+		} else if(preg_match("/^(.*?)(\\d+)[-ï¿½](\\d+) ?s(?:\\.|oil)? on r(?:\\.|ock|\\n)(.*)$/is", $s, $mats)) {
 			$substrate = "soil on rock";
 			$recordNumber = trim($mats[2])."-".trim($mats[3]);
 			$s = trim($mats[1])."\n".trim($mats[4]);
-		} else if(preg_match("/^(.*?)(\\d+)[-—](\\d+) ?s(?:\\.|oil|\\n)(.*)$/is", $s, $mats)) {
+		} else if(preg_match("/^(.*?)(\\d+)[-ï¿½](\\d+) ?s(?:\\.|oil|\\n)(.*)$/is", $s, $mats)) {
 			$substrate = "soil";
 			$recordNumber = trim($mats[2])."-".trim($mats[3]);
 			$s = trim($mats[1])."\n".trim($mats[4]);
-		} else if(preg_match("/^(.*?)(\\d+)[-—](\\d+) ?r(?:\\.|ock|\\n)(.*)$/is", $s, $mats)) {
+		} else if(preg_match("/^(.*?)(\\d+)[-ï¿½](\\d+) ?r(?:\\.|ock|\\n)(.*)$/is", $s, $mats)) {
 			$substrate = "rock";
 			$recordNumber = trim($mats[2])."-".trim($mats[3]);
 			$s = trim($mats[1])."\n".trim($mats[4]);
-		} else if(preg_match("/^(.*?)(\\d+)[-—](\\d+) ?b(?:\\.|ark|\\n)(.*)$/is", $s, $mats)) {
+		} else if(preg_match("/^(.*?)(\\d+)[-ï¿½](\\d+) ?b(?:\\.|ark|\\n)(.*)$/is", $s, $mats)) {
 			$substrate = "bark";
 			$recordNumber = trim($mats[2])."-".trim($mats[3]);
 			$s = trim($mats[1])."\n".trim($mats[4]);
-		} else if(preg_match("/^(.*?)(\\d+)[-—](\\d+) ?c(?:\\.|lay|\\n)(.*)$/is", $s, $mats)) {
+		} else if(preg_match("/^(.*?)(\\d+)[-ï¿½](\\d+) ?c(?:\\.|lay|\\n)(.*)$/is", $s, $mats)) {
 			$substrate = "clay";
 			$recordNumber = trim($mats[2])."-".trim($mats[3]);
 			$s = trim($mats[1])."\n".trim($mats[4]);
-		} else if(preg_match("/^(.*?)(\\d+)[-—](\\d+) ?w(?:\\.|et) ?s(?:\\.|oil|\\n)(.*)$/is", $s, $mats)) {
+		} else if(preg_match("/^(.*?)(\\d+)[-ï¿½](\\d+) ?w(?:\\.|et) ?s(?:\\.|oil|\\n)(.*)$/is", $s, $mats)) {
 			$substrate = "wet soil";
 			$recordNumber = trim($mats[2])."-".trim($mats[3]);
 			$s = trim($mats[1])."\n".trim($mats[4]);
 		}
-		if(preg_match("/^(.*)\\b[HK]ong (\\d+)[-—](\\d+)\\b(.*)$/is", $s, $mats)) {
+		if(preg_match("/^(.*)\\b[HK]ong (\\d+)[-ï¿½](\\d+)\\b(.*)$/is", $s, $mats)) {
 			$recordedBy = "Hong, Won Shic";
 			$recordNumber = trim($mats[2])."-".trim($mats[3]);
 			$s = trim($mats[1])."\n".trim($mats[4]);
-		} else if(preg_match("/^(.*)(\\d+)[-—](\\d+)\\b(?:by\\s)?W\\. ?(?:S\\. ?)?Hon.?\\b(.*)$/is", $s, $mats)) {
+		} else if(preg_match("/^(.*)(\\d+)[-ï¿½](\\d+)\\b(?:by\\s)?W\\. ?(?:S\\. ?)?Hon.?\\b(.*)$/is", $s, $mats)) {
 			$recordedBy = "Hong, Won Shic";
 			$recordNumber = trim($mats[2])."-".trim($mats[3]);
 			$s = trim($mats[1])."\n".trim($mats[4]);

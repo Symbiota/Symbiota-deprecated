@@ -86,7 +86,7 @@ class ImageProcessor {
 		$this->matchOtherCatalogNumbers = (array_key_exists('matchothercatalognumbers', $postArr)?true:false);
 
 		if($this->collid){
-			$iPlantDataUrl = 'https://bisque.cyverse.org/data_service/'; 
+			$iPlantDataUrl = 'https://bisque.cyverse.org/data_service/';
 			$iPlantImageUrl = 'https://bisque.cyverse.org/image_service/image/';
 			if(!$iPlantSourcePath && array_key_exists('IPLANT_IMAGE_IMPORT_PATH', $GLOBALS)) $iPlantSourcePath = $GLOBALS['IPLANT_IMAGE_IMPORT_PATH'];
 			if($iPlantSourcePath){
@@ -100,7 +100,7 @@ class ImageProcessor {
 			$this->initProcessor('iplant');
 			$collStr = $this->collArr['instcode'].($this->collArr['collcode']?'-'.$this->collArr['collcode']:'');
 			$this->logOrEcho('Starting image processing: '.$collStr.' ('.date('Y-m-d h:i:s A').')');
-			
+
 			if(!$pmTerm){
 				$this->logOrEcho('COLLECTION SKIPPED: Pattern matching term is NULL');
 				return false;
@@ -124,13 +124,13 @@ class ImageProcessor {
 					//check if response is 200
 					if(strpos($result[0],'200') !== false) {
 						$xml = '';
-						try { 
+						try {
 							$xml = new SimpleXMLElement($contents);
-						} 
-						catch (Exception $e) { 
+						}
+						catch (Exception $e) {
 							$this->logOrEcho('ABORTED: bad content received from iPlant: '.$contents);
-							return false; 
-						} 
+							return false;
+						}
 						if(count($xml->image)){
 							$this->logOrEcho('Starting to process '.count($xml->image).' images uploaded on '.$lastRunDate,1);
 							$cnt = 0;
@@ -143,10 +143,13 @@ class ImageProcessor {
 										$guid = $i['resource_uniq'];
 										if($occid = $this->getOccid($specPk,$guid,$fileName)){
 											$baseUrl = $iPlantImageUrl.$guid;
-											$webUrl = $baseUrl.'?resize=1250&format=jpeg';
-											$tnUrl = $baseUrl.'?thumbnail=200,200';
-											$lgUrl = $baseUrl.'?resize=4000&format=jpeg';
-											
+											$webUrl = $baseUrl.'/resize:1250/format:jpeg';
+											$tnUrl = $baseUrl.'/thumbnail:200,200';
+											$lgUrl = $baseUrl.'/resize:4000/format:jpeg';
+											//$webUrl = $baseUrl.'?resize=1250&format=jpeg';
+											//$tnUrl = $baseUrl.'?thumbnail=200,200';
+											//$lgUrl = $baseUrl.'?resize=4000&format=jpeg';
+
 											$this->databaseImage($occid,$webUrl,$tnUrl,$lgUrl,$baseUrl,$this->collArr['collname'],$guid.'; filename: '.$fileName);
 											//$this->logOrEcho("Image processed successfully (".date('Y-m-d h:i:s A').")!",2);
 										}
@@ -199,7 +202,7 @@ class ImageProcessor {
 						while(($data = fgetcsv($fh,1000,",")) !== FALSE){
 							if($data[$mediaMd5Index]){
 								$origFileName = basename($data[$origFileNameIndex]);
-								//basename() function is system specific, thus following code needed to parse filename independent of source file from PC, Mac, etc 
+								//basename() function is system specific, thus following code needed to parse filename independent of source file from PC, Mac, etc
 								if(strpos($origFileName,'/') !== false){
 									$origFileName = substr($origFileName,(strrpos($origFileName,'/')+1));
 								}
@@ -216,7 +219,8 @@ class ImageProcessor {
 											$baseUrl = $idigbioImageUrl.$data[$mediaMd5Index];
 											$webUrl = $baseUrl.'?size=webview';
 											$tnUrl = $baseUrl.'?size=thumbnail';
-											$lgUrl = $baseUrl.'?size=fullsize';
+											//$lgUrl = $baseUrl.'?size=fullsize';
+											$lgUrl = $baseUrl;
 											$this->databaseImage($occid,$webUrl,$tnUrl,$lgUrl,$baseUrl,$this->collArr['collname'],$origFileName);
 										}
 									}
@@ -251,7 +255,179 @@ class ImageProcessor {
 		return $status;
 	}
 
-	//Shared functions 
+	public function initiateFileUpload(){
+		$this->initProcessor('imageFile');
+		$collStr = $this->collArr['instcode'].($this->collArr['collcode']?'-'.$this->collArr['collcode']:'');
+		$this->logOrEcho('Starting image processing for '.$collStr.' ('.date('Y-m-d h:i:s A').')');
+		if($pmTerm){
+			$fullPath = $GLOBALS['SERVER_ROOT'].(substr($GLOBALS['SERVER_ROOT'],-1) != '/'?'/':'').'temp/data/idigbio_'.time().'.csv';
+			if(move_uploaded_file($_FILES['idigbiofile']['tmp_name'],$fullPath)){
+				if($fh = fopen($fullPath,'rb')){
+					$headerArr = fgetcsv($fh,0,',');
+				}
+			}
+		}
+	}
+
+	//Image file upload
+	public function loadImageFile(){
+		$inFileName = basename($_FILES['uploadfile']['name']);
+		$ext = substr(strrchr($inFileName, '.'), 1);
+		$fileName = 'imageMappingFile_'.time();
+		$fullPath = $GLOBALS['SERVER_ROOT'].(substr($GLOBALS['SERVER_ROOT'],-1) != '/'?'/':'').'temp/data/';
+		if(move_uploaded_file($_FILES['uploadfile']['tmp_name'],$fullPath.$fileName.'.'.$ext)){
+			if($ext == 'zip'){
+				$zipFilePath = $fullPath.$fileName.'.zip';
+				$ext = '';
+				$zip = new ZipArchive;
+				$res = $zip->open($zipFilePath);
+				if($res === TRUE) {
+					for($i = 0; $i < $zip->numFiles; $i++){
+						$fileExt = substr(strrchr($zip->getNameIndex($i), '.'), 1);
+						if($fileExt == 'csv' || $fileExt == 'txt'){
+							$ext = $fileExt;
+							$zip->renameIndex($i, $fileName.'.'.$ext);
+							$zip->extractTo($fullPath,$fileName.'.'.$ext);
+							$zip->close();
+							unlink($zipFilePath);
+							break;
+						}
+					}
+				}
+				else{
+					echo 'failed, code:' . $res;
+					return false;
+				}
+			}
+			return $fileName.'.'.$ext;
+		}
+		return '';
+	}
+
+	public function echoFileMapping($fileName){
+		$fullPath = $GLOBALS['SERVER_ROOT'].(substr($GLOBALS['SERVER_ROOT'],-1) != '/'?'/':'').'temp/data/'.$fileName;
+		if($fh = fopen($fullPath,'rb')){
+			$translationMap = array('catalognumber' => 'catalognumber', 'url' => 'url', 'thumbnailurl' => 'thumbnailurl',
+				'originalurl' => 'originalurl', 'thumbnail' => 'thumbnailurl', 'large' => 'originalurl', 'web' => 'url');
+			$headerArr = fgetcsv($fh,0,',');
+			foreach($headerArr as $i => $sourceField){
+				if($sourceField != 'collid'){
+					echo '<tr><td style="padding:2px;">';
+					echo $sourceField;
+					$sourceField = strtolower($sourceField);
+					echo '<input type="hidden" name="sf['.$i.']" value="'.$sourceField.'" />';
+					echo '</td><td>';
+					echo '<select name="tf['.$i.']" style="background:'.(!array_key_exists($sourceField,$translationMap)?'yellow':'').'">';
+					echo '<option value="">Select Target Field</option>';
+					echo '<option value="">-------------------------</option>';
+					echo '<option value="catalognumber" '.(isset($translationMap[$sourceField]) && $translationMap[$sourceField]=='catalognumber'?'SELECTED':'').'>Catalog Number (required)</option>';
+					echo '<option value="originalurl" '.(isset($translationMap[$sourceField]) && $translationMap[$sourceField]=='originalurl'?'SELECTED':'').'>Large Image URL (required)</option>';
+					echo '<option value="url" '.(isset($translationMap[$sourceField]) && $translationMap[$sourceField]=='url'?'SELECTED':'').'>Web Image URL</option>';
+					echo '<option value="thumbnailurl" '.(isset($translationMap[$sourceField]) && $translationMap[$sourceField]=='thumbnailurl'?'SELECTED':'').'>Thumbnail URL</option>';
+					echo '</select>';
+					echo '</td></tr>';
+				}
+			}
+		}
+	}
+
+	public function loadFileData($postArr){
+		if(isset($postArr['filename']) && isset($postArr['tf'])){
+			//Get field map
+			$fieldMap = array_flip($postArr['tf']);
+			//Load data
+			$fullPath = $GLOBALS['SERVER_ROOT'].(substr($GLOBALS['SERVER_ROOT'],-1) != '/'?'/':'').'temp/data/'.$postArr['filename'];
+			if($fh = fopen($fullPath,'rb')){
+				$headerArr = fgetcsv($fh);
+				while($recordArr = fgetcsv($fh)){
+					$catalogNumber = (isset($fieldMap['catalognumber'])?$this->cleanInStr($recordArr[$fieldMap['catalognumber']]):'');
+					$originalUrl = (isset($fieldMap['originalurl'])?$this->cleanInStr($recordArr[$fieldMap['originalurl']]):'');
+					$url = (isset($fieldMap['url'])?$this->cleanInStr($recordArr[$fieldMap['url']]):'');
+					if(!$url) $url = 'empty';
+					$thumbnailUrl = (isset($fieldMap['thumbnailurl'])?$this->cleanInStr($recordArr[$fieldMap['thumbnailurl']]):'');
+					if($catalogNumber && $originalUrl){
+						echo '<li>Processing catalogNumber: '.$catalogNumber.'</li>';
+						//Get catalogNumber
+						$occArr = array();
+						$sql = 'SELECT occid FROM omoccurrences WHERE collid = '.$this->collid.' AND catalognumber = "'.$catalogNumber.'"';
+						$rs = $this->conn->query($sql);
+						while($r = $rs->fetch_object()){
+							$occArr[] = $r->occid;
+						}
+						$rs->free();
+						if($occArr){
+							//Check to see if image with matching filename is already linked. If so, remove and replace with new
+							$origFileName = substr(strrchr($originalUrl, "/"), 1);
+							$urlFileName = substr(strrchr($url, "/"), 1);
+							foreach($occArr as $k => $occid){
+								$sql1 = 'SELECT imgid, url, originalurl, thumbnailurl FROM images WHERE (occid = '.$occid.')';
+								$rs1 = $this->conn->query($sql1);
+								while($r1 = $rs1->fetch_object()){
+									$uFileName = substr(strrchr($r1->url, "/"), 1);
+									$oFileName = substr(strrchr($r1->originalurl, "/"), 1);
+									if($oFileName == $origFileName || $uFileName == $urlFileName || $oFileName == $urlFileName || $uFileName == $origFileName){
+										$sql2 = 'UPDATE images '.
+											'SET url = "'.$url.'", originalurl = "'.$originalUrl.'", thumbnailurl = '.($thumbnailUrl?'"'.$thumbnailUrl.'"':'NULL').' '.
+											'WHERE imgid = '.$r1->imgid;
+										if($this->conn->query($sql2)){
+											echo '<li style="margin-left:10px">Existing image replaced with new image mapping: <a href="../editor/occurrenceeditor.php?occid='.$occid.'" target="_blank">'.$catalogNumber.'</a></li>';
+											//Delete physical images it previous version was mapped locally
+											$this->deleteImage($r1->url);
+											$this->deleteImage($r1->originalurl);
+											$this->deleteImage($r1->thumbnailurl);
+											unset($occArr[$k]);
+											break;
+										}
+										else{
+											echo '<li style="margin-left:10px">ERROR updating existing image record: '.$this->conn->error.'</li>';
+										}
+									}
+								}
+								$rs1->free();
+							}
+						}
+						else{
+							//Create new occurrence record to link image
+							$sqlIns = 'INSERT INTO omoccurrences(collid,catalognumber,processingstatus,dateentered) '.
+								'VALUES('.$this->collid.',"'.$catalogNumber.'","unprocessed",now())';
+							if($this->conn->query($sqlIns)){
+								$occArr[] = $this->conn->insert_id;
+								echo '<li style="margin-left:10px">Unable to find record with matching catalogNumber; new occurrence record created</li>';
+							}
+							else{
+								echo '<li style="margin-left:10px">ERROR creating new occurrence record: '.$this->conn->error.'</li>';
+							}
+						}
+						foreach($occArr as $occid){
+							//Load image URLs
+							$sqlInsert = 'INSERT INTO images(occid,url,originalurl,thumbnailurl) '.
+								'VALUES('.$occid.',"'.$url.'","'.$originalUrl.'",'.($thumbnailUrl?'"'.$thumbnailUrl.'"':'NULL').')';
+							if($this->conn->query($sqlInsert)){
+								echo '<li style="margin-left:10px">Image URLs linked to: <a href="../editor/occurrenceeditor.php?occid='.$occid.'" target="_blank">'.$catalogNumber.'</a></li>';
+							}
+							else{
+								echo '<li style="margin-left:10px">ERROR loading image: '.$this->conn->error.'</li>';
+							}
+						}
+					}
+				}
+			}
+			fclose($fh);
+			unlink($fullPath);
+		}
+	}
+
+	private function deleteImage($imgUrl){
+		if(stripos($imgUrl, 'http') === 0 || stripos($imgUrl, 'https') === 0){
+			$imgUrl = parse_url($imgUrl, PHP_URL_PATH);
+		}
+		if($GLOBALS['IMAGE_ROOT_URL'] && strpos($imgUrl,$GLOBALS['IMAGE_ROOT_URL']) === 0){
+			$imgPath = $GLOBALS['IMAGE_ROOT_PATH'].substr($imgUrl,strlen($GLOBALS['IMAGE_ROOT_URL']));
+			unlink($imgPath);
+		}
+	}
+
+	//Shared functions
 	private function getOccid($specPk,$sourceIdentifier,$fileName = ''){
 		$occid = 0;
 		if($this->collid){
@@ -305,26 +481,26 @@ class ImageProcessor {
 								$fnExt = strtolower(array_pop($fnArr));
 								$fnBase = implode($fnArr);
 								if($guid == $sourceIdentifier){
-									//Image file already loaded (based on identifier, thus abort and don't reload 
+									//Image file already loaded (based on identifier, thus abort and don't reload
 									$occid = false;
 									$this->logOrEcho('NOTICE: Image mapping skipped; image identifier ('.$sourceIdentifier.') already in system (#'.$occLink.')',2);
 									break;
 								}
 								elseif($fn == $fileName){
-									//Image file already loaded, thus abort and don't reload 
+									//Image file already loaded, thus abort and don't reload
 									$occid = false;
-									$this->logOrEcho('NOTICE: Image mapping skipped; file ('.$fileName.') already in system (#'.$occLink.')',2); 
+									$this->logOrEcho('NOTICE: Image mapping skipped; file ('.$fileName.') already in system (#'.$occLink.')',2);
 									break;
 								}
 								elseif($fileBaseName  == $fnBase && $fnExt == 'jpg'){
-									//JPG already mapped for this image, thus abort and don't reload 
+									//JPG already mapped for this image, thus abort and don't reload
 									$occid = false;
-									//$this->logOrEcho('NOTICE: Image mapping skipped; high-res image with same name already in system ('.$fileName.'; '.$occLink.')',2); 
+									//$this->logOrEcho('NOTICE: Image mapping skipped; high-res image with same name already in system ('.$fileName.'; '.$occLink.')',2);
 									break;
 								}
 								elseif($fileExt == 'jpg' && in_array($fnExt,$highResList)){
-									//$this->logOrEcho('NOTICE: Replacing exist map of high-res with this JPG version ('.$fileName.'; #'.$occLink.')',2); 
-									//Replace high res source with JPG by deleteing high res from database 
+									//$this->logOrEcho('NOTICE: Replacing exist map of high-res with this JPG version ('.$fileName.'; #'.$occLink.')',2);
+									//Replace high res source with JPG by deleteing high res from database
 									$this->conn->query('DELETE FROM images WHERE imgid = '.$imgId);
 								}
 							}
@@ -332,17 +508,13 @@ class ImageProcessor {
 					}
 				}
 				else{
-					//Check to see if urls are already in system
-					$sql1 = 'SELECT i.imgid '.
-						'FROM images i INNER JOIN omoccurrences o ON i.occid = o.occid '.
-						'WHERE o.collid = '.$this->collid.' AND i.sourceIdentifier = "'.$sourceIdentifier.'"';
-					//echo $sql1;
-					$rs1 = $this->conn->query($sql1);
-					if($rs1->num_rows){
-						$this->logOrEcho('NOTICE: Image already mapped in system (#'.$occLink.')',2);
-						$occid = false;
+					if($sourceIdentifier){
+						//Check to see if image was previous loaded into system, if so remove
+						$sql = 'DELETE i.* FROM images i INNER JOIN omoccurrences o ON i.occid = o.occid '.
+							'WHERE (o.occid = '.$occid.') AND (i.originalurl LIKE "http%://api.idigbio.org%") AND (i.sourceIdentifier = "'.$sourceIdentifier.'")';
+						$this->conn->query($sql);
+						$this->logOrEcho('Replacing previously mapped image with new input',2);
 					}
-					$rs1->free();
 				}
 				if($occid) $this->logOrEcho('Linked image to existing record ('.($fileName?$fileName.'; ':'').'#'.$occLink.') ',2);
 			}
@@ -361,7 +533,7 @@ class ImageProcessor {
 		}
 		return $occid;
 	}
-	
+
 	private function databaseImage($occid,$webUrl,$tnUrl,$lgUrl,$archiveUrl,$ownerStr,$sourceIdentifier){
 		$status = true;
 		if($occid){
@@ -370,7 +542,7 @@ class ImageProcessor {
 			/*
 			$testUrl = $lgUrl;
 			if(!$testUrl) $testUrl = $webUrl;
-			$imgInfo = getimagesize($testUrl);
+			$imgInfo = getimagesize(str_replace(' ', '%20', $testUrl));
 			if($imgInfo){
 				if($imgInfo[2] == IMAGETYPE_GIF){
 					$format = 'image/gif';
@@ -448,7 +620,7 @@ class ImageProcessor {
 
 	private function updateLastRunDate($date){
 		if($this->spprid){
-			$sql = 'UPDATE specprocessorprojects SET source = "'.$date.'" WHERE spprid = '.$this->spprid;
+			$sql = 'UPDATE specprocessorprojects SET lastrundate = "'.$date.'" WHERE spprid = '.$this->spprid;
 			if(!$this->conn->query($sql)){
 				$this->logOrEcho('ERROR updating last run date: '.$this->conn->error);
 			}
@@ -478,7 +650,7 @@ class ImageProcessor {
 			$this->setCollArr();
 		}
 	}
-	
+
 	public function setSpprid($spprid){
 		if(is_numeric($spprid)){
 			$this->spprid = $spprid;
@@ -502,7 +674,7 @@ class ImageProcessor {
 	public function getLogMode(){
 		return $this->logMode;
 	}
-	
+
 	//Misc functions
 	private function cleanInStr($inStr){
 		$retStr = trim($inStr);

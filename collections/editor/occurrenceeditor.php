@@ -2,7 +2,6 @@
 include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceEditorManager.php');
 include_once($SERVER_ROOT.'/classes/ProfileManager.php');
-include_once($SERVER_ROOT.'/classes/SOLRManager.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 header('Access-Control-Allow-Origin: http://www.catalogueoflife.org/col/webservice');
 
@@ -34,8 +33,6 @@ if($crowdSourceMode){
 	$occManager->setCrowdSourceMode(1);
 }
 
-if($SOLR_MODE) $solrManager = new SOLRManager();
-
 $isEditor = 0;		//If not editor, edits will be submitted to omoccuredits table but not applied to omoccurrences
 $displayQuery = 0;
 $isGenObs = 0;
@@ -48,21 +45,24 @@ $qryCnt = false;
 $statusStr = '';
 $navStr = '';
 
-if($symbUid){
+if($SYMB_UID){
 	//Set variables
-	$occManager->setSymbUid($symbUid);
+	$occManager->setSymbUid($SYMB_UID);
 	$occManager->setOccId($occId);
 	$occManager->setCollId($collId);
 	$collMap = $occManager->getCollMap();
-	if($occId && !$collId && !$crowdSourceMode) $collId = $collMap['collid'];
+	if(isset($collMap['collid']) && $collId != $collMap['collid']){
+		$collId = $collMap['collid'];
+		$occManager->setCollId($collId);
+	}
 
 	if($collMap && $collMap['colltype']=='General Observations') $isGenObs = 1;
 
 	//Bring in config variables
 	if($isGenObs){
-		if(file_exists('includes/config/occurVarGenObs'.$symbUid.'.php')){
+		if(file_exists('includes/config/occurVarGenObs'.$SYMB_UID.'.php')){
 			//Specific to particular collection
-			include('includes/config/occurVarGenObs'.$symbUid.'.php');
+			include('includes/config/occurVarGenObs'.$SYMB_UID.'.php');
 		}
 		elseif(file_exists('includes/config/occurVarGenObsDefault.php')){
 			//Specific to Default values for portal
@@ -85,12 +85,12 @@ if($symbUid){
 	}
 	if(isset($ACTIVATE_EXSICCATI) && $ACTIVATE_EXSICCATI) $occManager->setExsiccatiMode(true);
 
-	if($isAdmin || ($collId && array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights["CollAdmin"]))){
+	if($IS_ADMIN || ($collId && array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collId,$USER_RIGHTS["CollAdmin"]))){
 		$isEditor = 1;
 	}
 	else{
 		if($isGenObs){
-			if(!$occId && array_key_exists("CollEditor",$userRights) && in_array($collId,$userRights["CollEditor"])){
+			if(!$occId && array_key_exists("CollEditor",$USER_RIGHTS) && in_array($collId,$USER_RIGHTS["CollEditor"])){
 				//Approved General Observation editors can add records
 				$isEditor = 2;
 			}
@@ -98,15 +98,15 @@ if($symbUid){
 				//Lets assume that Edits where submitted and they remain on same specimen, user is still approved
 				 $isEditor = 2;
 			}
-			elseif($occManager->getObserverUid() == $symbUid){
+			elseif($occManager->getObserverUid() == $SYMB_UID){
 				//Users can edit their own records
 				$isEditor = 2;
 			}
 		}
-		elseif(array_key_exists("CollEditor",$userRights) && in_array($collId,$userRights["CollEditor"])){
+		elseif(array_key_exists("CollEditor",$USER_RIGHTS) && in_array($collId,$USER_RIGHTS["CollEditor"])){
 			$isEditor = 2;
 		}
-		elseif(array_key_exists("CollTaxon",$userRights) && $occId){
+		elseif(array_key_exists("CollTaxon",$USER_RIGHTS) && $occId){
 			//Check to see if this user is authorized to edit this occurrence given their taxonomic editing authority
 			//0 = not editor, 2 = full editor, 3 = taxon editor, but not for this specific occurrence
 			$isEditor = $occManager->isTaxonomicEditor();
@@ -114,7 +114,6 @@ if($symbUid){
 	}
 	if($action == "Save Edits"){
 		$statusStr = $occManager->editOccurrence($_POST,($crowdSourceMode?1:$isEditor));
-        if($SOLR_MODE) $solrManager->updateSOLR();
 	}
 	if($isEditor == 1 || $isEditor == 2 || $crowdSourceMode){
 		if($action == 'Save OCR'){
@@ -136,17 +135,14 @@ if($symbUid){
 		if($action == "Submit Determination"){
 			//Adding a new determination
 			$statusStr = $occManager->addDetermination($_POST,$isEditor);
-            if($SOLR_MODE) $solrManager->updateSOLR();
 			$tabTarget = 1;
 		}
 		elseif($action == "Submit Determination Edits"){
 			$statusStr = $occManager->editDetermination($_POST);
-            if($SOLR_MODE) $solrManager->updateSOLR();
 			$tabTarget = 1;
 		}
 		elseif($action == "Delete Determination"){
 			$statusStr = $occManager->deleteDetermination($_POST['detid']);
-            if($SOLR_MODE) $solrManager->updateSOLR();
 			$tabTarget = 1;
 		}
 		//Only full editors can perform following actions
@@ -164,7 +160,6 @@ if($symbUid){
 						//Stay on record and get $occId
 						$occId = $occManager->getOccId();
 					}
-                    if($SOLR_MODE) $solrManager->updateSOLR();
 				}
 				else{
 					$statusStr = $occManager->getErrorStr();
@@ -174,7 +169,6 @@ if($symbUid){
 				if($occManager->deleteOccurrence($occId)){
 					$occId = 0;
 					$occManager->setOccId(0);
-                    if($SOLR_MODE) $solrManager->updateSOLR();
 				}
 				else{
 					$statusStr = $occManager->getErrorStr();
@@ -189,7 +183,6 @@ if($symbUid){
 							$collId = $transferCollid;
 							$collMap = $occManager->getCollMap();
 						}
-                        if($SOLR_MODE) $solrManager->updateSOLR();
 					}
 					else{
 						$statusStr = $occManager->getErrorStr();
@@ -198,13 +191,11 @@ if($symbUid){
 			}
 			elseif($action == "Submit Image Edits"){
 				$statusStr = $occManager->editImage($_POST);
-                if($SOLR_MODE) $solrManager->updateSOLR();
 				$tabTarget = 2;
 			}
 			elseif($action == "Submit New Image"){
 				if($occManager->addImage($_POST)){
 					$statusStr = 'Image added successfully';
-                    if($SOLR_MODE) $solrManager->updateSOLR();
 					$tabTarget = 2;
 				}
 				if($occManager->getErrorStr()){
@@ -215,7 +206,6 @@ if($symbUid){
 				$removeImg = (array_key_exists("removeimg",$_POST)?$_POST["removeimg"]:0);
 				if($occManager->deleteImage($_POST["imgid"], $removeImg)){
 					$statusStr = 'Image deleted successfully';
-                    if($SOLR_MODE) $solrManager->updateSOLR();
 					$tabTarget = 2;
 				}
 				else{
@@ -225,7 +215,6 @@ if($symbUid){
 			elseif($action == "Remap Image"){
 				if($occManager->remapImage($_POST["imgid"], $_POST["targetoccid"])){
 					$statusStr = 'SUCCESS: Image remapped to record <a href="occurrenceeditor.php?occid='.$_POST["targetoccid"].'" target="_blank">'.$_POST["targetoccid"].'</a>';
-                    if($SOLR_MODE) $solrManager->updateSOLR();
 				}
 				else{
 					$statusStr = 'ERROR linking image to new specimen: '.$occManager->getErrorStr();
@@ -234,49 +223,40 @@ if($symbUid){
 			elseif($action == "Disassociate Image"){
 				if($occManager->remapImage($_POST["imgid"])){
 					$statusStr = 'SUCCESS disassociating image <a href="../../imagelib/imgdetails.php?imgid='.$_POST["imgid"].'" target="_blank">#'.$_POST["imgid"].'</a>';
-                    if($SOLR_MODE) $solrManager->updateSOLR();
 				}
 				else{
 					$statusStr = 'ERROR disassociating image: '.$occManager->getErrorStr();
 				}
-				
+
 			}
 			elseif($action == "Apply Determination"){
 				$makeCurrent = 0;
 				if(array_key_exists('makecurrent',$_POST)) $makeCurrent = 1;
 				$statusStr = $occManager->applyDetermination($_POST['detid'],$makeCurrent);
-                if($SOLR_MODE) $solrManager->updateSOLR();
 				$tabTarget = 1;
 			}
 			elseif($action == "Make Determination Current"){
 				$statusStr = $occManager->makeDeterminationCurrent($_POST['detid']);
-                if($SOLR_MODE) $solrManager->updateSOLR();
 				$tabTarget = 1;
 			}
 			elseif($action == "Submit Verification Edits"){
 				$statusStr = $occManager->editIdentificationRanking($_POST['confidenceranking'],$_POST['notes']);
-                if($SOLR_MODE) $solrManager->updateSOLR();
 				$tabTarget = 1;
 			}
 			elseif($action == 'Link to Checklist as Voucher'){
 				$statusStr = $occManager->linkChecklistVoucher($_POST['clidvoucher'],$_POST['tidvoucher']);
-                if($SOLR_MODE) $solrManager->updateSOLR();
 			}
 			elseif($action == 'deletevoucher'){
 				$statusStr = $occManager->deleteChecklistVoucher($_REQUEST['delclid']);
-                if($SOLR_MODE) $solrManager->updateSOLR();
 			}
 			elseif($action == 'editgeneticsubmit'){
 				$statusStr = $occManager->editGeneticResource($_POST);
-                if($SOLR_MODE) $solrManager->updateSOLR();
 			}
 			elseif($action == 'deletegeneticsubmit'){
 				$statusStr = $occManager->deleteGeneticResource($_POST['genid']);
-                if($SOLR_MODE) $solrManager->updateSOLR();
 			}
 			elseif($action == 'addgeneticsubmit'){
 				$statusStr = $occManager->addGeneticResource($_POST);
-                if($SOLR_MODE) $solrManager->updateSOLR();
 			}
 		}
 	}
@@ -332,7 +312,18 @@ if($symbUid){
 		if($oArr){
 			if(!$occId) $occId = $occManager->getOccId();
 			$occArr = $oArr[$occId];
-			if(!$collMap) $collMap = $occManager->getCollMap();
+			if(!$collMap){
+				$collMap = $occManager->getCollMap();
+				//if(isset($collMap['collid'])) $collId = $collMap['collid'];
+				if(!$isEditor){
+					if(isset($USER_RIGHTS["CollAdmin"]) && in_array($collMap['collid'],$USER_RIGHTS["CollAdmin"])){
+						$isEditor = 1;
+					}
+					elseif(isset($USER_RIGHTS["CollEditor"]) && in_array($collMap['collid'],$USER_RIGHTS["CollEditor"])){
+						$isEditor = 1;
+					}
+				}
+			}
 		}
 	}
 	elseif($goToMode == 2){
@@ -395,7 +386,7 @@ if($symbUid){
 
 	$isLocked = false;
 	if($occId) $isLocked = $occManager->getLock();
-	
+
 }
 else{
 	header('Location: ../../profile/index.php?refurl=../collections/editor/occurrenceeditor.php?'.$_SERVER['QUERY_STRING']);
@@ -409,36 +400,35 @@ else{
     <?php
     if($crowdSourceMode == 1){
 		?>
-		<link href="includes/config/occureditorcrowdsource.css?ver=20170503" type="text/css" rel="stylesheet" id="editorCssLink" />
+		<link href="includes/config/occureditorcrowdsource.css?ver=1802" type="text/css" rel="stylesheet" id="editorCssLink" />
 		<?php
     }
     else{
 		?>
-		<link href="../../css/occureditor.css?ver=20170503" type="text/css" rel="stylesheet" id="editorCssLink" />
+		<link href="../../css/occureditor.css?ver=170601" type="text/css" rel="stylesheet" id="editorCssLink" />
 		<?php
 		if(isset($CSSARR)){
 			foreach($CSSARR as $cssVal){
-				echo '<link href="includes/config/'.$cssVal.'?ver=150106" type="text/css" rel="stylesheet" id="editorCssLink" />';
+				echo '<link href="includes/config/'.$cssVal.'?ver=170601" type="text/css" rel="stylesheet" id="editorCssLink" />';
 			}
 		}
 		if(isset($JSARR)){
 			foreach($JSARR as $jsVal){
-				echo '<script src="includes/config/'.$jsVal.'?ver=150106" type="text/javascript"></script>';
+				echo '<script src="includes/config/'.$jsVal.'?ver=170601" type="text/javascript"></script>';
 			}
 		}
 	}
     ?>
 	<script src="../../js/jquery.js?ver=140310" type="text/javascript"></script>
 	<script src="../../js/jquery-ui.js?ver=140310" type="text/javascript"></script>
-	<script src="../../js/jquery.imagetool-1.7.js?ver=140310" type="text/javascript"></script>
 	<script type="text/javascript">
-		var collId = "<?php echo $collId; ?>";
+		var collId = "<?php echo (isset($collMap['collid'])?$collMap['collid']:$collId); ?>";
 		var csMode = "<?php echo $crowdSourceMode; ?>";
 		var tabTarget = <?php echo (is_numeric($tabTarget)?$tabTarget:'0'); ?>;
 		var imgArr = [];
 		var imgLgArr = [];
 		var localityAutoLookup = 1;
-		<?php 
+		<?php
 		if($imgArr){
 			foreach($imgArr as $iCnt => $iArr){
 				echo 'imgArr['.$iCnt.'] = "'.$iArr['web'].'";'."\n";
@@ -462,11 +452,13 @@ else{
         }
 
 	</script>
-	<script type="text/javascript" src="../../js/symb/collections.coordinateValidation.js?ver=170310"></script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditormain.js?ver=20170503"></script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditortools.js?ver=170101"></script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditorimgtools.js?ver=170310"></script>
-	<script type="text/javascript" src="../../js/symb/collections.occureditorshare.js?ver=170302"></script>
+	<script src="../../js/symb/collections.coordinateValidation.js?ver=170310" type="text/javascript"></script>
+	<script src="../../js/symb/wktpolygontools.js?ver=180208" type="text/javascript"></script>
+	<script src="../../js/symb/collections.occureditormain.js?ver=20180308" type="text/javascript"></script>
+	<script src="../../js/symb/collections.occureditortools.js?ver=170204" type="text/javascript"></script>
+	<script src="../../js/symb/collections.occureditorimgtools.js?ver=170310" type="text/javascript"></script>
+	<script src="../../js/jquery.imagetool-1.7.js?ver=140310" type="text/javascript"></script>
+	<script src="../../js/symb/collections.occureditorshare.js?ver=20180309" type="text/javascript"></script>
 </head>
 <body>
 	<!-- inner text -->
@@ -519,7 +511,7 @@ else{
 						<?php
 						if($crowdSourceMode){
 							?>
-							<a href="../specprocessor/crowdsource/central.php">Crowd Sourcing Central</a> &gt;&gt;
+							<a href="../specprocessor/crowdsource/index.php">Crowd Sourcing Central</a> &gt;&gt;
 							<?php
 						}
 						else{
@@ -531,7 +523,7 @@ else{
 							else{
 								if($isEditor == 1 || $isEditor == 2){
 									?>
-									<a href="../misc/collprofiles.php?collid=<?php echo $collId; ?>&emode=1" onclick="return verifyLeaveForm()">Collection Management</a> &gt;&gt;
+									<a href="../misc/collprofiles.php?collid=<?php echo (isset($collMap['collid'])?$collMap['collid']:$collId); ?>&emode=1" onclick="return verifyLeaveForm()">Collection Management</a> &gt;&gt;
 									<?php
 								}
 							}
@@ -601,7 +593,7 @@ else{
 									if($occId && $isEditor){
 										// Get symbiota user email as the annotator email (for fp)
 										$pHandler = new ProfileManager();
-										$pHandler->setUid($symbUid);
+										$pHandler->setUid($SYMB_UID);
 										$person = $pHandler->getPerson();
 										$userEmail = ($person?$person->getEmail():'');
 
@@ -682,7 +674,7 @@ else{
 													<?php echo (defined('OTHERCATALOGNUMBERSLABEL')?OTHERCATALOGNUMBERSLABEL:'Other Cat. #s'); ?>
 													<a href="#" onclick="return dwcDoc('otherCatalogNumbers')"><img class="docimg" src="../../images/qmark.png" /></a>
 													<br/>
-													<input type="text" name="othercatalognumbers" tabindex="4" maxlength="255" value="<?php echo array_key_exists('othercatalognumbers',$occArr)?$occArr['othercatalognumbers']:''; ?>" onchange="fieldChanged('othercatalognumbers');<?php if(defined('OTHERCATNUMDUPECHECK') && OTHERCATNUMDUPECHECK) echo 'searchDupesOtherCatalogNumbers(this.form)'; ?>" />
+													<input type="text" name="othercatalognumbers" tabindex="4" maxlength="255" value="<?php echo array_key_exists('othercatalognumbers',$occArr)?$occArr['othercatalognumbers']:''; ?>" onchange="fieldChanged('othercatalognumbers');<?php if(!defined('OTHERCATNUMDUPECHECK') || OTHERCATNUMDUPECHECK) echo 'searchDupesOtherCatalogNumbers(this.form)'; ?>" />
 												</div>
 												<div id="recordedByDiv">
 													<?php echo (defined('RECORDEDBYLABEL')?RECORDEDBYLABEL:'Collector'); ?>
@@ -794,14 +786,14 @@ else{
 													<?php echo (defined('SCIENTIFICNAMELABEL')?SCIENTIFICNAMELABEL:'Scientific Name'); ?>
 													<a href="#" onclick="return dwcDoc('scientificName')"><img class="docimg" src="../../images/qmark.png" /></a>
 													<br/>
-													<input type="text" id="ffsciname" name="sciname" maxlength="250" tabindex="28" value="<?php echo array_key_exists('sciname',$occArr)?$occArr['sciname']:''; ?>" onchange="fieldChanged('sciname');" <?php if((!$isEditor || $isEditor == 3) && $occArr['sciname']) echo 'disabled '; ?> />
+													<input type="text" id="ffsciname" name="sciname" maxlength="250" tabindex="28" value="<?php echo array_key_exists('sciname',$occArr)?$occArr['sciname']:''; ?>" onchange="fieldChanged('sciname');" <?php if(!$isEditor || $isEditor == 3) echo 'disabled '; ?> />
 													<input type="hidden" id="tidinterpreted" name="tidinterpreted" value="<?php echo array_key_exists('tidinterpreted',$occArr)?$occArr['tidinterpreted']:''; ?>" />
 													<?php
-													if(!$isEditor && isset($occArr['sciname']) && $occArr['sciname'] != ''){
+													if(!$isEditor){
 														echo '<div style="clear:both;color:red;margin-left:5px;">Note: Full editing permissions are needed to edit an identification</div>';
 													}
 													elseif($isEditor == 3){
-														echo '<div style="clear:both;color:red;margin-left:5px;">Limited editing right: use determination tab to edit identification</div>';
+														echo '<div style="clear:both;color:red;margin-left:5px;">Limited editing rights: use determination tab to edit identification</div>';
 													}
 													?>
 												</div>
@@ -813,10 +805,10 @@ else{
 												</div>
 											</div>
 											<div style="clear:both;padding:3px 0px 0px 10px;">
-												<?php 
+												<?php
 												if(!$occId){
 													echo '<div id="idRankDiv">';
-													echo (defined('IDCONFIDENCELABEL')?IDCONFIDENCELABEL:'ID Confidence'); 
+													echo (defined('IDCONFIDENCELABEL')?IDCONFIDENCELABEL:'ID Confidence');
 													echo ' <a href="#" onclick="return dwcDoc(\'idConfidence\')"><img class="docimg" src="../../images/qmark.png" /></a> ';
 													echo '<select name="confidenceranking" onchange="fieldChanged(\'confidenceranking\')">';
 													echo '<option value="">Undefined</option>';
@@ -877,29 +869,49 @@ else{
 											<div style="clear:both;">
 												<div id="countryDiv">
 													<?php echo (defined('COUNTRYLABEL')?COUNTRYLABEL:'Country'); ?>
+													<a href="#" onclick="return dwcDoc('country')"><img class="docimg" src="../../images/qmark.png" /></a>
 													<br/>
 													<input type="text" id="ffcountry" name="country" tabindex="40" value="<?php echo array_key_exists('country',$occArr)?$occArr['country']:''; ?>" onchange="fieldChanged('country');" />
 												</div>
 												<div id="stateProvinceDiv">
 													<?php echo (defined('STATEPROVINCELABEL')?STATEPROVINCELABEL:'State/Province'); ?>
+													<a href="#" onclick="return dwcDoc('stateProvince')"><img class="docimg" src="../../images/qmark.png" /></a>
 													<br/>
 													<input type="text" id="ffstate" name="stateprovince" tabindex="42" value="<?php echo array_key_exists('stateprovince',$occArr)?$occArr['stateprovince']:''; ?>" onchange="stateProvinceChanged(this.value)" />
 												</div>
 												<div id="countyDiv">
 													<?php echo (defined('COUNTYLABEL')?COUNTYLABEL:'County'); ?>
+													<a href="#" onclick="return dwcDoc('county')"><img class="docimg" src="../../images/qmark.png" /></a>
 													<br/>
 													<input type="text" id="ffcounty" name="county" tabindex="44" value="<?php echo array_key_exists('county',$occArr)?$occArr['county']:''; ?>" onchange="fieldChanged('county');" />
 												</div>
 												<div id="municipalityDiv">
 													<?php echo (defined('MUNICIPALITYLABEL')?MUNICIPALITYLABEL:'Municipality'); ?>
+													<a href="#" onclick="return dwcDoc('municipality')"><img class="docimg" src="../../images/qmark.png" /></a>
 													<br/>
 													<input type="text" id="ffmunicipality" name="municipality" tabindex="45" value="<?php echo array_key_exists('municipality',$occArr)?$occArr['municipality']:''; ?>" onchange="fieldChanged('municipality');" />
 												</div>
 											</div>
 											<div id="localityDiv">
 												<?php echo (defined('LOCALITYLABEL')?LOCALITYLABEL:'Locality'); ?>
+												<a href="#" onclick="return dwcDoc('locality')"><img class="docimg" src="../../images/qmark.png" /></a>
 												<br />
 												<input type="text" id="fflocality" name="locality" tabindex="46" value="<?php echo array_key_exists('locality',$occArr)?$occArr['locality']:''; ?>" onchange="fieldChanged('locality');" />
+												<a id="localityExtraToggle" onclick="toggle('localityExtraDiv');">
+													<img src="../../images/editplus.png" style="width:15px;" />
+												</a>
+											</div>
+											<?php
+											$localityExtraDiv = 'none';
+											if(array_key_exists("locationremarks",$occArr) && $occArr["locationremarks"]) $localityExtraDiv = "block";
+											?>
+											<div id="localityExtraDiv" style="display:<?php echo $localityExtraDiv; ?>">
+												<div id="locationRemarksDiv">
+													<?php echo (defined('LOCATIONREMARKSLABEL')?LOCATIONREMARKSLABEL:'Location Remarks'); ?>
+													<a href="#" onclick="return dwcDoc('locationRemarks')"><img class="docimg" src="../../images/qmark.png" /></a>
+													<br/>
+													<input type="text" id="locationremarks" name="locationremarks" value="<?php echo array_key_exists('locationremarks',$occArr)?$occArr['locationremarks']:''; ?>" onchange="fieldChanged('locationremarks');" />
+												</div>
 											</div>
 											<?php
 											if(!defined('LOCALITYAUTOLOOKUP') || LOCALITYAUTOLOOKUP){
@@ -907,7 +919,7 @@ else{
 												echo '<input name="localautodeactivated" type="checkbox" value="1" onchange="localAutoChanged(this)" '.(defined('LOCALITYAUTOLOOKUP') && LOCALITYAUTOLOOKUP==2?'checked':'').' /> ';
 												echo 'Deactivate Locality Lookup</div>';
 											}
-											$lsHasValue = array_key_exists("localitysecurity",$occArr)&&$occArr["localitysecurity"]?1:0; 
+											$lsHasValue = array_key_exists("localitysecurity",$occArr)&&$occArr["localitysecurity"]?1:0;
 											$lsrValue = array_key_exists('localitysecurityreason',$occArr)?$occArr['localitysecurityreason']:'';
 											?>
 											<div id="localSecurityDiv">
@@ -918,8 +930,8 @@ else{
 												</div>
 												<div id="locsecreason" style="margin-left:5px;border:2px solid gray;float:left;display:<?php echo ($lsrValue?'inline':'none') ?>;padding:3px">
 													<div ><input name="lockLocalitySecurity" type="checkbox" onchange="securityLockChanged(this)"  <?php echo ($lsrValue?'checked':'') ?> /> Lock Security Setting</div>
-													<?php 
-													echo (defined('LOCALITYSECURITYREASONLABEL')?LOCALITYSECURITYREASONLABEL:'Reason'); 
+													<?php
+													echo (defined('LOCALITYSECURITYREASONLABEL')?LOCALITYSECURITYREASONLABEL:'Reason');
 													?>:
 													<input type="text" name="localitysecurityreason" tabindex="0" onchange="localitySecurityReasonChanged();" value="<?php echo $lsrValue; ?>" title="Entering any text will lock security status on or off; leave blank to accept default security status" />
 												</div>
@@ -976,7 +988,8 @@ else{
 														<a href="#" onclick="parseVerbatimCoordinates(document.fullform,1);return false">&lt;&lt;</a>
 													</div>
 													<div style="float:left;">
-														<?php echo (defined('VERBATIMCOORDINATES')?VERBATIMCOORDINATES:'Verbatim Coordinates'); ?>
+														<?php echo (defined('VERBATIMCOORDINATESLABEL')?VERBATIMCOORDINATESLABEL:'Verbatim Coordinates'); ?>
+														<a href="#" onclick="return dwcDoc('verbatimCoordinates')"><img class="docimg" src="../../images/qmark.png" /></a>
 														<br/>
 														<input type="text" name="verbatimcoordinates" tabindex="57" maxlength="255" value="<?php echo array_key_exists('verbatimcoordinates',$occArr)?$occArr['verbatimcoordinates']:''; ?>" onchange="verbatimCoordinatesChanged(this.form);" title="" />
 													</div>
@@ -985,6 +998,7 @@ else{
 											<div style="clear:both;">
 												<div id="elevationDiv">
 													<?php echo (defined('ELEVATIONINMETERSLABEL')?ELEVATIONINMETERSLABEL:'Elevation in Meters'); ?>
+													<a href="#" onclick="return dwcDoc('minimumElevationInMeters')"><img class="docimg" src="../../images/qmark.png" /></a>
 													<br/>
 													<input type="text" name="minimumelevationinmeters" tabindex="58" maxlength="6" value="<?php echo array_key_exists('minimumelevationinmeters',$occArr)?$occArr['minimumelevationinmeters']:''; ?>" onchange="minimumElevationInMetersChanged(this.form);" title="Minumum Elevation In Meters" /> -
 													<input type="text" name="maximumelevationinmeters" tabindex="60" maxlength="6" value="<?php echo array_key_exists('maximumelevationinmeters',$occArr)?$occArr['maximumelevationinmeters']:''; ?>" onchange="maximumElevationInMetersChanged(this.form);" title="Maximum Elevation In Meters" />
@@ -994,41 +1008,57 @@ else{
 														<a href="#" onclick="parseVerbatimElevation(document.fullform);return false">&lt;&lt;</a>
 													</div>
 													<div style="float:left;">
-														<?php echo (defined('VERBATIMELEVATION')?VERBATIMELEVATION:'Verbatim Elevation'); ?>
+														<?php echo (defined('VERBATIMELEVATIONLABEL')?VERBATIMELEVATIONLABEL:'Verbatim Elevation'); ?>
+														<a href="#" onclick="return dwcDoc('verbatimElevation')"><img class="docimg" src="../../images/qmark.png" /></a>
 														<br/>
-														<input type="text" name="verbatimelevation" tabindex="62" maxlength="255" value="<?php echo array_key_exists('verbatimelevation',$occArr)?$occArr['verbatimelevation']:''; ?>" onchange="verbatimElevationChanged(this.form);" title="" />
+														<input type="text" name="verbatimelevation" tabindex="61" maxlength="255" value="<?php echo array_key_exists('verbatimelevation',$occArr)?$occArr['verbatimelevation']:''; ?>" onchange="verbatimElevationChanged(this.form);" />
 													</div>
 												</div>
-												<div id="locExtraToggleDiv" onclick="toggle('locExtraDiv');">
+												<div id="depthDiv">
+													<?php echo (defined('DEPTHINMETERSLABEL')?DEPTHINMETERSLABEL:'Depth in Meters'); ?>
+													<a href="#" onclick="return dwcDoc('minimumDepthInMeters')"><img class="docimg" src="../../images/qmark.png" /></a>
+													<br/>
+													<input type="text" name="minimumdepthinmeters" tabindex="63" maxlength="6" value="<?php echo array_key_exists('minimumdepthinmeters',$occArr)?$occArr['minimumdepthinmeters']:''; ?>" onchange="minimumDepthInMetersChanged(this.form);" title="Minumum Depth In Meters" /> -
+													<input type="text" name="maximumdepthinmeters" tabindex="64" maxlength="6" value="<?php echo array_key_exists('maximumdepthinmeters',$occArr)?$occArr['maximumdepthinmeters']:''; ?>" onchange="maximumDepthInMetersChanged(this.form);" title="Depth In Meters" />
+												</div>
+												<div id="verbatimDepthDiv">
+													<div style="float:left;">
+														<?php echo (defined('VERBATIMDEPTHLABEL')?VERBATIMDEPTHLABEL:'Verbatim Depth'); ?>
+														<a href="#" onclick="return dwcDoc('verbatimDepth')"><img class="docimg" src="../../images/qmark.png" /></a>
+														<br/>
+														<input type="text" name="verbatimdepth" tabindex="65" maxlength="255" value="<?php echo array_key_exists('verbatimdepth',$occArr)?$occArr['verbatimdepth']:''; ?>" onchange="fieldChanged('verbatimdepth');" />
+													</div>
+												</div>
+												<div id="georefExtraToggleDiv" onclick="toggle('georefExtraDiv');">
 													<img src="../../images/editplus.png" style="width:15px;" />
 												</div>
 											</div>
 											<?php
 											include_once('includes/geotools.php');
-											$locExtraDiv = 'display:';
+											$georefExtraDiv = 'display:';
 											if(array_key_exists("georeferencedby",$occArr) && $occArr["georeferencedby"]){
-												$locExtraDiv .= "block";
+												$georefExtraDiv .= "block";
 											}
 											elseif(array_key_exists("footprintwkt",$occArr) && $occArr["footprintwkt"]){
-												$locExtraDiv .= "block";
+												$georefExtraDiv .= "block";
 											}
 											elseif(array_key_exists("georeferenceprotocol",$occArr) && $occArr["georeferenceprotocol"]){
-												$locExtraDiv .= "block";
+												$georefExtraDiv .= "block";
 											}
 											elseif(array_key_exists("georeferencesources",$occArr) && $occArr["georeferencesources"]){
-												$locExtraDiv .= "block";
+												$georefExtraDiv .= "block";
 											}
 											elseif(array_key_exists("georeferenceverificationstatus",$occArr) && $occArr["georeferenceverificationstatus"]){
-												$locExtraDiv .= "block";
+												$georefExtraDiv .= "block";
 											}
 											elseif(array_key_exists("georeferenceremarks",$occArr) && $occArr["georeferenceremarks"]){
-												$locExtraDiv .= "block";
+												$georefExtraDiv .= "block";
 											}
 											?>
-											<div id="locExtraDiv" style="<?php echo $locExtraDiv; ?>;">
+											<div id="georefExtraDiv" style="<?php echo $georefExtraDiv; ?>;">
 												<div style="clear:both;">
 													<div id="georeferencedByDiv">
-														<?php echo (defined('GEOREFERENCEDBY')?GEOREFERENCEDBY:'Georeferenced By'); ?>
+														<?php echo (defined('GEOREFERENCEDBYLABEL')?GEOREFERENCEDBYLABEL:'Georeferenced By'); ?>
 														<br/>
 														<input type="text" name="georeferencedby" tabindex="66" maxlength="255" value="<?php echo array_key_exists('georeferencedby',$occArr)?$occArr['georeferencedby']:''; ?>" onchange="fieldChanged('georeferencedby');" />
 													</div>
@@ -1063,7 +1093,7 @@ else{
 														<div style="float:right;margin-top:-2px;margin-left:2px;" id="googleDiv" onclick="openMappingPolyAid();" title="Google Maps">
 															<img src="../../images/world.png" />
 														</div>
-														<textarea name="footprintwkt" id="footprintWKT" onchange="footPrintWktChanged(this)" style="height:40px;resize:vertical;" ><?php echo array_key_exists('footprintwkt',$occArr)?$occArr['footprintwkt']:''; ?></textarea>
+														<textarea name="footprintwkt" id="footprintwkt" onchange="footPrintWktChanged(this)" style="height:40px;resize:vertical;" ><?php echo array_key_exists('footprintwkt',$occArr)?$occArr['footprintwkt']:''; ?></textarea>
 													</div>
 												</div>
 											</div>
@@ -1071,11 +1101,15 @@ else{
 										<fieldset>
 											<legend><b>Misc</b></legend>
 											<div id="habitatDiv">
-												<?php echo (defined('HABITATLABEL')?HABITATLABEL:'Habitat'); ?><br/>
+												<?php echo (defined('HABITATLABEL')?HABITATLABEL:'Habitat'); ?>
+												<a href="#" onclick="return dwcDoc('habitat')"><img class="docimg" src="../../images/qmark.png" /></a>
+												<br/>
 												<input type="text" name="habitat" tabindex="80" value="<?php echo array_key_exists('habitat',$occArr)?$occArr['habitat']:''; ?>" onchange="fieldChanged('habitat');" />
 											</div>
 											<div id="substrateDiv">
-												<?php echo (defined('SUBSTRATELABEL')?SUBSTRATELABEL:'Substrate'); ?><br/>
+												<?php echo (defined('SUBSTRATELABEL')?SUBSTRATELABEL:'Substrate'); ?>
+												<a href="#" onclick="return dwcDoc('substrate')"><img class="docimg" src="../../images/qmark.png" /></a>
+												<br/>
 												<input type="text" name="substrate" tabindex="82" maxlength="500" value="<?php echo array_key_exists('substrate',$occArr)?$occArr['substrate']:''; ?>" onchange="fieldChanged('substrate');" />
 											</div>
 											<?php
@@ -1091,7 +1125,9 @@ else{
 											}
 											?>
 											<div id="associatedTaxaDiv">
-												<?php echo (defined('ASSOCIATEDTAXALABEL')?ASSOCIATEDTAXALABEL:'Associated Taxa'); ?><br/>
+												<?php echo (defined('ASSOCIATEDTAXALABEL')?ASSOCIATEDTAXALABEL:'Associated Taxa'); ?>
+												<a href="#" onclick="return dwcDoc('associatedTaxa')"><img class="docimg" src="../../images/qmark.png" style="width:9px;margin-bottom:2px" /></a>
+												<br/>
 												<textarea name="associatedtaxa" tabindex="84" onchange="fieldChanged('associatedtaxa');" style="height:22px;"><?php echo array_key_exists('associatedtaxa',$occArr)?$occArr['associatedtaxa']:''; ?></textarea>
 												<?php
 												if(!isset($ACTIVATEASSOCTAXAAID) || $ACTIVATEASSOCTAXAAID){
@@ -1100,11 +1136,15 @@ else{
 												?>
 											</div>
 											<div id="verbatimAttributesDiv">
-												<?php echo (defined('VERBATIMATTRIBUTESLABEL')?VERBATIMATTRIBUTESLABEL:'Description'); ?><br/>
+												<?php echo (defined('VERBATIMATTRIBUTESLABEL')?VERBATIMATTRIBUTESLABEL:'Description'); ?>
+												<a href="#" onclick="return dwcDoc('verbatimAttributes')"><img class="docimg" src="../../images/qmark.png" /></a>
+												<br/>
 												<input type="text" name="verbatimattributes" tabindex="86" value="<?php echo array_key_exists('verbatimattributes',$occArr)?$occArr['verbatimattributes']:''; ?>" onchange="fieldChanged('verbatimattributes');" />
 											</div>
 											<div id="occurrenceRemarksDiv">
-												<?php echo (defined('OCCURRENCEREMARKSLABEL')?OCCURRENCEREMARKSLABEL:'Notes (Occurrence Remarks)'); ?><br/>
+												<?php echo (defined('OCCURRENCEREMARKSLABEL')?OCCURRENCEREMARKSLABEL:'Notes (Occurrence Remarks)'); ?>
+												<a href="#" onclick="return dwcDoc('occurrenceRemarks')"><img class="docimg" src="../../images/qmark.png" style="width:9px;margin-bottom:2px" /></a>
+												<br/>
 												<input type="text" name="occurrenceremarks" tabindex="88" value="<?php echo array_key_exists('occurrenceremarks',$occArr)?$occArr['occurrenceremarks']:''; ?>" onchange="fieldChanged('occurrenceremarks');" title="Occurrence Remarks" />
 												<span id="dynPropToggleSpan" onclick="toggle('dynamicPropertiesDiv');">
 													<img src="../../images/editplus.png" />
@@ -1181,7 +1221,7 @@ else{
 										</fieldset>
 										<fieldset>
 											<legend><b>Curation</b></legend>
-											<div style="padding:3px;">
+											<div style="padding:3px;clear:both;">
 												<div id="typeStatusDiv">
 													<?php echo (defined('TYPESTATUSLABEL')?TYPESTATUSLABEL:'Type Status'); ?>
 													<a href="#" onclick="return dwcDoc('typeStatus')"><img class="docimg" src="../../images/qmark.png" /></a><br/>
@@ -1202,11 +1242,6 @@ else{
 													<a href="#" onclick="return dwcDoc('fieldnumber')"><img class="docimg" src="../../images/qmark.png" /></a><br/>
 													<input type="text" name="fieldnumber" tabindex="107" maxlength="45" value="<?php echo array_key_exists('fieldnumber',$occArr)?$occArr['fieldnumber']:''; ?>" onchange="fieldChanged('fieldnumber');" />
 												</div>
-												<div id="ownerInstitutionCodeDiv" title="If different than institution code">
-													<?php echo (defined('OWNERSHIPCODELABEL')?OWNERSHIPCODELABEL:'Owner Code'); ?>
-													<a href="#" onclick="return dwcDoc('ownerInstitutionCode')"><img class="docimg" src="../../images/qmark.png" /></a><br/>
-													<input type="text" name="ownerinstitutioncode" tabindex="108" maxlength="32" value="<?php echo array_key_exists('ownerinstitutioncode',$occArr)?$occArr['ownerinstitutioncode']:''; ?>" onchange="fieldChanged('ownerinstitutioncode');" />
-												</div>
 												<div id="basisOfRecordDiv">
 													<?php echo (defined('BASISOFRECORDLABEL')?BASISOFRECORDLABEL:'Basis of Record'); ?>
 													<a href="#" onclick="return dwcDoc('basisOfRecord')"><img class="docimg" src="../../images/qmark.png" /></a><br/>
@@ -1221,7 +1256,7 @@ else{
 														else{
 															$extraBOR = $occArr['basisofrecord'];
 														}
-													} 
+													}
 													if(!isset($occArr['basisofrecord']) || !$occArr['basisofrecord']){
 														if($collMap['colltype']=='General Observations' || $collMap['colltype']=='Observations'){
 															$targetBOR = 'HumanObservation';
@@ -1229,10 +1264,10 @@ else{
 														elseif($collMap['colltype']=='Preserved Specimens'){
 															$targetBOR = 'PreservedSpecimen';
 														}
-													} 
+													}
 													?>
 													<select name="basisofrecord" tabindex="109" onchange="fieldChanged('basisofrecord');">
-														<?php 
+														<?php
 														foreach($borArr as $bValue){
 															echo '<option '.($bValue == $targetBOR?'SELECTED':'').'>'.$bValue.'</option>';
 														}
@@ -1252,6 +1287,23 @@ else{
 													<?php echo (defined('DUPLICATEQUALITYCOUNTLABEL')?DUPLICATEQUALITYCOUNTLABEL:'Dupe Count'); ?><br/>
 													<input type="text" name="duplicatequantity" tabindex="116" value="<?php echo array_key_exists('duplicatequantity',$occArr)?$occArr['duplicatequantity']:''; ?>" onchange="fieldChanged('duplicatequantity');" />
 												</div>
+											</div>
+											<div style="padding:3px;clear:both;">
+												<div id="institutionCodeDiv" title="Overrides institution code set within collection's metadata form">
+													<?php echo (defined('INSTITUTIONCODELABEL')?INSTITUTIONCODELABEL:'Institution Code (override)'); ?>
+													<a href="#" onclick="return dwcDoc('institutionCode')"><img class="docimg" src="../../images/qmark.png" /></a><br/>
+													<input type="text" name="institutioncode" tabindex="116" maxlength="32" value="<?php echo array_key_exists('institutioncode',$occArr)?$occArr['institutioncode']:''; ?>" onchange="fieldChanged('institutioncode');" />
+												</div>
+												<div id="collectionCodeDiv" title="Overrides collection code set within collection's metadata form">
+													<?php echo (defined('COLLECTIONCODELABEL')?COLLECTIONCODELABEL:'Collection Code (override)'); ?>
+													<a href="#" onclick="return dwcDoc('collectionCode')"><img class="docimg" src="../../images/qmark.png" /></a><br/>
+													<input type="text" name="collectioncode" tabindex="117" maxlength="32" value="<?php echo array_key_exists('collectioncode',$occArr)?$occArr['collectioncode']:''; ?>" onchange="fieldChanged('collectioncode');" />
+												</div>
+												<div id="ownerInstitutionCodeDiv" title="If different than institution code">
+													<?php echo (defined('OWNERINSTITUTIONCODELABEL')?OWNERINSTITUTIONCODELABEL:'Owner Code (override)'); ?>
+													<a href="#" onclick="return dwcDoc('ownerInstitutionCode')"><img class="docimg" src="../../images/qmark.png" /></a><br/>
+													<input type="text" name="ownerinstitutioncode" tabindex="118" maxlength="32" value="<?php echo array_key_exists('ownerinstitutioncode',$occArr)?$occArr['ownerinstitutioncode']:''; ?>" onchange="fieldChanged('ownerinstitutioncode');" />
+												</div>
 												<div id="processingStatusDiv">
 													<?php echo (defined('PROCESSINGSTATUSLABEL')?PROCESSINGSTATUSLABEL:'Processing Status'); ?><br/>
 													<?php
@@ -1269,7 +1321,7 @@ else{
 																echo '<option value="'.$keyOut.'" '.($pStatus==$keyOut?'SELECTED':'').'>'.ucwords($v).'</option>';
 															}
 														}
-														if(!in_array($pStatus,$processingStatusArr)){
+														if($pStatus && $pStatus != 'isnull' && !in_array($pStatus,$processingStatusArr)){
 															echo '<option value="'.$pStatus.'" SELECTED>'.$pStatus.'</option>';
 														}
 														?>
@@ -1292,11 +1344,11 @@ else{
 														<?php if(array_key_exists('datelastmodified',$occArr)) echo 'Modified: '.$occArr['datelastmodified']; ?>
 													</div>
 													<div style="float:left;margin-left:50px;">
-														<?php 
+														<?php
 														if(array_key_exists('recordenteredby',$occArr)){
 															echo 'Entered by: '.($occArr['recordenteredby']?$occArr['recordenteredby']:'not recorded');
 														}
-														if(isset($occArr['dateentered']) && $occArr['dateentered']) echo ' ['.$occArr['dateentered'].']'; 
+														if(isset($occArr['dateentered']) && $occArr['dateentered']) echo ' ['.$occArr['dateentered'].']';
 														?>
 													</div>
 												</div>
@@ -1308,13 +1360,47 @@ else{
 										if($navStr){
 											//echo '<div style="float:right;margin-right:20px;">'.$navStr.'</div>'."\n";
 										}
+										if(!$occId){
+											$userChecklists = $occManager->getUserChecklists();
+											if($userChecklists){
+												?>
+												<fieldset>
+													<legend><b>Checklist Voucher</b></legend>
+													Link Occurrence to Checklist:
+													<select name="clidvoucher">
+														<option value="">No Checklist Selected</option>
+														<option value="">---------------------------------------------</option>
+														<?php
+														foreach($userChecklists as $clid => $clName){
+															echo '<option value="'.$clid.'">'.$clName.'</option>';
+														}
+														?>
+													</select>
+												</fieldset>
+												<?php
+											}
+										}
 										?>
 										<div style="padding:10px;">
 											<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
 											<input type="hidden" name="collid" value="<?php echo $collId; ?>" />
-											<input type="hidden" name="observeruid" value="<?php echo $symbUid; ?>" />
+											<input type="hidden" name="observeruid" value="<?php echo $SYMB_UID; ?>" />
 											<input type="hidden" name="csmode" value="<?php echo $crowdSourceMode; ?>" />
 											<input type="hidden" name="linkdupe" value="" />
+											Status Auto-Set:
+											<select name="autoprocessingstatus" onchange="autoProcessingStatusChanged(this)">
+												<option value=''>Not Activated</option>
+												<option value=''>-------------------</option>
+												<?php
+												foreach($processingStatusArr as $v){
+													$keyOut = strtolower($v);
+													//Don't display all options if editor is crowd sourced
+													if($isEditor || ($keyOut != 'reviewed' && $keyOut != 'closed')){
+														echo '<option value="'.$keyOut.'" '.($crowdSourceMode && $keyOut == "pending review"?'SELECTED':'').'>'.ucwords($v).'</option>';
+													}
+												}
+												?>
+											</select>
 											<?php
 											if($occId){
 												if(($isEditor == 1 || $isEditor == 2) && !$crowdSourceMode){
@@ -1332,21 +1418,6 @@ else{
 												?>
 												<div id="editButtonDiv">
 													<input type="submit" name="submitaction" value="Save Edits" style="width:150px;" onclick="return verifyFullFormEdits(this.form)" disabled />
-													<br/>
-													Status Auto-Set:
-													<select name="autoprocessingstatus" onchange="autoProcessingStatusChanged(this)">
-														<option value=''>Not Activated</option>
-														<option value=''>-------------------</option>
-														<?php
-														foreach($processingStatusArr as $v){
-															$keyOut = strtolower($v);
-															//Don't display all options if editor is crowd sourced
-															if($isEditor || ($keyOut != 'reviewed' && $keyOut != 'closed')){
-																echo '<option value="'.$keyOut.'" '.($crowdSourceMode && $keyOut == "pending review"?'SELECTED':'').'>'.ucwords($v).'</option>';
-															}
-														}
-														?>
-													</select>
 													<?php
 													if($occIndex !== false){
 														?>
@@ -1359,24 +1430,6 @@ else{
 												<?php
 											}
 											else{
-												$userChecklists = $occManager->getUserChecklists();
-												if($userChecklists){
-													?>
-													<fieldset>
-														<legend><b>Checklist Voucher</b></legend>
-														Link Occurrence to Checklist: 
-														<select name="clidvoucher">
-															<option value="">No Checklist Selected</option>
-															<option value="">---------------------------------------------</option>
-															<?php 
-															foreach($userChecklists as $clid => $clName){
-																echo '<option value="'.$clid.'">'.$clName.'</option>';
-															}
-															?>
-														</select>
-													</fieldset>
-													<?php
-												}
 												?>
 												<div id="addButtonDiv">
 													<input type="hidden" name="recordenteredby" value="<?php echo $paramsArr['un']; ?>" />
@@ -1392,7 +1445,6 @@ else{
 														<input type="radio" name="gotomode" value="0" <?php echo (!$goToMode?'CHECKED':''); ?> /> Remain on Editing Page (add images, determinations, etc)
 													</div>
 												</div>
-												
 												<?php
 											}
 											?>

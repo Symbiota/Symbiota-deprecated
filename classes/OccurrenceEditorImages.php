@@ -1,7 +1,7 @@
 <?php
-include_once($serverRoot.'/classes/OccurrenceEditorManager.php');
-include_once($serverRoot.'/classes/SpecProcessorOcr.php');
-include_once($serverRoot.'/classes/ImageShared.php');
+include_once($SERVER_ROOT.'/classes/OccurrenceEditorManager.php');
+include_once($SERVER_ROOT.'/classes/SpecProcessorOcr.php');
+include_once($SERVER_ROOT.'/classes/ImageShared.php');
 
 class OccurrenceEditorImages extends OccurrenceEditorManager {
 

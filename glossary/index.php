@@ -16,7 +16,7 @@ if($language == 'en') $language = 'English';
 if($language == 'es') $language = 'Spanish';
 
 $isEditor = false;
-if($isAdmin || array_key_exists("Taxonomy",$USER_RIGHTS)){
+if($IS_ADMIN || array_key_exists("Taxonomy",$USER_RIGHTS)){
 	$isEditor = true;
 }
 
@@ -50,9 +50,9 @@ $taxonName = ($tid?$taxaArr[$tid]:'');
 	<script type="text/javascript" src="../js/jquery.js"></script>
 	<script type="text/javascript" src="../js/jquery-ui.js"></script>
 	<script type="text/javascript">
-		var langArr = {<?php 
+		var langArr = {<?php
 			$d = '';
-			foreach($languageArr as $k => $v){ 
+			foreach($languageArr as $k => $v){
 				echo $d.'"'.$k.'":['.$v.']';
 				$d = ',';
 			}
@@ -80,13 +80,13 @@ $taxonName = ($tid?$taxaArr[$tid]:'');
 				alert("Please select a primary language and taxonomic group to download.");
 				return false;
 			}
-			
+
 			var downloadtype = f.exporttype.value;
 			if(downloadtype == 'translation'){
 				var numTranslations = 0;
 				var e = f.getElementsByTagName("input");
 				for(var i=0;i<e.length;i++){
-					if(e[i].name == "language[]"){ 
+					if(e[i].name == "language[]"){
 						if(e[i].checked == true){
 							numTranslations++;
 						}
@@ -106,13 +106,13 @@ $taxonName = ($tid?$taxaArr[$tid]:'');
 
 		function openNewTermPopup(glossid,relation){
 			var urlStr = 'addterm.php?rellanguage=<?php echo $language.'&taxatid='.$tid.'&taxaname='.$taxonName; ?>';
-			newWindow = window.open(urlStr,'addnewpopup','toolbar=1,status=1,scrollbars=1,width=1250,height=900,left=20,top=20');
+			newWindow = window.open(urlStr,'addnewpopup','toolbar=0,status=1,scrollbars=1,width=1250,height=700,left=20,top=20');
 			if (newWindow.opener == null) newWindow.opener = self;
 		}
 
 		function openTermPopup(glossid){
 			var urlStr = 'individual.php?glossid='+glossid;
-			newWindow = window.open(urlStr,'popup','toolbar=1,status=1,scrollbars=1,width=800,height=750,left=20,top=20');
+			newWindow = window.open(urlStr,'popup','toolbar=0,status=1,scrollbars=1,width=800,height=450,left=20,top=20');
 			if (newWindow.opener == null) newWindow.opener = self;
 			return false;
 		}
@@ -131,31 +131,31 @@ $taxonName = ($tid?$taxaArr[$tid]:'');
 		if($glossary_indexCrumbs){
 			?>
 			<div class='navpath'>
-				<a href='../index.php'>Home</a> &gt;&gt; 
+				<a href='../index.php'>Home</a> &gt;&gt;
 				<?php echo $glossary_indexCrumbs; ?>
 				<a href='index.php'> <b>Glossary</b></a>
 			</div>
-			<?php 
+			<?php
 		}
 	}
 	else{
 		?>
 		<div class='navpath'>
-			<a href='../index.php'>Home</a> &gt;&gt; 
+			<a href='../index.php'>Home</a> &gt;&gt;
 			<a href='index.php'> <b>Glossary</b></a>
 		</div>
-		<?php 
+		<?php
 	}
 	?>
 	<!-- This is inner text! -->
 	<div id="innertext">
-		<?php 
+		<?php
 		if($statusStr){
 			?>
 			<div style="margin:15px;color:red;">
 				<?php echo $statusStr; ?>
 			</div>
-			<?php 
+			<?php
 		}
 		if(isset($GLOSSARY_BANNER) && $GLOSSARY_BANNER){
 			$bannerUrl = $GLOSSARY_BANNER;
@@ -170,7 +170,7 @@ $taxonName = ($tid?$taxaArr[$tid]:'');
 		?>
 		<div style="float:right;width:360px;position:relative;">
 			<div style="float:right;position:relative">
-				<?php 
+				<?php
 				if($isEditor){
 					?>
 					<div>
@@ -179,9 +179,11 @@ $taxonName = ($tid?$taxaArr[$tid]:'');
 						</a>
 					</div>
 					<div>
+						<!--
 						<a href='glossaryloader.php'>Batch Upload Terms</a>
+						 -->
 					</div>
-					<?php 
+					<?php
 				}
 				?>
 				<div>
@@ -194,35 +196,49 @@ $taxonName = ($tid?$taxaArr[$tid]:'');
 				<form name="downloadform" action="glossdocexport.php" method="post" onsubmit="return verifyDownloadForm(this);">
 					<fieldset style="padding:8px">
 						<legend><b>Download Options</b></legend>
-						<div style="margin-bottom:8px;">
-							Primary language will be language selected to the left.
-						</div>
-						<div style="margin-bottom:8px;">
-							<div>
-								<input name="exporttype" type="radio" value="singlelanguage" checked /> Single Language
+						<?php
+						if(count($langArr) > 1){
+							?>
+							<div style="margin-bottom:8px;">
+								Primary language will be language selected to the left.
 							</div>
-							<div style="margin-left:25px;">
+							<div style="margin-bottom:8px;">
+								<div>
+									<input name="exporttype" type="radio" value="singlelanguage" checked /> Single Language
+								</div>
+								<div style="margin-left:25px;">
+									<input name="images" type="checkbox" value="images" /> Include Images
+								</div>
+							</div>
+							<div>
+								<div>
+									<input name="exporttype" type="radio" value="translation" /> Translation Table
+								</div>
+								<div style="float:left;margin-left:25px;">
+									<b>Translations</b><br />
+									<?php
+									foreach($langArr as $k => $v){
+										echo '<input name="language[]" type="checkbox" value="'.$v.'" /> '.$v.'<br />';
+									}
+									?>
+								</div>
+								<div style="float:left;margin-left:15px;padding-top:1.1em;">
+									<input name="definitions" type="radio" value="nodef" checked /> Without Definitions<br />
+									<input name="definitions" type="radio" value="onedef" /> Primary Definition Only<br />
+									<input name="definitions" type="radio" value="alldef" /> All Definitions
+								</div>
+							</div>
+							<?php
+						}
+						else{
+							?>
+							<div style="margin-left:5px;">
+								<input name="exporttype" type="hidden" value="singlelanguage" />
 								<input name="images" type="checkbox" value="images" /> Include Images
 							</div>
-						</div>
-						<div>
-							<div>
-								<input name="exporttype" type="radio" value="translation" /> Translation Table
-							</div>
-							<div style="float:left;margin-left:25px;">
-								<b>Translations</b><br />
-								<?php
-								foreach($langArr as $k => $v){
-									echo '<input name="language[]" type="checkbox" value="'.$v.'" /> '.$v.'<br />';
-								}
-								?>
-							</div>
-							<div style="float:left;margin-left:15px;padding-top:1.1em;">
-								<input name="definitions" type="radio" value="nodef" checked /> Without Definitions<br />
-								<input name="definitions" type="radio" value="onedef" /> Primary Definition Only<br />
-								<input name="definitions" type="radio" value="alldef" /> All Definitions
-							</div>
-						</div>
+							<?php
+						}
+						?>
 						<div style="clear:both;padding:15px">
 							<input name="searchlanguage" type="hidden" value="" />
 							<input name="searchtaxa" type="hidden" value="" />
@@ -238,13 +254,13 @@ $taxonName = ($tid?$taxaArr[$tid]:'');
 		<div style="float:left;">
 			<form id="searchform" name="searchform" action="index.php" method="post" onsubmit="return verifySearchForm(this);">
 				<div style="height:25px;">
-					<?php 
+					<?php
 					if(count($taxaArr) > 1){
 						?>
 						<div style="float:left;">
 							<b>Taxonomic Group:</b>
 							<select id="searchtaxa" name="searchtaxa" style="margin-top:2px;width:300px;" onchange="resetLanguageSelect(this.form)">
-								<?php 
+								<?php
 								foreach($taxaArr as $k => $v){
 									echo '<option value="'.$k.'" '.($k==$tid?'SELECTED':'').'>'.$v.'</option>';
 								}
@@ -261,7 +277,7 @@ $taxonName = ($tid?$taxaArr[$tid]:'');
 						<div style="float:left;margin-left:10px;">
 							<b>Language:</b>
 							<select id="searchlanguage" name="searchlanguage" style="margin-top:2px;" onchange="">
-								<?php 
+								<?php
 								foreach($langArr as $k => $v){
 									echo '<option value="'.$v.'" '.($v==$language||$k==$language?'SELECTED':'').'>'.$v.'</option>';
 								}
@@ -271,17 +287,17 @@ $taxonName = ($tid?$taxaArr[$tid]:'');
 						<?php
 					}
 					else{
-						echo '<input name="searchlanguage" type="hidden" value="'.current($langArr).'" />';
+						echo '<input name="searchlanguage" type="hidden" value="'.reset($langArr).'" />';
 					}
 					?>
 				</div>
 				<div style="clear:both;">
-					<b>Search Term:</b> 
+					<b>Search Term:</b>
 					<input type="text" autocomplete="off" name="searchterm" size="25" value="<?php echo $searchTerm; ?>" />
 				</div>
 				<div style="margin-left:40px">
-					<input name="deepsearch" type="checkbox" value="1" <?php echo $deepSearch?'checked':''; ?> /> 
-					<b>search within definitions</b> 
+					<input name="deepsearch" type="checkbox" value="1" <?php echo $deepSearch?'checked':''; ?> />
+					<b>search within definitions</b>
 				</div>
 				<div style="margin:20px">
 					<button name="formsubmit" type="submit" value="Search Terms">Search/Browse Terms</button>
@@ -300,8 +316,8 @@ $taxonName = ($tid?$taxaArr[$tid]:'');
 						}
 						?>
 						<div>
-							<?php 
-							echo '<div style="float:left;font-weight:bold;font-size:120%;">'.$title.'</div>'; 
+							<?php
+							echo '<div style="float:left;font-weight:bold;font-size:120%;">'.$title.'</div>';
 							$sourceArrFull = $glosManager->getTaxonSources($tid);
 							$sourceArr = current($sourceArrFull);
 							if($sourceArr){
@@ -369,7 +385,7 @@ $taxonName = ($tid?$taxaArr[$tid]:'');
 									?>
 								</fieldset>
 							</div>
-							<?php 
+							<?php
 						}
 						echo '<div style="clear:both;padding:10px;"><ul>';
 						foreach($termList as $glossId => $termName){

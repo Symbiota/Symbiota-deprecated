@@ -1,6 +1,6 @@
 <?php
 include_once($SERVER_ROOT.'/config/dbconnection.php');
-include_once($SERVER_ROOT.'/classes/TaxonomyUtilities.php');
+include_once($SERVER_ROOT.'/classes/OccurrenceTaxaManager.php');
 
 class TaxonomyAPIManager{
 
@@ -12,7 +12,7 @@ class TaxonomyAPIManager{
     private $limit = 0;
     private $hideAuth = false;
     private $hideProtected = false;
-	
+
 	function __construct(){
 		$this->conn = MySQLiConnectionFactory::getCon("readonly");
 	}
@@ -79,7 +79,96 @@ class TaxonomyAPIManager{
 
         return $retArr;
     }
- 	
+
+    public function generateAnynameList($queryString){
+        $retArr = Array();
+        $queryString = $this->cleanInStr($queryString);
+
+        $LANG = array();
+        $LANG['SELECT_1-2'] = 'Scientific Name';
+        $LANG['SELECT_1-3'] = 'Family';
+        $LANG['SELECT_1-4'] = 'Taxonomic Group';
+        $LANG['SELECT_1-5'] = 'Common Name';
+        $sql      = "SELECT DISTINCT CONCAT('".$LANG['SELECT_1-5'].": ',v.vernacularname) AS sciname, ".
+                    "                CONCAT('A:'                       ,v.vernacularname) AS snorder, ".
+                    "                ''                                                   AS author, ".
+                    "                'v.TID'                                              AS tid ".
+                    "FROM taxavernaculars v ".
+                    "WHERE v.vernacularname LIKE '%".$queryString."%' ";
+
+        $sql     .= "UNION ".
+                    "SELECT          CONCAT('".$LANG['SELECT_1-4'].": ',t.sciname       ) AS sciname, ".
+                    "                CONCAT('E:'                       ,t.sciname       ) AS snorder, ".
+                    "                t.Author                                             AS author, ".
+                    "                t.TID                                                AS tid ".
+                    "FROM taxa t ";
+        if($this->taxAuthId){
+            $sql .= 'INNER JOIN taxstatus AS ts ON t.tid = ts.tid ';
+        }
+        $sql     .= "WHERE t.sciname LIKE '%".$queryString."%' AND t.rankId > 20 AND t.rankId < 140 ";
+        if($this->hideProtected){
+            $sql .= 'AND t.SecurityStatus <> 2 ';
+        }
+
+        $sql     .= "UNION ".
+                    "SELECT DISTINCT CONCAT('".$LANG['SELECT_1-2'].": ',t.sciname       ) AS sciname, ".
+                    "                CONCAT('B:'                       ,t.sciname       ) AS snorder, ".
+                    "                t.Author                                             AS author, ".
+                    "                t.TID                                                AS tid ".
+                    "FROM taxa t ";
+        if($this->taxAuthId){
+            $sql .= 'INNER JOIN taxstatus AS ts ON t.tid = ts.tid ';
+        }
+        $sql     .= "WHERE t.sciname LIKE '%".$queryString."%' AND t.rankid > 140 ";
+        if($this->hideProtected){
+            $sql .= 'AND t.SecurityStatus <> 2 ';
+        }
+
+        $sql     .= "UNION ".
+                    "SELECT DISTINCT CONCAT('".$LANG['SELECT_1-3'].": ',ts.family       ) AS sciname, ".
+                    "                CONCAT('C:'                       ,ts.family       ) AS snorder, ".
+                    "                ''                                                   AS author, ".
+                    "                'ts.tid'                                             AS tid ".
+                    "FROM taxstatus ts ".
+                    "WHERE ts.family LIKE '%".$queryString."%' ";
+
+        $sql     .= "UNION ".
+                    "SELECT DISTINCT CONCAT('".$LANG['SELECT_1-3'].": ',t.sciname       ) AS sciname, ".
+                    "                CONCAT('C:'                       ,t.sciname       ) AS snorder, ".
+                    "                t.Author                                             AS author, ".
+                    "                t.TID                                                AS tid ".
+                    "FROM taxa t ";
+        if($this->taxAuthId){
+            $sql .= 'INNER JOIN taxstatus AS ts ON t.tid = ts.tid ';
+        }
+        $sql     .= "WHERE t.sciname LIKE '%".$queryString."%' AND rankid = 140 ";
+        if($this->hideProtected){
+            $sql .= 'AND t.SecurityStatus <> 2 ';
+        }
+
+        $sql     .= "ORDER BY snorder ";
+
+        if($this->limit){
+            $sql .= "LIMIT ".$this->limit." ";
+        } else {
+            $sql .= "LIMIT 30 ";
+        }
+
+        error_log($sql);
+
+        $rs = $this->conn->query($sql);
+        if ($rs) {
+            while ($r = $rs->fetch_object()){
+                $sciName = $r->sciname.($this->hideAuth?'':' '.$r->author);
+                $retArr[$sciName]['id'    ] = $r->tid;
+                $retArr[$sciName]['value' ] = $sciName;
+                $retArr[$sciName]['author'] = $r->author;
+            }
+        }
+
+        return $retArr;
+    }
+
 	public function setTaxAuthId($val){
         $this->taxAuthId = $this->cleanInStr($val);
     }
@@ -107,7 +196,7 @@ class TaxonomyAPIManager{
     public function setHideProtected($val){
         $this->hideProtected = $this->cleanInStr($val);
     }
-	
+
 	protected function cleanInStr($str){
         $newStr = trim($str);
         $newStr = preg_replace('/\s\s+/', ' ',$newStr);

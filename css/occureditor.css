@@ -310,7 +310,7 @@ body{
 }
 
 #localityDiv input{
-	width: 99%;
+	width: 97%;
 }
 
 #localSecurityDiv{
@@ -326,6 +326,19 @@ body{
 #localAutoDeactivatedDiv{
 	float:right;
 	margin-right:15px;
+}
+
+#localityExtraDiv{
+	clear:	both;
+}
+
+#locationRemarksDiv{
+	clear:	both;
+	margin:	4px 0px 2px 0px;
+}
+
+#locationRemarksDiv input{
+	width: 99%;
 }
 
 #decimalLatitudeDiv{
@@ -452,13 +465,33 @@ body{
 	width:	130px;
 }
 
-#locExtraToggleDiv{
+#depthDiv{
+	float:	left;
+	margin-top:2px;
+	margin-left:15px;
+}
+
+#depthDiv input{
+	width:65px;
+}
+
+#verbatimDepthDiv{
+	float:	left;
+	margin-top:2px;
+	margin-left:5px;
+}
+
+#verbatimDepthDiv input{
+	width:	130px;
+}
+
+#georefExtraToggleDiv{
 	float:left;
 	margin:15px 5px;
 	cursor:pointer;
 }
 
-#locExtraDiv{
+#georefExtraDiv{
 	display:none;
 	position:relative;
 	clear:both;
@@ -698,6 +731,24 @@ body{
 	width:150px;
 }
 
+#institutionCodeDiv{
+	float:left;
+	margin:3px;
+}
+
+#institutionCodeDiv input{
+	width:150px;
+}
+
+#collectionCodeDiv{
+	float:left;
+	margin:3px;
+}
+
+#collectionCodeDiv input{
+	width:150px;
+}
+
 #ownerInstitutionCodeDiv{
 	float:left;
 	margin:3px;
@@ -782,5 +833,3 @@ table {
 	font-family: 	Arial, Helvetica, sans-serif; 
 	font-size: 		12px;
 }
-
-

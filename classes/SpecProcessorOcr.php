@@ -2,7 +2,7 @@
 /*
  * Used by automatic nightly process and by the occurrence editor (/collections/editor/occurrenceeditor.php)
  */
-include_once($serverRoot.'/config/dbconnection.php');
+include_once($SERVER_ROOT.'/config/dbconnection.php');
 
 class SpecProcessorOcr{
 
@@ -16,14 +16,15 @@ class SpecProcessorOcr{
 	private $cropW = 1;
 	private $cropH = 1;
 
+	private $collid;
 	private $specKeyPattern;
 	private $ocrSource;
-	
+
 	//If silent is set, script will produce no non-fatal output.
 	private $verbose = 0;			//0 = silent, 1 = logFile, 2 = echo, 3 = both
 	private $logFH;
 	private $errorStr;
-	
+
 	function __construct() {
 		$this->setTempPath();
 		$this->conn = MySQLiConnectionFactory::getCon("write");
@@ -47,7 +48,7 @@ class SpecProcessorOcr{
 		}
 		return $rawStr;
 	}
-	
+
 	private function ocrImageByUrl($imgUrl,$getBest = 0,$sciName=''){
 		$rawStr = '';
 		if($imgUrl){
@@ -132,7 +133,7 @@ class SpecProcessorOcr{
 	private function databaseRawStr($imgId,$rawStr,$notes,$source){
 		if(is_numeric($imgId) && $rawStr){
 			$score = '';
-			if($rawStr == 'Failed OCR return') $score = 0; 
+			if($rawStr == 'Failed OCR return') $score = 0;
 			$sql = 'INSERT INTO specprocessorrawlabels(imgid,rawstr,notes,source,score) '.
 				'VALUE ('.$imgId.',"'.$this->cleanInStr($rawStr).'",'.
 				($notes?'"'.$this->cleanInStr($notes).'"':'NULL').','.
@@ -161,7 +162,7 @@ class SpecProcessorOcr{
 				}
 				else{
 					$urlDomain = "http://";
-					if((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || $_SERVER['SERVER_PORT'] == 443) 
+					if((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || $_SERVER['SERVER_PORT'] == 443)
 						$urlDomain = "https://";
 					$urlDomain .= $_SERVER["SERVER_NAME"];
 					if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $urlDomain .= ':'.$_SERVER["SERVER_PORT"];
@@ -184,7 +185,7 @@ class SpecProcessorOcr{
 		if($inCollStr) {
 			set_time_limit(600);
 			ini_set('memory_limit','512M');
-			
+
 			//Get collection list
 			$sql = 'SELECT DISTINCT collid, CONCAT_WS("-",institutioncode,collectioncode) AS instcode '.
 				'FROM omcollections '.
@@ -194,7 +195,7 @@ class SpecProcessorOcr{
 				$collArr[$r->collid] = $r->instcode;
 			}
 			$rs->free();
-			
+
 			//Batch OCR
 			foreach($collArr as $collid => $instCode){
 				$this->logMsg('Starting batch processing for '.$instCode);
@@ -224,9 +225,11 @@ class SpecProcessorOcr{
 		}
 	}
 
+	// OCR upload functions
 	public function harvestOcrText($postArr){
 		$status = true;
 		set_time_limit(3600);
+		$this->collid = $postArr['collid'];
 		$this->ocrSource = $postArr['ocrsource'];
 		$this->specKeyPattern = $postArr['speckeypattern'];
 		if(!$this->specKeyPattern){
@@ -254,19 +257,19 @@ class SpecProcessorOcr{
 				$this->errorStr = 'ERROR loading OCR files: sourcePath returned bad headers ('.$sourcePath.')';
 				$this->logMsg($this->errorStr);
 				return false;
-			} 
+			}
 			preg_match('/http.+\s{1}(\d{3})\s{1}/i',$headerArr[0],$codeArr);
-			if($codeArr[1] == '403'){ 
+			if($codeArr[1] == '403'){
 				$this->errorStr = 'ERROR loading OCR files: sourcePath returned Forbidden ('.$sourcePath.')';
 				$this->logMsg($this->errorStr);
 				return false;
 			}
-			if($codeArr[1] == '404'){ 
+			if($codeArr[1] == '404'){
 				$this->errorStr = 'ERROR loading OCR files: sourcePath returned a page Not Found error ('.$sourcePath.')';
 				$this->logMsg($this->errorStr);
 				return false;
 			}
-			if($codeArr[1] != '200'){ 
+			if($codeArr[1] != '200'){
 				$this->errorStr = 'ERROR loading OCR files: sourcePath returned error code '.$codeArr[1].' ('.$sourcePath.')';
 				$this->logMsg($this->errorStr);
 				return false;
@@ -286,11 +289,11 @@ class SpecProcessorOcr{
 			$this->processOcrFolder($sourcePath);
 		}
 		$this->logMsg('Done loading OCR files ');
-		
-		
+
+
 		return $status;
 	}
-	
+
 	private function uploadOcrFile(){
 		$retPath = '';
 		if(!array_key_exists('ocrfile',$_FILES)){
@@ -330,7 +333,7 @@ class SpecProcessorOcr{
 		}
 		return $retPath;
 	}
-	
+
 	private function processOcrHtml($sourcePath){
 		$dom = new DOMDocument();
 		$dom->loadHTMLFile($sourcePath);
@@ -383,7 +386,7 @@ class SpecProcessorOcr{
 		else{
 			$this->logMsg("ERROR: unable to access source directory: ".$sourcePath,1);
 		}
-		if($this->deleteAllOcrFiles) unlink($sourcePath); 
+		if($this->deleteAllOcrFiles) unlink($sourcePath);
 	}
 
 	private function processOcrFile($fileName,$sourcePath){
@@ -392,9 +395,9 @@ class SpecProcessorOcr{
 		if($rawTextFH = fopen($sourcePath.$fileName, 'r')){
 			$rawStr = fread($rawTextFH, filesize($sourcePath.$fileName));
 			fclose($rawTextFH);
-			if($this->deleteAllOcrFiles) unlink($sourcePath.$fileName); 
-			//Grab specimen primary key (e.g. catalog number 
-			$catNumber = ''; 
+			if($this->deleteAllOcrFiles) unlink($sourcePath.$fileName);
+			//Grab specimen primary key (e.g. catalog number
+			$catNumber = '';
 			if(preg_match($this->specKeyPattern,$fileName,$matchArr)){
 				if(array_key_exists(1,$matchArr) && $matchArr[1]){
 					$catNumber = $matchArr[1];
@@ -403,21 +406,43 @@ class SpecProcessorOcr{
 			if($catNumber){
 				//Grab image primary key (imgid)
 				$imgArr = array();
-				$sql = 'SELECT i.imgid, i.url '.
+				$sql = 'SELECT i.imgid, IFNULL(i.originalurl,i.url) AS url '.
 					'FROM images i INNER JOIN omoccurrences o ON i.occid = o.occid '.
-					'WHERE (o.catalognumber = "'.$this->cleanInStr($catNumber).'")';
+					'WHERE (o.collid = '.$this->collid.') AND (o.catalognumber = "'.$this->cleanInStr($catNumber).'")';
 				$rs = $this->conn->query($sql);
 				while($r = $rs->fetch_object()){
 					$imgArr[$r->imgid] = $r->url;
 				}
 				$rs->free();
+				if(!$imgArr){
+					$fileBaseName = basename($sourcePath.$fileName, ".txt");
+					if(strlen($fileBaseName)>4){
+						$sql = 'SELECT i.imgid, IFNULL(i.originalurl,i.url) AS url '.
+							'FROM images i INNER JOIN omoccurrences o ON i.occid = o.occid '.
+							'WHERE (o.collid = '.$this->collid.') AND ((i.originalurl LIKE "%/'.$this->cleanInStr($fileBaseName).'.jpg") OR (i.url LIKE "%/'.$this->cleanInStr($fileBaseName).'.jpg"))';
+						$rs = $this->conn->query($sql);
+						while($r = $rs->fetch_object()){
+							$imgArr[$r->imgid] = $r->url;
+						}
+						$rs->free();
+					}
+				}
 				if($imgArr){
 					$imgId = key($imgArr);
 					if(count($imgArr) > 1){
-						$fileBaseName = basename($sourcePath.$fileName, ".php");
+						// By default will link to first image, unless there is another image with exact name as OCR file
+						$fileBaseName = basename($sourcePath.$fileName, ".txt");
+						$imgIdOverride = '';
 						foreach($imgArr as $k => $v){
-							if(stripos($v,'/'.$fileBaseName.'.')) $imgId = $k;
-						} 
+							if(stripos($v,'/'.$fileBaseName.'.') || stripos($v,'/'.$fileBaseName.'_lg.')){
+								$imgIdOverride= $k;
+								break;
+							}
+							elseif(stripos($v,'/'.$fileBaseName.'_')){
+								$imgIdOverride= $k;
+							}
+						}
+						if($imgIdOverride) $imgId = $imgIdOverride;
 					}
 					//Process and database OCR string
 					if($this->databaseRawStr($imgId,$rawStr,'',$this->ocrSource.': '.date('Y-m-d'))){
@@ -454,7 +479,7 @@ class SpecProcessorOcr{
 					$pW = $imgW*$this->cropW;
 					$pH = $imgH*$this->cropH;
 					$dest = imagecreatetruecolor($pW,$pH);
-	
+
 					// Copy
 					if(imagecopy($dest,$img,0,0,$pX,$pY,$pW,$pH)){
 						//$status = imagejpeg($dest,str_replace('_img.jpg','_crop.jpg',$this->imgUrlLocal));
@@ -802,7 +827,7 @@ class SpecProcessorOcr{
 		$retStr = $this->encodeString($inStr);
 
 		//replace commonly misinterpreted characters
-		$replacements = array("/\." => "A.", "/-\\" => "A", "\X/" => "W", "\Y/" => "W", "`\‘i/" => "W", chr(96) => "'", chr(145) => "'", chr(146) => "'", 
+		$replacements = array("/\." => "A.", "/-\\" => "A", "\X/" => "W", "\Y/" => "W", "`\‘i/" => "W", chr(96) => "'", chr(145) => "'", chr(146) => "'",
 			"�" => "'", "�" => '"', "�" => '"', "�" => '"', chr(147) => '"', chr(148) => '"', chr(152) => '"', chr(239) => "�");
 		$retStr = str_replace(array_keys($replacements), $replacements, $retStr);
 
@@ -835,13 +860,13 @@ class SpecProcessorOcr{
 	}
 
 	private function encodeString($inStr){
-		global $charset;
+		global $CHARSET;
 		$retStr = $inStr;
 		//Get rid of Windows curly (smart) quotes
 		$search = array(chr(145),chr(146),chr(147),chr(148),chr(149),chr(150),chr(151));
 		$replace = array("'","'",'"','"','*','-','-');
 		$inStr = str_replace($search, $replace, $inStr);
-		//Get rid of UTF-8 curly smart quotes and dashes 
+		//Get rid of UTF-8 curly smart quotes and dashes
 		$badwordchars=array("\xe2\x80\x98", // left single quote
 							"\xe2\x80\x99", // right single quote
 							"\xe2\x80\x9c", // left double quote
@@ -851,15 +876,15 @@ class SpecProcessorOcr{
 		);
 		$fixedwordchars=array("'", "'", '"', '"', '-', '...');
 		$inStr = str_replace($badwordchars, $fixedwordchars, $inStr);
-		
+
 		if($inStr){
-			if(strtolower($charset) == "utf-8" || strtolower($charset) == "utf8"){
+			if(strtolower($CHARSET) == "utf-8" || strtolower($CHARSET) == "utf8"){
 				if(mb_detect_encoding($inStr,'UTF-8,ISO-8859-1',true) == "ISO-8859-1"){
 					$retStr = utf8_encode($inStr);
 					//$retStr = iconv("ISO-8859-1//TRANSLIT","UTF-8",$inStr);
 				}
 			}
-			elseif(strtolower($charset) == "iso-8859-1"){
+			elseif(strtolower($CHARSET) == "iso-8859-1"){
 				if(mb_detect_encoding($inStr,'UTF-8,ISO-8859-1') == "UTF-8"){
 					$retStr = utf8_decode($inStr);
 					//$retStr = iconv("UTF-8","ISO-8859-1//TRANSLIT",$inStr);

@@ -18,43 +18,23 @@ class SpecUploadFile extends SpecUploadBase{
 
 	public function uploadFile(){
 		if(!$this->ulFileName){
+			$finalPath = '';
 			if(array_key_exists("ulfnoverride",$_POST) && $_POST['ulfnoverride']){
-				$this->ulFileName = $_POST['ulfnoverride'];
+				$this->ulFileName = substr($_POST['ulfnoverride'],strrpos($_POST['ulfnoverride'],'/')+1);
+				if(copy($_POST['ulfnoverride'],$this->uploadTargetPath.$this->ulFileName)){
+					$finalPath = $this->uploadTargetPath.$this->ulFileName;
+				}
 			}
 			elseif(array_key_exists("uploadfile",$_FILES)){
 				$this->ulFileName = $_FILES['uploadfile']['name'];
-				$fullPath = $this->uploadTargetPath.$this->ulFileName;
-				if(move_uploaded_file($_FILES['uploadfile']['tmp_name'], $fullPath)){
-					$fullPath = $this->uploadTargetPath.$this->ulFileName;
-					//If a zip file, unpackage and assume that first and/or only file is the occurrrence file
-					if(substr($fullPath,-4) == ".zip"){
-						$zipFilePath = $fullPath;
-						$zip = new ZipArchive;
-						$res = $zip->open($fullPath);
-						if($res === TRUE) {
-							for($i = 0; $i < $zip->numFiles; $i++) {
-								$this->ulFileName = $zip->getNameIndex($i);
-								if(strtolower(substr($this->ulFileName,-4)) == '.csv'){
-									if($this->uploadType != $this->NFNUPLOAD || stripos($this->ulFileName,'.reconcile.')){
-										$zip->extractTo($this->uploadTargetPath,$zip->getNameIndex($i));
-										$zip->close();
-										unlink($zipFilePath);
-										break;
-									}
-								}
-							}
-						}
-						else{
-							echo 'failed, code:' . $res;
-			 				return false;
-						}
-					}
+				if(move_uploaded_file($_FILES['uploadfile']['tmp_name'], $this->uploadTargetPath.$this->ulFileName)){
+					$finalPath = $this->uploadTargetPath.$this->ulFileName;
 				}
 				else{
 					echo '<div style="margin:15px;font-weight:bold;font-size:120%;">';
 					echo 'ERROR uploading file (code '.$_FILES['uploadfile']['error'].'): ';
-					if(!is_writable($fullPath)){
-						echo 'Target path ('.$fullPath.') is not writable ';
+					if(!is_writable($this->uploadTargetPath)){
+						echo 'Target path ('.$this->uploadTargetPath.') is not writable ';
 					}
 					else{
 						echo 'Zip file may be too large for the upload limits set within the PHP configurations (upload_max_filesize = '.ini_get("upload_max_filesize").'; post_max_size = '.ini_get("post_max_size").')';
@@ -62,6 +42,36 @@ class SpecUploadFile extends SpecUploadBase{
 					echo '</div>';
 					return false;
 				}
+			}
+			//If a zip file, unpackage and assume that last or only file is the occurrrence file
+			if($finalPath && substr($this->ulFileName,-4) == ".zip"){
+				$this->ulFileName = '';
+				$zipFilePath = $finalPath;
+				$zip = new ZipArchive;
+				$res = $zip->open($finalPath);
+				if($res === TRUE) {
+					for($i = 0; $i < $zip->numFiles; $i++) {
+						$fileName = $zip->getNameIndex($i);
+						if(substr($fileName,0,2) != '._'){
+							$ext = strtolower(substr(strrchr($fileName, '.'), 1));
+							if($ext == 'csv' || $ext == 'txt'){
+								$this->ulFileName = $fileName;
+								if($this->uploadType != $this->NFNUPLOAD || stripos($fileName,'.reconcile.')){
+									break;
+								}
+							}
+						}
+					}
+					if($this->ulFileName){
+						$zip->extractTo($this->uploadTargetPath,$this->ulFileName);
+					}
+				}
+				else{
+					echo 'failed, code:' . $res;
+					return false;
+				}
+				$zip->close();
+				unlink($zipFilePath);
 			}
 		}
 		return $this->ulFileName;
@@ -94,13 +104,13 @@ class SpecUploadFile extends SpecUploadBase{
 			$this->outputMsg('<li>Initiating import from: '.$this->ulFileName.'</li>');
 		 	//First, delete all records in uploadspectemp table associated with this collection
 			$this->prepUploadData();
-			
+
 			$fullPath = $this->uploadTargetPath.$this->ulFileName;
 	 		$fh = fopen($fullPath,'rb') or die("Can't open file");
-			
+
 			$headerArr = $this->getHeaderArr($fh);
-			
-			//Grab data 
+
+			//Grab data
 			$this->transferCount = 0;
 			$this->outputMsg('<li>Beginning to load records...</li>',1);
 			while($recordArr = $this->getRecordArr($fh)){
@@ -120,18 +130,21 @@ class SpecUploadFile extends SpecUploadBase{
 				if($this->uploadType == $this->SKELETAL && !$recMap['catalognumber']){
 					//Skip loading record
 					unset($recMap);
-					continue;  
+					continue;
+				}
+				if($this->uploadType == $this->SKELETAL && (!array_key_exists('recordenteredby', $recMap) || !$recMap['recordenteredby'])){
+					$recMap['recordenteredby'] = 'preprocessed';
 				}
 				$this->loadRecord($recMap);
 				unset($recMap);
 			}
 			fclose($fh);
 
-			//Delete upload file 
+			//Delete upload file
 			if(file_exists($fullPath)) unlink($fullPath);
-			
+
 			$this->cleanUpload();
-			
+
 			if($this->uploadType == $this->NFNUPLOAD){
 				//Identify identifier column (recordID GUID in tempfield02, or occid = tempfield01)
 				$this->nfnIdentifier = 'url';
@@ -201,8 +214,8 @@ class SpecUploadFile extends SpecUploadBase{
 				$this->delimiter = "\t";
 			}
 		}
-		//Check to see if file is csv\
-		if(substr($this->ulFileName,-4) == ".csv" || strpos($headerData,$this->delimiter.'"') !== false){
+		//Check to see if file is csv
+		if(substr(strtolower($this->ulFileName),-4) == ".csv" || strpos($headerData,$this->delimiter.'"') !== false){
 			$this->isCsv = true;
 		}
 		//Grab header terms

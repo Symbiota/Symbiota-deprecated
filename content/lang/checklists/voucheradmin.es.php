@@ -1,7 +1,7 @@
 ﻿<?php
 /*
 ------------------
-Language: Español (Spanish)
+Language:  Español (Spanish)
 ------------------
 */
 
@@ -24,6 +24,7 @@ $LANG['LONGE'] = 'Long Este';
 $LANG['LONGW'] = 'Long Oeste';
 $LANG['INCLUDELATLONG'] = 'Incluir Lat/Long y localidad como una condici&oacute;n "OR"';
 $LANG['ONLYCOORD'] = 'Solamente incluir ocurrencias con coordenadas';
+$LANG['POLYGON_SEARCH'] = 'Search based on polygon defining checklist research boundaries';
 $LANG['EXCLUDE'] = 'Excluir especies cultivadas';
 $LANG['TAXON'] = 'Tax&oacute;n';
 $LANG['SAVESEARCH'] = 'Guardar T&eacute;rminos de B&uacute;squeda';
@@ -43,13 +44,18 @@ $LANG['ADDNAMECURRTAX'] = ' Agregar nombre utilizando la taxonom&iacute;a actual
 $LANG['NOVOUCHLOCA'] = 'No se localizaron vouchers';
 $LANG['LISTEDBELOWARESPECINSTRUC'] = 'A continuaci&oacute;n se enumeran las especies de la lista de control que no han sido vinculadas a esp&eacute;cimenes voucher.  Haga clic en el nombre para utilizar la instrucci&oacute;n de b&uacute;squeda de arriba para consultar de forma din&aacute;mica el conjunto de datos de ocurrencia de espec&iacute;menes voucher posibles. Utilice la lista desplegable a la derecha para mostrar los espec&iacute;menes en un formato de tabla.';
 $LANG['ALLTAXACONTAINVOUCH'] = 'Todos los taxones contienen enlaces a vouchers';
-$LANG['FULLSPECLIST'] = 'Listado de especies completo con vouchers (CSV)';
-$LANG['FULLPRINT'] = 'Listado de especies completo con vouchers (Print Friendly)';
+$LANG['FULLSPECLIST'] = 'Listado de especies completo (CSV)';
+$LANG['FULLPRINT'] = 'Listado de especies completo (Print Friendly)';
+$LANG['FULLSPECLISTVOUCHER'] = 'Listado de especies completo con vouchers (CSV)';
+$LANG['FULLPRINTVOUCHER'] = 'Listado de especies completo con vouchers (Print Friendly)';
+$LANG['PENSOFT_XLSX_EXPORT'] = 'Listado de especies en el formato del Pensoft';
+$LANG['VOUCHERONLY'] = 'Vouchers solomente (DwC-A, CSV, Tab-delimited)';
+$LANG['SPECMISSINGTITLE'] = 'Posibles adiciones de especies basadas en vales de muestra';
 $LANG['SPECMISSTAXA'] = 'Espec&iacute;menes de taxa faltantes del listado de Comprobaci&oacute;n (CSV)';
 $LANG['SPECMISSPELLED'] = 'Espec&iacute;menes con nombres cient&iacute;ficos mal escritos, ilegales, y problem&aacute;ticos (CSV)';
 $LANG['CHECKIDNOTSET'] = 'Identificador de listado de Comprobaci&oacute;n no establecido';
 $LANG['NOADMINPERM'] = 'Usted no tiene permiso administrativo para esta lista de Comprobaci&oacute;n';
-$LANG['DELETESQL'] = 'Eliminar Fragmento SQL';
+$LANG['DELETEVARIABLES'] = 'Eliminar Variables de Consulta';
 $LANG['LINKVOUCHSPECIMEN'] = 'Vincular Espec&iacute;menes Voucher';
 $LANG['REFRESHLIST'] = 'Actualizar Listado';
 $LANG['PREVIOUS'] = 'Anterior';

@@ -17,11 +17,11 @@ class TPImageEditorManager extends TPEditorManager{
 		set_time_limit(120);
 		ini_set("max_input_time",120);
  	}
- 	
+
  	public function __destruct(){
  		parent::__destruct();
  	}
- 
+
 	public function getImages(){
 		$imageArr = Array();
 		$tidArr = Array($this->tid);
@@ -35,7 +35,7 @@ class TPImageEditorManager extends TPEditorManager{
 			}
 			$rs1->free();
 		}
-		
+
 		$tidStr = implode(",",$tidArr);
 		$this->imageArr = Array();
 		$sql = 'SELECT ti.imgid, ti.url, ti.thumbnailurl, ti.originalurl, ti.caption, ti.photographer, ti.photographeruid, '.
@@ -45,7 +45,7 @@ class TPImageEditorManager extends TPEditorManager{
 			'INNER JOIN taxstatus ts ON ti.tid = ts.tid '.
 			'INNER JOIN taxa t ON ti.tid = t.tid '.
 			'WHERE ts.taxauthid = 1 AND (ts.tidaccepted IN('.$tidStr.')) AND ti.SortSequence < 500 '.
-			'ORDER BY ti.sortsequence'; 
+			'ORDER BY ti.sortsequence';
 		//echo $sql; exit;
 		$result = $this->taxonCon->query($sql);
 		$imgCnt = 0;
@@ -97,11 +97,11 @@ class TPImageEditorManager extends TPEditorManager{
 		if($status) $status = "with editImageSort method: ".$status;
 		return $status;
 	}
-	
+
 	public function loadImage($postArr){
 		$status = true;
 		$imgManager = new ImageShared();
-		
+
 		$imgPath = $postArr["filepath"];
 
 		$imgManager->setTid($this->tid);
@@ -140,9 +140,9 @@ class TPImageEditorManager extends TPEditorManager{
 				//echo implode('; ',$imgManager->getErrArr());
 			}
 		}
-		$imgManager->processImage();
-		if($imgManager->getErrArr()){
+		if(!$imgManager->processImage()){
 			$this->errorStr = implode('<br/>',$imgManager->getErrArr());
+			$status = false;
 		}
 		return $status;
 	}

@@ -29,13 +29,13 @@
  * @author Paul J. Morris
  */
 
-include_once("$serverRoot/classes/OmOccurrences.php");
-include_once("$serverRoot/classes/OmOccurDeterminations.php");
-if (file_exists("$serverRoot/classes/Gazeteer.php")) { 
-   include_once("$serverRoot/classes/Gazeteer.php");
+include_once("$SERVER_ROOT/classes/OmOccurrences.php");
+include_once("$SERVER_ROOT/classes/OmOccurDeterminations.php");
+if (file_exists("$SERVER_ROOT/classes/Gazeteer.php")) { 
+   include_once("$SERVER_ROOT/classes/Gazeteer.php");
 }
-include_once("$serverRoot/classes/iPlantUtility.php");
-include_once("$serverRoot/classes/ImageShared.php");
+include_once("$SERVER_ROOT/classes/iPlantUtility.php");
+include_once("$SERVER_ROOT/classes/ImageShared.php");
 
 define ("DEFAULT_NEVP_COUNTRY","United States of America");
 
@@ -668,15 +668,15 @@ class NEVPProcessor {
               break;
         }  
   
-        if (!in_array($parser,$depth)) { 
-          $depth[$parser] = 0;
+        if (!in_array((int) $parser,$depth)) { 
+          $depth[(int) $parser] = 0;
         }
-        $depth[$parser]++;
+        $depth[(int) $parser]++;
     }
     
     function endElement($parser, $name) {
         global $depth, $currentOcc, $currentId, $currentDate, $result, $currentAnnotator, $currentAnnotation, $currentMedia, $currentAP,$currentSerializer, $currentDocument;
-        $depth[$parser]--;
+        $depth[(int) $parser]--;
         
         switch ($name) { 
            case "DWCFP:OCCURRENCE":

@@ -1,5 +1,5 @@
 <?php
-include_once('../../config/symbini.php'); 
+include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceCleaner.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 
@@ -20,10 +20,10 @@ if($action && !preg_match('/^[a-zA-Z\s]+$/',$action)) $action = '';
 
 $cleanManager = new OccurrenceCleaner();
 if($collid) $cleanManager->setCollId($collid);
-$collMap = $cleanManager->getCollMap();
+$collMap = current($cleanManager->getCollMap());
 
 $statusStr = '';
-$isEditor = 0; 
+$isEditor = 0;
 if($IS_ADMIN || (array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collid,$USER_RIGHTS["CollAdmin"]))
 	|| ($collMap['colltype'] == 'General Observations')){
 	$isEditor = 1;
@@ -93,7 +93,7 @@ if($action && $isEditor){
 			}
 			return true;
 		}
-	
+
 		function verifyStateCleanForm(f){
 			if(f.newstate.value == ""){
 				alert("Select a state value");
@@ -128,15 +128,15 @@ if($action && $isEditor){
 	</script>
 </head>
 <body>
-	<?php 	
+	<?php
 	$displayLeftMenu = false;
 	include($SERVER_ROOT.'/header.php');
 	?>
 	<div class='navpath'>
 		<a href="../../index.php">Home</a> &gt;&gt;
 		<a href="../misc/collprofiles.php?collid=<?php echo $collid; ?>&emode=off">Collection Management</a> &gt;&gt;
-		<a href="index.php?collid=<?php echo $collid; ?>">Cleaning Tools Index</a> 
-		<?php 
+		<a href="index.php?collid=<?php echo $collid; ?>">Cleaning Tools Index</a>
+		<?php
 		if($mode) echo '&gt;&gt; <a href="politicalunits.php?collid='.$collid.'"><b>Political Geography Cleaning Menu</b></a>';
 		?>
 	</div>
@@ -151,15 +151,15 @@ if($action && $isEditor){
 				<?php echo $statusStr; ?>
 			</div>
 			<hr/>
-			<?php 
-		} 
+			<?php
+		}
 		echo '<h2>'.$collMap['collectionname'].' ('.$collMap['code'].')</h2>';
 		if($isEditor){
 			?>
 			<fieldset style="padding:20px;position:relative">
 				<legend><b>Geographic Report</b></legend>
 				<?php
-				if($target == 'geolocal'){ 
+				if($target == 'geolocal'){
 					if($mode) echo '<div style="position:absolute;top:5px;right:0px;padding:10px;border:1px solid grey"><a href="politicalunits.php?collid='.$collid.'&mode=0">Main Menu</a></div>';
 					echo '<div style="width:85%;margin-bottom:15px;">Click on links provided below to list non-standardized geographical terms used within the collection. '.
 						'The numbers to the right of each geographic designation represent the number of specimens using that term. '.
@@ -174,7 +174,7 @@ if($action && $isEditor){
 							<div style="margin:5px">
 								<div style="margin-bottom:10px;">
 									<b>Questionable countries:</b> <?php echo $cleanManager->getFeatureCount(); ?> possible issues
-								</div> 
+								</div>
 								<?php
 								foreach($badCountryArr as $countryName => $countryCnt){
 									?>
@@ -186,7 +186,7 @@ if($action && $isEditor){
 											<select name="newcountry" style="width:200px;">
 												<option value="">Replace with...</option>
 													<option value="">-------------------------</option>
-												<?php 
+												<?php
 												foreach($goodCountryArr as $cgv){
 													echo '<option>'.$cgv.'</option>';
 												}
@@ -199,12 +199,12 @@ if($action && $isEditor){
 											<input name="action" type="submit" value="Replace Country" />
 										</form>
 									</div>
-									<?php 
+									<?php
 								}
 								?>
 							</div>
 						</div>
-						<?php 
+						<?php
 					}
 					elseif($mode == 'nullcountry'){
 						$badCountryArr = $cleanManager->getNullCountryNotStateArr();
@@ -214,7 +214,7 @@ if($action && $isEditor){
 							<div style="margin:5px">
 								<div style="margin-bottom:10px;font-size:120%;">
 									<span style="text-decoration: underline; font-weight:bold">NULL countries and non-Null state:</span> <?php echo $cleanManager->getFeatureCount(); ?> possible issues
-								</div> 
+								</div>
 								<?php
 								foreach($badCountryArr as $stateName => $stateCnt){
 									?>
@@ -226,7 +226,7 @@ if($action && $isEditor){
 											<select name="country" style="width:200px;">
 												<option value="">Assign Country...</option>
 												<option value="">-------------------------</option>
-												<?php 
+												<?php
 												foreach($goodCountryArr as $gcv => $stateArr){
 													echo '<option '.($gcv!='USA'&&in_array($stateName,$stateArr)?'SELECTED':'').'>'.$gcv.'</option>';
 												}
@@ -239,12 +239,12 @@ if($action && $isEditor){
 											<input name="action" type="submit" value="Assign Country" />
 										</form>
 									</div>
-									<?php 
+									<?php
 								}
 								?>
 							</div>
 						</div>
-						<?php 
+						<?php
 					}
 					elseif($mode == 'badstate'){
 						$badStateArr = $cleanManager->getBadStateArr();
@@ -254,7 +254,7 @@ if($action && $isEditor){
 							<div style="margin:5px">
 								<div style="margin-bottom:10px;">
 									<b>Questionable states:</b> <?php echo $cleanManager->getFeatureCount(); ?> possible issues
-								</div> 
+								</div>
 								<?php
 								foreach($badStateArr as $countryValue => $stateArr){
 									echo '<div style="margin-left:0px;"><b><u>'.$countryValue.'</u></b></div>';
@@ -265,13 +265,13 @@ if($action && $isEditor){
 												<b><?php echo $stateName; ?></b>
 												<?php echo ' <span title="Number of Specimens">('.$stateCnt.')</span>'; ?>
 												<a href="../editor/occurrenceeditor.php?q_catalognumber=&occindex=0&q_customfield1=stateProvince&q_customtype1=EQUALS&q_customvalue1=<?php echo urlencode($stateName).'&collid='.$collid; ?>" target="_blank"><img src="../../images/edit.png" style="width:13px" /></a>
-												<?php 
+												<?php
 												if(array_key_exists($countryValue,$goodStateArr)){
 													?>
 													<select name="newstate" style="width:200px;">
 														<option value="">Replace with...</option>
 														<option value="">-------------------------</option>
-														<?php 
+														<?php
 														$arr = $goodStateArr[$countryValue];
 														foreach($arr as $stateValue){
 															echo '<option>'.$stateValue.'</option>';
@@ -285,17 +285,17 @@ if($action && $isEditor){
 													<input name="country" type="hidden" value="<?php echo $countryValue; ?>" />
 													<input name="action" type="submit" value="Replace State" />
 													<?php
-												} 
+												}
 												?>
 											</form>
 										</div>
-										<?php 
+										<?php
 									}
 								}
 								?>
 							</div>
 						</div>
-						<?php 
+						<?php
 					}
 					elseif($mode == 'nullstate'){
 						$badStateArr = $cleanManager->getNullStateNotCountyArr();
@@ -305,7 +305,7 @@ if($action && $isEditor){
 							<div style="margin:5px">
 								<div style="margin-bottom:10px;font-size:120%;">
 									<span style="text-decoration: underline; font-weight:bold">NULL state/province and non-Null county:</span> <?php echo $cleanManager->getFeatureCount(); ?> possible issues
-								</div> 
+								</div>
 								<?php
 								foreach($badStateArr as $countryName => $countyArr){
 									echo '<div style="margin-left:0px;"><b><u>'.$countryName.'</u></b></div>';
@@ -316,13 +316,13 @@ if($action && $isEditor){
 												<b><?php echo $countyName; ?></b>
 												<?php echo ' <span title="Number of Specimens">('.$countyCnt.')</span>'; ?>
 												<a href="../editor/occurrenceeditor.php?q_catalognumber=&occindex=0&q_customfield1=stateProvince&q_customtype1=NULL&q_customfield2=county&q_customtype2=EQUALS&q_customvalue2=<?php echo urlencode($countyName).'&collid='.$collid; ?>" target="_blank"><img src="../../images/edit.png" style="width:13px" /></a>
-												<?php 
+												<?php
 												if(array_key_exists($countryName,$goodStateArr)){
 													?>
 													<select name="state" style="width:200px;">
 														<option value="">Assign State...</option>
 														<option value="">-------------------------</option>
-														<?php 
+														<?php
 														$countyTestStr = str_replace(array(' county',' co.',' co'),'',strtolower($countyName));
 														$arr = $goodStateArr[$countryName];
 														foreach($arr as $gsv => $cArr){
@@ -337,17 +337,17 @@ if($action && $isEditor){
 													<input name="mode" type="hidden" value="nullstate" />
 													<input name="action" type="submit" value="Assign State" />
 													<?php
-												} 
+												}
 												?>
 											</form>
 										</div>
-										<?php 
+										<?php
 									}
 								}
 								?>
 							</div>
 						</div>
-						<?php 
+						<?php
 					}
 					elseif($mode == 'badcounty'){
 						$badCountyArr = $cleanManager->getBadCountyArr();
@@ -357,7 +357,7 @@ if($action && $isEditor){
 							<div style="margin:5px">
 								<div style="margin-bottom:10px;">
 									<b>Questionable counties:</b> <?php echo $cleanManager->getFeatureCount(); ?> possible issues
-								</div> 
+								</div>
 								<?php
 								foreach($badCountyArr as $countryName => $stateArr){
 									echo '<div style="margin-left:0px;"><b><u>'.$countryName.'</u></b></div>';
@@ -372,13 +372,13 @@ if($action && $isEditor){
 													<b><?php echo $countyName; ?></b>
 													<?php echo ' <span title="Number of Specimens">('.$countyCnt.')</span>'; ?>
 													<a href="../editor/occurrenceeditor.php?q_catalognumber=&occindex=0&q_customfield1=county&q_customtype1=EQUALS&q_customvalue1=<?php echo urlencode($countyName).'&collid='.$collid; ?>" target="_blank"><img src="../../images/edit.png" style="width:13px" /></a>
-													<?php 
+													<?php
 													if(array_key_exists($stateTestStr,$goodCountyArr)){
 														?>
 														<select name="newcounty" style="width:200px;">
 															<option value="">Replace with...</option>
 																<option value="">-------------------------</option>
-															<?php 
+															<?php
 															$arr = $goodCountyArr[$stateTestStr];
 															foreach($arr as $v){
 																echo '<option '.($countyTestStr==strtolower($v)?'selected':'').'>'.$v.'</option>';
@@ -393,18 +393,18 @@ if($action && $isEditor){
 														<input name="state" type="hidden" value="<?php echo $stateName; ?>" />
 														<input name="action" type="submit" value="Replace County" />
 														<?php
-													} 
+													}
 													?>
 												</form>
 											</div>
-											<?php 
+											<?php
 										}
 									}
 								}
 								?>
 							</div>
 						</div>
-						<?php 
+						<?php
 					}
 					elseif($mode == 'nullcounty'){
 						$badCountyArr = $cleanManager->getNullCountyNotLocalityArr();
@@ -414,7 +414,7 @@ if($action && $isEditor){
 							<div style="margin:5px">
 								<div style="margin-bottom:10px;font-size:120%;">
 									<span style="text-decoration: underline; font-weight:bold">NULL county and non-Null locality:</span> <?php echo $cleanManager->getFeatureCount(); ?> possible issues
-								</div> 
+								</div>
 								<?php
 								foreach($badCountyArr as $countryName => $stateArr){
 									echo '<div style="margin-left:0px;"><b><u>'.$countryName.'</u></b></div>';
@@ -428,20 +428,20 @@ if($action && $isEditor){
 													<b><?php echo $localityName; ?></b>
 													<?php echo ' <span title="Number of Specimens">('.$localityCnt.')</span>'; ?>
 													<a href="../editor/occurrenceeditor.php?q_catalognumber=&occindex=0&q_customfield1=county&q_customtype1=NULL&q_customfield2=locality&q_customtype2=EQUALS&q_customvalue2=<?php echo urlencode($localityName).'&collid='.$collid; ?>" target="_blank"><img src="../../images/edit.png" style="width:13px" /></a>
-													<?php 
+													<?php
 													if(array_key_exists($stateTestStr,$goodCountyArr)){
 														?>
 														<select name="county" style="width:200px;">
 															<option value="">Assign County...</option>
 															<option value="">-------------------------</option>
-															<?php 
+															<?php
 															$arr = $goodCountyArr[$stateTestStr];
 															foreach($arr as $v){
 																echo '<option>'.$v.'</option>';
 															}
 															?>
 														</select>
-														<input name="locality" type="hidden" value="<?php echo htmlentities($localityName); ?>" />
+														<input name="locality" type="hidden" value="<?php echo htmlentities($localityName, ENT_COMPAT, $CHARSET); ?>" />
 														<input name="country" type="hidden" value="<?php echo $countryName; ?>" />
 														<input name="state" type="hidden" value="<?php echo $stateName; ?>" />
 														<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
@@ -449,18 +449,18 @@ if($action && $isEditor){
 														<input name="mode" type="hidden" value="nullcounty" />
 														<input name="action" type="submit" value="Assign County" />
 														<?php
-													} 
+													}
 													?>
 												</form>
 											</div>
-											<?php 
+											<?php
 										}
 									}
 								}
 								?>
 							</div>
 						</div>
-						<?php 
+						<?php
 					}
 					else{
 						if($mode === ''){
@@ -471,39 +471,39 @@ if($action && $isEditor){
 							$cleanManager->countryCleanFirstStep();
 							echo '</div>';
 						}
-						
+
 						echo '<div style="margin-bottom:2px"><b>Questionable countries:</b> ';
 						$badCountryCnt = $cleanManager->getBadCountryCount();
 						echo $badCountryCnt;
 						if($badCountryCnt) echo ' => <a href="politicalunits.php?collid='.$collid.'&target=geolocal&mode=badcountry">List countries...</a>';
 						echo '</div>';
-						
+
 						//Get Null country and not null state
 						echo '<div style="margin-bottom:20px"><b>Null country with non-Null state/province:</b> ';
 						$nullCountryCnt = $cleanManager->getNullCountryNotStateCount();
 						echo $nullCountryCnt;
 						if($nullCountryCnt) echo ' => <a href="politicalunits.php?collid='.$collid.'&target=geolocal&mode=nullcountry">List records...</a>';
 						echo '</div>';
-						
+
 						echo '<div style="margin-bottom:2px"><b>Questionable states/provinces:</b> ';
 						$badStateCnt = $cleanManager->getBadStateCount();
 						echo $badStateCnt;
 						if($badStateCnt) echo ' => <a href="politicalunits.php?collid='.$collid.'&target=geolocal&mode=badstate">List states...</a>';
 						echo '</div>';
-						
+
 						//Get Null state and not null county or municipality
 						echo '<div style="margin-bottom:20px"><b>Null state/province with non-Null county:</b> ';
 						$nullStateCnt = $cleanManager->getNullStateNotCountyCount();
 						echo $nullStateCnt;
 						if($nullStateCnt) echo ' => <a href="politicalunits.php?collid='.$collid.'&target=geolocal&mode=nullstate">List records...</a>';
 						echo '</div>';
-						
+
 						echo '<div style="margin-bottom:2px"><b>Questionable counties:</b> ';
 						$badCountiesCnt = $cleanManager->getBadCountyCount();
 						echo $badCountiesCnt;
 						if($badCountiesCnt) echo ' => <a href="politicalunits.php?collid='.$collid.'&target=geolocal&mode=badcounty">List counties...</a>';
 						echo '</div>';
-						
+
 						//Get Null county and not null locality
 						echo '<div style="margin-bottom:60px"><b>Null county with non-Null locality details:</b> ';
 						$nullCountyCnt = $cleanManager->getNullCountyNotLocalityCount();
@@ -514,42 +514,42 @@ if($action && $isEditor){
 				}
 				?>
 			</fieldset>
-			<!-- 
+			<!--
 			<fieldset style="padding:20px;">
 				<legend><b>All Fields</b></legend>
 				<div style="margin:5px">
-					<b>Field Name:</b> 
+					<b>Field Name:</b>
 					<select name="fieldname">
 						<option value="">Select Target Field</option>
 						<option value="">--------------------------------</option>
-						<?php 
-						
-						
-						
-						
+						<?php
+
+
+
+
 						?>
 					</select>
 				</div>
 				<div style="margin:5px">
-					<b>Current Value:</b> 
+					<b>Current Value:</b>
 					<select name="value_old">
 						<option value="">Select Target Value</option>
 						<option value="">--------------------------------</option>
-						<?php 
-						
-						
-						
-						
+						<?php
+
+
+
+
 						?>
 					</select>
 				</div>
 				<div style="margin:5px">
-					<b>Replacement Value:</b> 
-					<input name="country_new" type="text" value="" /> 
+					<b>Replacement Value:</b>
+					<input name="country_new" type="text" value="" />
 				</div>
 			</fieldset>
  			-->
- 			<?php 
+ 			<?php
 		}
 		else{
 			echo '<h2>You are not authorized to access this page</h2>';

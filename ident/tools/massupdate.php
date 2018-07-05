@@ -1,16 +1,20 @@
 <?php
 include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/KeyMassUpdate.php');
-header("Content-Type: text/html; charset=".$charset);
+header("Content-Type: text/html; charset=".$CHARSET);
 if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../ident/tools/massupdate.php?'.$_SERVER['QUERY_STRING']);
 
 $clid = $_REQUEST['clid'];
 $taxonFilter = array_key_exists("tf",$_REQUEST)?$_REQUEST["tf"]:'';
-$generaOnly = array_key_exists("generaonly",$_POST)?$_POST["generaonly"]:0; 
+$generaOnly = array_key_exists("generaonly",$_POST)?$_POST["generaonly"]:0;
 $cidValue = array_key_exists("cid",$_REQUEST)?$_REQUEST["cid"]:'';
-$removeAttrs = array_key_exists("r",$_REQUEST)?$_REQUEST["r"]:""; 
-$addAttrs = array_key_exists("a",$_REQUEST)?$_REQUEST["a"]:""; 
-$langValue = array_key_exists("lang",$_REQUEST)?$_REQUEST["lang"]:""; 
+$removeAttrs = array_key_exists("r",$_REQUEST)?$_REQUEST["r"]:"";
+$addAttrs = array_key_exists("a",$_REQUEST)?$_REQUEST["a"]:"";
+$langValue = array_key_exists("lang",$_REQUEST)?$_REQUEST["lang"]:"";
+
+if(!is_numeric($clid)) $clid = 0;
+if(!is_numeric($taxonFilter)) $taxonFilter = 0;
+if(!is_numeric($cidValue)) $cidValue = 0;
 
 $muManager = new KeyMassUpdate();
 $muManager->setClid($clid);
@@ -18,7 +22,7 @@ if($langValue) $muManager->setLang($langValue);
 if($cidValue) $muManager->setCid($cidValue);
 
 $isEditor = false;
-if($isAdmin || array_key_exists("KeyEditor",$userRights) || array_key_exists("KeyAdmin",$userRights)){
+if($IS_ADMIN || array_key_exists("KeyEditor",$USER_RIGHTS) || array_key_exists("KeyAdmin",$USER_RIGHTS)){
 	$isEditor = true;
 }
 
@@ -37,12 +41,12 @@ if($isEditor){
 		var addStr = ";";
 		var removeStr = ";";
 		var dataChanged = false;
-		
+
 		window.onbeforeunload = verifyClose();
 
-		function verifyClose() { 
-			if(dataChanged == true) { 
-				return "You will lose any unsaved data if you don't first save your changes!"; 
+		function verifyClose() {
+			if(dataChanged == true) {
+				return "You will lose any unsaved data if you don't first save your changes!";
 			}
 		}
 
@@ -55,7 +59,7 @@ if($isEditor){
 				removeAttr(target);
 			}
 		}
-		
+
 		function removeAttr(target){
 			var indexOfRemove = removeStr.indexOf(";"+target+";");
 			if(indexOfRemove == -1){
@@ -65,13 +69,13 @@ if($isEditor){
 				addAttr(target);
 			}
 		}
-	
+
 		function submitAttrs(){
 			var sform = document.submitform;
 			var a;
 			var r;
 			var submitForm = false;
-			
+
 			if(addStr.length > 1){
 				var addAttrs = addStr.split(";");
 				for(a in addAttrs){
@@ -86,7 +90,7 @@ if($isEditor){
 				}
 				submitForm = true;
 			}
-	
+
 			if(removeStr.length > 1){
 				var removeAttrs = removeStr.split(";");
 				for(r in removeAttrs){
@@ -111,7 +115,7 @@ if($isEditor){
 	</script>
 </head>
 <body>
-<?php 
+<?php
 $displayLeftMenu = false;
 include($SERVER_ROOT.'/header.php');
 ?>
@@ -123,14 +127,14 @@ include($SERVER_ROOT.'/header.php');
 	<a href="../key.php?cl=<?php echo $clid; ?>&taxon=All+Species">
 		<b>Open Key</b>
 	</a>
-	<?php 
+	<?php
 	if($cidValue){
 		?>
 		&gt;&gt;
 		<a href='massupdate.php?clid=<?php echo $clid.'&tf='.$taxonFilter.'&lang='.$langValue; ?>'>
 			<b>Return to Character List</b>
 		</a>
-		<?php 
+		<?php
 	}
 	?>
 </div>
@@ -141,28 +145,29 @@ include($SERVER_ROOT.'/header.php');
 		if(!$cidValue){
 			?>
 			<form id="filterform" action="massupdate.php" method="post" onsubmit="return verifyFilterForm(this)">
+				<fieldset>
 		  			<div style="margin: 10px 0px;">Select character to edit</div>
 		  			<div>
-						<select name="tf">
+						<select name="tf" onchange="this.form.submit()">
 				 			<option value="">All Taxa</option>
 				 			<option value="">--------------------------</option>
-					  		<?php 
+					  		<?php
 					  		$selectList = $muManager->getTaxaQueryList();
 				  			foreach($selectList as $tid => $scinameValue){
 				  				echo '<option value="'.$tid.'" '.($tid==$taxonFilter?"SELECTED":"").'>'.$scinameValue."</option>";
 				  			}
 					  		?>
 						</select>
-						<?php 
+						<?php
 						count($selectList);
 						?>
 					</div>
 					<div style="margin: 10px 0px;">
-						<input type="checkbox" name="generaonly" value="1" <?php if($generaOnly) echo "checked"; ?> /> 
+						<input type="checkbox" name="generaonly" value="1" <?php if($generaOnly) echo "checked"; ?> />
 						Exclude Species Rank
 					</div>
-			 		<?php 
-	 				$cList = $muManager->getCharList($taxonFilter);			//Array(Heading => Array(CID => CharName))
+			 		<?php
+	 				$cList = $muManager->getCharList($taxonFilter);
 					foreach($cList as $h => $charData){
 						echo "<div style='margin-top:1em;font-size:125%;font-weight:bold;'>$h</div>\n";
 						ksort($charData);
@@ -182,7 +187,7 @@ include($SERVER_ROOT.'/header.php');
 			?>
 			<div><?php echo $inheritStr; ?> = character state is inherited as true from a parent taxon (genus, family, etc)</div>
 		 	<table class="styledtable" style="font-family:Arial;font-size:12px;">
-				<?php 
+				<?php
 				$muManager->echoTaxaList($taxonFilter,$generaOnly);
 				?>
 			</table>
@@ -191,19 +196,18 @@ include($SERVER_ROOT.'/header.php');
 				<input type='hidden' name='cid' value='<?php echo $cidValue; ?>' />
 				<input type='hidden' name='clid' value='<?php echo $clid; ?>' />
 				<input type='hidden' name='lang' value='<?php echo $langValue; ?>' />
+				<input type='hidden' name='generaonly' value='<?php echo $generaOnly; ?>' />
 			</form>
 			<?php
 	 	}
 	}
-	else{  
+	else{
 		echo "<h1>You appear not to have necessary premissions to edit character data.</h1>";
 	}
 	?>
 </div>
-<?php  
+<?php
 include($SERVER_ROOT.'/footer.php');
 ?>
 </body>
 </html>
-
-	

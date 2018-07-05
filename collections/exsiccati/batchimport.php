@@ -1,7 +1,7 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/ExsiccatiManager.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/ExsiccatiManager.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 
 if(!$SYMB_UID){
 	header('Location: ../../profile/index.php?refurl=../collections/exsiccati/batchimport.php?'.$_SERVER['QUERY_STRING']);
@@ -15,13 +15,13 @@ $formSubmit = array_key_exists('formsubmit',$_POST)?$_POST['formsubmit']:'';
 
 $statusStr = '';
 $isEditor = 0;
-if($isAdmin){
+if($IS_ADMIN){
 	$isEditor = 1;
 }
-elseif(array_key_exists('CollAdmin',$userRights) && in_array($collid,$userRights['CollAdmin'])){
+elseif(array_key_exists('CollAdmin',$USER_RIGHTS) && in_array($collid,$USER_RIGHTS['CollAdmin'])){
 	$isEditor = 1;
 }
-elseif(array_key_exists('CollEditor',$userRights) && in_array($collid,$userRights['CollEditor'])){
+elseif(array_key_exists('CollEditor',$USER_RIGHTS) && in_array($collid,$USER_RIGHTS['CollEditor'])){
 	$isEditor = 1;
 }
 
@@ -39,7 +39,7 @@ if($isEditor && $formSubmit){
 ?>
 <html>
 <head>
-	<title><?php echo $defaultTitle; ?> Exsiccati Batch Transfer</title>
+	<title><?php echo $DEFAULT_TITLE; ?> Exsiccati Batch Transfer</title>
     <link href="../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
     <link href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 	<script type="text/javascript">
@@ -99,7 +99,7 @@ if($isEditor && $formSubmit){
 			else if(document.body.offsetWidth){
 				wWidth = document.body.offsetWidth*0.9;
 			}
-			newWindow = window.open('../individual/index.php?occid='+occId,'indspec','scrollbars=1,toolbar=1,resizable=1,width='+(wWidth)+',height=600,left=20,top=20');
+			newWindow = window.open('../individual/index.php?occid='+occId,'indspec','scrollbars=1,toolbar=0,resizable=1,width='+(wWidth)+',height=600,left=20,top=20');
 			if(newWindow.opener == null) newWindow.opener = self;
 			return false;
 		}
@@ -112,7 +112,7 @@ if($isEditor && $formSubmit){
 			else if(document.body.offsetWidth){
 				wWidth = document.body.offsetWidth*0.9;
 			}
-			newWindow = window.open('index.php?omenid='+omenid,'exsnum','scrollbars=1,toolbar=1,resizable=1,width='+(wWidth)+',height=600,left=20,top=20');
+			newWindow = window.open('index.php?omenid='+omenid,'exsnum','scrollbars=1,toolbar=0,resizable=1,width='+(wWidth)+',height=600,left=20,top=20');
 			if(newWindow.opener == null) newWindow.opener = self;
 			return false;
 		}
@@ -121,7 +121,7 @@ if($isEditor && $formSubmit){
 <body>
 	<?php 
 	$displayLeftMenu = (isset($collections_exsiccati_batchimport)?$collections_exsiccati_batchimport:false);
-	include($serverRoot."/header.php");
+	include($SERVER_ROOT."/header.php");
 	?>
 	<div class='navpath'>
 		<a href="../../index.php">Home</a> &gt;&gt; 
@@ -302,7 +302,7 @@ if($isEditor && $formSubmit){
 		?>
 	</div>
 	<?php
-	include($serverRoot."/footer.php");
+	include($SERVER_ROOT."/footer.php");
 	?>
 </body>
 </html>

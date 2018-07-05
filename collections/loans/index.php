@@ -1,7 +1,7 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($serverRoot.'/classes/SpecLoans.php');
-header("Content-Type: text/html; charset=".$charset);
+include_once($SERVER_ROOT.'/classes/SpecLoans.php');
+header("Content-Type: text/html; charset=".$CHARSET);
 ini_set('max_execution_time', 180); //180 seconds = 3 minutes
 
 $collId = $_REQUEST['collid'];
@@ -15,9 +15,9 @@ $tabIndex = array_key_exists('tabindex',$_REQUEST)?$_REQUEST['tabindex']:0;
 $eMode = array_key_exists('emode',$_REQUEST)?$_REQUEST['emode']:0;
 
 $isEditor = 0;
-if($symbUid && $collId){
-	if($isAdmin	|| (array_key_exists("CollAdmin",$userRights) && in_array($collId,$userRights["CollAdmin"]))
-		|| (array_key_exists("CollEditor",$userRights) && in_array($collId,$userRights["CollEditor"]))){
+if($SYMB_UID && $collId){
+	if($IS_ADMIN || (array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collId,$USER_RIGHTS["CollAdmin"]))
+		|| (array_key_exists("CollEditor",$USER_RIGHTS) && in_array($collId,$USER_RIGHTS["CollEditor"]))){
 		$isEditor = 1;
 	}
 }
@@ -67,7 +67,7 @@ if($isEditor){
 			$statusStr = $loanManager->editSpecimen($_REQUEST);
 		}
 		elseif($formSubmit == 'Add New Determinations'){
-			include_once($serverRoot.'/classes/OccurrenceEditorManager.php');
+			include_once($SERVER_ROOT.'/classes/OccurrenceEditorManager.php');
 			$occManager = new OccurrenceEditorDeterminations();
 			$occidArr = $_REQUEST['occid'];
 			foreach($occidArr as $k){
@@ -84,8 +84,8 @@ $loanInList = $loanManager->getLoanInList($searchTerm,$displayAll);
 ?>
 <html>
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset;?>">
-	<title><?php echo $defaultTitle; ?> Loan Management</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET;?>">
+	<title><?php echo $DEFAULT_TITLE; ?> Loan Management</title>
     <link href="../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" rel="stylesheet" type="text/css" />
     <link href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" rel="stylesheet" type="text/css" />
 	<link href="../../css/jquery-ui.css" rel="Stylesheet" type="text/css" />
@@ -99,24 +99,22 @@ $loanInList = $loanManager->getLoanInList($searchTerm,$displayAll);
 <body>
 	<?php
 	$displayLeftMenu = (isset($collections_loans_indexMenu)?$collections_loans_indexMenu:false);
-	include($serverRoot."/header.php");
-	if(isset($collections_loans_indexCrumbs)){
-		if($collections_loans_indexCrumbs){
-			?>
-			<div class='navpath'>
-				<a href='../../index.php'>Home</a> &gt;&gt; 
-				<?php echo $collections_loans_indexCrumbs; ?>
-				<a href='index.php?collid=<?php echo $collId; ?>'> <b>Loan Management</b></a>
-			</div>
-			<?php 
-		}
+	include($SERVER_ROOT."/header.php");
+	if(isset($collections_loans_indexCrumbs) && $collections_loans_indexCrumbs){
+		?>
+		<div class='navpath'>
+			<a href='../../index.php'>Home</a> &gt;&gt; 
+			<?php echo $collections_loans_indexCrumbs; ?>
+			<a href='index.php?collid=<?php echo $collId; ?>'> <b>Loan Management Main Menu</b></a>
+		</div>
+		<?php 
 	}
 	else{
 		?>
 		<div class='navpath'>
 			<a href='../../index.php'>Home</a> &gt;&gt; 
-			<a href="../misc/collprofiles.php?collid=<?php echo $collId; ?>&emode=1">Collection Management</a> &gt;&gt;
-			<a href='index.php?collid=<?php echo $collId; ?>'> <b>Loan Management</b></a>
+			<a href="../misc/collprofiles.php?collid=<?php echo $collId; ?>&emode=1">Collection Management Menu</a> &gt;&gt;
+			<a href='index.php?collid=<?php echo $collId; ?>'> <b>Loan Management Main Menu</b></a>
 		</div>
 		<?php 
 	}
@@ -124,7 +122,7 @@ $loanInList = $loanManager->getLoanInList($searchTerm,$displayAll);
 	<!-- This is inner text! -->
 	<div id="innertext">
 		<?php 
-		if($symbUid && $isEditor && $collId){
+		if($SYMB_UID && $isEditor && $collId){
 			//Collection is defined and User is logged-in and have permissions
 			if($statusStr){
 				?>
@@ -143,14 +141,7 @@ $loanInList = $loanManager->getLoanInList($searchTerm,$displayAll);
 						<li><a href="#loanoutdiv"><span>Outgoing Loans</span></a></li>
 						<li><a href="#loanindiv"><span>Incoming Loans</span></a></li>
 						<li><a href="exchange.php?collid=<?php echo $collId; ?>"><span>Gifts/Exchanges</span></a></li>
-						<!-- <li><a href="#reportdiv">Reports</a></li> -->
 					</ul>
-					<!-- <div id="reportdiv" style="height:50px;">
-						-- IN DEVELOPMENT --
-						List loans outstanding, Invoices, mailing labels, etc?
-						
-						
-					</div> -->
 					<div id="loanoutdiv" style="">
 						<div style="float:right;">
 							<form name='optionform' action='index.php' method='post'>
@@ -355,16 +346,13 @@ $loanInList = $loanManager->getLoanInList($searchTerm,$displayAll);
 								}
 								echo '</ul>';
 							}
-							else{
-								echo '<div style="font-weight:bold;font-size:120%;margin-top:10px;">There are no loans on their way to this collection.</div>';
-							}
 							?>
 						</div>
 						<div>
 							<?php 
+							echo '<h3>Incoming Loans</h3>';
+							echo '<ul>';
 							if($loanInList){
-								echo '<h3>Incoming Loan Records</h3>';
-								echo '<ul>';
 								foreach($loanInList as $k => $loanArr){
 									echo '<li>';
 									echo '<a href="index.php?collid='.$collId.'&loanid='.$k.'&loantype=in">';
@@ -373,11 +361,11 @@ $loanInList = $loanManager->getLoanInList($searchTerm,$displayAll);
 									echo ' - '.($loanArr['dateclosed']?'Closed: '.$loanArr['dateclosed']:'<b>OPEN</b>');
 									echo '</li>';
 								}
-								echo '</ul>';
 							}
 							else{
-								echo '<div style="font-weight:bold;font-size:120%;margin-top:10px;">There are no loans in registered for this collection</div>';
+								echo '<li>There are no loans received</li>';
 							}
+							echo '</ul>';
 							?>
 						</div>
 						<div style="clear:both;">&nbsp;</div>
@@ -395,8 +383,8 @@ $loanInList = $loanManager->getLoanInList($searchTerm,$displayAll);
 				include_once('exchangedetails.php');
 			}
 			else{
-				if(!$symbUid){
-					echo '<h2>Please <a href="'.$clientRoot.'/profile/index.php?collid='.$collId.'&refurl='.$clientRoot.'/collections/loans/index.php?collid='.$collId.'">login</a></h2>';
+				if(!$SYMB_UID){
+					echo '<h2>Please <a href="'.$CLIENT_ROOT.'/profile/index.php?collid='.$collId.'&refurl='.$CLIENT_ROOT.'/collections/loans/index.php?collid='.$collId.'">login</a></h2>';
 				}
 				elseif(!$collId){
 					echo '<h2>Collection not defined</h2>';
@@ -407,7 +395,7 @@ $loanInList = $loanManager->getLoanInList($searchTerm,$displayAll);
 			}
 		}
 		else{
-			if(!$symbUid){
+			if(!$SYMB_UID){
 				echo 'Please <a href="../../profile/index.php?refurl=../collections/loans/index.php?collid='.$collId.'">login</a>';
 			}
 			elseif(!$isEditor){
@@ -420,7 +408,7 @@ $loanInList = $loanManager->getLoanInList($searchTerm,$displayAll);
 		?>
 	</div>
 	<?php
-	include($serverRoot."/footer.php");
+	include($SERVER_ROOT."/footer.php");
 	?>
 </body>
 </html>

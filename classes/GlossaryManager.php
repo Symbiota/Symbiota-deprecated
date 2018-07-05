@@ -675,7 +675,6 @@ class GlossaryManager{
 				if(substr($imgDelPath,0,4) != 'http'){
 					if(!unlink($imgDelPath)){
 						$this->errArr[] = 'WARNING: Deleted records from database successfully but FAILED to delete image from server (path: '.$imgDelPath.')';
-						//$status .= '<br/>Return to <a href="../taxa/admin/tpeditor.php?tid='.$tid.'&tabindex=1">Taxon Editor</a>';
 					}
 				}
 				
@@ -730,7 +729,7 @@ class GlossaryManager{
 
 		//Get image dimensions
 		if(!$this->sourceWidth || !$this->sourceHeight){
-			list($this->sourceWidth, $this->sourceHeight) = getimagesize($this->sourcePath);
+			list($this->sourceWidth, $this->sourceHeight) = getimagesize(str_replace(' ', '%20', $this->sourcePath));
 		}
 		//Get image file size
 		$fileSize = $this->getSourceFileSize();
@@ -825,7 +824,7 @@ class GlossaryManager{
 		$imgInfo = null;
 		if(strtolower(substr($fPath,0,7)) == 'http://' || strtolower(substr($fPath,0,8)) == 'https://'){
 			//Image is URL 
-			$imgInfo = getimagesize($fPath);
+			$imgInfo = getimagesize(str_replace(' ', '%20', $fPath));
 			list($this->sourceWidth, $this->sourceHeight) = $imgInfo;
 		
 			if($pos = strrpos($fName,'/')){
@@ -1006,7 +1005,7 @@ class GlossaryManager{
 		ini_set('memory_limit','512M');
 
 		if(!$this->sourceWidth || !$this->sourceHeight){
-			list($this->sourceWidth, $this->sourceHeight) = getimagesize($this->sourcePath);
+			list($this->sourceWidth, $this->sourceHeight) = getimagesize(str_replace(' ', '%20', $this->sourcePath));
 		}
 		if($this->sourceWidth){
 			$newHeight = round($this->sourceHeight*($newWidth/$this->sourceWidth));
@@ -1257,6 +1256,21 @@ class GlossaryManager{
 	//Misc data retrival functions
 	public function getStats(){
 		/*
+		
+		// Report output for csv export
+		SELECT g.term, g.definition, g.language, GROUP_CONCAT(t.sciname) as sciname, syn.term as syn
+		FROM glossary g LEFT JOIN glossarytermlink te ON g.glossid = te.glossid
+		LEFT JOIN glossarytaxalink tl ON te.glossgrpid = tl.glossid
+		LEFT JOIN taxa t ON tl.tid = t.tid
+		LEFT JOIN (SELECT te.glossgrpid, g.term
+		FROM glossarytermlink te INNER JOIN glossary g ON te.glossid = g.glossid
+		WHERE te.relationshipType = "synonym") syn ON g.glossid = syn.glossgrpid
+		GROUP BY g.language, g.term
+		LIMIT 10000000;
+
+		
+		 
+		
 		SELECT language, count(*)
 		FROM glossary
 		GROUP BY language;

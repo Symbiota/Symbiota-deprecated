@@ -35,12 +35,14 @@ class DwcArchiverDetermination{
 		$fieldArr['recordId'] = 'g.guid AS recordId';
 		$termArr['modified'] = 'http://purl.org/dc/terms/modified';
 		$fieldArr['modified'] = 'd.initialTimeStamp AS modified';
+		$termArr['detid'] = 'http://symbiota.org/terms/detid';
+		$fieldArr['detid'] = 'd.detid';
 
 		$retArr['terms'] = self::trimBySchemaType($termArr,$schemaType,$extended);
 		$retArr['fields'] = self::trimBySchemaType($fieldArr,$schemaType,$extended);
 		return $retArr;
 	}
-	
+
 	private static function trimBySchemaType($detArr,$schemaType,$extended){
 		$trimArr = array();
 		if($schemaType == 'dwc'){
@@ -55,16 +57,16 @@ class DwcArchiverDetermination{
 			}
 		}
 		elseif($schemaType == 'backup'){
-			$trimArr = array(); 
+			$trimArr = array();
 		}
 		elseif($schemaType == 'coge'){
-			$trimArr = array(); 
+			$trimArr = array();
 		}
 		return array_diff_key($detArr,array_flip($trimArr));
 	}
 
 	public static function getSqlDeterminations($fieldArr,$conditionSql){
-		$sql = ''; 
+		$sql = '';
 		if($fieldArr && $conditionSql){
 			$sqlFrag = '';
 			foreach($fieldArr as $fieldName => $colName){
@@ -73,8 +75,10 @@ class DwcArchiverDetermination{
 			$sql = 'SELECT '.trim($sqlFrag,', ').
 				' FROM omoccurdeterminations d INNER JOIN omoccurrences o ON d.occid = o.occid '.
 				'INNER JOIN guidoccurdeterminations g ON d.detid = g.detid '.
-				'INNER JOIN guidoccurrences og ON o.occid = og.occid '.
 				'LEFT JOIN taxa t ON d.tidinterpreted = t.tid ';
+			if(strpos($conditionSql,'ts.taxauthid')){
+				$sql .= 'LEFT JOIN taxstatus ts ON o.tidinterpreted = ts.tid ';
+			}
 			if(strpos($conditionSql,'v.clid')){
 				//Search criteria came from custom search page
 				$sql .= 'LEFT JOIN fmvouchers v ON o.occid = v.occid ';
@@ -83,7 +87,7 @@ class DwcArchiverDetermination{
 				//Search criteria came from map search page
 				$sql .= 'LEFT JOIN omoccurpoints p ON o.occid = p.occid ';
 			}
-			if(strpos($conditionSql,'MATCH(f.recordedby)')){
+			if(strpos($conditionSql,'MATCH(f.recordedby)') || strpos($conditionSql,'MATCH(f.locality)')){
 				$sql .= 'INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ';
 			}
 			if(stripos($conditionSql,'a.stateid')){

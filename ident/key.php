@@ -67,7 +67,7 @@ if($chars){
 			echo '<div class="navpath">';
 			if($dynClid){
 				if($dataManager->getClType() == 'Specimen Checklist'){
-					echo '<a href="'.$clientRoot.'/collections/list.php?tabindex=0">';
+					echo '<a href="'.$CLIENT_ROOT.'/collections/list.php?tabindex=0">';
 					echo 'Occurrence Checklist';
 					echo '</a> &gt; ';
 				}
@@ -84,18 +84,18 @@ if($chars){
 		echo '<a href="../index.php">'.$LANG['HOME'].'</a> &gt;&gt; ';
 		if($dynClid){
 			if($dataManager->getClType() == 'Specimen Checklist'){
-				echo '<a href="'.$clientRoot.'/collections/list.php?tabindex=0">';
+				echo '<a href="'.$CLIENT_ROOT.'/collections/list.php?tabindex=0">';
 				echo 'Occurrence Checklist';
 				echo '</a> &gt;&gt; ';
 			}
 		}
 		elseif($clid){
-			echo '<a href="'.$clientRoot.'/checklists/checklist.php?cl='.$clid.'&proj='.$projValue.'">';
+			echo '<a href="'.$CLIENT_ROOT.'/checklists/checklist.php?cl='.$clid.'&proj='.$projValue.'">';
 			echo 'Checklist: '.$dataManager->getClName();
 			echo '</a> &gt;&gt; ';
 		}
 		elseif($pid){
-			echo '<a href="'.$clientRoot.'/projects/index.php?pid='.$pid.'">';
+			echo '<a href="'.$CLIENT_ROOT.'/projects/index.php?pid='.$pid.'">';
 			echo 'Project Checklists';
 			echo '</a> &gt;&gt; ';
 		}

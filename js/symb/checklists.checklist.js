@@ -2,7 +2,7 @@ $(document).ready(function() {
 	//Filter autocomplete
 	$("#taxonfilter").autocomplete({ 
 		source: function( request, response ) {
-			$.getJSON( "rpc/clsearchsuggest.php", { term: request.term, cl: clid }, response );
+			$.getJSON( "rpc/searchsuggest.php", { term: request.term, clid: clid }, response );
 		}
 	},
 	{ minLength: 3 });
@@ -10,10 +10,12 @@ $(document).ready(function() {
 	//Species add form
 	$("#speciestoadd").autocomplete({
 		source: function( request, response ) {
-			$.getJSON( "rpc/speciessuggest.php", { term: request.term, cl: clid }, response );
+			$.getJSON( "rpc/speciessuggest.php", { term: request.term }, response );
 		}
-	},{ minLength: 4, }
-	);
+	},{ 
+		minLength: 4,
+		autoFocus: true
+	});
 
 });
 
@@ -70,7 +72,7 @@ function openIndividualPopup(occid){
 }
 
 function openPopup(urlStr,windowName){
-	newWindow = window.open(urlStr,windowName,'scrollbars=1,toolbar=1,resizable=1,width=1000,height=800,left=400,top=40');
+	newWindow = window.open(urlStr,windowName,'scrollbars=1,toolbar=0,resizable=1,width=1000,height=800,left=400,top=40');
 	if (newWindow.opener == null) newWindow.opener = self;
 	return false;
 }
@@ -97,28 +99,31 @@ function validateAddSpecies(f){
 		return false;
 	}
 	else{
-		cseXmlHttp=GetXmlHttpObject();
-		if (cseXmlHttp==null){
-	  		alert ("Your browser does not support AJAX!");
-	  		return false;
-	  	}
-		var url="rpc/gettid.php";
-		url=url+"?sciname="+sciName;
-		url=url+"&sid="+Math.random();
-		cseXmlHttp.onreadystatechange=function(){
-			if(cseXmlHttp.readyState==4 && cseXmlHttp.status==200){
-				testTid = cseXmlHttp.responseText;
-				if(testTid == ""){
-					alert("ERROR: Scientific name does not exist in database. Did you spell it correctly? If so, contact your data administrator to add this species to the Taxonomic Thesaurus.");
-				}
-				else{
-					f.tidtoadd.value = testTid;
+		$.ajax({
+			type: "POST",
+			url: "../api/taxonomy/gettaxon.php",
+			dataType: "json",
+			data: { sciname: sciName }
+		}).done(function( taxaObj ) {
+			//alert(JSON.stringify(taxaObj));
+			//alert(Object.keys(taxaObj).length)
+			var retCnt = Object.keys(taxaObj).length;
+			if(retCnt == 0){
+				alert("ERROR: Scientific name does not exist in database. Did you spell it correctly? If so, contact your data administrator to add this species to the Taxonomic Thesaurus.");
+			}
+			else{
+				if(retCnt == 1){
+					f.tidtoadd.value = Object.keys(taxaObj)[0];
 					f.submit();
 				}
+				else{
+					f.tidtoadd.value = Object.keys(taxaObj)[0];
+					f.submit();
+					//alert(Object.keys(taxaObj)[0]);
+					//alert(Object.keys(taxaObj)[1]);
+				}
 			}
-		};
-		cseXmlHttp.open("POST",url,true);
-		cseXmlHttp.send(null);
+		});
 		return false;
 	}
 }
@@ -129,24 +134,6 @@ function changeOptionFormAction(action,target){
 }
 
 //Misc functions
-function GetXmlHttpObject(){
-	var xmlHttp=null;
-	try{
-		// Firefox, Opera 8.0+, Safari, IE 7.x
-  		xmlHttp=new XMLHttpRequest();
-  	}
-	catch (e){
-  		// Internet Explorer
-  		try{
-    		xmlHttp=new ActiveXObject("Msxml2.XMLHTTP");
-    	}
-  		catch(e){
-    		xmlHttp=new ActiveXObject("Microsoft.XMLHTTP");
-    	}
-  	}
-	return xmlHttp;
-}
-
 Array.prototype.unique = function() {
 	var a = [];
 	var l = this.length;

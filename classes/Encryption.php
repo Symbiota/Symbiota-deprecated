@@ -14,8 +14,8 @@ class Encryption{
 		$ivSize = openssl_cipher_iv_length(self::METHOD);
 		$iv = openssl_random_pseudo_bytes($ivSize);
 
-		$ciphertext = openssl_encrypt($plainText, self::METHOD, $key, OPENSSL_RAW_DATA, $iv);
-	
+		$ciphertext = openssl_encrypt($plainText, self::METHOD, $key, 1, $iv);
+
 		return $iv . $ciphertext;
 	}
 
@@ -36,7 +36,7 @@ class Encryption{
 			//Work around needed if mb_string functions are prior than version 5.3
 			$cipherText = mb_substr($cipherTextIn, $ivSize);
 		}
-		return openssl_decrypt($cipherText, self::METHOD, $key, OPENSSL_RAW_DATA, $iv);
+		return openssl_decrypt($cipherText, self::METHOD, $key, 1, $iv);
 	}
 
 	public static function getKey(){
