@@ -308,8 +308,10 @@ else{
 			<div style="margin:5px;">
 				<input type="hidden" name="collid" value="<?php echo $collId; ?>" />
 				<input type="hidden" name="csmode" value="<?php echo $crowdSourceMode; ?>" />
-				<input type="hidden" name="occid" value="" />
-				<input type="hidden" name="occindex" value="0" />
+				<input type="hidden" name="occid" value="<?php echo $occManager->getOccId(); ?>" />
+				<input type="hidden" name="occindex" value="<?php echo $occManager->getOccIndex(); ?>" />
+				<input type="hidden" name="occidlist" value="<?php echo $occManager->getOccidIndexStr(); ?>" />
+				<input type="hidden" name="direction" value="" />
 				<input type="button" name="submitaction" value="Display Editor" onclick="submitQueryEditor(this.form)" />
 				<input type="button" name="submitaction" value="Display Table" onclick="submitQueryTable(this.form)" />
 				<span style="margin-left:10px;">

@@ -88,30 +88,30 @@ if($SYMB_UID){
 
 	if($ouid){
 		$occManager->setQueryVariables(array('ouid' => $ouid));
-		$occManager->setSqlWhere(0,$recLimit);
+		$occManager->setSqlWhere();
 		$qryCnt = $occManager->getQueryRecordCount();
 	}
 	elseif($occIndex !== false){
 		//Query Form has been activated
 		if(!$reset) $occManager->setQueryVariables();
-		$occManager->setSqlWhere($occIndex,$recLimit);
+		$occManager->setSqlWhere();
 		$qryCnt = $occManager->getQueryRecordCount(1);
 	}
 	elseif(isset($_SESSION['editorquery'])){
 		//Make sure query is null
 		unset($_SESSION['editorquery']);
 	}
-
-	$recArr = $occManager->getOccurMap();
+	$recStart = floor($occIndex/$recLimit)*$recLimit;
+	$recArr = $occManager->getOccurMap($recStart, $recLimit);
 	$navStr = '<div style="float:right;">';
-	if($occIndex >= $recLimit){
-		$navStr .= '<a href="#" onclick="return submitQueryForm('.($occIndex-$recLimit).');" title="Previous '.$recLimit.' records">&lt;&lt;</a>';
+	if($recStart >= $recLimit){
+		$navStr .= '<a href="#" onclick="return submitQueryForm('.($recStart-$recLimit).');" title="Previous '.$recLimit.' records">&lt;&lt;</a>';
 	}
 	$navStr .= ' | ';
-	$navStr .= ($occIndex+1).'-'.($qryCnt<$recLimit+$occIndex?$qryCnt:$recLimit+$occIndex).' of '.$qryCnt.' records';
+	$navStr .= ($recStart+1).'-'.($qryCnt<$recLimit+$recStart?$qryCnt:$recLimit+$recStart).' of '.$qryCnt.' records';
 	$navStr .= ' | ';
-	if($qryCnt > ($recLimit+$occIndex)){
-		$navStr .= '<a href="#" onclick="return submitQueryForm('.($occIndex+$recLimit).');" title="Next '.$recLimit.' records">&gt;&gt;</a>';
+	if($qryCnt > ($recLimit+$recStart)){
+		$navStr .= '<a href="#" onclick="return submitQueryForm('.($recStart+$recLimit).');" title="Next '.$recLimit.' records">&gt;&gt;</a>';
 	}
 	$navStr .= '</div>';
 }
@@ -247,7 +247,7 @@ else{
 								<div style="margin:2px;">
 									<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
 									<input name="ouid" type="hidden" value="<?php echo $ouid; ?>" />
-									<input name="occid" type="hidden" value="" />
+									<input name="occid" type="hidden" value="0" />
 									<input name="occindex" type="hidden" value="0" />
 									<input name="submitaction" type="submit" value="Batch Update Field" onclick="submitBatchUpdate(this.form); return false;" />
 								</div>
@@ -320,8 +320,8 @@ else{
 						}
 						echo "<tr ".($recCnt%2?'class="alt"':'').">\n";
 						echo '<td>';
-						echo '<a href="occurrenceeditor.php?csmode='.$crowdSourceMode.'&occindex='.($recCnt+$occIndex).'&occid='.$id.'&collid='.$collId.'" title="open in same window">'.$id.'</a> ';
-						echo '<a href="occurrenceeditor.php?csmode='.$crowdSourceMode.'&occindex='.($recCnt+$occIndex).'&occid='.$id.'&collid='.$collId.'" target="_blank" title="open in new window">';
+						echo '<a href="occurrenceeditor.php?csmode='.$crowdSourceMode.'&occindex='.($recCnt+$recStart).'&occid='.$id.'&collid='.$collId.'" title="open in same window">'.$id.'</a> ';
+						echo '<a href="occurrenceeditor.php?csmode='.$crowdSourceMode.'&occindex='.($recCnt+$recStart).'&occid='.$id.'&collid='.$collId.'" target="_blank" title="open in new window">';
 						echo '<img src="../../images/newwin.png" style="width:10px;" />';
 						echo '</a>';
 						echo '</td>'."\n";

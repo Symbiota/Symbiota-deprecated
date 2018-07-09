@@ -157,20 +157,20 @@ class OccurrenceEditorImages extends OccurrenceEditorManager {
             $kArr = $this->getImageTagValues();
             foreach($kArr as $key => $description) {
                    // Note: By using check boxes, we can't tell the difference between
-                   // an unchecked checkbox and the checkboxes not being present on the 
+                   // an unchecked checkbox and the checkboxes not being present on the
                    // form, we'll get around this by including the original state of the
                    // tags for each image in a hidden field.
                    $sql = null;
                    if (array_key_exists("ch_$key",$_REQUEST)) {
                       // checkbox is selected for this image
                       $sql = "INSERT IGNORE into imagetag (imgid,keyvalue) values (?,?) ";
-                   } else { 
+                   } else {
                       if (array_key_exists("hidden_$key",$_REQUEST) && $_REQUEST["hidden_$key"]==1) {
                          // checkbox is not selected and this tag was used for this image
                          $sql = "DELETE from imagetag where imgid = ? and keyvalue = ? ";
-                      } 
-                   } 
-                   if ($sql!=null) { 
+                      }
+                   }
+                   if ($sql!=null) {
                       $stmt = $this->conn->stmt_init();
                       $stmt->prepare($sql);
                       if ($stmt) {
@@ -182,14 +182,14 @@ class OccurrenceEditorImages extends OccurrenceEditorManager {
                       }
                    }
             }
-        } else { 
+        } else {
 			$status .= "ERROR: image not changed, ".$this->conn->error."SQL: ".$sql;
 		}
 		return $status;
 	}
 
 	public function deleteImage($imgIdDel, $removeImg){
-		$status = true; 
+		$status = true;
 		$imgManager = new ImageShared();
 		if(!$imgManager->deleteImage($imgIdDel, $removeImg)){
 			$this->errorStr = implode('',$imgManager->getErrArr());
@@ -225,11 +225,11 @@ class OccurrenceEditorImages extends OccurrenceEditorManager {
 		}
 		return $status;
 	}
-	
+
 	public function addImage($postArr){
 		$status = true;
 		$imgManager = new ImageShared();
-		
+
 		//Set target path
 		$subTargetPath = $this->collMap['institutioncode'];
 		if($this->collMap['collectioncode']) $subTargetPath .= '_'.$this->collMap['collectioncode'];
@@ -259,7 +259,7 @@ class OccurrenceEditorImages extends OccurrenceEditorManager {
 		else{
 			$imgManager->setMapLargeImg(true);
 		}
-		
+
 		//Set image metadata variables
 		if(array_key_exists('caption',$postArr)) $imgManager->setCaption($postArr['caption']);
 		if(array_key_exists('photographeruid',$postArr)) $imgManager->setPhotographerUid($postArr['photographeruid']);
@@ -292,18 +292,18 @@ class OccurrenceEditorImages extends OccurrenceEditorManager {
 		if($imgManager->processImage()){
 			$this->activeImgId = $imgManager->getActiveImgId();
 		}
-		
+
 		//Load tags
 		$status = $imgManager->insertImageTags($postArr);
-		
+
 		//Get errors and warnings
 		$this->errorStr = $imgManager->getErrStr();
 		return $status;
 	}
-	
+
 	private function setRootPaths(){
 		$this->imageRootPath = $GLOBALS["imageRootPath"];
-		if(substr($this->imageRootPath,-1) != "/") $this->imageRootPath .= "/";  
+		if(substr($this->imageRootPath,-1) != "/") $this->imageRootPath .= "/";
 		$this->imageRootUrl = $GLOBALS["imageRootUrl"];
 		if(substr($this->imageRootUrl,-1) != "/") $this->imageRootUrl .= "/";
 	}
@@ -316,7 +316,7 @@ class OccurrenceEditorImages extends OccurrenceEditorManager {
 			while($row = $result->fetch_object()){
 				$this->photographerArr[$row->uid] = $this->cleanOutStr($row->fullname);
 			}
-			$result->close();
+			$result->free();
 		}
 		return $this->photographerArr;
 	}
@@ -327,25 +327,25 @@ class OccurrenceEditorImages extends OccurrenceEditorManager {
      * @param lang language for the description, only en currently supported.
      * @return an array of keys for image type tagging along with their descriptions.
      */
-    public function getImageTagValues($lang='en') { 
+    public function getImageTagValues($lang='en') {
        $returnArr = Array();
-       switch ($lang) { 
+       switch ($lang) {
           case 'en':
-          default: 
+          default:
            $sql = "select tagkey, description_en from imagetagkey order by sortorder";
-       } 
+       }
        $stmt = $this->conn->stmt_init();
        $stmt->prepare($sql);
-       if ($stmt) { 
+       if ($stmt) {
           $stmt->bind_result($key,$desc);
           $stmt->execute();
-          while ($stmt->fetch()) { 
+          while ($stmt->fetch()) {
              $returnArr[$key]=$desc;
-          } 
-          $stmt->close(); 
+          }
+          $stmt->close();
        }
        return $returnArr;
-    } 
+    }
 
     /**
      * Obtain an array of the keys used for tagging images by content type.
@@ -362,11 +362,11 @@ class OccurrenceEditorImages extends OccurrenceEditorManager {
           default:
             $sql = "select * from ( " .
                    "  select tagkey, description_en, shortlabel, sortorder, not isnull(imgid) from imagetagkey k " .
-                   "     left join imagetag i on k.tagkey = i.keyvalue " . 
+                   "     left join imagetag i on k.tagkey = i.keyvalue " .
                    "     where (i.imgid is null or i.imgid = ? ) " .
                    "  union " .
                    "  select tagkey, description_en, shortlabel, sortorder, 0 from imagetagkey k " .
-                   "     left join imagetag i on k.tagkey = i.keyvalue " . 
+                   "     left join imagetag i on k.tagkey = i.keyvalue " .
                    "     where (i.imgid is not null and i.imgid <> ? ) " .
                    " ) a order by sortorder ";
        }
@@ -393,7 +393,7 @@ class OccurrenceEditorImages extends OccurrenceEditorManager {
     }
 }
 
-class ImageTagUse { 
+class ImageTagUse {
    public $tagkey;  // magic value
    public $shortlabel;  // short human readable value
    public $description; // human readable description

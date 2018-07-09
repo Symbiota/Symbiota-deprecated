@@ -262,12 +262,11 @@ if($SYMB_UID){
 	}
 
 	if($goToMode){
-		$occId = 0;
 		//Adding new record, override query form and prime for current user's dataentry for the day
-		$today = date('Y-m-d');
-		$occManager->setQueryVariables(array('eb'=>$paramsArr['un'],'dm'=>$today));
+		$occId = 0;
+		$occManager->setQueryVariables(array('eb'=>$paramsArr['un'],'dm'=>date('Y-m-d')));
 		if(!$qryCnt){
-			$occManager->setSqlWhere(0);
+			$occManager->setSqlWhere();
 			$qryCnt = $occManager->getQueryRecordCount();
 			$occIndex = $qryCnt;
 		}
@@ -284,7 +283,7 @@ if($SYMB_UID){
 			if($qryCnt > 1){
 				if(($occIndex + 1) >= $qryCnt) $occIndex = $qryCnt - 2;
 				$qryCnt--;
-				$occManager->setSqlWhere($occIndex);
+				$occManager->setSqlWhere();
 			}
 			else{
 				unset($_SESSION['editorquery']);
@@ -292,13 +291,13 @@ if($SYMB_UID){
 			}
 		}
 		elseif($action == 'Save Edits'){
-			$occManager->setSqlWhere(0);
+			$occManager->setSqlWhere();
 			//Get query count and then reset; don't use new count for this display
 			$qryCnt = $occManager->getQueryRecordCount();
 			$occManager->getQueryRecordCount(1);
 		}
 		else{
-			$occManager->setSqlWhere($occIndex);
+			$occManager->setSqlWhere();
 			$qryCnt = $occManager->getQueryRecordCount();
 		}
 	}
@@ -306,12 +305,14 @@ if($SYMB_UID){
 		//Make sure query variables are null
 		unset($_SESSION['editorquery']);
 	}
+	$occManager->setOccIndex($occIndex);
 
 	if(!$goToMode){
 		$oArr = $occManager->getOccurMap();
 		if($oArr){
-			if(!$occId) $occId = $occManager->getOccId();
+			$occId = $occManager->getOccId();
 			$occArr = $oArr[$occId];
+			$occIndex = $occManager->getOccIndex();
 			if(!$collMap){
 				$collMap = $occManager->getCollMap();
 				//if(isset($collMap['collid'])) $collId = $collMap['collid'];
@@ -343,12 +344,12 @@ if($SYMB_UID){
 			$navStr .= '|&lt;';
 			if($occIndex > 0) $navStr .= '</a>';
 			$navStr .= '&nbsp;&nbsp;&nbsp;&nbsp;';
-			if($occIndex > 0) $navStr .= '<a href="#" onclick="return submitQueryForm('.($occIndex-1).');" title="Previous Record">';
+			if($occIndex > 0) $navStr .= '<a href="#" onclick="return submitQueryForm(\'back\');" title="Previous Record">';
 			$navStr .= '&lt;&lt;';
 			if($occIndex > 0) $navStr .= '</a>';
 			$recIndex = ($occIndex<$qryCnt?($occIndex + 1):'*');
 			$navStr .= '&nbsp;&nbsp;| '.$recIndex.' of '.$qryCnt.' |&nbsp;&nbsp;';
-			if($occIndex<$qryCnt-1) $navStr .= '<a href="#" onclick="return submitQueryForm('.($occIndex+1).');"  title="Next Record">';
+			if($occIndex<$qryCnt-1) $navStr .= '<a href="#" onclick="return submitQueryForm(\'forward\');"  title="Next Record">';
 			$navStr .= '&gt;&gt;';
 			if($occIndex<$qryCnt-1) $navStr .= '</a>';
 			$navStr .= '&nbsp;&nbsp;&nbsp;&nbsp;';
@@ -458,7 +459,7 @@ else{
 	<script src="../../js/symb/collections.occureditortools.js?ver=170204" type="text/javascript"></script>
 	<script src="../../js/symb/collections.occureditorimgtools.js?ver=170310" type="text/javascript"></script>
 	<script src="../../js/jquery.imagetool-1.7.js?ver=140310" type="text/javascript"></script>
-	<script src="../../js/symb/collections.occureditorshare.js?ver=20180309" type="text/javascript"></script>
+	<script src="../../js/symb/collections.occureditorshare.js?ver=201807" type="text/javascript"></script>
 </head>
 <body>
 	<!-- inner text -->
@@ -610,12 +611,6 @@ else{
 												style="">Determination History</a>
 										</li>
 										<?php
-										if (isset($fpEnabled) && $fpEnabled) { // FP Annotations tab
-											echo '<li>';
-											echo '<a href="includes/findannotations.php?'.$anchorVars.'&'.$detVars.'"';
-											echo ' style=""> Annotations </a>';
-											echo '</li>';
-										}
 										if($isEditor == 1 || $isEditor == 2){
 											?>
 											<li id="imgTab">
