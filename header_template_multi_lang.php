@@ -38,8 +38,6 @@ include_once($SERVER_ROOT.'/content/lang/header.'.$LANG_TAG.'.php');
 							<a href="<?php echo $CLIENT_ROOT; ?>/profile/index.php?submit=logout"><?php echo (isset($LANG['H_LOGOUT'])?$LANG['H_LOGOUT']:'Logout')?></a>
 						</span>
 						<?php
-						$LANG['H_LOGIN'] = 'Login';
-						$LANG['H_NEW_ACCOUNT'] = 'New Account';
 					}
 					else{
 						?>

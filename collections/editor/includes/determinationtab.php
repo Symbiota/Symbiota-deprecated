@@ -198,14 +198,6 @@ $specImgArr = $occManager->getImageMap();  // find out if there are images in or
 						<div style='margin:3px;'>
 							<input type="checkbox" name="printqueue" value="1" /> Add to Annotation Queue
 						</div>
-						<?php
-						global $fpEnabled;
-						if($fpEnabled){
-							echo '<div style="float:left;margin-left:30px;">';
-							echo '<input type="checkbox" name="fpsubmit" value="1" checked="true" /> Submit determination to Filtered Push network';
-							echo '</div>';
-						}
-						?>
 						<div style='margin:15px;'>
 							<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
 							<input type="hidden" name="occindex" value="<?php echo $occIndex; ?>" />

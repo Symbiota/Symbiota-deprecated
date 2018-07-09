@@ -190,19 +190,6 @@ if(isset($profile_viewprofileCrumbs)){
 					echo '<li><a href="specimenstoid.php?userid='.$userId.'&action='.$action.'">IDs Needed</a></li>';
 					echo '<li><a href="imagesforid.php">Images for ID</a></li>';
 				}
-				if( $fpEnabled) {
-					$userTaxonomy = $person->getUserTaxonomy();
-
-					foreach ($userTaxonomy as $cat => $taxonArr) {
-						foreach ($taxonArr as $tid => $taxon) {
-							$sciName = $taxon['sciname'];
-						}
-					}
-
-					if ($person->getIsHasTaxonInterest()) {
-						echo '<li><a href="taxoninterests.php?scientificName='.$sciName.'">Taxon Interests</a></li>';
-					}
-				}
 				?>
 			</ul>
 		</div>

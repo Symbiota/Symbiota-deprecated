@@ -1,9 +1,9 @@
-<SCRIPT>
+<script>
 <!--
 if (top.frames.length!=0)
   top.location=self.document.location;
 // -->
-</SCRIPT>
+</script>
 <table id="maintable" cellspacing="0">
 	<tr>
 		<td class="header" colspan="3">

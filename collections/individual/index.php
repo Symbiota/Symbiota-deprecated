@@ -311,16 +311,6 @@ header("Content-Type: text/html; charset=".$CHARSET);
 						<li><a href="#edittab"><span>Edit History</span></a></li>
 						<?php
 					}
-					if (isset($fpEnabled) && $fpEnabled) { // FP Annotations tab
-						$detVars = 'catalognumber='.urlencode($occArr['catalognumber']) .
-						(isset($occArr['secondarycollcode'])?'&collectioncode='.urlencode($occArr['secondarycollcode']):'').
-						(isset($collMap['collectioncode'])?'&collectioncode='.urlencode($collMap['collectioncode']):'').
-						(isset($collMap['institutioncode'])?'&institutioncode='.urlencode($collMap['institutioncode']):'');
-						echo '<li>';
-						echo '<a href="../editor/includes/findannotations.php?'.$detVars.'"';
-						echo ' style="margin: 0px 20px 0px 20px;"> Annotations </a>';
-						echo '</li>';
-					}
 					?>
 				</ul>
 				<div id="occurtab">

@@ -413,14 +413,6 @@ if($isEditor){
 									<input type="checkbox" name="printqueue" value="1" checked /> Add to Annotation Print Queue
 									<a href="../reports/labelmanager.php?collid=<?php echo $collid; ?>&tabtarget=1" target="_blank"><img src="../../images/list.png" style="width:13px" title="Display Annotation Print Queue" /></a>
 								</div>
-								<?php
-								global $fpEnabled;
-								if($fpEnabled){
-									echo '<div style="float:left;margin-left:30px;">';
-									echo '<input type="checkbox" name="fpsubmit" value="1" checked="true" /> Submit determination to Filtered Push network';
-									echo '</div>';
-								}
-								?>
 								<div style='margin:15px;'>
 									<div style="float:left;">
 										<input name="collid" type="hidden" value="<?php echo $collid; ?>" />

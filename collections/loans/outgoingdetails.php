@@ -1,4 +1,4 @@
-<?php 
+<?php
 $specList = $loanManager->getSpecList($loanId);
 ?>
 <script type="text/javascript" src="../../js/symb/collections.occureditormain.js?ver=141210"></script>
@@ -9,7 +9,7 @@ $specList = $loanManager->getSpecList($loanId);
 		<li><a href="#outloandeldiv"><span>Admin</span></a></li>
 	</ul>
 	<div id="outloandetaildiv">
-		<?php 
+		<?php
 		//Show loan details
 		$loanArr = $loanManager->getLoanOutDetails($loanId);
 		?>
@@ -59,7 +59,7 @@ $specList = $loanManager->getSpecList($loanId);
 					</span><br />
 					<span>
 						<select name="iidborrower" style="width:400px;">
-							<?php 
+							<?php
 							$instArr = $loanManager->getInstitutionArr();
 							foreach($instArr as $k => $v){
 								echo '<option value="'.$k.'" '.($loanArr['iidborrower']==$k?'SELECTED':'').'>'.$v.'</option>';
@@ -75,7 +75,7 @@ $specList = $loanManager->getSpecList($loanId);
 								<img src="../../images/edit.png" style="width:15px;" />
 							</a>
 						</span>
-						<?php 
+						<?php
 					}
 					?>
 				</div>
@@ -241,7 +241,7 @@ $specList = $loanManager->getSpecList($loanId);
 				</div>
 			</fieldset>
 		</div>
-		<div id="speclistdiv" style="<?php echo (!$specList?'display:none;':''); ?>">	
+		<div id="speclistdiv" style="<?php echo (!$specList?'display:none;':''); ?>">
 			<div style="height:25px;margin-top:15px;">
 				<div style="float:left;margin-left:15px;">
 					<input name="" value="" type="checkbox" onclick="selectAll(this);" />
@@ -282,17 +282,17 @@ $specList = $loanManager->getSpecList($loanId);
 								</a>
 							</td>
 							<td>
-								<?php 
+								<?php
 								$loc = $specArr['locality'];
 								if(strlen($loc) > 500) $loc = substr($loc,400);
 								echo '<i>'.$specArr['sciname'].'</i>; ';
 								echo  $specArr['collector'].'; '.$loc;
-								?> 
-								
+								?>
+
 							</td>
 							<td><?php echo $specArr['returndate']; ?></td>
 						</tr>
-						<?php 
+						<?php
 					}
 				?>
 				</table>
@@ -307,17 +307,17 @@ $specList = $loanManager->getSpecList($loanId);
 										<input type="text" name="identificationqualifier" title="e.g. cf, aff, etc" />
 									</div>
 									<div style='margin:3px;'>
-										<b>Scientific Name:</b> 
+										<b>Scientific Name:</b>
 										<input type="text" id="dafsciname" name="sciname" style="background-color:lightyellow;width:350px;" onfocus="initLoanDetAutocomplete(this.form)" />
 										<input type="hidden" id="daftidtoadd" name="tidtoadd" value="" />
 										<input type="hidden" name="family" value="" />
 									</div>
 									<div style='margin:3px;'>
-										<b>Author:</b> 
+										<b>Author:</b>
 										<input type="text" name="scientificnameauthorship" style="width:200px;" />
 									</div>
 									<div style='margin:3px;'>
-										<b>Confidence of Determination:</b> 
+										<b>Confidence of Determination:</b>
 										<select name="confidenceranking">
 											<option value="8">High</option>
 											<option value="5" selected>Medium</option>
@@ -325,19 +325,19 @@ $specList = $loanManager->getSpecList($loanId);
 										</select>
 									</div>
 									<div style='margin:3px;'>
-										<b>Determiner:</b> 
+										<b>Determiner:</b>
 										<input type="text" name="identifiedby" id="identifiedby" style="background-color:lightyellow;width:200px;" />
 									</div>
 									<div style='margin:3px;'>
-										<b>Date:</b> 
+										<b>Date:</b>
 										<input type="text" name="dateidentified" id="dateidentified" style="background-color:lightyellow;" onchange="detDateChanged(this.form);" />
 									</div>
 									<div style='margin:3px;'>
-										<b>Reference:</b> 
+										<b>Reference:</b>
 										<input type="text" name="identificationreferences" style="width:350px;" />
 									</div>
 									<div style='margin:3px;'>
-										<b>Notes:</b> 
+										<b>Notes:</b>
 										<input type="text" name="identificationremarks" style="width:350px;" />
 									</div>
 									<div style='margin:3px;'>
@@ -346,14 +346,6 @@ $specList = $loanManager->getSpecList($loanId);
 									<div style='margin:3px;'>
 										<input type="checkbox" name="printqueue" value="1" /> Add to Annotation Queue
 									</div>
-									<?php 
-									global $fpEnabled;
-									if($fpEnabled){
-										echo '<div style="float:left;margin-left:30px;">';
-										echo '<input type="checkbox" name="fpsubmit" value="1" checked="true" /> Submit determination to Filtered Push network';
-										echo '</div>';
-									}
-									?>
 									<div style='margin:15px;'>
 										<div style="float:left;">
 											<input type="submit" name="formsubmit" onclick="verifyLoanDet();" value="Add New Determinations" />
@@ -382,14 +374,14 @@ $specList = $loanManager->getSpecList($loanId);
 					</tr>
 				</table>
 			</form>
-		</div>	
+		</div>
 		<div id="nospecdiv" style="font-weight:bold;font-size:120%;<?php echo ($specList?'display:none;':''); ?>">There are no specimens registered for this loan.</div>
 	</div>
 	<div id="outloandeldiv">
 		<form name="deloutloanform" action="index.php" method="post" onsubmit="return confirm('Are you sure you want to permanently delete this loan?')">
 			<fieldset style="width:350px;margin:20px;padding:20px;">
 				<legend><b>Delete Outgoing Loan</b></legend>
-				<?php 
+				<?php
 				if($specList){
 					echo '<div style="font-weight:bold;margin-bottom:15px;">';
 					echo 'Loan cannot be deleted until all linked specimens are removed';
