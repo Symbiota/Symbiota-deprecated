@@ -4,7 +4,7 @@ if(!$displayQuery && array_key_exists('displayquery',$_REQUEST)) $displayQuery =
 $qCatalogNumber=''; $qOtherCatalogNumbers='';
 $qRecordedBy=''; $qRecordNumber=''; $qEventDate='';
 $qRecordEnteredBy=''; $qObserverUid='';$qDateLastModified='';$qDateEntered='';
-$qProcessingStatus='';$qOrderBy='';$qOrderByDir='';
+$qProcessingStatus='';$qOcrFrag='';$qOrderBy='';$qOrderByDir='';
 $qImgOnly='';$qWithoutImg='';$qExsiccatiId='';
 $qCustomField1='';$qCustomType1='';$qCustomValue1='';
 $qCustomField2='';$qCustomType2='';$qCustomValue2='';

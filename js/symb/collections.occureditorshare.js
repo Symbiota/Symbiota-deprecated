@@ -27,6 +27,7 @@ function submitQueryEditor(f){
 	f.action = "occurrenceeditor.php"
 	f.direction.value = "";
 	f.occid.value = "";
+	f.occindex.value = "0"
 	f.occidlist.value = "";
 	if(verifyQueryForm(f)) f.submit();
 	return true;
@@ -36,6 +37,7 @@ function submitQueryTable(f){
 	f.action = "occurrencetabledisplay.php";
 	f.direction.value = "";
 	f.occid.value = "";
+	f.occindex.value = "0"
 	f.occidlist.value = "";
 	if(verifyQueryForm(f)) f.submit();
 	return true;
@@ -136,6 +138,10 @@ function verifyQueryForm(f){
 }
 
 function resetQueryForm(f){
+	f.occid.value = "";
+	f.occidlist.value = "";
+	f.direction.value = "";
+	f.occindex.value = "0";
 	f.q_catalognumber.value = "";
 	f.q_othercatalognumbers.value = "";
 	f.q_recordedby.value = "";

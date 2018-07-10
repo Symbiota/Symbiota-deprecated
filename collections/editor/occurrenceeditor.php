@@ -5,11 +5,11 @@ include_once($SERVER_ROOT.'/classes/ProfileManager.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 header('Access-Control-Allow-Origin: http://www.catalogueoflife.org/col/webservice');
 
-$occId = array_key_exists('occid',$_REQUEST)?$_REQUEST['occid']:0;
+$occId = array_key_exists('occid',$_REQUEST)?$_REQUEST['occid']:'';
 $tabTarget = array_key_exists('tabtarget',$_REQUEST)?$_REQUEST['tabtarget']:0;
 $collId = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
 $goToMode = array_key_exists('gotomode',$_REQUEST)?$_REQUEST['gotomode']:0;
-$occIndex = array_key_exists('occindex',$_REQUEST)&&$_REQUEST['occindex']!=""?$_REQUEST['occindex']:false;
+$occIndex = array_key_exists('occindex',$_REQUEST)?$_REQUEST['occindex']:false;
 $ouid = array_key_exists('ouid',$_REQUEST)?$_REQUEST['ouid']:0;
 $crowdSourceMode = array_key_exists('csmode',$_REQUEST)?$_REQUEST['csmode']:0;
 $action = array_key_exists('submitaction',$_REQUEST)?$_REQUEST['submitaction']:'';
@@ -266,7 +266,6 @@ if($SYMB_UID){
 		$occId = 0;
 		$occManager->setQueryVariables(array('eb'=>$paramsArr['un'],'dm'=>date('Y-m-d')));
 		if(!$qryCnt){
-			$occManager->setSqlWhere();
 			$qryCnt = $occManager->getQueryRecordCount();
 			$occIndex = $qryCnt;
 		}
@@ -274,7 +273,7 @@ if($SYMB_UID){
 	if($ouid){
 		$occManager->setQueryVariables(array('ouid' => $ouid));
 	}
-	elseif($occIndex !== false){
+	elseif(is_numeric($occIndex)){
 		//Query Form has been activated
 		$occManager->setQueryVariables();
 		if($action == 'Delete Occurrence'){
@@ -283,7 +282,6 @@ if($SYMB_UID){
 			if($qryCnt > 1){
 				if(($occIndex + 1) >= $qryCnt) $occIndex = $qryCnt - 2;
 				$qryCnt--;
-				$occManager->setSqlWhere();
 			}
 			else{
 				unset($_SESSION['editorquery']);
@@ -291,13 +289,11 @@ if($SYMB_UID){
 			}
 		}
 		elseif($action == 'Save Edits'){
-			$occManager->setSqlWhere();
 			//Get query count and then reset; don't use new count for this display
 			$qryCnt = $occManager->getQueryRecordCount();
 			$occManager->getQueryRecordCount(1);
 		}
 		else{
-			$occManager->setSqlWhere();
 			$qryCnt = $occManager->getQueryRecordCount();
 		}
 	}
@@ -307,7 +303,7 @@ if($SYMB_UID){
 	}
 	$occManager->setOccIndex($occIndex);
 
-	if(!$goToMode){
+	if(!$goToMode && $occIndex !== false){
 		$oArr = $occManager->getOccurMap();
 		if($oArr){
 			$occId = $occManager->getOccId();
@@ -459,7 +455,7 @@ else{
 	<script src="../../js/symb/collections.occureditortools.js?ver=170204" type="text/javascript"></script>
 	<script src="../../js/symb/collections.occureditorimgtools.js?ver=170310" type="text/javascript"></script>
 	<script src="../../js/jquery.imagetool-1.7.js?ver=140310" type="text/javascript"></script>
-	<script src="../../js/symb/collections.occureditorshare.js?ver=201807" type="text/javascript"></script>
+	<script src="../../js/symb/collections.occureditorshare.js?ver=20180711" type="text/javascript"></script>
 </head>
 <body>
 	<!-- inner text -->
@@ -1413,13 +1409,7 @@ else{
 												?>
 												<div id="editButtonDiv">
 													<input type="submit" name="submitaction" value="Save Edits" style="width:150px;" onclick="return verifyFullFormEdits(this.form)" disabled />
-													<?php
-													if($occIndex !== false){
-														?>
-														<input type="hidden" name="occindex" value="<?php echo $occIndex; ?>" />
-														<?php
-													}
-													?>
+													<input type="hidden" name="occindex" value="<?php echo is_numeric($occIndex)?$occIndex:''; ?>" />
 													<input type="hidden" name="editedfields" value="" />
 												</div>
 												<?php
