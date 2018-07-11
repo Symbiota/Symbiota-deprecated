@@ -451,13 +451,14 @@ class ChecklistVoucherAdmin {
 
 	public function batchAdjustChecklist($postArr){
 		$occidArr = $postArr['occid'];
+		$removeTidArr = array();
 		foreach($occidArr as $occid){
 			//Get checklist tid
 			$tidChecklist = 0;
 			$sql = 'SELECT tid FROM fmvouchers WHERE (clid = '.$this->clid.') AND (occid = '.$occid.')';
 			$rs = $this->conn->query($sql);
 			if($r = $rs->fetch_object()){
-				$tidChecklist = $r->tid;
+				$removeTidArr[] = $r->tid;
 			}
 			$rs->free();
 			//Get voucher tid
@@ -477,11 +478,12 @@ class ChecklistVoucherAdmin {
 			//Transfer voucher to new name
 			$sql3 = 'UPDATE fmvouchers SET tid = '.$tidVoucher.' WHERE (clid = '.$this->clid.') AND (occid = '.$occid.')';
 			$this->conn->query($sql3);
-			if(array_key_exists('removeOldIn',$postArr)){
-				$sql4 = 'DELETE c.* FROM fmchklsttaxalink c LEFT JOIN fmvouchers v ON c.clid = v.clid AND c.tid = v.tid '.
-					'WHERE (c.clid = '.$this->clid.') AND (c.tid = '.$tidChecklist.') AND (v.clid IS NULL)';
-				$this->conn->query($sql4);
-			}
+		}
+		if(array_key_exists('removetaxa',$postArr)){
+			//Remove taxa where all vouchers have been removed
+			$sql4 = 'DELETE c.* FROM fmchklsttaxalink c LEFT JOIN fmvouchers v ON c.clid = v.clid AND c.tid = v.tid '.
+				'WHERE (c.clid = '.$this->clid.') AND (c.tid IN('.implode(',', $removeTidArr).')) AND (v.clid IS NULL)';
+			$this->conn->query($sql4);
 		}
 	}
 

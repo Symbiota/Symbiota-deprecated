@@ -2,8 +2,8 @@
 include_once('../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/ChecklistVoucherAdmin.php');
 
-$action = array_key_exists("submitaction",$_REQUEST)?$_REQUEST["submitaction"]:""; 
-$clid = array_key_exists("clid",$_REQUEST)?$_REQUEST["clid"]:0; 
+$action = array_key_exists("submitaction",$_REQUEST)?$_REQUEST["submitaction"]:"";
+$clid = array_key_exists("clid",$_REQUEST)?$_REQUEST["clid"]:0;
 $pid = array_key_exists("pid",$_REQUEST)?$_REQUEST["pid"]:"";
 $startPos = (array_key_exists('start',$_REQUEST)?(int)$_REQUEST['start']:0);
 
@@ -25,7 +25,7 @@ if($IS_ADMIN || (array_key_exists("ClAdmin",$USER_RIGHTS) && in_array($clid,$USE
 			if(f.elements[i].name == "occid[]") f.elements[i].checked = boxesChecked;
 		}
 	}
-	
+
 	function validateBatchConflictForm(f){
 		var formVerified = false;
 		for(var h=0;h<f.length;h++){
@@ -44,11 +44,11 @@ if($IS_ADMIN || (array_key_exists("ClAdmin",$USER_RIGHTS) && in_array($clid,$USE
 <div id="innertext" style="background-color:white;">
 	<h2>Possible Voucher Conflicts</h2>
 	<div style="margin-bottom:10px;">
-		List of specimen vouchers where the current identifications conflict with the checklist. 
+		List of specimen vouchers where the current identifications conflict with the checklist.
 		Voucher conflicts are typically due to recent annotations of specimens located within collection.
-		Click on Checklist ID to open the editing pane for that record. 
+		Click on Checklist ID to open the editing pane for that record.
 	</div>
-	<?php 
+	<?php
 	if($conflictArr = $vManager->getConflictVouchers()){
 		echo '<div style="font-weight:bold;">Conflict Count: '.count($conflictArr).'</div>';
 		?>
@@ -66,15 +66,15 @@ if($IS_ADMIN || (array_key_exists("ClAdmin",$USER_RIGHTS) && in_array($clid,$USE
 					?>
 					<tr>
 						<td>
-							<input name="occid[]" type="checkbox" value="<?php echo $vArr['occid']; ?>" /> 
+							<input name="occid[]" type="checkbox" value="<?php echo $vArr['occid']; ?>" />
 						</td>
 						<td>
 							<a href="#" onclick="return openPopup('clsppeditor.php?tid=<?php echo $vArr['tid']."&clid=".$vArr['clid']; ?>','editorwindow');">
-								<?php 
+								<?php
 								echo $vArr['listid'];
 								?>
 							</a>
-							<?php 
+							<?php
 							if($vArr['clid'] != $clid) echo '<br/>(from child checklists)';
 							?>
 						</td>
@@ -90,23 +90,23 @@ if($IS_ADMIN || (array_key_exists("ClAdmin",$USER_RIGHTS) && in_array($clid,$USE
 							<?php echo $vArr['identifiedby'] ?>
 						</td>
 					</tr>
-					<?php 
+					<?php
 				}
 				?>
 			</table>
 			<div>
-				<input name="removeOldIn" type="checkbox" value="1" checked /> Remove old ID if all vouchers have been transferred
+				<input name="removetaxa" type="checkbox" value="1" checked /> Remove taxa from checklist if all vouchers are removed
 			</div>
 			<div style="margin: 10px 0px">
 				<input name="clid" type="hidden" value="<?php echo $clid; ?>" />
 				<input name="pid" type="hidden" value="<?php echo $pid; ?>" />
 				<input name="tabindex" type="hidden" value="2" />
 				<input name="submitaction" type="hidden" value="resolveconflicts" />
-				<b>Batch Action:</b> <input name="submitbutton" type="button" value="Transfer Vouchers to Corrected Taxon" onclick="return validateBatchConflictForm(this.form)" />
+				<b>Batch Action:</b> <input name="submitbutton" type="button" value="Link Vouchers to Corrected Identification" onclick="return validateBatchConflictForm(this.form)" /><br/>
 				<div>* Corrected taxon will be added to checklist if not yet present</div>
 			</div>
 		</form>
-		<?php 
+		<?php
 	}
 	else{
 		echo '<h3>No conflicts exist</h3>';
