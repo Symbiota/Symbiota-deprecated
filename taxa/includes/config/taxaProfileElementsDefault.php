@@ -89,6 +89,28 @@ if($taxonRank > 140){
 $familyDiv = ob_get_clean();
 
 ob_start();
+$notes = $taxonManager->getTaxonNotes();
+if($notes){
+    ?>
+    <div id="taxonnotes" class="<?php echo $styleClass; ?>">
+        <?php echo '<b>Notes:</b> '.$notes; ?>
+    </div>
+    <?php
+}
+$taxonNotesDiv = ob_get_clean();
+
+ob_start();
+$sources = $taxonManager->getTaxonSources();
+if($sources){
+    ?>
+    <div id="taxonsource" class="<?php echo $styleClass; ?>">
+        <?php echo '<b>Source:</b> '.$sources; ?>
+    </div>
+    <?php
+}
+$taxonSourcesDiv = ob_get_clean();
+
+ob_start();
 if($projValue){
     ?>
     <div id='project'><b>Project:</b> <?php echo $taxonManager->getProjName(); ?></div>
