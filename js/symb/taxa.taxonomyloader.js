@@ -119,7 +119,7 @@ function parseName(f){
 			rankId = 230;
 		}
 	}
-	if(unitName1.indexOf("aceae") == (unitName1.length - 5) || unitName1.indexOf("idae") == (unitName1.length - 4)){
+	if(unitName1.length > 4 && (unitName1.indexOf("aceae") == (unitName1.length - 5) || unitName1.indexOf("idae") == (unitName1.length - 4))){
 		rankId = 140;
 	}
 	f.rankid.value = rankId;
