@@ -130,14 +130,8 @@ function resetHarvestParamsForm(f){
 	sessionStorage.removeItem('querystr');
 }
 
-function openPointRadiusMap() {
-	mapWindow=open("mappointradius.php","pointradius","resizable=0,width=700,height=630,left=20,top=20");
-	if (mapWindow.opener == null) mapWindow.opener = self;
-	mapWindow.focus();
-}
-
-function openBoundingBoxMap() {
-	mapWindow=open("mapboundingbox.php","boundingbox","resizable=0,width=700,height=630,left=20,top=20");
+function openCoordAid(mapMode) {
+	mapWindow=open("tools/mapcoordaid.php?mapmode="+mapMode,"polygon","resizable=0,width=900,height=630,left=20,top=20");
 	if (mapWindow.opener == null) mapWindow.opener = self;
 	mapWindow.focus();
 }

@@ -103,7 +103,10 @@ $searchVar = $collManager->getQueryTermStr();
 				<hr>
 				<h1><?php echo $LANG['LAT_LNG_HEADER']; ?></h1>
 			</div>
-			<div style="width:300px;float:left;border:2px solid brown;padding:10px;margin-bottom:10px;">
+			<div style="width:300px;height:120px;float:left;border:2px solid brown;padding:10px;margin-bottom:10px;">
+				<div style="clear:both;float:right;">
+					<a href="#" onclick="openCoordAid('rectangle');return false;"><img src="../images/world.png" width="15px" title="<?php echo $LANG['GLOBE_TITLE']; ?>" /></a>
+				</div>
 				<div style="font-weight:bold;">
 					<?php echo $LANG['LL_BOUND_TEXT']; ?>
 				</div>
@@ -135,11 +138,22 @@ $searchVar = $collManager->getQueryTermStr();
 						<option id="rlE" value="E"><?php echo $LANG['LL_E_SYMB']; ?></option>
 					</select>
 				</div>
-				<div style="clear:both;float:right;margin-top:8px;cursor:pointer;" onclick="openBoundingBoxMap();">
-					<img src="../images/world.png" width="15px" title="<?php echo $LANG['LL_P-RADIUS_TITLE_1']; ?>" />
+			</div>
+			<div style="width:260px;height:120px;float:left;border:2px solid brown;padding:10px;margin-left:10px;">
+				<div style="clear:both;float:right;">
+					<a href="#" onclick="openCoordAid('polygon');return false;"><img src="../images/world.png" width="15px" title="<?php echo $LANG['GLOBE_TITLE']; ?>" /></a>
+				</div>
+				<div style="font-weight:bold;">
+					<?php echo isset($LANG['LL_POLYGON_TEXT'])?$LANG['LL_POLYGON_TEXT']:''; ?>
+				</div>
+				<div>
+					<textarea id="footprintwkt" name="footprintwkt" style="width:250px;height:100px;zIndex:999"></textarea>
 				</div>
 			</div>
 			<div style="width:260px; float:left;border:2px solid brown;padding:10px;margin-left:10px;">
+				<div style="clear:both;float:right;">
+					<a href="#" onclick="openCoordAid('circle');return false;"><img src="../images/world.png" width="15px" title="<?php echo $LANG['GLOBE_TITLE']; ?>" /></a>
+				</div>
 				<div style="font-weight:bold;">
 					<?php echo $LANG['LL_P-RADIUS_TEXT']; ?>
 				</div>
@@ -163,9 +177,6 @@ $searchVar = $collManager->getQueryTermStr();
 						<option value="km"><?php echo $LANG['LL_P-RADIUS_KM']; ?></option>
 						<option value="mi"><?php echo $LANG['LL_P-RADIUS_MI']; ?></option>
 					</select>
-				</div>
-				<div style="clear:both;float:right;margin-top:8px;cursor:pointer;" onclick="openPointRadiusMap();">
-					<img src="../images/world.png" width="15px" title="<?php echo $LANG['LL_P-RADIUS_TITLE_1']; ?>" />
 				</div>
 			</div>
 			<div style=";clear:both;"><hr/></div>

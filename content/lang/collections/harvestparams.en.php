@@ -28,7 +28,7 @@ $LANG['LOCALITY'] = 'Locality';
 $LANG['ELEV_INPUT_1'] = 'Elevation (in meters)';
 $LANG['ELEV_INPUT_2'] = 'to';
 $LANG['LAT_LNG_HEADER'] = 'Latitude and Longitude';
-$LANG['LL_BOUND_TEXT'] = 'Bounding box coordinates in decimal degrees';
+$LANG['LL_BOUND_TEXT'] = 'Bounding box';
 $LANG['LL_BOUND_NLAT'] = 'Northern Latitude';
 $LANG['LL_BOUND_SLAT'] = 'Southern Latitude';
 $LANG['LL_BOUND_WLNG'] = 'Western Longitude';
@@ -37,13 +37,14 @@ $LANG['LL_N_SYMB'] = 'N';
 $LANG['LL_S_SYMB'] = 'S';
 $LANG['LL_W_SYMB'] = 'W';
 $LANG['LL_E_SYMB'] = 'E';
-$LANG['LL_P-RADIUS_TEXT'] = 'Point-Radius Search';
+$LANG['LL_POLYGON_TEXT'] = 'Polygon (WKT footprint)';
+$LANG['LL_P-RADIUS_TEXT'] = 'Point-Radius';
 $LANG['LL_P-RADIUS_LAT'] = 'Latitude';
 $LANG['LL_P-RADIUS_LNG'] = 'Longitude';
 $LANG['LL_P-RADIUS_RADIUS'] = 'Radius';
 $LANG['LL_P-RADIUS_KM'] = 'Kilometers';
 $LANG['LL_P-RADIUS_MI'] = 'Miles';
-$LANG['LL_P-RADIUS_TITLE_1'] = 'Find Coordinate';
+$LANG['GLOBE_TITLE'] = 'Define Coordinates';
 $LANG['COLLECTOR_HEADER'] = 'Collector Criteria';
 $LANG['COLLECTOR_LASTNAME'] = "Collector&#39;s Last Name";
 $LANG['TITLE_TEXT_2'] = 'Separate multiple terms by commas and ranges by " - " (space before and after dash required), e.g.: 3542,3602,3700 - 3750';
@@ -57,20 +58,4 @@ $LANG['INCLUDE_OTHER_CATNUM'] = 'Include other catalog numbers and GUIDs';
 $LANG['TYPE'] = 'Limit to Type Specimens Only';
 $LANG['HAS_IMAGE'] = 'Limit to Specimens with Images Only';
 $LANG['HAS_GENETIC'] = 'Limit to Specimens with Genetic Data Only';
-
-//Following used in mapboundingbox.php
-$LANG['MBB_TITLE'] = 'Coordinate Mapper';
-$LANG['MBB_INSTRUCTIONS'] = 'Click once to start drawing and again to finish rectangle. Click on the Submit button to transfer Coordinates.';
-$LANG['MBB_NORTHERN'] = 'Northern Lat';
-$LANG['MBB_EASTERN'] = 'Eastern Long';
-$LANG['MBB_SOUTHERN'] = 'Southern Lat';
-$LANG['MBB_WESTERN'] = 'Western Long';
-
-//Following used in mappointradius.php
-$LANG['MPR_TITLE'] = 'Coordinate Mapper';
-$LANG['MPR_INSTRUCTIONS'] = 'Click once to capture coordinates. Click on the Submit Coordinate button to transfer Coordinates.';
-$LANG['MPR_LAT'] = 'Latitude';
-$LANG['MPR_LNG'] = 'Longitude';
-$LANG['SUBMIT'] = 'Submit';
-
 ?>
