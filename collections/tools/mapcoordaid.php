@@ -361,11 +361,11 @@ else{
 		</script>
 	</head>
 	<body style="background-color:#ffffff;" onload="initialize()">
-		<div style="float:right">
+		<div style="float:right;margin-top:5px;margin-right:15px;">
 			<button name="closebutton" type="button" onclick="self.close()">Close Mapping Aid</button>
 		</div>
 		<div id="helptext">
-			Click on polygon symbol to activate polygon tool and create a shape representing research area.
+			Click on shape symbol to create a rectangle, circle, or polygon.<br/>Close mapping tool to transfer shape definition to search form.
 		</div>
 		<div id='map_canvas' style='width:100%;height:600px;'></div>
 		<div>
