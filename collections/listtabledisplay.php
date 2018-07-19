@@ -35,13 +35,13 @@ $urlPrefix = (isset($_SERVER['HTTPS'])?'https://':'http://').$_SERVER['HTTP_HOST
 	<script type="text/javascript">
 		<?php include_once($SERVER_ROOT.'/config/googleanalytics.php'); ?>
 	</script>
-	<script src="../js/symb/collections.list.js?ver=5f" type="text/javascript"></script>
+	<script src="../js/symb/collections.list.js?ver=6" type="text/javascript"></script>
 </head>
 <body style="margin-left: 0px; margin-right: 0px;background-color:white;">
 	<div id="">
 		<div style="width:750px;margin-bottom:5px;">
 			<div style="float:right;">
-				<form action="download/index.php" method="get" style="float:left">
+				<form action="download/index.php" method="get" style="float:left" onsubmit="targetPopup(this)">
 					<button class="ui-button ui-widget ui-corner-all" style="margin:5px;padding:5px;cursor: pointer" title="<?php echo $LANG['DOWNLOAD_SPECIMEN_DATA']; ?>">
 						<img src="../images/dl2.png" style="width:13px" />
 					</button>

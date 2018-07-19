@@ -161,9 +161,8 @@ else{
 						setSelection(newShape);
 					}
 				});
-
 				//Set shape based on values within form
-				var bounds = new google.maps.LatLngBounds();
+				var bounds;
 				if(drawingManager.getDrawingMode() == "circle"){
 					if(opener.document.getElementById("pointlat").value != '' && opener.document.getElementById("pointlong").value != '' && opener.document.getElementById("radius").value != ''){
 						drawingManager.setDrawingMode(null);
@@ -201,6 +200,7 @@ else{
 				else if(drawingManager.getDrawingMode() == "polygon"){
 					if(opener.document.getElementById("footprintwkt").value != ''){
 						//Set polygon
+						bounds = new google.maps.LatLngBounds();
 						drawingManager.setDrawingMode(null);
 						var pointArr = [];
 						var origFootprintWkt = opener.document.getElementById("footprintwkt").value;
@@ -275,8 +275,10 @@ else{
 						setSelection(newShape);
 					}
 				}
-				map.fitBounds(bounds);
-				map.panToBounds(bounds);
+				if(bounds){
+					map.fitBounds(bounds);
+					map.panToBounds(bounds);
+				}
 			}
 
 			function setSelection(shape) {

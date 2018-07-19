@@ -93,6 +93,9 @@ function setHarvestParamsForm(){
 			frm.leftlong.value = Math.abs(parseFloat(coordArr[2]));
 			frm.rightlong.value = Math.abs(parseFloat(coordArr[3]));
 		}
+		if(urlVar.footprintwkt){
+			frm.footprintwkt.value = urlVar.footprintwkt;
+		}
 		if(urlVar.llpoint){
 			var coordArr = urlVar.llpoint.split(';');
 			frm.pointlat.value = Math.abs(parseFloat(coordArr[0]));

@@ -161,11 +161,12 @@ class OccurrenceManager extends OccurrenceTaxaManager {
 				$bLat = $llboundArr[1];
 				$lLng = $llboundArr[2];
 				$rLng = $llboundArr[3];
-				$sqlWhere .= 'AND (o.DecimalLatitude BETWEEN '.$llboundArr[1].' AND '.$llboundArr[0].' AND o.DecimalLongitude BETWEEN '.$llboundArr[2].' AND '.$llboundArr[3].') ';
+				//$sqlWhere .= 'AND (o.DecimalLatitude BETWEEN '.$llboundArr[1].' AND '.$llboundArr[0].' AND o.DecimalLongitude BETWEEN '.$llboundArr[2].' AND '.$llboundArr[3].') ';
+				$sqlWhere .= 'AND (ST_Within(p.point,GeomFromText("POLYGON(('.$uLat.' '.$rLng.','.$bLat.' '.$rLng.','.$bLat.' '.$lLng.','.$uLat.' '.$lLng.','.$uLat.' '.$rLng.'))"))) ';
 				$this->displaySearchArr[] = 'Lat: '.$llboundArr[1].' - '.$llboundArr[0].' Long: '.$llboundArr[2].' - '.$llboundArr[3];
 			}
 		}
-		if(array_key_exists("llpoint",$this->searchTermArr)){
+		elseif(array_key_exists("llpoint",$this->searchTermArr)){
 			$pointArr = explode(";",$this->searchTermArr["llpoint"]);
 			if(count($pointArr) == 4){
 				$lat = $pointArr[0];
@@ -186,6 +187,10 @@ class OccurrenceManager extends OccurrenceTaxaManager {
 					' - radians('.$lng.') ) + sin( radians('.$lat.') ) * sin(radians(o.DecimalLatitude)) ) ) < '.$radius.') ';
 			}
 			$this->displaySearchArr[] = $pointArr[0]." ".$pointArr[1]." +- ".$pointArr[2].$pointArr[3];
+		}
+		elseif(array_key_exists('footprintwkt',$this->searchTermArr)){
+			$sqlWhere .= 'AND (ST_Within(p.point,GeomFromText("'.$this->searchTermArr['footprintwkt'].'"))) ';
+			$this->displaySearchArr[] = 'Polygon search (not displayed)';
 		}
 		if(array_key_exists("collector",$this->searchTermArr)){
 			$collectorArr = explode(";",$this->searchTermArr["collector"]);
@@ -766,6 +771,9 @@ class OccurrenceManager extends OccurrenceTaxaManager {
 		}
 		if(array_key_exists("llpoint",$_REQUEST) && $_REQUEST['llpoint']){
 			$this->searchTermArr["llpoint"] = $this->cleanInputStr($_REQUEST['llpoint']);
+		}
+		if(array_key_exists("footprintwkt",$_REQUEST)){
+			$this->searchTermArr["footprintwkt"] = $this->cleanInputStr($_REQUEST['footprintwkt']);
 		}
 	}
 
