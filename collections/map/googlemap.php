@@ -189,20 +189,16 @@ $sharedMapManager->setTaxaArr($tArr);
 				<?php
 				$spCnt++;
 			}
-			if($boundLatMin > $minLat) $minLat = $boundLatMin;
-			if($boundLatMax < $maxLat) $maxLat = $boundLatMax;
-			if($boundLngMin > $minLng) $minLng = $boundLngMin;
-			if($boundLngMax < $maxLng) $maxLng = $boundLngMax;
 			//Add some padding
-			if($minLat > -80) $minLat -= 5;
-			if($maxLat < 80) $maxLat += 5;
-			if($minLng > -170) $minLng -= 5;
-			if($maxLng < 170) $maxLng += 5;
+			$padding = 0.5;
+			if($minLat > -80) $minLat -= $padding;
+			if($maxLat < 80) $maxLat += $padding;
+			if($minLng > -170) $minLng -= $padding;
+			if($maxLng < 170) $maxLng += $padding;
 			?>
-			var swLatLng = new google.maps.LatLng(<?php echo $minLat.','.$minLng; ?>);
-			var neLatLng = new google.maps.LatLng(<?php echo $maxLat.','.$maxLng; ?>);
-			var llBounds = new google.maps.LatLngBounds(swLatLng, neLatLng);
-			map.fitBounds(llBounds);
+        	var bounds = new google.maps.LatLngBounds(new google.maps.LatLng(<?php echo $minLat.','.$minLng; ?>),new google.maps.LatLng(<?php echo $maxLat.','.$maxLng; ?>));
+			map.fitBounds(bounds);
+			map.panToBounds(bounds);
 		}
 
 		function openIndPU(occId,clid){
