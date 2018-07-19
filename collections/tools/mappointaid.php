@@ -4,15 +4,6 @@ header("Content-Type: text/html; charset=".$CHARSET);
 include_once($SERVER_ROOT.'/content/lang/collections/tools/mapaids.'.$LANG_TAG.'.php');
 
 $errMode = array_key_exists("errmode",$_REQUEST)?$_REQUEST["errmode"]:1;
-$zoom = array_key_exists("zoom",$_REQUEST)&&$_REQUEST["zoom"]?$_REQUEST["zoom"]:5;
-
-$lat = 42.877742;
-$lng = -97.380979;
-if($MAPPING_BOUNDARIES){
-	$boundaryArr = explode(";",$MAPPING_BOUNDARIES);
-	$lat = ($boundaryArr[0]>$boundaryArr[2]?((($boundaryArr[0]-$boundaryArr[2])/2)+$boundaryArr[2]):((($boundaryArr[2]-$boundaryArr[0])/2)+$boundaryArr[0]));
-	$lng = ($boundaryArr[1]>$boundaryArr[3]?((($boundaryArr[1]-$boundaryArr[3])/2)+$boundaryArr[3]):((($boundaryArr[3]-$boundaryArr[1])/2)+$boundaryArr[1]));
-}
 ?>
 <html>
 	<head>
@@ -26,22 +17,19 @@ if($MAPPING_BOUNDARIES){
 			var errCircle;
 
 			function initialize(){
-				var latCenter = <?php echo $lat; ?>;
-				var lngCenter = <?php echo $lng; ?>;
-				var latValue = opener.document.getElementById("decimallatitude").value;
-				var lngValue = opener.document.getElementById("decimallongitude").value;
-				var errRadius = 0;
-				if(opener.document.getElementById("coordinateuncertaintyinmeters")) errRadius = opener.document.getElementById("coordinateuncertaintyinmeters").value;
-				if(latValue){
-					latCenter = latValue;
-					lngCenter = lngValue;
-					document.getElementById("latbox").value = latValue;
-					document.getElementById("lngbox").value = lngValue;
+				var latCenter = opener.document.getElementById("decimallatitude").value;
+				var lngCenter = opener.document.getElementById("decimallongitude").value;
+				if(latCenter){
+					document.getElementById("latbox").value = latCenter;
+					document.getElementById("lngbox").value = lngCenter;
 				}
-		    	var dmLatLng = new google.maps.LatLng(latCenter,lngCenter);
+				var errRadius = 0;
+				if(opener.document.getElementById("coordinateuncertaintyinmeters") && opener.document.getElementById("coordinateuncertaintyinmeters").value){
+					errRadius = opener.document.getElementById("coordinateuncertaintyinmeters").value;
+					document.getElementById("errRadius").value = opener.document.getElementById("coordinateuncertaintyinmeters").value;
+				}
+
 		    	var dmOptions = {
-					zoom: <?php echo $zoom; ?>,
-					center: dmLatLng,
 					mapTypeId: google.maps.MapTypeId.TERRAIN,
 					scaleControl: true
 				};
@@ -63,8 +51,8 @@ if($MAPPING_BOUNDARIES){
 
 				drawingManager.setMap(map);
 
-				if(latValue && lngValue){
-					var mLatLng = new google.maps.LatLng(latValue,lngValue);
+				if(latCenter && lngCenter){
+					var mLatLng = new google.maps.LatLng(latCenter,lngCenter);
 					var marker = new google.maps.Marker({
 						position: mLatLng,
 						map: map
@@ -77,7 +65,33 @@ if($MAPPING_BOUNDARIES){
 		            startLocation = event.latLng;
 		            setTimeout("placeMarker()", 500);
 		        });
-				setErrorRadius(latValue, lngValue, errRadius);
+				setErrorRadius(latCenter, lngCenter, errRadius);
+
+				if(!errCircle){
+					if(latCenter){
+						map.setCenter(new google.maps.LatLng(latCenter,lngCenter));
+						map.setZoom(16);
+					}
+					else{
+						var bounds = new google.maps.LatLngBounds();
+						<?php
+						$boundArr = array();
+						if($MAPPING_BOUNDARIES){
+							$boundArr = explode(";",$MAPPING_BOUNDARIES);
+						}
+						if(!$boundArr || count($boundArr) != 4){
+							$boundArr[0] = 51;
+							$boundArr[1] = -65;
+							$boundArr[2] = 25;
+							$boundArr[3] = -125;
+						}
+						echo 'bounds.extend(new google.maps.LatLng('.$boundArr[2].','.$boundArr[3].'));'."\n";
+						echo 'bounds.extend(new google.maps.LatLng('.$boundArr[0].','.$boundArr[1].'));'."\n";
+						?>
+						map.fitBounds(bounds);
+						map.panToBounds(bounds);
+					}
+				}
 			}
 
 			function coordinatesChanged(){
@@ -92,7 +106,10 @@ if($MAPPING_BOUNDARIES){
 				var radius = parseInt(inputObj.value,10);
 				if(errCircle){
 					if(radius){
-						errCircle.set('radius',radius);
+						errCircle.setRadius(radius);
+						var bounds = errCircle.getBounds();
+						map.fitBounds(bounds);
+						map.panToBounds(bounds);
 					}
 					else{
 						errCircle.setMap(null);
@@ -100,33 +117,11 @@ if($MAPPING_BOUNDARIES){
 					}
 				}
 				else{
-					setErrorRadius(latValue, lngValue, radius);
+					if(currentMarker){
+						setErrorRadius(currentMarker.getPosition().lat(), currentMarker.getPosition().lng(), radius);
+					}
 				}
 	        }
-
-			function setErrorRadius(latValue, lngValue, errRadius){
-				if(latValue && lngValue && errRadius > 0){
-					errCircle = new google.maps.Circle({
-						center: new google.maps.LatLng(latValue, lngValue),
-						radius: errRadius,
-						strokeWeight: 0,
-						fillOpacity: 0.45,
-						editable: true,
-						draggable: true,
-						map: map
-					});
-					google.maps.event.addListener(errCircle, 'radius_changed', function(){
-						var radius = (errCircle.getRadius());
-						document.getElementById("errRadius").value = radius.toFixed(0);
-					});
-					google.maps.event.addListener(errCircle, 'center_changed', function(){
-						var latLng = (errCircle.getCenter());
-						document.getElementById("latbox").value = latLng.lat().toFixed(6);
-						document.getElementById("lngbox").value = latLng.lng().toFixed(6);
-					});
-					errCircle.bindTo('center', currentMarker, 'position');
-				}
-			}
 
 	        function placeMarker() {
 	    		if(currentMarker) currentMarker.setMap();
@@ -147,12 +142,44 @@ if($MAPPING_BOUNDARIES){
 	    		}
 	        }
 
+			function setErrorRadius(latValue, lngValue, errRadius){
+				errRadius = parseInt(errRadius);
+				if(latValue && lngValue && isNumeric(errRadius) && errRadius > 0){
+					errCircle = new google.maps.Circle({
+						center: new google.maps.LatLng(latValue, lngValue),
+						radius: errRadius,
+						strokeWeight: 0,
+						fillOpacity: 0.45,
+						editable: true,
+						draggable: true,
+						map: map
+					});
+					google.maps.event.addListener(errCircle, 'radius_changed', function(){
+						var radius = (errCircle.getRadius());
+						document.getElementById("errRadius").value = radius.toFixed(0);
+					});
+					google.maps.event.addListener(errCircle, 'center_changed', function(){
+						var latLng = (errCircle.getCenter());
+						document.getElementById("latbox").value = latLng.lat().toFixed(6);
+						document.getElementById("lngbox").value = latLng.lng().toFixed(6);
+					});
+					errCircle.bindTo('center', currentMarker, 'position');
+					var bounds = errCircle.getBounds();
+					map.fitBounds(bounds);
+					map.panToBounds(bounds);
+				}
+			}
+
 	        function updateParentForm(f){
 					var latObj = opener.document.getElementById("decimallatitude");
 					var lngObj = opener.document.getElementById("decimallongitude");
 					latObj.value = f.latbox.value;
 					lngObj.value = f.lngbox.value;
+					if(opener.document.getElementById("coordinateuncertaintyinmeters")){
+						opener.document.getElementById("coordinateuncertaintyinmeters").value = f.errRadius.value;
+					}
 				try{
+					latObj.onchange();
 					lngObj.onchange();
 				}
 				catch(myErr){

@@ -86,7 +86,7 @@ $collManager->cleanOutArr($collData);
 		});
 
 		function openMappingAid() {
-			mapWindow=open("../tools/mappointaid.php?errmode=0&zoom=15","mappointaid","resizable=0,width=800,height=700,left=20,top=20");
+			mapWindow=open("../tools/mappointaid.php?errmode=0","mappointaid","resizable=0,width=800,height=700,left=20,top=20");
 			if (mapWindow.opener == null) mapWindow.opener = self;
 		}
 
@@ -351,7 +351,7 @@ $collManager->cleanOutArr($collData);
 									Latitude:
 								</td>
 								<td>
-									<input id="decimallatitude" type="text" name="latitudedecimal" value="<?php echo ($collid?$collData["latitudedecimal"]:'');?>" />
+									<input id="decimallatitude" name="latitudedecimal" type="text" value="<?php echo ($collid?$collData["latitudedecimal"]:'');?>" />
 									<a href="#" onclick="openMappingAid();">
 										<img src="../../images/world.png" style="width:12px;" />
 									</a>
@@ -362,7 +362,7 @@ $collManager->cleanOutArr($collData);
 									Longitude:
 								</td>
 								<td>
-									<input id="decimallongitude" type="text" name="longitudedecimal" value="<?php echo ($collid?$collData["longitudedecimal"]:'');?>" />
+									<input id="decimallongitude" name="longitudedecimal" type="text" value="<?php echo ($collid?$collData["longitudedecimal"]:'');?>" />
 								</td>
 							</tr>
 							<?php

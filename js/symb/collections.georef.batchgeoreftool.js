@@ -425,7 +425,7 @@ function openMappingAid() {
 	var lngDef = f.decimallongitude.value;
 	var zoom = 5;
 	if(latDef && lngDef) zoom = 11;
-	mapWindow=open("../tools/mappointaid.php?zoom="+zoom,"geomapaid","resizable=0,width=800,height=700,left=20,top=20");
+	mapWindow=open("../tools/mappointaid.php","geomapaid","resizable=0,width=800,height=700,left=20,top=20");
 	if (mapWindow.opener == null) mapWindow.opener = self;
 }
 
