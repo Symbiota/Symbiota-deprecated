@@ -936,10 +936,10 @@ class DwcArchiverCore extends Manager{
 
 		$occCnt = 1;
 		$termArr = $this->occurrenceFieldArr['terms'];
-		if($this->schemaType == 'dwc'){
+		if($this->schemaType == 'dwc' || $this->schemaType == 'pensoft'){
 			unset($termArr['localitySecurity']);
 		}
-		if($this->schemaType == 'dwc' || $this->schemaType == 'backup'){
+		if($this->schemaType == 'dwc' || $this->schemaType == 'pensoft' || $this->schemaType == 'backup'){
 			unset($termArr['collId']);
 		}
 		foreach($termArr as $k => $v){
@@ -969,9 +969,11 @@ class DwcArchiverCore extends Manager{
 			$coreIdElem1->setAttribute('index','0');
 			$extElem1->appendChild($coreIdElem1);
 
+
 			//List identification fields
 			$detCnt = 1;
 			$termArr = $this->determinationFieldArr['terms'];
+			unset($termArr['detid']);
 			foreach($termArr as $k => $v){
 				$fieldElem = $newDoc->createElement('field');
 				$fieldElem->setAttribute('index',$detCnt);
@@ -1003,6 +1005,7 @@ class DwcArchiverCore extends Manager{
 			//List image fields
 			$imgCnt = 1;
 			$termArr = $this->imageFieldArr['terms'];
+			unset($termArr['imgid']);
 			foreach($termArr as $k => $v){
 				$fieldElem = $newDoc->createElement('field');
 				$fieldElem->setAttribute('index',$imgCnt);
