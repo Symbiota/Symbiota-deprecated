@@ -296,10 +296,8 @@ class ChecklistVoucherAdmin {
 		$retArr = Array();
 		if($sqlFrag = $this->getSqlFrag()){
 			if($includeAll == 1 || $includeAll == 2){
-				$sql = 'SELECT DISTINCT cl.tid AS cltid, t.sciname AS clsciname, o.occid, '.
-					'IFNULL(CONCAT(c.institutioncode,"-",c.collectioncode,"-",o.catalognumber),"[no catalog number]") AS collcode, '.
-					'o.tidinterpreted, o.sciname, o.recordedby, o.recordnumber, o.eventdate, '.
-					'CONCAT_WS("; ",o.country, o.stateprovince, o.county, o.locality) as locality '.
+				$sql = 'SELECT DISTINCT cl.tid AS cltid, t.sciname AS clsciname, o.occid, c.institutioncode, c.collectioncode, o.catalognumber, '.
+					'o.tidinterpreted, o.sciname, o.recordedby, o.recordnumber, o.eventdate, CONCAT_WS("; ",o.country, o.stateprovince, o.county, o.locality) as locality '.
 					'FROM omoccurrences o LEFT JOIN omcollections c ON o.collid = c.collid '.
 					'INNER JOIN taxstatus ts ON o.tidinterpreted = ts.tid '.
 					'INNER JOIN fmchklsttaxalink cl ON ts.tidaccepted = cl.tid '.
@@ -322,7 +320,12 @@ class ChecklistVoucherAdmin {
 					$sciName = $r->clsciname;
 					if($r->clsciname <> $r->sciname) $sciName .= '<br/>spec id: '.$r->sciname;
 					$retArr[$r->cltid][$r->occid]['sciname'] = $sciName;
-					$retArr[$r->cltid][$r->occid]['collcode'] = $r->collcode;
+					$collCode = '';
+					if(!$r->catalognumber || strpos($r->catalognumber, $r->institutioncode) === false){
+						$collCode = $r->institutioncode.($r->collectioncode?'-'.$r->collectioncode:'');
+					}
+					$collCode .= ($collCode?'-':'').($r->catalognumber?$r->catalognumber:'[catalog number null]');
+					$retArr[$r->cltid][$r->occid]['collcode'] = $collCode;
 					$retArr[$r->cltid][$r->occid]['recordedby'] = $r->recordedby;
 					$retArr[$r->cltid][$r->occid]['recordnumber'] = $r->recordnumber;
 					$retArr[$r->cltid][$r->occid]['eventdate'] = $r->eventdate;
@@ -331,7 +334,7 @@ class ChecklistVoucherAdmin {
 			}
 			elseif($includeAll == 3){
 				$sql = 'SELECT DISTINCT t.tid AS cltid, t.sciname AS clsciname, o.occid, '.
-					'IFNULL(CONCAT(c.institutioncode,"-",c.collectioncode,"-",o.catalognumber),"[no catalog number]") AS collcode, '.
+					'c.institutioncode, c.collectioncode, o.catalognumber, '.
 					'o.tidinterpreted, o.sciname, o.recordedby, o.recordnumber, o.eventdate, '.
 					'CONCAT_WS("; ",o.country, o.stateprovince, o.county, o.locality) as locality '.
 					'FROM omcollections AS c INNER JOIN omoccurrences AS o ON c.collid = o.collid '.
@@ -349,7 +352,12 @@ class ChecklistVoucherAdmin {
 					$sciName = $r->clsciname;
 					if($r->clsciname <> $r->sciname) $sciName .= '<br/>spec id: '.$r->sciname;
 					$retArr[$r->cltid][$r->occid]['sciname'] = $sciName;
-					$retArr[$r->cltid][$r->occid]['collcode'] = $r->collcode;
+					$collCode = '';
+					if(!$r->catalognumber || strpos($r->catalognumber, $r->institutioncode) === false){
+						$collCode = $r->institutioncode.($r->collectioncode?'-'.$r->collectioncode:'');
+					}
+					$collCode .= ($collCode?'-':'').($r->catalognumber?$r->catalognumber:'[catalog number null]');
+					$retArr[$r->cltid][$r->occid]['collcode'] = $collCode;
 					$retArr[$r->cltid][$r->occid]['recordedby'] = $r->recordedby;
 					$retArr[$r->cltid][$r->occid]['recordnumber'] = $r->recordnumber;
 					$retArr[$r->cltid][$r->occid]['eventdate'] = $r->eventdate;
@@ -381,7 +389,7 @@ class ChecklistVoucherAdmin {
 		$retArr = Array();
 		if($sqlFrag = $this->getSqlFrag()){
 			$sqlBase = $this->getMissingTaxaBaseSql($sqlFrag);
-			$sql = 'SELECT DISTINCT o.occid, IFNULL(CONCAT(c.institutioncode,"-",c.collectioncode,"-",o.catalognumber),"[no catalog number]") AS collcode, '.
+			$sql = 'SELECT DISTINCT o.occid, c.institutioncode ,c.collectioncode, o.catalognumber, '.
 				'o.tidinterpreted, o.sciname, o.recordedby, o.recordnumber, o.eventdate, '.
 				'CONCAT_WS("; ",o.country, o.stateprovince, o.county, o.locality) as locality '.
 				$sqlBase.' LIMIT '.($limitIndex?($limitIndex*400).',':'').'400';
@@ -389,7 +397,12 @@ class ChecklistVoucherAdmin {
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
 				$retArr[$r->sciname][$r->occid]['tid'] = $r->tidinterpreted;
-				$retArr[$r->sciname][$r->occid]['collcode'] = $r->collcode;
+				$collCode = '';
+				if(!$r->catalognumber || strpos($r->catalognumber, $r->institutioncode) === false){
+					$collCode = $r->institutioncode.($r->collectioncode?'-'.$r->collectioncode:'');
+				}
+				$collCode .= ($collCode?'-':'').($r->catalognumber?$r->catalognumber:'[catalog number null]');
+				$retArr[$r->sciname][$r->occid]['collcode'] = $collCode;
 				$retArr[$r->sciname][$r->occid]['recordedby'] = $r->recordedby;
 				$retArr[$r->sciname][$r->occid]['recordnumber'] = $r->recordnumber;
 				$retArr[$r->sciname][$r->occid]['eventdate'] = $r->eventdate;
@@ -523,7 +536,7 @@ class ChecklistVoucherAdmin {
 			//Make sure tidinterpreted are valid
 			//$this->conn->query('UPDATE omoccurrences o INNER JOIN taxa t ON o.sciname = t.sciname SET o.tidinterpreted = t.tid WHERE o.tidinterpreted IS NULL');
 			//Grab records
-			$sql = 'SELECT DISTINCT o.occid, IFNULL(CONCAT(c.institutioncode,"-",c.collectioncode,"-",o.catalognumber),"[no catalog number]") AS collcode, '.
+			$sql = 'SELECT DISTINCT o.occid, c.institutioncode, c.collectioncode, o.catalognumber, '.
 				'o.sciname, o.recordedby, o.recordnumber, o.eventdate, '.
 				'CONCAT_WS("; ",o.country, o.stateprovince, o.county, o.locality) as locality '.
 				$this->getProblemTaxaSql($sqlFrag);
@@ -532,7 +545,12 @@ class ChecklistVoucherAdmin {
 			while($r = $rs->fetch_object()){
 				$sciname = $r->sciname;
 				if($sciname){
-					$retArr[$sciname][$r->occid]['collcode'] = $r->collcode;
+					$collCode = '';
+					if(!$r->catalognumber || strpos($r->catalognumber, $r->institutioncode) === false){
+						$collCode = $r->institutioncode.($r->collectioncode?'-'.$r->collectioncode:'');
+					}
+					$collCode .= ($collCode?'-':'').($r->catalognumber?$r->catalognumber:'[catalog number null]');
+					$retArr[$sciname][$r->occid]['collcode'] = $collCode;
 					$retArr[$sciname][$r->occid]['recordedby'] = $r->recordedby;
 					$retArr[$sciname][$r->occid]['recordnumber'] = $r->recordnumber;
 					$retArr[$sciname][$r->occid]['eventdate'] = $r->eventdate;
