@@ -303,7 +303,7 @@ if($SYMB_UID){
 	}
 	$occManager->setOccIndex($occIndex);
 
-	if(!$goToMode && $occIndex !== false){
+	if($occId || (!$goToMode && $occIndex !== false)){
 		$oArr = $occManager->getOccurMap();
 		if($oArr){
 			$occId = $occManager->getOccId();
