@@ -91,7 +91,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 		<link type="text/css" href="<?php echo $CLIENT_ROOT; ?>/css/jquery-ui.css" rel="Stylesheet" />
 		<script type="text/javascript" src="<?php echo $CLIENT_ROOT; ?>/js/jquery.js"></script>
 		<script type="text/javascript" src="<?php echo $CLIENT_ROOT; ?>/js/jquery-ui.js"></script>
-		<script type="text/javascript" src="<?php echo $CLIENT_ROOT; ?>/js/symb/collections.georef.batchgeoreftool.js?ver=1807"></script>
+		<script type="text/javascript" src="<?php echo $CLIENT_ROOT; ?>/js/symb/collections.georef.batchgeoreftool.js?ver=180721"></script>
 	</head>
 	<body>
 		<!-- This is inner text! -->
