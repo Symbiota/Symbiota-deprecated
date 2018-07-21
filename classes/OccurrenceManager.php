@@ -772,7 +772,7 @@ class OccurrenceManager extends OccurrenceTaxaManager {
 		if(array_key_exists("llpoint",$_REQUEST) && $_REQUEST['llpoint']){
 			$this->searchTermArr["llpoint"] = $this->cleanInputStr($_REQUEST['llpoint']);
 		}
-		if(array_key_exists("footprintwkt",$_REQUEST)){
+		if(array_key_exists("footprintwkt",$_REQUEST) && $_REQUEST['footprintwkt']){
 			$this->searchTermArr["footprintwkt"] = $this->cleanInputStr($_REQUEST['footprintwkt']);
 		}
 	}
