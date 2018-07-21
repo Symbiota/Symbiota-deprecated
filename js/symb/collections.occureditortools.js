@@ -59,7 +59,7 @@ function openMappingAid() {
 	var errRadius = f.coordinateuncertaintyinmeters.value;
 	var zoom = 5;
 	if(latDef && lngDef) zoom = 11;
-	var mapWindow=open("../tools/mappointaid.php?zoom="+zoom,"mappointaid","resizable=0,width=800,height=700,left=20,top=20");
+	var mapWindow=open("../tools/mappointaid.php","mappointaid","resizable=0,width=900,height=700,left=20,top=20");
 	if(mapWindow != null){
 		if (mapWindow.opener == null) mapWindow.opener = self;
 		mapWindow.focus();
