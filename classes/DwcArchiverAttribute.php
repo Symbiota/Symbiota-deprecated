@@ -27,14 +27,14 @@ class DwcArchiverAttribute{
 		//$fieldArr['measurementMethod'] = '';
 		$termArr['measurementRemarks'] = 'http://rs.tdwg.org/dwc/terms/measurementRemarks';
 		$fieldArr['measurementRemarks'] = 'a.notes';
-		
+
 		$retArr['terms'] = $termArr;
 		$retArr['fields'] = $fieldArr;
 		return $retArr;
 	}
 
 	public static function getSql($fieldArr, $conditionSql){
-		$sql = ''; 
+		$sql = '';
 		if($fieldArr && $conditionSql){
 			$sqlFrag = '';
 			foreach($fieldArr as $fieldName => $colName){
@@ -45,6 +45,12 @@ class DwcArchiverAttribute{
 				'INNER JOIN tmattributes a ON s.stateid = a.stateid '.
 				'INNER JOIN userlogin u ON a.createduid = u.uid '.
 				'INNER JOIN omoccurrences o ON a.occid = o.occid ';
+			if(strpos($conditionSql,'ts.taxauthid')){
+				$sql .= 'LEFT JOIN taxstatus ts ON o.tidinterpreted = ts.tid ';
+			}
+			if(stripos($conditionSql,'e.parenttid')){
+				$sql .= 'LEFT JOIN taxaenumtree e ON o.tidinterpreted = e.tid ';
+			}
 			if(strpos($conditionSql,'v.clid')){
 				//Search criteria came from custom search page
 				$sql .= 'LEFT JOIN fmvouchers v ON o.occid = v.occid ';

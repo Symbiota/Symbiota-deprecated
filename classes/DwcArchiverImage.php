@@ -69,6 +69,9 @@ class DwcArchiverImage{
 			if(strpos($conditionSql,'ts.taxauthid')){
 				$sql .= 'LEFT JOIN taxstatus ts ON o.tidinterpreted = ts.tid ';
 			}
+			if(stripos($conditionSql,'e.parenttid')){
+				$sql .= 'LEFT JOIN taxaenumtree e ON o.tidinterpreted = e.tid ';
+			}
 			if(strpos($conditionSql,'v.clid')){
 				//Search criteria came from custom search page
 				$sql .= 'LEFT JOIN fmvouchers v ON o.occid = v.occid ';
