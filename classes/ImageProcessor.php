@@ -452,6 +452,7 @@ class ImageProcessor {
 			}
 			if($occid){
 				$occLink = '<a href="../individual/index.php?occid='.$occid.'" target="_blank">'.$occid.'</a>';
+				$extraMsg = '';
 				if($fileName){
 					//Is iPlant mapped image
 					//Check to see if image has already been linked
@@ -513,10 +514,13 @@ class ImageProcessor {
 						$sql = 'DELETE i.* FROM images i INNER JOIN omoccurrences o ON i.occid = o.occid '.
 							'WHERE (o.occid = '.$occid.') AND (i.originalurl LIKE "http%://api.idigbio.org%") AND (i.sourceIdentifier = "'.$sourceIdentifier.'")';
 						$this->conn->query($sql);
-						if($this->conn->affected_rows) $this->logOrEcho('Replacing previously mapped image with new input',2);
+						if($this->conn->affected_rows) $extraMsg = 'Replacing previously mapped image with new input';
 					}
 				}
-				if($occid) $this->logOrEcho('Linked image to existing record ('.($fileName?$fileName.'; ':'').'#'.$occLink.') ',2);
+				if($occid){
+					$this->logOrEcho('Linked image to existing record ('.($fileName?$fileName.'; ':'').'#'.$occLink.') ',2);
+					if($extraMsg) $this->logOrEcho($extraMsg,3);
+				}
 			}
 			else{
 				//Records does not exist, create a new one to which image will be linked
