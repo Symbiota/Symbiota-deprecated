@@ -133,9 +133,7 @@ class OccurrenceIndividualManager extends Manager{
 				}
 
 				if($this->occArr['secondaryinstcode'] && $this->occArr['secondaryinstcode'] != $this->metadataArr['institutioncode']){
-					$sqlSec = 'SELECT collectionname, homepage, individualurl, contact, email, icon '.
-					'FROM omcollsecondary '.
-					'WHERE (collid = '.$this->occArr['collid'].')';
+					$sqlSec = 'SELECT collectionname, homepage, individualurl, contact, email, icon  FROM omcollsecondary WHERE (collid = '.$this->occArr['collid'].')';
 					$rsSec = $this->conn->query($sqlSec);
 					if($r = $rsSec->fetch_object()){
 						$this->metadataArr['collectionname'] = $r->collectionname;

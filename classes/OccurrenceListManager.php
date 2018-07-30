@@ -30,7 +30,7 @@ class OccurrenceListManager extends OccurrenceManager{
 			$this->setRecordCnt($sqlWhere);
 		}
 		$sql = 'SELECT o.occid, c.collid, c.institutioncode, c.collectioncode, c.collectionname, c.icon, '.
-			'o.catalognumber, o.family, o.sciname, o.scientificnameauthorship, o.tidinterpreted, o.recordedby, o.recordnumber, o.eventdate, o.year, o.enddayofyear, '.
+			'o.catalognumber, o.family, o.sciname, o.scientificnameauthorship, o.tidinterpreted, o.recordedby, o.recordnumber, o.eventdate, o.year, o.startdayofyear, o.enddayofyear, '.
 			'o.country, o.stateprovince, o.county, o.locality, o.decimallatitude, o.decimallongitude, o.localitysecurity, o.localitysecurityreason, '.
 			'o.habitat, o.minimumelevationinmeters, o.maximumelevationinmeters, o.observeruid, c.sortseq '.
 			'FROM omoccurrences o LEFT JOIN omcollections c ON o.collid = c.collid ';
@@ -74,8 +74,8 @@ class OccurrenceListManager extends OccurrenceManager{
     					$returnArr[$row->occid]["collnum"] = $this->cleanOutStr($row->recordnumber);
     					$dateStr = '';
     					if($row->eventdate) $dateStr = date('d M Y',strtotime($row->eventdate));
-    					if($row->enddayofyear && $row->year){
-    						if($d = DateTime::createFromFormat('z Y', strval($row->enddayofyear).' '.strval($row->year))){
+    					if($row->startdayofyear && $row->enddayofyear && $row->year && $row->startdayofyear != $row->enddayofyear){
+    						if($d = DateTime::createFromFormat('z Y', (strval($row->enddayofyear)-1).' '.strval($row->year))){
     							$dateStr .= ' to '.$d->format('d M Y');
     						}
     					}
