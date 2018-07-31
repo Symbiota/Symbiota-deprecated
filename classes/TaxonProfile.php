@@ -407,11 +407,13 @@ class TaxonProfile extends Manager {
 			//Get descriptions associated with accepted name only
 			$usedCaptionArr = array();
 			foreach($rsArr as $n => $rowArr){
-				if($rowArr['tid'] == $this->tid){
+				//if($rowArr['tid'] == $this->tid){
+				if(!array_key_exists($rowArr['caption'], $usedCaptionArr) || $rowArr['caption'] != $rowArr['tdbid']){
 					$retArr = $this->loadDescriptionArr($rowArr, $retArr);
-					$usedCaptionArr[] = $rowArr['caption'];
+					$usedCaptionArr[$rowArr['caption']] = $rowArr['tdbid'];
 				}
 			}
+			/*
 			//Then add description linked to synonyms ONLY if one doesn't exist with same caption
 			reset($rsArr);
 			foreach($rsArr as $n => $rowArr){
@@ -419,8 +421,8 @@ class TaxonProfile extends Manager {
 					$retArr = $this->loadDescriptionArr($rowArr, $retArr);
 				}
 			}
-
 			ksort($retArr);
+			*/
 		}
 		return $retArr;
 	}
