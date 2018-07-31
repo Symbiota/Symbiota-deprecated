@@ -226,14 +226,16 @@ class ChecklistManager {
 				$vSql = 'SELECT DISTINCT v.tid, v.occid, c.institutioncode, v.notes, o.catalognumber, o.recordedby, o.recordnumber, o.eventdate '.
 					'FROM fmvouchers v INNER JOIN omoccurrences o ON v.occid = o.occid '.
 					'INNER JOIN omcollections c ON o.collid = c.collid '.
-					'WHERE (v.clid IN ('.$clidStr.')) AND v.tid IN('.implode(',',array_keys($this->taxaList)).')';
+					'WHERE (v.clid IN ('.$clidStr.')) AND v.tid IN('.implode(',',array_keys($this->taxaList)).') '.
+					'ORDER BY o.collid';
 				if($this->thesFilter){
 					$vSql = 'SELECT DISTINCT ts.tidaccepted AS tid, v.occid, c.institutioncode, v.notes, o.catalognumber, o.recordedby, o.recordnumber, o.eventdate '.
 						'FROM fmvouchers v INNER JOIN omoccurrences o ON v.occid = o.occid '.
 						'INNER JOIN omcollections c ON o.collid = c.collid '.
 						'INNER JOIN taxstatus ts ON v.tid = ts.tid '.
 						'WHERE (ts.taxauthid = '.$this->thesFilter.') AND (v.clid IN ('.$clidStr.')) '.
-						'AND (ts.tidaccepted IN('.implode(',',array_keys($this->taxaList)).')) ';
+						'AND (ts.tidaccepted IN('.implode(',',array_keys($this->taxaList)).')) '.
+						'ORDER BY o.collid';
 				}
 				//echo $vSql; exit;
 		 		$vResult = $this->conn->query($vSql);
