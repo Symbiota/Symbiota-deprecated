@@ -528,7 +528,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 							if($occArr['eventdate']){
 								echo '<div><b>Date: </b>';
 								echo $occArr['eventdate'];
-								if($occArr['eventdateend']){
+								if($occArr['eventdateend'] && $occArr['eventdateend'] != $occArr['eventdate']){
 									echo ' - '.$occArr['eventdateend'];
 								}
 								echo '</div>';
