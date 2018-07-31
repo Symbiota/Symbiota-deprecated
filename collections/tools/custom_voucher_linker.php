@@ -15,7 +15,7 @@ $voucherLinker->linkVouchers();
 class VoucherLinker {
 
 	private $conn;
-	private $clid = 4529;
+	private $clid = 4905;
 	private $numberOfVouchersToLoad = 5;
 	private $linkSpecimens = true;
 	private $linkObservations = true;
@@ -32,7 +32,7 @@ class VoucherLinker {
 	public function linkVouchers(){
 		//Uncomment following line to remove and reset existing voucher links
 		$sql = 'DELETE FROM fmvouchers WHERE clid = '.$this->clid;
-		if(!$this->conn->query($sql)) echo 'ERROR resetting voucher: '.$this->conn->error."\n";
+		//if(!$this->conn->query($sql)) echo 'ERROR resetting voucher: '.$this->conn->error."\n";
 
 		//Get taxa and synonyms
 		$taxaArr = array();
@@ -47,7 +47,7 @@ class VoucherLinker {
 		}
 		$rs->free();
 
-		$cnt = 0;
+		$cnt = 1;
 		foreach($taxaArr as $targetTid => $tidArr){
 			if($this->linkSpecimens) $this->loadVouchers($targetTid,$tidArr,array('Preserved Specimens'));
 			if($this->linkObservations) $this->loadVouchers($targetTid,$tidArr,array('General Observations','Observations'));
@@ -63,7 +63,7 @@ class VoucherLinker {
 		$oldestOccid = 0;
 		$newest = '';
 		$newestOccid = 0;
-		$sql = 'SELECT DISTINCT o.occid, o.recordedby, o.recordnumber, o.eventdate, o.establishmentmeans, o.decimallatitude, c.colltype '.
+		$sql = 'SELECT DISTINCT o.collid, o.occid, o.recordedby, o.recordnumber, o.eventdate, o.establishmentmeans, o.decimallatitude, c.colltype '.
 			'FROM omoccurrences o INNER JOIN omcollections c ON o.collid = c.collid '.
 			'WHERE (o.stateprovince = "New York") AND (o.county LIKE "Bronx%" OR o.county LIKE "Kings%" OR o.county LIKE "New York%" OR o.county LIKE "Queens%" OR o.county LIKE "Richmond%") '.
 			'AND (o.tidinterpreted IN('.implode(',',$tidArr).')) AND (cultivationStatus IS NULL OR cultivationStatus = 0) AND (c.colltype IN("'.implode('","', $collTypeArr).'"))';
@@ -85,10 +85,13 @@ class VoucherLinker {
 			if($this->excludeCultivated && stripos($r->establishmentmeans,'cultivate') !== false){
 				continue;
 			}
+			if($r->collid == 40) $ranking++;
 			if(strpos($r->recordedby,'Atha') !== false) $ranking++;
 			if($r->decimallatitude) $ranking++;
-			if($r->recordnumber > 1000) $ranking++;
-
+			if($r->recordnumber){
+				if(!preg_match('/^s\.{0,1}n\.{0,1}$/', $r->recordnumber)) $ranking++;
+				if($r->recordnumber > 1000) $ranking++;
+			}
 			$voucherArr[$r->occid] = $ranking;
 		}
 		$rs->free();
