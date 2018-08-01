@@ -19,8 +19,9 @@ $rv = array_key_exists("rv",$_REQUEST)?htmlspecialchars($_REQUEST["rv"],ENT_QUOT
 $projValue = array_key_exists("proj",$_REQUEST)?htmlspecialchars($_REQUEST["proj"],ENT_QUOTES):"";
 $langValue = array_key_exists("lang",$_REQUEST)?htmlspecialchars($_REQUEST["lang"],ENT_QUOTES):"";
 $displayMode = array_key_exists("displaymode",$_REQUEST)?htmlspecialchars($_REQUEST["displaymode"],ENT_QUOTES):"";
-if(!$action){
-	$attrsValues = array_key_exists("attr",$_REQUEST)?htmlspecialchars($_REQUEST["attr"],ENT_QUOTES):"";	//Array of: cid + "-" + cs (ie: 2-3)
+$attrsValues = '';
+if(!$action && array_key_exists("attr",$_REQUEST) && is_array($_REQUEST["attr"])){
+	$attrsValues = $_REQUEST["attr"];	//Array of: cid + "-" + cs (ie: 2-3)
 }
 
 $dataManager = new KeyDataManager();
