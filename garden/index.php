@@ -22,10 +22,9 @@ $evergreenArr = $gsManager->getCharacterStateArr(100,true);
 $flowerColorArr = $gsManager->getCharacterStateArr(612,true);
 $bloomMonthArr = $gsManager->getCharacterStateArr(569,true);
 $landscapeUseArr = $gsManager->getCharacterStateArr(679,true);
-$cultivationPrefArr = $gsManager->getCharacterStateArr(737,true);
+$cultivationPrefArr = $gsManager->getCharacterStateArr(767,true);
 $propagationArr = $gsManager->getCharacterStateArr(740,true);
-$growthHabitArr = $gsManager->getCharacterStateArr(739,true);
-$nativeHabitatArr = $gsManager->getCharacterStateArr(163,true);
+$plantBehaviorArr = $gsManager->getCharacterStateArr(688,true);
 $availabilityArr = $gsManager->getCharacterStateArr(209,true);
 ?>
 <html>
@@ -891,7 +890,7 @@ include($serverRoot."/header.php");
     </div>
 
     <?php
-    if($propagationArr || $growthHabitArr || $nativeHabitatArr){
+    if($propagationArr || $plantBehaviorArr){
         ?>
         <div id="morePane" class="advSearchPane">
             <h3>Growth & Maintenance</h3>
@@ -919,37 +918,15 @@ include($serverRoot."/header.php");
                     </div>
                     <?php
                 }
-                if($growthHabitArr){
+                if($plantBehaviorArr){
                     ?>
                     <div class="advSearchOptionWrapper">
                         <div class="advSearchOptionHeader">
-                            Growth habit
+                            Plant Behavior
                             <hr />
                         </div>
                         <?php
-                        foreach($growthHabitArr as $opt => $optArr){
-                            $cId = $optArr['cid'];
-                            $csId = $optArr['cs'];
-                            $optId = $cId.'--'.$csId;
-                            $onchange = "processOption('".$optId."');";
-                            echo '<input class="advSearchOptCheckBox" type="checkbox" onchange="'.$onchange.'" id="'.$optId.'">';
-                            echo '<div id="'.$optId.'Div" class="advSearchOptCheckBoxDiv unselectable">';
-                            echo '<label id="'.$optId.'Label" class="advSearchOptCheckBoxLabel" for="'.$optId.'">'.$opt.'</label>';
-                            echo '</div>';
-                        }
-                        ?>
-                    </div>
-                    <?php
-                }
-                if($nativeHabitatArr){
-                    ?>
-                    <div class="advSearchOptionWrapper">
-                        <div class="advSearchOptionHeader">
-                            Native habitat
-                            <hr />
-                        </div>
-                        <?php
-                        foreach($nativeHabitatArr as $opt => $optArr){
+                        foreach($plantBehaviorArr as $opt => $optArr){
                             $cId = $optArr['cid'];
                             $csId = $optArr['cs'];
                             $optId = $cId.'--'.$csId;
@@ -980,7 +957,8 @@ include($serverRoot."/header.php");
                         $cId = $optArr['cid'];
                         $csId = $optArr['cs'];
                         $optId = $cId.'--'.$csId;
-                        $onchange = "processOption('".$optId."');";
+                        //$onchange = "processOption('".$optId."');";
+                        $onchange = "";
                         echo '<input class="advSearchOptCheckBox" type="checkbox" onchange="'.$onchange.'" id="'.$optId.'">';
                         echo '<div id="'.$optId.'Div" class="advSearchOptCheckBoxDiv unselectable">';
                         echo '<label id="'.$optId.'Label" class="advSearchOptCheckBoxLabel" for="'.$optId.'">'.$opt.'</label>';

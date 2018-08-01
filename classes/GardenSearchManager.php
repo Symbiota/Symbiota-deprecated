@@ -63,6 +63,7 @@ class GardenSearchManager {
             }
             $this->sqlWhereArr[] = $tempStr;
         }
+        $this->sqlWhereArr[] = '(t.TID IN(SELECT TID FROM fmchklsttaxalink WHERE CLID = 54))';
     }
 
     public function setSQL(){
@@ -73,7 +74,7 @@ class GardenSearchManager {
             $sqlFrom = 'FROM taxa AS t LEFT JOIN taxaenumtree AS te ON t.TID = te.parenttid ';
             $sqlFrom .= 'LEFT JOIN images AS i ON (te.tid = i.tid OR t.TID = i.tid) ';
             if(isset($this->searchParamsArr['common'])) $sqlFrom .= 'LEFT JOIN taxavernaculars AS v ON t.TID = v.TID ';
-            $sqlWhere .= 'AND te.taxauthid = 1 ';
+            //$sqlWhere .= 'AND te.taxauthid = 1 ';
             $sqlSuffix = 'ORDER BY t.SciName, i.sortsequence ';
         }
         elseif($this->display == 'list'){
@@ -81,7 +82,7 @@ class GardenSearchManager {
             $sqlFrom = 'FROM taxa AS t LEFT JOIN taxavernaculars AS v ON t.TID = v.TID ';
             $sqlFrom .= 'LEFT JOIN kmdescr AS kd ON t.TID = kd.TID ';
             $sqlFrom .= 'LEFT JOIN kmcs AS ks ON kd.CID = ks.cid AND kd.CS = ks.cs ';
-            $sqlWhere .= 'AND (kd.CID IN(137,681,682,690,738,684)) ';
+            //$sqlWhere .= 'AND (kd.CID IN(137,681,682,690,738,684)) ';
             $sqlSuffix = 'ORDER BY t.SciName ';
         }
         $this->sql = $sqlSelect.$sqlFrom.$sqlWhere.$sqlSuffix;
