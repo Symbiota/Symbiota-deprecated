@@ -142,6 +142,40 @@
 	margin-left:	20px;
 }
 
+#taxonnotes.species{
+	display:		block;
+	margin-left:	25px;
+}
+
+#taxonnotes.genus{
+	display:		block;
+	margin-top:		3px;
+	margin-left:	20px;
+}
+
+#taxonnotes.higher{
+	display:		block;
+	margin-top:		3px;
+	margin-left:	20px;
+}
+
+#taxonsource.species{
+	display:		block;
+	margin-left:	25px;
+}
+
+#taxonsource.genus{
+	display:		block;
+	margin-top:		3px;
+	margin-left:	20px;
+}
+
+#taxonsource.higher{
+	display:		block;
+	margin-top:		3px;
+	margin-left:	20px;
+}
+
 #project{
 	display:		block;
 	margin-top:		3px;

@@ -219,7 +219,8 @@ class ImageProcessor {
 											$baseUrl = $idigbioImageUrl.$data[$mediaMd5Index];
 											$webUrl = $baseUrl.'?size=webview';
 											$tnUrl = $baseUrl.'?size=thumbnail';
-											$lgUrl = $baseUrl.'?size=fullsize';
+											//$lgUrl = $baseUrl.'?size=fullsize';
+											$lgUrl = $baseUrl;
 											$this->databaseImage($occid,$webUrl,$tnUrl,$lgUrl,$baseUrl,$this->collArr['collname'],$origFileName);
 										}
 									}

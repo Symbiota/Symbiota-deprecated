@@ -122,12 +122,12 @@ if($isEditor){
 			}
 			return false;
 		}
-		
+
 		function verifyDwcaForm(f){
-	
+
 			return true;
 		}
-	
+
     	function verifyDwcaAdminForm(f){
 			var dbElements = document.getElementsByName("coll[]");
 			for(i = 0; i < dbElements.length; i++){
@@ -158,29 +158,29 @@ if($isEditor){
     </script>
 </head>
 <body>
-<?php 
+<?php
 $displayLeftMenu = (isset($collections_datasets_datapublisherMenu)?$collections_datasets_datapublisherMenu: 'true');
 include($SERVER_ROOT. '/header.php');
 ?>
 <div class='navpath'>
 	<a href="../../index.php">Home</a> &gt;&gt;
-	<?php 
+	<?php
 	if($collId){
 		?>
 		<a href="../misc/collprofiles.php?collid=<?php echo $collId; ?>&emode=1">Collection Management</a> &gt;&gt;
-		<?php 
+		<?php
 	}
 	else{
 		?>
 		<a href="../../sitemap.php">Sitemap</a> &gt;&gt;
-		<?php 
+		<?php
 	}
 	?>
 	<b>Darwin Core Archive Publisher</b>
 </div>
 <!-- This is inner text! -->
 <div id="innertext">
-	<?php 
+	<?php
 	if(!$collId && $IS_ADMIN){
 		?>
 		<div style="float:right;">
@@ -189,10 +189,10 @@ include($SERVER_ROOT. '/header.php');
 			</a>
 		</div>
 		<?php
-	} 
+	}
 	?>
 	<h1>Darwin Core Archive Publishing</h1>
-	<?php 
+	<?php
 	if($collId){
 		echo '<div style="font-weight:bold;font-size:120%;">'.$collArr['collname'].'</div>';
 		?>
@@ -200,38 +200,38 @@ include($SERVER_ROOT. '/header.php');
 			Use the controls below to publish occurrence data within this collection as a
 			<a href="http://rs.tdwg.org/dwc/terms/guides/text/index.htm">Darwin Core Archive (DwC-A)</a> file.
 			A DwC-A file is a single compressed ZIP file that contains one to several data files along with a meta.xml
-			document that describes the content. 
+			document that describes the content.
 			The occurrence data file is required, but identifications (determinations) and image metadata are optional.
-			Fields within the occurrences.csv file are defined by the <a href="http://rs.tdwg.org/dwc/terms/index.htm">Darwin Core</a> 
-			exchange standard. 
+			Fields within the occurrences.csv file are defined by the <a href="http://rs.tdwg.org/dwc/terms/index.htm">Darwin Core</a>
+			exchange standard.
 		</div>
-		<?php 
+		<?php
 	}
 	else{
 		?>
 		<div style="margin:10px;">
-			The following downloads are occurrence data packages from collections 
+			The following downloads are occurrence data packages from collections
 			that have chosen to publish their complete dataset as a
 			<a href="http://rs.tdwg.org/dwc/terms/guides/text/index.htm">Darwin Core Archive (DwC-A)</a> file.
 			A DwC-A file is a single compressed ZIP file that contains one to several data files along with a meta.xml
-			document that describes the content. 
+			document that describes the content.
 			The archives below contain three comma separated (CSV) files containing occurrences, identifications (determinations), and image metadata.
-			Fields within the occurrences.csv file are defined by the <a href="http://rs.tdwg.org/dwc/terms/index.htm">Darwin Core</a> 
+			Fields within the occurrences.csv file are defined by the <a href="http://rs.tdwg.org/dwc/terms/index.htm">Darwin Core</a>
 			exchange standard. The identification and image files follow the DwC extensions for those data types.
 		</div>
 		<div style="margin:10px;">
 			<h3>Data Usage Policy:</h3>
-			Use of these datasets requires agreement with the terms and conditions in our 
+			Use of these datasets requires agreement with the terms and conditions in our
 			<a href="../../misc/usagepolicy.php">Data Usage Policy</a>.
-			Locality details for rare, threatened, or sensitive records have been redacted from these data files. 
+			Locality details for rare, threatened, or sensitive records have been redacted from these data files.
 			One must contact the collections directly to obtain access to sensitive locality data.
 		</div>
 		<?php
-	} 
+	}
 	?>
 	<div style="margin:20px;">
-		<b>RSS Feed:</b> 
-		<?php 
+		<b>RSS Feed:</b>
+		<?php
 		$urlPrefix = $dwcaManager->getServerDomain().$CLIENT_ROOT.(substr($CLIENT_ROOT,-1)=='/'?'':'/');
 		if(file_exists('../../webservices/dwc/rss.xml')){
 			$feedLink = $urlPrefix.'webservices/dwc/rss.xml';
@@ -242,7 +242,7 @@ include($SERVER_ROOT. '/header.php');
 		}
 		?>
 	</div>
-	<?php 
+	<?php
 	if($collId){
 		if($action == 'Create/Refresh Darwin Core Archive'){
 			echo '<ul>';
@@ -261,7 +261,7 @@ include($SERVER_ROOT. '/header.php');
 			?>
 			<div style="margin:10px;">
 				<div>
-					<b>Title:</b> <?php echo $dArr['title']; ?> 
+					<b>Title:</b> <?php echo $dArr['title']; ?>
 					<form action="datapublisher.php" method="post" style="display:inline;" onsubmit="return window.confirm('Are you sure you want to delete this archive?');">
 						<input type="hidden" name="colliddel" value="<?php echo $dArr['collid']; ?>">
 						<input type="hidden" name="collid" value="<?php echo $dArr['collid']; ?>">
@@ -270,13 +270,13 @@ include($SERVER_ROOT. '/header.php');
 				</div>
 				<div><b>Description:</b> <?php echo $dArr['description']; ?></div>
 				<?php
-				$emlLink = $urlPrefix.'collections/datasets/emlhandler.php?collid='.$collId; 
+				$emlLink = $urlPrefix.'collections/datasets/emlhandler.php?collid='.$collId;
 				?>
 				<div><b>EML:</b> <a href="<?php echo $emlLink; ?>"><?php echo $emlLink; ?></a></div>
 				<div><b>DwC-Archive File:</b> <a href="<?php echo $dArr['link']; ?>"><?php echo $dArr['link']; ?></a></div>
 				<div><b>Publication Date:</b> <?php echo $dArr['pubDate']; ?></div>
 			</div>
-			<?php 
+			<?php
 		}
 		else{
 			echo '<div style="margin:20px;font-weight:bold;color:orange;">No data archives have been published for this collection</div>';
@@ -327,13 +327,12 @@ include($SERVER_ROOT. '/header.php');
 					?>
 					<div style="margin:10px;">
 						You have selected to have this collection's DwC archives published to GBIF. Please go to the
-						<a href="http://www.gbif.org/publishing-data/request-endorsement#/intro" target="_blank">GBIF Endorsement Request page</a> to
+						<a href="https://www.gbif.org/become-a-publisher" target="_blank">GBIF Endorsement Request page</a> to
 						register your collection with GBIF and enter the key provided by GBIF below. If your collection is found in the
-                        <a href="http://www.gbif.org/publishing-data/request-endorsement#/eoi/lookup" target="_blank">GBIF Organization lookup</a>,
-						there is already a GBIF Key assigned. The key is the remaining part of
+                        GBIF Organization lookup, there is already a GBIF Key assigned. The key is the remaining part of
 						the url after the last backslash of your collection's GBIF Data Provider page. If your collection is found,
                         please ensure that your data is not already published in GBIF. DO NOT PUBLISH your data if there is any chance it is
-                        already published. Before activating your GBIF Key in this portal, you will also need to contact GBIF and
+                        already published. Before activating your GBIF Key in this portal, you will also need to contact GBIF (<a href="mailto:helpdesk@gbif.org">helpdesk@gbif.org</a>) and
                         request that the user: <b><?php echo $GBIF_USERNAME; ?></b> has permissions to create and edit datatsets for your collection.
 						<form style="margin-top:10px;" name="gbifpubform" action="datapublisher.php" method="post" onsubmit="return processGbifOrgKey(this.form);">
 							GBIF Key <input type="text" name="gbifOrgKey" id="gbifOrgKey" value="" style="width:250px;"/>
@@ -382,7 +381,7 @@ include($SERVER_ROOT. '/header.php');
 				<div style="clear:both;margin:10px;">
 					<input type="hidden" name="collid" value="<?php echo $collId; ?>" />
 					<input type="submit" name="formsubmit" value="Create/Refresh Darwin Core Archive" <?php if($blockSubmitMsg) echo 'disabled'; ?> />
-					<?php 
+					<?php
 					if($blockSubmitMsg){
 						echo '<span style="color:red;margin-left:10px;">'.$blockSubmitMsg.'</span>';
 					}
@@ -421,15 +420,15 @@ include($SERVER_ROOT. '/header.php');
 					<fieldset style="padding:15px;">
 						<legend><b>Publish / Refresh <?php echo $catTitle; ?> DwC-A Files</b></legend>
 						<div style="margin:10px;">
-							<input name="collcheckall" type="checkbox" value="" onclick="checkAllColl(this)" /> Select/Deselect All<br/><br/> 
-							<?php 
+							<input name="collcheckall" type="checkbox" value="" onclick="checkAllColl(this)" /> Select/Deselect All<br/><br/>
+							<?php
 							$collList = $dwcaManager->getCollectionList($catID);
 							foreach($collList as $k => $v){
 								$errMsg = '';
-								if(!$v['guid']){ 
+								if(!$v['guid']){
 									$errMsg = 'Missing GUID source';
 								}
-								elseif($v['url'] && !strpos($v['url'],str_replace('www.', '', $_SERVER["SERVER_NAME"]))){ 
+								elseif($v['url'] && !strpos($v['url'],str_replace('www.', '', $_SERVER["SERVER_NAME"]))){
 									$baseUrl = substr($v['url'],0,strpos($v['url'],'/content')).'/collections/datasets/datapublisher.php';
 									$errMsg = 'Already published on different domain (<a href="'.$baseUrl.'" target="_blank">'.substr($baseUrl,0,strpos($baseUrl,'/',10)).'</a>)';
 								}
@@ -453,21 +452,21 @@ include($SERVER_ROOT. '/header.php');
 					</fieldset>
 				</form>
 			</div>
-			<?php 
+			<?php
 		}
 		if($dwcaArr = $dwcaManager->getDwcaItems()){
 			if($catTitle) echo '<div style="font-weight:bold;font-size:140%;margin:50px 0px 15px 0px;">'.$catTitle.' DwC-Archive Files</div>';
 			?>
 			<table class="styledtable" style="font-family:Arial;font-size:12px;margin:10px;">
 				<tr><th>Code</th><th>Collection Name</th><th>DwC-Archive</th><th>Metadata</th><th>Pub Date</th></tr>
-				<?php 
-				foreach($dwcaArr as $k => $v){ 
+				<?php
+				foreach($dwcaArr as $k => $v){
 					?>
 					<tr>
 						<td><?php echo '<a href="../misc/collprofiles.php?collid='.$v['collid'].'">'.str_replace(' DwC-Archive','',$v['title']).'</a>'; ?></td>
 						<td><?php echo substr($v['description'],24); ?></td>
 						<td class="nowrap">
-							<?php 
+							<?php
 							echo '<a href="'.$v['link'].'">DwC-A ('.$dwcaManager->humanFileSize($v['link']).')</a>';
 							if($IS_ADMIN){
 								?>
@@ -480,17 +479,17 @@ include($SERVER_ROOT. '/header.php');
 							?>
 						</td>
 						<td>
-							<?php 
+							<?php
 							echo '<a href="'.$urlPrefix.'collections/datasets/emlhandler.php?collid='.$v['collid'].'">EML</a>';
 							?>
-						</td> 
+						</td>
 						<td class="nowrap"><?php echo date('Y-m-d', strtotime($v['pubDate'])); ?></td>
 					</tr>
-					<?php 
+					<?php
 				}
 				?>
 			</table>
-			<?php 
+			<?php
 		}
 		else{
 			echo '<div style="margin:10px;font-weight:bold;">There are no publishable collections</div>';
@@ -508,7 +507,7 @@ include($SERVER_ROOT. '/header.php');
 	}
 	?>
 </div>
-<?php 
+<?php
 include($SERVER_ROOT.'/footer.php');
 ?>
 </body>

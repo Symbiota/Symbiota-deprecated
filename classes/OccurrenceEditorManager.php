@@ -566,13 +566,13 @@ class OccurrenceEditorManager {
 		if($this->crowdSourceMode){
 			$sqlWhere .= 'AND (q.reviewstatus = 0) ';
 		}
-		if($this->collId) $sqlWhere .= 'AND (o2.collid = '.$this->collId.') ';
+        if($this->collId) $sqlWhere .= 'AND (o2.collid = '.$this->collId.') ';
 		if($sqlWhere){
             if(strpos($str, "OR") === 0){
-                $sqlWhere = 'WHERE '.substr($sqlWhere,3);
+                $sqlWhere = 'WHERE ('.substr($sqlWhere,3).') ';
             }
             else{
-                $sqlWhere = 'WHERE '.substr($sqlWhere,4);
+            	$sqlWhere = 'WHERE ('.substr($sqlWhere,4).') ';
             }
         }
 

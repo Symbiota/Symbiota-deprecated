@@ -54,7 +54,7 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 	<body>
 		<!-- This is inner text! -->
 		<div id="innertext" style="background-color:white;">
-			<?php 
+			<?php
 			if($collid && $isEditor){
 				if($ACTIVATE_GEOLOCATE_TOOLKIT){
 					//GeoLocate tools
@@ -63,7 +63,7 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 						<fieldset>
 							<legend><b>GeoLocate Community Toolkit</b></legend>
 							<div style="margin:15px;">
-								This module extracts specimen records that have text locality details but lack decimal coordinates.  
+								This module extracts specimen records that have text locality details but lack decimal coordinates.
 								These specimens are packaged and delivered directly into the GeoLocate Community Tools.
 							</div>
 							<table>
@@ -71,34 +71,34 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 									<td>
 										<div style="margin:10px;">
 											<b>Processing Status:</b>
-										</div> 
+										</div>
 									</td>
 									<td>
 										<div style="margin:10px 0px;">
 											<select name="processingstatus" onchange="cogeUpdateCount(this)">
 												<option value="">All Records</option>
-												<?php 
+												<?php
 												$statusArr = $dlManager->getProcessingStatusList($collid);
 												foreach($statusArr as $v){
 													echo '<option value="'.$v.'">'.ucwords($v).'</option>';
 												}
 												?>
 											</select>
-										</div> 
+										</div>
 									</td>
 								</tr>
  								<tr>
 									<td>
 										<div style="margin:10px;">
 											<b>Additional<br/>Filters:</b>
-										</div> 
+										</div>
 									</td>
 									<td>
 										<div style="margin:10px 0px;">
 											<select name="customfield1" style="width:200px">
 												<option value="">Select Field Name</option>
 												<option value="">---------------------------------</option>
-												<?php 
+												<?php
 												foreach($advFieldArr as $k => $v){
 													echo '<option value="'.$k.'" '.($k==$customField1?'SELECTED':'').'>'.$v.'</option>';
 												}
@@ -112,12 +112,12 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 												<option <?php echo ($customType1=='NOTNULL'?'SELECTED':''); ?> value="NOTNULL">IS NOT NULL</option>
 											</select>
 											<input name="customvalue1" type="text" value="<?php echo $customValue1; ?>" style="width:200px;" onchange="cogeUpdateCount(this)" />
-										</div> 
+										</div>
 										<div style="margin:10px 0px;">
 											<select name="customfield2" style="width:200px">
 												<option value="">Select Field Name</option>
 												<option value="">---------------------------------</option>
-												<?php 
+												<?php
 												foreach($advFieldArr as $k => $v){
 													echo '<option value="'.$k.'" '.($k==$customField2?'SELECTED':'').'>'.$v.'</option>';
 												}
@@ -131,7 +131,7 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 												<option <?php echo ($customType2=='NOTNULL'?'SELECTED':''); ?> value="NOTNULL">IS NOT NULL</option>
 											</select>
 											<input name="customvalue2" type="text" value="<?php echo $customValue2; ?>" style="width:200px;" onchange="cogeUpdateCount(this)" />
-										</div> 
+										</div>
 									</td>
 								</tr>
 								<tr>
@@ -139,8 +139,8 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 										<fieldset style="margin:10px;padding:20px;">
 											<legend><b>CoGe Status</b></legend>
 											<div>
-												<b>Match Count:</b> 
-												<?php 
+												<b>Match Count:</b>
+												<?php
 												$dwcaHandler = new DwcArchiverCore();
 												$dwcaHandler->setCollArr($collid);
 												$dwcaHandler->setVerboseMode(0);
@@ -148,7 +148,7 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 												$dwcaHandler->addCondition('decimallongitude','NULL');
 												$dwcaHandler->addCondition('locality','NOTNULL');
 												$dwcaHandler->addCondition('catalognumber','NOTNULL');
-												echo '<span id="countdiv">'.$dwcaHandler->getOccurrenceCnt().'</span> records'; 
+												echo '<span id="countdiv">'.$dwcaHandler->getOccurrenceCnt().'</span> records';
 												?>
 												<span id="recalspan" style="color:orange;display:none;">recalculating... <img src="../../images/workingcircle.gif" style="width:13px;" /></span>
 											</div>
@@ -156,14 +156,14 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 												<b>CoGe Authentication:</b>
 												<span id="coge-status" style="width:150px;color:red;">Disconnected</span>
 												<span style="margin-left:40px"><input type="button" name="cogeCheckStatusButton" value="Check Status" onclick="cogeCheckAuthentication()" /></span>
-												<span style="margin-left:40px"><a href="https://www.museum.tulane.edu/coge/" target="_blank" onclick="startAuthMonitoring()">Login to CoGe</a></span>
+												<span style="margin-left:40px"><a href="http://coge.geo-locate.org/" target="_blank" onclick="startAuthMonitoring()">Login to CoGe</a></span>
 											</div>
 										</fieldset>
 										<fieldset id="coge-communities" style="margin:10px;padding:10px;">
 											<legend style="font-weight:bold">Available Communities</legend>
 											<div style="margin:10px;">
-												To import data into an existing geoLocate community, login to GeoLocate (see above), select the target community, 
-												provide a required identifier, an optional descriptive name, and then click the Push Data to GeoLocate button. 
+												To import data into an existing geoLocate community, login to GeoLocate (see above), select the target community,
+												provide a required identifier, an optional descriptive name, and then click the Push Data to GeoLocate button.
 											</div>
 											<div style="margin:10px;">
 												<div id="coge-commlist" style="margin:15px 0px;padding:15px;border:1px solid orange;">
@@ -186,7 +186,7 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 											<input name="format" type="hidden" value="csv" />
 											<input name="schema" type="hidden" value="coge" />
 											<div style="margin:5px">
-												<input id="builddwcabutton" name="builddwcabutton" type="button" value="Push Data to GeoLocate CoGe" onclick="cogePublishDwca(this.form)" disabled /> 
+												<input id="builddwcabutton" name="builddwcabutton" type="button" value="Push Data to GeoLocate CoGe" onclick="cogePublishDwca(this.form)" disabled />
 												<span id="coge-download" style="display:none;color:orange">Creating data package... <img src="../../images/workingcircle.gif" style="width:13px;" /></span>
 												<span id="coge-push2coge" style="display:none;color:orange">Pushing data to CoGe... <img src="../../images/workingcircle.gif" style="width:13px;" /></span>
 												<span id="coge-importcomplete" style="display:none;color:green">
@@ -197,8 +197,8 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 												<div id="coge-dwcalink"></div>
 												<div id="coge-guid"></div>
 												<div id="coge-importstatus" style="color:orange;display:none;">
-													Data import complete! Go to GeoLocate website and open dataset within selected community, 
-													then click Update Cache button to index and integrate data into community. 
+													Data import complete! Go to GeoLocate website and open dataset within selected community,
+													then click Update Cache button to index and integrate data into community.
 													After processing step completes, remember to finalize the import process by clicking the save button.
 												</div>
 											</div>
@@ -217,10 +217,10 @@ $advFieldArr = array('family'=>'Family','sciname'=>'Scientific Name','identified
 										</div>
 									</td>
 								</tr>
-							</table>							
+							</table>
 						</fieldset>
 					</form>
-					<?php 
+					<?php
 				}
 			}
 			else{

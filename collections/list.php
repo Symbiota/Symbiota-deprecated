@@ -28,11 +28,13 @@ if(isset($_REQUEST['taxa']) || isset($_REQUEST['country']) || isset($_REQUEST['s
 }
 
 if(isset($_REQUEST['db'])){
-    $collArr['db'] = $_REQUEST['db'];
-    $stArrCollJson = json_encode($collArr);
+    if(is_array($_REQUEST['db']) || $_REQUEST['db'] == 'all'){
+        $collArr['db'] = $_REQUEST['db'];
+        $stArrCollJson = json_encode($collArr);
+        if(!isset($_REQUEST['page']) || !$_REQUEST['page']) $resetPageNum = true;
+    }
     if(!isset($_REQUEST['page']) || !$_REQUEST['page']) $resetPageNum = true;
 }
-
 ?>
 
 <html>

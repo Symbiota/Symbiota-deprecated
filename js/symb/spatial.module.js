@@ -2452,7 +2452,7 @@ function prepareTaxaParams(callback){
                                 scinameArr = taxaArr[i]["scinames"];
                                 if(scinameArr.length > 0){
                                     for (s in scinameArr){
-                                        taxaSolrqString += " OR ((sciname:"+scinameArr[s].replace(" ","\\ ")+") OR (sciname:"+scinameArr[s].replace(" ","\\ ")+"\\ *))";
+                                        taxaSolrqString += " OR ((sciname:"+scinameArr[s].replace(/ /g,"\\ ")+") OR (sciname:"+scinameArr[s].replace(/ /g,"\\ ")+"\\ *))";
                                         taxaCqlString += " OR sciname LIKE '"+scinameArr[s]+"%'";
                                     }
                                 }
@@ -2464,7 +2464,7 @@ function prepareTaxaParams(callback){
                                 taxaCqlString += " OR family = '"+i+"'";
                             }
                             if((taxontype == 3 || taxontype == 1) && ((i.substr(i.length - 5) != "aceae") || (i.substr(i.length - 4) != "idae"))){
-                                taxaSolrqString += " OR ((sciname:"+i.replace(" ","\\ ")+") OR (sciname:"+i.replace(" ","\\ ")+"\\ *))";
+                                taxaSolrqString += " OR ((sciname:"+i.replace(/ /g,"\\ ")+") OR (sciname:"+i.replace(/ /g,"\\ ")+"\\ *))";
                                 taxaCqlString += " OR sciname LIKE '"+i+"%'";
                             }
                         }

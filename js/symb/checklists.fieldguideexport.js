@@ -4,15 +4,18 @@ $(document).ready(function() {
         scrolllock: true
     });
 });
-var loadingComplete = true;
-var lazyLoadCnt = 200;
+var pdfDocGenerator = '';
+var lazyLoadCnt = 100;
 var loadIndex = 0;
+var zipIndex = 1;
 var procIndex = 0;
-var lastLoad = 0;
+var processed = 0;
 var dataArr = [];
-var lastImage = 0;
+var imagesExist = false;
+var tempImgArr = [];
 var imgDataArr = [];
 var contentArr = [];
+var titlePageContent = [];
 var leftColContent = [];
 var rightColContent = [];
 var priDescSource = '';
@@ -26,15 +29,20 @@ var pdfFileNum = 0;
 var pdfFileTot = 0;
 var projFileName = '';
 var savedPDFs = 0;
+var t0 = 0;
+var t1 = 0;
 
 function hideWorking(){
     $('#loadingOverlay').popup('hide');
     $("#fieldguideexport").popup("show");
+    //t1 = performance.now();
+    //console.log("Total process took " + ((t1 - t0)/1000) + " seconds.");
 }
 
 function showWorking(){
     $("#fieldguideexport").popup("hide");
     $('#loadingOverlay').popup('show');
+    //t0 = performance.now();
 }
 
 function openFieldGuideExporter(){
@@ -45,19 +53,45 @@ function openFieldGuideExporter(){
 function prepareFieldGuideExport(taxCnt){
     showWorking();
     processSettings();
-    var processed = 0;
-    lastLoad = Math.ceil(taxCnt/lazyLoadCnt);
-    pdfFileTot = Math.ceil(taxCnt/100);
+    zipIndex = document.getElementById("zipindex").value;
+    if(taxCnt > 300){
+        if(zipIndex > 1){
+            taxCnt = taxCnt - ((zipIndex - 1) * 300);
+            loadIndex = ((zipIndex - 1) * 3);
+        }
+        else{
+            taxCnt = 300;
+        }
+    }
+    pdfFileTot = Math.ceil(taxCnt/lazyLoadCnt);
     projFileName = checklistName.replace(/ /g,"_");
-    do{
-        lazyLoadData(loadIndex,function(res){
-            loadingComplete = true;
-            processDataResponse(res);
-        });
+    pdfDocGenerator = '';
+    dataArr = [];
+    tempImgArr = [];
+    imgDataArr = [];
+    contentArr = [];
+    titlePageContent = [];
+    leftColContent = [];
+    rightColContent = [];
+    processed = 0;
+    savedPDFs = 0;
+    zipFile = '';
+    zipFolder = '';
+    callDataLoader(taxCnt);
+}
+
+function callDataLoader(taxCnt){
+    lazyLoadData(loadIndex,function(res){
+        processDataResponse(res);
         processed = processed + lazyLoadCnt;
         loadIndex++;
-    }
-    while(processed < taxCnt);
+        if(processed < taxCnt){
+            callDataLoader(taxCnt);
+        }
+        else{
+            prepImageResponse();
+        }
+    });
 }
 
 function processSettings(){
@@ -81,7 +115,6 @@ function processSettings(){
 
 function processDataResponse(res){
     var tempArr = JSON.parse(res);
-    var imagesExist = false;
     for(i in tempArr) {
         var family = tempArr[i]['family'];
         if(!family) family = "Family Undefined";
@@ -114,20 +147,64 @@ function processDataResponse(res){
             imagesExist = true;
             for(im in tempArr[i]['img']){
                 var imgId = tempArr[i]['img'][im]['id'];
-                dataArr[family][sciname]['images'].push(tempArr[i]['img'][im]);
-                lastImage = imgId;
-                loadImageDataUri(imgId,function(res){
-                    var imgArr = res.split("-||-");
-                    var resId = imgArr[0];
-                    var resData = imgArr[1];
-                    if(resData) imgDataArr[resId] = resData;
-                    if(loadingComplete && (procIndex == lastLoad) && (lastImage == resId)) createPDFGuides();
-                });
+                var imgUrl = tempArr[i]['img'][im]['url'];
+                if(imgId && imgUrl){
+                    dataArr[family][sciname]['images'].push(tempArr[i]['img'][im]);
+                    tempImgArr.push(imgId);
+                }
             }
         }
     }
     procIndex++;
-    if(loadingComplete && (procIndex == lastLoad) && (!imagesExist)) createPDFGuides();
+}
+
+function splitArray(arr,size){
+    var index = 0;
+    var arrLength = arr.length;
+    var tempArr = [];
+    for (index = 0; index < arrLength; index += size) {
+        var subArr = arr.slice(index,(index+size));
+        tempArr.push(subArr);
+    }
+
+    return tempArr;
+}
+
+function prepImageResponse(){
+    if(imagesExist){
+        tempImgArr = splitArray(tempImgArr,200);
+        processImageResponse();
+    }
+    else{
+        createPDFGuides();
+    }
+}
+
+function processImageResponse(){
+    //console.log(tempImgArr.length);
+    var reqArrStr = JSON.stringify(tempImgArr[0]);
+    loadImageDataUri(reqArrStr,function(res){
+        if(res){
+            var tempDataArr = res.split("-****-");
+            for(d in tempDataArr){
+                if(tempDataArr[d]){
+                    var imgArr = tempDataArr[d].toString().split("-||-");
+                    var resId = imgArr[0];
+                    var resData = imgArr[1];
+                    if(resData) imgDataArr[resId] = resData;
+                    //t1 = performance.now();
+                    //console.log(resId+" processed at " + ((t1 - t0)/1000) + " seconds.");
+                }
+            }
+        }
+        tempImgArr.splice(0,1);
+        if(tempImgArr.length > 0){
+            processImageResponse();
+        }
+        else{
+            createPDFGuides();
+        }
+    });
 }
 
 function createPDFGuides(){
@@ -136,6 +213,7 @@ function createPDFGuides(){
     zipFile = new JSZip();
     zipFolder = zipFile.folder("files");
     contentArr = [];
+    createTitlePage(pdfFileNum);
     contentArr.push({
         toc: {
             title: {text: 'INDEX', alignment: 'left', style: 'TOCHeader'}
@@ -151,9 +229,10 @@ function createPDFGuides(){
             scinameKeys.sort();
             for(s in scinameKeys){
                 if(taxonNum == 100){
-                    savePDFFile(contentArr,pdfFileNum);
+                    savePDFFile(contentArr);
                     taxonNum = 0;
                     contentArr = [];
+                    createTitlePage();
                     contentArr.push({
                         toc: {
                             title: {text: 'INDEX', alignment: 'left', style: 'TOCHeader'}
@@ -169,10 +248,51 @@ function createPDFGuides(){
             }
         }
     }
-    savePDFFile(contentArr,pdfFileNum);
+    savePDFFile(contentArr);
+}
+
+function createTitlePage(){
+    if(zipIndex > 1) var fileNumber = ((zipIndex * 3) + pdfFileNum);
+    else var fileNumber = pdfFileNum;
+    var titlePageHead = checklistName+' Vol. '+fileNumber;
+    var titleTextArr = [];
+    titlePageContent = [];
+    titlePageContent.push({text: titlePageHead, style: 'titleHeader'});
+    if(checklistAuthors){
+        titleTextArr.push({text: 'Authors: ', style: 'descheadtext'});
+        titleTextArr.push({text: checklistAuthors, style: 'descstattext'});
+        titleTextArr.push('\n');
+    }
+    if(checklistCitation){
+        titleTextArr.push({text: 'Citation: ', style: 'descheadtext'});
+        titleTextArr.push({text: checklistCitation, style: 'descstattext'});
+        titleTextArr.push('\n');
+    }
+    if(checklistLocality){
+        titleTextArr.push({text: 'Locality: ', style: 'descheadtext'});
+        titleTextArr.push({text: checklistLocality, style: 'descstattext'});
+        titleTextArr.push('\n');
+    }
+    if(checklistAbstract){
+        titleTextArr.push({text: 'Abstract: ', style: 'descheadtext'});
+        titleTextArr.push({text: checklistAbstract, style: 'descstattext'});
+        titleTextArr.push('\n');
+    }
+    if(checklistNotes){
+        titleTextArr.push({text: 'Notes: ', style: 'descheadtext'});
+        titleTextArr.push({text: checklistNotes, style: 'descstattext'});
+        titleTextArr.push('\n');
+    }
+    titlePageContent.push({text: titleTextArr});
+    titlePageContent.push({text: fieldguideDisclaimer, style: 'titleDisclaimer'});
+    contentArr.push({
+        stack: titlePageContent,
+        pageBreak: 'after'
+    });
 }
 
 function createPDFPage(familyName,sciname){
+    //console.log(sciname);
     leftColContent = [];
     rightColContent = [];
     var taxonOrder = dataArr[familyName][sciname]['order'];
@@ -204,8 +324,10 @@ function createPDFPage(familyName,sciname){
                 leftColContent.push({text: descArr[d]['heading']+':', style: 'descheadtext'});
                 leftColContent.push(' ');
             }
-            leftColContent.push({text: descArr[d]['statement'], style: 'descstattext'});
-            leftColContent.push(' ');
+            if(descArr[d]['statement']){
+                leftColContent.push({text: descArr[d]['statement'], style: 'descstattext'});
+                leftColContent.push(' ');
+            }
         }
         if(source){
             leftColContent.push('\n');
@@ -273,7 +395,11 @@ function createPDFPage(familyName,sciname){
     contentArr.push(pageArr);
 }
 
-function savePDFFile(content,fileNum){
+function savePDFFile(content){
+    if(zipIndex > 1) var fileNumber = ((zipIndex * 3) + pdfFileNum);
+    else var fileNumber = pdfFileNum;
+    var filename = projFileName+'-'+fileNumber+'.pdf';
+    pdfFileNum++;
     var docDefinition = {
         content: content,
         footer: function(page){
@@ -283,7 +409,7 @@ function savePDFFile(content,fileNum){
                     columns: [
                         {
                             width: 400,
-                            text: checklistName, alignment: 'right', style: 'checkListName', margin: [20, 10, 20, 10]
+                            text: checklistName+' Vol. '+fileNumber, alignment: 'right', style: 'checkListName', margin: [20, 10, 20, 10]
                         },
                         {
                             width: 200,
@@ -306,6 +432,17 @@ function savePDFFile(content,fileNum){
             ];
         },
         styles: {
+            titleHeader: {
+                fontSize: 18,
+                bold: true,
+                alignment: 'center',
+                margin: [0, 190, 0, 150]
+            },
+            titleDisclaimer: {
+                fontSize: 10,
+                alignment: 'left',
+                margin: [0, 50, 0, 0]
+            },
             ordertext: {
                 fontSize: 11.5,
                 bold: true
@@ -356,15 +493,13 @@ function savePDFFile(content,fileNum){
             }
         }
     };
-    pdfFileNum++;
-    const pdfDocGenerator = pdfMake.createPdf(docDefinition);
+    pdfDocGenerator = pdfMake.createPdf(docDefinition);
     pdfDocGenerator.getBase64((data) => {
-        var filename = projFileName+'-'+fileNum+'.pdf';
         zipFolder.file(filename, data.substr(data.indexOf(',')+1), {base64: true});
         savedPDFs++;
         if(savedPDFs == pdfFileTot){
             zipFile.generateAsync({type:"blob"}).then(function(content) {
-                var zipfilename = projFileName+'.zip';
+                var zipfilename = projFileName+zipIndex+'.zip';
                 saveAs(content,zipfilename);
                 hideWorking();
             });

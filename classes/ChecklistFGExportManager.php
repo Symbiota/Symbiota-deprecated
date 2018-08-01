@@ -94,7 +94,8 @@ class ChecklistFGExportManager {
         $sql = 'SELECT DISTINCT t.tid, ts.family, t.sciname, t.author '.
             'FROM '.$this->linkTable.' AS ctl LEFT JOIN taxstatus AS ts ON ctl.tid = ts.tid '.
             'LEFT JOIN taxa AS t ON ts.tidaccepted = t.TID '.
-            'WHERE (ts.taxauthid = '.$this->thesFilter.') AND '.$this->sqlWhereVar.' ';
+            'WHERE (ts.taxauthid = '.$this->thesFilter.') AND '.$this->sqlWhereVar.' '.
+            'ORDER BY ts.family, t.sciname ';
         if($this->index || $this->recLimit) $sql .= "LIMIT ".$this->index.",".$this->recLimit;
         //echo $sql; exit;
         $rs = $this->conn->query($sql);
@@ -102,57 +103,63 @@ class ChecklistFGExportManager {
             $this->dataArr[$row->tid]["sciname"] = $row->sciname;
             $this->dataArr[$row->tid]["family"] = $row->family;
             $this->dataArr[$row->tid]["author"] = $row->author;
-            $taxaArr[] = $row->tid;
+            if($row->tid) $taxaArr[] = $row->tid;
         }
         $rs->free();
         $this->sqlTaxaStr = implode(',',$taxaArr);
     }
 
     public function primeOrderData(){
-        $sql = 'SELECT te.tid, t.SciName AS taxonOrder '.
-            'FROM taxaenumtree AS te LEFT JOIN taxa AS t ON te.parenttid = t.TID '.
-            'WHERE te.taxauthid = '.$this->thesFilter.' AND t.RankId = 100 AND te.tid IN('.$this->sqlTaxaStr.') ';
-        //echo $sql; exit;
-        $rs = $this->conn->query($sql);
-        while($row = $rs->fetch_object()){
-            $this->dataArr[$row->tid]["order"] = $row->taxonOrder;
+        if($this->sqlTaxaStr){
+            $sql = 'SELECT te.tid, t.SciName AS taxonOrder '.
+                'FROM taxaenumtree AS te LEFT JOIN taxa AS t ON te.parenttid = t.TID '.
+                'WHERE te.taxauthid = '.$this->thesFilter.' AND t.RankId = 100 AND te.tid IN('.$this->sqlTaxaStr.') ';
+            //echo $sql; exit;
+            $rs = $this->conn->query($sql);
+            while($row = $rs->fetch_object()){
+                $this->dataArr[$row->tid]["order"] = $row->taxonOrder;
+            }
+            $rs->free();
         }
-        $rs->free();
     }
 
     public function primeDescData(){
-        $sql = 'SELECT tdb.tid, tdb.caption, tdb.source, tds.tdsid, tds.heading, tds.statement, tds.displayheader '.
-            'FROM taxadescrblock AS tdb LEFT JOIN taxadescrstmts AS tds ON tdb.tdbid = tds.tdbid '.
-            'WHERE tdb.tid IN('.$this->sqlTaxaStr.') '.
-            'ORDER BY tdb.tid,tdb.displaylevel,tds.sortsequence ';
-        //echo $sql; exit;
-        $rs = $this->conn->query($sql);
-        while($row = $rs->fetch_object()){
-            $heading = ($row->displayheader?strip_tags($row->heading):'');
-            $statement = strip_tags($row->statement);
-            $source = strip_tags($row->source);
-            $this->dataArr[$row->tid]["desc"][$row->caption]['source'] = $this->cleanOutStr(htmlspecialchars_decode($source));
-            $this->dataArr[$row->tid]["desc"][$row->caption][$row->tdsid]['heading'] = $this->cleanOutStr(htmlspecialchars_decode($heading));
-            $this->dataArr[$row->tid]["desc"][$row->caption][$row->tdsid]['statement'] = $this->cleanOutStr(htmlspecialchars_decode($statement));
+        if($this->sqlTaxaStr){
+            $sql = 'SELECT tdb.tid, tdb.caption, tdb.source, tds.tdsid, tds.heading, tds.statement, tds.displayheader '.
+                'FROM taxadescrblock AS tdb LEFT JOIN taxadescrstmts AS tds ON tdb.tdbid = tds.tdbid '.
+                'WHERE tdb.tid IN('.$this->sqlTaxaStr.') '.
+                'ORDER BY tdb.tid,tdb.displaylevel,tds.sortsequence ';
+            //echo $sql; exit;
+            $rs = $this->conn->query($sql);
+            while($row = $rs->fetch_object()){
+                $heading = ($row->displayheader?strip_tags($row->heading):'');
+                $statement = strip_tags($row->statement);
+                $source = strip_tags($row->source);
+                $this->dataArr[$row->tid]["desc"][$row->caption]['source'] = $this->cleanOutStr(htmlspecialchars_decode($source));
+                $this->dataArr[$row->tid]["desc"][$row->caption][$row->tdsid]['heading'] = $this->cleanOutStr(htmlspecialchars_decode($heading));
+                $this->dataArr[$row->tid]["desc"][$row->caption][$row->tdsid]['statement'] = $this->cleanOutStr(htmlspecialchars_decode($statement));
+            }
+            $rs->free();
         }
-        $rs->free();
     }
 
     public function primeVernaculars(){
-        $sql = 'SELECT v.tid, v.VernacularName '.
-            'FROM taxavernaculars AS v '.
-            'WHERE v.tid IN('.$this->sqlTaxaStr.') AND (v.SortSequence < 90) AND v.`language` = "'.$this->language.'" '.
-            'ORDER BY v.tid,v.SortSequence';
-        //echo $sql; exit;
-        $result = $this->conn->query($sql);
-        while($row = $result->fetch_object()){
-            $this->dataArr[$row->tid]["vern"][] = strtoupper($row->VernacularName);
+        if($this->sqlTaxaStr){
+            $sql = 'SELECT v.tid, v.VernacularName '.
+                'FROM taxavernaculars AS v '.
+                'WHERE v.tid IN('.$this->sqlTaxaStr.') AND (v.SortSequence < 90) AND v.`language` = "'.$this->language.'" '.
+                'ORDER BY v.tid,v.SortSequence';
+            //echo $sql; exit;
+            $result = $this->conn->query($sql);
+            while($row = $result->fetch_object()){
+                $this->dataArr[$row->tid]["vern"][] = strtoupper($row->VernacularName);
+            }
+            $result->free();
         }
-        $result->free();
     }
 
     public function primeImages(){
-        if($this->maxPhoto > 0){
+        if($this->sqlTaxaStr && ($this->maxPhoto > 0)){
             $photogNameStr = '';
             $photogIdStr = '';
             if($this->photogNameArr){
@@ -192,6 +199,7 @@ class ChecklistFGExportManager {
                     $imgUrl = $row->thumbnailurl;
                     if((!$imgUrl || $imgUrl == 'empty') && $row->url) $imgUrl = $row->url;
                     $this->dataArr[$row->tid]["img"][$row->imgid]['id'] = $row->imgid;
+                    $this->dataArr[$row->tid]["img"][$row->imgid]['url'] = $imgUrl;
                     $this->dataArr[$row->tid]["img"][$row->imgid]['owner'] = $row->owner;
                     $this->dataArr[$row->tid]["img"][$row->imgid]['photographer'] = $this->cleanOutStr(htmlspecialchars_decode($row->photographer));
                 }
@@ -199,7 +207,7 @@ class ChecklistFGExportManager {
             }
             $result->free();
         }
-	}
+    }
 
     public function getImageUrl($imgID){
         $imgUrl = '';
@@ -216,8 +224,17 @@ class ChecklistFGExportManager {
 
     public function getImageDataUrl($url){
         $type = pathinfo($url, PATHINFO_EXTENSION);
-        $data = file_get_contents($url);
-        $base64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
+        $dataType = '';
+        $base64 = '';
+        $data = '';
+        if(strtolower($type) == 'jpg' || strtolower($type) == 'jpeg') $dataType = 'jpg';
+        if(strtolower($type) == 'png') $dataType = 'png';
+        if($dataType){
+            @$data = file_get_contents($url);
+            if($data){
+                $base64 = 'data:image/'.$dataType.';base64,'.base64_encode($data);
+            }
+        }
 
         return $base64;
     }

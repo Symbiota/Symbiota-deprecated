@@ -11,16 +11,16 @@ if($IS_ADMIN || array_key_exists("KeyEditor",$USER_RIGHTS)){
 
 $attrsValues = Array();
 
-$clValue = array_key_exists("cl",$_REQUEST)?$_REQUEST["cl"]:""; 
-$dynClid = array_key_exists("dynclid",$_REQUEST)?$_REQUEST["dynclid"]:0; 
-$taxonValue = array_key_exists("taxon",$_REQUEST)?$_REQUEST["taxon"]:""; 
-$action = array_key_exists("submitbutton",$_REQUEST)?$_REQUEST["submitbutton"]:""; 
-$rv = array_key_exists("rv",$_REQUEST)?$_REQUEST["rv"]:""; 
-$projValue = array_key_exists("proj",$_REQUEST)?$_REQUEST["proj"]:""; 
-$langValue = array_key_exists("lang",$_REQUEST)?$_REQUEST["lang"]:""; 
-$displayMode = array_key_exists("displaymode",$_REQUEST)?$_REQUEST["displaymode"]:""; 
+$clValue = array_key_exists("cl",$_REQUEST)?htmlspecialchars($_REQUEST["cl"],ENT_QUOTES):"";
+$dynClid = array_key_exists("dynclid",$_REQUEST)?htmlspecialchars($_REQUEST["dynclid"],ENT_QUOTES):0;
+$taxonValue = array_key_exists("taxon",$_REQUEST)?htmlspecialchars($_REQUEST["taxon"],ENT_QUOTES):"";
+$action = array_key_exists("submitbutton",$_REQUEST)?htmlspecialchars($_REQUEST["submitbutton"],ENT_QUOTES):"";
+$rv = array_key_exists("rv",$_REQUEST)?htmlspecialchars($_REQUEST["rv"],ENT_QUOTES):"";
+$projValue = array_key_exists("proj",$_REQUEST)?htmlspecialchars($_REQUEST["proj"],ENT_QUOTES):"";
+$langValue = array_key_exists("lang",$_REQUEST)?htmlspecialchars($_REQUEST["lang"],ENT_QUOTES):"";
+$displayMode = array_key_exists("displaymode",$_REQUEST)?htmlspecialchars($_REQUEST["displaymode"],ENT_QUOTES):"";
 if(!$action){
-	$attrsValues = array_key_exists("attr",$_REQUEST)?$_REQUEST["attr"]:"";	//Array of: cid + "-" + cs (ie: 2-3) 
+	$attrsValues = array_key_exists("attr",$_REQUEST)?htmlspecialchars($_REQUEST["attr"],ENT_QUOTES):"";	//Array of: cid + "-" + cs (ie: 2-3)
 }
 
 $dataManager = new KeyDataManager();

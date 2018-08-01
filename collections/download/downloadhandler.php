@@ -21,15 +21,15 @@ $solrManager = new SOLRManager();
 
 $occWhereStr = '';
 
-if($stArrCollJson && $stArrSearchJson){
+if($stArrSearchJson){
 	$stArrSearchJson = str_replace("%apos;","'",$stArrSearchJson);
 	$collStArr = json_decode($stArrCollJson, true);
-	$searchStArr = json_decode($stArrSearchJson, true);
-	$stArr = array_merge($searchStArr,$collStArr);
-	$occurManager->setSearchTermsArr($stArr);
+	$searchArr = json_decode($stArrSearchJson, true);
+	if($collStArr) $searchArr = array_merge($searchArr,$collStArr);
+	$occurManager->setSearchTermsArr($searchArr);
 
     if($SOLR_MODE){
-        $solrManager->setSearchTermsArr($stArr);
+    	$solrManager->setSearchTermsArr($searchArr);
         if($schema == 'checklist'){
             if($taxonFilterCode){
                 $solrArr = $solrManager->getTaxaArr();

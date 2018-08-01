@@ -33,7 +33,7 @@ if($isEditor){
 	<link type="text/css" href="../../css/jquery-ui.css" rel="Stylesheet" />	
 	<script type="text/javascript" src="../../js/jquery.js"></script>
 	<script type="text/javascript" src="../../js/jquery-ui.js"></script>
-	<script src="../../js/symb/taxa.taxonomyloader.js?ver=161227"></script>
+	<script src="../../js/symb/taxa.taxonomyloader.js?ver=180713"></script>
 </head>
 <body>
 <?php

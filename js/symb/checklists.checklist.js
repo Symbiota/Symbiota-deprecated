@@ -147,7 +147,7 @@ function GetXmlHttpObject(){
 	return xmlHttp;
 }
 
-Array.prototype.unique = function() {
+/*Array.prototype.unique = function() {
 	var a = [];
 	var l = this.length;
     for(var i=0; i<l; i++) {
@@ -157,7 +157,7 @@ Array.prototype.unique = function() {
 	a.push(this[i]);
 	}
 	return a;
-};
+};*/
 
 //Game menu 
 var timeout	= 500;

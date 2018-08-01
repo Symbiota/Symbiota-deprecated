@@ -22,8 +22,10 @@ if(isset($_REQUEST['taxa']) || isset($_REQUEST['country']) || isset($_REQUEST['s
 }
 
 if(isset($_REQUEST['db'])){
-    $collArr['db'] = $collManager->getSearchTerm('db');
-    $stArrCollJson = json_encode($collArr);
+    if(is_array($_REQUEST['db']) || $_REQUEST['db'] == 'all'){
+        $collArr['db'] = $collManager->getSearchTerm('db');
+        $stArrCollJson = json_encode($collArr);
+    }
 }
 ?>
 

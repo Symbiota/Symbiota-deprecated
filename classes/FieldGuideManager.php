@@ -17,6 +17,7 @@ class FieldGuideManager {
     private $recLimit = 0;
     private $fgResultTot = 0;
     private $fgResultArr = array();
+    private $fgImageCntArr = array();
     private $fgResOccArr = array();
     private $fgResTidArr = array();
     private $resultArr = array();
@@ -39,6 +40,39 @@ class FieldGuideManager {
             $retArr = json_decode($jsonStr,true);
         }
         return $retArr;
+    }
+
+    public function processCurrentJobs($jobs){
+        global $FIELDGUIDE_API_KEY;
+        foreach($jobs as $job => $jArr){
+            $pArr["job_id"] = $job;
+            $headers = array(
+                'authorization: Token '.$FIELDGUIDE_API_KEY,
+                'Content-Type: application/x-www-form-urlencoded',
+                'Accept: application/json',
+                'Cache-Control: no-cache',
+                'Pragma: no-cache',
+                'Content-Length: '.strlen(http_build_query($pArr))
+            );
+            $ch = curl_init();
+            $options = array(
+                CURLOPT_URL => 'https://fieldguide.net/api2/symbiota/cv_job_status',
+                CURLOPT_POST => true,
+                CURLOPT_HTTPHEADER => $headers,
+                CURLOPT_TIMEOUT => 90,
+                CURLOPT_POSTFIELDS => http_build_query($pArr),
+                CURLOPT_RETURNTRANSFER => true
+            );
+            curl_setopt_array($ch, $options);
+            $result = curl_exec($ch);
+            curl_close($ch);
+            if($result){
+                $statArr = json_decode($result, true);
+                $jobs[$job]['status'] = ($statArr['status']?$statArr['status']:'');
+                $jobs[$job]['progress'] = ($statArr['progress']?$statArr['progress']:'');
+            }
+        }
+        return $jobs;
     }
 
     public function initiateFGBatchProcess(){
@@ -259,6 +293,7 @@ class FieldGuideManager {
         $processDataArr["dateinitiated"] = $startDate;
         $processDataArr["datereceived"] = $dateReceived;
         $processDataArr["images"] = $resArr['images'];
+        if(isset($resArr['image_counts'])) $processDataArr["imagecnts"] = $resArr['image_counts'];
         $jsonFileName = $collid.'-r-'.$token.'.json';
         $fp = fopen($SERVER_ROOT.'/temp/data/fieldguide/'.$jsonFileName, 'w');
         fwrite($fp, json_encode($processDataArr));
@@ -299,6 +334,7 @@ class FieldGuideManager {
         $fileArr = json_decode(file_get_contents($SERVER_ROOT.'/temp/data/fieldguide/'.$resultFilename), true);
         $this->taxon = $fileArr["parenttaxon"];
         $this->fgResultArr = $fileArr["images"];
+        if(isset($fileArr["imagecnts"])) $this->fgImageCntArr = $fileArr["imagecnts"];
         foreach($this->fgResultArr as $imgId => $ifArr){
             if($ifArr["status"] == 'OK'){
                 if($ifArr["result"]){
@@ -351,21 +387,25 @@ class FieldGuideManager {
             'FROM taxa AS t LEFT JOIN taxstatus AS ts ON t.TID = ts.tid '.
             "WHERE t.SciName IN(".$fgIDNamesStr.") AND ts.taxauthid = 1 AND t.TID = ts.tidaccepted ";
         //echo "<div>Sql: ".$sql."</div>";
-        $result = $this->conn->query($sql);
-        while($row = $result->fetch_object()){
-            $sciname = $row->SciName;
-            $tid = $row->TID;
-            $this->fgResTidArr[$sciname][] = $tid;
+        //$result = $this->conn->query($sql);
+        if($result = $this->conn->query($sql)){
+            while($row = $result->fetch_object()){
+                $sciname = $row->SciName;
+                $tid = $row->TID;
+                $this->fgResTidArr[$sciname][] = $tid;
+            }
+            $result->free();
         }
-        $result->free();
     }
 
     public function getFGResultImgArr(){
         $returnArr = Array();
         $fgOccIdStr = implode(",",$this->fgResOccArr);
-        $sql = 'SELECT i.imgid, o.occid, o.sciname, i.url '.
+        $sql = 'SELECT i.imgid, o.occid, o.sciname, IFNULL(ts.family,o.family) AS family, i.url, c.InstitutionCode, c.CollectionCode '.
             'FROM images AS i LEFT JOIN omoccurrences AS o ON i.occid = o.occid '.
-            'WHERE o.occid IN('.$fgOccIdStr.') ';
+            'LEFT JOIN taxstatus AS ts ON o.tidinterpreted = ts.tid '.
+            'LEFT JOIN omcollections AS c ON o.collid = c.CollID '.
+            'WHERE o.occid IN('.$fgOccIdStr.') AND ts.taxauthid = 1 ';
         //echo "<div>Sql: ".$sql."</div>";
         $result = $this->conn->query($sql);
         while($row = $result->fetch_object()){
@@ -380,7 +420,10 @@ class FieldGuideManager {
             }
             if(substr($imgUrl,0,1) == '/') $imgUrl = $localDomain.$imgUrl;
             $returnArr[$imgId]["occid"] = $row->occid;
+            $returnArr[$imgId]["InstitutionCode"] = $row->InstitutionCode;
+            $returnArr[$imgId]["CollectionCode"] = $row->CollectionCode;
             $returnArr[$imgId]["sciname"] = $row->sciname;
+            $returnArr[$imgId]["family"] = $row->family;
             $returnArr[$imgId]["url"] = $imgUrl;
         }
         $result->free();
@@ -394,8 +437,8 @@ class FieldGuideManager {
         $sql = 'SELECT DISTINCT occid '.
             'FROM omoccurrences '.
             "WHERE occid IN(".$occIDStr.") ".
-            'ORDER BY occid '.
-            'LIMIT '.$this->recStart.','.$this->recLimit;
+            'ORDER BY occid ';
+        if($this->recLimit) $sql .= 'LIMIT '.$this->recStart.','.$this->recLimit;
         //echo "<div>Sql: ".$sql."</div>";
         $result = $this->conn->query($sql);
         while($row = $result->fetch_object()){
@@ -413,7 +456,7 @@ class FieldGuideManager {
         $prevOccid = 0;
         //echo json_encode($imgArr);
         foreach($this->fgResultArr as $occId => $oArr){
-            if(($i > $this->recLimit)){
+            if(($this->recLimit && $i > $this->recLimit)){
                 break;
             }
             if(in_array($occId,$limitArr)){
@@ -421,6 +464,7 @@ class FieldGuideManager {
                     if($imgArr[$imgId]){
                         $ifArr = $imgArr[$imgId];
                         $currID = $ifArr["sciname"];
+                        $family = $ifArr["family"];
                         $imgUrl = $ifArr["url"];
                         $fgStatus = $iArr["status"];
                         $fgResults = $iArr["result"];
@@ -428,7 +472,10 @@ class FieldGuideManager {
                             $prevOccid = $occId;
                             $i++;
                         }
+                        $this->resultArr[$occId]["InstitutionCode"] = $ifArr["InstitutionCode"];
+                        $this->resultArr[$occId]["CollectionCode"] = $ifArr["CollectionCode"];
                         $this->resultArr[$occId]["sciname"] = $currID;
+                        $this->resultArr[$occId]["family"] = $family;
                         $this->resultArr[$occId][$imgId]["url"] = $imgUrl;
                         $this->resultArr[$occId][$imgId]["status"] = $fgStatus;
                         $this->resultArr[$occId][$imgId]["results"] = $fgResults;
@@ -514,6 +561,10 @@ class FieldGuideManager {
 
     public function getResults(){
         return $this->resultArr;
+    }
+
+    public function getImageCnts(){
+        return $this->fgImageCntArr;
     }
 
     public function getResultTot(){

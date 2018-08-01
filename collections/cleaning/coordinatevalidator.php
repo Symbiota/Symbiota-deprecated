@@ -1,11 +1,12 @@
 <?php
-include_once('../../config/symbini.php'); 
+include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceCleaner.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 
 $collid = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
 $obsUid = array_key_exists('obsuid',$_REQUEST)?$_REQUEST['obsuid']:'';
 $queryCountry = array_key_exists('q_country',$_REQUEST)?$_REQUEST['q_country']:'';
+$ranking = array_key_exists('ranking',$_REQUEST)?$_REQUEST['ranking']:'';
 $action = array_key_exists('action',$_POST)?$_POST['action']:'';
 
 if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../collections/cleaning/coordinatevalidator.php?'.$_SERVER['QUERY_STRING']);
@@ -20,7 +21,7 @@ if($collid) $cleanManager->setCollId($collid);
 $collMap = $cleanManager->getCollMap();
 
 $statusStr = '';
-$isEditor = 0; 
+$isEditor = 0;
 if($IS_ADMIN || (array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collid,$USER_RIGHTS["CollAdmin"]))
 	|| ($collMap['colltype'] == 'General Observations')){
 	$isEditor = 1;
@@ -47,16 +48,16 @@ if($collMap['colltype'] == 'General Observations' && $obsUid !== 0){
 	</style>
 </head>
 <body>
-	<?php 	
+	<?php
 	$displayLeftMenu = false;
 	include($SERVER_ROOT.'/header.php');
 	?>
 	<div class='navpath'>
-		<a href="../../index.php">Home</a> &gt;&gt; 
-		<a href="../misc/collprofiles.php?collid=<?php echo $collid; ?>&emode=1">Collection Management</a> &gt;&gt; 
-		<a href="index.php?collid=<?php echo $collid; ?>">Cleaning Tools Index</a> &gt;&gt; 
-		<b>Coordinate Political Units Validator</b> 
-		<?php 
+		<a href="../../index.php">Home</a> &gt;&gt;
+		<a href="../misc/collprofiles.php?collid=<?php echo $collid; ?>&emode=1">Collection Management</a> &gt;&gt;
+		<a href="index.php?collid=<?php echo $collid; ?>">Cleaning Tools Index</a> &gt;&gt;
+		<b>Coordinate Political Units Validator</b>
+		<?php
 		//echo '&gt;&gt; <a href="coordinatevalidator.php?collid='.$collid.'"><b>Coordinate Validator Main Menu</b></a>';
 		?>
 	</div>
@@ -71,8 +72,8 @@ if($collMap['colltype'] == 'General Observations' && $obsUid !== 0){
 				<?php echo $statusStr; ?>
 			</div>
 			<hr/>
-			<?php 
-		} 
+			<?php
+		}
 		echo '<h2>'.$collMap['collectionname'].' ('.$collMap['code'].')</h2>';
 		if($isEditor){
 			?>
@@ -80,20 +81,23 @@ if($collMap['colltype'] == 'General Observations' && $obsUid !== 0){
 				This tool will loop through all unvalidated georeferenced specimens and verify that the coordinates actually fall within the defined political units.
 			</div>
 			<div style="margin:15px">
-				<?php 
+				<?php
 				if($action){
 					echo '<fieldset>';
 					echo '<legend><b>Action Panel</b></legend>';
 					if($action == 'Validate Coordinates'){
 						$cleanManager->verifyCoordAgainstPolitical($queryCountry);
 					}
+					elseif($action == 'displayranklist'){
+
+					}
 					echo '</fieldset>';
 				}
 				?>
 			</div>
-			<div style="margin:10px 0px">
+			<div style="margin:10px">
 				<div style="font-weight:bold">Ranking Statistics</div>
-				<?php 
+				<?php
 				$coordRankingArr = $cleanManager->getRankingStats('coordinate');
 				$rankArr = current($coordRankingArr);
 				echo '<table class="styledtable">';
@@ -110,9 +114,9 @@ if($collMap['colltype'] == 'General Observations' && $obsUid !== 0){
 				echo '</table>';
 				?>
 			</div>
-			<div style="margin:10px 0px">
+			<div style="margin:10px">
 				<div style="font-weight:bold">Non-verified by State/Province</div>
-				<?php 
+				<?php
 				$countryArr = $cleanManager->getUnverifiedByCountry();
 				echo '<table class="styledtable">';
 				echo '<tr><th>Country</th><th>Count</th><th>Action</th></tr>';
@@ -123,19 +127,60 @@ if($collMap['colltype'] == 'General Observations' && $obsUid !== 0){
 					echo '<td>';
 					?>
 					<form action="coordinatevalidator.php" method="post" style="margin:10px">
-						<input name="collid" type="hidden" value="<?php echo $collid; ?>" /> 
-						<input name="obsuid" type="hidden" value="<?php echo $obsUid; ?>" /> 
-						<input name="q_country" type="hidden" value="<?php echo $country; ?>" /> 
+						<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
+						<input name="obsuid" type="hidden" value="<?php echo $obsUid; ?>" />
+						<input name="q_country" type="hidden" value="<?php echo $country; ?>" />
 						<input name="action" type="submit" value="Validate Coordinates" />
 					</form>
-					<?php 
+					<?php
 					echo '</td>';
 					echo '</tr>';
 				}
 				echo '</table>';
 				?>
 			</div>
- 			<?php 
+			<div style="margin:10px">
+				<fieldset style="width:400px;padding:20px">
+					<legend><b>Rank Listing</b></legend>
+					<div>
+						<form action="coordinatevalidator.php" method="post">
+							Select Rank:
+							<select name="ranking" onchange="this.form.submit()">
+								<option value="">Select Rank</option>
+								<option value="">----------------</option>
+								<?php
+								$rankList = $cleanManager->getRankList();
+								foreach($rankList as $rankId){
+									echo '<option value="'.$rankId.'" '.($ranking==$rankId?'SELECTED':'').'>'.$rankId.'</option>';
+								}
+								?>
+							</select>
+							<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
+							<input name="action" type="hidden" value="displayranklist" />
+						</form>
+					</div>
+					<div>
+						<?php
+						$occurList = array();
+						if($action == 'displayranklist'){
+							$occurList = $cleanManager->getOccurrenceRankingArr('coordinate', $ranking);
+						}
+						if($occurList){
+							foreach($occurList as $occid => $inArr){
+								echo '<div>';
+								echo '<a href="../editor/occurrenceeditor.php?occid='.$occid.'" target="_blank">'.$occid.'</a>';
+								echo '- checked by '.$inArr['username'].' on '.$inArr['ts'];
+								echo '</div>';
+							}
+						}
+						else{
+							echo '<div style="margin:30xp;font-weight:bold;font-size:150%">Nothing to be displayed</div>';
+						}
+						?>
+					</div>
+				</fieldset>
+			</div>
+ 			<?php
 		}
 		else{
 			echo '<h2>You are not authorized to access this page</h2>';

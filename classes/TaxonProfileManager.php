@@ -12,6 +12,8 @@ class TaxonProfileManager {
 	private $author;
 	private $parentTid;
 	private $family;
+    private $taxonNotes;
+    private $taxonSources;
     private $ambSyn = false;
     private $acceptedName = false;
 	private $familyVern;
@@ -53,7 +55,7 @@ class TaxonProfileManager {
 
     public function setTaxon($t,$isFinal=0){
  		$t = trim($t);
-        $sql = 'SELECT t.TID, ts.family, t.SciName, t.Author, t.RankId, ts.ParentTID, t.SecurityStatus, ts.TidAccepted, t2.SciName AS synName '.
+        $sql = 'SELECT t.TID, ts.family, t.SciName, t.Author, t.RankId, t.Source, t.Notes, ts.ParentTID, t.SecurityStatus, ts.TidAccepted, t2.SciName AS synName '.
             'FROM taxstatus AS ts INNER JOIN taxa AS t ON ts.tid = t.TID '.
             'LEFT JOIN taxa AS t2 ON ts.TidAccepted = t2.TID '.
             'WHERE (ts.taxauthid = '.($this->taxAuthId?$this->taxAuthId:'1').') ';
@@ -78,6 +80,8 @@ class TaxonProfileManager {
                 $this->family = $row->family;
                 $this->author = $row->Author;
                 $this->rankId = $row->RankId;
+                $this->taxonNotes = $row->Notes;
+                $this->taxonSources = $row->Source;
                 $this->parentTid = $row->ParentTID;
                 $this->securityStatus = $row->SecurityStatus;
                 if($row->synName != $row->SciName) {
@@ -100,6 +104,8 @@ class TaxonProfileManager {
                 $this->family = $row->family;
                 $this->author = $row->Author;
                 $this->rankId = $row->RankId;
+                $this->taxonNotes = $row->Notes;
+                $this->taxonSources = $row->Source;
                 $this->parentTid = $row->ParentTID;
                 $this->securityStatus = $row->SecurityStatus;
 
@@ -716,6 +722,14 @@ class TaxonProfileManager {
  	public function getRankId(){
  		return $this->rankId;
  	}
+
+    public function getTaxonNotes(){
+        return $this->taxonNotes;
+    }
+
+    public function getTaxonSources(){
+        return $this->taxonSources;
+    }
 
  	public function getParentTid(){
  		return $this->parentTid;
