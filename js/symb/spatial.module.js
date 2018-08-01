@@ -2566,7 +2566,8 @@ function primeSymbologyData(features){
         else{
             family = 'undefined';
         }
-        var namestring = (sciname?sciname:'')+(tidinterpreted?tidinterpreted:'');
+        //var namestring = (sciname?sciname:'')+(tidinterpreted?tidinterpreted:'');
+        var namestring = (sciname?sciname:'');
         namestring = namestring.replace(" ","");
         namestring = namestring.toLowerCase();
         namestring = namestring.replace(/[^A-Za-z0-9 ]/g,'');
