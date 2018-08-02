@@ -486,6 +486,24 @@ body{
 	width:15px;
 }
 
+#fieldNotesDiv{
+	float: left;
+	margin-top:2px;
+}
+
+#fieldNotesDiv input{
+	width: 550px;
+}
+
+#fieldNotesDiv span{
+	margin-left: 5px;
+	cursor: pointer;
+}
+
+#fieldNotesDiv img{
+	width:15px;
+}
+
 #dynPropToggleSpan{
 	display:none;
 }
