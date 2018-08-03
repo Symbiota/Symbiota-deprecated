@@ -621,6 +621,11 @@ body{
 	width: 95%;
 }
 
+#fieldNotesDiv textarea{
+	width: 95%;
+	resize: vertical;
+}
+
 #fieldNotesDiv span{
 	margin-left: 5px;
 	cursor: pointer;

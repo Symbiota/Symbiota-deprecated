@@ -409,21 +409,21 @@ else{
     <?php
     if($crowdSourceMode == 1){
 		?>
-		<link href="includes/config/occureditorcrowdsource.css?ver=1803" type="text/css" rel="stylesheet" id="editorCssLink" />
+		<link href="includes/config/occureditorcrowdsource.css?ver=1805" type="text/css" rel="stylesheet" id="editorCssLink" />
 		<?php
     }
     else{
 		?>
-		<link href="../../css/occureditor.css?ver=170602" type="text/css" rel="stylesheet" id="editorCssLink" />
+		<link href="../../css/occureditor.css?ver=170604" type="text/css" rel="stylesheet" id="editorCssLink" />
 		<?php
 		if(isset($CSSARR)){
 			foreach($CSSARR as $cssVal){
-				echo '<link href="includes/config/'.$cssVal.'?ver=170602" type="text/css" rel="stylesheet" id="editorCssLink" />';
+				echo '<link href="includes/config/'.$cssVal.'?ver=170603" type="text/css" rel="stylesheet" id="editorCssLink" />';
 			}
 		}
 		if(isset($JSARR)){
 			foreach($JSARR as $jsVal){
-				echo '<script src="includes/config/'.$jsVal.'?ver=170602" type="text/javascript"></script>';
+				echo '<script src="includes/config/'.$jsVal.'?ver=170603" type="text/javascript"></script>';
 			}
 		}
 	}
@@ -1159,7 +1159,7 @@ else{
                                                 <?php echo (defined('FIELDNOTESLABEL')?FIELDNOTESLABEL:'Field Notes'); ?>
                                                 <a href="#" onclick="return dwcDoc('fieldNotes')"><img class="docimg" src="../../images/qmark.png" style="width:9px;margin-bottom:2px" /></a>
                                                 <br/>
-                                                <input type="text" name="fieldnotes" tabindex="88.5" value="<?php echo array_key_exists('fieldnotes',$occArr)?$occArr['fieldnotes']:''; ?>" onchange="fieldChanged('fieldnotes');" title="Field Notes" />
+                                                <textarea name="fieldnotes" tabindex="88.5" onchange="fieldChanged('fieldnotes');" title="Field Notes"><?php echo array_key_exists('fieldnotes',$occArr)?$occArr['fieldnotes']:''; ?></textarea>
                                                 <span id="dynPropToggleSpan" onclick="toggle('dynamicPropertiesDiv');">
 													<img src="../../images/editplus.png" />
 												</span>
