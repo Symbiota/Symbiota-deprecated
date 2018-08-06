@@ -23,7 +23,7 @@ $installationKey = '';
 $datasetKey = '';
 $endpointKey = '';
 $idigbioKey = '';
-if($collId && isset($GBIF_USERNAME) && isset($GBIF_PASSWORD) && isset($GBIF_ORG_KEY)){
+if($collId && isset($GBIF_USERNAME) && $GBIF_USERNAME && isset($GBIF_PASSWORD) && $GBIF_PASSWORD && isset($GBIF_ORG_KEY) && $GBIF_ORG_KEY){
     $collPubArr = $collManager->getCollPubArr($collId);
     if($collPubArr[$collId]['publishToGbif']){
         $publishGBIF = true;
