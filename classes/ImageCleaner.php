@@ -170,6 +170,17 @@ class ImageCleaner extends Manager{
 			$imgUrl = trim($recUrlOrig);
 			$webIsEmpty = true;
 		}
+		$webFullUrl = '';
+		$lgFullUrl = '';
+		//If a TROPICOS image, harvest web image from their website
+		if(strpos($recUrlOrig, 'tropicos.org/ImageDownload.aspx') && (!$recUrlWeb || $recUrlWeb == 'empty')){
+			$tropUrl = $this->getTropicosWebUrl($recUrlOrig);
+			if($tropUrl){
+				$imgUrl = $tropUrl;
+				$webFullUrl = $tropUrl;
+				$webIsEmpty = false;
+			}
+		}
 		if($this->imgManager->parseUrl($imgUrl)){
 			//Create thumbnail
 			$imgTnUrl = '';
@@ -189,8 +200,6 @@ class ImageCleaner extends Manager{
 			}
 
 			if($status && $imgTnUrl && $this->imgManager->uriExists($imgTnUrl)){
-				$webFullUrl = '';
-				$lgFullUrl = '';
 				//If web image is too large, transfer to large image and create new web image
 				list($sourceWidth, $sourceHeight) = getimagesize(str_replace(' ', '%20', $this->imgManager->getSourcePath()));
 				if(!$webIsEmpty && !$recUrlOrig){
@@ -249,6 +258,28 @@ class ImageCleaner extends Manager{
 		$sqlWeb = 'UPDATE images SET url = "empty" '.
 			'WHERE (url = "") OR (url LIKE "processing %" AND url != "processing '.date('Y-m-d').'") ';
 		$this->conn->query($sqlWeb);
+	}
+
+	private function getTropicosWebUrl($url){
+		//Extract image id
+		$imgUrl = '';
+		if(preg_match('/imageid=(\d+)$/', $url, $m)){
+			$imageID = $m[1];
+			//Get web url
+			$imgDisplayUrl = 'http://www.tropicos.org/Image/'.$imageID;
+			$htmlSource = file_get_contents($imgDisplayUrl);
+			$doc = new DOMDocument();
+			libxml_use_internal_errors(true);
+			$doc->loadHTML($htmlSource);
+			foreach($doc->getElementsByTagName('img') as $link) {
+				if($link->getAttribute('id')){
+					if($link->getAttribute('id') == 'ctl00_MainContentPlaceHolder_imageDetailsControl_ImageHolder'){
+						$imgUrl = $link->getAttribute('src');
+					}
+				}
+			}
+		}
+		return $imgUrl;
 	}
 
 	//Test and refresh image thumbnails for remote images

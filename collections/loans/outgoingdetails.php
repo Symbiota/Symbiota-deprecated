@@ -344,7 +344,7 @@ $specList = $loanManager->getSpecList($loanId);
 										<input type="checkbox" name="makecurrent" value="1" /> Make this the current determination
 									</div>
 									<div style='margin:3px;'>
-										<input type="checkbox" name="printqueue" value="1" /> Add to Annotation Queue
+										<input type="checkbox" name="printqueue" value="1" /> Add to Annotation Print Queue
 									</div>
 									<div style='margin:15px;'>
 										<div style="float:left;">
