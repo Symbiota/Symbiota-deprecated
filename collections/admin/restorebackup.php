@@ -17,7 +17,7 @@ if($action && !preg_match('/^[a-zA-Z0-9\s_]+$/',$action)) $action = '';
 $duManager = new SpecUploadDwca();
 $duManager->setCollId($collid);
 $duManager->setUploadType(10);
-$duManager->setBaseFolderName($ulPath);
+$duManager->setTargetPath($ulPath);
 $duManager->setIncludeIdentificationHistory(true);
 $duManager->setIncludeImages(true);
 $duManager->setMatchCatalogNumber(false);

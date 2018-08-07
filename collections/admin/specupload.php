@@ -70,7 +70,7 @@ elseif($uploadType == $SKELETAL){
 }
 elseif($uploadType == $DWCAUPLOAD || $uploadType == $IPTUPLOAD){
 	$duManager = new SpecUploadDwca();
-	$duManager->setBaseFolderName($ulPath);
+	$duManager->setTargetPath($ulPath);
 	$duManager->setIncludeIdentificationHistory($importIdent);
 	$duManager->setIncludeImages($importImage);
 	for($i=0;$i<3;$i++){

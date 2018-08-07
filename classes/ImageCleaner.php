@@ -174,12 +174,14 @@ class ImageCleaner extends Manager{
 		$lgFullUrl = '';
 		//If a TROPICOS image, harvest web image from their website
 		if(strpos($recUrlOrig, 'tropicos.org/ImageDownload.aspx') && (!$recUrlWeb || $recUrlWeb == 'empty')){
+			/*
 			$tropUrl = $this->getTropicosWebUrl($recUrlOrig);
 			if($tropUrl){
 				$imgUrl = $tropUrl;
 				$webFullUrl = $tropUrl;
 				$webIsEmpty = false;
 			}
+			*/
 		}
 		if($this->imgManager->parseUrl($imgUrl)){
 			//Create thumbnail
@@ -235,7 +237,7 @@ class ImageCleaner extends Manager{
 					}
 				}
 				$sql .= "WHERE ti.imgid = ".$imgId;
-				//echo $sql;
+				//echo $sql;getTropicosWebUrl
 				if(!$this->conn->query($sql)){
 					$this->errorMessage = 'ERROR: thumbnail created but failed to update database: '.$this->conn->error;
 					$this->logOrEcho($this->errorMessage,1);
@@ -265,16 +267,46 @@ class ImageCleaner extends Manager{
 		$imgUrl = '';
 		if(preg_match('/imageid=(\d+)$/', $url, $m)){
 			$imageID = $m[1];
-			//Get web url
 			$imgDisplayUrl = 'http://www.tropicos.org/Image/'.$imageID;
-			$htmlSource = file_get_contents($imgDisplayUrl);
-			$doc = new DOMDocument();
-			libxml_use_internal_errors(true);
-			$doc->loadHTML($htmlSource);
-			foreach($doc->getElementsByTagName('img') as $link) {
-				if($link->getAttribute('id')){
-					if($link->getAttribute('id') == 'ctl00_MainContentPlaceHolder_imageDetailsControl_ImageHolder'){
-						$imgUrl = $link->getAttribute('src');
+			$ip = $_SERVER['HTTP_HOST'];
+
+			$header[0]  = "Accept: text/xml,application/xml,application/xhtml+xml,";
+			$header[0] .= "text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5";
+			$header[] = "Cache-Control: max-age=0";
+			$header[] = "Connection: keep-alive";
+			$header[] = "Keep-Alive: 300";
+			$header[] = "Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7";
+			$header[] = "Accept-Language: en-us,en;q=0.5";
+			$header[] = "Pragma: "; // browsers = blank
+			$header[] = "X_FORWARDED_FOR: " . $ip;
+			$header[] = "REMOTE_ADDR: " . $ip;
+
+			$ch = curl_init();
+			curl_setopt($ch,CURLOPT_URL,$imgDisplayUrl);
+			curl_setopt($ch,CURLOPT_RETURNTRANSFER,true);
+			curl_setopt($ch,CURLOPT_COOKIEFILE,'cookies.txt');
+			curl_setopt($ch, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']);
+			curl_setopt($ch,CURLOPT_COOKIEJAR,'cookies.txt');
+			curl_setopt($ch, CURLOPT_REFERER, $_SERVER['HTTP_HOST']);
+			curl_setopt($ch,CURLOPT_HTTPHEADER,$header);
+			curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+			curl_setopt($ch, CURLOPT_VERBOSE, 1);
+			$htmlSource = curl_exec($ch);
+
+			curl_close($ch);
+
+			//$htmlSource = file_get_contents($imgDisplayUrl);
+			//echo 'source: '.$htmlSource; exit;
+
+			if($htmlSource){
+				$doc = new DOMDocument();
+				libxml_use_internal_errors(true);
+				$doc->loadHTML($htmlSource);
+				foreach($doc->getElementsByTagName('img') as $link) {
+					if($link->getAttribute('id')){
+						if($link->getAttribute('id') == 'ctl00_MainContentPlaceHolder_imageDetailsControl_ImageHolder'){
+							$imgUrl = $link->getAttribute('src');
+						}
 					}
 				}
 			}
