@@ -245,7 +245,8 @@ include($SERVER_ROOT. '/header.php');
 	<?php
 	if($collId){
 		if($action == 'Create/Refresh Darwin Core Archive'){
-			echo '<ul>';
+            $dwcaManager->setCollID($collId);
+		    echo '<ul>';
 			$dwcaManager->setVerboseMode(3);
 			$dwcaManager->setLimitToGuids(true);
 			$dwcaManager->createDwcArchive();
