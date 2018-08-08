@@ -75,8 +75,7 @@ if($isEditor){
 			$statusStr = "Profile update failed!";
 		}
 		$person = $pHandler->getPerson();
-		if($person->getIsTaxonomyEditor()) $tabIndex = 3;
-		else $tabIndex = 2;
+		$tabIndex = 2;
 	}
 	elseif($action == "Change Password"){
 		$newPwd = $_REQUEST["newpwd"];
@@ -95,8 +94,7 @@ if($isEditor){
 			$statusStr = "Password update failed! Are you sure you typed the old password correctly?";
 		}
 		$person = $pHandler->getPerson();
-		if($person->getIsTaxonomyEditor()) $tabIndex = 3;
-		else $tabIndex = 2;
+		$tabIndex = 2;
 	}
 	elseif($action == "Change Login"){
 		$pwd = '';
@@ -105,14 +103,12 @@ if($isEditor){
 			$statusStr = $pHandler->getErrorStr();
 		}
 		$person = $pHandler->getPerson();
-		if($person->getIsTaxonomyEditor()) $tabIndex = 3;
-		else $tabIndex = 2;
+		$tabIndex = 2;
 	}
     elseif($action == "Clear Tokens"){
         $statusStr = $pHandler->clearAccessTokens();
         $person = $pHandler->getPerson();
-        if($person->getIsTaxonomyEditor()) $tabIndex = 3;
-        else $tabIndex = 2;
+        $tabIndex = 2;
     }
 	elseif($action == "Delete Profile"){
 		if($pHandler->deleteProfile($userId, $isSelf)){
@@ -125,14 +121,12 @@ if($isEditor){
 	elseif($action == "delusertaxonomy"){
 		$statusStr = $pHandler->deleteUserTaxonomy($_GET['utid']);
 		$person = $pHandler->getPerson();
-		if($person->getIsTaxonomyEditor()) $tabIndex = 3;
-		else $tabIndex = 2;
+		$tabIndex = 2;
 	}
 	elseif($action == "Add Taxonomic Relationship"){
 		$statusStr = $pHandler->addUserTaxonomy($_POST['taxon'], $_POST['editorstatus'], $_POST['geographicscope'], $_POST['notes']);
 		$person = $pHandler->getPerson();
-		if($person->getIsTaxonomyEditor()) $tabIndex = 3;
-		else $tabIndex = 2;
+		$tabIndex = 2;
 	}
 
 	if(!$person) $person = $pHandler->getPerson();

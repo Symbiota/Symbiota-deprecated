@@ -236,7 +236,7 @@ class KeyDataManager extends Manager{
 				"ORDER BY charnames.Heading, characters.SortSequence, cs.SortSequence";*/
 			$sqlChar = "SELECT DISTINCT cs.CID, cs.CS, cs.CharStateName, cs.Description AS csdescr, chars.CharName,".
 				"chars.description AS chardescr, chars.hid, chead.headingname, chars.helpurl, Count(cs.CS) AS Ct, chars.DifficultyRank,".
-				(Manager::checkFieldExists('kmcharacters','display')?'chars.display, ':'')."chars.defaultlang ".
+				($this->checkFieldExists('kmcharacters','display')?'chars.display, ':'')."chars.defaultlang ".
                 "FROM ((((".$this->sql.") AS tList INNER JOIN kmdescr d ON tList.TID = d.TID)".
 				"INNER JOIN kmcs cs ON (d.CS = cs.CS)	AND (d.CID = cs.CID)) INNER JOIN kmcharacters chars ON chars.cid = cs.CID) ".
 				"INNER JOIN kmcharheading chead ON chars.hid = chead.hid ".

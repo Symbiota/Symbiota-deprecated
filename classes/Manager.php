@@ -1,6 +1,6 @@
-<?php 
+<?php
 /**
- *  Base class for managers.  Supplies $conn for connection, $id for primary key, and 
+ *  Base class for managers.  Supplies $conn for connection, $id for primary key, and
  *  $errorMessage/getErrorMessage(), along with supporting clean methods cleanOutStr()
  *  cleanInStr() and cleanInArray();
  */
@@ -15,7 +15,7 @@ class Manager  {
 
 	protected $logFH;
 	protected $verboseMode = 0;
-	
+
     public function __construct($id=null,$conType='readonly'){
  		$this->conn = MySQLiConnectionFactory::getCon($conType);
  		if($id != null || is_numeric($id)){
@@ -40,7 +40,7 @@ class Manager  {
 			if($this->verboseMode == 3 || $this->verboseMode == 1){
 				if($this->logFH){
 					fwrite($this->logFH,$str);
-				} 
+				}
 			}
 			if($this->verboseMode == 3 || $this->verboseMode == 2){
 				echo '<'.$tag.' style="'.($indexLevel?'margin-left:'.($indexLevel*15).'px':'').'">'.$str.'</'.$tag.'>';
@@ -52,12 +52,10 @@ class Manager  {
 
     public function checkFieldExists($table, $field){
         $exists = false;
-        $this->__construct(null,'readonly');
-        $sql = 'SELECT '.$field.' FROM '.$table.' LIMIT 1 ';
+        $sql = 'SHOW COLUMNS FROM '.$table.' WHERE field = "'.$field.'"';
         //echo "<div>SQL: ".$sql."</div>";
-        if($result = $this->conn->query($sql)){
-            $exists = true;
-        }
+        $result = $this->conn->query($sql);
+        if($result->num_rows) $exists = true;
         return $exists;
     }
 
@@ -69,14 +67,14 @@ class Manager  {
 		return $this->verboseMode;
 	}
 
-	public function getErrorMessage() { 
+	public function getErrorMessage() {
 		return $this->errorMessage;
 	}
 
    public function getWarningArr(){
 		return $this->warningArr;
 	}
- 
+
 	protected function cleanOutStr($str){
 		$newStr = str_replace('"',"&quot;",$str);
 		$newStr = str_replace("'","&apos;",$newStr);
@@ -108,7 +106,7 @@ class Manager  {
 			$search = array(chr(145),chr(146),chr(147),chr(148),chr(149),chr(150),chr(151));
 			$replace = array("'","'",'"','"','*','-','-');
 			$inStr= str_replace($search, $replace, $inStr);
-			//Get rid of UTF-8 curly smart quotes and dashes 
+			//Get rid of UTF-8 curly smart quotes and dashes
 			$badwordchars=array("\xe2\x80\x98", // left single quote
 								"\xe2\x80\x99", // right single quote
 								"\xe2\x80\x9c", // left double quote
@@ -118,7 +116,7 @@ class Manager  {
 			);
 			$fixedwordchars=array("'", "'", '"', '"', '-', '...');
 			$inStr = str_replace($badwordchars, $fixedwordchars, $inStr);
-			
+
 			if($inStr){
 				if(strtolower($GLOBALS['CHARSET']) == "utf-8" || strtolower($GLOBALS['CHARSET']) == "utf8"){
 					if(mb_detect_encoding($inStr,'UTF-8,ISO-8859-1',true) == "ISO-8859-1"){
@@ -138,12 +136,12 @@ class Manager  {
 		}
 		return $retStr;
 	}
-	
-   /** To enable mysqli_stmt->bind_param using call_user_func_array($array) 
-     * allow $array to be converted to array of by references 
-     * if php version requires it. 
+
+   /** To enable mysqli_stmt->bind_param using call_user_func_array($array)
+     * allow $array to be converted to array of by references
+     * if php version requires it.
      */
-   public static function correctReferences($array) { 
+   public static function correctReferences($array) {
     if (strnatcmp(phpversion(),'5.3') >= 0) {
        $byrefs = array();
        foreach($array as $key => $value)

@@ -4,7 +4,7 @@ include_once($SERVER_ROOT.'/classes/Manager.php');
 include_once("Person.php");
 include_once("Encryption.php");
 
-class ProfileManager{
+class ProfileManager extends Manager{
 
 	private $rememberMe = false;
 	private $uid;
@@ -12,22 +12,20 @@ class ProfileManager{
     private $displayName;
     private $token;
     private $authSql;
-	private $conn;
 	private $errorStr;
 
 	public function __construct(){
-		$this->conn = MySQLiConnectionFactory::getCon("readonly");
+		parent::__construct();
 	}
 
  	public function __destruct(){
-		if(!($this->conn === null)) $this->conn->close();
-		$this->conn = null;
+ 		parent::__destruct();
 	}
-	
+
 	private function getConnection($type){
 		return MySQLiConnectionFactory::getCon($type);
 	}
-	
+
 	public function reset(){
 		$domainName = $_SERVER['SERVER_NAME'];
 		if(!$domainName) $domainName = $_SERVER['HTTP_HOST'];
@@ -37,7 +35,7 @@ class ProfileManager{
         unset($_SESSION['userrights']);
         unset($_SESSION['userparams']);
 	}
-	
+
 	public function authenticate($pwdStr = ''){
 		$authStatus = false;
         unset($_SESSION['userrights']);
@@ -56,7 +54,7 @@ class ProfileManager{
 				$this->displayName = $row->firstname;
 				if(strlen($this->displayName) > 15) $this->displayName = $this->userName;
 				if(strlen($this->displayName) > 15) $this->displayName = substr($this->displayName,0,10).'...';
-				
+
 				$authStatus = true;
 				$this->reset();
 				$this->setUserRights();
@@ -90,10 +88,9 @@ class ProfileManager{
             setcookie("SymbiotaCrumb", Encryption::encrypt(json_encode($tokenArr)), $cookieExpire, ($GLOBALS["CLIENT_ROOT"] ? $GLOBALS["CLIENT_ROOT"] : '/'), $domainName, false, true);
         }
     }
-	
+
 	public function getPerson(){
-        $manager = new Manager();
-	    $sqlStr = "SELECT u.uid, u.firstname, ".($manager->checkFieldExists('users','middleinitial')?'u.middleinitial, ':'')."u.lastname, u.title, u.institution, u.department, ".
+	    $sqlStr = "SELECT u.uid, u.firstname, ".($this->checkFieldExists('users','middleinitial')?'u.middleinitial, ':'')."u.lastname, u.title, u.institution, u.department, ".
 			"u.address, u.city, u.state, u.zip, u.country, u.phone, u.email, ".
 			"u.url, u.biography, u.ispublic, u.notes, ul.username, ul.lastlogindate ".
 			"FROM users u LEFT JOIN userlogin ul ON u.uid = ul.uid ".
@@ -107,7 +104,7 @@ class ProfileManager{
 			$person->setUserName($row->username);
 			$person->setLastLoginDate($row->lastlogindate);
 			$person->setFirstName($row->firstname);
-			if($row->middleinitial) $person->setMiddleInitial($row->middleinitial);
+			if(isset($row->middleinitial) && $row->middleinitial) $person->setMiddleInitial($row->middleinitial);
 			$person->setLastName($row->lastname);
 			$person->setTitle($row->title);
 			$person->setInstitution($row->institution);
@@ -124,7 +121,7 @@ class ProfileManager{
 			$person->setIsPublic($row->ispublic);
 			$this->setUserTaxonomy($person);
 			while($row = $result->fetch_object()){
-				//Old code allowed folks to maintain more than one login names. This code will make sure the most recently active one is used 
+				//Old code allowed folks to maintain more than one login names. This code will make sure the most recently active one is used
 				if($row->lastlogindate && (!$person->getLastLoginDate() || $row->lastlogindate > $person->getLastLoginDate())){
 					$badUserNameArr[] = $person->getUserName();
 					$person->setUserName($row->username);
@@ -145,7 +142,7 @@ class ProfileManager{
 		$result->free();
 		return $person;
 	}
-	
+
 	public function updateProfile($person){
 		$success = false;
         $manager = new Manager();
@@ -210,7 +207,7 @@ class ProfileManager{
 		}
 		return $success;
 	}
-	
+
 	public function resetPassword($un){
 		global $charset;
 		$newPassword = $this->generateNewPassword();
@@ -218,7 +215,7 @@ class ProfileManager{
 		$returnStr = "";
 		if($un){
 			$editCon = $this->getConnection('write');
-			$sql = 'UPDATE userlogin ul SET ul.password = PASSWORD("'.$this->cleanInStr($newPassword).'") '. 
+			$sql = 'UPDATE userlogin ul SET ul.password = PASSWORD("'.$this->cleanInStr($newPassword).'") '.
 					'WHERE (ul.username = "'.$this->cleanInStr($un).'")';
 			$status = $editCon->query($sql);
 			$editCon->close();
@@ -255,7 +252,7 @@ class ProfileManager{
 		}
 		return $returnStr;
 	}
-	
+
 	private function generateNewPassword(){
 		// generate new random password
 		$newPassword = "";
@@ -265,7 +262,7 @@ class ProfileManager{
 		}
 		return $newPassword;
 	}
-	
+
 	public function register($postArr){
 		$status = false;
         $manager = new Manager();
@@ -278,7 +275,7 @@ class ProfileManager{
 				return false;
 			}
 		}
-		
+
 		$person = new Person();
 		$person->setPassword($postArr['pwd']);
 		$person->setUserName($this->userName);
@@ -297,8 +294,8 @@ class ProfileManager{
 		$person->setUrl($postArr['url']);
 		$person->setBiography($postArr['biography']);
 		$person->setIsPublic(isset($postArr['ispublic'])?1:0);
-		
-		
+
+
 		//Add to users table
 		$fields = 'INSERT INTO users (';
 		$values = 'VALUES (';
@@ -358,7 +355,7 @@ class ProfileManager{
 			$fields .= ', ispublic';
 			$values .= ', '.$person->getIsPublic();
 		}
-		
+
 		$sql = $fields.') '.$values.')';
 		//echo "SQL: ".$sql;
 		$editCon = $this->getConnection('write');
@@ -383,7 +380,7 @@ class ProfileManager{
 			}
 		}
 		$editCon->close();
-		
+
 		return $status;
 	}
 
@@ -428,7 +425,7 @@ class ProfileManager{
 
 		return $status;
 	}
-	
+
 	public function changeLogin($newLogin, $pwd = ''){
 		$status = true;
 		if($this->uid){
@@ -436,7 +433,7 @@ class ProfileManager{
 			if($this->uid != $GLOBALS['SYMB_UID']) $isSelf = false;
 			$newLogin = trim($newLogin);
 			if(!$this->validateUserName($newLogin)) return false;
-	
+
 			//Test if login exists
 			$sqlTestLogin = 'SELECT ul.uid FROM userlogin ul WHERE (ul.username = "'.$newLogin.'") ';
 			$rs = $this->conn->query($sqlTestLogin);
@@ -481,7 +478,7 @@ class ProfileManager{
 	public function checkLogin($email){
 		if(!$this->validateEmailAddress($email)) return false;
 		//Check to see if userlogin already exists
-		$status = true; 
+		$status = true;
 	   	$sql = 'SELECT u.email, ul.username '.
 			'FROM users u INNER JOIN userlogin ul ON u.uid = ul.uid '.
 			'WHERE (ul.username = "'.$this->userName.'" OR u.email = "'.$email.'" )';
@@ -499,7 +496,7 @@ class ProfileManager{
 		$result->free();
 		return $status;
 	}
-	
+
 	//Personal and general specimen management
 	public function getPersonalCollectionArr(){
 		global $USER_RIGHTS;
@@ -557,7 +554,7 @@ class ProfileManager{
 		}
 		$statement->close();
 	}
-	
+
 	public function deleteUserTaxonomy($utid,$editorStatus = ''){
 		$statusStr = 'SUCCESS: Taxonomic relationship deleted';
 		if(is_numeric($utid) || $utid == 'all'){
@@ -588,7 +585,7 @@ class ProfileManager{
 
 	public function addUserTaxonomy($taxon,$editorStatus,$geographicScope,$notes){
 		$statusStr = 'SUCCESS adding taxonomic relationship';
-		
+
 		$tid = 0;
 		$taxon = $this->cleanInStr($taxon);
 		$editorStatus = $this->cleanInStr($editorStatus);
@@ -625,14 +622,14 @@ class ProfileManager{
 	}
 
 	/**
-	 * 
-	 * Obtain the list of specimens that have an identification verification status rank less than 6 
+	 *
+	 * Obtain the list of specimens that have an identification verification status rank less than 6
 	 * within the list of taxa for which this user is listed as a specialist.
-	 * 
+	 *
 	 */
 	public function echoSpecimensPendingIdent($withImgOnly = 1){
 		if($this->uid){
-			$tidArr = array(); 
+			$tidArr = array();
 			$sqlt = 'SELECT t.tid, t.sciname '.
 				'FROM usertaxonomy u INNER JOIN taxa t ON u.tid = t.tid '.
 				'WHERE u.uid = '.$this->uid.' AND u.editorstatus = "OccurrenceEditor" '.
@@ -719,12 +716,12 @@ class ProfileManager{
 		$tempPath = $this->getTempPath();
     	$buFileName = $paramsArr['un'].'_'.time();
  		$zipArchive;
-    	
+
     	if($zipFile && class_exists('ZipArchive')){
 			$zipArchive = new ZipArchive;
 			$zipArchive->open($tempPath.$buFileName.'.zip', ZipArchive::CREATE);
  		}
-    	
+
     	$cSet = str_replace('-','',strtolower($charset));
 		$fileUrl = '';
     	//If zip archive can be created, the occurrences, determinations, and image records will be added to single archive file
@@ -736,7 +733,7 @@ class ProfileManager{
     	//Adding occurrence records
     	$fileName = $tempPath.$buFileName;
     	$specFH = fopen($fileName.'_spec.csv', "w");
-    	//Output header 
+    	//Output header
     	$headerStr = 'occid,dbpk,basisOfRecord,otherCatalogNumbers,ownerInstitutionCode, '.
 			'family,scientificName,sciname,tidinterpreted,genus,specificEpithet,taxonRank,infraspecificEpithet,scientificNameAuthorship, '.
 			'taxonRemarks,identifiedBy,dateIdentified,identificationReferences,identificationRemarks,identificationQualifier, '.
@@ -764,7 +761,7 @@ class ProfileManager{
     	}
     	fclose($specFH);
 		if($zipFile && $zipArchive){
-    		//Add occurrence file and then rename to 
+    		//Add occurrence file and then rename to
 			$zipArchive->addFile($fileName.'_spec.csv');
 			$zipArchive->renameName($fileName.'_spec.csv','occurrences.csv');
 
@@ -791,7 +788,7 @@ class ProfileManager{
 			$zipArchive->addFile($fileName.'_det.csv');
     		$zipArchive->renameName($fileName.'_det.csv','determinations.csv');
 			*/
-    		
+
 			echo 'Done!</li> ';
 			ob_flush();
 			flush();
@@ -849,7 +846,7 @@ class ProfileManager{
     public function setToken($token){
         $this->token = $token;
     }
-	
+
 	public function setRememberMe($test){
 		$this->rememberMe = $test;
 	}
@@ -901,7 +898,7 @@ class ProfileManager{
 		}
 		return $tPath;
 	}
-	
+
 	public function getErrorStr(){
 		return $this->errorStr;
 	}
@@ -914,7 +911,7 @@ class ProfileManager{
 		}
 		return true;
 	}
-	
+
 	private function validateUserName($un){
 		$status = true;
 		if (preg_match('/^[0-9A-Za-z_!@#$\s\.+\-]+$/', $un) == 0) $status = false;
@@ -924,27 +921,13 @@ class ProfileManager{
 		return $status;
 	}
 
-	private function cleanOutStr($str){
-		$newStr = str_replace('"',"&quot;",$str);
-		$newStr = str_replace("'","&apos;",$newStr);
-		//$newStr = $this->conn->real_escape_string($newStr);
-		return $newStr;
-	}
-	
-	private function cleanInStr($str){
-		$newStr = trim($str);
-		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
-		$newStr = $this->conn->real_escape_string($newStr);
-		return $newStr;
-	}
-	
 	private function encodeArr(&$inArr,$cSet){
 		foreach($inArr as $k => $v){
-			$inArr[$k] = $this->encodeString($v,$cSet);
+			$inArr[$k] = $this->encodeStr($v,$cSet);
 		}
 	}
 
-	private function encodeString($inStr,$cSet){
+	private function encodeStr($inStr,$cSet){
  		$retStr = $inStr;
 		if($cSet == "utf8"){
 			if(mb_detect_encoding($inStr,'UTF-8,ISO-8859-1',true) == "ISO-8859-1"){
@@ -1128,5 +1111,5 @@ class ProfileManager{
         $editCon->close();
         return $statusStr;
     }
-} 
+}
 ?>
