@@ -103,9 +103,10 @@ class OccurrenceIndividualManager extends Manager{
 			'occurrenceid, catalognumber, occurrenceremarks, tidinterpreted, family, sciname, '.
 			'scientificnameauthorship, identificationqualifier, identificationremarks, identificationreferences, taxonremarks, '.
 			'identifiedby, dateidentified, recordedby, associatedcollectors, recordnumber, eventdate, MAKEDATE(YEAR(eventDate),enddayofyear) AS eventdateend, '.
-			'verbatimeventdate, country, stateprovince, county, municipality, locality, '.
-			'minimumelevationinmeters, maximumelevationinmeters, verbatimelevation, localitysecurity, localitysecurityreason, '.
-			'decimallatitude, decimallongitude, geodeticdatum, coordinateuncertaintyinmeters, verbatimcoordinates, georeferenceremarks, verbatimattributes, '.
+			'verbatimeventdate, country, stateprovince, county, municipality, locality, localitysecurity, localitysecurityreason, '.
+			'decimallatitude, decimallongitude, geodeticdatum, coordinateuncertaintyinmeters, verbatimcoordinates, georeferenceremarks, '.
+			'minimumelevationinmeters, maximumelevationinmeters, verbatimelevation, '.
+			'verbatimattributes, o.locationremarks, o.lifestage, o.sex, o.individualcount, o.samplingprotocol, o.preparations, '.
 			'typestatus, dbpk, habitat, substrate, associatedtaxa, reproductivecondition, cultivationstatus, establishmentmeans, '.
 			'ownerinstitutioncode, othercatalognumbers, disposition, modified, observeruid, g.guid, recordenteredby, dateentered, datelastmodified '.
 			'FROM omoccurrences o LEFT JOIN guidoccurrences g ON o.occid = g.occid ';
