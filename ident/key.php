@@ -11,22 +11,27 @@ if($IS_ADMIN || array_key_exists("KeyEditor",$USER_RIGHTS)){
 
 $attrsValues = Array();
 
-$clValue = array_key_exists("cl",$_REQUEST)?$_REQUEST["cl"]:""; 
-$dynClid = array_key_exists("dynclid",$_REQUEST)?$_REQUEST["dynclid"]:0; 
-$taxonValue = array_key_exists("taxon",$_REQUEST)?$_REQUEST["taxon"]:""; 
-$action = array_key_exists("submitbutton",$_REQUEST)?$_REQUEST["submitbutton"]:""; 
-$rv = array_key_exists("rv",$_REQUEST)?$_REQUEST["rv"]:""; 
-$projValue = array_key_exists("proj",$_REQUEST)?$_REQUEST["proj"]:""; 
-$langValue = array_key_exists("lang",$_REQUEST)?$_REQUEST["lang"]:""; 
-$displayMode = array_key_exists("displaymode",$_REQUEST)?$_REQUEST["displaymode"]:""; 
-if(!$action){
-	$attrsValues = array_key_exists("attr",$_REQUEST)?$_REQUEST["attr"]:"";	//Array of: cid + "-" + cs (ie: 2-3) 
+$clValue = array_key_exists("cl",$_REQUEST)?$_REQUEST["cl"]:"";
+$dynClid = array_key_exists("dynclid",$_REQUEST)?$_REQUEST["dynclid"]:0;
+$taxonValue = array_key_exists("taxon",$_REQUEST)?$_REQUEST["taxon"]:"";
+$action = array_key_exists("submitbutton",$_REQUEST)?$_REQUEST["submitbutton"]:"";
+$rv = array_key_exists("rv",$_REQUEST)?$_REQUEST["rv"]:"";
+$projValue = array_key_exists("proj",$_REQUEST)?htmlspecialchars($_REQUEST["proj"],ENT_QUOTES):"";
+$langValue = array_key_exists("lang",$_REQUEST)?$_REQUEST["lang"]:"";
+$displayMode = array_key_exists("displaymode",$_REQUEST)?$_REQUEST["displaymode"]:"";
+if(!$action && array_key_exists("attr",$_REQUEST) && is_array($_REQUEST["attr"])){
+	$attrsValues = $_REQUEST["attr"];	//Array of: cid + "-" + cs (ie: 2-3)
 }
 
-$dataManager = new KeyDataManager();
-//if(!$langValue) $langValue = $defaultLang;
+//Sanitation
+if(!is_numeric($dynClid)) $dynClid = 0;
+if(!is_numeric($rv)) $rv = '';
 $langValue = 'English';
-if($displayMode) $dataManager->setCommonDisplay(true);;  
+
+$dataManager = new KeyDataManager();
+
+//if(!$langValue) $langValue = $defaultLang;
+if($displayMode) $dataManager->setCommonDisplay(true);;
 $dataManager->setLanguage($langValue);
 if($projValue) $pid = $dataManager->setProject($projValue);
 if($dynClid) $dataManager->setDynClid($dynClid);
@@ -59,7 +64,7 @@ if($chars){
 	<script type="text/javascript" src="../js/symb/ident.key.js"></script>
 </head>
 <body>
-	<?php 
+	<?php
 	$displayLeftMenu = (isset($ident_keyMenu)?$ident_keyMenu:true);
 	include($SERVER_ROOT.'/header.php');
 	if(isset($ident_keyCrumbs)){
@@ -90,7 +95,7 @@ if($chars){
 			}
 		}
 		elseif($clid){
-			echo '<a href="'.$CLIENT_ROOT.'/checklists/checklist.php?cl='.$clid.'&proj='.$projValue.'">';
+			echo '<a href="'.$CLIENT_ROOT.'/checklists/checklist.php?cl='.$clid.'&pid='.$pid.'">';
 			echo 'Checklist: '.$dataManager->getClName();
 			echo '</a> &gt;&gt; ';
 		}
@@ -102,16 +107,16 @@ if($chars){
 		echo '<b>Key: '.$dataManager->getClName().'</b>';
 		echo '</div>';
 	}
-	
+
 ?>
 <div id="innertext">
-	<?php 
+	<?php
 	if($isEditor){
 		?>
 		<div style="float:right;margin:15px;" title="Edit Character Matrix">
 			<a href="tools/massupdate.php?clid=<?php echo $clid; ?>"><img src="../images/edit.png" /><span style="font-size:70%;">CM</span></a>
 		</div>
-		<?php 
+		<?php
 	}
 	?>
 	<form name="keyform" id="keyform" action="key.php" method="get">
@@ -172,7 +177,7 @@ if($chars){
                                 <h2>
                                     <?php
                                     if($FLORA_MOD_IS_ACTIVE){
-                                        echo '<a href="../checklists/checklist.php?cl='.$clid.'&dynclid='.$dynClid.'&proj='.$projValue.'">';
+                                        echo '<a href="../checklists/checklist.php?cl='.$clid.'&dynclid='.$dynClid.'&pid='.$pid.'">';
                                     }
                                     echo $dataManager->getClName()." ";
                                     if($FLORA_MOD_IS_ACTIVE){
@@ -217,7 +222,7 @@ if($chars){
                 </td>
 			</tr>
 		</table>
-		<?php 
+		<?php
 		if(array_key_exists("crumburl",$_REQUEST)) echo "<input type='hidden' name='crumburl' value='".$_REQUEST["crumburl"]."' />";
 		if(array_key_exists("crumbtitle",$_REQUEST)) echo "<input type='hidden' name='crumbtitle' value='".$_REQUEST["crumbtitle"]."' />";
 		?>
