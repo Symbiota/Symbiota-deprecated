@@ -498,6 +498,7 @@ if($clValue || $dynClid){
 						$argStr .= ($showAuthors?"&showauthors=".$showAuthors:"").($clManager->getThesFilter()?"&thesfilter=".$clManager->getThesFilter():"");
 						$argStr .= ($pid?"&pid=".$pid:"").($showImages?"&showimages=".$showImages:"").($taxonFilter?"&taxonfilter=".$taxonFilter:"");
 						$argStr .= ($searchCommon?"&searchcommon=".$searchCommon:"").($searchSynonyms?"&searchsynonyms=".$searchSynonyms:"");
+						$argStr .= ($showAlphaTaxa?"&showalphataxa=".$showAlphaTaxa:"");
 						$argStr .= ($defaultOverride?"&defaultoverride=".$defaultOverride:"");
 						echo "<hr /><div>".$LANG['PAGE']."<b>".($pageNumber)."</b>".$LANG['OF']."<b>$pageCount</b>: ";
 						for($x=1;$x<=$pageCount;$x++){
