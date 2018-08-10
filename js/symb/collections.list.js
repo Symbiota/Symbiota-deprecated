@@ -53,7 +53,6 @@ function toggleFieldBox(target){
 
 function openIndPU(occId,clid){
 	var wWidth = 1100;
-	alert(document.body.offsetWidth);
 	if(document.body.offsetWidth < wWidth) wWidth = document.body.offsetWidth*0.9;
 	var newWindow = window.open('individual/index.php?occid='+occId+'&clid='+clid,'indspec' + occId,'scrollbars=1,toolbar=0,resizable=1,width='+(wWidth)+',height=700,left=20,top=20');
 	if (newWindow.opener == null) newWindow.opener = self;
