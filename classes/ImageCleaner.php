@@ -106,7 +106,6 @@ class ImageCleaner extends Manager{
 
 			$setFormat = ($row->format?false:true);
 			$this->buildImageDerivatives($imgId, $row->catalognumber, $row->url, $row->thumbnailurl, $row->originalurl, $setFormat);
-
 			if(!$status) $this->logOrEcho($this->errorMessage,1);
 			$cnt++;
 		}
@@ -163,27 +162,30 @@ class ImageCleaner extends Manager{
 		}
 		$this->imgManager->setTargetPath($targetPath);
 
-		//Build derivatives
+		$imgUrl = '';
 		$webIsEmpty = false;
-		$imgUrl = trim($recUrlWeb);
-		if((!$imgUrl || $imgUrl == 'empty') && $recUrlOrig){
-			$imgUrl = trim($recUrlOrig);
-			$webIsEmpty = true;
-		}
-		$webFullUrl = '';
-		$lgFullUrl = '';
 		//If a TROPICOS image, harvest web image from their website
-		if(strpos($recUrlOrig, 'tropicos.org/ImageDownload.aspx') && (!$recUrlWeb || $recUrlWeb == 'empty')){
-			/*
-			$tropUrl = $this->getTropicosWebUrl($recUrlOrig);
-			if($tropUrl){
-				$imgUrl = $tropUrl;
-				$webFullUrl = $tropUrl;
-				$webIsEmpty = false;
+		if(strpos($recUrlOrig, 'tropicos.org/ImageDownload.aspx')){
+			if(preg_match('/imageid=(\d+)$/', $recUrlOrig, $m)){
+				$newImgPath = $this->imgManager->getTargetPath().'mo_'.$m[1].'.jpg';
+				if(copy($recUrlOrig, $newImgPath)){
+					$imgUrl = str_replace($GLOBALS['IMAGE_ROOT_PATH'],$GLOBALS['IMAGE_ROOT_URL'],$newImgPath);
+					if((!$recUrlWeb || $recUrlWeb == 'empty')){
+						$webIsEmpty = true;
+					}
+				}
 			}
-			*/
+		}
+		else{
+			$imgUrl = trim($recUrlWeb);
+			if((!$imgUrl || $imgUrl == 'empty') && $recUrlOrig){
+				$imgUrl = trim($recUrlOrig);
+				$webIsEmpty = true;
+			}
 		}
 		if($this->imgManager->parseUrl($imgUrl)){
+			$webFullUrl = '';
+			$lgFullUrl = '';
 			//Create thumbnail
 			$imgTnUrl = '';
 			if(!$recUrlTn || substr($recUrlTn,0,10) == 'processing'){
@@ -237,7 +239,7 @@ class ImageCleaner extends Manager{
 					}
 				}
 				$sql .= "WHERE ti.imgid = ".$imgId;
-				//echo $sql;getTropicosWebUrl
+				//echo $sql;
 				if(!$this->conn->query($sql)){
 					$this->errorMessage = 'ERROR: thumbnail created but failed to update database: '.$this->conn->error;
 					$this->logOrEcho($this->errorMessage,1);
@@ -251,6 +253,10 @@ class ImageCleaner extends Manager{
 			//$this->logOrEcho($this->errorMessage,1);
 			$status = false;
 		}
+		if(preg_match('/\/mo_\d+.jpg/', $imgUrl)){
+			$imgUrl = str_replace($GLOBALS['IMAGE_ROOT_URL'],$GLOBALS['IMAGE_ROOT_PATH'],$imgUrl);
+			unlink($imgUrl);
+		}
 	}
 
 	public function resetProcessing(){
@@ -263,6 +269,25 @@ class ImageCleaner extends Manager{
 	}
 
 	private function getTropicosWebUrl($url){
+		$imgUrl = '';
+		echo $url.'<br/>';
+		if(preg_match('/imageid=(\d+)$/', $url, $m)){
+			$imageID = $m[1];
+			echo $imageID.'<br/>';
+			//http://mbgserv18.mobot.org/adore-djatoka/resolver?url_ver=Z39.88-2004&rft_id=http://mbgserv18:8057/TropicosImages2/100309000/100309162.jp2&svc_id=info:lanl-repo/svc/getRegion&svc_val_fmt=info:ofi/fmt:kev:mtx:jpeg2000&svc.format=image/jpeg&svc.scale=0.2';
+			$newImgUrl = 'http://mbgserv18.mobot.org/adore-djatoka/resolver?url_ver=Z39.88-2004&rft_id=http://mbgserv18:8057/TropicosImages2/'.substr($imageID, 0, 6).'000/'.$imageID.'.jp2&svc_id=info:lanl-repo/svc/getRegion&svc_val_fmt=info:ofi/fmt:kev:mtx:jpeg2000&svc.format=image/jpeg&svc.scale=0.2';
+			echo $newImgUrl.'<br/>';
+
+			if(copy($newImgUrl,$this->imgManager->getTargetPath().$this->imgManager->getImgName().'_web'.$this->imgManager->getImgExt())){
+				$imgUrl = $this->imgManager->getTargetPath().$this->imgManager->getImgName().'_web'.$this->imgManager->getImgExt();
+				echo $imgUrl;
+			}
+			exit;
+		}
+		return $imgUrl;
+	}
+
+	private function getTropicosWebUrl2($url){
 		//Extract image id
 		$imgUrl = '';
 		if(preg_match('/imageid=(\d+)$/', $url, $m)){
@@ -462,7 +487,7 @@ class ImageCleaner extends Manager{
 			return false;
 		}
 
-return -1;
+		//return -1;
 		$ts = curl_getinfo($curl, CURLINFO_FILETIME);
 		return $ts;
 	}
