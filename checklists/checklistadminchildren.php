@@ -18,10 +18,10 @@ $clManager->setClid($clid);
 		<u>Children Checklists</u>
 	</div>
 	<div style="margin:25px;clear:both;">
-		Checklists will inherit scientific names, vouchers, notes, etc from all children checklists. 
-		Adding a new taxon or voucher to a child checklist will automatically add it to all parent checklists. 
+		Checklists will inherit scientific names, vouchers, notes, etc from all children checklists.
+		Adding a new taxon or voucher to a child checklist will automatically add it to all parent checklists.
 		The parent child relationship can transcend multiple levels (e.g. country &lt;- state &lt;- county).
-		Note that only direct child can be removed. 
+		Note that only direct child can be removed.
 	</div>
 	<div id="addchilddiv" style="margin:15px;display:none;">
 		<fieldset style="padding:15px;">
@@ -31,7 +31,7 @@ $clManager->setClid($clid);
 					<select name="clidadd">
 						<option value="">Select Child Checklist</option>
 						<option value="">-------------------------------</option>
-						<?php 
+						<?php
 						$clArr = $clManager->getChildSelectArr();
 						foreach($clArr as $k => $name){
 							echo '<option value="'.$k.'">'.$name.'</option>';
@@ -55,8 +55,8 @@ $clManager->setClid($clid);
 				foreach($childArr as $k => $cArr){
 					?>
 					<li>
-						<a href="checklist.php?cl=<?php echo $k; ?>"><?php echo $cArr['name']; ?></a>
-						<?php 
+						<a href="checklist.php?clid=<?php echo $k; ?>"><?php echo $cArr['name']; ?></a>
+						<?php
 						if($cArr['pclid'] == $clid){
 							echo '<a href="checklistadmin.php?submitaction=delchild&tabindex=2&cliddel='.$k.'&clid='.$clid.'&pid='.$pid.'" onclick="return confirm(\'Are you sure you want to remove'.$cArr['name'].' as a child checklist?\')"><img src="../images/del.png" style="width:14px;" /></a>';
 						}
@@ -81,7 +81,7 @@ $clManager->setClid($clid);
 				foreach($parentArr as $k => $name){
 					?>
 					<li>
-						<a href="checklist.php?cl=<?php echo $k; ?>"><?php echo $name; ?></a>
+						<a href="checklist.php?clid=<?php echo $k; ?>"><?php echo $name; ?></a>
 					</li>
 					<?php
 				}

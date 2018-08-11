@@ -784,7 +784,7 @@ function verifyAssocVouchers(occidIn){
 			document.getElementById("delvoulistdiv").style.display = "block";
 			var strOut = "";
 			for(var key in vList){
-				strOut = strOut + "<li><a href='../../checklists/checklist.php?cl="+key+"' target='_blank'>"+vList[key]+"</a></li>";
+				strOut = strOut + "<li><a href='../../checklists/checklist.php?clid="+key+"' target='_blank'>"+vList[key]+"</a></li>";
 			}
 			document.getElementById("voucherlist").innerHTML = strOut;
 		}

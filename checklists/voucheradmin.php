@@ -66,14 +66,14 @@ include($SERVER_ROOT.'/header.php');
 ?>
 <div class="navpath">
 	<a href="../index.php"><?php echo $LANG['NAV_HOME']?></a> &gt;&gt;
-	<a href="checklist.php?cl=<?php echo $clid.'&pid='.$pid; ?>"><?php echo $LANG['RETURNCHECK'];?></a> &gt;&gt;
+	<a href="checklist.php?clid=<?php echo $clid.'&pid='.$pid; ?>"><?php echo $LANG['RETURNCHECK'];?></a> &gt;&gt;
 	<b><?php echo $LANG['CHECKADMIN'];?></b>
 </div>
 
 <!-- This is inner text! -->
 <div id='innertext'>
 <div style="color:#990000;font-size:20px;font-weight:bold;margin:0px 10px 10px 0px;">
-	<a href="checklist.php?cl=<?php echo $clid.'&pid='.$pid; ?>">
+	<a href="checklist.php?clid=<?php echo $clid.'&pid='.$pid; ?>">
 		<?php echo $clManager->getClName(); ?>
 	</a>
 </div>
@@ -340,7 +340,7 @@ if($clid && $isEditor){
 										foreach($tArr as $tid => $sciname){
 											?>
 											<div>
-												<a href="#" onclick="openPopup('../taxa/index.php?taxauthid=1&taxon=<?php echo $tid.'&cl='.$clid; ?>','taxawindow');return false;"><?php echo $sciname; ?></a>
+												<a href="#" onclick="openPopup('../taxa/index.php?taxauthid=1&taxon=<?php echo $tid.'&clid='.$clid; ?>','taxawindow');return false;"><?php echo $sciname; ?></a>
 												<a href="#" onclick="openPopup('../collections/list.php?db=all&thes=1&reset=1&taxa=<?php echo $sciname.'&targetclid='.$clid.'&targettid='.$tid;?>','editorwindow');return false;">
 													<img src="../images/link.png" style="width:13px;" title="<?php echo $LANG['LINKVOUCHSPECIMEN'];?>" />
 												</a>
@@ -377,9 +377,9 @@ if($clid && $isEditor){
 				<div style="margin:25px;height:400px;">
 					<ul>
 						<li><a href="voucherreporthandler.php?rtype=fullcsv&clid=<?php echo $clid; ?>"><?php echo $LANG['FULLSPECLIST'];?></a></li>
-						<li><a href="checklist.php?printmode=1&showvouchers=0&defaultoverride=1&cl=<?php echo $clid; ?>" target="_blank"><?php echo $LANG['FULLPRINT'];?></a></li>
+						<li><a href="checklist.php?printmode=1&showvouchers=0&defaultoverride=1&clid=<?php echo $clid; ?>" target="_blank"><?php echo $LANG['FULLPRINT'];?></a></li>
 						<li><a href="voucherreporthandler.php?rtype=fullvoucherscsv&clid=<?php echo $clid; ?>"><?php echo $LANG['FULLSPECLISTVOUCHER'];?></a></li>
-						<li><a href="checklist.php?printmode=1&showvouchers=1&defaultoverride=1&cl=<?php echo $clid; ?>" target="_blank"><?php echo $LANG['FULLPRINTVOUCHER'];?></a></li>
+						<li><a href="checklist.php?printmode=1&showvouchers=1&defaultoverride=1&clid=<?php echo $clid; ?>" target="_blank"><?php echo $LANG['FULLPRINTVOUCHER'];?></a></li>
 						<li><a href="voucherreporthandler.php?rtype=pensoftxlsx&clid=<?php echo $clid; ?>" target="_blank"><?php echo (isset($LANG['PENSOFT_XLSX_EXPORT'])?$LANG['PENSOFT_XLSX_EXPORT']:'Pensoft Excel Export');?></a></li>
 						<li>
 							<a href="#" onclick="openPopup('../collections/download/index.php?searchvar=<?php echo urlencode('clid='.$clid); ?>&noheader=1','repvouchers');return false;">

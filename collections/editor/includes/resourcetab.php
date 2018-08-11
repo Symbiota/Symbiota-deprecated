@@ -122,7 +122,7 @@ $dupClusterArr = $dupManager->getClusterArr($occid);
 		if($checklistArr){
 			foreach($checklistArr as $vClid => $vClName){
 				echo '<div style="margin:3px">';
-				echo '<a href="../../checklists/checklist.php?showvouchers=1&cl='.$vClid.'" target="_blank">'.$vClName.'</a> ';
+				echo '<a href="../../checklists/checklist.php?showvouchers=1&clid='.$vClid.'" target="_blank">'.$vClName.'</a> ';
 				if(array_key_exists($vClid, $userChecklists)){
 					echo '<a href="occurrenceeditor.php?submitaction=deletevoucher&delclid='.$vClid.'&occid='.$occid.'&tabtarget=3" title="Delete voucher link" onclick="return confirm(\"Are you sure you want to remove this voucher link?\")">';
 					echo '<img src="../../images/drop.png" style="width:12px;" />';

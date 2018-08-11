@@ -43,7 +43,7 @@ $imgloc = "../images/games/namegame/";
 		.question{font-size:30px}
 		#rw{margin-left:auto;margin-right:auto}
 	</style>
-	<script> 
+	<script>
 		//COLLAPSE MENU
 		function toggle(divID, linkID) {
 			var ele = document.getElementById(divID);
@@ -54,7 +54,7 @@ $imgloc = "../images/games/namegame/";
 			else {
 				ele.style.display = "block";
 			}
-		} 
+		}
 
 		//CHANGE WORDLIST SCRIPT
 		function getWordList(){
@@ -64,7 +64,7 @@ $imgloc = "../images/games/namegame/";
 				dataType: "json",
 				data: {
 					clid : <?php echo $clid; ?>,
-					dynclid: <?php echo $dynClid; ?> 
+					dynclid: <?php echo $dynClid; ?>
 				},
 				success: function(data) {
 					mainList = data;
@@ -72,7 +72,7 @@ $imgloc = "../images/games/namegame/";
 				}
 			});
 		}
-		
+
 		function openPopup(urlStr,windowName){
 			var wWidth = 900;
 			try{
@@ -88,7 +88,7 @@ $imgloc = "../images/games/namegame/";
 			newWindow = window.open(urlStr,windowName,'scrollbars=1,toolbar=0,resizable=1,width='+(wWidth)+',height=600,left=20,top=20');
 			if (newWindow.opener == null) newWindow.opener = self;
 		}
-		
+
 		mainList = [['','']];
 		hangpics=[
 			["<?php echo $imgloc; ?>man1_0.gif","<?php echo $imgloc; ?>man1_1.gif","<?php echo $imgloc; ?>man1_2.gif","<?php echo $imgloc; ?>man1_3.gif","<?php echo $imgloc; ?>man1_4.gif","<?php echo $imgloc; ?>man1_5.gif","<?php echo $imgloc; ?>gallow.gif","<?php echo $imgloc; ?>gallow5.gif","<?php echo $imgloc; ?>gallow4.gif","<?php echo $imgloc; ?>gallow3.gif","<?php echo $imgloc; ?>gallow2.gif","<?php echo $imgloc; ?>gallow1.gif","<?php echo $imgloc; ?>spacer.gif","<?php echo $imgloc; ?>man1win.gif"],
@@ -109,7 +109,7 @@ $imgloc = "../images/games/namegame/";
 		PreImage4 = new Image();
 		PreImage5 = new Image();
 		PreImage6 = new Image();
-	
+
 		defaultImage="<?php echo $imgloc; ?>plant7.gif";
 		maxWildCards=1;
 
@@ -136,21 +136,21 @@ $imgloc = "../images/games/namegame/";
 		repeat="";
 
 		function initNameGame(){
-			
+
 			mClick(imgSetId,lastImgId,imgSetVal,'<?php echo $imgloc; ?>plant_on.gif','<?php echo $imgloc; ?>plant_off.gif');
 			mClick(levelSet,lastLevelId,levelSetVal,'<?php echo $imgloc; ?>radio_on4.gif','<?php echo $imgloc; ?>radio_off4.gif');
-			
+
 			tds=document.getElementById("charactertable").getElementsByTagName("TD");
-			
+
 			for(var i=0 ; i<tds.length ; i++){
 				tds[i].getElementsByTagName("span")[0].onmouseover=function(){this.offsetParent.bgColor='#CCCC99';};
 				tds[i].getElementsByTagName("span")[0].onmousedown=function(){/*this.offsetParent.bgColor='#FFFFFF';*/this.offsetParent.style.color='#FFFFFF';};
 				tds[i].getElementsByTagName("span")[0].onmouseout=function(){this.offsetParent.bgColor='';this.offsetParent.style.color='#000000';};
-			
+
 				if(i<tds.length-1){
 					tds[i].getElementsByTagName("span")[0].onclick=function(){getKey(this.id);};
 				}
-			
+
 				if(i==tds.length-1){
 					tds[i].getElementsByTagName("span")[0].onclick=function(){wildCard();};
 				}
@@ -173,10 +173,10 @@ $imgloc = "../images/games/namegame/";
 
 		function mClick(setId,imgId,imgVal,imgOn,imgOff){
 			if(running==1) return;
-		
+
 			if(setId==imgSetId){
 				document.getElementById(imgId).src = imgOn;
-				
+
 				if (lastImgId != ""){
 					(lastImgId != imgId?document.getElementById(lastImgId).src = lastImg:"");
 				}
@@ -185,7 +185,7 @@ $imgloc = "../images/games/namegame/";
 				lastImg=imgOff;
 				avatar=imgVal;
 			}
-		
+
 			if(setId==levelSet){
 				document.getElementById(imgId).src = imgOn;
 
@@ -203,38 +203,38 @@ $imgloc = "../images/games/namegame/";
 		function generate(){
 			numbersRange=mainList.length; //range
 			firstRun=true;
-			selectedNums=new Array(); 
-			
+			selectedNums=new Array();
+
 			for(var i=0;i<numbersRange;i++){
-				wordChosen=false; 
+				wordChosen=false;
 				rndnum=Math.floor(Math.random()*numbersRange);
-				
+
 				if(!firstRun){
 					for(var j=0;j<selectedNums.length;j++){
 						if(rndnum==selectedNums[j]){
-							wordChosen=true; 
+							wordChosen=true;
 							i--;
 						}
-					} 
-				} 
-				
-				if(!wordChosen){ 
-					selectedNums[i]=rndnum; 
+					}
+				}
+
+				if(!wordChosen){
+					selectedNums[i]=rndnum;
 					firstRun=false;
-				} 
+				}
 			}
 			wordCount=0;
 			newWord();
 		}
 
 		function newWord(){
-			if(wordCount==selectedNums.length){ 
-				// generate random list 
+			if(wordCount==selectedNums.length){
+				// generate random list
 				// Does this when you run out of words in current list
 				getWordList();
 				return;
 			}
-			
+
 			lastChar="";
 			running=0;
 			clearTimeout(repeat);  // splash
@@ -244,15 +244,15 @@ $imgloc = "../images/games/namegame/";
 			hintShown=0;
 			document.getElementById("hintdisplay").innerHTML="";
 			charDisplay=document.getElementById("charactertable").getElementsByTagName('span');
-			
+
 			for(var k=0;k<charDisplay.length;k++){
 				charDisplay[k].style.visibility="visible"; // show all hidden alphabet characters
 			}
-		
+
 			currentNum=selectedNums[wordCount];
 			chosenWord=mainList[currentNum][0].toLowerCase(); // chosen word
 			RealName=chosenWord;
-		
+
 			/////////////////////////TAKE OUT THE VAR. or SUBSP. BECUASE IT'S TOO LONG///////////////////////////
 			tempWord=chosenWord;
 			varpos=tempWord.indexOf(" var.");
@@ -286,13 +286,13 @@ $imgloc = "../images/games/namegame/";
 				}
 			}
 			chosenWord = tempbuilder;
-			
+
 			initWildCard(chosenWord);
 			wordLength=lengthofword.length; // word length
 			wordLength+=templength;
 			temp="";
 			addedlength = 0;
-			
+
 			for(var n=0;n<wordLength;n++){
 				if((chosenWord.charAt(n)!=" ")&&(chosenWord.charAt(n)!="\u00A0")){
 					if(chosenWord.charAt(n)==".")
@@ -312,9 +312,9 @@ $imgloc = "../images/games/namegame/";
 			wordChosen=1; // word has been selected
 			wordCount++;
 			document.getElementById("showhint").disabled=false;
-			
+
 			var now = new Date();
-		
+
 			PreImage0.src = 'tempcover0.jpg?' + now.getTime();
 			PreImage1.src = 'tempcover1.jpg?' + now.getTime();
 			PreImage2.src = 'tempcover2.jpg?' + now.getTime();
@@ -337,37 +337,37 @@ $imgloc = "../images/games/namegame/";
 		function level(){
 			if(running==1)return;
 			guessCount=levelSetVal;
-			
+
 			if(avatar=="5"){
-				if(guessCount=="12") 	
+				if(guessCount=="12")
 					document.getElementById("hpic").src="<?php echo $imgloc; ?>flower12.gif";
-				else if(guessCount=="6") 	
+				else if(guessCount=="6")
 					document.getElementById("hpic").src="<?php echo $imgloc; ?>flower6.gif";
-				else if(guessCount=="3") 	
+				else if(guessCount=="3")
 					document.getElementById("hpic").src="<?php echo $imgloc; ?>flower3.gif";
 			}
 			else if(avatar=="6"){
-				if(guessCount=="12") 	
+				if(guessCount=="12")
 					document.getElementById("hpic").src="<?php echo $imgloc; ?>plant12.gif";
-				else if(guessCount=="6") 	
+				else if(guessCount=="6")
 					document.getElementById("hpic").src="<?php echo $imgloc; ?>plant7.gif";
-				else if(guessCount=="3") 	
+				else if(guessCount=="3")
 					document.getElementById("hpic").src="<?php echo $imgloc; ?>plant4.gif";
 			}
 			else if(avatar=="7"){				// IF IT'S THE REVEALING PLANT PICTURE
-				if(guessCount=="12") 	
+				if(guessCount=="12")
 					document.getElementById("hpic").src="<?php echo $imgloc; ?>plant12.gif";
-				else if(guessCount=="6") 	
+				else if(guessCount=="6")
 					document.getElementById("hpic").src="<?php echo $imgloc; ?>tempcover6.jpg";
-				else if(guessCount=="3") 	
+				else if(guessCount=="3")
 					document.getElementById("hpic").src="<?php echo $imgloc; ?>tempcover3.jpg";
 			}
 			else if(avatar=="8"){				// IF IT'S THE REVEALING PLANT PICTURE
-				if(guessCount=="12") 	
+				if(guessCount=="12")
 					document.getElementById("hpic").src="<?php echo $imgloc; ?>apple_12.gif";
-				else if(guessCount=="6") 	
+				else if(guessCount=="6")
 					document.getElementById("hpic").src="<?php echo $imgloc; ?>apple_6.gif";
-				else if(guessCount=="3") 	
+				else if(guessCount=="3")
 					document.getElementById("hpic").src="<?php echo $imgloc; ?>apple_6.gif";
 			}
 			else if(guessCount=="12"){
@@ -376,7 +376,7 @@ $imgloc = "../images/games/namegame/";
 			else if((avatar>="0")&&(avatar<="4")){
 				document.getElementById("hpic").src="<?php echo $imgloc; ?>gallows.gif";
 			}
-			
+
 			document.getElementById("counter").innerHTML="Chances left = "+guessCount; // visual counter
 			document.getElementById("splash").style.display="none";  // splash
 		}
@@ -386,7 +386,7 @@ $imgloc = "../images/games/namegame/";
 			keyCode=(!ns)?event.keyCode:e.which; // which key has been pressed
 			chkChar=e;
 			temp="";
-			
+
 			if(keyCode){
 				if(keyCode>=65&&keyCode<=90){ // if caps on
 					keyCode+=32;
@@ -433,13 +433,13 @@ $imgloc = "../images/games/namegame/";
 				guessCount--; // deduct 1 from guesses left
 				document.getElementById("hpic").src=hangpics[avatar][guessCount]; // show pic
 			}
-			
+
 			document.getElementById("attempt").innerHTML=temp.toUpperCase(); // change correct character chosen to uppercase
 			document.getElementById("counter").innerHTML="Chances left = "+guessCount; // visual counter
-			
+
 			last=temp; // remember last attempt
 			lastChar=currentChar; // remember last character selected
-			
+
 			if(guessCount==0){ // if counter reaches zero
 				wordChosen=0;
 				gameover=1;
@@ -472,7 +472,7 @@ $imgloc = "../images/games/namegame/";
 				document.getElementById("hpic").src=hangpics[avatar][13];
 				gameEnd(); // splash
 			}
-			
+
 			if(guessCount==1){
 				document.getElementById("showhint").disabled=true;
 				document.getElementById("?").style.visibility="hidden";
@@ -566,22 +566,22 @@ $imgloc = "../images/games/namegame/";
 		echo $games_namegameCrumbs;
 	}
 	else{
-		echo '<a href="../checklists/checklist.php?cl='.$clid.'">';
+		echo '<a href="../checklists/checklist.php?clid='.$clid.'">';
 		echo $clName;
 		echo '</a> &gt;&gt; ';
 	}
 	echo ' <b>Name Game</b>';
 	echo '</div>';
 	?>
-	
+
 	<!-- This is inner text! -->
 	<div id="innertext">
 		<div style="width:100%;text-align:center;">
 			<h1><?php echo $DEFAULT_TITLE; ?> Name Game</h1>
 		</div>
 		<div style="width:100%;text-align:center;margin:10px;">
-			I am thinking of a species found within the following checklist: <b><?php echo $clName;?></b><br/> 
-			What am I thinking of? 
+			I am thinking of a species found within the following checklist: <b><?php echo $clName;?></b><br/>
+			What am I thinking of?
 		</div>
 		<div style="width:140px;margin-left:auto;margin-right:auto;margin-top:20px;">
 			<div id="imageset" style="cursor:hand;cursor:pointer;">
@@ -594,7 +594,7 @@ $imgloc = "../images/games/namegame/";
 				<!--<img onclick="mClick(this.parentNode.id,this.id,'3','<?php echo $imgloc; ?>woman2_head_on.gif','<?php echo $imgloc; ?>woman2_head_off.gif')" onmouseover="mOver(this.parentNode.id,this.id,'<?php echo $imgloc; ?>woman2_head_on.gif')" onmouseout="mOut(this.parentNode.id,this.id,'<?php echo $imgloc; ?>woman2_head_off.gif')" src="<?php echo $imgloc; ?>woman2_head_off.gif" id="img4">-->
 				<!--<img onclick="mClick(this.parentNode.id,this.id,'4','<?php echo $imgloc; ?>wwoman_head_on.gif','<?php echo $imgloc; ?>wwoman_head_off.gif')" onmouseover="mOver(this.parentNode.id,this.id,'<?php echo $imgloc; ?>wwoman_head_on.gif')" onmouseout="mOut(this.parentNode.id,this.id,'<?php echo $imgloc; ?>wwoman_head_off.gif')" src="<?php echo $imgloc; ?>wwoman_head_off.gif" id="img5">-->
 				<!--<img onclick="mClick(this.parentNode.id,this.id,'7','<?php echo $imgloc; ?>hidden_on.gif','<?php echo $imgloc; ?>hidden_off.gif')" onmouseover="mOver(this.parentNode.id,this.id,'<?php echo $imgloc; ?>hidden_on.gif')" onmouseout="mOut(this.parentNode.id,this.id,'<?php echo $imgloc; ?>hidden_off.gif')" src="<?php echo $imgloc; ?>hidden_off.gif" id="img8">-->
-			</div> 
+			</div>
 		</div>
 		<div style="width:600px;margin-left:auto;margin-right:auto;margin-top:20px;">
 			<div style="float:left;width:250px;">
@@ -602,7 +602,7 @@ $imgloc = "../images/games/namegame/";
 					<img id="hpic" style="width:150px;" src="<?php echo $imgloc; ?>plant7.gif">
 				</div>
 				<div id="counter" style="text-align:center;width:190px;margin-left:auto;margin-right:auto;">Chances left = 6</div>
-			</div> 
+			</div>
 			<div style="float:right;width:250px;">
 				<div style="clear:both;width:150px;margin-left:auto;margin-right:auto;margin-top:20px;">
 					<div style="margin-top:30px;">

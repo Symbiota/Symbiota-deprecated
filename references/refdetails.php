@@ -444,7 +444,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 								echo '<ul>';
 								foreach($refChecklistArr as $k => $v){
 									echo '<li>';
-									echo '<a href="../checklists/checklist.php?cl='.$k.'&pid=1" target="_blank" >';
+									echo '<a href="../checklists/checklist.php?clid='.$k.'&pid=" target="_blank" >';
 									echo $v;
 									echo '</a>';
 									echo '</li>';

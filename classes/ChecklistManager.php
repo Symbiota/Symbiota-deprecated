@@ -39,41 +39,22 @@ class ChecklistManager {
  		if(!($this->conn === false)) $this->conn->close();
 	}
 
-	public function setClValue($clValue){
-		$retStr = '';
-		$clValue = $this->conn->real_escape_string($clValue);
-		if(is_numeric($clValue)){
-			$this->clid = $clValue;
-		}
-		else{
-			$sql = 'SELECT c.clid FROM fmchecklists c WHERE (c.Name = "'.$clValue.'")';
-			$rs = $this->conn->query($sql);
-			if($rs){
-				if($row = $rs->fetch_object()){
-					$this->clid = $row->clid;
+	public function setClid($clid){
+		if(is_numeric($clid)){
+			$this->clid = $clid;
+			//Get children checklists
+			$sqlChildBase = 'SELECT clidchild FROM fmchklstchildren WHERE clid IN(';
+			$sqlChild = $sqlChildBase.$this->clid.')';
+			do{
+				$childStr = "";
+				$rsChild = $this->conn->query($sqlChild);
+				while($rChild = $rsChild->fetch_object()){
+					$this->childClidArr[] = $rChild->clidchild;
+					$childStr .= ','.$rChild->clidchild;
 				}
-				else{
-					$retStr = '<h1>ERROR: invalid checklist identifier supplied ('.$clValue.')</h1>';
-				}
-				$rs->free();
-			}
-			else{
-				trigger_error('ERROR setting checklist ID, SQL: '.$sql, E_USER_ERROR);
-			}
+				$sqlChild = $sqlChildBase.substr($childStr,1).')';
+			}while($childStr);
 		}
-		//Get children checklists
-		$sqlChildBase = 'SELECT clidchild FROM fmchklstchildren WHERE clid IN(';
-		$sqlChild = $sqlChildBase.$this->clid.')';
-		do{
-			$childStr = "";
-			$rsChild = $this->conn->query($sqlChild);
-			while($rChild = $rsChild->fetch_object()){
-				$this->childClidArr[] = $rChild->clidchild;
-				$childStr .= ','.$rChild->clidchild;
-			}
-			$sqlChild = $sqlChildBase.substr($childStr,1).')';
-		}while($childStr);
-		return $retStr;
 	}
 
 	public function setDynClid($did){
@@ -425,9 +406,9 @@ class ChecklistManager {
 			fputcsv($fh,$headerArr);
 			foreach($taxaArr as $tid => $tArr){
 				unset($outArr);
-				$outArr = array($tArr['family'],$tArr['sciname'],$tArr['author']);
-				if($this->showCommon) $outArr[] = (array_key_exists('vern',$tArr)?$tArr['vern']:'');
-				$outArr[] = (array_key_exists('notes',$tArr)?strip_tags($tArr['notes']):'');
+				$outArr = array($tArr['family'],html_entity_decode($tArr['sciname'],ENT_QUOTES|ENT_XML1),html_entity_decode($tArr['author'],ENT_QUOTES|ENT_XML1));
+				if($this->showCommon) $outArr[] = (array_key_exists('vern',$tArr)?html_entity_decode($tArr['vern'],ENT_QUOTES|ENT_XML1):'');
+				$outArr[] = (array_key_exists('notes',$tArr)?strip_tags(html_entity_decode($tArr['notes'],ENT_QUOTES|ENT_XML1)):'');
 				$outArr[] = $tid;
 				fputcsv($fh,$outArr);
 			}
@@ -552,10 +533,10 @@ class ChecklistManager {
 			echo "google.maps.event.addListener(marker".$idStr.", 'click', function(){ closeAllInfoWins(); infoWin".$idStr.".open(map,marker".$idStr."); });\n";
 			//Double click event
 			if($target == 'keys'){
-				echo "var lStr".$idStr." = '../ident/key.php?cl=".$idStr."&proj=".$this->pid."&taxon=All+Species';\n";
+				echo "var lStr".$idStr." = '../ident/key.php?clid=".$idStr."&pid=".$this->pid."&taxon=All+Species';\n";
 			}
 			else{
-				echo "var lStr".$idStr." = 'checklist.php?cl=".$idStr."&proj=".$this->pid."';\n";
+				echo "var lStr".$idStr." = 'checklist.php?clid=".$idStr."&pid=".$this->pid."';\n";
 			}
 			echo "google.maps.event.addListener(marker".$idStr.", 'dblclick', function(){ closeAllInfoWins(); marker".$idStr.".setAnimation(google.maps.Animation.BOUNCE); window.location.href = lStr".$idStr."; });\n";
 		}
@@ -680,24 +661,19 @@ class ChecklistManager {
 		return $this->clName;
 	}
 
-	public function setProj($pValue){
-		$sql = 'SELECT pid, projname FROM fmprojects ';
-		if(is_numeric($pValue)){
-			$sql .= 'WHERE (pid = '.$pValue.')';
-		}
-		else{
-			$sql .= 'WHERE (projname = "'.$this->cleanInStr($pValue).'")';
-		}
-		$rs = $this->conn->query($sql);
-		if($rs){
-			if($r = $rs->fetch_object()){
-				$this->pid = $r->pid;
-				$this->projName = $this->cleanOutStr($r->projname);
+	public function setProj($pid){
+		if(is_numeric($pid)){
+			$sql = 'SELECT pid, projname FROM fmprojects WHERE (pid = '.$pid.')';
+			if($rs = $this->conn->query($sql)){
+				if($r = $rs->fetch_object()){
+					$this->pid = $r->pid;
+					$this->projName = $this->cleanOutStr($r->projname);
+				}
+				$rs->free();
 			}
-			$rs->free();
-		}
-		else{
-			trigger_error('ERROR: Unable to project => SQL: '.$sql, E_USER_WARNING);
+			else{
+				trigger_error('ERROR: Unable to project => SQL: '.$sql, E_USER_WARNING);
+			}
 		}
 		return $this->pid;
 	}

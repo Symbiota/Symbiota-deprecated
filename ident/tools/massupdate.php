@@ -121,10 +121,10 @@ include($SERVER_ROOT.'/header.php');
 ?>
 <div class='navpath'>
 	<a href="../../index.php">Home</a> &gt;&gt;
-	<a href="../../checklists/checklist.php?cl=<?php echo $clid; ?>">
+	<a href="../../checklists/checklist.php?clid=<?php echo $clid; ?>">
 		<b>Open Checklist</b>
 	</a> &gt;&gt;
-	<a href="../key.php?cl=<?php echo $clid; ?>&taxon=All+Species">
+	<a href="../key.php?clid=<?php echo $clid; ?>&taxon=All+Species">
 		<b>Open Key</b>
 	</a>
 	<?php

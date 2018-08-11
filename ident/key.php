@@ -12,11 +12,12 @@ if($IS_ADMIN || array_key_exists("KeyEditor",$USER_RIGHTS)){
 $attrsValues = Array();
 
 $clValue = array_key_exists("cl",$_REQUEST)?$_REQUEST["cl"]:"";
+if(!$clValue && array_key_exists('clid',$_REQUEST)) $clValue = $_REQUEST['clid'];
 $dynClid = array_key_exists("dynclid",$_REQUEST)?$_REQUEST["dynclid"]:0;
 $taxonValue = array_key_exists("taxon",$_REQUEST)?$_REQUEST["taxon"]:"";
 $action = array_key_exists("submitbutton",$_REQUEST)?$_REQUEST["submitbutton"]:"";
 $rv = array_key_exists("rv",$_REQUEST)?$_REQUEST["rv"]:"";
-$projValue = array_key_exists("proj",$_REQUEST)?htmlspecialchars($_REQUEST["proj"],ENT_QUOTES):"";
+$pid = array_key_exists('pid',$_REQUEST)?$_REQUEST['pid']:'';
 $langValue = array_key_exists("lang",$_REQUEST)?$_REQUEST["lang"]:"";
 $displayMode = array_key_exists("displaymode",$_REQUEST)?$_REQUEST["displaymode"]:"";
 if(!$action && array_key_exists("attr",$_REQUEST) && is_array($_REQUEST["attr"])){
@@ -25,6 +26,7 @@ if(!$action && array_key_exists("attr",$_REQUEST) && is_array($_REQUEST["attr"])
 
 //Sanitation
 if(!is_numeric($dynClid)) $dynClid = 0;
+if(!is_numeric($pid)) $pid = 0;
 if(!is_numeric($rv)) $rv = '';
 $langValue = 'English';
 
@@ -33,7 +35,7 @@ $dataManager = new KeyDataManager();
 //if(!$langValue) $langValue = $defaultLang;
 if($displayMode) $dataManager->setCommonDisplay(true);;
 $dataManager->setLanguage($langValue);
-if($projValue) $pid = $dataManager->setProject($projValue);
+if($pid) $dataManager->setProject($pid);
 if($dynClid) $dataManager->setDynClid($dynClid);
 $clid = $dataManager->setClValue($clValue);
 if($taxonValue) $dataManager->setTaxonFilter($taxonValue);
@@ -95,7 +97,7 @@ if($chars){
 			}
 		}
 		elseif($clid){
-			echo '<a href="'.$CLIENT_ROOT.'/checklists/checklist.php?cl='.$clid.'&pid='.$pid.'">';
+			echo '<a href="'.$CLIENT_ROOT.'/checklists/checklist.php?clid='.$clid.'&pid='.$pid.'">';
 			echo 'Checklist: '.$dataManager->getClName();
 			echo '</a> &gt;&gt; ';
 		}
@@ -138,9 +140,9 @@ if($chars){
                         </select>
                     </div>
                     <div style='font-weight:bold; margin-top:0.5em;'>
-                        <input type="hidden" id="cl" name="cl" value="<?php echo $clid; ?>" />
+                        <input type="hidden" id="cl" name="clid" value="<?php echo $clid; ?>" />
                         <input type="hidden" id="dynclid" name="dynclid" value="<?php echo $dynClid; ?>" />
-                        <input type="hidden" id="proj" name="proj" value="<?php echo $projValue; ?>" />
+                        <input type="hidden" id="pid" name="pid" value="<?php echo $pid; ?>" />
                         <input type="hidden" id="rv" name="rv" value="<?php echo $dataManager->getRelevanceValue(); ?>" />
                         <input type="submit" name="submitbutton" id="submitbutton" value="<?php echo $LANG['DISPRESSPEC'];?>"/>
                     </div>
@@ -177,7 +179,7 @@ if($chars){
                                 <h2>
                                     <?php
                                     if($FLORA_MOD_IS_ACTIVE){
-                                        echo '<a href="../checklists/checklist.php?cl='.$clid.'&dynclid='.$dynClid.'&pid='.$pid.'">';
+                                        echo '<a href="../checklists/checklist.php?clid='.$clid.'&dynclid='.$dynClid.'&pid='.$pid.'">';
                                     }
                                     echo $dataManager->getClName()." ";
                                     if($FLORA_MOD_IS_ACTIVE){
@@ -202,7 +204,7 @@ if($chars){
                                 echo "<tr><td colspan='2'><h3 style='margin-bottom:0px;margin-top:10px;'>$family</h3></td></tr>\n";
                                 natcasesort($species);
                                 foreach($species as $tid => $disName){
-                                    $newSpLink = '../taxa/index.php?taxon='.$tid."&cl=".($dataManager->getClType()=="static"?$dataManager->getClName():"");
+                                    $newSpLink = '../taxa/index.php?taxon='.$tid."&clid=".($dataManager->getClType()=="static"?$dataManager->getClid():"");
                                     echo "<tr><td><div style='margin:0px 5px 0px 10px;'><a href='".$newSpLink."' target='_blank'><i>$disName</i></a></div></td>\n";
                                     echo "<td align='right'>\n";
                                     if($isEditor){

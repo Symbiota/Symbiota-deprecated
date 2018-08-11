@@ -280,15 +280,6 @@ class KeyDataManager extends Manager {
 		if(is_numeric($projValue)){
 			$this->pid = $projValue;
 		}
-		else{
-			$sql = "SELECT p.pid FROM fmprojects p WHERE (p.projname = '".$this->cleanInStr($projValue)."')";
-			$result = $this->conn->query($sql);
-			if($row = $result->fetch_object()){
-				$this->pid = $row->pid;
-			}
-			$result->free();
-		}
-		return $this->pid;
 	}
 
 	public function getTaxaFilterList(){

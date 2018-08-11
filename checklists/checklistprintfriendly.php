@@ -2,28 +2,40 @@
 	include_once('../config/symbini.php');
 	include_once($SERVER_ROOT.'/classes/ChecklistManager.php');
 	header("Content-Type: text/html; charset=".$CHARSET);
-	$action = array_key_exists("submitaction",$_REQUEST)?$_REQUEST["submitaction"]:""; 
-	$tabIndex = array_key_exists("tabindex",$_REQUEST)?$_REQUEST["tabindex"]:0; 
-	$clValue = array_key_exists("cl",$_REQUEST)?$_REQUEST["cl"]:0; 
+	$clid = array_key_exists("clid",$_REQUEST)?$_REQUEST["clid"]:0;
 	$dynClid = array_key_exists("dynclid",$_REQUEST)?$_REQUEST["dynclid"]:0;
-	$proj = array_key_exists("proj",$_REQUEST)?$_REQUEST["proj"]:"";
+	$pid = array_key_exists("pid",$_REQUEST)?$_REQUEST["pid"]:0;
+	if(!$pid && array_key_exists("proj",$_REQUEST)) $pid = $_REQUEST["proj"];
 	$thesFilter = array_key_exists("thesfilter",$_REQUEST)?$_REQUEST["thesfilter"]:0;
-	$taxonFilter = array_key_exists("taxonfilter",$_REQUEST)?$_REQUEST["taxonfilter"]:""; 
-	$showAuthors = array_key_exists("showauthors",$_REQUEST)?$_REQUEST["showauthors"]:0; 
-	$showCommon = array_key_exists("showcommon",$_REQUEST)?$_REQUEST["showcommon"]:0; 
-	$showImages = array_key_exists("showimages",$_REQUEST)?$_REQUEST["showimages"]:0; 
-	$showVouchers = array_key_exists("showvouchers",$_REQUEST)?$_REQUEST["showvouchers"]:0; 
+	$taxonFilter = array_key_exists("taxonfilter",$_REQUEST)?$_REQUEST["taxonfilter"]:"";
+	$showAuthors = array_key_exists("showauthors",$_REQUEST)?$_REQUEST["showauthors"]:0;
+	$showCommon = array_key_exists("showcommon",$_REQUEST)?$_REQUEST["showcommon"]:0;
+	$showImages = array_key_exists("showimages",$_REQUEST)?$_REQUEST["showimages"]:0;
+	$showVouchers = array_key_exists("showvouchers",$_REQUEST)?$_REQUEST["showvouchers"]:0;
 	$searchCommon = array_key_exists("searchcommon",$_REQUEST)?$_REQUEST["searchcommon"]:0;
 	$searchSynonyms = array_key_exists("searchsynonyms",$_REQUEST)?$_REQUEST["searchsynonyms"]:0;
-	
+
+	//Sanitation
+	if(!is_numeric($clid)) $clid = 0;
+	if(!is_numeric($dynClid)) $dynClid = 0;
+	if(!is_numeric($pid)) $pid = 0;
+	if(!is_numeric($thesFilter)) $thesFilter = 0;
+	if(!preg_match('/^[a-z\-\s]+$/i', $taxonFilter)) $taxonFilter = '';
+	if(!is_numeric($showAuthors)) $showAuthors = 0;
+	if(!is_numeric($showCommon)) $showCommon = 0;
+	if(!is_numeric($showImages)) $showImages = 0;
+	if(!is_numeric($showVouchers)) $showVouchers = 0;
+	if(!is_numeric($searchCommon)) $searchCommon = 0;
+	if(!is_numeric($searchSynonyms)) $searchSynonyms = 0;
+
 	$clManager = new ChecklistManager();
-	if($clValue){
-		$clManager->setClValue($clValue);
+	if($clid){
+		$clManager->setClid($clid);
 	}
 	elseif($dynClid){
 		$clManager->setDynClid($dynClid);
 	}
-	if($proj) $clManager->setProj($proj);
+	if($pid) $clManager->setProj($pid);
 	if($thesFilter) $clManager->setThesFilter($thesFilter);
 	if($taxonFilter) $clManager->setTaxonFilter($taxonFilter);
 	if($searchCommon){
@@ -37,7 +49,7 @@
 	if($showVouchers) $clManager->setShowVouchers();
 
 	$clArray = Array();
-	if($clValue || $dynClid){
+	if($clid || $dynClid){
 		$clArray = $clManager->getClMetaData();
 		$taxaArray = $clManager->getTaxaList(0,99999);
 	}
@@ -54,29 +66,29 @@
 	<!-- This is inner text! -->
 	<div id='innertext'>
 		<?php
-		if($clValue || $dynClid){
+		if($clid || $dynClid){
 			?>
 			<div style="float:left;color:#990000;font-size:20px;font-weight:bold;margin:0px 10px 10px 0px;">
 				<?php echo $clManager->getClName(); ?>
 			</div>
 			<?php
 			//Do not show certain fields if Dynamic Checklist ($dynClid)
-			if($clValue){
+			if($clid){
 				?>
 				<div>
 					<span style="font-weight:bold;">
-						Authors: 
+						Authors:
 					</span>
 					<?php echo $clArray["authors"]; ?>
 				</div>
-				<?php 
+				<?php
 			}
 			?>
 			<div>
 				<div>
 					<h1>Species List</h1>
 					<div style="margin:3px;">
-						<b>Families:</b> 
+						<b>Families:</b>
 						<?php echo $clManager->getFamilyCount(); ?>
 					</div>
 					<div style="margin:3px;">
@@ -89,12 +101,12 @@
 						(species rank)
 					</div>
 					<div style="margin:3px;">
-						<b>Total Taxa:</b> 
+						<b>Total Taxa:</b>
 						<?php echo $clManager->getTaxaCount(); ?>
 						(including subsp. and var.)
 					</div>
-					<?php 
-					$prevfam = ''; 
+					<?php
+					$prevfam = '';
 					if($showImages){
 						foreach($taxaArray as $tid => $sppArr){
 							$family = $sppArr['family'];
@@ -108,11 +120,11 @@
 							}
 							?>
 							<div>
-								<?php 
+								<?php
 								echo "<div style='float:left;text-align:center;width:210px;height:".($showCommon?"260":"240")."px;'>";
 								$imgSrc = (array_key_exists('tnurl',$sppArr)&&$sppArr["tnurl"]?$sppArr["tnurl"]:$sppArr["url"]);
 								echo "<div class='tnimg' style='".($imgSrc?"":"border:1px solid black;")."'>";
-								$spUrl = "../taxa/index.php?taxauthid=1&taxon=$tid&cl=".$clManager->getClid();
+								$spUrl = "../taxa/index.php?taxauthid=1&taxon=$tid&clid=".$clManager->getClid();
 								if($imgSrc){
 									$imgSrc = (array_key_exists("imageDomain",$GLOBALS)&&substr($imgSrc,0,4)!="http"?$GLOBALS["imageDomain"]:"").$imgSrc;
 									echo "<img src='".$imgSrc."' style='height:100%;' />";
@@ -125,7 +137,7 @@
 								echo "</div>\n";
 								?>
 							</div>
-							<?php 
+							<?php
 						}
 					}
 					else{
@@ -178,9 +190,9 @@
 			<div>
 				Checklist identification is null!
 			</div>
-			<?php 
+			<?php
 		}
 		?>
 	</div>
 </body>
-</html> 
+</html>

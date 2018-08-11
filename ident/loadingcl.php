@@ -8,18 +8,18 @@ Header($ExpStr);
 
  $symClid = 0;
  $attrsValues = Array();
- 
- $clValue = array_key_exists("cl",$_REQUEST)?$_REQUEST["cl"]:""; 
- $symClid = array_key_exists("symclid",$_REQUEST)?$_REQUEST["symclid"]:0; 
- $taxonValue = array_key_exists("taxon",$_REQUEST)?$_REQUEST["taxon"]:""; 
- $action = array_key_exists("submit",$_REQUEST)?$_REQUEST["submit"]:""; 
- $rf = array_key_exists("rf",$_REQUEST)?$_REQUEST["rf"]:""; 
- $projValue = array_key_exists("proj",$_REQUEST)?$_REQUEST["proj"]:""; 
- $defaultLang = array_key_exists("lang",$_REQUEST)?$_REQUEST["lang"]:""; 
- $displayMode = array_key_exists("displaymode",$_REQUEST)?$_REQUEST["displaymode"]:""; 
- $attrsValues = array_key_exists("attr",$_REQUEST)?$_REQUEST["attr"]:"";	//Array of: cid + "-" + cs (ie: 2-3) 
- 
- $url = "key.php?cl=".$clValue;
+
+ $clValue = array_key_exists("cl",$_REQUEST)?$_REQUEST["cl"]:"";
+ $symClid = array_key_exists("symclid",$_REQUEST)?$_REQUEST["symclid"]:0;
+ $taxonValue = array_key_exists("taxon",$_REQUEST)?$_REQUEST["taxon"]:"";
+ $action = array_key_exists("submit",$_REQUEST)?$_REQUEST["submit"]:"";
+ $rf = array_key_exists("rf",$_REQUEST)?$_REQUEST["rf"]:"";
+ $projValue = array_key_exists("proj",$_REQUEST)?$_REQUEST["proj"]:"";
+ $defaultLang = array_key_exists("lang",$_REQUEST)?$_REQUEST["lang"]:"";
+ $displayMode = array_key_exists("displaymode",$_REQUEST)?$_REQUEST["displaymode"]:"";
+ $attrsValues = array_key_exists("attr",$_REQUEST)?$_REQUEST["attr"]:"";	//Array of: cid + "-" + cs (ie: 2-3)
+
+ $url = "key.php?clid=".$clValue;
  $url .= $taxonValue?"&taxon=".$taxonValue:"";
  $url .= $action?"&submit=".$action:"";
  $url .= $rf?"&rf=".$rf:"";
@@ -45,7 +45,7 @@ Header($ExpStr);
 	$displayLeftMenu = (isset($ident_loadingclMenu)?$ident_loadingclMenu:"true");
 	include($SERVER_ROOT.'/header.php');
 	if(isset($ident_loadingclCrumbs)) echo "<div class='navpath'>".$ident_loadingclCrumbs."</div>";
-	
+
 	?>
 	<!-- This is inner text! -->
 	<div id="innertext">
@@ -57,14 +57,14 @@ Header($ExpStr);
 			            <a href='../index.php' class='navpath'>Home</a> &gt;
 			            <a href='../collections/index.jsp' class='navpath'>Select Databases</a> &gt;
 			            <a href='../collections/harvestparams.jsp' class='navpath'>Search Parameters</a> &gt;
-			            <a href='../collections/checklist.jsp' class='navpath'>Checklist</a> 
+			            <a href='../collections/checklist.jsp' class='navpath'>Checklist</a>
 					<?php }else{ ?>
-			        	<a href='../index.php' class='navpath'>Home</a> &gt; 
-			        	<a href='../ident/index.php' class='navpath'>Symbiota Intro</a> &gt; 
+			        	<a href='../index.php' class='navpath'>Home</a> &gt;
+			        	<a href='../ident/index.php' class='navpath'>Symbiota Intro</a> &gt;
 			        	<span class='navpath'>Symbiota Key</span>
 					<?php } ?>
 		        </td>
-		        
+
 		        <td rowspan="2" width="20" align="center" valign="top">
 		            <!-- this is the line to the far right -->
 		            <img src="../images/vert_strip_right.gif" />
@@ -81,6 +81,6 @@ Header($ExpStr);
 	<?php
 		include($SERVER_ROOT.'/footer.php');
 	?>
-  
+
   </body>
 </html>

@@ -3,12 +3,12 @@ include_once('../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/ChecklistManager.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 
-$projValue = $_REQUEST['proj'];
+$pid = $_REQUEST['pid'];
 $target = array_key_exists('target',$_REQUEST)?$_REQUEST['target']:'checklists';
 
 $clManager = new ChecklistManager();
-if(!$projValue && isset($DEFAULT_PROJ_ID)) $projValue = $DEFAULT_PROJ_ID;
-$clManager->setProj($projValue);
+if(!$pid && isset($DEFAULT_PROJ_ID)) $pid = $DEFAULT_PROJ_ID;
+$clManager->setProj($pid);
 
 ?>
 <html>
@@ -20,7 +20,7 @@ $clManager->setProj($projValue);
 		    var map;
 		    var points = new Array();
 		    var infoWins = new Array();
-		  	
+
 		    function initialize(){
 		    	var dmLatLng = new google.maps.LatLng(41.0, -95.0);
 		    	var dmOptions = {
@@ -42,12 +42,12 @@ $clManager->setProj($projValue);
 				var averLat = 0;
 				var averLng = 0;
 				var panBounds;
-	            
+
 				var neBounds;
 				var swBounds;
 				var optimalBounds;
 				var zoomLevel = 3;
-	
+
 				// Find the max/min points
 				for( var i = 0; i < points.length; i++ ) {
 					var p = points[i];
