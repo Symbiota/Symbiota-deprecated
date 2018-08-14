@@ -304,6 +304,8 @@ include($serverRoot."/header.php");
         var url = "rpc/gettaxadata.php";
         var params = 'searchJson='+searchStr+'&display='+display;
         //console.log(url+'?'+params);
+        //console.log('loading');
+        $('body').addClass('with-overlay');
         http.open("POST", url, true);
         http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
         http.onreadystatechange = function() {
@@ -332,6 +334,8 @@ include($serverRoot."/header.php");
         else{
             document.getElementById("results-wrapper").style.display = 'none';
         }
+        //console.log('loaded');
+        $('body').removeClass('with-overlay');
     }
 
     function getResultCnt(res){
