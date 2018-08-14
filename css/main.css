@@ -1792,6 +1792,13 @@ div.mf_container {
 	background: #83c44b;
 }
 
+.searchResultListImage {
+	max-width: 125px;
+	height: auto;
+	padding-right: 10px;
+	vertical-align: middle;
+}
+
 /* metro */
 
 .metro-wrapper {

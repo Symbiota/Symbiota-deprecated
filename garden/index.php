@@ -354,6 +354,7 @@ include($serverRoot."/header.php");
             html += '<div class="searchResultTable">';
         }
         for(i in res){
+            //console.log(res[i]);
             var sciname = res[i].sciname;
             if(display == "grid"){
                 html += '<div class="searchresultgridcell">';
@@ -375,6 +376,7 @@ include($serverRoot."/header.php");
                 html += '</div>';
                 html += '</div>';
                 html += '<div id="hiddenListDiv'+i+'" class="searchResultListHiddenRow">';
+                if(res[i].url) html += '<img class="searchResultListImage" src="'+res[i].url+'" title="'+sciname+'" alt="'+sciname+' image" />';
                 html += '<div class="searchResultListType">'+(res[i].type?res[i].type:"")+'</div>';
                 html += '<div class="dsearchResultListLight">'+(res[i].light?res[i].light+" light":"")+'</div>';
                 html += '<div class="searchResultListMoisture">'+(res[i].moisture?res[i].moisture+" moisture":"")+'</div>';
