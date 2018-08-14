@@ -1799,6 +1799,15 @@ div.mf_container {
 	vertical-align: middle;
 }
 
+/* icons in results list */
+.list-icon {
+	background-size: contain;
+	height: 60px;
+	width: 60px;
+	margin-right: 10px;
+	text-indent: -1000px;
+	font-size: 1px;
+}
 /* metro */
 
 .metro-wrapper {

@@ -78,7 +78,7 @@ class GardenSearchManager {
             $sqlSuffix = 'ORDER BY t.SciName, i.sortsequence ';
         }
         elseif($this->display == 'list'){
-            $sqlSelect = 'SELECT t.TID, t.SciName, i.thumbnailurl, v.VernacularName, kd.CID, ks.CharStateName ';
+            $sqlSelect = 'SELECT t.TID, t.SciName, i.thumbnailurl, v.VernacularName, kd.CID, ks.CharStateName, ks.cs ';
             $sqlFrom = 'FROM taxa AS t LEFT JOIN taxavernaculars AS v ON t.TID = v.TID ';
 	        $sqlFrom .= 'LEFT JOIN kmdescr AS kd ON t.TID = kd.TID ';
             $sqlFrom .= 'LEFT JOIN kmcs AS ks ON kd.CID = ks.cid AND kd.CS = ks.cs ';
@@ -115,9 +115,29 @@ class GardenSearchManager {
 		            $returnArr[$tid]['url'] = $imgThumbnail;
 	            }
                 if(!isset($returnArr[$tid]['common'])) $returnArr[$tid]['common'] = $row->VernacularName;
-                if(!isset($returnArr[$tid]['type']) && $cid == 137) $returnArr[$tid]['type'] = $row->CharStateName;
-                if(!isset($returnArr[$tid]['light']) && $cid == 681) $returnArr[$tid]['light'] = $row->CharStateName;
-                if(!isset($returnArr[$tid]['moisture']) && $cid == 682) $returnArr[$tid]['moisture'] = $row->CharStateName;
+                if(!isset($returnArr[$tid]['type']) && $cid == 137) {
+	                $returnArr[$tid]['type'] = $row->CharStateName;
+	                if($row->cs == 3) $returnArr[$tid]['type_class'] = "planttype1";
+	                if($row->cs == 2) $returnArr[$tid]['type_class'] = "planttype2";
+	                if($row->cs == 6) $returnArr[$tid]['type_class'] = "planttype3";
+	                if($row->cs == 1) $returnArr[$tid]['type_class'] = "planttype4";
+	                if($row->cs == 4) $returnArr[$tid]['type_class'] = "planttype5";
+	                if($row->cs == 5) $returnArr[$tid]['type_class'] = "planttype6";
+                }
+                if(!isset($returnArr[$tid]['light']) && $cid == 681) {
+                	$returnArr[$tid]['light'] = $row->CharStateName;
+	                if($row->cs == 1) $returnArr[$tid]['light_class'] = "sunlight1";
+	                if($row->cs == 3) $returnArr[$tid]['light_class'] = "sunlight2";
+	                if($row->cs == 4) $returnArr[$tid]['light_class'] = "sunlight3";
+                }
+                if(!isset($returnArr[$tid]['moisture']) && $cid == 682) {
+                	$returnArr[$tid]['moisture'] = $row->CharStateName;
+	                if($row->cs == 1) $returnArr[$tid]['moisture_class'] = "moisture1";
+	                if($row->cs == 2) $returnArr[$tid]['moisture_class'] = "moisture2";
+	                if($row->cs == 3) $returnArr[$tid]['moisture_class'] = "moisture3";
+	                if($row->cs == 4) $returnArr[$tid]['moisture_class'] = "moisture5";
+	                if($row->cs == 5) $returnArr[$tid]['moisture_class'] = "moisture4";
+                }
                 if(!isset($returnArr[$tid]['ease']) && $cid == 684) $returnArr[$tid]['ease'] = $row->CharStateName;
                 if(!isset($returnArr[$tid]['maxheight']) && $cid == 690) $returnArr[$tid]['maxheight'] = $row->CharStateName;
                 if(!isset($returnArr[$tid]['maxwidth']) && $cid == 738) $returnArr[$tid]['maxwidth'] = $row->CharStateName;
