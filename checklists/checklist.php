@@ -607,6 +607,7 @@ if($clid || $dynClid){
 						}
 					}
 					else{
+						//Display taxa
 						foreach($taxaArray as $tid => $sppArr){
 							if(!$showAlphaTaxa){
 								$family = $sppArr['family'];
@@ -630,23 +631,23 @@ if($clid || $dynClid){
 							if(array_key_exists('vern',$sppArr)){
 								echo " - <span style='font-weight:bold;'>".$sppArr["vern"]."</span>";
 							}
+							$clidArr = explode(',',$sppArr['clid']);
+							if(in_array($clid, $clidArr) && $clArray["dynamicsql"]){
+								?>
+								<span style="margin-left:10px">
+									<a href="../collections/list.php?db=all&thes=1&reset=1&taxa=<?php echo $tid."&targetclid=".$clid."&targettid=".$tid;?>" target="_blank">
+										<img src="../images/mappoint.png" style="width:14px;" title="View Related Specimens" />
+									</a>
+								</span>
+								<?php
+							}
 							if($isEditor){
 								//Delete species or edit details specific to this taxon (vouchers, notes, habitat, abundance, etc
-								$clidArr = explode(',',$sppArr['clid']);
 								foreach($clidArr as $id){
 									?>
 									<span class="editspp" style="<?php echo ($editMode?'':'display:none'); ?>;">
 										<a href="#" onclick="return openPopup('clsppeditor.php?tid=<?php echo $tid."&clid=".$id; ?>','editorwindow');">
 											<img src="../images/edit.png" style="width:13px;" title="edit details (clid = <?php echo $id; ?>)" />
-										</a>
-									</span>
-									<?php
-								}
-								if(in_array($clid, $clidArr) && $showVouchers && array_key_exists("dynamicsql",$clArray) && $clArray["dynamicsql"]){
-									?>
-									<span class="editspp" style="display:none;margin-left:10px">
-										<a href="#" onclick="return openPopup('../collections/list.php?db=all&thes=1&reset=1&taxa=<?php echo $tid."&targetclid=".$clid."&targettid=".$tid;?>','editorwindow');">
-											<img src="../images/link.png" style="width:13px;" title="Link Voucher Specimens" />
 										</a>
 									</span>
 									<?php
