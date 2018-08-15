@@ -52,6 +52,7 @@ class OccurrenceManager extends OccurrenceTaxaManager {
 		if(array_key_exists("targetclid",$this->searchTermArr) && is_numeric($this->searchTermArr["targetclid"])){
 			//Used to exclude vouchers alredy linked to target checklist
 			$sqlWhere .= 'AND ('.$this->voucherManager->getSqlFrag().') ';
+			/* Temporarily deactivate code, may reactivate later if needed
 			$clOccidArr = array();
 			if(isset($this->taxaArr['search']) && is_numeric($this->taxaArr['search'])){
 				$sql = 'SELECT DISTINCT v.occid '.
@@ -65,6 +66,7 @@ class OccurrenceManager extends OccurrenceTaxaManager {
 				$rs->free();
 			}
 			if($clOccidArr) $sqlWhere .= 'AND (o.occid NOT IN('.implode(',',$clOccidArr).')) ';
+			*/
 			$this->displaySearchArr[] = $this->voucherManager->getQueryVariableStr();
 		}
 		elseif(array_key_exists('clid',$this->searchTermArr) && is_numeric($this->searchTermArr['clid'])){
