@@ -461,25 +461,25 @@ if($clid || $dynClid){
 											$googleUrl .= '&markers=size:tiny|'.implode('|',$coordArr);
 											?>
 											<img src="<?php echo $googleUrl; ?>" style="border:0px;" /><br/>
-											Display Vouchers in Simple Map
 										</a>
 									</div>
-									<div>
-										<a href="../collections/map/index.php?clid=<?php echo $clid.'&cltype=vouchers&taxonfilter='.$taxonFilter; ?>&db=all&maptype=occquery&type=1&reset=1" target="_blank">
-											Display Vouchers in Dynamic Map
-										</a>
-									</div>
-									<?php
-									if($clArray['footprintwkt'] && substr($clArray['footprintwkt'],0,7) == 'POLYGON'){
-										?>
-										<div>
-											<a href="../collections/map/index.php?clid=<?php echo $clid.'&cltype=all&taxonfilter='.$taxonFilter; ?>&db=all&maptype=occquery&type=1&reset=1" target="_blank">
-												Display All Occurrence in Dynamic Map
-											</a>
-										</div>
+									<div style="margin-top:5px">
+										<span style="margin:5px">
+											<a href="checklistmap.php?clid=<?php echo $clid.'&thesfilter='.$thesFilter.'&taxonfilter='.$taxonFilter; ?>" target="_blank"><img src="../images/world.png" style="width:18px" title="<?php echo (isset($LANG['VOUCHERS_SIMPLE_MAP'])?$LANG['VOUCHERS_SIMPLE_MAP']:'Display Vouchers in Simple Map'); ?>" /></a>
+										</span>
+										<span style="margin:5px">
+											<a href="../collections/map/index.php?clid=<?php echo $clid.'&cltype=vouchers&taxonfilter='.$taxonFilter; ?>&db=all&maptype=occquery&type=1&reset=1" target="_blank"><img src="../images/world.png" style="width:18px" title="<?php echo (isset($LANG['VOUCHERS_DYNAMIC_MAP'])?$LANG['VOUCHERS_DYNAMIC_MAP']:'Display Vouchers in Dynamic Map'); ?>" /></a>
+										</span>
 										<?php
-									}
-									?>
+										if($clArray['footprintwkt'] && substr($clArray['footprintwkt'],0,7) == 'POLYGON'){
+											?>
+											<span style="margin:5px">
+												<a href="../collections/map/index.php?clid=<?php echo $clid.'&cltype=all&taxonfilter='.$taxonFilter; ?>&db=all&maptype=occquery&type=1&reset=1" target="_blank"><img src="../images/world.png" style="width:18px" title="<?php echo (isset($LANG['OCCUR_DYNAMIC_MAP'])?$LANG['OCCUR_DYNAMIC_MAP']:'Display All Occurrence in Dynamic Map'); ?>" /></a>
+											</span>
+											<?php
+										}
+										?>
+									</div>
 								</div>
 								<?php
 							}
@@ -636,7 +636,7 @@ if($clid || $dynClid){
 								?>
 								<span style="margin-left:10px">
 									<a href="../collections/list.php?db=all&thes=1&reset=1&taxa=<?php echo $tid."&targetclid=".$clid."&targettid=".$tid;?>" target="_blank">
-										<img src="../images/mappoint.png" style="width:14px;" title="View Related Specimens" />
+										<img src="../images/mappoint.png" style="width:14px;" title="<?php echo (isset($LANG['VIEW_RELATED'])?$LANG['VIEW_RELATED']:'View Related Specimens'); ?>" />
 									</a>
 								</span>
 								<?php
