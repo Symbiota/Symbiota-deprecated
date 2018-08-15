@@ -48,7 +48,7 @@ $clManager->setProj($pid);
 							<ul>
 								<?php
 								foreach($projArr['clid'] as $clid => $clName){
-									echo "<li><a href='checklist.php?clid=".$clid."&pid=".$pid."'>".$clid."</a></li>\n";
+									echo "<li><a href='checklist.php?clid=".$clid."&pid=".$pid."'>".$clName."</a></li>\n";
 								}
 								?>
 							</ul>
