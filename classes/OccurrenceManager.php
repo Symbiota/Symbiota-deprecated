@@ -52,21 +52,21 @@ class OccurrenceManager extends OccurrenceTaxaManager {
 		if(array_key_exists("targetclid",$this->searchTermArr) && is_numeric($this->searchTermArr["targetclid"])){
 			//Used to exclude vouchers alredy linked to target checklist
 			$sqlWhere .= 'AND ('.$this->voucherManager->getSqlFrag().') ';
-			/* Temporarily deactivate code, may reactivate later if needed
-			$clOccidArr = array();
-			if(isset($this->taxaArr['search']) && is_numeric($this->taxaArr['search'])){
-				$sql = 'SELECT DISTINCT v.occid '.
-					'FROM fmvouchers v INNER JOIN taxstatus ts ON v.tid = ts.tidaccepted '.
-					'INNER JOIN taxstatus ts2 ON ts.tidaccepted = ts2.tidaccepted '.
-					'WHERE (v.clid = '.$this->searchTermArr["targetclid"].') AND (v.tid = '.$this->taxaArr['search'].')';
-				$rs = $this->conn->query($sql);
-				while($r = $rs->fetch_object()){
-					$clOccidArr[] = $r->occid;
+			if(array_key_exists('mode', $_REQUEST) && $_REQUEST['mode'] == 'voucher'){
+				$clOccidArr = array();
+				if(isset($this->taxaArr['search']) && is_numeric($this->taxaArr['search'])){
+					$sql = 'SELECT DISTINCT v.occid '.
+						'FROM fmvouchers v INNER JOIN taxstatus ts ON v.tid = ts.tidaccepted '.
+						'INNER JOIN taxstatus ts2 ON ts.tidaccepted = ts2.tidaccepted '.
+						'WHERE (v.clid = '.$this->searchTermArr["targetclid"].') AND (v.tid = '.$this->taxaArr['search'].')';
+					$rs = $this->conn->query($sql);
+					while($r = $rs->fetch_object()){
+						$clOccidArr[] = $r->occid;
+					}
+					$rs->free();
 				}
-				$rs->free();
+				if($clOccidArr) $sqlWhere .= 'AND (o.occid NOT IN('.implode(',',$clOccidArr).')) ';
 			}
-			if($clOccidArr) $sqlWhere .= 'AND (o.occid NOT IN('.implode(',',$clOccidArr).')) ';
-			*/
 			$this->displaySearchArr[] = $this->voucherManager->getQueryVariableStr();
 		}
 		elseif(array_key_exists('clid',$this->searchTermArr) && is_numeric($this->searchTermArr['clid'])){

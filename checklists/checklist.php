@@ -634,9 +634,9 @@ if($clid || $dynClid){
 							$clidArr = explode(',',$sppArr['clid']);
 							if(in_array($clid, $clidArr) && $clArray["dynamicsql"]){
 								?>
-								<span style="margin-left:10px">
+								<span style="margin:0px 10px">
 									<a href="../collections/list.php?db=all&thes=1&reset=1&taxa=<?php echo $tid."&targetclid=".$clid."&targettid=".$tid;?>" target="_blank">
-										<img src="../images/mappoint.png" style="width:14px;" title="<?php echo (isset($LANG['VIEW_RELATED'])?$LANG['VIEW_RELATED']:'View Related Specimens'); ?>" />
+										<img src="../images/list.png" style="width:14px;" title="<?php echo (isset($LANG['VIEW_RELATED'])?$LANG['VIEW_RELATED']:'View Related Specimens'); ?>" />
 									</a>
 								</span>
 								<?php
@@ -648,6 +648,15 @@ if($clid || $dynClid){
 									<span class="editspp" style="<?php echo ($editMode?'':'display:none'); ?>;">
 										<a href="#" onclick="return openPopup('clsppeditor.php?tid=<?php echo $tid."&clid=".$id; ?>','editorwindow');">
 											<img src="../images/edit.png" style="width:13px;" title="edit details (clid = <?php echo $id; ?>)" />
+										</a>
+									</span>
+									<?php
+								}
+								if(in_array($clid, $clidArr) && $showVouchers && array_key_exists('dynamicsql',$clArray) && $clArray['dynamicsql']){
+									?>
+									<span class="editspp" style="margin-left:5px;display:none">
+										<a href="../collections/list.php?db=all&thes=1&reset=1&taxa=<?php echo $tid."&targetclid=".$clid."&targettid=".$tid.'&mode=voucher'; ?>" target="_blank">
+											<img src="../images/link.png" style="width:12px;" title="<?php echo (isset($LANG['VIEW_RELATED'])?$LANG['VIEW_RELATED']:'Link Specimen Vouchers'); ?>" /><span style="font-size:70%">V</span>
 										</a>
 									</span>
 									<?php
