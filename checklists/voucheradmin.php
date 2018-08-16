@@ -180,8 +180,7 @@ if($clid && $isEditor){
 								<div>
 									<input name="includewkt" value="1" type="checkbox" <?php if(isset($termArr['includewkt'])) echo 'CHECKED'; ?> onclick="coordInputSelected(this)" />
 									<?php echo (isset($LANG['POLYGON_SEARCH'])?$LANG['POLYGON_SEARCH']:'Search based on polygon defining checklist research boundaries'); ?>
-									<a href="#" onclick="openPopup('tools/mappolyaid.php?clid=<?php echo $clid; ?>&emode=0','mappopup');return false;" target="_blank" title="View Polygon"><img src="../images/world.png" style="width:12px" /></a>
-									<a href="checklistadmin.php?clid=<?php echo $clid; ?>&tabindex=1" target="_blank" title="Edit Metadata and polygon"><img src="../images/edit.png" style="width:12px" /></a>
+									<a href="#"  onclick="openPopup('tools/mappolyaid.php?clid=<?php echo $clid; ?>','mappopup');return false;" title="Edit Metadata and polygon"><img src="../images/edit.png" style="width:12px" /></a>
 								</div>
 								<div>
 									<input name="excludecult" value="1" type="checkbox" <?php if(isset($termArr['excludecult'])) echo 'CHECKED'; ?> />

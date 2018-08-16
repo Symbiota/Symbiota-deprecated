@@ -12,7 +12,7 @@ $clManager->setClid($clid);
 if($thesFilter) $clManager->setThesFilter($thesFilter);
 if($taxonFilter) $clManager->setTaxonFilter($taxonFilter);
 
-$coordArr = $clManager->getCoordinates(0);
+$coordArr = $clManager->getVoucherCoordinates(0);
 ?>
 <html>
 <head>

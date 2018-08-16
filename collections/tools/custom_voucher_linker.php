@@ -15,7 +15,7 @@ $voucherLinker = new VoucherLinker();
 
 if($clid && is_numeric($clid)) $voucherLinker->setClid($clid);
 
-$voucherLinker->linkVouchers();
+//$voucherLinker->linkVouchers();
 
 class VoucherLinker {
 

@@ -255,12 +255,31 @@ else{
 				}
 				return true;
 			}
+
+			function toggle(target){
+				var ele = document.getElementById(target);
+				if(ele){
+					if(ele.style.display=="none"){
+						ele.style.display="";
+			  		}
+				 	else{
+				 		ele.style.display="none";
+				 	}
+				}
+			}
 		</script>
 	</head>
 	<body style="background-color:#ffffff;" onload="initialize()">
 		<div id='map_canvas' style='width:100%;height:600px;'></div>
 		<div>
 			<div id="reformatdiv" style="display:none;color:red">Polygon has been reformated. The new polygon must be saved before it is usable!</div>
+			<div id="helptext" style="display:none;margin:5px 0px">
+				Click on polygon symbol to activate polygon tool and create a shape representing research area.
+				Click save button to link polygon to checklist.
+				The WKT polygon footprint within the text box can be modifed by hand and rebuilt on map using the Redraw Polygon button.
+				A WKT polygon definition can be copied into text area from another application.
+				Use Switch Coordinate Order button to convert Long-Lat coordinate pairs to Lat-Long format.
+			</div>
 			<form name="polygonSubmitForm" method="post" action="mappolyaid.php" onsubmit="return submitPolygonForm(this)">
 				<div style="float:left">
 					<textarea id="footprintwkt" name="footprintwkt" style="width:650px;height:75px;"><?php echo $clManager->getFootprintWkt(); ?></textarea>
@@ -273,24 +292,15 @@ else{
 				if($eMode){
 					?>
 					<div style="float:left">
-						<button type="button" onclick="resetPolygon()">Redraw Polygon</button>
+						<button name="formsubmit" type="submit" value="save">Save Polygon</button>
 						<a href="#" onclick="toggle('helptext')"><img alt="Display Help Text" src="../../images/qmark_big.png" style="width:15px;" /></a><br/>
-						<button type="button" onclick="reformCoordinates(this.form);">Reformat Coordinates</button><br/>
-						<button name="formsubmit" type="submit" value="save">Save Polygon</button><br/>
-						<button name="formsubmit" type="submit" value="save" onclick="deleteSelectedShape(this.form)">Delete Selected Shape</button>
+						<button name="formsubmit" type="submit" value="save" onclick="deleteSelectedShape(this.form)">Delete Selected Shape</button><br/>
+						<button type="button" onclick="resetPolygon()">Redraw Polygon</button><br/>
+						<button type="button" onclick="reformCoordinates(this.form);">Reformat Coordinates</button>
 					</div>
 					<?php
 				}
 				?>
-				<div style="clear: both;">
-					<div id="helptext" style="clear:both;display:none;">
-						Click on polygon symbol to activate polygon tool and create a shape representing research area.<br/>
-						Click save button to link polygon to checklist.<br/>
-						The WKT polygon footprint within the text box can be modifed by hand and rebuilt on map using the Redraw Polygon button.<br/>
-						A WKT polygon definition can be copied into text area from another application. <br/>
-						Use Switch Coordinate Order button to convert Long-Lat coordinate pairs to Lat-Long format
-					</div>
-				</div>
 			</form>
 		</div>
 	</body>

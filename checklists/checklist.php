@@ -450,39 +450,54 @@ if($clid || $dynClid){
 							<?php
 						}
 						if(!$showImages){
-							if($coordArr = $clManager->getCoordinates(0,true)){
-								?>
-								<div style="text-align:center;padding:10px">
+							?>
+							<div style="text-align:center;padding:10px">
+								<?php
+								$coordArr = $clManager->getVoucherCoordinates(0,true);
+								$googleUrl = '//maps.googleapis.com/maps/api/staticmap?size=170x170&maptype=terrain';
+								if(array_key_exists('GOOGLE_MAP_KEY',$GLOBALS) && $GLOBALS['GOOGLE_MAP_KEY']) $googleUrl .= '&key='.$GLOBALS['GOOGLE_MAP_KEY'];
+								if($coordArr){
+									$googleUrl .= '&markers=size:tiny|'.implode('|',$coordArr);
+									?>
 									<div>
 										<a href="checklistmap.php?clid=<?php echo $clid.'&thesfilter='.$thesFilter.'&taxonfilter='.$taxonFilter; ?>" target="_blank">
-											<?php
-											$googleUrl = '//maps.googleapis.com/maps/api/staticmap?size=170x170&maptype=terrain';
-											if(array_key_exists('GOOGLE_MAP_KEY',$GLOBALS) && $GLOBALS['GOOGLE_MAP_KEY']) $googleUrl .= '&key='.$GLOBALS['GOOGLE_MAP_KEY'];
-											$googleUrl .= '&markers=size:tiny|'.implode('|',$coordArr);
-											?>
 											<img src="<?php echo $googleUrl; ?>" style="border:0px;" /><br/>
 										</a>
 									</div>
-									<div style="margin-top:5px">
-										<span style="margin:5px">
-											<a href="checklistmap.php?clid=<?php echo $clid.'&thesfilter='.$thesFilter.'&taxonfilter='.$taxonFilter; ?>" target="_blank"><img src="../images/world.png" style="width:18px" title="<?php echo (isset($LANG['VOUCHERS_SIMPLE_MAP'])?$LANG['VOUCHERS_SIMPLE_MAP']:'Display Vouchers in Simple Map'); ?>" /></a>
-										</span>
+									<?php
+								}
+								?>
+								<div style="margin-top:5px">
+									<?php
+									if($coordArr){
+										?>
 										<span style="margin:5px">
 											<a href="../collections/map/index.php?clid=<?php echo $clid.'&cltype=vouchers&taxonfilter='.$taxonFilter; ?>&db=all&maptype=occquery&type=1&reset=1" target="_blank"><img src="../images/world.png" style="width:18px" title="<?php echo (isset($LANG['VOUCHERS_DYNAMIC_MAP'])?$LANG['VOUCHERS_DYNAMIC_MAP']:'Display Vouchers in Dynamic Map'); ?>" /></a>
 										</span>
 										<?php
-										if($clArray['footprintwkt'] && substr($clArray['footprintwkt'],0,7) == 'POLYGON'){
-											?>
-											<span style="margin:5px">
-												<a href="../collections/map/index.php?clid=<?php echo $clid.'&cltype=all&taxonfilter='.$taxonFilter; ?>&db=all&maptype=occquery&type=1&reset=1" target="_blank"><img src="../images/world.png" style="width:18px" title="<?php echo (isset($LANG['OCCUR_DYNAMIC_MAP'])?$LANG['OCCUR_DYNAMIC_MAP']:'Display All Occurrence in Dynamic Map'); ?>" /></a>
-											</span>
-											<?php
-										}
+									}
+									if($clArray['dynamicsql']){
 										?>
-									</div>
+										<span style="margin:5px">
+											<a href="../collections/map/index.php?clid=<?php echo $clid.'&cltype=all&taxonfilter='.$taxonFilter; ?>&db=all&maptype=occquery&type=1&reset=1" target="_blank">
+												<?php
+												if($coordArr){
+													echo '<img src="../images/world.png" style="width:18px" title="'.(isset($LANG['OCCUR_DYNAMIC_MAP'])?$LANG['OCCUR_DYNAMIC_MAP']:'Display All Occurrence in Dynamic Map').'" />';
+												}
+												else{
+													$polygonCoordArr = $clManager->getPolygonCoordinates();
+													$googleUrl .= '&markers=size:tiny|'.implode('|',$polygonCoordArr);
+													echo '<img src="'.$googleUrl.'" style="border:0px;" /><br/>';
+												}
+												?>
+											</a>
+										</span>
+										<?php
+									}
+									?>
 								</div>
-								<?php
-							}
+							</div>
+						<?php
 						}
 						?>
 					</div>
@@ -652,7 +667,7 @@ if($clid || $dynClid){
 									</span>
 									<?php
 								}
-								if(in_array($clid, $clidArr) && $showVouchers && array_key_exists('dynamicsql',$clArray) && $clArray['dynamicsql']){
+								if(in_array($clid, $clidArr) && $showVouchers && $clArray['dynamicsql']){
 									?>
 									<span class="editspp" style="margin-left:5px;display:none">
 										<a href="../collections/list.php?db=all&thes=1&reset=1&taxa=<?php echo $tid."&targetclid=".$clid."&targettid=".$tid.'&mode=voucher'; ?>" target="_blank">

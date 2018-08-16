@@ -70,7 +70,12 @@ class OccurrenceManager extends OccurrenceTaxaManager {
 			$this->displaySearchArr[] = $this->voucherManager->getQueryVariableStr();
 		}
 		elseif(array_key_exists('clid',$this->searchTermArr) && is_numeric($this->searchTermArr['clid'])){
-			$sqlWhere .= 'AND (v.clid = '.$this->searchTermArr['clid'].') ';
+			if(isset($this->searchTermArr["cltype"]) && $this->searchTermArr["cltype"] == 'all'){
+				$sqlWhere .= 'AND (cl.clid IN('.$this->searchTermArr['clid'].')) ';
+			}
+			else{
+				$sqlWhere .= 'AND (v.clid IN('.$this->searchTermArr['clid'].')) ';
+			}
 			$this->displaySearchArr[] = 'Checklist ID: '.$this->searchTermArr['clid'];
 		}
 		elseif(array_key_exists("db",$this->searchTermArr) && $this->searchTermArr['db']){
@@ -392,7 +397,12 @@ class OccurrenceManager extends OccurrenceTaxaManager {
 	protected function getTableJoins($sqlWhere){
 		$sqlJoin = '';
 		if(array_key_exists('clid',$this->searchTermArr) && $this->searchTermArr['clid']){
-			$sqlJoin .= 'INNER JOIN fmvouchers v ON o.occid = v.occid ';
+			if(strpos($sqlWhere,'v.clid')){
+				$sqlJoin .= 'INNER JOIN fmvouchers v ON o.occid = v.occid ';
+			}
+			else{
+				$sqlJoin .= 'INNER JOIN fmchklsttaxalink cl ON o.tidinterpreted = cl.tid ';
+			}
 		}
 		if(strpos($sqlWhere,'MATCH(f.recordedby)') || strpos($sqlWhere,'MATCH(f.locality)')){
 			$sqlJoin .= 'INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ';

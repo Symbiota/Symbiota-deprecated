@@ -1,5 +1,6 @@
 <?php
 include_once($SERVER_ROOT.'/config/dbconnection.php');
+include_once($SERVER_ROOT.'/classes/ChecklistVoucherAdmin.php');
 
 class ChecklistManager {
 
@@ -7,6 +8,7 @@ class ChecklistManager {
 	private $clid;
 	private $dynClid;
 	private $clName;
+	private $clMetadata;
 	private $childClidArr = array();
 	private $voucherArr = array();
 	private $pid = '';
@@ -64,7 +66,6 @@ class ChecklistManager {
 	}
 
 	public function getClMetaData(){
-		$retArr = array();
 		$sql = "";
 		if($this->clid){
 			$sql = 'SELECT c.clid, c.name, c.locality, c.publication, c.abstract, c.authors, c.parentclid, c.notes, '.
@@ -81,23 +82,24 @@ class ChecklistManager {
 			if($result){
 		 		if($row = $result->fetch_object()){
 					$this->clName = $row->name;
-					$retArr["locality"] = $row->locality;
-					$retArr["notes"] = $row->notes;
-					$retArr["type"] = $row->type;
+					$this->clMetadata["locality"] = $row->locality;
+					//clMetadata
+					$this->clMetadata["notes"] = $row->notes;
+					$this->clMetadata["type"] = $row->type;
 					if($this->clid){
-						$retArr["publication"] = $row->publication;
-						$retArr["abstract"] = $row->abstract;
-						$retArr["authors"] = $row->authors;
-						$retArr["parentclid"] = $row->parentclid;
-						$retArr["uid"] = $row->uid;
-						$retArr["latcentroid"] = $row->latcentroid;
-						$retArr["longcentroid"] = $row->longcentroid;
-						$retArr["pointradiusmeters"] = $row->pointradiusmeters;
-						$retArr['footprintwkt'] = $row->footprintwkt;
-						$retArr["access"] = $row->access;
-						$retArr["defaultSettings"] = $row->defaultSettings;
-						$retArr["dynamicsql"] = $row->dynamicsql;
-						$retArr["datelastmodified"] = $row->datelastmodified;
+						$this->clMetadata["publication"] = $row->publication;
+						$this->clMetadata["abstract"] = $row->abstract;
+						$this->clMetadata["authors"] = $row->authors;
+						$this->clMetadata["parentclid"] = $row->parentclid;
+						$this->clMetadata["uid"] = $row->uid;
+						$this->clMetadata["latcentroid"] = $row->latcentroid;
+						$this->clMetadata["longcentroid"] = $row->longcentroid;
+						$this->clMetadata["pointradiusmeters"] = $row->pointradiusmeters;
+						$this->clMetadata['footprintwkt'] = $row->footprintwkt;
+						$this->clMetadata["access"] = $row->access;
+						$this->clMetadata["defaultSettings"] = $row->defaultSettings;
+						$this->clMetadata["dynamicsql"] = $row->dynamicsql;
+						$this->clMetadata["datelastmodified"] = $row->datelastmodified;
 					}
 		    	}
 		    	$result->free();
@@ -106,7 +108,7 @@ class ChecklistManager {
 				trigger_error('ERROR: unable to set checklist metadata => '.$sql, E_USER_ERROR);
 			}
 		}
-		return $retArr;
+		return $this->clMetadata;
 	}
 
 	public function echoFilterList(){
@@ -298,7 +300,7 @@ class ChecklistManager {
 		}
 	}
 
-	public function getCoordinates($tid = 0,$abbreviated=false){
+	public function getVoucherCoordinates($tid = 0,$abbreviated=false){
 		$retArr = array();
 		if(!$this->basicSql) $this->setClSql();
 		if($this->clid){
@@ -347,19 +349,15 @@ class ChecklistManager {
 			if(!$abbreviated || $retCnt < 50){
 				try{
 					//Grab voucher points
-					$sql2 = '';
-					if($tid){
-						$sql2 = 'SELECT DISTINCT v.tid, o.occid, o.decimallatitude, o.decimallongitude, '.
+					$sql2 = 'SELECT DISTINCT v.tid, o.occid, o.decimallatitude, o.decimallongitude, '.
 							'CONCAT(o.recordedby," (",IFNULL(o.recordnumber,o.eventdate),")") as notes '.
-							'FROM omoccurrences o INNER JOIN fmvouchers v ON o.occid = v.occid '.
-							'WHERE v.tid = '.$tid.' AND v.clid IN ('.$clidStr.') AND o.decimallatitude IS NOT NULL AND o.decimallongitude IS NOT NULL '.
+							'FROM omoccurrences o INNER JOIN fmvouchers v ON o.occid = v.occid ';
+					if($tid){
+						$sql2 .= 'WHERE v.tid = '.$tid.' AND v.clid IN ('.$clidStr.') AND o.decimallatitude IS NOT NULL AND o.decimallongitude IS NOT NULL '.
 							'AND (o.localitysecurity = 0 OR o.localitysecurity IS NULL) ';
 					}
 					else{
-						$sql2 = 'SELECT DISTINCT v.tid, o.occid, o.decimallatitude, o.decimallongitude, '.
-							'CONCAT(o.recordedby," (",IFNULL(o.recordnumber,o.eventdate),")") as notes '.
-							'FROM omoccurrences o INNER JOIN fmvouchers v ON o.occid = v.occid '.
-							'INNER JOIN ('.$this->basicSql.') t ON v.tid = t.tid '.
+						$sql2 .= 'INNER JOIN ('.$this->basicSql.') t ON v.tid = t.tid '.
 							'WHERE v.clid IN ('.$clidStr.') AND o.decimallatitude IS NOT NULL AND o.decimallongitude IS NOT NULL '.
 							'AND (o.localitysecurity = 0 OR o.localitysecurity IS NULL) ';
 					}
@@ -376,6 +374,7 @@ class ChecklistManager {
 							else{
 								$retArr[$r2->tid][] = array('ll'=>$r2->decimallatitude.','.$r2->decimallongitude,'notes'=>$this->cleanOutStr($r2->notes),'occid'=>$r2->occid);
 							}
+							$retCnt++;
 						}
 						$rs2->free();
 					}
@@ -383,6 +382,32 @@ class ChecklistManager {
 				catch(Exception $e){
 					//echo 'Caught exception getting voucher coordinates: ',  $e->getMessage(), "\n";
 				}
+			}
+		}
+		return $retArr;
+	}
+
+	public function getPolygonCoordinates(){
+		$retArr = array();
+		if($this->clid){
+			if($this->clMetadata['dynamicsql']){
+				$sql = 'SELECT o.decimallatitude, o.decimallongitude FROM omoccurrences o ';
+				if($this->clMetadata['footprintwkt'] && substr($this->clMetadata['footprintwkt'],0,7) == 'POLYGON'){
+					$sql .= 'INNER JOIN omoccurpoints p ON o.occid = p.occid WHERE (ST_Within(p.point,GeomFromText("'.$this->clMetadata['footprintwkt'].'"))) ';
+				}
+				else{
+					$this->voucherManager = new ChecklistVoucherAdmin($this->conn);
+					$this->voucherManager->setClid($this->clid);
+					$this->voucherManager->setCollectionVariables();
+					$sql .= 'WHERE ('.$this->voucherManager->getSqlFrag().') ';
+				}
+				$sql .= 'LIMIT 50';
+				//echo $sql; exit;
+				$rs = $this->conn->query($sql);
+				while($r = $rs->fetch_object()){
+					$retArr[] = $r->decimallatitude.','.$r->decimallongitude;
+				}
+				$rs->free();
 			}
 		}
 		return $retArr;
