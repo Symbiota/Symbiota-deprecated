@@ -409,21 +409,21 @@ else{
     <?php
     if($crowdSourceMode == 1){
 		?>
-		<link href="includes/config/occureditorcrowdsource.css?ver=1802" type="text/css" rel="stylesheet" id="editorCssLink" />
+		<link href="includes/config/occureditorcrowdsource.css?ver=1805" type="text/css" rel="stylesheet" id="editorCssLink" />
 		<?php
     }
     else{
 		?>
-		<link href="../../css/occureditor.css?ver=170601" type="text/css" rel="stylesheet" id="editorCssLink" />
+		<link href="../../css/occureditor.css?ver=170604" type="text/css" rel="stylesheet" id="editorCssLink" />
 		<?php
 		if(isset($CSSARR)){
 			foreach($CSSARR as $cssVal){
-				echo '<link href="includes/config/'.$cssVal.'?ver=170601" type="text/css" rel="stylesheet" id="editorCssLink" />';
+				echo '<link href="includes/config/'.$cssVal.'?ver=170603" type="text/css" rel="stylesheet" id="editorCssLink" />';
 			}
 		}
 		if(isset($JSARR)){
 			foreach($JSARR as $jsVal){
-				echo '<script src="includes/config/'.$jsVal.'?ver=170601" type="text/javascript"></script>';
+				echo '<script src="includes/config/'.$jsVal.'?ver=170603" type="text/javascript"></script>';
 			}
 		}
 	}
@@ -1150,14 +1150,20 @@ else{
 												<input type="text" name="verbatimattributes" tabindex="86" value="<?php echo array_key_exists('verbatimattributes',$occArr)?$occArr['verbatimattributes']:''; ?>" onchange="fieldChanged('verbatimattributes');" />
 											</div>
 											<div id="occurrenceRemarksDiv">
-												<?php echo (defined('OCCURRENCEREMARKSLABEL')?OCCURRENCEREMARKSLABEL:'Notes (Occurrence Remarks)'); ?>
+												<?php echo (defined('OCCURRENCEREMARKSLABEL')?OCCURRENCEREMARKSLABEL:'Occurrence Remarks'); ?>
 												<a href="#" onclick="return dwcDoc('occurrenceRemarks')"><img class="docimg" src="../../images/qmark.png" style="width:9px;margin-bottom:2px" /></a>
 												<br/>
 												<input type="text" name="occurrenceremarks" tabindex="88" value="<?php echo array_key_exists('occurrenceremarks',$occArr)?$occArr['occurrenceremarks']:''; ?>" onchange="fieldChanged('occurrenceremarks');" title="Occurrence Remarks" />
-												<span id="dynPropToggleSpan" onclick="toggle('dynamicPropertiesDiv');">
+											</div>
+                                            <div id="fieldNotesDiv">
+                                                <?php echo (defined('FIELDNOTESLABEL')?FIELDNOTESLABEL:'Field Notes'); ?>
+                                                <a href="#" onclick="return dwcDoc('fieldNotes')"><img class="docimg" src="../../images/qmark.png" style="width:9px;margin-bottom:2px" /></a>
+                                                <br/>
+                                                <textarea name="fieldnotes" tabindex="88.5" onchange="fieldChanged('fieldnotes');" title="Field Notes"><?php echo array_key_exists('fieldnotes',$occArr)?$occArr['fieldnotes']:''; ?></textarea>
+                                                <span id="dynPropToggleSpan" onclick="toggle('dynamicPropertiesDiv');">
 													<img src="../../images/editplus.png" />
 												</span>
-											</div>
+                                            </div>
 											<div id="dynamicPropertiesDiv">
 												<?php echo (defined('DYNAMICPROPERTIESLABEL')?DYNAMICPROPERTIESLABEL:'Dynamic Properties'); ?>
 												<a href="#" onclick="return dwcDoc('dynamicProperties')"><img class="docimg" src="../../images/qmark.png" /></a><br/>

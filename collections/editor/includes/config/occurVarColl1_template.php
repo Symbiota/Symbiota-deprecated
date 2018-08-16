@@ -67,6 +67,7 @@
 //define('ASSOCIATEDTAXALABEL','');
 //define('VERBATIMATTRIBUTESLABEL','');
 //define('OCCURRENCEREMARKSLABEL','');
+//define('FIELDNOTESLABEL','');
 //define('DYNAMICPROPERTIESLABEL','');
 //define('LIFESTAGELABEL','');
 //define('SEXLABEL','');

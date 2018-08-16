@@ -23,7 +23,7 @@ $installationKey = '';
 $datasetKey = '';
 $endpointKey = '';
 $idigbioKey = '';
-if($collId && isset($GBIF_USERNAME) && isset($GBIF_PASSWORD) && isset($GBIF_ORG_KEY)){
+if($collId && isset($GBIF_USERNAME) && $GBIF_USERNAME && isset($GBIF_PASSWORD) && $GBIF_PASSWORD && isset($GBIF_ORG_KEY) && $GBIF_ORG_KEY){
     $collPubArr = $collManager->getCollPubArr($collId);
     if($collPubArr[$collId]['publishToGbif']){
         $publishGBIF = true;
@@ -245,7 +245,8 @@ include($SERVER_ROOT. '/header.php');
 	<?php
 	if($collId){
 		if($action == 'Create/Refresh Darwin Core Archive'){
-			echo '<ul>';
+            $dwcaManager->setCollID($collId);
+		    echo '<ul>';
 			$dwcaManager->setVerboseMode(3);
 			$dwcaManager->setLimitToGuids(true);
 			$dwcaManager->createDwcArchive();

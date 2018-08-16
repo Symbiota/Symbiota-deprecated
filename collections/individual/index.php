@@ -727,18 +727,37 @@ header("Content-Type: text/html; charset=".$CHARSET);
                             </div>
                             <?php
                         }
-						$noteStr = '';
-						if($occArr['occurrenceremarks']) $noteStr .= "; ".$occArr['occurrenceremarks'];
-						if($occArr['establishmentmeans']) $noteStr .= "; ".$occArr['establishmentmeans'];
-						if($occArr['cultivationstatus']) $noteStr .= "; Cultivated";
-						if($noteStr){
-							?>
-							<div style="clear:both;">
-								<b>Notes:</b>
-								<?php echo substr($noteStr,2); ?>
-							</div>
-							<?php
-						}
+						if($occArr['occurrenceremarks']){
+                            ?>
+                            <div style="clear:both;">
+                                <b>Occurrence Remarks: </b>
+                                <?php echo $occArr['occurrenceremarks']; ?>
+                            </div>
+                            <?php
+                        }
+                        if($occArr['fieldnotes']){
+                            ?>
+                            <div style="clear:both;">
+                                <b>Field Notes: </b>
+                                <?php echo $occArr['fieldnotes']; ?>
+                            </div>
+                            <?php
+                        }
+                        if($occArr['cultivationstatus']){
+                            ?>
+                            <div style="clear:both;">
+                                <b>Cultivation Status:</b> Cultivated
+                            </div>
+                            <?php
+                        }
+                        if($occArr['establishmentmeans']){
+                            ?>
+                            <div style="clear:both;">
+                                <b>Establishment Means: </b>
+                                <?php echo $occArr['establishmentmeans']; ?>
+                            </div>
+                            <?php
+                        }
 						if($occArr['disposition']){
 							?>
 							<div style="clear:both;">

@@ -613,6 +613,28 @@ body{
 	width:15px;
 }
 
+#fieldNotesDiv{
+	padding: 2px;
+}
+
+#fieldNotesDiv input{
+	width: 95%;
+}
+
+#fieldNotesDiv textarea{
+	width: 95%;
+	resize: vertical;
+}
+
+#fieldNotesDiv span{
+	margin-left: 5px;
+	cursor: pointer;
+}
+
+#fieldNotesDiv img{
+	width:15px;
+}
+
 #dynamicPropertiesDiv{
 	padding: 2px;
 	display: none;

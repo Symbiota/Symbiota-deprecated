@@ -13,6 +13,7 @@ class DwcArchiverCore extends Manager{
 	private $ts;
 
 	protected $collArr;
+	private $collID;
 	private $customWhereSql;
 	private $conditionSql;
  	private $conditionArr = array();
@@ -1113,7 +1114,7 @@ class DwcArchiverCore extends Manager{
 	 * USED BY: this class, and emlhandler.php
 	 */
 	public function getEmlDom($emlArr = null){
-		global $RIGHTS_TERMS_DEFS;
+		global $RIGHTS_TERMS_DEFS,$EML_PROJECT_ADDITIONS;
 		$usageTermArr = Array();
 
 		if(!$emlArr) $emlArr = $this->getEmlArr();
@@ -1277,7 +1278,22 @@ class DwcArchiverCore extends Manager{
 			$datasetElem->appendChild($rightsElem);
 		}
 
-		$symbElem = $newDoc->createElement('symbiota');
+        if($EML_PROJECT_ADDITIONS){
+            foreach($EML_PROJECT_ADDITIONS as $k => $v){
+                if(is_array($v['collid']) && in_array($this->collID,$v['collid'])){
+                    $projID = $v['id'];
+                    $projTitle = $v['title'];
+                    $projectElem = $newDoc->createElement('project');
+                    $projectElem->setAttribute('id',$projID);
+                    $titleElem = $newDoc->createElement('title');
+                    $titleElem->appendChild($newDoc->createTextNode($projTitle));
+                    $projectElem->appendChild($titleElem);
+                    $datasetElem->appendChild($projectElem);
+                }
+            }
+        }
+
+        $symbElem = $newDoc->createElement('symbiota');
 		$dateElem = $newDoc->createElement('dateStamp');
 		$dateElem->appendChild($newDoc->createTextNode(date("c")));
 		$symbElem->appendChild($dateElem);
@@ -2004,6 +2020,10 @@ class DwcArchiverCore extends Manager{
 	public function setGeolocateVariables($geolocateArr){
 		$this->geolocateVariables = $geolocateArr;
 	}
+
+    public function setCollID($id){
+        $this->collID = $id;
+    }
 
 	public function setServerDomain($domain = ''){
 		if($domain){

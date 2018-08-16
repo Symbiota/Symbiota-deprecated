@@ -57,7 +57,7 @@ if($isEditor){
 		}
 	}
 }
-if(isset($GBIF_USERNAME) && isset($GBIF_PASSWORD) && isset($GBIF_ORG_KEY) && $collid){
+if(isset($GBIF_USERNAME) && $GBIF_USERNAME && isset($GBIF_PASSWORD) && $GBIF_PASSWORD && isset($GBIF_ORG_KEY) && $GBIF_ORG_KEY && $collid){
 	$collPubArr = $collManager->getCollPubArr($collid);
 	if($collPubArr[$collid]['publishToGbif']){
 		$publishGBIF = true;
@@ -518,7 +518,7 @@ $collManager->cleanOutArr($collData);
 								</td>
 							</tr>
                             <?php
-                            if(isset($GBIF_USERNAME) && isset($GBIF_PASSWORD) && isset($GBIF_ORG_KEY)) {
+                            if(isset($GBIF_USERNAME) && $GBIF_USERNAME && isset($GBIF_PASSWORD) && $GBIF_PASSWORD && isset($GBIF_ORG_KEY) && $GBIF_ORG_KEY) {
                                 ?>
 	                            <tr>
 	                                <td>
