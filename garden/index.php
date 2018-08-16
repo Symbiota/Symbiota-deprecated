@@ -1042,18 +1042,6 @@ include($serverRoot."/header.php");
         </a>
     </div>
 </div>
-<div class="metro-wrapper">
-    <div class="inner-content">
-        <hr />
-        <div class="metro-col1"> </div>
-        <div class="metro-col2">
-            <div class="col-content">
-                <p>Metro is a primary contributor to OregonFlora's Gardening with Native Plants and supports efforts to protect clean
-                    air, water and habitat in greater portland.</p>
-            </div>
-        </div>
-    </div>
-</div>
 
 
 <?php
