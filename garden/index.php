@@ -487,7 +487,7 @@ include($serverRoot."/header.php");
                     <div class="divTableHead">Plant Type</div>
                     <div class="divTableHead">Sunlight</div>
                     <div class="divTableHead">Moisture</div>
-                    <div class="divTableHead">Size</div>
+                    <div class="divTableHead">Mature Size</div>
                     <div class="divTableHead">Ease of Growth</div>
                 </div>
             </div>
@@ -1016,28 +1016,28 @@ include($serverRoot."/header.php");
             <img src="<?php echo $clientRoot; ?>/images/layout/Pollinator_garden_sm.jpg" alt="Pollinator Garden">
             <h3>Pollinator Garden</h3>
             <div class="box-overlay">
-                <div class="centered">Description text</div>
+                <div class="centered">A focus on flowers that provide nectar or pollen to native bees and other insect pollinators</div>
             </div>
         </a>
         <a href="<?php echo $clientRoot; ?>/checklists/checklist.php?cl=14798&pid=3" class="home-box image-box">
             <img src="<?php echo $clientRoot; ?>/images/layout/Rock_garden_sm.jpg" alt="Rock Garden">
             <h3>Rock Garden</h3>
             <div class="box-overlay">
-                <div class="centered">Description text</div>
+                <div class="centered">Plants that bring color and texture to rocky, well-drained landscapes</div>
             </div>
         </a>
         <a href="<?php echo $clientRoot; ?>/checklists/checklist.php?cl=14799&pid=3" class="home-box image-box">
             <img src="<?php echo $clientRoot; ?>/images/layout/Water_features_garden_sm.jpg" alt="Rain Garden">
             <h3>Rain Garden</h3>
             <div class="box-overlay">
-                <div class="centered">Description text</div>
+                <div class="centered">Plants suited to the edge of a pond or stream, or moist soils nearby</div>
             </div>
         </a>
         <a href="<?php echo $clientRoot; ?>/checklists/checklist.php?cl=14800&pid=3" class="home-box image-box">
             <img src="<?php echo $clientRoot; ?>/images/layout/Woodland_garden_sm.jpg" alt="Woodland Garden">
             <h3>Woodland Garden</h3>
             <div class="box-overlay">
-                <div class="centered">Description text</div>
+                <div class="centered">Understory ferns, herbs, and shrubs to complete a wooded planting</div>
             </div>
         </a>
     </div>
