@@ -304,6 +304,8 @@ include($serverRoot."/header.php");
         var url = "rpc/gettaxadata.php";
         var params = 'searchJson='+searchStr+'&display='+display;
         //console.log(url+'?'+params);
+        //console.log('loading');
+        $('body').addClass('with-overlay');
         http.open("POST", url, true);
         http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
         http.onreadystatechange = function() {
@@ -332,6 +334,8 @@ include($serverRoot."/header.php");
         else{
             document.getElementById("results-wrapper").style.display = 'none';
         }
+        //console.log('loaded');
+        $('body').removeClass('with-overlay');
     }
 
     function getResultCnt(res){
@@ -350,6 +354,7 @@ include($serverRoot."/header.php");
             html += '<div class="searchResultTable">';
         }
         for(i in res){
+            //console.log(res[i]);
             var sciname = res[i].sciname;
             if(display == "grid"){
                 html += '<div class="searchresultgridcell">';
@@ -371,9 +376,10 @@ include($serverRoot."/header.php");
                 html += '</div>';
                 html += '</div>';
                 html += '<div id="hiddenListDiv'+i+'" class="searchResultListHiddenRow">';
-                html += '<div class="searchResultListType">'+(res[i].type?res[i].type:"")+'</div>';
-                html += '<div class="dsearchResultListLight">'+(res[i].light?res[i].light+" light":"")+'</div>';
-                html += '<div class="searchResultListMoisture">'+(res[i].moisture?res[i].moisture+" moisture":"")+'</div>';
+                if(res[i].url) html += '<img class="searchResultListImage" src="'+res[i].url+'" title="'+sciname+'" alt="'+sciname+' image" />';
+                html += '<div class="searchResultListType list-icon '+(res[i].type_class?res[i].type_class:"")+'">'+(res[i].type?res[i].type:"")+'</div>';
+                html += '<div class="dsearchResultListLight list-icon '+(res[i].light_class?res[i].light_class:"")+'">'+(res[i].light?res[i].light+" light":"")+'</div>';
+                html += '<div class="searchResultListMoisture list-icon '+(res[i].moisture_class?res[i].moisture_class:"asef")+'">'+(res[i].moisture?res[i].moisture+" moisture":"")+'</div>';
                 html += '<div class="searchResultListMaxheight">'+(res[i].maxheight?res[i].maxheight+" ft. Max. Height":"")+'</div>';
                 html += '<div class="searchResultListMaxwidth">'+(res[i].maxwidth?res[i].maxwidth+" ft. Max. Width":"")+'</div>';
                 html += '<div class="searchResultListEase">'+(res[i].ease?res[i].ease:"")+'</div>';
@@ -481,7 +487,7 @@ include($serverRoot."/header.php");
                     <div class="divTableHead">Plant Type</div>
                     <div class="divTableHead">Sunlight</div>
                     <div class="divTableHead">Moisture</div>
-                    <div class="divTableHead">Size</div>
+                    <div class="divTableHead">Mature Size</div>
                     <div class="divTableHead">Ease of Growth</div>
                 </div>
             </div>
@@ -1010,42 +1016,30 @@ include($serverRoot."/header.php");
             <img src="<?php echo $clientRoot; ?>/images/layout/Pollinator_garden_sm.jpg" alt="Pollinator Garden">
             <h3>Pollinator Garden</h3>
             <div class="box-overlay">
-                <div class="centered">Description text</div>
+                <div class="centered">A focus on flowers that provide nectar or pollen to native bees and other insect pollinators</div>
             </div>
         </a>
         <a href="<?php echo $clientRoot; ?>/checklists/checklist.php?cl=14798&pid=3" class="home-box image-box">
             <img src="<?php echo $clientRoot; ?>/images/layout/Rock_garden_sm.jpg" alt="Rock Garden">
             <h3>Rock Garden</h3>
             <div class="box-overlay">
-                <div class="centered">Description text</div>
+                <div class="centered">Plants that bring color and texture to rocky, well-drained landscapes</div>
             </div>
         </a>
         <a href="<?php echo $clientRoot; ?>/checklists/checklist.php?cl=14799&pid=3" class="home-box image-box">
             <img src="<?php echo $clientRoot; ?>/images/layout/Water_features_garden_sm.jpg" alt="Rain Garden">
             <h3>Rain Garden</h3>
             <div class="box-overlay">
-                <div class="centered">Description text</div>
+                <div class="centered">Plants suited to the edge of a pond or stream, or moist soils nearby</div>
             </div>
         </a>
         <a href="<?php echo $clientRoot; ?>/checklists/checklist.php?cl=14800&pid=3" class="home-box image-box">
             <img src="<?php echo $clientRoot; ?>/images/layout/Woodland_garden_sm.jpg" alt="Woodland Garden">
             <h3>Woodland Garden</h3>
             <div class="box-overlay">
-                <div class="centered">Description text</div>
+                <div class="centered">Understory ferns, herbs, and shrubs to complete a wooded planting</div>
             </div>
         </a>
-    </div>
-</div>
-<div class="metro-wrapper">
-    <div class="inner-content">
-        <hr />
-        <div class="metro-col1"> </div>
-        <div class="metro-col2">
-            <div class="col-content">
-                <p>Metro is a primary contributor to OregonFlora's Gardening with Native Plants and supports efforts to protect clean
-                    air, water and habitat in greater portland.</p>
-            </div>
-        </div>
     </div>
 </div>
 

@@ -16,6 +16,46 @@ body{
 	font-size: 16px;
 	font-family: 'Source Sans Pro', sans-serif;
 }
+body.with-overlay:before {
+	display: block;
+	position: fixed;
+	content: "";
+	font-size: 100px;
+	text-align: center;
+	color: #ffffff;
+	font-family: FontAwesome;
+	padding-top: 50vh;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	/* height: 100%; */
+	z-index: 10000000;
+	background: rgba(0,0,0,0.6);
+	-webkit-animation: name 2s infinite linear
+}
+.with-overlay:after {
+	content: "";
+	box-sizing: border-box;
+	position: fixed;
+	z-index: 100000000;
+	top: 50%;
+	left: 50%;
+	height: 100px;
+	width: 100px;
+	background: rgba(0,0,0,.0);
+	border-radius: 50%;
+	border: 3px solid #fff;
+	border-top-color: #bdbdbd;
+	border-bottom: 3px solid #cacaca;
+	animation: spin 1.5s linear infinite;
+}
+@keyframes spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
 article, aside, details, figcaption, figure, footer, header, main, menu, nav, section, summary {
 	display: block;
 }
@@ -109,7 +149,7 @@ figure {
 }
 hr {
 	box-sizing: content-box;
-	height: 1;
+	height: 1px;
 	color: #4E1E97;
 	background: #4E1E97;
 	border: none;
@@ -131,6 +171,7 @@ button {
 }
 button, select {
 	text-transform: none;
+	max-width: 100%;
 }
 button, html input[type="button"], input[type="reset"], input[type="submit"] {
 	-webkit-appearance: button;
@@ -145,6 +186,7 @@ button::-moz-focus-inner, input::-moz-focus-inner {
 }
 input {
 	line-height: normal;
+	max-width: 100%;
 }
 input[type="checkbox"], input[type="radio"] {
 	box-sizing: border-box;
@@ -254,10 +296,12 @@ img.image-right {
 .inner-content {
 	max-width: 1100px;
 	margin: 0 auto;
+	padding: 0 20px;
 }
 .garden-content {
 	max-width: 1100px;
 	margin: 0 auto;
+	padding: 0 20px;
 }
 /* responsive videos */
 .video-wrapper {
@@ -573,13 +617,17 @@ ul.square-bullets {
 	width: 40%;
 	padding-left: 20px;
 }
+.our-app {
+	overflow: hidden;
+}
 .books-wrapper h2 {
 	display: block;
 	font-size: 30px;
+	color: white;
 }
 .books-wrapper .btn {
 	background: #ffffff;
-	color: #b04e2c;
+	color: #b04e2c !important;
 	overflow: hidden;
 }
 .books-wrapper .btn:hover {
@@ -1095,9 +1143,8 @@ button.menu-toggle {
 --------------------------------------------------------------*/
 /* content */
 .navpath {
-	padding-left: 0;
-	padding-top: 30px;
-	max-width: 1060px;
+	padding: 30px 20px 0 20px;
+	max-width: 1100px;
 	margin: 0 auto;
 }
 
@@ -1110,6 +1157,7 @@ button.menu-toggle {
 .native-banner-wrapper h2 {
 	display: block;
 	font-size: 30px;
+	color: #ffffff;
 }
 
 .garden-header-wrapper {
@@ -1239,7 +1287,8 @@ button.menu-toggle {
 /* advanced search */
 
 .garden-name-search-box {
-	width: 500px;
+	max-width: 540px;
+	padding: 0 20px;
 	margin: 20px auto;
 	display: flex;
 	font-size: 20px;
@@ -1752,6 +1801,26 @@ div.mf_container {
 	background: #83c44b;
 }
 
+.searchResultListImage {
+	max-width: 125px;
+	height: auto;
+	padding-right: 10px;
+	vertical-align: middle;
+}
+
+.searchResultListCommon {
+	font-size: 20px;
+	color: #4e1e97;
+}
+/* icons in results list */
+.list-icon {
+	background-size: contain;
+	height: 60px;
+	width: 60px;
+	margin-right: 10px;
+	text-indent: -1000px;
+	font-size: 1px;
+}
 /* metro */
 
 .metro-wrapper {
@@ -1981,12 +2050,52 @@ a:hover {
 	.search-wrapper {
 		padding: 20px 0 0 0;
 	}
+	#cloptiondiv {
+		margin: 5px;
+		width: 100%;
+		text-align: left;
+		float: none;
+	}
+	#omlisttable td {
+		display: block;
+	}
+	#innertext a {
+		overflow-wrap: break-word;
+		word-wrap: break-word;
+	}
+	.garden-header-wrapper {
+		display: block;
+	}
+	.garden-header-wrapper .col1 .col-content {
+		width: auto;
+		padding-left: 0px;
+	}
+	.garden-name-search-box {
+		display: block;
+	}
+	.news-item-wrapper {
+		display: block;
+		padding: 9px;
+	}
+	.nl_block {
+		padding: 8px;
+		display: block;
+	}
+	.newsletter-content .inner {
+		left: 10px;
+	}
+	.our-books .vol1, .our-books .vol2 {
+		width: 100%;
+		float: none;
+		padding-right: 0;
+	}
 }
 
 #innertable, #innertext  {
-	max-width: 1060px;
+	max-width: 1100px;
 	margin-left: auto;
 	margin-right: auto;
+	padding: 0 20px;
 }
 
 #site-content .ui-widget-header {
