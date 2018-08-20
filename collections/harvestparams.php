@@ -103,7 +103,7 @@ $searchVar = $collManager->getQueryTermStr();
 				<hr>
 				<h1><?php echo $LANG['LAT_LNG_HEADER']; ?></h1>
 			</div>
-			<div style="width:300px;height:120px;float:left;border:2px solid brown;padding:10px;margin-bottom:10px;">
+			<div style="width:270px;height:120px;float:left;border:2px solid brown;padding:10px;margin-bottom:10px;">
 				<div style="clear:both;float:right;">
 					<a href="#" onclick="openCoordAid('rectangle');return false;"><img src="../images/world.png" width="15px" title="<?php echo $LANG['GLOBE_TITLE']; ?>" /></a>
 				</div>
@@ -150,7 +150,7 @@ $searchVar = $collManager->getQueryTermStr();
 					<textarea id="footprintwkt" name="footprintwkt" style="width:250px;height:100px;zIndex:999"></textarea>
 				</div>
 			</div>
-			<div style="width:260px; float:left;border:2px solid brown;padding:10px;margin-left:10px;">
+			<div style="width:240px; float:left;border:2px solid brown;padding:10px;margin-left:10px;">
 				<div style="clear:both;float:right;">
 					<a href="#" onclick="openCoordAid('circle');return false;"><img src="../images/world.png" width="15px" title="<?php echo $LANG['GLOBE_TITLE']; ?>" /></a>
 				</div>
@@ -209,13 +209,16 @@ $searchVar = $collManager->getQueryTermStr();
 				<input name="includeothercatnum" type="checkbox" value="1" checked /> <?php echo $LANG['INCLUDE_OTHER_CATNUM']?>
 			</div>
 			<div>
-				<input type='checkbox' name='typestatus' value='1' /> <?php echo $LANG['TYPE']; ?>
+				<input type='checkbox' name='typestatus' value='1' /> <?php echo isset($LANG['TYPE'])?$LANG['TYPE']:'Limit to Type Specimens Only'; ?>
 			</div>
 			<div>
-				<input type='checkbox' name='hasimages' value='1' /> <?php echo $LANG['HAS_IMAGE']; ?>
+				<input type='checkbox' name='hasimages' value='1' /> <?php echo isset($LANG['HAS_IMAGE'])?$LANG['HAS_IMAGE']:'Limit to Specimens with Images Only'; ?>
 			</div>
 			<div>
-				<input type='checkbox' name='hasgenetic' value='1' /> <?php echo $LANG['HAS_GENETIC']; ?>
+				<input type='checkbox' name='hasgenetic' value='1' /> <?php echo isset($LANG['HAS_GENETIC'])?$LANG['HAS_GENETIC']:'Limit to Specimens with Genetic Data Only'; ?>
+			</div>
+			<div>
+				<input type='checkbox' name='includecult' value='1' /> <?php echo isset($LANG['INCLUDE_CULTIVATED'])?$LANG['INCLUDE_CULTIVATED']:'Include cultivated specimens'; ?>
 			</div>
 			<div>
 				<input type="hidden" name="reset" value="1" />

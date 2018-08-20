@@ -58,4 +58,5 @@ $LANG['INCLUDE_OTHER_CATNUM'] = 'Include other catalog numbers and GUIDs';
 $LANG['TYPE'] = 'Limit to Type Specimens Only';
 $LANG['HAS_IMAGE'] = 'Limit to Specimens with Images Only';
 $LANG['HAS_GENETIC'] = 'Limit to Specimens with Genetic Data Only';
+$LANG['INCLUDE_CULTIVATED'] = 'Include cultivated specimens';
 ?>

@@ -112,6 +112,7 @@ function setHarvestParamsForm(){
 		if(typeof urlVar.typestatus !== 'undefined'){frm.typestatus.checked = true;}
 		if(typeof urlVar.hasimages !== 'undefined'){frm.hasimages.checked = true;}
 		if(typeof urlVar.hasgenetic !== 'undefined'){frm.hasgenetic.checked = true;}
+		if(typeof urlVar.includecult !== 'undefined'){frm.includecult.checked = true;}
 		if(urlVar.db){frm.db.value = urlVar.db;}
 	}
 }

@@ -1304,6 +1304,10 @@ if(!array_key_exists("pointlat",$_REQUEST)) $_REQUEST["pointlat"] = '';
 									<input data-role="none" type='checkbox' name='hasgenetic' value='1' <?php if(array_key_exists("hasgenetic",$_REQUEST) && $_REQUEST["hasgenetic"]) echo "CHECKED"; ?> >
 									 <?php echo (isset($LANG['LIMIT_GENETIC'])?$LANG['LIMIT_GENETIC']:'Limit to Specimens with Genetic Data Only'); ?>
 								</div>
+								<div style="margin-top:5px;">
+									<input data-role="none" type='checkbox' name='includecult' value='1' <?php if(array_key_exists("includecult",$_REQUEST) && $_REQUEST["includecult"]) echo "CHECKED"; ?> >
+									 <?php echo (isset($LANG['INCLUDE_CULTIVATED'])?$LANG['INCLUDE_CULTIVATED']:'Include cultivated specimens'); ?>
+								</div>
 								<div><hr></div>
 								<input type="hidden" name="reset" value="1" />
 							</div>

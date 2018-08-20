@@ -366,6 +366,10 @@ class OccurrenceManager extends OccurrenceTaxaManager {
 			$sqlWhere .= "AND (o.occid IN(SELECT occid FROM omoccurgenetic)) ";
 			$this->displaySearchArr[] = 'has genetic data';
 		}
+		if(!array_key_exists("includecult",$this->searchTermArr)){
+			$sqlWhere .= "AND (o.cultivationStatus IS NULL OR o.cultivationStatus = 0) ";
+			$this->displaySearchArr[] = 'has genetic data';
+		}
 		if($sqlWhere){
 			$this->sqlWhere = 'WHERE '.substr($sqlWhere,4);
 		}
@@ -713,6 +717,14 @@ class OccurrenceManager extends OccurrenceTaxaManager {
 			}
 			else{
 				unset($this->searchTermArr["hasgenetic"]);
+			}
+		}
+		if(array_key_exists("includecult",$_REQUEST)){
+			if($_REQUEST["includecult"]){
+				$this->searchTermArr["includecult"] = true;
+			}
+			else{
+				unset($this->searchTermArr["includecult"]);
 			}
 		}
 		$llPattern = '-?\d+\.{0,1}\d*';
