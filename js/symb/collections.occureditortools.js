@@ -95,6 +95,9 @@ function geoLocateLocality(){
 		locality = country+"; "+state+"; "+county+"; "+municipality;
 	}
 	if(f.verbatimcoordinates.value) locality = locality + "; " + encodeURIComponent(f.verbatimcoordinates.value);
+	var decLat = f.decimallatitude.value;
+	var decLng = f.decimallongitude.value;
+	var uncertainty = f.coordinateuncertaintyinmeters.value;
 
 	if(!country){
 		alert("Country is blank and it is a required field for GeoLocate");
@@ -103,7 +106,7 @@ function geoLocateLocality(){
 		alert("Record does not contain any verbatim locality details for GeoLocate");
 	}
 	else{
-		geolocWindow=open("../georef/geolocate.php?country="+country+"&state="+state+"&county="+county+"&locality="+locality,"geoloctool","resizable=1,scrollbars=1,toolbar=0,width=1050,height=700,left=20,top=20");
+		geolocWindow=open("../georef/geolocate.php?country="+country+"&state="+state+"&county="+county+"&locality="+locality+"&declat="+decLat+"&declng="+decLng+"&uncertainty="+uncertainty,"geoloctool","resizable=1,scrollbars=1,toolbar=0,width=1050,height=700,left=20,top=20");
 		if(geolocWindow.opener == null){
 			geolocWindow.opener = self;
 		}
