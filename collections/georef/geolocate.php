@@ -16,6 +16,11 @@ if(!$country || !$state || !$county){
 	if(!$country && $locArr) $country = trim(array_shift($locArr));
 	if(!$state && $locArr) $state = trim(array_shift($locArr));
 	if(!$county && $locArr) $county = trim(array_shift($locArr));
+	//Extract lat/long from locality, when it exists
+	if(preg_match('/\(([-]{0,1}\d{1,2}\.\d+)[\s,]+([-]{0,1}\d{1,3}\.\d+)\)/', $locality, $m)){
+		$decLat = $m[1];
+		$decLng = $m[2];
+	}
 }
 //Modify TRS data to make it more compatable to the GeoLocate format (S23 needs to be Sec23)
 if(preg_match('/\d{1,2}[NS]{1}T\s\d{1,2}[EW]{1}R\s\d{1,2}S/',$locality)){
