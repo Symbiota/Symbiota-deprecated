@@ -366,9 +366,13 @@ class OccurrenceManager extends OccurrenceTaxaManager {
 			$sqlWhere .= "AND (o.occid IN(SELECT occid FROM omoccurgenetic)) ";
 			$this->displaySearchArr[] = 'has genetic data';
 		}
-		if($sqlWhere && !array_key_exists("includecult",$this->searchTermArr)){
-			$sqlWhere .= "AND (o.cultivationStatus IS NULL OR o.cultivationStatus = 0) ";
-			$this->displaySearchArr[] = 'has genetic data';
+		if($sqlWhere){
+			if(!array_key_exists("includecult",$this->searchTermArr)){
+				$sqlWhere .= "AND (o.cultivationStatus IS NULL OR o.cultivationStatus = 0) ";
+			}
+			else{
+				$this->displaySearchArr[] = 'includes cultivated/captive occurrences';
+			}
 		}
 		if($sqlWhere){
 			$this->sqlWhere = 'WHERE '.substr($sqlWhere,4);

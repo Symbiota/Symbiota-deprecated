@@ -724,7 +724,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 						$noteStr = '';
 						if($occArr['occurrenceremarks']) $noteStr .= "; ".$occArr['occurrenceremarks'];
 						if($occArr['establishmentmeans']) $noteStr .= "; ".$occArr['establishmentmeans'];
-						if($occArr['cultivationstatus']) $noteStr .= "; Cultivated";
+						if($occArr['cultivationstatus']) $noteStr .= "; Cultivated or Captive";
 						if($noteStr){
 							?>
 							<div style="clear:both;">

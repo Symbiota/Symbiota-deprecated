@@ -1306,7 +1306,7 @@ if(!array_key_exists("pointlat",$_REQUEST)) $_REQUEST["pointlat"] = '';
 								</div>
 								<div style="margin-top:5px;">
 									<input data-role="none" type='checkbox' name='includecult' value='1' <?php if(array_key_exists("includecult",$_REQUEST) && $_REQUEST["includecult"]) echo "CHECKED"; ?> >
-									 <?php echo (isset($LANG['INCLUDE_CULTIVATED'])?$LANG['INCLUDE_CULTIVATED']:'Include cultivated specimens'); ?>
+									 <?php echo (isset($LANG['INCLUDE_CULTIVATED'])?$LANG['INCLUDE_CULTIVATED']:'Include cultivated/captive specimens'); ?>
 								</div>
 								<div><hr></div>
 								<input type="hidden" name="reset" value="1" />

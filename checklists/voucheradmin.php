@@ -184,7 +184,7 @@ if($clid && $isEditor){
 								</div>
 								<div>
 									<input name="excludecult" value="1" type="checkbox" <?php if(isset($termArr['excludecult'])) echo 'CHECKED'; ?> />
-									<?php echo (isset($LANG['EXCLUDE'])?$LANG['EXCLUDE']:'Exclude cultivated species');?>
+									<?php echo (isset($LANG['EXCLUDE'])?$LANG['EXCLUDE']:'Exclude cultivated/captive records');?>
 								</div>
 							</div>
 						</td>

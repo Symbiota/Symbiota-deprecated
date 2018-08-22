@@ -304,9 +304,9 @@ if($collMap){
 							Establishment Means:
 							<input type="text" name="establishmentmeans" tabindex="100" maxlength="32" style="width:140px;" value="" />
 						</span>
-						<span style="margin-left:15px;" title="Click if specimen was cultivated ">
+						<span style="margin-left:15px;" title="Click if specimen was cultivated or captive">
 							<input type="checkbox" name="cultivationstatus" tabindex="102" style="" value="" />
-							Cultivated
+							Cultivated/Captive
 						</span>
 					</div>
 				</fieldset>

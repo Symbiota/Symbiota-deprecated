@@ -868,7 +868,7 @@ class ChecklistVoucherAdmin {
 		if(isset($this->queryVariablesArr['lngwest']) && isset($this->queryVariablesArr['lngeast'])) $retStr .= 'Long between '.$this->queryVariablesArr['lngwest'].' and '.$this->queryVariablesArr['lngeast'].'; ';
 		if(isset($this->queryVariablesArr['includewkt'])) $retStr .= 'Search based on polygon; ';
 		if(isset($this->queryVariablesArr['latlngor'])) $retStr .= 'Include Lat/Long and locality as an "OR" condition; ';
-		if(isset($this->queryVariablesArr['excludecult'])) $retStr .= 'Exclude cultivated species; ';
+		if(isset($this->queryVariablesArr['excludecult'])) $retStr .= 'Exclude cultivated/captive records; ';
 		if(isset($this->queryVariablesArr['onlycoord'])) $retStr .= 'Only include occurrences with coordinates; ';
 		return trim($retStr,' ;');
 	}

@@ -58,5 +58,5 @@ $LANG['INCLUDE_OTHER_CATNUM'] = 'Includa todos n&uacute;meros de cat&eacute;logo
 $LANG['TYPE'] = 'Limitar solamente a ejemplares tipo';
 $LANG['HAS_IMAGE'] = 'Limitar solamente a ejemplares con im&aacute;genes';
 $LANG['HAS_GENETIC'] = 'Limitar solamente a ejemplares con datos gen&eacute;ticos';
-$LANG['INCLUDE_CULTIVATED'] = 'Incluye ejemplares cultivadas';
+$LANG['INCLUDE_CULTIVATED'] = 'Incluye ejemplares cultivadas/cautivas';
 ?>
