@@ -659,7 +659,7 @@ include($serverRoot."/header.php");
                                                 </div>
                                             </div>
                                             <div class="feature-slider-label">
-                                                Width
+                                                Width (ft)
                                             </div>
                                         </div>
                                     </div>
