@@ -1326,6 +1326,7 @@ div.gardenSearchTable {
 }
 .divTable.gardenSearchTable .divTableBody .divTableCell {
 	font-size: 13px;
+	vertical-align: top;
 }
 .divTable.gardenSearchTable .divTableHeading {
 	background: #75B04D;
@@ -1758,7 +1759,7 @@ div.growthCol {
 	width: 100%;
 }
 div.mf_container {
-	border: 0px;
+	min-width: 100px;
 	width: 100%;
 }
 .searchResultListToggleShow {
