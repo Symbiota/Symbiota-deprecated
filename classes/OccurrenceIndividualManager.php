@@ -125,12 +125,15 @@ class OccurrenceIndividualManager extends Manager{
 				if(!$this->occid) $this->occid = $this->occArr['occid'];
 				if(!$this->collid) $this->collid = $this->occArr['collid'];
 				$this->loadMetadata();
-				//Set occurrenceId according to guidsource \
-				if($this->metadataArr['guidtarget'] == 'catalogNumber'){
-					$this->occArr['occurrenceid'] = $this->occArr['catalognumber'];
-				}
-				elseif($this->metadataArr['guidtarget'] == 'symbiotaUUID'){
-					$this->occArr['occurrenceid'] = $this->occArr['guid'];
+
+				if(!$this->occArr['occurrenceid']){
+					//Set occurrence GUID based on GUID target, but only if occurrenceID field isn't already populated
+					if($this->metadataArr['guidtarget'] == 'catalogNumber'){
+						$this->occArr['occurrenceid'] = $this->occArr['catalognumber'];
+					}
+					elseif($this->metadataArr['guidtarget'] == 'symbiotaUUID'){
+						$this->occArr['occurrenceid'] = $this->occArr['guid'];
+					}
 				}
 
 				if($this->occArr['secondaryinstcode'] && $this->occArr['secondaryinstcode'] != $this->metadataArr['institutioncode']){
