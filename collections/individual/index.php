@@ -50,27 +50,27 @@ $isEditor = false;
 $done=FALSE;
 $accept = RdfUtility::parseHTTPAcceptHeader($_SERVER['HTTP_ACCEPT']);
 while (!$done && list($key, $mediarange) = each($accept)) {
-    if ($mediarange=='text/turtle' || $format == 'turtle') {
-       Header("Content-Type: text/turtle; charset=".$CHARSET);
-       $dwcManager = new DwcArchiverCore();
-       $dwcManager->setCustomWhereSql(" o.occid = $occid ");
-       echo $dwcManager->getAsTurtle();
-       $done = TRUE;
-    }
-    if ($mediarange=='application/rdf+xml' || $format == 'rdf') {
-       Header("Content-Type: application/rdf+xml; charset=".$CHARSET);
-       $dwcManager = new DwcArchiverCore();
-       $dwcManager->setCustomWhereSql(" o.occid = $occid ");
-       echo $dwcManager->getAsRdfXml();
-       $done = TRUE;
-    }
-    if ($mediarange=='application/json' || $format == 'json') {
-       Header("Content-Type: application/json; charset=".$CHARSET);
-       $dwcManager = new DwcArchiverCore();
-       $dwcManager->setCustomWhereSql(" o.occid = $occid ");
-       echo $dwcManager->getAsJson();
-       $done = TRUE;
-    }
+	if ($mediarange=='text/turtle' || $format == 'turtle') {
+	   Header("Content-Type: text/turtle; charset=".$CHARSET);
+	   $dwcManager = new DwcArchiverCore();
+	   $dwcManager->setCustomWhereSql(" o.occid = $occid ");
+	   echo $dwcManager->getAsTurtle();
+	   $done = TRUE;
+	}
+	if ($mediarange=='application/rdf+xml' || $format == 'rdf') {
+	   Header("Content-Type: application/rdf+xml; charset=".$CHARSET);
+	   $dwcManager = new DwcArchiverCore();
+	   $dwcManager->setCustomWhereSql(" o.occid = $occid ");
+	   echo $dwcManager->getAsRdfXml();
+	   $done = TRUE;
+	}
+	if ($mediarange=='application/json' || $format == 'json') {
+	   Header("Content-Type: application/json; charset=".$CHARSET);
+	   $dwcManager = new DwcArchiverCore();
+	   $dwcManager->setCustomWhereSql(" o.occid = $occid ");
+	   echo $dwcManager->getAsJson();
+	   $done = TRUE;
+	}
 
 }
 if ($done) {
@@ -311,16 +311,6 @@ header("Content-Type: text/html; charset=".$CHARSET);
 						<li><a href="#edittab"><span>Edit History</span></a></li>
 						<?php
 					}
-					if (isset($fpEnabled) && $fpEnabled) { // FP Annotations tab
-						$detVars = 'catalognumber='.urlencode($occArr['catalognumber']) .
-						(isset($occArr['secondarycollcode'])?'&collectioncode='.urlencode($occArr['secondarycollcode']):'').
-						(isset($collMap['collectioncode'])?'&collectioncode='.urlencode($collMap['collectioncode']):'').
-						(isset($collMap['institutioncode'])?'&institutioncode='.urlencode($collMap['institutioncode']):'');
-						echo '<li>';
-						echo '<a href="../editor/includes/findannotations.php?'.$detVars.'"';
-						echo ' style="margin: 0px 20px 0px 20px;"> Annotations </a>';
-						echo '</li>';
-					}
 					?>
 				</ul>
 				<div id="occurtab">
@@ -538,7 +528,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 							if($occArr['eventdate']){
 								echo '<div><b>Date: </b>';
 								echo $occArr['eventdate'];
-								if($occArr['eventdateend']){
+								if($occArr['eventdateend'] && $occArr['eventdateend'] != $occArr['eventdate']){
 									echo ' - '.$occArr['eventdateend'];
 								}
 								echo '</div>';
@@ -604,6 +594,14 @@ header("Content-Type: text/html; charset=".$CHARSET);
 								<div style="margin-left:10px;">
 									<b>Verbatim Coordinates: </b>
 									<?php echo $occArr['verbatimcoordinates']; ?>
+								</div>
+								<?php
+							}
+							if($occArr['locationremarks']){
+								?>
+								<div style="margin-left:10px;">
+									<b>Location Remarks: </b>
+									<?php echo $occArr['locationremarks']; ?>
 								</div>
 								<?php
 							}
@@ -678,15 +676,55 @@ header("Content-Type: text/html; charset=".$CHARSET);
 						if($occArr['reproductivecondition']){
 							?>
 							<div style="clear:both;">
-								<b>Phenology:</b>
+								<b>Reproductive Condition:</b>
 								<?php echo $occArr['reproductivecondition']; ?>
+							</div>
+							<?php
+						}
+						if($occArr['lifestage']){
+							?>
+							<div style="clear:both;">
+								<b>Life Stage:</b>
+								<?php echo $occArr['lifestage']; ?>
+							</div>
+							<?php
+						}
+						if($occArr['sex']){
+							?>
+							<div style="clear:both;">
+								<b>Sex:</b>
+								<?php echo $occArr['sex']; ?>
+							</div>
+							<?php
+						}
+						if($occArr['individualcount']){
+							?>
+							<div style="clear:both;">
+								<b>Individual Count:</b>
+								<?php echo $occArr['individualcount']; ?>
+							</div>
+							<?php
+						}
+						if($occArr['samplingprotocol']){
+							?>
+							<div style="clear:both;">
+								<b>Sampling Protocol:</b>
+								<?php echo $occArr['samplingprotocol']; ?>
+							</div>
+							<?php
+						}
+						if($occArr['preparations']){
+							?>
+							<div style="clear:both;">
+								<b>Preparations:</b>
+								<?php echo $occArr['preparations']; ?>
 							</div>
 							<?php
 						}
 						$noteStr = '';
 						if($occArr['occurrenceremarks']) $noteStr .= "; ".$occArr['occurrenceremarks'];
 						if($occArr['establishmentmeans']) $noteStr .= "; ".$occArr['establishmentmeans'];
-						if($occArr['cultivationstatus']) $noteStr .= "; Cultivated";
+						if($occArr['cultivationstatus']) $noteStr .= "; Cultivated or Captive";
 						if($noteStr){
 							?>
 							<div style="clear:both;">

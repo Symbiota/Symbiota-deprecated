@@ -29,18 +29,18 @@ if($searchTaxon) $rsManager->setSearchTaxon($searchTaxon);
 	<title>Rare, Threatened, Sensitive Species</title>
 	<link href="../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
-	<link href="../../css/jquery-ui.css" type="text/css" rel="Stylesheet" />	
+	<link href="../../css/jquery-ui.css" type="text/css" rel="Stylesheet" />
 	<script src="../../js/jquery.js" type="text/javascript"></script>
 	<script src="../../js/jquery-ui.js" type="text/javascript"></script>
 	<script>
 		$(document).ready(function() {
-			$("#speciestoadd").autocomplete({ 
-				source: "rpc/speciessuggest.php" },{ minLength: 3, autoFocus: true 
+			$("#speciestoadd").autocomplete({
+				source: "rpc/speciessuggest.php" },{ minLength: 3, autoFocus: true
 			});
 
-			$("#searchtaxon").autocomplete({ 
-				source: "rpc/speciessuggest.php" },{ minLength: 3, autoFocus: true 
-			});			
+			$("#searchtaxon").autocomplete({
+				source: "rpc/speciessuggest.php" },{ minLength: 3, autoFocus: true
+			});
 		});
 
 		function toggle(target){
@@ -106,13 +106,13 @@ if(isset($collections_misc_rarespeciesCrumbs)){
 ?>
 <!-- This is inner text! -->
 <div id="innertext">
-	<?php 
+	<?php
 	if($isEditor){
 		?>
 		<div style="float:right;cursor:pointer;" onclick="javascript:toggle('editobj');" title="Toggle Editing Functions">
 			<img style="border:0px;" src="../../images/edit.png" />
 		</div>
-		<?php 
+		<?php
 	}
 	?>
 	<h1>Rare, Threatened, Sensitive Species</h1>
@@ -126,9 +126,9 @@ if(isset($collections_misc_rarespeciesCrumbs)){
 		</fieldset>
 	</div>
 	<div style='margin:15px;'>
-		Species in the list below have protective status with specific locality 
-		details below county withheld (e.g. decimal lat/long). 
-		Rare, threatened, or sensitive status are the typical causes for protection though 
+		Species in the list below have protective status with specific locality
+		details below county withheld (e.g. decimal lat/long).
+		Rare, threatened, or sensitive status are the typical causes for protection though
 		species that are cherished by collectors or wild harvesters may also appear on the list.
 	</div>
 	<div style="clear:both">
@@ -153,7 +153,7 @@ if(isset($collections_misc_rarespeciesCrumbs)){
 						</fieldset>
 					</form>
 				</div>
-				<?php 
+				<?php
 			}
 			$rsArr = $rsManager->getRareSpeciesList();
 			if($rsArr){
@@ -161,7 +161,7 @@ if(isset($collections_misc_rarespeciesCrumbs)){
 					?>
 					<h3><?php echo $family; ?></h3>
 					<div style='margin-left:20px;'>
-					<?php 
+					<?php
 					foreach($speciesArr as $tid => $sciName){
 						echo '<div id="tid-'.$tid.'"><a href="../../taxa/index.php?taxon='.$tid.'" target="_blank">'.$sciName.'</a>';
 						if($isEditor){
@@ -177,27 +177,27 @@ if(isset($collections_misc_rarespeciesCrumbs)){
 					}
 					?>
 					</div>
-					<?php 
+					<?php
 				}
 			}
 			else{
 				?>
 				<div style="margin:30px;font-weight:bold;font-size:120%;">
-					No species were returned marked for global protection. 
+					No species were returned marked for global protection.
 				</div>
-				<?php 
+				<?php
 			}
 			?>
 		</fieldset>
 		<fieldset style="padding:25px;margin:15px">
 			<legend><b>State/Province Level Protections</b></legend>
-			<?php 
+			<?php
 			$stateList = $rsManager->getStateList();
 			$emptyList = true;
 			foreach($stateList as $clid => $stateArr){
 				if($isEditor || $stateArr['access'] == 'public'){
 					echo '<div>';
-					echo '<a href="../../checklists/checklist.php?cl='.$clid.'">';
+					echo '<a href="../../checklists/checklist.php?clid='.$clid.'">';
 					echo $stateArr['locality'].': '.$stateArr['name'];
 					echo '</a>';
 					if($stateArr['access'] == 'private') echo ' (private)';
@@ -208,15 +208,15 @@ if(isset($collections_misc_rarespeciesCrumbs)){
 			if($emptyList){
 				?>
 				<div style="margin:30px;font-weight:bold;font-size:120%;">
-					 No checklists returned 
+					 No checklists returned
 				</div>
-				<?php 
+				<?php
 			}
 			?>
 		</fieldset>
 	</div>
 </div>
-<?php 		
+<?php
 include($SERVER_ROOT.'/footer.php')
 ?>
 </body>

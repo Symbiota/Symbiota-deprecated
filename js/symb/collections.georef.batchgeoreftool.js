@@ -191,8 +191,8 @@ function analyseLocalityStr(){
 		var locStr = selObj.options[selObj.selectedIndex].text;
 		
 		var utmRegEx5 = /(\d{1,2})\D{1}\s{1}(\d{2}\s{1}\d{2}\s{1}\d{3})mE\s{1}(\d{2}\s{1}\d{2}\s{1}\d{3})mN/ //Format: ##S ## ## ###mE ## ## ###mN ##
-		var llRegEx1 = /(\d{1,2})[^\.\d]{1,2}(?:deg)*\s*(\d{1,2}(?:\.[0-9])*)[^\.\d]{1,2}(\d{0,2}(?:\.[0-9])*)[^\.\d,;]{1,3}[NS,;]{1}[\.,;]*\s*(\d{1,3})[^\.\d]{1}(?:deg)*\s*(\d{0,2}(?:\.[0-9]+)*)[^\.\d]{1,2}(\d{0,2}(?:\.[0-9]+)*)[^\.\d]{1,3}/i 
-		var llRegEx2 = /(\d{1,2})[^\.\d]{1,2}\s{0,1}(\d{1,2}(?:\.[0-9])*)[^\.\d,;]{1,2}[NS,;]{1}[\.,;]*\s*(\d{1,3})[^\.\d]{1,2}\s*(\d{1,2}(?:\.[0-9])*)[^\.\d]{1,2}/i 
+		var llRegEx1 = /(\d{1,2})[^\.\d]{1,2}(?:deg)*\s*(\d{1,2}(?:\.[0-9])*)[^\.\d]{1,2}\s*(\d{0,2}(?:\.[0-9])*)[^\.\d,;]{1,3}\s*[NS,;]{1}[\.,;]*\s*[EW]{0,1}\s*(\d{1,3})[^\.\d]{1}(?:deg)*\s*(\d{0,2}(?:\.[0-9]+)*)[^\.\d]{1,2}\s*(\d{0,2}(?:\.[0-9]+)*)[^\.\d]{1,3}/i 
+		var llRegEx2 = /(\d{1,2})[^\.\d]{1,2}\s{0,1}(\d{1,2}(?:\.[0-9])*)[^\.\d,;]{1,2}\s{0,1}[NS,;]{1}[\s,;]{0,3}[EW]{0,1}\s{0,2}(\d{1,3})[^\.\d]{1,2}\s*(\d{1,2}(?:\.[0-9])*)[^\.\d]{1,2}/i 
 		var llRegEx3 = /(-{0,1}\d{1,2}\.{1}\d+)[^\d]{1,2},{0,1}\s*(-{0,1}\d{1,3}\.{1}\d+)[^\d]{1}/	//Format: (##.#####, -###.#####)
 		var utmRegEx1 = /(\d{7})N{0,1}\s+(\d{6,7})E{0,1}\s+(\d{1,2})/ 				//Format: #######N ######E ##
 		var utmRegEx2 = /(\d{1,2})\D{0,2}\s+(\d{7})N\s+(\d{6,7})E/ 					//Format: ## #######N ######E 
@@ -425,7 +425,7 @@ function openMappingAid() {
 	var lngDef = f.decimallongitude.value;
 	var zoom = 5;
 	if(latDef && lngDef) zoom = 11;
-	mapWindow=open("../editor/mappointaid.php?latdef="+latDef+"&lngdef="+lngDef+"&zoom="+zoom,"geomapaid","resizable=0,width=800,height=700,left=20,top=20");
+	mapWindow=open("../tools/mappointaid.php","geomapaid","resizable=0,width=900,height=700,left=20,top=20");
 	if (mapWindow.opener == null) mapWindow.opener = self;
 }
 

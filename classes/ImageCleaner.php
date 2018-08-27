@@ -106,7 +106,6 @@ class ImageCleaner extends Manager{
 
 			$setFormat = ($row->format?false:true);
 			$this->buildImageDerivatives($imgId, $row->catalognumber, $row->url, $row->thumbnailurl, $row->originalurl, $setFormat);
-
 			if(!$status) $this->logOrEcho($this->errorMessage,1);
 			$cnt++;
 		}
@@ -163,14 +162,30 @@ class ImageCleaner extends Manager{
 		}
 		$this->imgManager->setTargetPath($targetPath);
 
-		//Build derivatives
+		$imgUrl = '';
 		$webIsEmpty = false;
-		$imgUrl = trim($recUrlWeb);
-		if((!$imgUrl || $imgUrl == 'empty') && $recUrlOrig){
-			$imgUrl = trim($recUrlOrig);
-			$webIsEmpty = true;
+		//If a TROPICOS image, harvest web image from their website
+		if(strpos($recUrlOrig, 'tropicos.org/ImageDownload.aspx')){
+			if(preg_match('/imageid=(\d+)$/', $recUrlOrig, $m)){
+				$newImgPath = $this->imgManager->getTargetPath().'mo_'.$m[1].'.jpg';
+				if(copy($recUrlOrig, $newImgPath)){
+					$imgUrl = str_replace($GLOBALS['IMAGE_ROOT_PATH'],$GLOBALS['IMAGE_ROOT_URL'],$newImgPath);
+					if((!$recUrlWeb || $recUrlWeb == 'empty')){
+						$webIsEmpty = true;
+					}
+				}
+			}
+		}
+		else{
+			$imgUrl = trim($recUrlWeb);
+			if((!$imgUrl || $imgUrl == 'empty') && $recUrlOrig){
+				$imgUrl = trim($recUrlOrig);
+				$webIsEmpty = true;
+			}
 		}
 		if($this->imgManager->parseUrl($imgUrl)){
+			$webFullUrl = '';
+			$lgFullUrl = '';
 			//Create thumbnail
 			$imgTnUrl = '';
 			if(!$recUrlTn || substr($recUrlTn,0,10) == 'processing'){
@@ -189,8 +204,6 @@ class ImageCleaner extends Manager{
 			}
 
 			if($status && $imgTnUrl && $this->imgManager->uriExists($imgTnUrl)){
-				$webFullUrl = '';
-				$lgFullUrl = '';
 				//If web image is too large, transfer to large image and create new web image
 				list($sourceWidth, $sourceHeight) = getimagesize(str_replace(' ', '%20', $this->imgManager->getSourcePath()));
 				if(!$webIsEmpty && !$recUrlOrig){
@@ -240,6 +253,10 @@ class ImageCleaner extends Manager{
 			//$this->logOrEcho($this->errorMessage,1);
 			$status = false;
 		}
+		if(preg_match('/\/mo_\d+.jpg/', $imgUrl)){
+			$imgUrl = str_replace($GLOBALS['IMAGE_ROOT_URL'],$GLOBALS['IMAGE_ROOT_PATH'],$imgUrl);
+			unlink($imgUrl);
+		}
 	}
 
 	public function resetProcessing(){
@@ -249,6 +266,77 @@ class ImageCleaner extends Manager{
 		$sqlWeb = 'UPDATE images SET url = "empty" '.
 			'WHERE (url = "") OR (url LIKE "processing %" AND url != "processing '.date('Y-m-d').'") ';
 		$this->conn->query($sqlWeb);
+	}
+
+	private function getTropicosWebUrl($url){
+		$imgUrl = '';
+		echo $url.'<br/>';
+		if(preg_match('/imageid=(\d+)$/', $url, $m)){
+			$imageID = $m[1];
+			echo $imageID.'<br/>';
+			//http://mbgserv18.mobot.org/adore-djatoka/resolver?url_ver=Z39.88-2004&rft_id=http://mbgserv18:8057/TropicosImages2/100309000/100309162.jp2&svc_id=info:lanl-repo/svc/getRegion&svc_val_fmt=info:ofi/fmt:kev:mtx:jpeg2000&svc.format=image/jpeg&svc.scale=0.2';
+			$newImgUrl = 'http://mbgserv18.mobot.org/adore-djatoka/resolver?url_ver=Z39.88-2004&rft_id=http://mbgserv18:8057/TropicosImages2/'.substr($imageID, 0, 6).'000/'.$imageID.'.jp2&svc_id=info:lanl-repo/svc/getRegion&svc_val_fmt=info:ofi/fmt:kev:mtx:jpeg2000&svc.format=image/jpeg&svc.scale=0.2';
+			echo $newImgUrl.'<br/>';
+
+			if(copy($newImgUrl,$this->imgManager->getTargetPath().$this->imgManager->getImgName().'_web'.$this->imgManager->getImgExt())){
+				$imgUrl = $this->imgManager->getTargetPath().$this->imgManager->getImgName().'_web'.$this->imgManager->getImgExt();
+				echo $imgUrl;
+			}
+			exit;
+		}
+		return $imgUrl;
+	}
+
+	private function getTropicosWebUrl2($url){
+		//Extract image id
+		$imgUrl = '';
+		if(preg_match('/imageid=(\d+)$/', $url, $m)){
+			$imageID = $m[1];
+			$imgDisplayUrl = 'http://www.tropicos.org/Image/'.$imageID;
+			$ip = $_SERVER['HTTP_HOST'];
+
+			$header[0]  = "Accept: text/xml,application/xml,application/xhtml+xml,";
+			$header[0] .= "text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5";
+			$header[] = "Cache-Control: max-age=0";
+			$header[] = "Connection: keep-alive";
+			$header[] = "Keep-Alive: 300";
+			$header[] = "Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7";
+			$header[] = "Accept-Language: en-us,en;q=0.5";
+			$header[] = "Pragma: "; // browsers = blank
+			$header[] = "X_FORWARDED_FOR: " . $ip;
+			$header[] = "REMOTE_ADDR: " . $ip;
+
+			$ch = curl_init();
+			curl_setopt($ch,CURLOPT_URL,$imgDisplayUrl);
+			curl_setopt($ch,CURLOPT_RETURNTRANSFER,true);
+			curl_setopt($ch,CURLOPT_COOKIEFILE,'cookies.txt');
+			curl_setopt($ch, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']);
+			curl_setopt($ch,CURLOPT_COOKIEJAR,'cookies.txt');
+			curl_setopt($ch, CURLOPT_REFERER, $_SERVER['HTTP_HOST']);
+			curl_setopt($ch,CURLOPT_HTTPHEADER,$header);
+			curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+			curl_setopt($ch, CURLOPT_VERBOSE, 1);
+			$htmlSource = curl_exec($ch);
+
+			curl_close($ch);
+
+			//$htmlSource = file_get_contents($imgDisplayUrl);
+			//echo 'source: '.$htmlSource; exit;
+
+			if($htmlSource){
+				$doc = new DOMDocument();
+				libxml_use_internal_errors(true);
+				$doc->loadHTML($htmlSource);
+				foreach($doc->getElementsByTagName('img') as $link) {
+					if($link->getAttribute('id')){
+						if($link->getAttribute('id') == 'ctl00_MainContentPlaceHolder_imageDetailsControl_ImageHolder'){
+							$imgUrl = $link->getAttribute('src');
+						}
+					}
+				}
+			}
+		}
+		return $imgUrl;
 	}
 
 	//Test and refresh image thumbnails for remote images
@@ -399,7 +487,7 @@ class ImageCleaner extends Manager{
 			return false;
 		}
 
-return -1;
+		//return -1;
 		$ts = curl_getinfo($curl, CURLINFO_FILETIME);
 		return $ts;
 	}

@@ -1108,23 +1108,26 @@ class ImageShared{
 	public function uriExists($uri) {
 		$exists = false;
 
+		$urlPrefix = "http://";
+		if((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || $_SERVER['SERVER_PORT'] == 443) $urlPrefix = "https://";
+		$urlPrefix .= $_SERVER["SERVER_NAME"];
+		if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $urlPrefix .= ':'.$_SERVER["SERVER_PORT"];
+
+		if(strpos($uri,$urlPrefix) === 0){
+			$uri = substr($uri,strlen($urlPrefix));
+		}
 		if(substr($uri,0,1) == '/'){
 			if($GLOBALS['IMAGE_ROOT_URL'] && strpos($uri,$GLOBALS['IMAGE_ROOT_URL']) === 0){
 				$fileName = str_replace($GLOBALS['IMAGE_ROOT_URL'],$GLOBALS['IMAGE_ROOT_PATH'],$uri);
-				if(file_exists($fileName)) $exists = true;
+				if(file_exists($fileName)) return true;
 			}
 			if(isset($GLOBALS['imageDomain']) && $GLOBALS['imageDomain']){
 				$uri = $GLOBALS['imageDomain'].$uri;
 			}
 			else{
-				$urlPrefix = "http://";
-				if((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || $_SERVER['SERVER_PORT'] == 443) $urlPrefix = "https://";
-				$urlPrefix .= $_SERVER["SERVER_NAME"];
-				if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $urlPrefix .= ':'.$_SERVER["SERVER_PORT"];
 				$uri = $urlPrefix.$uri;
 			}
 		}
-
 		if(!$exists){
 			//First test, won't download file body
 			if(function_exists('curl_init')){
@@ -1184,9 +1187,26 @@ class ImageShared{
 
 	public static function getImgDim($imgUrl){
 		if(!$imgUrl) return false;
-		$imgDim = self::getImgDim1($imgUrl);
-		if(!$imgDim) $imgDim = self::getImgDim2($imgUrl);
-		if(!$imgDim) $imgDim = @getimagesize($imgUrl);
+
+		$urlPrefix = "http://";
+		if((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || $_SERVER['SERVER_PORT'] == 443) $urlPrefix = "https://";
+		$urlPrefix .= $_SERVER["SERVER_NAME"];
+		if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $urlPrefix .= ':'.$_SERVER["SERVER_PORT"];
+
+		if(strpos($imgUrl,$urlPrefix) === 0){
+			$uri = substr($imgUrl,strlen($urlPrefix));
+		}
+		if(substr($imgUrl,0,1) == '/'){
+			if($GLOBALS['IMAGE_ROOT_URL'] && strpos($imgUrl,$GLOBALS['IMAGE_ROOT_URL']) === 0){
+				$imgUrl = str_replace($GLOBALS['IMAGE_ROOT_URL'],$GLOBALS['IMAGE_ROOT_PATH'],$imgUrl);
+			}
+			$imgDim = getimagesize($imgUrl);
+		}
+		else{
+			$imgDim = self::getImgDim1($imgUrl);
+			if(!$imgDim) $imgDim = self::getImgDim2($imgUrl);
+			if(!$imgDim) $imgDim = @getimagesize($imgUrl);
+		}
 		return $imgDim;
 	}
 

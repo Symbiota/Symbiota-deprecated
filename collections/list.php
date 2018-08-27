@@ -80,7 +80,7 @@ $occurArr = $collManager->getSpecimenMap($pageNumber,$cntPerPage);
 			});
 		}
 	</script>
-	<script src="../js/symb/collections.list.js?ver=6" type="text/javascript"></script>
+	<script src="../js/symb/collections.list.js?ver=7" type="text/javascript"></script>
 </head>
 <body>
 <?php
@@ -222,7 +222,7 @@ $occurArr = $collManager->getSpecimenMap($pageNumber,$cntPerPage);
 							echo '<img src="../images/edit.png" style="border:solid 1px gray;height:13px;" /></a></div>';
 						}
 						$targetClid = $collManager->getSearchTerm("targetclid");
-						if($collManager->getClName() && $targetTid){
+						if($collManager->getClName() && $targetTid && array_key_exists('mode', $_REQUEST)){
 							echo '<div style="float:right;" >';
 							echo '<a href="#" onclick="addVoucherToCl('.$occid.','.$targetClid.','.$targetTid.')" title="'.$LANG['VOUCHER_LINK_TITLE'].' '.$collManager->getClName().';return false;">';
 							echo '<img src="../images/voucheradd.png" style="border:solid 1px gray;height:13px;margin-right:5px;" /></a></div>';

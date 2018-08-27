@@ -301,7 +301,7 @@ $smManager = new SiteMapManager();
 						<?php
 						if($clAdmin){
 							foreach($clAdmin as $k => $v){
-								echo "<li><a href='".$CLIENT_ROOT."/checklists/checklist.php?cl=".$k."&emode=1'>$v</a></li>";
+								echo "<li><a href='".$CLIENT_ROOT."/checklists/checklist.php?clid=".$k."&emode=1'>$v</a></li>";
 							}
 						}
 						else{

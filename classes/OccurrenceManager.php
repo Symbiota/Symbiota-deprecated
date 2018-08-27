@@ -52,23 +52,30 @@ class OccurrenceManager extends OccurrenceTaxaManager {
 		if(array_key_exists("targetclid",$this->searchTermArr) && is_numeric($this->searchTermArr["targetclid"])){
 			//Used to exclude vouchers alredy linked to target checklist
 			$sqlWhere .= 'AND ('.$this->voucherManager->getSqlFrag().') ';
-			$clOccidArr = array();
-			if(isset($this->taxaArr['search']) && is_numeric($this->taxaArr['search'])){
-				$sql = 'SELECT DISTINCT v.occid '.
-					'FROM fmvouchers v INNER JOIN taxstatus ts ON v.tid = ts.tidaccepted '.
-					'INNER JOIN taxstatus ts2 ON ts.tidaccepted = ts2.tidaccepted '.
-					'WHERE (v.clid = '.$this->searchTermArr["targetclid"].') AND (v.tid = '.$this->taxaArr['search'].')';
-				$rs = $this->conn->query($sql);
-				while($r = $rs->fetch_object()){
-					$clOccidArr[] = $r->occid;
+			if(array_key_exists('mode', $_REQUEST) && $_REQUEST['mode'] == 'voucher'){
+				$clOccidArr = array();
+				if(isset($this->taxaArr['search']) && is_numeric($this->taxaArr['search'])){
+					$sql = 'SELECT DISTINCT v.occid '.
+						'FROM fmvouchers v INNER JOIN taxstatus ts ON v.tid = ts.tidaccepted '.
+						'INNER JOIN taxstatus ts2 ON ts.tidaccepted = ts2.tidaccepted '.
+						'WHERE (v.clid = '.$this->searchTermArr["targetclid"].') AND (v.tid = '.$this->taxaArr['search'].')';
+					$rs = $this->conn->query($sql);
+					while($r = $rs->fetch_object()){
+						$clOccidArr[] = $r->occid;
+					}
+					$rs->free();
 				}
-				$rs->free();
+				if($clOccidArr) $sqlWhere .= 'AND (o.occid NOT IN('.implode(',',$clOccidArr).')) ';
 			}
-			if($clOccidArr) $sqlWhere .= 'AND (o.occid NOT IN('.implode(',',$clOccidArr).')) ';
 			$this->displaySearchArr[] = $this->voucherManager->getQueryVariableStr();
 		}
 		elseif(array_key_exists('clid',$this->searchTermArr) && is_numeric($this->searchTermArr['clid'])){
-			$sqlWhere .= 'AND (v.clid = '.$this->searchTermArr['clid'].') ';
+			if(isset($this->searchTermArr["cltype"]) && $this->searchTermArr["cltype"] == 'all'){
+				$sqlWhere .= 'AND (cl.clid IN('.$this->searchTermArr['clid'].')) ';
+			}
+			else{
+				$sqlWhere .= 'AND (v.clid IN('.$this->searchTermArr['clid'].')) ';
+			}
 			$this->displaySearchArr[] = 'Checklist ID: '.$this->searchTermArr['clid'];
 		}
 		elseif(array_key_exists("db",$this->searchTermArr) && $this->searchTermArr['db']){
@@ -161,11 +168,12 @@ class OccurrenceManager extends OccurrenceTaxaManager {
 				$bLat = $llboundArr[1];
 				$lLng = $llboundArr[2];
 				$rLng = $llboundArr[3];
-				$sqlWhere .= 'AND (o.DecimalLatitude BETWEEN '.$llboundArr[1].' AND '.$llboundArr[0].' AND o.DecimalLongitude BETWEEN '.$llboundArr[2].' AND '.$llboundArr[3].') ';
+				//$sqlWhere .= 'AND (o.DecimalLatitude BETWEEN '.$llboundArr[1].' AND '.$llboundArr[0].' AND o.DecimalLongitude BETWEEN '.$llboundArr[2].' AND '.$llboundArr[3].') ';
+				$sqlWhere .= 'AND (ST_Within(p.point,GeomFromText("POLYGON(('.$uLat.' '.$rLng.','.$bLat.' '.$rLng.','.$bLat.' '.$lLng.','.$uLat.' '.$lLng.','.$uLat.' '.$rLng.'))"))) ';
 				$this->displaySearchArr[] = 'Lat: '.$llboundArr[1].' - '.$llboundArr[0].' Long: '.$llboundArr[2].' - '.$llboundArr[3];
 			}
 		}
-		if(array_key_exists("llpoint",$this->searchTermArr)){
+		elseif(array_key_exists("llpoint",$this->searchTermArr)){
 			$pointArr = explode(";",$this->searchTermArr["llpoint"]);
 			if(count($pointArr) == 4){
 				$lat = $pointArr[0];
@@ -186,6 +194,10 @@ class OccurrenceManager extends OccurrenceTaxaManager {
 					' - radians('.$lng.') ) + sin( radians('.$lat.') ) * sin(radians(o.DecimalLatitude)) ) ) < '.$radius.') ';
 			}
 			$this->displaySearchArr[] = $pointArr[0]." ".$pointArr[1]." +- ".$pointArr[2].$pointArr[3];
+		}
+		elseif(array_key_exists('footprintwkt',$this->searchTermArr)){
+			$sqlWhere .= 'AND (ST_Within(p.point,GeomFromText("'.$this->searchTermArr['footprintwkt'].'"))) ';
+			$this->displaySearchArr[] = 'Polygon search (not displayed)';
 		}
 		if(array_key_exists("collector",$this->searchTermArr)){
 			$collectorArr = explode(";",$this->searchTermArr["collector"]);
@@ -355,6 +367,14 @@ class OccurrenceManager extends OccurrenceTaxaManager {
 			$this->displaySearchArr[] = 'has genetic data';
 		}
 		if($sqlWhere){
+			if(!array_key_exists("includecult",$this->searchTermArr)){
+				$sqlWhere .= "AND (o.cultivationStatus IS NULL OR o.cultivationStatus = 0) ";
+			}
+			else{
+				$this->displaySearchArr[] = 'includes cultivated/captive occurrences';
+			}
+		}
+		if($sqlWhere){
 			$this->sqlWhere = 'WHERE '.substr($sqlWhere,4);
 		}
 		else{
@@ -385,7 +405,12 @@ class OccurrenceManager extends OccurrenceTaxaManager {
 	protected function getTableJoins($sqlWhere){
 		$sqlJoin = '';
 		if(array_key_exists('clid',$this->searchTermArr) && $this->searchTermArr['clid']){
-			$sqlJoin .= 'INNER JOIN fmvouchers v ON o.occid = v.occid ';
+			if(strpos($sqlWhere,'v.clid')){
+				$sqlJoin .= 'INNER JOIN fmvouchers v ON o.occid = v.occid ';
+			}
+			else{
+				$sqlJoin .= 'INNER JOIN fmchklsttaxalink cl ON o.tidinterpreted = cl.tid ';
+			}
 		}
 		if(strpos($sqlWhere,'MATCH(f.recordedby)') || strpos($sqlWhere,'MATCH(f.locality)')){
 			$sqlJoin .= 'INNER JOIN omoccurrencesfulltext f ON o.occid = f.occid ';
@@ -698,6 +723,14 @@ class OccurrenceManager extends OccurrenceTaxaManager {
 				unset($this->searchTermArr["hasgenetic"]);
 			}
 		}
+		if(array_key_exists("includecult",$_REQUEST)){
+			if($_REQUEST["includecult"]){
+				$this->searchTermArr["includecult"] = true;
+			}
+			else{
+				unset($this->searchTermArr["includecult"]);
+			}
+		}
 		$llPattern = '-?\d+\.{0,1}\d*';
 		if(array_key_exists("upperlat",$_REQUEST)){
 			$upperLat = ''; $bottomlat = ''; $leftLong = ''; $rightlong = '';
@@ -766,6 +799,9 @@ class OccurrenceManager extends OccurrenceTaxaManager {
 		}
 		if(array_key_exists("llpoint",$_REQUEST) && $_REQUEST['llpoint']){
 			$this->searchTermArr["llpoint"] = $this->cleanInputStr($_REQUEST['llpoint']);
+		}
+		if(array_key_exists("footprintwkt",$_REQUEST) && $_REQUEST['footprintwkt']){
+			$this->searchTermArr["footprintwkt"] = $this->cleanInputStr($_REQUEST['footprintwkt']);
 		}
 	}
 

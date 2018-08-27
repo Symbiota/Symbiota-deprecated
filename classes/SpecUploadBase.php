@@ -1245,8 +1245,8 @@ class SpecUploadBase extends SpecUpload{
 				$sqlFragments = $this->getSqlFragments($recMap,$this->identFieldMap);
 				if($sqlFragments){
 					if($recMap['identifiedby'] || $recMap['dateidentified']){
-						if(!$recMap['identifiedby']) $recMap['identifiedby'] = 'not specified';
-						if(!$recMap['dateidentified']) $recMap['dateidentified'] = 'not specified';
+						if(!isset($recMap['identifiedby']) || !$recMap['identifiedby']) $recMap['identifiedby'] = 'not specified';
+						if(!isset($recMap['dateidentified']) || $recMap['dateidentified']) $recMap['dateidentified'] = 'not specified';
 						$sql = 'INSERT INTO uploaddetermtemp(collid'.$sqlFragments['fieldstr'].') '.
 							'VALUES('.$this->collId.$sqlFragments['valuestr'].')';
 						//echo "<div>SQL: ".$sql."</div>"; exit;
@@ -1508,7 +1508,7 @@ class SpecUploadBase extends SpecUpload{
 	}
 
 	protected function setUploadTargetPath(){
-		$tPath = $GLOBALS["tempDirRoot"];
+		$tPath = $GLOBALS['TEMP_DIR_ROOT'];
 		if(!$tPath){
 			$tPath = ini_get('upload_tmp_dir');
 		}

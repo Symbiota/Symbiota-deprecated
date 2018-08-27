@@ -5,11 +5,11 @@ include_once($SERVER_ROOT.'/classes/ProfileManager.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 header('Access-Control-Allow-Origin: http://www.catalogueoflife.org/col/webservice');
 
-$occId = array_key_exists('occid',$_REQUEST)?$_REQUEST['occid']:0;
+$occId = array_key_exists('occid',$_REQUEST)?$_REQUEST['occid']:'';
 $tabTarget = array_key_exists('tabtarget',$_REQUEST)?$_REQUEST['tabtarget']:0;
 $collId = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
 $goToMode = array_key_exists('gotomode',$_REQUEST)?$_REQUEST['gotomode']:0;
-$occIndex = array_key_exists('occindex',$_REQUEST)&&$_REQUEST['occindex']!=""?$_REQUEST['occindex']:false;
+$occIndex = array_key_exists('occindex',$_REQUEST)?$_REQUEST['occindex']:false;
 $ouid = array_key_exists('ouid',$_REQUEST)?$_REQUEST['ouid']:0;
 $crowdSourceMode = array_key_exists('csmode',$_REQUEST)?$_REQUEST['csmode']:0;
 $action = array_key_exists('submitaction',$_REQUEST)?$_REQUEST['submitaction']:'';
@@ -262,12 +262,10 @@ if($SYMB_UID){
 	}
 
 	if($goToMode){
-		$occId = 0;
 		//Adding new record, override query form and prime for current user's dataentry for the day
-		$today = date('Y-m-d');
-		$occManager->setQueryVariables(array('eb'=>$paramsArr['un'],'dm'=>$today));
+		$occId = 0;
+		$occManager->setQueryVariables(array('eb'=>$paramsArr['un'],'dm'=>date('Y-m-d')));
 		if(!$qryCnt){
-			$occManager->setSqlWhere(0);
 			$qryCnt = $occManager->getQueryRecordCount();
 			$occIndex = $qryCnt;
 		}
@@ -275,7 +273,7 @@ if($SYMB_UID){
 	if($ouid){
 		$occManager->setQueryVariables(array('ouid' => $ouid));
 	}
-	elseif($occIndex !== false){
+	elseif(is_numeric($occIndex)){
 		//Query Form has been activated
 		$occManager->setQueryVariables();
 		if($action == 'Delete Occurrence'){
@@ -284,7 +282,6 @@ if($SYMB_UID){
 			if($qryCnt > 1){
 				if(($occIndex + 1) >= $qryCnt) $occIndex = $qryCnt - 2;
 				$qryCnt--;
-				$occManager->setSqlWhere($occIndex);
 			}
 			else{
 				unset($_SESSION['editorquery']);
@@ -292,13 +289,11 @@ if($SYMB_UID){
 			}
 		}
 		elseif($action == 'Save Edits'){
-			$occManager->setSqlWhere(0);
 			//Get query count and then reset; don't use new count for this display
 			$qryCnt = $occManager->getQueryRecordCount();
 			$occManager->getQueryRecordCount(1);
 		}
 		else{
-			$occManager->setSqlWhere($occIndex);
 			$qryCnt = $occManager->getQueryRecordCount();
 		}
 	}
@@ -306,12 +301,14 @@ if($SYMB_UID){
 		//Make sure query variables are null
 		unset($_SESSION['editorquery']);
 	}
+	$occManager->setOccIndex($occIndex);
 
-	if(!$goToMode){
+	if($occId || (!$goToMode && $occIndex !== false)){
 		$oArr = $occManager->getOccurMap();
 		if($oArr){
-			if(!$occId) $occId = $occManager->getOccId();
+			$occId = $occManager->getOccId();
 			$occArr = $oArr[$occId];
+			$occIndex = $occManager->getOccIndex();
 			if(!$collMap){
 				$collMap = $occManager->getCollMap();
 				//if(isset($collMap['collid'])) $collId = $collMap['collid'];
@@ -343,12 +340,12 @@ if($SYMB_UID){
 			$navStr .= '|&lt;';
 			if($occIndex > 0) $navStr .= '</a>';
 			$navStr .= '&nbsp;&nbsp;&nbsp;&nbsp;';
-			if($occIndex > 0) $navStr .= '<a href="#" onclick="return submitQueryForm('.($occIndex-1).');" title="Previous Record">';
+			if($occIndex > 0) $navStr .= '<a href="#" onclick="return submitQueryForm(\'back\');" title="Previous Record">';
 			$navStr .= '&lt;&lt;';
 			if($occIndex > 0) $navStr .= '</a>';
 			$recIndex = ($occIndex<$qryCnt?($occIndex + 1):'*');
 			$navStr .= '&nbsp;&nbsp;| '.$recIndex.' of '.$qryCnt.' |&nbsp;&nbsp;';
-			if($occIndex<$qryCnt-1) $navStr .= '<a href="#" onclick="return submitQueryForm('.($occIndex+1).');"  title="Next Record">';
+			if($occIndex<$qryCnt-1) $navStr .= '<a href="#" onclick="return submitQueryForm(\'forward\');"  title="Next Record">';
 			$navStr .= '&gt;&gt;';
 			if($occIndex<$qryCnt-1) $navStr .= '</a>';
 			$navStr .= '&nbsp;&nbsp;&nbsp;&nbsp;';
@@ -454,11 +451,11 @@ else{
 	</script>
 	<script src="../../js/symb/collections.coordinateValidation.js?ver=170310" type="text/javascript"></script>
 	<script src="../../js/symb/wktpolygontools.js?ver=180208" type="text/javascript"></script>
-	<script src="../../js/symb/collections.occureditormain.js?ver=20180308" type="text/javascript"></script>
-	<script src="../../js/symb/collections.occureditortools.js?ver=170204" type="text/javascript"></script>
+	<script src="../../js/symb/collections.occureditormain.js?ver=201808" type="text/javascript"></script>
+	<script src="../../js/symb/collections.occureditortools.js?ver=1808" type="text/javascript"></script>
 	<script src="../../js/symb/collections.occureditorimgtools.js?ver=170310" type="text/javascript"></script>
 	<script src="../../js/jquery.imagetool-1.7.js?ver=140310" type="text/javascript"></script>
-	<script src="../../js/symb/collections.occureditorshare.js?ver=20180309" type="text/javascript"></script>
+	<script src="../../js/symb/collections.occureditorshare.js?ver=20180711" type="text/javascript"></script>
 </head>
 <body>
 	<!-- inner text -->
@@ -610,12 +607,6 @@ else{
 												style="">Determination History</a>
 										</li>
 										<?php
-										if (isset($fpEnabled) && $fpEnabled) { // FP Annotations tab
-											echo '<li>';
-											echo '<a href="includes/findannotations.php?'.$anchorVars.'&'.$detVars.'"';
-											echo ' style=""> Annotations </a>';
-											echo '</li>';
-										}
 										if($isEditor == 1 || $isEditor == 2){
 											?>
 											<li id="imgTab">
@@ -1215,7 +1206,7 @@ else{
 												<div id="cultivationStatusDiv">
 													<?php $hasValue = array_key_exists("cultivationstatus",$occArr)&&$occArr["cultivationstatus"]?1:0; ?>
 													<input type="checkbox" name="cultivationstatus" tabindex="102" value="1" <?php echo $hasValue?'CHECKED':''; ?> onchange="fieldChanged('cultivationstatus');" />
-													<?php echo (defined('CULTIVATIONSTATUSLABEL')?CULTIVATIONSTATUSLABEL:'Cultivated'); ?>
+													<?php echo (defined('CULTIVATIONSTATUSLABEL')?CULTIVATIONSTATUSLABEL:'Cultivated/Captive'); ?>
 												</div>
 											</div>
 										</fieldset>
@@ -1418,13 +1409,7 @@ else{
 												?>
 												<div id="editButtonDiv">
 													<input type="submit" name="submitaction" value="Save Edits" style="width:150px;" onclick="return verifyFullFormEdits(this.form)" disabled />
-													<?php
-													if($occIndex !== false){
-														?>
-														<input type="hidden" name="occindex" value="<?php echo $occIndex; ?>" />
-														<?php
-													}
-													?>
+													<input type="hidden" name="occindex" value="<?php echo is_numeric($occIndex)?$occIndex:''; ?>" />
 													<input type="hidden" name="editedfields" value="" />
 												</div>
 												<?php

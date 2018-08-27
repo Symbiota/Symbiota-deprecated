@@ -956,7 +956,6 @@ class OccurrenceCleaner extends Manager{
 				}
 			}
 			$editorManager->setQueryVariables($qryArr);
-			$editorManager->setSqlWhere();
 			$editorManager->batchUpdateField($fieldName,$oldValue,$newValue,false);
 		}
 		return true;

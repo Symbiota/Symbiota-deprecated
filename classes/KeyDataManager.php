@@ -1,7 +1,7 @@
 <?php
-include_once($SERVER_ROOT.'/config/dbconnection.php');
+include_once($SERVER_ROOT.'/classes/Manager.php');
 
-class KeyDataManager {
+class KeyDataManager extends Manager {
 
 	private $sql = '';
 	private $relevanceValue;		//Percent (as a decimal) of Taxa that must be coded for a CID to be displayed
@@ -22,162 +22,19 @@ class KeyDataManager {
 	private $dynClid;
 
 	function __construct() {
+		parent::__construct();
 		$this->relevanceValue = .9;
-		$this->keyCon = MySQLiConnectionFactory::getCon("readonly");
 	}
 
 	public function __destruct(){
-		if(!($this->keyCon === false)) $this->keyCon->close();
+		parent::__destruct();
 	}
 
-	public function setProject($projValue){
-		if(is_numeric($projValue)){
-			$this->pid = $projValue;
-		}
-		else{
-			$sql = "SELECT p.pid FROM fmprojects p WHERE (p.projname = '".$projValue."')";
-			$result = $this->keyCon->query($sql);
-			if($row = $result->fetch_object()){
-				$this->pid = $row->pid;
-			}
-			$result->close();
-		}
-		return $this->pid;
-	}
 
-	public function setLanguage($l){
-		$this->lang = $l;
-	}
-
-	public function setCommonDisplay($bool){
-		$this->commonDisplay = $bool;
-	}
-
-	public function getTaxaFilterList(){
-		$returnArr = Array();
-		$sql = "SELECT DISTINCT nt.UnitName1, ts.Family ";
-		if($this->clid && $this->clType == "static"){
-			$sql .= "FROM (taxstatus ts INNER JOIN taxa nt ON ts.tid = nt.tid) INNER JOIN fmchklsttaxalink cltl ON nt.TID = cltl.TID ".
-				"WHERE (cltl.CLID = ".$this->clid.") ";
-		}
-		else if($this->dynClid){
-			$sql .= "FROM (taxstatus ts INNER JOIN taxa nt ON ts.tid = nt.tid) INNER JOIN fmdyncltaxalink dcltl ON nt.TID = dcltl.TID ".
-			"WHERE (dcltl.dynclid = ".$this->dynClid.") ";
-		}
-		else{
-			$sql .= "FROM (((taxstatus ts INNER JOIN taxa nt ON ts.tid = nt.tid) ".
-				"INNER JOIN fmchklsttaxalink cltl ON nt.TID = cltl.TID) ".
-				"INNER JOIN fmchecklists cl ON cltl.CLID = cl.CLID) ".
-				"INNER JOIN fmchklstprojlink clpl ON cl.CLID = clpl.clid ".
-				"WHERE (clpl.pid = ".$this->pid.") ";
-		}
-		$sql .= 'AND (ts.taxauthid = 1)';
-		//echo $sql.'<br/>'; exit;
-		$result = $this->keyCon->query($sql);
-		while($row = $result->fetch_object()){
-			$genus = $row->UnitName1;
-			$family = $row->Family;
-			if($genus) $returnArr[] = $genus;
-			if($family) $returnArr[] = $family;
-		}
-
-		$result->free();
-		$returnArr = array_unique($returnArr);
-		natcasesort($returnArr);
-		array_unshift($returnArr,"--------------------------");
-		array_unshift($returnArr, "All Species");
-		return $returnArr;
-	}
-
-	public function setTaxonFilter($t){
-		$this->taxonFilter = $t;
-	}
-
-	public function setClValue($clv){
-		$sql = "";
-		if($this->dynClid){
-			$sql = 'SELECT d.name, d.details, d.type '.
-				'FROM fmdynamicchecklists d WHERE (dynclid = '.$this->dynClid.')';
-			$result = $this->keyCon->query($sql);
-			if($row = $result->fetch_object()){
-				$this->clName = $row->name;
-				$this->clType = $row->type;
-			}
-			$result->close();
-		}
-		else{
-			if(is_numeric($clv)){
-				$sql = "SELECT cl.CLID, cl.Name, cl.Authors, cl.Type, cl.dynamicsql ".
-					"FROM fmchecklists cl WHERE (cl.CLID = ".$clv.")";
-			}
-			else{
-				$sql = "SELECT cl.CLID, cl.Name, cl.Authors, cl.Type, cl.dynamicsql ".
-					"FROM fmchecklists cl WHERE (cl.Name = '".$clv."') OR (cl.Title = '".$clv."')";
-			}
-			$result = $this->keyCon->query($sql);
-			if($row = $result->fetch_object()){
-				$this->clid = $row->CLID;
-				$this->clName = $row->Name;
-				$this->clAuthors = $row->Authors;
-				$this->clType = ($row->Type?$row->Type:'static');
-				$this->dynamicSql = $row->dynamicsql;
-			}
-			$result->close();
-		}
-		return $this->clid;
-	}
-
-	public function getClid(){
-		return $this->clid;
-	}
-
-	public function setDynClid($id){
-		$this->dynClid = $id;
-	}
-
-	public function setAttrs($attrs){
-		if(is_array($attrs)){
-			foreach($attrs as $attr){
-				$fragments = explode("-",$attr);
-				$cid = $fragments[0];
-				$cs = $fragments[1];
-				$this->charArr[$cid][] = $cs;
-			}
-		}
-	}
-
-	public function getAttrs(){
-		return $this->attrs;
-	}
-
-	public function getTaxaCount(){
-		return $this->taxaCount;
-	}
-
-	public function getClName(){
-		return $this->clName;
-	}
-
-	public function getClAuthors(){
-		return $this->clAuthors;
-	}
-
-	public function getClType(){
-		return $this->clType;
-	}
-
-	public function setRelevanceValue($rel){
-		$this->relevanceValue = ($rel?$rel:0);
-	}
-
-	public function getRelevanceValue(){
-		return $this->relevanceValue;
-	}
-
- 	//$returns an Array of ("chars" => $charArray, "taxa" => $taxaArray)
- 	//In coming attrs are in the form of: (cid => array of cs)
+	//$returns an Array of ("chars" => $charArray, "taxa" => $taxaArray)
+	//In coming attrs are in the form of: (cid => array of cs)
 	public function getData(){
- 		$charArray = array();
+		$charArray = array();
 		$taxaArray = array();
 		if(($this->clid && $this->taxonFilter) || $this->dynClid){
 		    $this->setTaxaListSQL();
@@ -206,7 +63,7 @@ class KeyDataManager {
 			$sqlRev = "SELECT tc.CID, Count(tc.TID) AS c FROM ".
 				"(SELECT DISTINCT tList.TID, d.CID FROM ($this->sql) AS tList INNER JOIN kmdescr d ON tList.TID = d.TID WHERE (d.CS <> '-')) AS tc ".
 				"GROUP BY tc.CID HAVING ((Count(tc.TID)) > $countMin)";
-			$rs = $this->keyCon->query($sqlRev);
+			$rs = $this->conn->query($sqlRev);
 			//echo $sqlRev.'<br/>';
 			while($row = $rs->fetch_object()){
 				$charList[] = $row->CID;
@@ -231,11 +88,11 @@ class KeyDataManager {
 				INNER JOIN kmcs cs ON (d.CS = cs.CS)	AND (d.CID = cs.CID)) INNER JOIN kmcharacters chars ON chars.cid = cs.CID)
 				INNER JOIN kmcharheading chead ON chars.hid = chead.hid
 				GROUP BY chead.language, cs.CID, cs.CS, cs.CharStateName, chars.CharName, chead.headingname, chars.helpurl,
-				chars.DifficultyRank, chars.defaultlang, chars.chartype HAVING (chead.language = 'English' AND ((cs.CID) In (".implode(",",$charList).")) AND ((cs.CS)<>'-') AND
-				((chars.chartype)='UM' Or (chars.chartype)='OM') AND chars.DifficultyRank < 3)
+				chars.DifficultyRank, chars.defaultlang, chars.chartype HAVING (chead.language = 'English' AND (cs.CID In (".implode(",",$charList).")) AND (cs.CS <> '-') AND
+				(chars.chartype='UM' Or chars.chartype = 'OM') AND chars.DifficultyRank < 3)
 				ORDER BY chead.hid,	chars.SortSequence, cs.SortSequence ";
 			//echo $sqlChar.'<br/>';
-			$result = $this->keyCon->query($sqlChar);
+			$result = $this->conn->query($sqlChar);
 
 			//Process recordset
 			$langList = Array();
@@ -283,7 +140,7 @@ class KeyDataManager {
 			}
 			$result->free();
 			//Ensures correct sorting and puts html output into returnStrings Array
-			$returnArray["Languages"] = $langList; 			//Put a list of languages in returnArray
+			$returnArray["Languages"] = $langList;			//Put a list of languages in returnArray
 			foreach($headingArray as $HID => $cArray){
 				$displayHeading = true;
 				$headNameArray = $cArray["HeadingNames"];
@@ -324,9 +181,9 @@ class KeyDataManager {
 			}
 		}
 		return $returnArray;
- 	}
+	}
 
- 	//return an array: family => array(TID => DisplayName)
+	//return an array: family => array(TID => DisplayName)
 	public function getTaxaList(){
 		$taxaList[] = null;
 	    unset($taxaList);
@@ -339,23 +196,23 @@ class KeyDataManager {
 			$sqlTaxa = $this->sql;
 		}
 		//echo $sqlTaxa.'<br/>';
-		$result = $this->keyCon->query($sqlTaxa);
- 		$returnArray = array();
- 		$sppArr = array();
- 		$count = 0;
+		$result = $this->conn->query($sqlTaxa);
+		$returnArray = array();
+		$sppArr = array();
+		$count = 0;
 	    while ($row = $result->fetch_object()){
 			$count++;
-	    	$family = $row->Family;
+	   	$family = $row->Family;
 			$tid = $row->tid;
-	    	$displayName = $row->DisplayName;
-	    	unset($sppArr);
-	    	if(array_key_exists($family, $returnArray)) $sppArr = $returnArray[$family];
-	    	$sppArr[$tid] = $displayName;
-	    	$returnArray[$family] = $sppArr;
+	   	$displayName = $row->DisplayName;
+	   	unset($sppArr);
+	   	if(array_key_exists($family, $returnArray)) $sppArr = $returnArray[$family];
+	   	$sppArr[$tid] = $displayName;
+	   	$returnArray[$family] = $sppArr;
 	    }
 	    $this->taxaCount = $count;
 		$result->close();
- 		return $returnArray;
+		return $returnArray;
 	}
 
 	public function setTaxaListSQL(){
@@ -384,7 +241,7 @@ class KeyDataManager {
 					//Do nothing
 				}
 				else{
-					$sqlWhere .= 'AND ((ts.Family = "'.$this->taxonFilter.'") OR (t.UnitName1 = "'.$this->taxonFilter.'")) ';
+					$sqlWhere .= 'AND ((ts.Family = "'.$this->cleanInStr($this->taxonFilter).'") OR (t.UnitName1 = "'.$this->cleanInStr($this->taxonFilter).'")) ';
 				}
 			}
 
@@ -397,7 +254,7 @@ class KeyDataManager {
 					$sqlFromBase .= 'INNER JOIN kmdescr AS D'.$count.' ON t.TID = D'.$count.'.TID ';
 					$stateStr = '';
 					foreach($states as $cs){
-						 $stateStr.=(empty($stateStr)?'':'OR ').'(D'.$count.'.CS="'.$cs.'") ';
+						 $stateStr.=(empty($stateStr)?'':'OR ').'(D'.$count.'.CS="'.$this->cleanInStr($cs).'") ';
 					}
 					$sqlWhere.=' AND (D'.$count.'.CID='.$cid.') AND ('.$stateStr.')';
 				}
@@ -407,15 +264,155 @@ class KeyDataManager {
 		}
 	}
 
+	//Misc functions
 	public function getIntroHtml(){
 		$returnStr = "<h2>Please enter a checklist, taxonomic group, and then select 'Submit Criteria'</h2>";
 		$returnStr .= "This key is still in the developmental phase. The application, data model, and actual data will need tuning. ".
 			"The key has been developed to minimize the exclusion of species due to the ".
 			"lack of data. The consequences of this is that a 'shrubs' selection may show non-shrubs until that information is corrected. ".
-			"User input is necessary for the key to improve! Please email me with suggestions, comments, or problems: <a href='".$adminEmail."'>".$adminEmail."</a><br><br>";
+			"User input is necessary for the key to improve! Please email me with suggestions, comments, or problems: <a href='".$GLOBALS['ADMIN_EMAIL']."'>".$GLOBALS['ADMIN_EMAIL']."</a><br><br>";
 		$returnStr .= "<b>Note:</b> If few morphological characters are displayed for a particular checklist, it is likely due to not yet having enough ".
 		"morphological data compiled for that subset of species. If you would like to help, please email me at the above address. ";
 		return $returnStr;
+	}
+
+	public function setProject($projValue){
+		if(is_numeric($projValue)){
+			$this->pid = $projValue;
+		}
+	}
+
+	public function getTaxaFilterList(){
+		$returnArr = Array();
+		$sql = "SELECT DISTINCT nt.UnitName1, ts.Family ";
+		if($this->clid && $this->clType == "static"){
+			$sql .= "FROM (taxstatus ts INNER JOIN taxa nt ON ts.tid = nt.tid) INNER JOIN fmchklsttaxalink cltl ON nt.TID = cltl.TID ".
+					"WHERE (cltl.CLID = ".$this->clid.") ";
+		}
+		else if($this->dynClid){
+			$sql .= "FROM (taxstatus ts INNER JOIN taxa nt ON ts.tid = nt.tid) INNER JOIN fmdyncltaxalink dcltl ON nt.TID = dcltl.TID ".
+					"WHERE (dcltl.dynclid = ".$this->dynClid.") ";
+		}
+		else{
+			$sql .= "FROM (((taxstatus ts INNER JOIN taxa nt ON ts.tid = nt.tid) ".
+					"INNER JOIN fmchklsttaxalink cltl ON nt.TID = cltl.TID) ".
+					"INNER JOIN fmchecklists cl ON cltl.CLID = cl.CLID) ".
+					"INNER JOIN fmchklstprojlink clpl ON cl.CLID = clpl.clid ".
+					"WHERE (clpl.pid = ".$this->pid.") ";
+		}
+		$sql .= 'AND (ts.taxauthid = 1)';
+		//echo $sql.'<br/>'; exit;
+		$result = $this->conn->query($sql);
+		while($row = $result->fetch_object()){
+			$genus = $row->UnitName1;
+			$family = $row->Family;
+			if($genus) $returnArr[] = $genus;
+			if($family) $returnArr[] = $family;
+		}
+
+		$result->free();
+		$returnArr = array_unique($returnArr);
+		natcasesort($returnArr);
+		array_unshift($returnArr,"--------------------------");
+		array_unshift($returnArr, "All Species");
+		return $returnArr;
+	}
+
+	public function setClValue($clv){
+		$sql = "";
+		if($this->dynClid){
+			$sql = 'SELECT d.name, d.details, d.type '.
+					'FROM fmdynamicchecklists d WHERE (dynclid = '.$this->dynClid.')';
+			$result = $this->conn->query($sql);
+			if($row = $result->fetch_object()){
+				$this->clName = $row->name;
+				$this->clType = $row->type;
+			}
+			$result->close();
+		}
+		else{
+			if(is_numeric($clv)){
+				$sql = "SELECT cl.CLID, cl.Name, cl.Authors, cl.Type, cl.dynamicsql FROM fmchecklists cl WHERE (cl.CLID = ".$clv.")";
+			}
+			else{
+				$sql = "SELECT cl.CLID, cl.Name, cl.Authors, cl.Type, cl.dynamicsql ".
+						"FROM fmchecklists cl WHERE (cl.Name = '".$this->cleanInStr($clv)."') OR (cl.Title = '".$this->cleanInStr($clv)."')";
+			}
+			$result = $this->conn->query($sql);
+			if($row = $result->fetch_object()){
+				$this->clid = $row->CLID;
+				$this->clName = $row->Name;
+				$this->clAuthors = $row->Authors;
+				$this->clType = ($row->Type?$row->Type:'static');
+				$this->dynamicSql = $row->dynamicsql;
+			}
+			$result->free();
+		}
+		return $this->clid;
+	}
+
+	public function setAttrs($attrs){
+		if(is_array($attrs)){
+			foreach($attrs as $attr){
+				$fragments = explode("-",$attr);
+				$cid = $fragments[0];
+				$cs = $fragments[1];
+				if(is_numeric($cid)) $this->charArr[$cid][] = $cs;
+			}
+		}
+	}
+
+	//General setters and getters
+	public function getAttrs(){
+		return $this->attrs;
+	}
+
+	public function setLanguage($l){
+		$this->lang = $l;
+	}
+
+	public function setCommonDisplay($bool){
+		if($bool) $this->commonDisplay = true;
+	}
+
+	public function setTaxonFilter($t){
+		$this->taxonFilter = $t;
+	}
+
+	public function getClid(){
+		return $this->clid;
+	}
+
+	public function setDynClid($id){
+		if(is_numeric($id)){
+			$this->dynClid = $id;
+		}
+	}
+
+	public function getTaxaCount(){
+		return $this->taxaCount;
+	}
+
+	public function getClName(){
+		return $this->clName;
+	}
+
+	public function getClAuthors(){
+		return $this->clAuthors;
+	}
+
+	public function getClType(){
+		return $this->clType;
+	}
+
+	public function setRelevanceValue($rel){
+		if(is_numeric($rel)){
+			$this->relevanceValue = $rel;
+		}
+	}
+
+	public function getRelevanceValue(){
+		return $this->relevanceValue;
 	}
 }
 ?>

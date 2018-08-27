@@ -324,7 +324,7 @@ if($IS_ADMIN){
 											$name = '&lt;resource deleted&gt;';
 											if(isset($v['name'])) $name = $v['name'];
 											echo '<li>';
-											echo '<a href="../checklists/checklist.php?cl='.$k.'" target="_blank">';
+											echo '<a href="../checklists/checklist.php?clid='.$k.'" target="_blank">';
 											echo '<span title="'.$v['aby'].'">'.$name.'</span>';
 											echo '</a>';
 											echo "<a href='usermanagement.php?delrole=ClAdmin&tablepk=$k&userid=$userId'>";
@@ -540,7 +540,7 @@ if($IS_ADMIN){
 									<div style='margin-left:15px;'>
 										<?php
 										echo '<input type="checkbox" name="p[]" value="ClAdmin-'.$k.'" />';
-										echo '<a href="../checklists/checklist.php?cl='.$k.'" target="_blank">'.$v.'</a>';
+										echo '<a href="../checklists/checklist.php?clid='.$k.'" target="_blank">'.$v.'</a>';
 										?>
 									</div>
 									<?php

@@ -6,6 +6,9 @@ $locality = $_REQUEST['locality'];
 $country = array_key_exists('country',$_REQUEST)?$_REQUEST['country']:'';
 $state = array_key_exists('state',$_REQUEST)?$_REQUEST['state']:'';
 $county = array_key_exists('county',$_REQUEST)?$_REQUEST['county']:'';
+$decLat = array_key_exists('declat',$_REQUEST)?$_REQUEST['declat']:'';
+$decLng = array_key_exists('declng',$_REQUEST)?$_REQUEST['declng']:'';
+$uncertainty = array_key_exists('uncertainty',$_REQUEST)?$_REQUEST['uncertainty']:'';
 
 if(!$country || !$state || !$county){
 	$locArr = explode(";",$locality);
@@ -13,6 +16,11 @@ if(!$country || !$state || !$county){
 	if(!$country && $locArr) $country = trim(array_shift($locArr));
 	if(!$state && $locArr) $state = trim(array_shift($locArr));
 	if(!$county && $locArr) $county = trim(array_shift($locArr));
+	//Extract lat/long from locality, when it exists
+	if(preg_match('/\(([-]{0,1}\d{1,2}\.\d+)[\s,]+([-]{0,1}\d{1,3}\.\d+)\)/', $locality, $m)){
+		$decLat = $m[1];
+		$decLng = $m[2];
+	}
 }
 //Modify TRS data to make it more compatable to the GeoLocate format (S23 needs to be Sec23)
 if(preg_match('/\d{1,2}[NS]{1}T\s\d{1,2}[EW]{1}R\s\d{1,2}S/',$locality)){
@@ -41,7 +49,9 @@ $country = removeAccents($country);
 $state = removeAccents($state);
 $county = removeAccents($county);
 
-$urlVariables = 'country='.urlencode($country).'&state='.urlencode($state).'&county='.urlencode($county).'&locality='.urlencode($locality);
+$urlVariables = 'country='.urlencode($country).'&state='.urlencode($state).'&county='.urlencode($county);
+if($decLat && $decLng) $urlVariables .= '&points='.$decLat.'|'.$decLng.'|Source Coordinates||'.$uncertainty;
+$urlVariables .= '&locality='.urlencode($locality);
 if(isset($PORTAL_GUID) && $PORTAL_GUID){
 	$urlVariables .= '&gc='.$PORTAL_GUID;
 }
@@ -92,7 +102,7 @@ if(isset($PORTAL_GUID) && $PORTAL_GUID){
 <body>
 	<div id="container">
 		<div>
-			<iframe id="Iframe1" src="//www.geo-locate.org/web/WebGeoreflight.aspx?v=1&georef=run&tab=locality&<?php echo $urlVariables; ?>"></iframe>
+			<iframe id="Iframe1" src="//www.geo-locate.org/web/WebGeoreflight.aspx?v=1&georef=run|true|true|true|false|false|false|false|0&tab=locality&<?php echo $urlVariables; ?>"></iframe>
 		</div>
 	</div>
 </body>

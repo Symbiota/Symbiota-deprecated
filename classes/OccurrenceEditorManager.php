@@ -8,12 +8,17 @@ include_once($SERVER_ROOT.'/classes/UuidFactory.php');
 class OccurrenceEditorManager {
 
 	protected $conn;
-	protected $occid;
 	protected $collId = 0;
 	protected $collMap = array();
+	protected $occid = 0;
+	private $occIndex = 0;
+	private $direction = '';
+	private $occidIndexArr = array();
+
 	protected $occurrenceMap = array();
 	private $occFieldArr = array();
 	private $sqlWhere;
+	private $otherCatNumIsNum = false;
 	private $qryArr = array();
 	private $crowdSourceMode = 0;
 	private $exsiccatiMode = 0;
@@ -59,6 +64,32 @@ class OccurrenceEditorManager {
 		return $this->occid;
 	}
 
+	public function setOccIndex($index){
+		if(is_numeric($index)){
+			$this->occIndex = $index;
+		}
+	}
+
+	public function getOccIndex(){
+		return $this->occIndex;
+	}
+
+	public function setDirection($cnt){
+		if(is_numeric($cnt) && $cnt){
+			$this->direction = $cnt;
+		}
+	}
+
+	public function setOccidIndexArr($occidStr){
+		if(preg_match('/^[,\d]+$/', $occidStr)){
+			$this->occidIndexArr = explode(',',$occidStr);
+		}
+	}
+
+	public function getOccidIndexStr(){
+		return implode(',', $this->occidIndexArr);
+	}
+
 	public function setCollId($id){
 		if($id && is_numeric($id)){
 			if($id != $this->collId){
@@ -66,7 +97,7 @@ class OccurrenceEditorManager {
 				$this->collMap = array();
 				$this->getCollMap();
 			}
-			$this->collId = $this->cleanInStr($id);
+			$this->collId = $id;
 		}
 	}
 
@@ -148,18 +179,22 @@ class OccurrenceEditorManager {
 			}
 			if(array_key_exists('orderby',$_REQUEST)) $this->qryArr['orderby'] = trim($_REQUEST['orderby']);
 			if(array_key_exists('orderbydir',$_REQUEST)) $this->qryArr['orderbydir'] = trim($_REQUEST['orderbydir']);
+
+			if(array_key_exists('occidlist',$_POST) && $_POST['occidlist']) $this->setOccidIndexArr($_POST['occidlist']);
+			if(array_key_exists('direction',$_POST)) $this->direction = trim($_POST['direction']);
 			unset($_SESSION['editorquery']);
 		}
 		elseif(isset($_SESSION['editorquery'])){
 			$this->qryArr = json_decode($_SESSION['editorquery'],true);
 		}
+		$this->setSqlWhere();
 	}
 
 	public function getQueryVariables(){
 		return $this->qryArr;
 	}
 
-	public function setSqlWhere($occIndex=0, $recLimit = 1){
+	private function setSqlWhere(){
 		if ($this->qryArr==null) {
 			// supress warnings on array_key_exists(key,null) calls below
 			$this->qryArr=array();
@@ -251,7 +286,7 @@ class OccurrenceEditorManager {
 			}
 		}
 		//otherCatalogNumbers
-		$otherCatNumIsNum = false;
+		$this->otherCatNumIsNum = false;
 		if(array_key_exists('ocn',$this->qryArr)){
 			if(strtolower($this->qryArr['ocn']) == 'is null'){
 				$sqlWhere .= 'AND (o.othercatalognumbers IS NULL) ';
@@ -273,7 +308,7 @@ class OccurrenceEditorManager {
 						$term1 = trim(substr($v,0,$p));
 						$term2 = trim(substr($v,$p+3));
 						if(is_numeric($term1) && is_numeric($term2)){
-							$otherCatNumIsNum = true;
+							$this->otherCatNumIsNum = true;
 							$ocnBetweenFrag[] = '(o.othercatalognumbers BETWEEN '.$term1.' AND '.$term2.')';
 						}
 						else{
@@ -285,7 +320,7 @@ class OccurrenceEditorManager {
 					else{
 						$ocnInFrag[] = $v;
 						if(is_numeric($v)){
-							$otherCatNumIsNum = true;
+							$this->otherCatNumIsNum = true;
 							if(substr($v,0,1) == '0'){
 								//Add value with left padded zeros removed
 								$ocnInFrag[] = ltrim($vStr,0);
@@ -537,6 +572,11 @@ class OccurrenceEditorManager {
 		if($this->collId) $sqlWhere .= 'AND (o.collid = '.$this->collId.') ';
 		if($sqlWhere) $sqlWhere = 'WHERE '.substr($sqlWhere,4);
 
+		//echo $sqlWhere; exit;
+		$this->sqlWhere = $sqlWhere;
+	}
+
+	private function setSqlOrderBy(&$sql){
 		if(isset($this->qryArr['orderby'])){
 			$sqlOrderBy = '';
 			$orderBy = $this->cleanInStr($this->qryArr['orderby']);
@@ -549,7 +589,7 @@ class OccurrenceEditorManager {
 				}
 			}
 			elseif($orderBy == "othercatalognumbers"){
-				if($otherCatNumIsNum){
+				if($this->otherCatNumIsNum){
 					$sqlOrderBy = 'othercatalognumbers+1';
 				}
 				else{
@@ -562,12 +602,8 @@ class OccurrenceEditorManager {
 			else{
 				$sqlOrderBy = $orderBy;
 			}
-			if($sqlOrderBy) $sqlWhere .= 'ORDER BY (o.'.$sqlOrderBy.') '.$this->qryArr['orderbydir'].' ';
+			if($sqlOrderBy) $sql .= 'ORDER BY (o.'.$sqlOrderBy.') '.$this->qryArr['orderbydir'].' ';
 		}
-
-		$sqlWhere .= 'LIMIT '.($occIndex>0?$occIndex.',':'').$recLimit;
-		//echo $sqlWhere; exit;
-		$this->sqlWhere = $sqlWhere;
 	}
 
 	public function getQueryRecordCount($reset = 0){
@@ -577,14 +613,7 @@ class OccurrenceEditorManager {
 		if($this->sqlWhere){
 			$sql = 'SELECT COUNT(DISTINCT o.occid) AS reccnt FROM omoccurrences o ';
 			$this->addTableJoins($sql);
-			$sqlWhere = $this->sqlWhere;
-			if($obPos = strpos($sqlWhere,' ORDER BY')){
-				$sqlWhere = substr($sqlWhere,0,$obPos);
-			}
-			if($obPos = strpos($sqlWhere,' LIMIT ')){
-				$sqlWhere = substr($sqlWhere,0,$obPos);
-			}
-			$sql .= $sqlWhere;
+			$sql .= $this->sqlWhere;
 			//echo '<div>'.$sql.'</div>'; exit;
 			$rs = $this->conn->query($sql);
 			if($r = $rs->fetch_object()){
@@ -597,45 +626,113 @@ class OccurrenceEditorManager {
 		return $recCnt;
 	}
 
-	public function getOccurMap(){
-		if(!$this->occurrenceMap && ($this->occid || $this->sqlWhere)){
-			$this->setOccurArr();
+	public function getOccurMap($start = 0, $limit = 0){
+		if(!is_numeric($start)) $start = 0;
+		if(!is_numeric($limit)) $limit = 0;
+		if(!$this->occurrenceMap){
+			if($this->direction){
+				$indexKey = array_search($this->occid, $this->occidIndexArr);
+				$repeat = false;
+				do{
+					if($this->direction == 'forward'){
+						if($indexKey !== false) $indexKey++;
+						$this->occIndex++;
+					}
+					elseif($this->direction == 'back'){
+						if($indexKey !== false) $indexKey--;
+						$this->occIndex--;
+					}
+					if($indexKey !== false && array_key_exists($indexKey, $this->occidIndexArr)){
+						$this->occid = $this->occidIndexArr[$indexKey];
+					}
+					else{
+						$this->occid = 0;
+						unset($this->occidIndexArr);
+						$this->occidIndexArr = array();
+					}
+					$this->setOccurArr();
+					if(!$this->occurrenceMap && $this->occid && $this->occidIndexArr){
+						//echo 'skipping: '.$indexKey.':'.$this->occid.'<br/>';
+						//occid no longer belongs within where query domain
+						unset($this->occidIndexArr[$indexKey]);
+						if($this->direction == 'forward'){
+							$this->occIndex--;
+						}
+						$repeat = true;
+					}
+					else{
+						$repeat = false;
+					}
+				}while($repeat);
+			}
+			else{
+				$this->setOccurArr($start, $limit);
+			}
 		}
 		return $this->occurrenceMap;
 	}
 
-	protected function setOccurArr(){
+	protected function setOccurArr($start = 0, $limit = 0){
 		$retArr = Array();
-		$sql = 'SELECT DISTINCT o.occid, o.collid, o.'.implode(',o.',$this->occFieldArr).' FROM omoccurrences o ';
-		if($this->occid){
-			$sql .= 'WHERE (o.occid = '.$this->occid.')';
+		$localIndex = false;
+		$sqlFrag = '';
+		if($this->occid && !$this->direction){
+			$sqlFrag .= 'WHERE (o.occid = '.$this->occid.')';
 		}
 		elseif($this->sqlWhere){
-			/*
-			if(strpos($this->sqlWhere,'recordedby')){
-				$sql .= 'use index(Index_collector) ';
+			$this->addTableJoins($sqlFrag);
+			$sqlFrag .= $this->sqlWhere;
+			if($limit){
+				$this->setSqlOrderBy($sqlFrag);
+				$sqlFrag .= 'LIMIT '.$start.','.$limit;
 			}
-			*/
-			$this->addTableJoins($sql);
-			$sql .= $this->sqlWhere;
+			elseif($this->occid){
+				$sqlFrag .= 'AND (o.occid = '.$this->occid.') ';
+				$this->setSqlOrderBy($sqlFrag);
+			}
+			elseif(is_numeric($this->occIndex)){
+				$this->setSqlOrderBy($sqlFrag);
+				$localLimit = 500;
+				$localStart = floor($this->occIndex/$localLimit)*$localLimit;
+				$localIndex = $this->occIndex - $localStart;
+				$sqlFrag .= 'LIMIT '.$localStart.','.$localLimit;
+			}
 		}
-		if($sql){
-			//echo "<div>".$sql."</div>";
-			$occid = 0;
+		if($sqlFrag){
+			//$sql = 'SELECT DISTINCT o.occid, o.collid, o.'.implode(',o.',$this->occFieldArr).' FROM omoccurrences o '.$sqlFrag;
+			$sql = 'SELECT o.occid, o.collid, o.'.implode(',o.',$this->occFieldArr).' FROM omoccurrences o '.$sqlFrag;
+			//echo "<div>".$sql."</div>"; exit;
+			$previousOccid = 0;
 			$rs = $this->conn->query($sql);
+			$rsCnt = 0;
+			$indexArr = array();
 			while($row = $rs->fetch_assoc()){
-				if($occid != $row['occid']){
-					$occid = $row['occid'];
-					$retArr[$occid] = array_change_key_case($row);
+				if($previousOccid != $row['occid']){
+					if($limit){
+						//Table request, thus load all within query
+						$retArr[$row['occid']] = array_change_key_case($row);
+					}
+					elseif($this->occid == $row['occid']){
+						//Is target specimen
+						$retArr[$row['occid']] = array_change_key_case($row);
+					}
+					elseif(is_numeric($localIndex) && $localIndex == $rsCnt){
+						$retArr[$row['occid']] = array_change_key_case($row);
+						$this->occid = $row['occid'];
+					}
+					if($this->direction && !$this->occidIndexArr) $indexArr[] = $row['occid'];
+					$previousOccid = $row['occid'];
+					$rsCnt++;
 				}
 			}
 			$rs->free();
+			if($indexArr) $this->occidIndexArr = $indexArr;
 			if($retArr && count($retArr) == 1){
-				if(!$this->occid) $this->occid = $occid;
+				if(!$this->occid) $this->occid = key($retArr);
 				if(!$this->collMap) $this->getCollMap();
-				if(!$retArr[$occid]['institutioncode']) $retArr[$occid]['institutioncode'] = $this->collMap['institutioncode'];
-				if(!$retArr[$occid]['collectioncode']) $retArr[$occid]['collectioncode'] = $this->collMap['collectioncode'];
-				if(!$retArr[$occid]['ownerinstitutioncode']) $retArr[$occid]['ownerinstitutioncode'] = $this->collMap['institutioncode'];
+				if(!$retArr[$this->occid]['institutioncode']) $retArr[$this->occid]['institutioncode'] = $this->collMap['institutioncode'];
+				if(!$retArr[$this->occid]['collectioncode']) $retArr[$this->occid]['collectioncode'] = $this->collMap['collectioncode'];
+				if(!$retArr[$this->occid]['ownerinstitutioncode']) $retArr[$this->occid]['ownerinstitutioncode'] = $this->collMap['institutioncode'];
 			}
 			$this->occurrenceMap = $this->cleanOutArr($retArr);
 			if($this->occid){
@@ -1354,8 +1451,12 @@ class OccurrenceEditorManager {
 			$obsId = $this->occurrenceMap[$this->occid]['observeruid'];
 		}
 		elseif($this->occid){
-			$this->setOccurArr();
-			$obsId = $this->occurrenceMap[$this->occid]['observeruid'];
+			$sql = 'SELECT observeruid FROM omoccurrences WHERE occid = '.$this->occid;
+			$rs = $this->conn->query($sql);
+			if($r = $rs->fetch_object()){
+				$obsId = $r->observeruid;
+			}
+			$rs->free();
 		}
 		return $obsId;
 	}
@@ -1439,17 +1540,7 @@ class OccurrenceEditorManager {
 	}
 
 	private function getBatchUpdateWhere($fn,$ov,$buMatch){
-		$sql = '';
-		//Add where and strip ORDER BY and/or LIMIT fragments
-		if(strpos($this->sqlWhere,'ORDER BY')){
-			$sql .= substr($this->sqlWhere,0,strpos($this->sqlWhere,'ORDER BY'));
-		}
-		elseif(strpos($this->sqlWhere,'LIMIT')){
-			$sql .= substr($this->sqlWhere,0,strpos($this->sqlWhere,'LIMIT'));
-		}
-		else{
-			$sql .= $this->sqlWhere;
-		}
+		$sql = $this->sqlWhere;
 
 		if(!$buMatch || $ov===''){
 			$sql .= ' AND (o.'.$fn.' '.($ov===''?'IS NULL':'= "'.$ov.'"').') ';
@@ -1478,8 +1569,8 @@ class OccurrenceEditorManager {
 		//Get Identification ranking
 		$retArr = array();
 		$sql = 'SELECT v.ovsid, v.ranking, v.notes, l.username '.
-				'FROM omoccurverification v LEFT JOIN userlogin l ON v.uid = l.uid '.
-				'WHERE v.category = "identification" AND v.occid = '.$this->occid;
+			'FROM omoccurverification v LEFT JOIN userlogin l ON v.uid = l.uid '.
+			'WHERE v.category = "identification" AND v.occid = '.$this->occid;
 		//echo "<div>".$sql."</div>";
 		$rs = $this->conn->query($sql);
 		//There can only be one identification ranking per specimen
@@ -1792,9 +1883,9 @@ class OccurrenceEditorManager {
 	public function getExternalEditArr(){
 		$retArr = Array();
 		$sql = 'SELECT r.orid, r.oldvalues, r.newvalues, r.externalsource, r.externaleditor, r.reviewstatus, r.appliedstatus, '.
-				'CONCAT_WS(", ",u.lastname,u.firstname) AS username, r.externaltimestamp, r.initialtimestamp '.
-				'FROM omoccurrevisions r LEFT JOIN users u ON r.uid = u.uid '.
-				'WHERE (r.occid = '.$this->occid.') ORDER BY r.initialtimestamp DESC ';
+			'CONCAT_WS(", ",u.lastname,u.firstname) AS username, r.externaltimestamp, r.initialtimestamp '.
+			'FROM omoccurrevisions r LEFT JOIN users u ON r.uid = u.uid '.
+			'WHERE (r.occid = '.$this->occid.') ORDER BY r.initialtimestamp DESC ';
 		//echo '<div>'.$sql.'</div>';
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){

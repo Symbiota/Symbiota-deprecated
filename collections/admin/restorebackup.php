@@ -7,8 +7,10 @@ ini_set('max_execution_time', 3600);
 if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../collections/admin/reloadbackup.php?'.$_SERVER['QUERY_STRING']);
 
 $collid = $_REQUEST["collid"];
-$action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:"";
-$ulPath = array_key_exists("ulpath",$_REQUEST)?$_REQUEST["ulpath"]:"";
+$action = array_key_exists("action",$_REQUEST)?$_POST["action"]:"";
+$includeIdentificationHistory = array_key_exists("includeidentificationhistory",$_REQUEST)?$_POST["includeidentificationhistory"]:"";
+$includeImages = array_key_exists("includeimages",$_REQUEST)?$_POST["includeimages"]:"";
+$ulPath = array_key_exists("ulpath",$_REQUEST)?$_POST["ulpath"]:"";
 
 //Sanitation
 if(!is_numeric($collid)) $collid = 0;
@@ -17,14 +19,13 @@ if($action && !preg_match('/^[a-zA-Z0-9\s_]+$/',$action)) $action = '';
 $duManager = new SpecUploadDwca();
 $duManager->setCollId($collid);
 $duManager->setUploadType(10);
-$duManager->setBaseFolderName($ulPath);
-$duManager->setIncludeIdentificationHistory(true);
-$duManager->setIncludeImages(true);
+$duManager->setTargetPath($ulPath);
+$duManager->setIncludeIdentificationHistory($includeIdentificationHistory);
+$duManager->setIncludeImages($includeImages);
 $duManager->setMatchCatalogNumber(false);
 $duManager->setMatchOtherCatalogNumbers(false);
 $duManager->setVerifyImageUrls(false);
 
-$statusStr = '';
 $isEditor = 0;
 if($IS_ADMIN || (array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collid,$USER_RIGHTS["CollAdmin"]))){
 	$isEditor = 1;
@@ -35,55 +36,47 @@ if($duManager->getCollInfo("managementtype") == 'Live Data') $isLiveData = true;
 
 //Grab field mapping, if mapping form was submitted
 if(array_key_exists("sf",$_POST)){
-	if($action == "Reset Field Mapping"){
-		$statusStr = $duManager->deleteFieldMap();
-	}
-	else{
-		//Set field map for occurrences using mapping form
- 		$targetFields = $_POST["tf"];
- 		$sourceFields = $_POST["sf"];
- 		$fieldMap = Array();
-		for($x = 0;$x<count($targetFields);$x++){
-			if($targetFields[$x]){
-				$tField = $targetFields[$x];
-				if($tField == 'unmapped') $tField .= '-'.$x;
-				$fieldMap[$tField]["field"] = $sourceFields[$x];
-			}
+	//Set field map for occurrences using mapping form
+	$targetFields = $_POST["tf"];
+	$sourceFields = $_POST["sf"];
+	$fieldMap = Array();
+	for($x = 0;$x<count($targetFields);$x++){
+		if($targetFields[$x]){
+			$tField = $targetFields[$x];
+			if($tField == 'unmapped') $tField .= '-'.$x;
+			$fieldMap[$tField]["field"] = $sourceFields[$x];
 		}
-		//Set Source PK
- 		$duManager->setFieldMap($fieldMap);
+	}
+	//Set Source PK
+	$duManager->setFieldMap($fieldMap);
 
- 		//Set field map for identification history
-		if(array_key_exists("ID-sf",$_POST)){
-	 		$targetIdFields = $_POST["ID-tf"];
-	 		$sourceIdFields = $_POST["ID-sf"];
-	 		$fieldIdMap = Array();
-			for($x = 0;$x<count($targetIdFields);$x++){
-				if($targetIdFields[$x]){
-					$tIdField = $targetIdFields[$x];
-					if($tIdField == 'unmapped') $tIdField .= '-'.$x;
-					$fieldIdMap[$tIdField]["field"] = $sourceIdFields[$x];
-				}
+	//Set field map for identification history
+	if(array_key_exists("ID-sf",$_POST)){
+		$targetIdFields = $_POST["ID-tf"];
+		$sourceIdFields = $_POST["ID-sf"];
+		$fieldIdMap = Array();
+		for($x = 0;$x<count($targetIdFields);$x++){
+			if($targetIdFields[$x]){
+				$tIdField = $targetIdFields[$x];
+				if($tIdField == 'unmapped') $tIdField .= '-'.$x;
+				$fieldIdMap[$tIdField]["field"] = $sourceIdFields[$x];
 			}
- 			$duManager->setIdentFieldMap($fieldIdMap);
 		}
- 		//Set field map for image history
-		if(array_key_exists("IM-sf",$_POST)){
-	 		$targetImFields = $_POST["IM-tf"];
-	 		$sourceImFields = $_POST["IM-sf"];
-	 		$fieldImMap = Array();
-			for($x = 0;$x<count($targetImFields);$x++){
-				if($targetImFields[$x]){
-					$tImField = $targetImFields[$x];
-					if($tImField == 'unmapped') $tImField .= '-'.$x;
-					$fieldImMap[$tImField]["field"] = $sourceImFields[$x];
-				}
-			}
- 			$duManager->setImageFieldMap($fieldImMap);
-		}
+		$duManager->setIdentFieldMap($fieldIdMap);
 	}
-	if($action == "Save Mapping"){
-		$statusStr = $duManager->saveFieldMap($_POST);
+	//Set field map for image history
+	if(array_key_exists("IM-sf",$_POST)){
+		$targetImFields = $_POST["IM-tf"];
+		$sourceImFields = $_POST["IM-sf"];
+		$fieldImMap = Array();
+		for($x = 0;$x<count($targetImFields);$x++){
+			if($targetImFields[$x]){
+				$tImField = $targetImFields[$x];
+				if($tImField == 'unmapped') $tImField .= '-'.$x;
+				$fieldImMap[$tImField]["field"] = $sourceImFields[$x];
+			}
+		}
+		$duManager->setImageFieldMap($fieldImMap);
 	}
 }
 $duManager->loadFieldMap(true);
@@ -103,24 +96,22 @@ $duManager->loadFieldMap(true);
 
 		function verifyFileUploadForm(f){
 			var fileName = "";
-			if(f.uploadfile || f.ulfnoverride){
-				if(f.uploadfile && f.uploadfile.value){
-					 fileName = f.uploadfile.value;
-				}
+			if(f.uploadfile && f.uploadfile.value){
+				 fileName = f.uploadfile.value;
+			}
+			else{
+				fileName = f.ulfnoverride.value;
+			}
+			if(fileName == ""){
+				alert("File path is empty. Please select the file that is to be restored.");
+				return false;
+			}
+			else{
+				var ext = fileName.split('.').pop();
+				if(ext == 'zip' || ext == 'ZIP') return true;
 				else{
-					fileName = f.ulfnoverride.value;
-				}
-				if(fileName == ""){
-					alert("File path is empty. Please select the file that is to be loaded.");
+					alert("File must be a ZIP file (.zip) downloaded as a Symbiota backup");
 					return false;
-				}
-				else{
-					var ext = fileName.split('.').pop();
-					else if(ext == 'zip' || ext == 'ZIP') return true;
-					else{
-						alert("File must be a ZIP file (.zip) downloaded as a Symbiota backup");
-						return false;
-					}
 				}
 			}
 			return true;
@@ -160,11 +151,6 @@ include($SERVER_ROOT.'/header.php');
 <!-- This is inner text! -->
 <div id="innertext">
 	<?php
-	if($statusStr){
-		echo "<hr />";
-		echo "<div>$statusStr</div>";
-		echo "<hr />";
-	}
 	$recReplaceMsg = '<span style="color:orange"><b>Caution:</b></span> Matching records will be replaced with incoming records';
 	if($isEditor){
 		if($collid){
@@ -187,6 +173,10 @@ include($SERVER_ROOT.'/header.php');
 									server upload limitations (e.g. PHP configuration limits)
 								</div>
 							</div>
+						</div>
+						<div style="margin:10px 0px;">
+							<input name="includeidentificationhistory" type="checkbox" value="1" checked /> Restore Determination History<br/>
+							<input name="includeimages" type="checkbox" value="1" checked /> Restore Images<br/>
 						</div>
 						<div style="margin:10px 0px;">
 							<button name="action" type="submit" value="AnalyzeFile">Analyze File</button>
@@ -228,6 +218,8 @@ include($SERVER_ROOT.'/header.php');
 											<input type="submit" name="action" value="Continue with Restore" />
 										</div>
 									</fieldset>
+									<input name="includeidentificationhistory" type="hidden" value="<?php echo $includeIdentificationHistory; ?>" />
+									<input name="includeimages" type="hidden" value="<?php echo $includeImages; ?>" />
 									<input name="collid" type="hidden" value="<?php echo $collid;?>" />
 									<input name="ulpath" type="hidden" value="<?php echo $ulPath;?>" />
 								</form>
@@ -240,18 +232,18 @@ include($SERVER_ROOT.'/header.php');
 					}
 				}
 				if($action == 'Continue with Restore' || $uploadData){
-			 		echo "<div style='font-weight:bold;font-size:120%'>Upload Status:</div>";
-			 		echo "<ul style='margin:10px;font-weight:bold;'>";
-			 		$duManager->uploadData(false);
-			 		$duManager->cleanBackupReload();
+					echo "<div style='font-weight:bold;font-size:120%'>Upload Status:</div>";
+					echo "<ul style='margin:10px;font-weight:bold;'>";
+					$duManager->uploadData(false);
+					$duManager->cleanBackupReload();
 					echo "</ul>";
 					if($duManager->getTransferCount()){
 						?>
-		 				<fieldset style="margin:15px;">
-		 					<legend style=""><b>Final transfer</b></legend>
-		 					<div style="margin:5px;">
-		 						<?php
-		 						$reportArr = $duManager->getTransferReport();
+						<fieldset style="margin:15px;">
+							<legend style=""><b>Final transfer</b></legend>
+							<div style="margin:5px;">
+								<?php
+								$reportArr = $duManager->getTransferReport();
 								echo '<div>Occurrences pending transfer: '.$reportArr['occur'];
 								if($reportArr['occur']){
 									echo ' <a href="uploadviewer.php?collid='.$collid.'" target="_blank" title="Preview 1st 1000 Records"><img src="../../images/list.png" style="width:12px;" /></a>';
@@ -300,6 +292,8 @@ include($SERVER_ROOT.'/header.php');
 								?>
 							</div>
 							<form name="finaltransferform" action="restorebackup.php" method="post" style="margin-top:10px;" onsubmit="return confirm('Are you sure you want to transfer records from temporary table to central specimen table?');">
+								<input name="includeidentificationhistory" type="hidden" value="<?php echo $includeIdentificationHistory; ?>" />
+								<input name="includeimages" type="hidden" value="<?php echo $includeImages; ?>" />
 								<input type="hidden" name="collid" value="<?php echo $collid;?>" />
 								<div style="margin:5px;">
 									<button name="action" type="submit" value="TransferRecords">Transfer Records to Central Specimen Table</button>
@@ -309,7 +303,7 @@ include($SERVER_ROOT.'/header.php');
 						<?php
 					}
 				}
-		 	}
+			}
 			elseif($action == 'TransferRecords'){
 				echo '<ul>';
 				$duManager->finalTransfer();

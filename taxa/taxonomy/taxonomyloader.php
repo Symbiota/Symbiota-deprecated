@@ -9,12 +9,12 @@ $tid = array_key_exists("tid",$_REQUEST)?$_REQUEST["tid"]:"";
 $status = "";
 
 $loaderObj = new TaxonomyEditorManager();
- 
+
 $isEditor = false;
 if($IS_ADMIN || array_key_exists("Taxonomy",$USER_RIGHTS)){
 	$isEditor = true;
 }
- 
+
 if($isEditor){
 	if(array_key_exists('sciname',$_POST)){
 		$status = $loaderObj->loadNewName($_POST);
@@ -30,10 +30,10 @@ if($isEditor){
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET; ?>"/>
 	<link href="../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
-	<link type="text/css" href="../../css/jquery-ui.css" rel="Stylesheet" />	
+	<link type="text/css" href="../../css/jquery-ui.css" rel="Stylesheet" />
 	<script type="text/javascript" src="../../js/jquery.js"></script>
 	<script type="text/javascript" src="../../js/jquery-ui.js"></script>
-	<script src="../../js/symb/taxa.taxonomyloader.js?ver=161227"></script>
+	<script src="../../js/symb/taxa.taxonomyloader.js?ver=18"></script>
 </head>
 <body>
 <?php
@@ -41,13 +41,13 @@ if($isEditor){
 	include($SERVER_ROOT.'/header.php');
 	?>
 	<div class="navpath">
-		<a href="../../index.php">Home</a> &gt;&gt; 
-		<a href="taxonomydisplay.php">Taxonomy Tree Viewer</a> &gt;&gt; 
+		<a href="../../index.php">Home</a> &gt;&gt;
+		<a href="taxonomydisplay.php">Taxonomy Tree Viewer</a> &gt;&gt;
 		<b>Taxonomy Loader</b>
 	</div>
 	<!-- This is inner text! -->
 	<div id="innertext">
-		<?php 
+		<?php
 		if($status){
 			echo "<div style='color:red;font-size:120%;'>".$status."</div>";
 		}
@@ -70,7 +70,7 @@ if($isEditor){
 							<option value="">Select Taxon Rank</option>
 							<option value="0">Non-Ranked Node</option>
 							<option value="">--------------------------------</option>
-							<?php 
+							<?php
 							$tRankArr = $loaderObj->getRankArr();
 							foreach($tRankArr as $rankId => $rankName){
 								echo "<option value='".$rankId."' ".($rankId==220?" SELECTED":"").">".$rankName."</option>\n";
@@ -126,9 +126,9 @@ if($isEditor){
 							<div id="accdiv" style="display:none;margin-top:3px;">
 								Accepted Taxon:
 								<input id="acceptedstr" name="acceptedstr" type="text" style="width:400px;border:inset;" onchange="checkAcceptedExistance(this.form)" />
-								<input type="hidden" name="tidaccepted" /> 
+								<input type="hidden" name="tidaccepted" />
 								<div style="margin-top:3px;">
-									Unacceptability Reason: 
+									Unacceptability Reason:
 									<input type='text' id='unacceptabilityreason' name='unacceptabilityreason' style='width:350px;border:inset;' />
 								</div>
 							</div>
@@ -139,14 +139,14 @@ if($isEditor){
 					</div>
 				</fieldset>
 			</form>
-			<?php 
+			<?php
 		}
 		else{
 			?>
 			<div style="margin:30px;font-weight:bold;font-size:120%;">
-				You do not have permission to access this page. Please contact the portal manager. 
+				You do not have permission to access this page. Please contact the portal manager.
 			</div>
-			<?php 
+			<?php
 		}
 		include($SERVER_ROOT.'/footer.php');
 		?>

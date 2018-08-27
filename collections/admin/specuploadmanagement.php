@@ -1,4 +1,4 @@
-<?php 
+<?php
 include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/SpecUpload.php');
 header("Content-Type: text/html; charset=".$CHARSET);
@@ -72,7 +72,7 @@ $duManager->readUploadParameters();
 			else{
 				var radioCnt = f.uspid.length;
 				for(var counter = 0; counter < radioCnt; counter++){
-					if (f.uspid[counter].checked) return true; 
+					if (f.uspid[counter].checked) return true;
 				}
 			}
 			alert("Please select an Upload Option");
@@ -90,7 +90,7 @@ $duManager->readUploadParameters();
 			}
 			return true;
 		}
-		
+
 		function adjustParameterForm(){
 			//Hide all
 			document.getElementById("platformDiv").style.display='none';
@@ -104,6 +104,7 @@ $duManager->readUploadParameters();
 			document.getElementById("schemanameDiv").style.display='none';
 			document.getElementById("cleanupspDiv").style.display='none';
 			document.getElementById("querystrDiv").style.display='none';
+			document.getElementById("dwca_notes").style.display='none';
 			//Then open according to upload type selection
 			selValue = document.parameterform.uploadtype.value;
 			if(selValue == 1){ //Direct Upload
@@ -144,9 +145,10 @@ $duManager->readUploadParameters();
 			else if(selValue == 7){ //Skeletal File Upload
 				document.getElementById("cleanupspDiv").style.display='block';
 			}
-			else if(selValue == 8){ //IPT resource
+			else if(selValue == 8){ //IPT or DwC-A resource
 				document.getElementById("pathDiv").style.display='block';
 				document.getElementById("cleanupspDiv").style.display='block';
+				document.getElementById("dwca_notes").style.display='block';
 			}
 		}
 	</script>
@@ -161,26 +163,26 @@ $duManager->readUploadParameters();
 			<div class="navpath">
 				<a href="../../index.php">Home</a> &gt;&gt;
 				<?php echo $collections_admin_specuploadCrumbs; ?>
-				<b>Specimen Loader</b> 
+				<b>Specimen Loader</b>
 			</div>
-			<?php 
+			<?php
 		}
 	}
 	else{
 		?>
 		<div class="navpath">
-			<a href="../../index.php">Home</a> &gt;&gt; 
-			<a href="../misc/collprofiles.php?collid=<?php echo $collid; ?>&emode=1">Collection Management Panel</a> &gt;&gt; 
-			<b>Specimen Loader</b> 
+			<a href="../../index.php">Home</a> &gt;&gt;
+			<a href="../misc/collprofiles.php?collid=<?php echo $collid; ?>&emode=1">Collection Management Panel</a> &gt;&gt;
+			<b>Specimen Loader</b>
 		</div>
-		<?php 
+		<?php
 	}
-?> 
+?>
 <!-- This is inner text! -->
 <div id="innertext">
 	<h1>Data Upload Management</h1>
 	<?php
-	
+
 	if($statusStr){
 		echo "<hr />";
 		echo "<div>$statusStr</div>";
@@ -201,21 +203,21 @@ $duManager->readUploadParameters();
 					<fieldset>
 						<legend style="font-weight:bold;font-size:120%;">Upload Options</legend>
 						<div style="float:right;">
-							<?php 
+							<?php
 							echo '<a href="specuploadmanagement.php?collid='.$collid.'&action=addprofile"><img src="'.$CLIENT_ROOT.'/images/add.png" style="width:15px;border:0px;" title="Add a New Upload Profile" /></a>';
 							?>
 						</div>
-						<?php 
-						if($profileList){ 
+						<?php
+						if($profileList){
 						 	foreach($profileList as $id => $v){
 						 		?>
 						 		<div style="margin:10px;">
 									<input type="radio" name="uspid" value="<?php echo $id.'-'.$v["uploadtype"];?>" />
-									<?php echo $v["title"]; ?> 
+									<?php echo $v["title"]; ?>
 									<a href="specuploadmanagement.php?action=editprofile&collid=<?php echo $collid.'&uspid='.$id; ?>" title="View/Edit Parameters"><img src="../../images/edit.png" /></a>
 									<input type="hidden" name="uploadtype" value="<?php echo $v["uploadtype"];?>" />
 								</div>
-								<?php 
+								<?php
 						 	}
 							?>
 							<input type="hidden" name="collid" value="<?php echo $collid;?>" />
@@ -223,20 +225,20 @@ $duManager->readUploadParameters();
 								<input type="submit" name="action" value="Initialize Upload..." />
 							</div>
 							<?php
-						} 
+						}
 					 	else{
 					 		?>
 							<div style="padding:30px;">
 								There are no Upload Profiles associated with this collection. <br />
 								Click <a href="specuploadmanagement.php?collid=<?php echo ($collid);?>&action=addprofile">here</a> to add a new profile.
 							</div>
-							<?php 
+							<?php
 					 	}
 					 	 ?>
 					</fieldset>
 				</form>
 				<hr />
-				<?php 
+				<?php
 			}
 			else{
 		 		?>
@@ -244,17 +246,17 @@ $duManager->readUploadParameters();
 					<fieldset>
 						<legend><b>Upload Parameters</b></legend>
 						<div style="float:right;">
-							<?php 
+							<?php
 							echo '<a href="specuploadmanagement.php?collid='.$collid.'">View All</a> ';
 							?>
 						</div>
 						<form name="parameterform" action="specuploadmanagement.php" method="post" onsubmit="return checkParameterForm(this)">
 							<div id="updatetypeDiv" style="">
-								<b>Upload Type:</b> 
+								<b>Upload Type:</b>
 								<select name="uploadtype" onchange="adjustParameterForm()" <?php if($uspid) echo 'DISABLED'; ?>>
 									<option value="">Select an Upload Type</option>
 									<option value="">----------------------------------</option>
-									<?php 
+									<?php
 									$uploadType = $duManager->getUploadType();
 									echo '<option value="'.$DWCAUPLOAD.'" '.($uploadType==$DWCAUPLOAD?'SELECTED':'').'>Darwin Core Archive Manual Upload</option>';
 									echo '<option value="'.$IPTUPLOAD.'" '.($uploadType==$IPTUPLOAD?'SELECTED':'').'>IPT Resource / Darwin Core Archive Provider</option>';
@@ -270,7 +272,7 @@ $duManager->readUploadParameters();
 								</select>
 							</div>
 							<div id="titleDiv" style="">
-								<b>Title:</b> 
+								<b>Title:</b>
 								<input name="title" type="text" value="<?php echo $duManager->getTitle(); ?>" style="width:400px;" maxlength="45" />
 							</div>
 							<div id="platformDiv" style="display:none">
@@ -279,42 +281,42 @@ $duManager->readUploadParameters();
 									<option value="">None Selected</option>
 									<option value="">--------------------------------------------</option>
 									<option value="mysql" <?php echo ($duManager->getPlatform()=='mysql'?'SELECTED':''); ?>>MySQL Database</option>
-								</select> 
+								</select>
 							</div>
 							<div id="serverDiv" style="display:none">
-								<b>Server:</b> 
+								<b>Server:</b>
 								<input name="server" type="text" size="50" value="<?php echo $duManager->getServer(); ?>" style="width:400px;" />
 							</div>
 							<div id="portDiv" style="display:none">
-								<b>Port:</b> 
+								<b>Port:</b>
 								<input name="port" type="text" value="<?php echo $duManager->getPort(); ?>" />
 							</div>
 							<div id="pathDiv" style="display:none">
-								<b>Path:</b> 
-								<input name="path" type="text" size="50" value="<?php echo $duManager->getPath(); ?>" style="width:400px;" />
+								<b>Path:</b>
+								<input name="path" type="text" size="50" value="<?php echo $duManager->getPath(); ?>" style="width:500px;" />
 							</div>
 							<div id="codeDiv" style="display:none">
-								<b>Code:</b> 
+								<b>Code:</b>
 								<input name="code" type="text" value="<?php echo $duManager->getCode(); ?>" />
 							</div>
 							<div id="pkfieldDiv" style="display:none">
-								<b>Primary Key Field:</b> 
+								<b>Primary Key Field:</b>
 								<input name="pkfield" type="text" value="<?php echo $duManager->getPKField(); ?>" />
 							</div>
 							<div id="usernameDiv" style="display:none">
-								<b>Username:</b> 
+								<b>Username:</b>
 								<input name="username" type="text" value="<?php echo $duManager->getUsername(); ?>" />
 							</div>
 							<div id="passwordDiv" style="display:none">
-								<b>Password:</b> 
+								<b>Password:</b>
 								<input name="password" type="text" value="<?php echo $duManager->getPassword(); ?>" />
 							</div>
 							<div id="schemanameDiv" style="display:none">
-								<b>Schema Name:</b> 
+								<b>Schema Name:</b>
 								<input name="schemaname" type="text" size="65" value="<?php echo $duManager->getSchemaName(); ?>" />
 							</div>
 							<div id="cleanupspDiv" style="display:none">
-								<b>Stored Procedure:</b> 
+								<b>Stored Procedure:</b>
 								<input name="cleanupsp" type="text" size="40" value="<?php echo $duManager->getStoredProcedure(); ?>" style="width:400px;" />
 							</div>
 							<div id="querystrDiv" style="display:none">
@@ -325,22 +327,26 @@ $duManager->readUploadParameters();
 								<input type="hidden" name="uspid" value="<?php echo $uspid;?>" />
 								<input type="hidden" name="collid" value="<?php echo $collid;?>" />
 								<?php
-								if($uspid){ 
+								if($uspid){
 									?>
 									<input type="submit" name="action" value="Save Edits" />
 									<?php
 								}
-								else{ 
+								else{
 									?>
 									<input type="submit" name="action" value="Create Profile" />
-									<?php 
+									<?php
 								}
 								?>
+							</div>
+							<div id="dwca_notes" style="display: none">
+								* Path can be URL or local path leading to a DwC-Archive zip file or a directory path to a pre-extracted DwC-Archive data package.
+								If using local path on Windows OS, use foward slashes in place of backslashes.
 							</div>
 						</form>
 					</fieldset>
 				</div>
-				<?php 
+				<?php
 				if($uspid){
 					?>
 					<form action="specuploadmanagement.php" method="post" onsubmit="return confirm('Are you sure you want to permanently delete this profile?')">
@@ -366,11 +372,11 @@ $duManager->readUploadParameters();
 		<div style="font-weight:bold;font-size:120%;">
 			ERROR: you are not authorized to upload to this collection
 		</div>
-		<?php 
+		<?php
 	}
 	?>
 </div>
-<?php 
+<?php
 include($SERVER_ROOT.'/footer.php');
 ?>
 </body>

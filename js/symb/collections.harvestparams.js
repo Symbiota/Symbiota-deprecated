@@ -93,6 +93,9 @@ function setHarvestParamsForm(){
 			frm.leftlong.value = Math.abs(parseFloat(coordArr[2]));
 			frm.rightlong.value = Math.abs(parseFloat(coordArr[3]));
 		}
+		if(urlVar.footprintwkt){
+			frm.footprintwkt.value = urlVar.footprintwkt;
+		}
 		if(urlVar.llpoint){
 			var coordArr = urlVar.llpoint.split(';');
 			frm.pointlat.value = Math.abs(parseFloat(coordArr[0]));
@@ -109,6 +112,7 @@ function setHarvestParamsForm(){
 		if(typeof urlVar.typestatus !== 'undefined'){frm.typestatus.checked = true;}
 		if(typeof urlVar.hasimages !== 'undefined'){frm.hasimages.checked = true;}
 		if(typeof urlVar.hasgenetic !== 'undefined'){frm.hasgenetic.checked = true;}
+		if(typeof urlVar.includecult !== 'undefined'){frm.includecult.checked = true;}
 		if(urlVar.db){frm.db.value = urlVar.db;}
 	}
 }
@@ -130,14 +134,8 @@ function resetHarvestParamsForm(f){
 	sessionStorage.removeItem('querystr');
 }
 
-function openPointRadiusMap() {
-	mapWindow=open("mappointradius.php","pointradius","resizable=0,width=700,height=630,left=20,top=20");
-	if (mapWindow.opener == null) mapWindow.opener = self;
-	mapWindow.focus();
-}
-
-function openBoundingBoxMap() {
-	mapWindow=open("mapboundingbox.php","boundingbox","resizable=0,width=700,height=630,left=20,top=20");
+function openCoordAid(mapMode) {
+	mapWindow=open("tools/mapcoordaid.php?mapmode="+mapMode,"polygon","resizable=0,width=900,height=630,left=20,top=20");
 	if (mapWindow.opener == null) mapWindow.opener = self;
 	mapWindow.focus();
 }

@@ -29,9 +29,9 @@ $pid = $clManager->getPid();
 		echo "<b>".$LANG['IDKEYLIST']."</b>";
 		echo "</div>";
 	}
-	
-	?> 
-	
+
+	?>
+
 	<!-- This is inner text! -->
 	<div id="innertext">
 		<h2><?php echo $LANG['IDKEYS']; ?></h2>
@@ -43,11 +43,11 @@ $pid = $clManager->getPid();
 				$clArr = $clList['clid'];
 				echo '<div style="margin:3px 0px 0px 15px;">';
 				echo '<h3>'.$projName;
-				echo ' <a href="../checklists/clgmap.php?proj='.$pid.'&target=keys"><img src="../images/world.png" style="width:10px;border:0" /></a>';
+				echo ' <a href="../checklists/clgmap.php?pid='.$pid.'&target=keys"><img src="../images/world.png" style="width:10px;border:0" /></a>';
 				echo '</h3>';
 				echo "<div><ul>";
 				foreach($clArr as $clid => $clName){
-					echo "<li><a href='key.php?cl=$clid&proj=$pid&taxon=All+Species'>".$clName."</a></li>";
+					echo "<li><a href='key.php?clid=$clid&pid=$pid&taxon=All+Species'>".$clName."</a></li>";
 				}
 				echo "</ul></div>";
 				echo "</div>";
@@ -55,7 +55,7 @@ $pid = $clManager->getPid();
 			?>
 		</div>
 	</div>
-	<?php 
+	<?php
 		include($SERVER_ROOT.'/footer.php');
 	?>
 </body>

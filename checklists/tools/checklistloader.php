@@ -53,14 +53,14 @@ if($IS_ADMIN || (array_key_exists("ClAdmin",$USER_RIGHTS) && in_array($clid,$USE
 		<a href='../../index.php'>Home</a> &gt;&gt;
 		<?php
 		if($pid) echo '<a href="'.$CLIENT_ROOT.'/projects/index.php?pid='.$pid.'">';
-		echo '<a href="../checklist.php?cl='.$clid.'&pid='.$pid.'">Return to Checklist</a> &gt;&gt; ';
+		echo '<a href="../checklist.php?clid='.$clid.'&pid='.$pid.'">Return to Checklist</a> &gt;&gt; ';
 		?>
 		<a href="checklistloader.php?clid=<?php echo $clid.'&pid='.$pid; ?>"><b>Checklists Loader</b></a>
 	</div>
 	<!-- This is inner text! -->
 	<div id="innertext">
 		<h1>
-			<a href="<?php echo $CLIENT_ROOT."/checklists/checklist.php?cl=".$clid.'&pid='.$pid; ?>">
+			<a href="<?php echo $CLIENT_ROOT."/checklists/checklist.php?clid=".$clid.'&pid='.$pid; ?>">
 				<?php echo $clMeta['name']; ?>
 			</a>
 		</h1>
@@ -91,7 +91,7 @@ if($IS_ADMIN || (array_key_exists("ClAdmin",$USER_RIGHTS) && in_array($clid,$USE
 							<li style="margin-left:10px;">Taxa successfully loaded: <?php echo $cnt; ?></li>
 							<li style="margin-left:10px;">Problematic Taxa: <?php echo $probCnt.($probCnt?' (see below)':''); ?></li>
 							<li style="margin-left:10px;">General errors: <?php echo count($errorArr); ?></li>
-							<li style="margin-left:10px;">Upload Complete! <a href="../checklist.php?cl=<?php echo $clid.'&pid='.$pid; ?>">Proceed to Checklists</a></li>
+							<li style="margin-left:10px;">Upload Complete! <a href="../checklist.php?clid=<?php echo $clid.'&pid='.$pid; ?>">Proceed to Checklists</a></li>
 						</ul>
 						<?php
 						if($probCnt){

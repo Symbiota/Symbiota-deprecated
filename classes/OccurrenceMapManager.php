@@ -171,7 +171,7 @@ class OccurrenceMapManager extends OccurrenceManager {
 					$sqlWhere .= "AND (ST_Within(p.point,GeomFromText('".$this->getClFootprintWkt()." '))) ";
 				}
 				else{
-					$sqlWhere .= "AND (v.clid IN(".$this->searchTermArr['clid'].")) ";
+					//$sqlWhere .= "AND (v.clid IN(".$this->searchTermArr['clid'].")) ";
 				}
 			}
 			elseif(array_key_exists("polycoords",$this->searchTermArr)){

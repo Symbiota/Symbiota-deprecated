@@ -263,7 +263,7 @@ if(!$clid){
 			foreach($clArr as $kClid => $vName){
 				?>
 				<li>
-					<a href="../checklists/checklist.php?cl=<?php echo $kClid; ?>&emode=0">
+					<a href="../checklists/checklist.php?clid=<?php echo $kClid; ?>&emode=0">
 						<?php echo $vName; ?>
 					</a>
 					<a href="../checklists/checklistadmin.php?clid=<?php echo $kClid; ?>&emode=1">

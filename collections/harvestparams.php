@@ -15,7 +15,7 @@ $searchVar = $collManager->getQueryTermStr();
 	<link href="../js/jquery-ui-1.12.1/jquery-ui.min.css?ver=3" type="text/css" rel="Stylesheet" />
 	<script src="../js/jquery-3.2.1.min.js?ver=3" type="text/javascript"></script>
 	<script src="../js/jquery-ui-1.12.1/jquery-ui.min.js?ver=3" type="text/javascript"></script>
-	<script src="../js/symb/collections.harvestparams.js?ver=4" type="text/javascript"></script>
+	<script src="../js/symb/collections.harvestparams.js?ver=180721" type="text/javascript"></script>
 	<script type="text/javascript">
 		$(document).ready(function() {
 			<?php
@@ -103,7 +103,10 @@ $searchVar = $collManager->getQueryTermStr();
 				<hr>
 				<h1><?php echo $LANG['LAT_LNG_HEADER']; ?></h1>
 			</div>
-			<div style="width:300px;float:left;border:2px solid brown;padding:10px;margin-bottom:10px;">
+			<div style="width:270px;height:120px;float:left;border:2px solid brown;padding:10px;margin-bottom:10px;">
+				<div style="clear:both;float:right;">
+					<a href="#" onclick="openCoordAid('rectangle');return false;"><img src="../images/world.png" width="15px" title="<?php echo $LANG['GLOBE_TITLE']; ?>" /></a>
+				</div>
 				<div style="font-weight:bold;">
 					<?php echo $LANG['LL_BOUND_TEXT']; ?>
 				</div>
@@ -135,11 +138,22 @@ $searchVar = $collManager->getQueryTermStr();
 						<option id="rlE" value="E"><?php echo $LANG['LL_E_SYMB']; ?></option>
 					</select>
 				</div>
-				<div style="clear:both;float:right;margin-top:8px;cursor:pointer;" onclick="openBoundingBoxMap();">
-					<img src="../images/world.png" width="15px" title="<?php echo $LANG['LL_P-RADIUS_TITLE_1']; ?>" />
+			</div>
+			<div style="width:260px;height:120px;float:left;border:2px solid brown;padding:10px;margin-left:10px;">
+				<div style="clear:both;float:right;">
+					<a href="#" onclick="openCoordAid('polygon');return false;"><img src="../images/world.png" width="15px" title="<?php echo $LANG['GLOBE_TITLE']; ?>" /></a>
+				</div>
+				<div style="font-weight:bold;">
+					<?php echo isset($LANG['LL_POLYGON_TEXT'])?$LANG['LL_POLYGON_TEXT']:''; ?>
+				</div>
+				<div>
+					<textarea id="footprintwkt" name="footprintwkt" style="width:250px;height:100px;zIndex:999"></textarea>
 				</div>
 			</div>
-			<div style="width:260px; float:left;border:2px solid brown;padding:10px;margin-left:10px;">
+			<div style="width:240px; float:left;border:2px solid brown;padding:10px;margin-left:10px;">
+				<div style="clear:both;float:right;">
+					<a href="#" onclick="openCoordAid('circle');return false;"><img src="../images/world.png" width="15px" title="<?php echo $LANG['GLOBE_TITLE']; ?>" /></a>
+				</div>
 				<div style="font-weight:bold;">
 					<?php echo $LANG['LL_P-RADIUS_TEXT']; ?>
 				</div>
@@ -163,9 +177,6 @@ $searchVar = $collManager->getQueryTermStr();
 						<option value="km"><?php echo $LANG['LL_P-RADIUS_KM']; ?></option>
 						<option value="mi"><?php echo $LANG['LL_P-RADIUS_MI']; ?></option>
 					</select>
-				</div>
-				<div style="clear:both;float:right;margin-top:8px;cursor:pointer;" onclick="openPointRadiusMap();">
-					<img src="../images/world.png" width="15px" title="<?php echo $LANG['LL_P-RADIUS_TITLE_1']; ?>" />
 				</div>
 			</div>
 			<div style=";clear:both;"><hr/></div>
@@ -198,13 +209,16 @@ $searchVar = $collManager->getQueryTermStr();
 				<input name="includeothercatnum" type="checkbox" value="1" checked /> <?php echo $LANG['INCLUDE_OTHER_CATNUM']?>
 			</div>
 			<div>
-				<input type='checkbox' name='typestatus' value='1' /> <?php echo $LANG['TYPE']; ?>
+				<input type='checkbox' name='typestatus' value='1' /> <?php echo isset($LANG['TYPE'])?$LANG['TYPE']:'Limit to Type Specimens Only'; ?>
 			</div>
 			<div>
-				<input type='checkbox' name='hasimages' value='1' /> <?php echo $LANG['HAS_IMAGE']; ?>
+				<input type='checkbox' name='hasimages' value='1' /> <?php echo isset($LANG['HAS_IMAGE'])?$LANG['HAS_IMAGE']:'Limit to Specimens with Images Only'; ?>
 			</div>
 			<div>
-				<input type='checkbox' name='hasgenetic' value='1' /> <?php echo $LANG['HAS_GENETIC']; ?>
+				<input type='checkbox' name='hasgenetic' value='1' /> <?php echo isset($LANG['HAS_GENETIC'])?$LANG['HAS_GENETIC']:'Limit to Specimens with Genetic Data Only'; ?>
+			</div>
+			<div>
+				<input type='checkbox' name='includecult' value='1' /> <?php echo isset($LANG['INCLUDE_CULTIVATED'])?$LANG['INCLUDE_CULTIVATED']:'Include cultivated/captive occurrences'; ?>
 			</div>
 			<div>
 				<input type="hidden" name="reset" value="1" />

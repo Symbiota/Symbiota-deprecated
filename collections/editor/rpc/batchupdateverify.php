@@ -18,7 +18,6 @@ if($fieldName){
 	else{
 		$occManager->setQueryVariables();
 	}
-	$occManager->setSqlWhere();
 
 	$retCnt = $occManager->getBatchUpdateCount($fieldName,$oldValue, $buMatch);
 }

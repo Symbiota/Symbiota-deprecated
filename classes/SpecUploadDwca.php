@@ -2,8 +2,6 @@
 include_once($SERVER_ROOT.'/classes/SpecUploadBase.php');
 class SpecUploadDwca extends SpecUploadBase{
 
-	private $baseFolderName;
-	private $extensionFolderName = '';
 	private $metaArr;
 	private $delimiter = ",";
 	private $enclosure = '"';
@@ -21,12 +19,6 @@ class SpecUploadDwca extends SpecUploadBase{
 	}
 
 	public function uploadFile(){
-		//Create download location
-		$localFolder = $this->collMetadataArr["institutioncode"].($this->collMetadataArr["collectioncode"]?$this->collMetadataArr["collectioncode"].'_':'').time();
-		mkdir($this->uploadTargetPath.$localFolder);
-		$fullPath = $this->uploadTargetPath.$localFolder.'/dwca.zip';
-		$this->baseFolderName = $localFolder;
-
 		if(array_key_exists('ulfnoverride',$_POST) && $_POST['ulfnoverride'] && !$this->path){
 			$this->path = $_POST['ulfnoverride'];
 		}
@@ -41,14 +33,28 @@ class SpecUploadDwca extends SpecUploadBase{
 					$this->path = str_replace('/resource','/archive.do',$this->path);
 				}
 			}
-			if(!copy($this->path,$fullPath)){
-				$this->outputMsg('<li>ERROR: unable to upload file (path: '.$fullPath.') </li>');
-				$this->errorStr = 'ERROR: unable to upload file (path: '.$fullPath.')';
+			if((substr($this->path,0,1) == '/' || preg_match('/^[A-Za-z]{1}:/', $this->path)) && is_dir($this->path)){
+				//Path is a local directory, possible manually extracted local DWCA directory
+				if(substr($this->path,-1) != '/') $this->path .= '/';
+				$this->uploadTargetPath = $this->path;
+				$this->locateBaseFolder();
+			}
+			else{
+				$this->createTargetSubDir();
+				$targetPath = $this->uploadTargetPath.'dwca.zip';
+				if(!copy($this->path,$targetPath)){
+					$this->errorStr = 'ERROR uploading file (path: '.$targetPath.')';
+					if(!is_writable($this->uploadTargetPath)) $this->errorStr .= ', Permission issue: target directory is not writable';
+					$this->outputMsg('<li>'.$this->errorStr.' </li>');
+				}
+				if(!$this->unpackArchive()) $this->uploadTargetPath = '';
 			}
 		}
 		elseif(array_key_exists("uploadfile",$_FILES)){
 			//File is delivered as a POST stream, probably from browser
-			if(!move_uploaded_file($_FILES['uploadfile']['tmp_name'], $fullPath)){
+			$this->createTargetSubDir();
+			$targetPath = $this->uploadTargetPath.'dwca.zip';
+			if(!move_uploaded_file($_FILES['uploadfile']['tmp_name'], $targetPath)){
 				$msg = 'unknown';
 				$err = $_FILES['uploadfile']['error'];
 				if($err == 1) $msg = 'uploaded file exceeds the upload_max_filesize directive in php.ini';
@@ -59,45 +65,51 @@ class SpecUploadDwca extends SpecUploadBase{
 				elseif($err == 6) $msg = 'missing a temporary folder';
 				elseif($err == 7) $msg = 'failed to write file to disk';
 				elseif($err == 8) $msg = 'a PHP extension stopped the file upload';
-				$this->outputMsg('<li>ERROR uploading file (target: '.$fullPath.'): '.$msg.' </li>');
-				$this->errorStr = 'ERROR uploading file: '.$msg;
-			}
-		}
 
-		if($this->baseFolderName && substr($this->baseFolderName,-1) != '/') $this->baseFolderName .= '/';
-		if($this->baseFolderName){
-			if(!$this->unpackArchive()){
-				$this->baseFolderName = '';
+				$this->errorStr = 'ERROR uploading file (path: '.$targetPath.')';
+				if(!is_writable($this->uploadTargetPath)) $this->errorStr .= ', Permission issue: target directory is not writable';
+				$this->outputMsg('<li>'.$this->errorStr.' </li>');
 			}
+			if(!$this->unpackArchive()) $this->uploadTargetPath = '';
 		}
-		return $this->baseFolderName;
+		return $this->uploadTargetPath;
+	}
+
+	private function createTargetSubDir(){
+		$localFolder = $this->collMetadataArr["institutioncode"].($this->collMetadataArr["collectioncode"]?$this->collMetadataArr["collectioncode"].'_':'').time().'/';
+		if(mkdir($this->uploadTargetPath.$localFolder)) $this->uploadTargetPath .= $localFolder;
 	}
 
 	private function unpackArchive(){
 		//Extract archive
 		$status = true;
-		$zip = new ZipArchive;
-		$targetPath = $this->uploadTargetPath.$this->baseFolderName;
-		$zip->open($targetPath.'dwca.zip');
-		if($zip->extractTo($targetPath)){
-			//Get list of files
-			$this->locateBaseFolder($targetPath);
+		if(file_exists($this->uploadTargetPath.'dwca.zip')){
+			$zip = new ZipArchive;
+			$zip->open($this->uploadTargetPath.'dwca.zip');
+			if($zip->extractTo($this->uploadTargetPath)){
+				//Get list of files
+				$this->locateBaseFolder();
+			}
+			else{
+				$err = $zip->getStatusString();
+				if(!$err){
+					if($this->uploadType == $this->IPTUPLOAD){
+						$err = 'target path does not appear to be a valid IPT instance';
+					}
+					else{
+						$err = 'Upload file or target path does not lead to a valid zip file';
+					}
+				}
+				$this->outputMsg('<li>ERROR unpacking archive file: '.$err.'</li>');
+				$this->errorStr = 'ERROR unpacking archive file: '.$err;
+				$status = false;
+			}
+			$zip->close();
 		}
 		else{
-			$err = $zip->getStatusString();
-			if(!$err){
-				if($this->uploadType == $this->IPTUPLOAD){
-					$err = 'target path does not appear to be a valid IPT instance';
-				}
-				else{
-					$err = 'Upload file or target path does not lead to a valid zip file';
-				}
-			}
-			$this->outputMsg('<li>ERROR unpacking archive file: '.$err.'</li>');
-			$this->errorStr = 'ERROR unpacking archive file: '.$err;
-			$status = false;
+			$this->errorStr = 'ERROR: dwca file does not exist (path: '.$this->uploadTargetPath.'dwca.zip)';
+			$this->outputMsg('<li>'.$this->errorStr.' </li>');
 		}
-		$zip->close();
 		return $status;
 	}
 
@@ -119,25 +131,23 @@ class SpecUploadDwca extends SpecUploadBase{
 
 	public function verifyBackupFile(){
 		//File must contain eml.xml, meta.xml, occurrence.csv, image.csv, and identifications.csv
-		$this->locateBaseFolder($this->uploadTargetPath.$this->baseFolderName);
-		$dwcaDir = $this->uploadTargetPath.$this->baseFolderName.$this->extensionFolderName;
-		if(!file_exists($dwcaDir.'occurrences.csv')){
+		if(!file_exists($this->uploadTargetPath.'occurrences.csv')){
 			$this->errorStr = 'Not a valid backup file: occurrences.csv file is missing';
 			return false;
 		}
-		if(!file_exists($dwcaDir.'images.csv')){
+		if(!file_exists($this->uploadTargetPath.'images.csv')){
 			$this->errorStr = 'Not a valid backup file; images.csv file is missing';
 			return false;
 		}
-		if(!file_exists($dwcaDir.'identifications.csv')){
+		if(!file_exists($this->uploadTargetPath.'identifications.csv')){
 			$this->errorStr = 'Not a valid backup file; identifications.csv file is missing';
 			return false;
 		}
-		if(!file_exists($dwcaDir.'meta.xml')){
+		if(!file_exists($this->uploadTargetPath.'meta.xml')){
 			$this->errorStr = 'Not a valid backup file; meta.xml file is missing';
 			return false;
 		}
-		if(!file_exists($dwcaDir.'eml.xml')){
+		if(!file_exists($this->uploadTargetPath.'eml.xml')){
 			$this->errorStr = 'Not a valid backup file; eml.xml file is missing';
 			return false;
 		}
@@ -149,7 +159,7 @@ class SpecUploadDwca extends SpecUploadBase{
 		//Verify that XML file matches identification of target collection
 		$warningArr = array();
 		$emlDoc = new DOMDocument();
-		$emlDoc->load($dwcaDir.'eml.xml');
+		$emlDoc->load($this->uploadTargetPath.'eml.xml');
 		$xpath = new DOMXpath($emlDoc);
 
 		$nodeList = $xpath->query('//collection');
@@ -177,8 +187,7 @@ class SpecUploadDwca extends SpecUploadBase{
 	private function readMetaFile(){
 		//Read meta.xml file
 		if(!$this->metaArr){
-			$this->locateBaseFolder($this->uploadTargetPath.$this->baseFolderName);
-			$metaPath = $this->uploadTargetPath.$this->baseFolderName.$this->extensionFolderName.'meta.xml';
+			$metaPath = $this->uploadTargetPath.'meta.xml';
 			if(file_exists($metaPath)){
 				$metaDoc = new DOMDocument();
 				$metaDoc->load($metaPath);
@@ -235,8 +244,7 @@ class SpecUploadDwca extends SpecUploadBase{
 										$this->delimiter = $this->metaArr['occur']['fieldsTerminatedBy'];
 									}
 									//Read occurrence header and compare
-									$fullPath = $this->uploadTargetPath.$this->baseFolderName.$this->extensionFolderName.$this->metaArr['occur']['name'];
-			 						$fh = fopen($fullPath,'r') or die("Can't open occurrence file");
+									$fh = fopen($this->uploadTargetPath.$this->metaArr['occur']['name'],'r') or die("Can't open occurrence file");
 									$headerArr = $this->getRecordArr($fh);
 									foreach($headerArr as $k => $v){
 										if(strtolower($v) != strtolower($this->metaArr['occur']['fields'][$k])){
@@ -326,8 +334,7 @@ class SpecUploadDwca extends SpecUploadBase{
 											$this->delimiter = $this->metaArr[$tagName]['fieldsTerminatedBy'];
 										}
 										//Read extension file header and compare
-										$fullPath = $this->uploadTargetPath.$this->baseFolderName.$this->extensionFolderName.$this->metaArr[$tagName]['name'];
-				 						$fh = fopen($fullPath,'r') or die("Can't open $tagName extension file");
+										$fh = fopen($this->uploadTargetPath.$this->metaArr[$tagName]['name'],'r') or die("Can't open $tagName extension file");
 										$headerArr = $this->getRecordArr($fh);
 										foreach($headerArr as $k => $v){
 											$metaField = strtolower($this->metaArr[$tagName]['fields'][$k]);
@@ -362,24 +369,19 @@ class SpecUploadDwca extends SpecUploadBase{
 		return true;
 	}
 
-	private function locateBaseFolder($baseDir, $pathFrag = ''){
-		//echo $baseDir.' : '.$pathFrag.'<br/>';
-		if($handle = opendir($baseDir.$pathFrag)) {
+	private function locateBaseFolder($pathFrag = ''){
+		if($handle = opendir($this->uploadTargetPath.$pathFrag)) {
 			while(false !== ($item = readdir($handle))){
 				if($item){
-					$newPath = $baseDir.$pathFrag;
-					if(is_file($newPath.$item) || strtolower(substr($item,-4)) == '.zip'){
+					if(is_file($this->uploadTargetPath.$pathFrag.$item)){
 						if(strtolower($item) == 'meta.xml'){
-							$this->extensionFolderName = $pathFrag;
+							$this->uploadTargetPath .= $pathFrag;
 							break;
 						}
-						elseif(strtolower($item) == 'eml.xml'){
-							$this->extensionFolderName = $pathFrag;
-						}
 					}
-					elseif(is_dir($newPath) && $item != '.' && $item != '..'){
+					elseif(is_dir($this->uploadTargetPath.$pathFrag) && $item != '.' && $item != '..'){
 						$pathFrag .= $item.'/';
-						$this->locateBaseFolder($baseDir, $pathFrag);
+						$this->locateBaseFolder($pathFrag);
 					}
 				}
 			}
@@ -389,14 +391,14 @@ class SpecUploadDwca extends SpecUploadBase{
 
 	public function uploadData($finalTransfer){
 		global $CHARSET;
-		$fullPath = $this->uploadTargetPath.$this->baseFolderName;
+
+		//First, delete all records in uploadspectemp table associated with this collection
+		$this->prepUploadData();
+
+		$fullPath = $this->uploadTargetPath;
 		if(file_exists($fullPath)){
 
-			//First, delete all records in uploadspectemp table associated with this collection
-			$this->prepUploadData();
-
 			if($this->readMetaFile() && isset($this->metaArr['occur']['fields'])){
-				$fullPath .= $this->extensionFolderName;
 				//Set parsing variables
 				if(isset($this->metaArr['occur']['fieldsTerminatedBy']) && $this->metaArr['occur']['fieldsTerminatedBy']){
 					if($this->metaArr['occur']['fieldsTerminatedBy'] == '\t'){
@@ -560,7 +562,7 @@ class SpecUploadDwca extends SpecUploadBase{
 					$this->conn->query('SET autocommit=1');
 					$this->conn->query('SET unique_checks=1');
 					$this->conn->query('SET foreign_key_checks=1');
-					$this->outputMsg('<li style="margin-left:10px;">Complete: '.$this->getTransferCount().' records loaded</li>');
+					$this->outputMsg('<li style="margin-left:10px;">Complete: '.$this->getTransferCount().' occurrence records loaded</li>');
 					if($this->verboseMode){
 						ob_flush();
 						flush();
@@ -623,9 +625,7 @@ class SpecUploadDwca extends SpecUploadBase{
 					}
 
 					//Remove all upload files and directories
-					$this->removeFiles($this->uploadTargetPath.$this->baseFolderName);
-					//Remove orginal directory
-					//rmdir($this->uploadTargetPath.$this->baseFolderName);
+					$this->removeFiles();
 				}
 				else{
 					$this->errorStr = 'ERROR: unable to locate occurrence upload file ('.$fullPath.')';
@@ -653,21 +653,27 @@ class SpecUploadDwca extends SpecUploadBase{
 		}
 	}
 
-	private function removeFiles($baseDir,$pathFrag = ''){
+	private function removeFiles($pathFrag = ''){
 		//First remove files
-		$dirPath = $baseDir.$pathFrag;
+		$dirPath = $this->uploadTargetPath.$pathFrag;
+		if(!$pathFrag){
+			//If files were not uploaded to temp directory, don't delete
+			$this->setUploadTargetPath();
+			if(stripos($dirPath,$this->uploadTargetPath) === false){
+				return false;
+			}
+		}
 		if($handle = opendir($dirPath)) {
 			while(false !== ($item = readdir($handle))) {
 				if($item){
 					if(is_file($dirPath.$item) || strtolower(substr($item,-4)) == '.zip'){
 						if(stripos($dirPath,$this->uploadTargetPath) === 0){
-							//echo 'Deleting file: '.$dirPath.$item.'<br/>';
 							unlink($dirPath.$item);
 						}
 					}
 					elseif(is_dir($dirPath) && $item != '.' && $item != '..'){
 						$pathFrag .= $item.'/';
-						$this->removeFiles($baseDir, $pathFrag);
+						$this->removeFiles($pathFrag);
 					}
 					if($this->loopCnt > 15) break;
 				}
@@ -678,7 +684,6 @@ class SpecUploadDwca extends SpecUploadBase{
 		//Delete directory
 		if(stripos($dirPath,$this->uploadTargetPath) === 0){
 			rmdir($dirPath);
-			//echo 'Deleting directory: '.$dirPath.'<br/>';
 		}
 	}
 
@@ -686,7 +691,7 @@ class SpecUploadDwca extends SpecUploadBase{
 		global $CHARSET;
 		$fullPathExt = '';
 		if($this->metaArr[$targetStr]['name']){
-			$fullPathExt = $this->uploadTargetPath.$this->baseFolderName.$this->extensionFolderName.$this->metaArr[$targetStr]['name'];
+			$fullPathExt = $this->uploadTargetPath.$this->metaArr[$targetStr]['name'];
 		}
 		if($fullPathExt && file_exists($fullPathExt)){
 			if(isset($this->metaArr[$targetStr]['fields'])){
@@ -851,9 +856,8 @@ class SpecUploadDwca extends SpecUploadBase{
 		}
 	}
 
-	public function setBaseFolderName($name){
-		$this->baseFolderName = $name;
-		if($this->baseFolderName && substr($this->baseFolderName,-1) != '/') $this->baseFolderName .= '/';
+	public function setTargetPath($targetPath){
+		if($targetPath) $this->uploadTargetPath = $targetPath;
 	}
 
 	public function getDbpk(){

@@ -8,11 +8,11 @@ $thesFilter = array_key_exists("thesfilter",$_REQUEST)?$_REQUEST["thesfilter"]:0
 $taxonFilter = array_key_exists("taxonfilter",$_REQUEST)?$_REQUEST["taxonfilter"]:"";
 
 $clManager = new ChecklistManager();
-$clManager->setClValue($clid);
+$clManager->setClid($clid);
 if($thesFilter) $clManager->setThesFilter($thesFilter);
 if($taxonFilter) $clManager->setTaxonFilter($taxonFilter);
 
-$coordArr = $clManager->getCoordinates(0);
+$coordArr = $clManager->getVoucherCoordinates(0);
 ?>
 <html>
 <head>

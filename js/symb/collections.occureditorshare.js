@@ -2,7 +2,15 @@
 function submitQueryForm(qryIndex){
 	if(verifyLeaveForm()){
 		var f = document.queryform;
-		if(qryIndex) f.occindex.value = qryIndex;
+		if(qryIndex == 'forward' || qryIndex == 'back'){
+			f.direction.value = qryIndex;
+		}
+		else if(qryIndex === parseInt(qryIndex)){
+			f.occindex.value = qryIndex;
+			f.direction.value = "";
+			f.occidlist.value = "";
+			f.occid.value = "";
+		}
 		if(verifyQueryForm(f)) f.submit();
 	}
 	return false;
@@ -17,12 +25,20 @@ function verifyLeaveForm(){
 
 function submitQueryEditor(f){
 	f.action = "occurrenceeditor.php"
+	f.direction.value = "";
+	f.occid.value = "";
+	f.occindex.value = "0"
+	f.occidlist.value = "";
 	if(verifyQueryForm(f)) f.submit();
 	return true;
 }
 
 function submitQueryTable(f){
-	f.action = "occurrencetabledisplay.php"
+	f.action = "occurrencetabledisplay.php";
+	f.direction.value = "";
+	f.occid.value = "";
+	f.occindex.value = "0"
+	f.occidlist.value = "";
 	if(verifyQueryForm(f)) f.submit();
 	return true;
 }
@@ -122,6 +138,10 @@ function verifyQueryForm(f){
 }
 
 function resetQueryForm(f){
+	f.occid.value = "";
+	f.occidlist.value = "";
+	f.direction.value = "";
+	f.occindex.value = "0";
 	f.q_catalognumber.value = "";
 	f.q_othercatalognumbers.value = "";
 	f.q_recordedby.value = "";

@@ -584,6 +584,7 @@ function resetQueryForm(f){
 	$('input[name=typestatus]').attr('checked', false);
 	$('input[name=hasimages]').attr('checked', false);
 	$('input[name=hasgenetic]').attr('checked', false);
+	$('input[name=includecult]').attr('checked', false);
 	deleteSelectedShape();
 }
 

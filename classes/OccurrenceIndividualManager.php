@@ -103,9 +103,10 @@ class OccurrenceIndividualManager extends Manager{
 			'occurrenceid, catalognumber, occurrenceremarks, tidinterpreted, family, sciname, '.
 			'scientificnameauthorship, identificationqualifier, identificationremarks, identificationreferences, taxonremarks, '.
 			'identifiedby, dateidentified, recordedby, associatedcollectors, recordnumber, eventdate, MAKEDATE(YEAR(eventDate),enddayofyear) AS eventdateend, '.
-			'verbatimeventdate, country, stateprovince, county, municipality, locality, '.
-			'minimumelevationinmeters, maximumelevationinmeters, verbatimelevation, localitysecurity, localitysecurityreason, '.
-			'decimallatitude, decimallongitude, geodeticdatum, coordinateuncertaintyinmeters, verbatimcoordinates, georeferenceremarks, verbatimattributes, '.
+			'verbatimeventdate, country, stateprovince, county, municipality, locality, localitysecurity, localitysecurityreason, '.
+			'decimallatitude, decimallongitude, geodeticdatum, coordinateuncertaintyinmeters, verbatimcoordinates, georeferenceremarks, '.
+			'minimumelevationinmeters, maximumelevationinmeters, verbatimelevation, '.
+			'verbatimattributes, o.locationremarks, o.lifestage, o.sex, o.individualcount, o.samplingprotocol, o.preparations, '.
 			'typestatus, dbpk, habitat, substrate, associatedtaxa, reproductivecondition, cultivationstatus, establishmentmeans, '.
 			'ownerinstitutioncode, othercatalognumbers, disposition, modified, observeruid, g.guid, recordenteredby, dateentered, datelastmodified '.
 			'FROM omoccurrences o LEFT JOIN guidoccurrences g ON o.occid = g.occid ';
@@ -124,18 +125,19 @@ class OccurrenceIndividualManager extends Manager{
 				if(!$this->occid) $this->occid = $this->occArr['occid'];
 				if(!$this->collid) $this->collid = $this->occArr['collid'];
 				$this->loadMetadata();
-				//Set occurrenceId according to guidsource \
-				if($this->metadataArr['guidtarget'] == 'catalogNumber'){
-					$this->occArr['occurrenceid'] = $this->occArr['catalognumber'];
-				}
-				elseif($this->metadataArr['guidtarget'] == 'symbiotaUUID'){
-					$this->occArr['occurrenceid'] = $this->occArr['guid'];
+
+				if(!$this->occArr['occurrenceid']){
+					//Set occurrence GUID based on GUID target, but only if occurrenceID field isn't already populated
+					if($this->metadataArr['guidtarget'] == 'catalogNumber'){
+						$this->occArr['occurrenceid'] = $this->occArr['catalognumber'];
+					}
+					elseif($this->metadataArr['guidtarget'] == 'symbiotaUUID'){
+						$this->occArr['occurrenceid'] = $this->occArr['guid'];
+					}
 				}
 
 				if($this->occArr['secondaryinstcode'] && $this->occArr['secondaryinstcode'] != $this->metadataArr['institutioncode']){
-					$sqlSec = 'SELECT collectionname, homepage, individualurl, contact, email, icon '.
-					'FROM omcollsecondary '.
-					'WHERE (collid = '.$this->occArr['collid'].')';
+					$sqlSec = 'SELECT collectionname, homepage, individualurl, contact, email, icon  FROM omcollsecondary WHERE (collid = '.$this->occArr['collid'].')';
 					$rsSec = $this->conn->query($sqlSec);
 					if($r = $rsSec->fetch_object()){
 						$this->metadataArr['collectionname'] = $r->collectionname;

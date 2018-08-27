@@ -17,7 +17,7 @@ $clManager->setClid($clid);
 if($action == "SubmitAdd"){
 	//Anyone with a login can create a checklist
 	$newClid = $clManager->createChecklist($_POST);
-	header("Location: checklist.php?cl=".$newClid."&emode=1");
+	header("Location: checklist.php?clid=".$newClid."&emode=1");
 }
 
 $statusStr = "";
@@ -28,7 +28,7 @@ if($IS_ADMIN || (array_key_exists("ClAdmin",$USER_RIGHTS) && in_array($clid,$USE
 	//Submit checklist MetaData edits
 	if($action == "SubmitEdit"){
 		$clManager->editMetaData($_POST);
-		header('Location: checklist.php?cl='.$clid.'&pid='.$pid);
+		header('Location: checklist.php?clid='.$clid.'&pid='.$pid);
 	}
 	elseif($action == 'DeleteCheck'){
 		$statusStr = $clManager->deleteChecklist($_POST['delclid']);
@@ -91,14 +91,14 @@ include($SERVER_ROOT.'/header.php');
 ?>
 <div class="navpath">
 	<a href="../index.php"><?php echo $LANG['NAV_HOME'];?></a> &gt;&gt;
-	<a href="checklist.php?cl=<?php echo $clid.'&pid='.$pid; ?>"><?php echo $LANG['RETURNCHECK'];?></a> &gt;&gt;
+	<a href="checklist.php?clid=<?php echo $clid.'&pid='.$pid; ?>"><?php echo $LANG['RETURNCHECK'];?></a> &gt;&gt;
 	<b><?php echo $LANG['CHECKADMIN'];?></b>
 </div>
 
 <!-- This is inner text! -->
 <div id='innertext'>
 <div style="color:#990000;font-size:20px;font-weight:bold;margin:0px 10px 10px 0px;">
-	<a href="checklist.php?cl=<?php echo $clid.'&pid='.$pid; ?>">
+	<a href="checklist.php?clid=<?php echo $clid.'&pid='.$pid; ?>">
 		<?php echo $clManager->getClName(); ?>
 	</a>
 </div>

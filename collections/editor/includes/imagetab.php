@@ -1,5 +1,5 @@
 <?php
-include_once('../../../config/symbini.php'); 
+include_once('../../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceEditorManager.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceActionManager.php');
 header("Content-Type: text/html; charset=".$CHARSET);
@@ -11,8 +11,9 @@ $crowdSourceMode = $_GET['csmode'];
 $occManager = new OccurrenceEditorImages();
 $occActionManager = new OccurrenceActionManager();
 
-$occManager->setOccId($occId); 
+$occManager->setOccId($occId);
 $specImgArr = $occManager->getImageMap();
+$photographerArr = $occManager->getPhotographerArr();
 ?>
 <div id="imagediv" style="width:795px;">
 	<div style="float:right;cursor:pointer;" onclick="toggle('addimgdiv');" title="Add a New Image">
@@ -38,12 +39,12 @@ $specImgArr = $occManager->getImageMap();
 					</div>
 					<div class="targetdiv" style="display:none;">
 						<div style="margin-bottom:10px;">
-							Enter a URL to an image already located on a web server. 
-							If the image is larger than a typical web image, the url will be saved as the large version 
-							and a basic web derivative will be created. 
+							Enter a URL to an image already located on a web server.
+							If the image is larger than a typical web image, the url will be saved as the large version
+							and a basic web derivative will be created.
 						</div>
 						<div>
-							<b>Image URL:</b><br/> 
+							<b>Image URL:</b><br/>
 							<input type='text' name='imgurl' size='70'/>
 						</div>
 						<div style="float:right;text-decoration:underline;font-weight:bold;">
@@ -56,21 +57,20 @@ $specImgArr = $occManager->getImageMap();
 						</div>
 					</div>
 					<div>
-						<input type="checkbox" name="nolgimage" value="1" /> Do not map large version of image (when applicable) 
+						<input type="checkbox" name="nolgimage" value="1" /> Do not map large version of image (when applicable)
 					</div>
 				</div>
 				<div style="clear:both;margin:20px 0px 5px 10px;">
-					<b>Caption:</b> 
+					<b>Caption:</b>
 					<input name="caption" type="text" size="40" value="" />
 				</div>
 				<div style='margin:0px 0px 5px 10px;'>
-					<b>Photographer:</b> 
+					<b>Photographer:</b>
 					<select name='photographeruid' name='photographeruid'>
 						<option value="">Select Photographer</option>
 						<option value="">---------------------------------------</option>
 						<?php
-							$pArr = $occManager->getPhotographerArr();
-							foreach($pArr as $id => $uname){
+						foreach($photographerArr as $id => $uname){
 								echo '<option value="'.$id.'" >';
 								echo $uname;
 								echo '</option>';
@@ -82,12 +82,12 @@ $specImgArr = $occManager->getImageMap();
 					</a>
 				</div>
 				<div id="imgaddoverride" style="margin:0px 0px 5px 10px;display:none;">
-					<b>Photographer (override):</b> 
+					<b>Photographer (override):</b>
 					<input name='photographer' type='text' style="width:300px;" maxlength='100'>
 					* Will override above selection
 				</div>
 				<div style="margin:0px 0px 5px 10px;">
-					<b>Notes:</b> 
+					<b>Notes:</b>
 					<input name="notes" type="text" size="40" value="" />
 				</div>
 				<div style="margin:0px 0px 5px 10px;">
@@ -105,9 +105,9 @@ $specImgArr = $occManager->getImageMap();
 				<div style="margin:0px 0px 5px 10px;">
 					<b>Describe this image</b>
 				</div>
-                    <?php 
+                    <?php
                        $kArr = $occManager->getImageTagValues();
-                       foreach($kArr as $key => $description) { 
+                       foreach($kArr as $key => $description) {
 				          echo "<div style='margin-left:10px;'>\n";
 					      echo "   <input name='ch_$key' type='checkbox' value='0' />$description</br>\n";
                           echo "</div>\n";
@@ -129,8 +129,9 @@ $specImgArr = $occManager->getImageMap();
 		if($specImgArr){
 			?>
 			<table>
-				<?php 
+				<?php
 				foreach($specImgArr as $imgId => $imgArr){
+					$imageTagUsageArr = $occManager->getImageTagUsage($imgId);
 					?>
 					<tr>
 						<td style="width:300px;text-align:center;padding:20px;">
@@ -149,7 +150,7 @@ $specImgArr = $occManager->getImageMap();
 									$tnUrl = $GLOBALS["imageDomain"].$tnUrl;
 								}
 							}
-							
+
 							if($imgUrl == 'empty' && $origUrl) $imgUrl = $origUrl;
 							if(!$tnUrl && $imgUrl) $tnUrl = $imgUrl;
 							echo '<a href="'.$imgUrl.'" target="_blank">';
@@ -170,37 +171,35 @@ $specImgArr = $occManager->getImageMap();
 							</div>
 							<div style="margin-top:30px">
 								<div>
-									<b>Caption:</b> 
+									<b>Caption:</b>
 									<?php echo $imgArr["caption"]; ?>
 								</div>
 								<div>
-									<b>Photographer:</b> 
+									<b>Photographer:</b>
 									<?php
 									if($imgArr["photographer"]){
 										echo $imgArr["photographer"];
 									}
 									else if($imgArr["photographeruid"]){
-										$pArr = $occManager->getPhotographerArr();
-										echo $pArr[$imgArr["photographeruid"]];
-									} 
+										echo $photographerArr[$imgArr["photographeruid"]];
+									}
 									?>
 								</div>
 								<div>
-									<b>Notes:</b> 
+									<b>Notes:</b>
 									<?php echo $imgArr["notes"]; ?>
 								</div>
 								<div>
-									<b>Tags:</b> 
-	                                <?php 
-	                                   $kArr = $occManager->getImageTagUsage($imgId);
+									<b>Tags:</b>
+	                                <?php
 	                                   $comma = "";
-	                                   foreach($kArr as $tags) { 
-					                       if ($tags->value==1) { 
+	                                   foreach($imageTagUsageArr as $tags) {
+					                       if ($tags->value==1) {
 					                   	      echo "$comma$tags->shortlabel";
-					                   	      $comma = ", ";  
+					                   	      $comma = ", ";
 	                                       }
 	                                   }
-	                                ?>   
+	                                ?>
 								</div>
 								<div>
 									<b>Copyright:</b>
@@ -209,7 +208,7 @@ $specImgArr = $occManager->getImageMap();
 								<div>
 									<b>Source Webpage:</b>
 									<a href="<?php echo $imgArr["sourceurl"]; ?>" target="_blank">
-										<?php 
+										<?php
 										$sourceUrlDisplay = $imgArr["sourceurl"];
 										if(strlen($sourceUrlDisplay) > 60) $sourceUrlDisplay = '...'.substr($sourceUrlDisplay,-60);
 										echo $sourceUrlDisplay;
@@ -219,7 +218,7 @@ $specImgArr = $occManager->getImageMap();
 								<div>
 									<b>Web URL: </b>
 									<a href="<?php echo $imgArr["url"]; ?>"  title="<?php echo $imgArr["url"]; ?>" target="_blank">
-										<?php 
+										<?php
 										$urlDisplay = $imgArr["url"];
 										if(strlen($urlDisplay) > 60) $urlDisplay = '...'.substr($urlDisplay,-60);
 										echo $urlDisplay;
@@ -229,7 +228,7 @@ $specImgArr = $occManager->getImageMap();
 								<div>
 									<b>Large Image URL: </b>
 									<a href="<?php echo $imgArr["origurl"]; ?>" title="<?php echo $imgArr["origurl"]; ?>" target="_blank">
-										<?php 
+										<?php
 										$origUrlDisplay = $imgArr["origurl"];
 										if(strlen($origUrlDisplay) > 60) $origUrlDisplay = '...'.substr($origUrlDisplay,-60);
 										echo $origUrlDisplay;
@@ -239,7 +238,7 @@ $specImgArr = $occManager->getImageMap();
 								<div>
 									<b>Thumbnail URL: </b>
 									<a href="<?php echo $imgArr["tnurl"]; ?>" title="<?php echo $imgArr["tnurl"]; ?>" target="_blank">
-										<?php 
+										<?php
 										$tnUrlDisplay = $imgArr["tnurl"];
 										if(strlen($tnUrlDisplay) > 60) $tnUrlDisplay = '...'.substr($tnUrlDisplay,-60);
 										echo $tnUrlDisplay;
@@ -260,17 +259,16 @@ $specImgArr = $occManager->getImageMap();
 									<fieldset style="padding:15px">
 										<legend><b>Edit Image Data</b></legend>
 										<div>
-											<b>Caption:</b><br/> 
+											<b>Caption:</b><br/>
 											<input name="caption" type="text" value="<?php echo $imgArr["caption"]; ?>" style="width:300px;" />
 										</div>
 										<div>
-											<b>Photographer:</b><br/> 
+											<b>Photographer:</b><br/>
 											<select name='photographeruid' name='photographeruid'>
 												<option value="">Select Photographer</option>
 												<option value="">---------------------------------------</option>
 												<?php
-												$pArr = $occManager->getPhotographerArr();
-												foreach($pArr as $id => $uname){
+												foreach($photographerArr as $id => $uname){
 													echo "<option value='".$id."' ".($id == $imgArr["photographeruid"]?"SELECTED":"").">";
 													echo $uname;
 													echo "</option>\n";
@@ -282,7 +280,7 @@ $specImgArr = $occManager->getImageMap();
 											</a>
 										</div>
 										<div id="imgeditoverride<?php echo $imgId; ?>" style="display:<?php echo ($imgArr["photographer"]?'block':'none'); ?>;">
-											<b>Photographer (override):</b><br/> 
+											<b>Photographer (override):</b><br/>
 											<input name='photographer' type='text' value="<?php echo $imgArr["photographer"]; ?>" style="width:300px;" maxlength='100'>
 											* Warning: value will override above selection
 										</div>
@@ -338,16 +336,15 @@ $specImgArr = $occManager->getImageMap();
 					                    <div>
 						                   <b>Tags:</b>
 					                    </div>
-	                                        <?php 
-	                                           $kArr = $occManager->getImageTagUsage($imgId);
-	                                           foreach($kArr as $tags) { 
+	                                        <?php
+	                                           foreach($imageTagUsageArr as $tags) {
 					                              echo "<div style='margin-left:10px;'>\n";
-					                              if ($tags->value==1) { $checked = 'CHECKED'; } else { $checked=''; }  
+					                              if ($tags->value==1) { $checked = 'CHECKED'; } else { $checked=''; }
 						                          echo "   <input name='ch_".$tags->tagkey."' type='checkbox' $checked value='".$tags->value."' />".$tags->description."\n";
 						                          echo "   <input name='hidden_".$tags->tagkey."' type='hidden' value='".$tags->value."' />\n";
 	                                              echo "</div>\n";
 	                                           }
-	                                         ?>									
+	                                         ?>
 										<div style="margin-top:10px;">
 											<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
 											<input type="hidden" name="imgid" value="<?php echo $imgId; ?>" />
@@ -364,7 +361,7 @@ $specImgArr = $occManager->getImageMap();
 										<input type="hidden" name="imgid" value="<?php echo $imgId; ?>" />
 										<input type="hidden" name="occindex" value="<?php echo $occIndex; ?>" />
 										<input type="hidden" name="csmode" value="<?php echo $crowdSourceMode; ?>" />
-										<input name="removeimg" type="checkbox" value="1" /> Remove image from server 
+										<input name="removeimg" type="checkbox" value="1" /> Remove image from server
 										<div style="margin-left:20px;">
 											(Note: leaving unchecked removes image from database without removing from server)
 										</div>
@@ -377,7 +374,7 @@ $specImgArr = $occManager->getImageMap();
 									<fieldset style="padding:15px">
 										<legend><b>Remap to Another Specimen</b></legend>
 										<div>
-											<b>Occurrence Record #:</b> 
+											<b>Occurrence Record #:</b>
 											<input id="imgoccid-<?php echo $imgId; ?>" name="targetoccid" type="text" value="" />
 											<span style="cursor:pointer;color:blue;"  onclick="openOccurrenceSearch('imgoccid-<?php echo $imgId; ?>')">
 												Open Occurrence Linking Aid
@@ -403,7 +400,7 @@ $specImgArr = $occManager->getImageMap();
 											<input name="submitaction" type="submit" value="Disassociate Image" />
 										</div>
 										<div>
-											* Image will only be available from Taxon Profile page 
+											* Image will only be available from Taxon Profile page
 										</div>
 									</fieldset>
 								</form>
@@ -411,17 +408,17 @@ $specImgArr = $occManager->getImageMap();
 							<hr/>
 						</td>
 					</tr>
-					<?php 
+					<?php
 				}
 				?>
 			</table>
-			<?php 
+			<?php
 		}
 		else{
-			if (isset($RequestTrackingIsActive) && $RequestTrackingIsActive==1) { 
+			if (isset($RequestTrackingIsActive) && $RequestTrackingIsActive==1) {
 			     echo "<div style=\"margin-left:15px;\"><button onClick=' requestImage() '>Make an imaging request.</button></div><div id='imagerequestresult'></div>";
-                 echo "<div>"; 
-                 foreach ($occActionManager->listOccurrenceActionRequests($occId) as $request) { 
+                 echo "<div>";
+                 foreach ($occActionManager->listOccurrenceActionRequests($occId) as $request) {
                    echo "$request<br/>";
                  }
                  echo "</div>";

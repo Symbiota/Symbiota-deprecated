@@ -1,5 +1,6 @@
 <?php
 include_once($SERVER_ROOT.'/config/dbconnection.php');
+include_once($SERVER_ROOT.'/classes/ChecklistVoucherAdmin.php');
 
 class ChecklistManager {
 
@@ -7,6 +8,7 @@ class ChecklistManager {
 	private $clid;
 	private $dynClid;
 	private $clName;
+	private $clMetadata;
 	private $childClidArr = array();
 	private $voucherArr = array();
 	private $pid = '';
@@ -39,41 +41,22 @@ class ChecklistManager {
  		if(!($this->conn === false)) $this->conn->close();
 	}
 
-	public function setClValue($clValue){
-		$retStr = '';
-		$clValue = $this->conn->real_escape_string($clValue);
-		if(is_numeric($clValue)){
-			$this->clid = $clValue;
-		}
-		else{
-			$sql = 'SELECT c.clid FROM fmchecklists c WHERE (c.Name = "'.$clValue.'")';
-			$rs = $this->conn->query($sql);
-			if($rs){
-				if($row = $rs->fetch_object()){
-					$this->clid = $row->clid;
+	public function setClid($clid){
+		if(is_numeric($clid)){
+			$this->clid = $clid;
+			//Get children checklists
+			$sqlChildBase = 'SELECT clidchild FROM fmchklstchildren WHERE clid IN(';
+			$sqlChild = $sqlChildBase.$this->clid.')';
+			do{
+				$childStr = "";
+				$rsChild = $this->conn->query($sqlChild);
+				while($rChild = $rsChild->fetch_object()){
+					$this->childClidArr[] = $rChild->clidchild;
+					$childStr .= ','.$rChild->clidchild;
 				}
-				else{
-					$retStr = '<h1>ERROR: invalid checklist identifier supplied ('.$clValue.')</h1>';
-				}
-				$rs->free();
-			}
-			else{
-				trigger_error('ERROR setting checklist ID, SQL: '.$sql, E_USER_ERROR);
-			}
+				$sqlChild = $sqlChildBase.substr($childStr,1).')';
+			}while($childStr);
 		}
-		//Get children checklists
-		$sqlChildBase = 'SELECT clidchild FROM fmchklstchildren WHERE clid IN(';
-		$sqlChild = $sqlChildBase.$this->clid.')';
-		do{
-			$childStr = "";
-			$rsChild = $this->conn->query($sqlChild);
-			while($rChild = $rsChild->fetch_object()){
-				$this->childClidArr[] = $rChild->clidchild;
-				$childStr .= ','.$rChild->clidchild;
-			}
-			$sqlChild = $sqlChildBase.substr($childStr,1).')';
-		}while($childStr);
-		return $retStr;
 	}
 
 	public function setDynClid($did){
@@ -83,11 +66,9 @@ class ChecklistManager {
 	}
 
 	public function getClMetaData(){
-		$retArr = array();
 		$sql = "";
 		if($this->clid){
-			$sql = 'SELECT c.clid, c.name, c.locality, c.publication, '.
-				'c.abstract, c.authors, c.parentclid, c.notes, '.
+			$sql = 'SELECT c.clid, c.name, c.locality, c.publication, c.abstract, c.authors, c.parentclid, c.notes, '.
 				'c.latcentroid, c.longcentroid, c.pointradiusmeters, c.footprintwkt, c.access, c.defaultSettings, '.
 				'c.dynamicsql, c.datelastmodified, c.uid, c.type, c.initialtimestamp '.
 				'FROM fmchecklists c WHERE (c.clid = '.$this->clid.')';
@@ -101,23 +82,24 @@ class ChecklistManager {
 			if($result){
 		 		if($row = $result->fetch_object()){
 					$this->clName = $row->name;
-					$retArr["locality"] = $row->locality;
-					$retArr["notes"] = $row->notes;
-					$retArr["type"] = $row->type;
+					$this->clMetadata["locality"] = $row->locality;
+					//clMetadata
+					$this->clMetadata["notes"] = $row->notes;
+					$this->clMetadata["type"] = $row->type;
 					if($this->clid){
-						$retArr["publication"] = $row->publication;
-						$retArr["abstract"] = $row->abstract;
-						$retArr["authors"] = $row->authors;
-						$retArr["parentclid"] = $row->parentclid;
-						$retArr["uid"] = $row->uid;
-						$retArr["latcentroid"] = $row->latcentroid;
-						$retArr["longcentroid"] = $row->longcentroid;
-						$retArr["pointradiusmeters"] = $row->pointradiusmeters;
-						$retArr['footprintwkt'] = $row->footprintwkt;
-						$retArr["access"] = $row->access;
-						$retArr["defaultSettings"] = $row->defaultSettings;
-						$retArr["dynamicsql"] = $row->dynamicsql;
-						$retArr["datelastmodified"] = $row->datelastmodified;
+						$this->clMetadata["publication"] = $row->publication;
+						$this->clMetadata["abstract"] = $row->abstract;
+						$this->clMetadata["authors"] = $row->authors;
+						$this->clMetadata["parentclid"] = $row->parentclid;
+						$this->clMetadata["uid"] = $row->uid;
+						$this->clMetadata["latcentroid"] = $row->latcentroid;
+						$this->clMetadata["longcentroid"] = $row->longcentroid;
+						$this->clMetadata["pointradiusmeters"] = $row->pointradiusmeters;
+						$this->clMetadata['footprintwkt'] = $row->footprintwkt;
+						$this->clMetadata["access"] = $row->access;
+						$this->clMetadata["defaultSettings"] = $row->defaultSettings;
+						$this->clMetadata["dynamicsql"] = $row->dynamicsql;
+						$this->clMetadata["datelastmodified"] = $row->datelastmodified;
 					}
 		    	}
 		    	$result->free();
@@ -126,7 +108,7 @@ class ChecklistManager {
 				trigger_error('ERROR: unable to set checklist metadata => '.$sql, E_USER_ERROR);
 			}
 		}
-		return $retArr;
+		return $this->clMetadata;
 	}
 
 	public function echoFilterList(){
@@ -226,14 +208,16 @@ class ChecklistManager {
 				$vSql = 'SELECT DISTINCT v.tid, v.occid, c.institutioncode, v.notes, o.catalognumber, o.recordedby, o.recordnumber, o.eventdate '.
 					'FROM fmvouchers v INNER JOIN omoccurrences o ON v.occid = o.occid '.
 					'INNER JOIN omcollections c ON o.collid = c.collid '.
-					'WHERE (v.clid IN ('.$clidStr.')) AND v.tid IN('.implode(',',array_keys($this->taxaList)).')';
+					'WHERE (v.clid IN ('.$clidStr.')) AND v.tid IN('.implode(',',array_keys($this->taxaList)).') '.
+					'ORDER BY o.collid';
 				if($this->thesFilter){
 					$vSql = 'SELECT DISTINCT ts.tidaccepted AS tid, v.occid, c.institutioncode, v.notes, o.catalognumber, o.recordedby, o.recordnumber, o.eventdate '.
 						'FROM fmvouchers v INNER JOIN omoccurrences o ON v.occid = o.occid '.
 						'INNER JOIN omcollections c ON o.collid = c.collid '.
 						'INNER JOIN taxstatus ts ON v.tid = ts.tid '.
 						'WHERE (ts.taxauthid = '.$this->thesFilter.') AND (v.clid IN ('.$clidStr.')) '.
-						'AND (ts.tidaccepted IN('.implode(',',array_keys($this->taxaList)).')) ';
+						'AND (ts.tidaccepted IN('.implode(',',array_keys($this->taxaList)).')) '.
+						'ORDER BY o.collid';
 				}
 				//echo $vSql; exit;
 		 		$vResult = $this->conn->query($vSql);
@@ -316,7 +300,7 @@ class ChecklistManager {
 		}
 	}
 
-	public function getCoordinates($tid = 0,$abbreviated=false){
+	public function getVoucherCoordinates($tid = 0,$abbreviated=false){
 		$retArr = array();
 		if(!$this->basicSql) $this->setClSql();
 		if($this->clid){
@@ -365,19 +349,15 @@ class ChecklistManager {
 			if(!$abbreviated || $retCnt < 50){
 				try{
 					//Grab voucher points
-					$sql2 = '';
-					if($tid){
-						$sql2 = 'SELECT DISTINCT v.tid, o.occid, o.decimallatitude, o.decimallongitude, '.
+					$sql2 = 'SELECT DISTINCT v.tid, o.occid, o.decimallatitude, o.decimallongitude, '.
 							'CONCAT(o.recordedby," (",IFNULL(o.recordnumber,o.eventdate),")") as notes '.
-							'FROM omoccurrences o INNER JOIN fmvouchers v ON o.occid = v.occid '.
-							'WHERE v.tid = '.$tid.' AND v.clid IN ('.$clidStr.') AND o.decimallatitude IS NOT NULL AND o.decimallongitude IS NOT NULL '.
+							'FROM omoccurrences o INNER JOIN fmvouchers v ON o.occid = v.occid ';
+					if($tid){
+						$sql2 .= 'WHERE v.tid = '.$tid.' AND v.clid IN ('.$clidStr.') AND o.decimallatitude IS NOT NULL AND o.decimallongitude IS NOT NULL '.
 							'AND (o.localitysecurity = 0 OR o.localitysecurity IS NULL) ';
 					}
 					else{
-						$sql2 = 'SELECT DISTINCT v.tid, o.occid, o.decimallatitude, o.decimallongitude, '.
-							'CONCAT(o.recordedby," (",IFNULL(o.recordnumber,o.eventdate),")") as notes '.
-							'FROM omoccurrences o INNER JOIN fmvouchers v ON o.occid = v.occid '.
-							'INNER JOIN ('.$this->basicSql.') t ON v.tid = t.tid '.
+						$sql2 .= 'INNER JOIN ('.$this->basicSql.') t ON v.tid = t.tid '.
 							'WHERE v.clid IN ('.$clidStr.') AND o.decimallatitude IS NOT NULL AND o.decimallongitude IS NOT NULL '.
 							'AND (o.localitysecurity = 0 OR o.localitysecurity IS NULL) ';
 					}
@@ -394,6 +374,7 @@ class ChecklistManager {
 							else{
 								$retArr[$r2->tid][] = array('ll'=>$r2->decimallatitude.','.$r2->decimallongitude,'notes'=>$this->cleanOutStr($r2->notes),'occid'=>$r2->occid);
 							}
+							$retCnt++;
 						}
 						$rs2->free();
 					}
@@ -401,6 +382,32 @@ class ChecklistManager {
 				catch(Exception $e){
 					//echo 'Caught exception getting voucher coordinates: ',  $e->getMessage(), "\n";
 				}
+			}
+		}
+		return $retArr;
+	}
+
+	public function getPolygonCoordinates(){
+		$retArr = array();
+		if($this->clid){
+			if($this->clMetadata['dynamicsql']){
+				$sql = 'SELECT o.decimallatitude, o.decimallongitude FROM omoccurrences o ';
+				if($this->clMetadata['footprintwkt'] && substr($this->clMetadata['footprintwkt'],0,7) == 'POLYGON'){
+					$sql .= 'INNER JOIN omoccurpoints p ON o.occid = p.occid WHERE (ST_Within(p.point,GeomFromText("'.$this->clMetadata['footprintwkt'].'"))) ';
+				}
+				else{
+					$this->voucherManager = new ChecklistVoucherAdmin($this->conn);
+					$this->voucherManager->setClid($this->clid);
+					$this->voucherManager->setCollectionVariables();
+					$sql .= 'WHERE ('.$this->voucherManager->getSqlFrag().') ';
+				}
+				$sql .= 'LIMIT 50';
+				//echo $sql; exit;
+				$rs = $this->conn->query($sql);
+				while($r = $rs->fetch_object()){
+					$retArr[] = $r->decimallatitude.','.$r->decimallongitude;
+				}
+				$rs->free();
 			}
 		}
 		return $retArr;
@@ -423,9 +430,9 @@ class ChecklistManager {
 			fputcsv($fh,$headerArr);
 			foreach($taxaArr as $tid => $tArr){
 				unset($outArr);
-				$outArr = array($tArr['family'],$tArr['sciname'],$tArr['author']);
-				if($this->showCommon) $outArr[] = (array_key_exists('vern',$tArr)?$tArr['vern']:'');
-				$outArr[] = (array_key_exists('notes',$tArr)?strip_tags($tArr['notes']):'');
+				$outArr = array($tArr['family'],html_entity_decode($tArr['sciname'],ENT_QUOTES|ENT_XML1),html_entity_decode($tArr['author'],ENT_QUOTES|ENT_XML1));
+				if($this->showCommon) $outArr[] = (array_key_exists('vern',$tArr)?html_entity_decode($tArr['vern'],ENT_QUOTES|ENT_XML1):'');
+				$outArr[] = (array_key_exists('notes',$tArr)?strip_tags(html_entity_decode($tArr['notes'],ENT_QUOTES|ENT_XML1)):'');
 				$outArr[] = $tid;
 				fputcsv($fh,$outArr);
 			}
@@ -528,36 +535,25 @@ class ChecklistManager {
 		return $retArr;
 	}
 
-	public function echoResearchPoints($target){
-		$clCluster = '';
-		if(isset($GLOBALS['USER_RIGHTS']['ClAdmin'])) {
-			$clCluster = $GLOBALS['USER_RIGHTS']['ClAdmin'];
+	public function getResearchPoints(){
+		$retArr = array();
+		$sql = 'SELECT c.clid, c.name, c.latcentroid, c.longcentroid '.
+			'FROM fmchecklists c LEFT JOIN fmchklstprojlink cpl ON c.CLID = cpl.clid '.
+			'LEFT JOIN fmprojects p ON cpl.pid = p.pid '.
+			'WHERE (c.latcentroid IS NOT NULL) AND (c.longcentroid IS NOT NULL) ';
+		if($this->pid) $sql .= 'AND (p.pid = '.$this->pid.') ';
+		else $sql .= 'AND (p.pid IS NULL) ';
+		$sql .= 'AND ((c.access LIKE "public%") ';
+		if(isset($GLOBALS['USER_RIGHTS']['ClAdmin']) && $GLOBALS['USER_RIGHTS']['ClAdmin']) $sql .= 'OR (c.clid IN('.implode(',',$GLOBALS['USER_RIGHTS']['ClAdmin']).'))';
+		$sql .= ') ';
+		$rs = $this->conn->query($sql);
+		while($row = $rs->fetch_object()){
+			$retArr[$row->clid]['name'] = $this->cleanOutStr($row->name);
+			$retArr[$row->clid]['lat'] = $row->latcentroid;
+			$retArr[$row->clid]['lng'] = $row->longcentroid;
 		}
-		$sql = 'SELECT c.clid, c.name, c.longcentroid, c.latcentroid '.
-			'FROM fmchecklists c INNER JOIN fmchklstprojlink cpl ON c.CLID = cpl.clid '.
-			'INNER JOIN fmprojects p ON cpl.pid = p.pid '.
-			'WHERE (c.access = "public"'.($clCluster?' OR c.clid IN('.implode(',',$clCluster).')':'').') AND (c.LongCentroid IS NOT NULL) AND (p.pid = '.$this->pid.')';
-		$result = $this->conn->query($sql);
-		while($row = $result->fetch_object()){
-			$idStr = $row->clid;
-			$nameStr = $this->cleanOutStr($row->name);
-			echo "var point".$idStr." = new google.maps.LatLng(".$row->latcentroid.", ".$row->longcentroid.");\n";
-			echo "points.push( point".$idStr." );\n";
-			echo 'var marker'.$idStr.' = new google.maps.Marker({ position: point'.$idStr.', map: map, title: "'.$nameStr.'" });'."\n";
-			//Single click event
-			echo 'var infoWin'.$idStr.' = new google.maps.InfoWindow({ content: "<div style=\'width:300px;\'><b>'.$nameStr.'</b><br/>Double Click to open</div>" });'."\n";
-			echo "infoWins.push( infoWin".$idStr." );\n";
-			echo "google.maps.event.addListener(marker".$idStr.", 'click', function(){ closeAllInfoWins(); infoWin".$idStr.".open(map,marker".$idStr."); });\n";
-			//Double click event
-			if($target == 'keys'){
-				echo "var lStr".$idStr." = '../ident/key.php?cl=".$idStr."&proj=".$this->pid."&taxon=All+Species';\n";
-			}
-			else{
-				echo "var lStr".$idStr." = 'checklist.php?cl=".$idStr."&proj=".$this->pid."';\n";
-			}
-			echo "google.maps.event.addListener(marker".$idStr.", 'dblclick', function(){ closeAllInfoWins(); marker".$idStr.".setAnimation(google.maps.Animation.BOUNCE); window.location.href = lStr".$idStr."; });\n";
-		}
-		$result->free();
+		$rs->free();
+		return $retArr;
 	}
 
 	//Taxon suggest functions
@@ -678,24 +674,19 @@ class ChecklistManager {
 		return $this->clName;
 	}
 
-	public function setProj($pValue){
-		$sql = 'SELECT pid, projname FROM fmprojects ';
-		if(is_numeric($pValue)){
-			$sql .= 'WHERE (pid = '.$pValue.')';
-		}
-		else{
-			$sql .= 'WHERE (projname = "'.$this->cleanInStr($pValue).'")';
-		}
-		$rs = $this->conn->query($sql);
-		if($rs){
-			if($r = $rs->fetch_object()){
-				$this->pid = $r->pid;
-				$this->projName = $this->cleanOutStr($r->projname);
+	public function setProj($pid){
+		if(is_numeric($pid)){
+			$sql = 'SELECT pid, projname FROM fmprojects WHERE (pid = '.$pid.')';
+			if($rs = $this->conn->query($sql)){
+				if($r = $rs->fetch_object()){
+					$this->pid = $r->pid;
+					$this->projName = $this->cleanOutStr($r->projname);
+				}
+				$rs->free();
 			}
-			$rs->free();
-		}
-		else{
-			trigger_error('ERROR: Unable to project => SQL: '.$sql, E_USER_WARNING);
+			else{
+				trigger_error('ERROR: Unable to project => SQL: '.$sql, E_USER_WARNING);
+			}
 		}
 		return $this->pid;
 	}

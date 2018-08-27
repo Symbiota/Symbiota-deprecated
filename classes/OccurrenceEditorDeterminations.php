@@ -1,9 +1,4 @@
 <?php
-if(isset($fpEnabled) && $fpEnabled){
-	include_once('fp/FPNetworkFactory.php');
-	include_once('fp/includes/symbiotahelper.php');
-}
-
 class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 
 	public function __construct(){

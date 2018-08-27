@@ -3,7 +3,7 @@ include_once('../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/ChecklistManager.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 
-$pid = array_key_exists("pid",$_REQUEST)?$_REQUEST["pid"]:0; 
+$pid = array_key_exists("pid",$_REQUEST)?$_REQUEST["pid"]:0;
 
 $clManager = new ChecklistManager();
 $clManager->setProj($pid);
@@ -33,22 +33,22 @@ $clManager->setProj($pid);
 	<div id="innertext">
 		<h1>Species Checklists</h1>
         <div style='margin:20px;'>
-			<?php 
+			<?php
             $researchArr = $clManager->getChecklists();
 			if($researchArr){
 				foreach($researchArr as $pid => $projArr){
 					?>
 					<div style='margin:3px 0px 0px 15px;'>
-						<h3><?php echo $projArr['name']; ?> 
-							<a href="<?php echo "clgmap.php?proj=".$pid; ?>" title='Show checklists on map'>
+						<h3><?php echo $projArr['name']; ?>
+							<a href="<?php echo "clgmap.php?pid=".$pid; ?>" title='Show checklists on map'>
 								<img src='../images/world.png' style='width:10px;border:0' />
 							</a>
 						</h3>
 						<div>
 							<ul>
-								<?php 
+								<?php
 								foreach($projArr['clid'] as $clid => $clName){
-									echo "<li><a href='checklist.php?cl=".$clid."'>".$clName."</a></li>\n";
+									echo "<li><a href='checklist.php?clid=".$clid."&pid=".$pid."'>".$clName."</a></li>\n";
 								}
 								?>
 							</ul>
