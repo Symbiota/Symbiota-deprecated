@@ -476,7 +476,7 @@ if($clid || $dynClid){
 										</span>
 										<?php
 									}
-									if($clArray['dynamicsql']){
+									if(false && $clArray['dynamicsql']){
 										?>
 										<span style="margin:5px">
 											<a href="../collections/map/index.php?clid=<?php echo $clid.'&cltype=all&taxonfilter='.$taxonFilter; ?>&db=all&maptype=occquery&type=1&reset=1" target="_blank">
