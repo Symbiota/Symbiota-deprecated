@@ -16,7 +16,7 @@ $formSubmit = array_key_exists('formsubmit',$_REQUEST)?$_REQUEST['formsubmit']:'
 
 $statusStr = '';
 $isEditor = 0;
-if($IS_ADMIN){
+if($IS_ADMIN || array_key_exists('CollAdmin',$USER_RIGHTS)){
 	$isEditor = 1;
 }
 
