@@ -22,6 +22,7 @@ $LANG['BATCH_GEOREF'] = 'Georreferir Espec&iacute;menes por Lote';
 $LANG['LOAN_MANAGEMENT'] = 'Administraci&oacute;n de Pr&eacute;stamos';
 $LANG['ADMIN_CONTROL'] = 'Panel de Control de Administraci&oacute;n';
 $LANG['VIEW_COMMENTS'] = 'Ver Comentarios Publicados';
+$LANG['UNREVIEWED_COMMENTS'] = 'comentarios no revisados';
 $LANG['EDIT_META'] = 'Editar metadatos e Informaci&oacute;n de Contacto';
 $LANG['MANAGE_PERMISSIONS'] = 'Administrar Permisos';
 $LANG['IMPORT_SPECIMEN'] = 'Importar/Actualizar Registros de Espec&iacute;menes';

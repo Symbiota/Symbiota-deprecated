@@ -305,8 +305,8 @@ if($imgArr){
 						if($isEditor){
 							?>
 							<div style="float:right;margin-right:15px;">
-								<a href="#" title="Edit Image">
-									<img src="../images/edit.png" style="border:0px;" onclick="toggle('imageedit');return false" /><span style="font-size:70%">IMG</span>
+								<a href="#" onclick="toggle('imageedit');return false" title="Edit Image">
+									<img src="../images/edit.png" style="border:0px;" /><span style="font-size:70%">IMG</span>
 								</a>
 							</div>
 							<?php
