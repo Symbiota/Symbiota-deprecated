@@ -12,10 +12,23 @@ $tsStart = array_key_exists('tsstart',$_POST)?$_POST['tsstart']:'';
 $tsEnd = array_key_exists('tsend',$_POST)?$_POST['tsend']:'';
 $uid = array_key_exists('uid',$_POST)?$_POST['uid']:0;
 $rs = array_key_exists('rs',$_POST)?$_POST['rs']:1;
+$showAllGeneralObservations = (array_key_exists('showallgenobs',$_POST) && $_POST['showallgenobs'] == 1?true:false);
+
+//Sanition
+if(!is_numeric($collid)) $collid = 0;
+if(!is_numeric($start)) $start = 0;
+if(!is_numeric($limit)) $limit = 100;
+if(!preg_match('/^[\d-]+$/', $tsStart)) $tsStart = '';
+if(!preg_match('/^[\d-]+$/', $tsEnd)) $tsEnd = '';
+if(!is_numeric($uid)) $uid = 0;
+if(!is_numeric($rs)) $rs = 1;
 
 $commentManager = new OccurrenceSupport();
+$commentManager->setCollid($collid);
+$collMeta = $commentManager->getCollectionMetadata();
 
-$isEditor = 0; 
+//Set editing rights
+$isEditor = 0;
 if($SYMB_UID){
 	if($IS_ADMIN){
 		$isEditor = 1;
@@ -23,6 +36,11 @@ if($SYMB_UID){
 	elseif($collid){
 		if(array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collid,$USER_RIGHTS["CollAdmin"])){
 			$isEditor = 1;
+		}
+		elseif($collMeta['colltype'] == 'General Observations'){
+			if(array_key_exists("CollEditor",$USER_RIGHTS) && in_array($collid,$USER_RIGHTS["CollEditor"])){
+				$isEditor = 1;
+			}
 		}
 	}
 }
@@ -37,7 +55,7 @@ if($isEditor){
 				$statusStr = $commentManager->getErrorStr();
 			}
 		}
-		elseif($formSubmit == 'Make comment public'){
+		elseif($formSubmit == 'Make Comment Public'){
 			if(!$commentManager->setReviewStatus($_POST['comid'],1)){
 				$statusStr = $commentManager->getErrorStr();
 			}
@@ -47,13 +65,18 @@ if($isEditor){
 				$statusStr = $commentManager->getErrorStr();
 			}
 		}
-		elseif($formSubmit == 'Mark as reviewed'){
+		elseif($formSubmit == 'Mark as Reviewed'){
 			if(!$commentManager->setReviewStatus($_POST['comid'],3)){
 				$statusStr = $commentManager->getErrorStr();
 			}
 		}
+		elseif($formSubmit == 'Mark as Unreviewed'){
+			if(!$commentManager->setReviewStatus($_POST['comid'],1)){
+				$statusStr = $commentManager->getErrorStr();
+			}
+		}
 	}
-	$commentArr = $commentManager->getComments($collid, $start, $limit, $tsStart, $tsEnd, $uid, $rs);
+	$commentArr = $commentManager->getComments($start, $limit, $tsStart, $tsEnd, $uid, $rs, $showAllGeneralObservations);
 }
 ?>
 <html>
@@ -62,122 +85,6 @@ if($isEditor){
 		<link href="<?php echo $CLIENT_ROOT; ?>/css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 		<link href="<?php echo $CLIENT_ROOT; ?>/css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 		<script>
-			function dateChanged(dateInput){
-				if(dateInput.value != ""){
-					var dateArr = parseDate(dateInput.value);
-					if(dateArr['y'] == 0){
-						alert("Unable to interpret Date. Please use the following formats: 2016-05-21, 05/21/2016, 21 May 2016, May 2016, or simply 2016");
-						return false;
-					}
-					else{
-						//Invalid format is month > 12
-						if(dateArr['m'] > 12){
-							alert("Month cannot be greater than 12. Note that the format should be YYYY-MM-DD");
-							return false;
-						}
-			
-						//Check to see if day is valid
-						if(dateArr['d'] > 28){
-							if(dateArr['d'] > 31 
-								|| (dateArr['d'] == 30 && dateArr['m'] == 2) 
-								|| (dateArr['d'] == 31 && (dateArr['m'] == 4 || dateArr['m'] == 6 || dateArr['m'] == 9 || dateArr['m'] == 11))){
-								alert("The Day (" + dateArr['d'] + ") is invalid for that month");
-								return false;
-							}
-						}
-			
-						//Enter date into date fields
-						var mStr = dateArr['m'];
-						if(mStr.length == 1){
-							mStr = "0" + mStr;
-						}
-						var dStr = dateArr['d'];
-						if(dStr.length == 1){
-							dStr = "0" + dStr;
-						}
-						dateInput.value = dateArr['y'] + "-" + mStr + "-" + dStr;
-					}
-				}
-				dateInput.form.submit();
-			}
-
-			function parseDate(dateStr){
-				var y = 0;
-				var m = 0;
-				var d = 0;
-				try{
-					var mNames = new Array("jan","feb","mar","apr","may","jun","jul","aug","sep","oct","nov","dec");
-					var validformat1 = /^\d{4}-\d{1,2}-\d{1,2}$/; //Format: yyyy-mm-dd
-					var validformat2 = /^\d{1,2}\/\d{1,2}\/\d{2,4}$/; //Format: mm/dd/yyyy
-					var validformat3 = /^\d{1,2} \D+ \d{2,4}$/; //Format: dd mmm yyyy
-					var validformat4 = /^\D+ \d{2,4}$/; //Format: mmm yyyy
-					var validformat5 = /^\d{2,4}$/; //Format: yyyy
-					if(validformat1.test(dateStr)){
-						var dateTokens = dateStr.split("-");
-						y = dateTokens[0];
-						m = dateTokens[1];
-						d = dateTokens[2];
-					}
-					else if(validformat2.test(dateStr)){
-						var dateTokens = dateStr.split("/");
-						m = dateTokens[0];
-						d = dateTokens[1];
-						y = dateTokens[2];
-						if(y.length == 2){
-							if(y < 20){
-								y = "20" + y;
-							}
-							else{
-								y = "19" + y;
-							}
-						}
-					}
-					else if(validformat3.test(dateStr)){
-						var dateTokens = dateStr.split(" ");
-						d = dateTokens[0];
-						mText = dateTokens[1];
-						y = dateTokens[2];
-						if(y.length == 2){
-							if(y < 15){
-								y = "20" + y;
-							}
-							else{
-								y = "19" + y;
-							}
-						}
-						mText = mText.substring(0,3);
-						mText = mText.toLowerCase();
-						m = mNames.indexOf(mText)+1;
-					}
-					else if(validformat4.test(dateStr)){
-						var dateTokens = dateStr.split(" ");
-						y = dateTokens[1];
-						mText = dateTokens[0];
-						mText = mText.substring(0,3);
-						mText = mText.toLowerCase();
-						m = mNames.indexOf(mText)+1;
-						d = "00";
-					}
-					else if(validformat5.test(dateStr)){
-						y = dateStr;
-						m = "00";
-						d = "00";
-					}
-					else if(dateObj instanceof Date && dateObj != "Invalid Date"){
-						var dateObj = new Date(dateStr);
-						y = dateObj.getFullYear();
-						m = dateObj.getMonth() + 1;
-						d = dateObj.getDate();
-					}
-				}
-				catch(ex){
-				}
-				var retArr = new Array();
-				retArr["y"] = y.toString();
-				retArr["m"] = m.toString();
-				retArr["d"] = d.toString();
-				return retArr;
-			}
 		</script>
 	</head>
 	<body>
@@ -186,11 +93,18 @@ if($isEditor){
 		include($SERVER_ROOT.'/header.php');
 		?>
 		<div class="navpath">
-			<a href="<?php echo $CLIENT_ROOT; ?>/index.php">Home</a> &gt;&gt; 
-			<a href="../misc/collprofiles.php?collid=<?php echo $collid; ?>&emode=1">Collection Management</a> &gt;&gt;
+			<a href="<?php echo $CLIENT_ROOT; ?>/index.php">Home</a> &gt;&gt;
+			<?php
+			if($collMeta['colltype'] == 'General Observations'){
+				echo '<a href="../../profile/viewprofile.php?tabindex=1">Collection Management</a> &gt;&gt;';
+			}
+			else{
+				echo '<a href="../misc/collprofiles.php?collid='.$collid.'&emode=1">Collection Management</a> &gt;&gt;';
+			}
+			?>
 			<b>Occurrence Comment Listing</b>
 		</div>
-		<?php 
+		<?php
 		if($statusStr){
 			echo '<div style="margin:20px;color:red;">';
 			echo $statusStr;
@@ -198,6 +112,7 @@ if($isEditor){
 		}
 		?>
 		<!-- This is inner text! -->
+		<h1><?php echo $collMeta['name']; ?></h1>
 		<div id="innertext">
 			<?php
 			if($collid){
@@ -240,26 +155,33 @@ if($isEditor){
 				}
 				?>
 				<!-- Option box -->
-				<fieldset style="float:right;width:250px;margin:10px;">
-					<legend><b>Options</b></legend>
+				<fieldset style="float:right;width:350px;margin:10px;">
+					<legend><b>Filter Options</b></legend>
 					<form name="optionform" action="commentlist.php" method="post">
 						<div>
 							<select name="uid" onchange="this.form.submit()">
-								<option value="0">All Users</option> 
-								<option value="0">------------------------</option> 
-								<?php 
-									$userArr = $commentManager->getCommentUsers($collid);
-									foreach($userArr as $userid => $userStr){
-										echo '<option value="'.$userid.'" '.($uid==$userid?'selected':'').'>'.$userStr.'</option>';
-									}
+								<option value="0">All Commenters</option>
+								<option value="0">------------------------</option>
+								<?php
+								$userArr = $commentManager->getCommentUsers($showAllGeneralObservations);
+								foreach($userArr as $userid => $userStr){
+									echo '<option value="'.$userid.'" '.($uid==$userid?'selected':'').'>'.$userStr.'</option>';
+								}
 								?>
 							</select>
 						</div>
+						<?php
+						if($IS_ADMIN && $collMeta['colltype'] == 'General Observations'){
+							echo '<div><input name="showallgenobs" type="checkbox" value="1" onchange="this.form.submit()" '.($showAllGeneralObservations?'checked':'').' /> Display all general observations (SuperAdmin option only)</div>';
+						}
+						?>
 						<div>
-							Beginning Date: 
-							<input name="tsstart" type="text" value="<?php echo $tsStart; ?>" style="width:100px;" onchange="dateChanged(this)" /><br/>
-							End Date:  
-							<input name="tsend" type="text" value="<?php echo $tsEnd; ?>" style="width:100px;" onchange="dateChanged(this)" />
+							Date:
+							<input name="tsstart" type="date" value="<?php echo $tsStart; ?>" onchange="this.form.submit()" title="Start date" />
+							- <input name="tsend" type="date" value="<?php echo $tsEnd; ?>" onchange="this.form.submit()" title="End date" />
+						</div>
+						<div style="float:right;margin-top:60px;">
+							<input type="submit" name="submitbutton" value="Refresh List" />
 						</div>
 						<div>
 							<input name="rs" type="radio" value="1" <?php echo ($rs==1?'checked':''); ?> onchange="this.form.submit()" /> Public <br/>
@@ -272,7 +194,7 @@ if($isEditor){
 						</div>
 					</form>
 				</fieldset>
-				<?php 
+				<?php
 				if($commentArr){
 					foreach($commentArr as $comid => $cArr){
 						echo '<div style="margin:15px;">';
@@ -297,24 +219,35 @@ if($isEditor){
 								<input name="tsend" type="hidden" value="<?php echo $tsEnd; ?>" />
 								<input name="uid" type="hidden" value="<?php echo $uid; ?>" />
 								<input name="rs" type="hidden" value="<?php echo $rs; ?>" />
-								<?php 
+								<?php
 								if($cArr['rs'] == 2){
-									echo '<input name="formsubmit" type="submit" value="Make comment public" />';
+									echo '<input name="formsubmit" type="submit" value="Make Comment Public" />';
 								}
 								else{
 									echo '<input name="formsubmit" type="submit" value="Hide Comment from Public" />';
 								}
+								if($cArr['rs'] == 3){
+									?>
+									<span style="margin-left:20px;">
+										<input name="formsubmit" type="submit" value="Mark as Unreviewed" />
+									</span>
+									<?php
+								}
+								else{
+									?>
+									<span style="margin-left:20px;">
+										<input name="formsubmit" type="submit" value="Mark as Reviewed" />
+									</span>
+									<?php
+								}
 								?>
-								<span style="margin-left:20px;">
-									<input name="formsubmit" type="submit" value="Mark as reviewed" />
-								</span>
 								<span style="margin-left:20px;">
 									<input name="formsubmit" type="submit" value="Delete Comment"  onclick="return confirm('Are you sure you want to delete this comment?')" />
 								</span>
 								<input name="comid" type="hidden" value="<?php echo $comid; ?>" />
 							</form>
 						</div>
-						<?php 
+						<?php
 						echo '</div>';
 						echo '<hr style="color:gray;"/>';
 					}
@@ -322,7 +255,10 @@ if($isEditor){
 					echo "<div style='clear:both;'><hr/></div></div>";
 				}
 				else{
-					echo '<div style="font-weight:bold;font-size:120%;margin:20px;">No comments have been submitted</div>';
+					echo '<div style="font-weight:bold;font-size:120%;margin:20px;">';
+					echo 'No comments are available matching the defined Filter Options. <br/>';
+					if($rs == 1) echo 'Note that only public, non-reviewed comments are currently being displayed. <br/>Modify form to the right to show all comments.';
+					echo '</div>';
 				}
 			}
 			else{

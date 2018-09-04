@@ -4,6 +4,8 @@ include_once($SERVER_ROOT.'/config/dbconnection.php');
 class OccurrenceSupport {
 
 	private $conn;
+	private $collid;
+	private $collMeta = array();
 	private $errorMessage;
 
 	public function __construct(){
@@ -15,37 +17,43 @@ class OccurrenceSupport {
 	}
 
 	//Comment functions
-	public function getComments($collid, $start, $limit, $tsStart, $tsEnd, $uid, $reviewStatus){
+	public function getComments($start, $limit, $tsStart, $tsEnd, $uid, $reviewStatus, $showAllGeneralObservations = true){
 		$retArr = array();
-		if(is_numeric($collid)){
+		if(is_numeric($this->collid)){
 			if(!is_numeric($start)) $start = 0;
 			if(!is_numeric($limit)) $limit = 100;
 			$sqlBase = 'FROM omoccurcomments c INNER JOIN omoccurrences o ON c.occid = o.occid '.
-				'WHERE o.collid = '.$collid;
+				'WHERE (o.collid = '.$this->collid.') ';
+			if(!$showAllGeneralObservations && $this->collMeta['colltype'] == 'General Observations' && isset($GLOBALS['SYMB_UID'])){
+				$sqlBase .= 'AND (o.observeruid = '.$GLOBALS['SYMB_UID'].') ';
+			}
 			if(is_numeric($uid) && $uid){
-				$sqlBase .= ' AND c.uid = '.$uid;
+				$sqlBase .= 'AND (c.uid = '.$uid.') ';
 			}
 			if(is_numeric($reviewStatus) && $reviewStatus){
-				$sqlBase .= ' AND c.reviewstatus IN('.($reviewStatus==2?$reviewStatus.',0':$reviewStatus).') ';
+				$sqlBase .= 'AND (c.reviewstatus IN('.($reviewStatus==2?$reviewStatus.',0':$reviewStatus).')) ';
 			}
 			if(preg_match('/^\d{4}-\d{2}-\d{2}/', $tsStart)){
-				$sqlBase .= ' AND initialtimestamp >= "'.$tsStart.'"';
-			}
-			if(preg_match('/^\d{4}-\d{2}-\d{2}/', $tsEnd)){
-				$sqlBase .= ' AND initialtimestamp < "'.$tsEnd.'"';
+				if(preg_match('/^\d{4}-\d{2}-\d{2}/', $tsEnd)){
+					$sqlBase .= 'AND (initialtimestamp BETWEEN "'.$tsStart.'" AND "'.$tsEnd.'") ';
+				}
+				else{
+					$sqlBase .= 'AND (DATE(initialtimestamp) = "'.$tsStart.'") ';
+				}
 			}
 			//Get count
 			$sqlCnt = 'SELECT count(c.comid) as cnt '.$sqlBase;
+			//echo $sqlCnt;
 			$rsCnt = $this->conn->query($sqlCnt);
 			while($rCnt = $rsCnt->fetch_object()){
 				$retArr['cnt'] = $rCnt->cnt;
 			}
 			$rsCnt->free();
-			
+
 			//Get records
 			$sql = 'SELECT c.comid, c.occid, c.comment, c.uid, c.reviewstatus, c.parentcomid, c.initialtimestamp, '.
 				'IFNULL(o.catalognumber, o.othercatalognumbers) AS catnum, o.recordedby, o.recordnumber, o.eventdate '.$sqlBase.
-				' ORDER BY initialtimestamp DESC LIMIT '.$start.','.$limit;
+				'ORDER BY initialtimestamp DESC LIMIT '.$start.','.$limit;
 			//echo $sql;
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
@@ -88,14 +96,17 @@ class OccurrenceSupport {
 		}
 		return $status;
 	}
-	
-	public function getCommentUsers($collid){
+
+	public function getCommentUsers($showAllGeneralObservations){
 		$retArr = array();
-		if($collid){
+		if($this->collid){
 			$sql = 'SELECT u.uid, CONCAT_WS(", ",u.lastname,u.firstname) as userstr  '.
 				'FROM omoccurcomments c INNER JOIN omoccurrences o ON c.occid = o.occid '.
 				'INNER JOIN users u ON c.uid = u.uid '.
-				'WHERE o.collid = '.$collid;
+				'WHERE (o.collid = '.$this->collid.') ';
+			if($this->collMeta['colltype'] == 'General Observations' && !$showAllGeneralObservations){
+				$sql .= 'AND (o.observeruid = '.$GLOBALS['SYMB_UID'].') ';
+			}
 			//echo $sql; exit;
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
@@ -148,21 +159,6 @@ class OccurrenceSupport {
 		$rs->free();
 		return $retArr;
 	}
-	
-	//Used by /collections/misc/occurrencesearch.php 
-	public function getCollectionArr($filter){
-		$retArr = array();
-		if(!$filter) return $retArr;
-		$sql = "SELECT collid, collectionname FROM omcollections ";
-		if($filter != 'all' && is_array($filter)) $sql .= 'WHERE collid IN('.implode(',',$filter).')';
-		$rs = $this->conn->query($sql);
-		while($row = $rs->fetch_object()){
-			$retArr[$row->collid] = $row->collectionname;
-		}
-		$rs->free();
-		asort($retArr);
-		return $retArr;
-	}
 
 	//Occurrence harvester function (occurharvester.php)
 	public function exportCsvFile($postArr){
@@ -195,9 +191,47 @@ class OccurrenceSupport {
 		}
 		$rs->free();
 	}
-	
+
+	//Misc functions
+	public function getCollectionArr($filter){
+		//Used by /collections/misc/occurrencesearch.php
+		$retArr = array();
+		if(!$filter) return $retArr;
+		$sql = "SELECT collid, collectionname FROM omcollections ";
+		if($filter != 'all' && is_array($filter)) $sql .= 'WHERE collid IN('.implode(',',$filter).')';
+		$rs = $this->conn->query($sql);
+		while($row = $rs->fetch_object()){
+			$retArr[$row->collid] = $row->collectionname;
+		}
+		$rs->free();
+		asort($retArr);
+		return $retArr;
+	}
+
+	private function setCollectionMetadata(){
+		if($this->collid){
+			$sql = 'SELECT collectionname, colltype FROM omcollections WHERE collid = '.$this->collid;
+			$rs = $this->conn->query($sql);
+			while($row = $rs->fetch_object()){
+				$this->collMeta['name'] = $row->collectionname;
+				$this->collMeta['colltype'] = $row->colltype;
+			}
+			$rs->free();
+		}
+	}
+
+	//Setters and getters
+	public function setCollid($id){
+		if(is_numeric($id)) $this->collid = $id;
+	}
+
 	public function getErrorStr(){
 		return $this->errorMessage;
+	}
+
+	public function getCollectionMetadata(){
+		if(!$this->collMeta) $this->setCollectionMetadata();
+		return $this->collMeta;
 	}
 }
 ?>
