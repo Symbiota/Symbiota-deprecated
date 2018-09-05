@@ -1148,57 +1148,67 @@ class SpecUploadBase extends SpecUpload{
 	protected function loadRecord($recMap){
 		//Only import record if at least one of the minimal fields have data
 		$recMap = OccurrenceUtilities::occurrenceArrayCleaning($recMap);
-		//Remove institution and collection codes when they match what is in omcollections
-		if(array_key_exists('institutioncode',$recMap) && $recMap['institutioncode'] == $this->collMetadataArr["institutioncode"]){
-			unset($recMap['institutioncode']);
-		}
-		if(array_key_exists('collectioncode',$recMap) && $recMap['collectioncode'] == $this->collMetadataArr["collectioncode"]){
-			unset($recMap['collectioncode']);
-		}
-
-		//If a DiGIR load, set dbpk value
-		if($this->pKField && array_key_exists($this->pKField,$recMap) && !array_key_exists('dbpk',$recMap)){
-			$recMap['dbpk'] = $recMap[$this->pKField];
-		}
-
-		//Do some cleaning on the dbpk; remove leading and trailing whitespaces and convert multiple spaces to a single space
-		if(array_key_exists('dbpk',$recMap)){
-			$recMap['dbpk'] = trim(preg_replace('/\s\s+/',' ',$recMap['dbpk']));
-		}
-
-		//Set processingStatus to value defined by loader
-		if($this->processingStatus){
-			$recMap['processingstatus'] = $this->processingStatus;
-		}
-		elseif($this->uploadType == $this->SKELETAL){
-			$recMap['processingstatus'] = 'unprocessed';
-		}
-
-		//Temporarily code until Specify output UUID as occurrenceID
-		if($this->sourceDatabaseType == 'specify' && (!isset($recMap['occurrenceid']) || !$recMap['occurrenceid'])){
-			if(strlen($recMap['dbpk']) == 36) $recMap['occurrenceid'] = $recMap['dbpk'];
-		}
-
-		if(!array_key_exists('basisofrecord',$recMap) || !$recMap['basisofrecord']){
-			$recMap['basisofrecord'] = ($this->collMetadataArr["colltype"]=="Preserved Specimens"?'PreservedSpecimen':'HumanObservation');
-		}
-
-		$sqlFragments = $this->getSqlFragments($recMap,$this->fieldMap);
-		if($sqlFragments){
-			$sql = 'INSERT INTO uploadspectemp(collid'.$sqlFragments['fieldstr'].') '.
-				'VALUES('.$this->collId.$sqlFragments['valuestr'].')';
-			//echo "<div>SQL: ".$sql."</div>";
-			if($this->conn->query($sql)){
-				$this->transferCount++;
-				if($this->transferCount%1000 == 0) $this->outputMsg('<li style="margin-left:10px;">Count: '.$this->transferCount.'</li>');
-				//$this->outputMsg("<li>");
-				//$this->outputMsg("Appending/Replacing observation #".$this->transferCount.": SUCCESS");
-				//$this->outputMsg("</li>");
+		$loadRecord = false;
+		if(isset($recMap['dbpk']) && $recMap['dbpk']) $loadRecord = true;
+		elseif(isset($recMap['catalognumber']) && $recMap['catalognumber']) $loadRecord = true;
+		elseif(isset($recMap['othercatalognumbers']) && $recMap['othercatalognumbers']) $loadRecord = true;
+		elseif(isset($recMap['occurrenceid']) && $recMap['occurrenceid']) $loadRecord = true;
+		elseif(isset($recMap['recordedby']) && $recMap['recordedby']) $loadRecord = true;
+		elseif(isset($recMap['eventdate']) && $recMap['eventdate']) $loadRecord = true;
+		elseif(isset($recMap['sciname']) && $recMap['sciname']) $loadRecord = true;
+		if($loadRecord){
+			//Remove institution and collection codes when they match what is in omcollections
+			if(array_key_exists('institutioncode',$recMap) && $recMap['institutioncode'] == $this->collMetadataArr["institutioncode"]){
+				unset($recMap['institutioncode']);
 			}
-			else{
-				$this->outputMsg("<li>FAILED adding record #".$this->transferCount."</li>");
-				$this->outputMsg("<li style='margin-left:10px;'>Error: ".$this->conn->error."</li>");
-				$this->outputMsg("<li style='margin:0px 0px 10px 10px;'>SQL: $sql</li>");
+			if(array_key_exists('collectioncode',$recMap) && $recMap['collectioncode'] == $this->collMetadataArr["collectioncode"]){
+				unset($recMap['collectioncode']);
+			}
+
+			//If a DiGIR load, set dbpk value
+			if($this->pKField && array_key_exists($this->pKField,$recMap) && !array_key_exists('dbpk',$recMap)){
+				$recMap['dbpk'] = $recMap[$this->pKField];
+			}
+
+			//Do some cleaning on the dbpk; remove leading and trailing whitespaces and convert multiple spaces to a single space
+			if(array_key_exists('dbpk',$recMap)){
+				$recMap['dbpk'] = trim(preg_replace('/\s\s+/',' ',$recMap['dbpk']));
+			}
+
+			//Set processingStatus to value defined by loader
+			if($this->processingStatus){
+				$recMap['processingstatus'] = $this->processingStatus;
+			}
+			elseif($this->uploadType == $this->SKELETAL){
+				$recMap['processingstatus'] = 'unprocessed';
+			}
+
+			//Temporarily code until Specify output UUID as occurrenceID
+			if($this->sourceDatabaseType == 'specify' && (!isset($recMap['occurrenceid']) || !$recMap['occurrenceid'])){
+				if(strlen($recMap['dbpk']) == 36) $recMap['occurrenceid'] = $recMap['dbpk'];
+			}
+
+			if(!array_key_exists('basisofrecord',$recMap) || !$recMap['basisofrecord']){
+				$recMap['basisofrecord'] = ($this->collMetadataArr["colltype"]=="Preserved Specimens"?'PreservedSpecimen':'HumanObservation');
+			}
+
+			$sqlFragments = $this->getSqlFragments($recMap,$this->fieldMap);
+			if($sqlFragments){
+				$sql = 'INSERT INTO uploadspectemp(collid'.$sqlFragments['fieldstr'].') '.
+					'VALUES('.$this->collId.$sqlFragments['valuestr'].')';
+				//echo "<div>SQL: ".$sql."</div>";
+				if($this->conn->query($sql)){
+					$this->transferCount++;
+					if($this->transferCount%1000 == 0) $this->outputMsg('<li style="margin-left:10px;">Count: '.$this->transferCount.'</li>');
+					//$this->outputMsg("<li>");
+					//$this->outputMsg("Appending/Replacing observation #".$this->transferCount.": SUCCESS");
+					//$this->outputMsg("</li>");
+				}
+				else{
+					$this->outputMsg("<li>FAILED adding record #".$this->transferCount."</li>");
+					$this->outputMsg("<li style='margin-left:10px;'>Error: ".$this->conn->error."</li>");
+					$this->outputMsg("<li style='margin:0px 0px 10px 10px;'>SQL: $sql</li>");
+				}
 			}
 		}
 	}
@@ -1582,9 +1592,9 @@ class SpecUploadBase extends SpecUpload{
 		if(!strstr($url, "http")){
 			$url = "http://".$url;
 		}
-	   	if(function_exists('curl_init')){
-		   	// Version 4.x supported
-			$handle   = curl_init($url);
+		if(function_exists('curl_init')){
+			// Version 4.x supported
+			$handle = curl_init($url);
 			if (false === $handle){
 				$exists = false;
 			}
@@ -1603,7 +1613,7 @@ class SpecUploadBase extends SpecUpload{
 
 		//One more  check
 		if(!$exists){
-		   	$exists = (@fclose(@fopen($url,"r")));
+			$exists = (@fclose(@fopen($url,"r")));
 		}
 		return $exists;
 	}

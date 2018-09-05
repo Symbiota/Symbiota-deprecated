@@ -894,6 +894,7 @@ $duManager->loadFieldMap();
 								<?php $duManager->echoFieldMapTable($autoMap,'spec'); ?>
 								<div>
 									* Unverified mappings are displayed in yellow<br/>
+									* At least one of following fields must be mapped and have content: catalogNumber, otherCatalogNumbers, occurrenceID, recordedBy (collector), eventDate, scientificName, dbpk<br/>
 									* To learn more about mapping to Symbiota fields (and Darwin Core):
 									<div style="margin-left:15px;">
 										<a href="http://symbiota.org/docs/wp-content/uploads/SymbiotaOccurrenceFields.pdf" target="_blank">SymbiotaOccurrenceFields.pdf</a><br/>

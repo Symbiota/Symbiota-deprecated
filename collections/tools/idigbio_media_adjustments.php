@@ -5,6 +5,7 @@
 include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/config/dbconnection.php');
 
+$collid = (array_key_exists('collid', $_POST)?$_POST['collid']:0);
 $imgidStart = (array_key_exists('imgidstart', $_POST)?$_POST['imgidstart']:0);
 $limit = (array_key_exists('limit', $_POST)?$_POST['limit']:10000);
 $submit = (array_key_exists('submitbutton', $_POST)?$_POST['submitbutton']:10000);
@@ -13,7 +14,7 @@ $voucherLinker = new VoucherLinker();
 $imgidEnd = 0;
 if($IS_ADMIN && $submit == 'Process Images'){
 	echo '<ol>';
-	$imgidEnd = $voucherLinker->checkImageLinks($imgidStart, $limit);
+	$imgidEnd = $voucherLinker->checkImageLinks($imgidStart, $limit, $collid);
 	echo '</ol>';
 }
 
@@ -42,13 +43,14 @@ class VoucherLinker {
 		if(!($this->conn === false)) $this->conn->close();
 	}
 
-	public function checkImageLinks($imgidStart, $limit){
+	public function checkImageLinks($imgidStart, $limit, $collid){
 		$imgidFinal = $imgidStart;
 		$cnt = 1;
-		$sql = 'SELECT imgid, originalurl FROM images '.
-			'WHERE (originalurl LIKE "https://api.idigbio.org/v2/media/%size=fullsize") AND (imgid > '.$imgidStart.') '.
-			'ORDER BY imgid ';
-		$sql .= 'LIMIT '.$limit;
+		$sql = 'SELECT i.imgid, i.originalurl FROM images i ';
+		if($collid) $sql .= 'INNER JOIN omoccurrences o ON i.occid = o.occid ';
+		$sql .= 'WHERE (i.originalurl LIKE "https://api.idigbio.org/v2/media/%size=fullsize") AND (i.imgid > '.$imgidStart.') ';
+		if($collid) $sql .= 'AND (o.collid = '.$collid.') ';
+		$sql .= 'ORDER BY i.imgid LIMIT '.$limit;
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
 			$url = $r->originalurl;
