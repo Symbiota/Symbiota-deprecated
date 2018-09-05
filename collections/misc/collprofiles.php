@@ -190,6 +190,7 @@ if($SYMB_UID){
 									<a href="commentlist.php?collid=<?php echo $collid; ?>" >
 										<?php echo $LANG['VIEW_COMMENTS']; ?>
 									</a>
+									<?php if($commCnt = $collManager->unreviewedCommentsExist()) echo '- <span style="color:orange">'.$commCnt.' '.(isset($LANG['UNREVIEWED_COMMENTS'])?$LANG['UNREVIEWED_COMMENTS']:'unreviewed comments').'</span>'; ?>
 								</li>
 								<li>
 									<a href="collmetadata.php?collid=<?php echo $collid; ?>" >

@@ -428,13 +428,13 @@ class OccurrenceManager extends OccurrenceTaxaManager {
 	}
 
 	public function getFullCollectionList($catId = ''){
-		if(!$this->searchSupportManager) $this->searchSupportManager = new occurrenceSearchSupport($this->conn);
+		if(!$this->searchSupportManager) $this->searchSupportManager = new OccurrenceSearchSupport($this->conn);
 		if(isset($this->searchTermArr['db'])) $this->searchSupportManager->setCollidStr($this->searchTermArr['db']);
 		return $this->searchSupportManager->getFullCollectionList($catId);
 	}
 
 	public function outputFullCollArr($occArr, $targetCatID = 0, $displayIcons = true, $displaySearchButtons = true){
-		if(!$this->searchSupportManager) $this->searchSupportManager = new occurrenceSearchSupport($this->conn);
+		if(!$this->searchSupportManager) $this->searchSupportManager = new OccurrenceSearchSupport($this->conn);
 		$this->searchSupportManager->outputFullCollArr($occArr, $targetCatID, $displayIcons, $displaySearchButtons);
 	}
 

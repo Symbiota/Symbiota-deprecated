@@ -1159,6 +1159,21 @@ class OccurrenceCollectionProfile {
 		return $statsArr;
 	}
 
+	//Misc functions
+	public function unreviewedCommentsExist(){
+		$retCnt = 0;
+		$sql = 'SELECT count(c.comid) AS reccnt '.
+			'FROM omoccurrences o INNER JOIN omoccurcomments c ON o.occid = c.occid '.
+			'WHERE (o.collid = '.$this->collid.') AND (c.reviewstatus < 3)';
+		if($rs = $this->conn->query($sql)){
+			while($r = $rs->fetch_object()){
+				$retCnt = $r->reccnt;
+			}
+			$rs->free();
+		}
+		return $retCnt;
+	}
+
 	//General data retrival functions
 	public function getInstitutionArr(){
 		$retArr = array();

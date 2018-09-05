@@ -78,6 +78,12 @@ if($SYMB_UID){
 							Backup file download (CSV extract)
 						</a>
 					</li>
+					<li>
+						<a href="../collections/misc/commentlist.php?collid=<?php echo $collId; ?>">
+							View User Comments
+						</a>
+						<?php if($commCnt = $specHandler->unreviewedCommentsExist($collId)) echo '- <span style="color:orange">'.$commCnt.' unreviewed comments</span>'; ?>
+					</li>
 					<!--
 					<li>
 						<a href="../collections/cleaning/index.php?collid=<?php echo $collId; ?>">
@@ -146,7 +152,7 @@ if($SYMB_UID){
 	if((count($cArr)+count($oArr)) > 1){
 		?>
 		<fieldset style="margin:15px;padding:15px;">
-			<legend style="font-weight:bold;"><b>Batch Editing Tools</b></legend>
+			<legend style="font-weight:bold;"><b>Cross Collection Batch Editing Tools</b></legend>
 			<ul>
 			<li><a href="../collections/georef/batchgeoreftool.php">Georeferencing Tool</a></li>
 			<?php

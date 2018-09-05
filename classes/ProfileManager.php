@@ -509,16 +509,30 @@ class ProfileManager{
 		return $retArr;
 	}
 
-	public function getPersonalOccurrenceCount($collId){
+	public function getPersonalOccurrenceCount($collid){
 		$retCnt = 0;
 		if($this->uid){
-			$sql = 'SELECT count(*) AS reccnt FROM omoccurrences WHERE observeruid = '.$this->uid.' AND collid = '.$collId;
+			$sql = 'SELECT count(*) AS reccnt FROM omoccurrences WHERE observeruid = '.$this->uid.' AND collid = '.$collid;
 			if($rs = $this->conn->query($sql)){
 				while($r = $rs->fetch_object()){
 					$retCnt = $r->reccnt;
 				}
-				$rs->close();
+				$rs->free();
 			}
+		}
+		return $retCnt;
+	}
+
+	public function unreviewedCommentsExist($collid){
+		$retCnt = 0;
+		$sql = 'SELECT count(c.comid) AS reccnt '.
+			'FROM omoccurrences o INNER JOIN omoccurcomments c ON o.occid = c.occid '.
+			'WHERE (o.observeruid = '.$GLOBALS['SYMB_UID'].') AND (o.collid = '.$collid.') AND (c.reviewstatus < 3)';
+		if($rs = $this->conn->query($sql)){
+			while($r = $rs->fetch_object()){
+				$retCnt = $r->reccnt;
+			}
+			$rs->free();
 		}
 		return $retCnt;
 	}

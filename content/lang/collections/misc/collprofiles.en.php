@@ -22,6 +22,7 @@ $LANG['BATCH_GEOREF'] = 'Batch Georeference Specimens';
 $LANG['LOAN_MANAGEMENT'] = 'Loan Management';
 $LANG['ADMIN_CONTROL'] = 'Administration Control Panel';
 $LANG['VIEW_COMMENTS'] = 'View Posted Comments';
+$LANG['UNREVIEWED_COMMENTS'] = 'unreviewed comments';
 $LANG['EDIT_META'] = 'Edit Metadata and Contact Information';
 $LANG['MANAGE_PERMISSIONS'] = 'Manage Permissions';
 $LANG['IMPORT_SPECIMEN'] = 'Import/Update Specimen Records';
