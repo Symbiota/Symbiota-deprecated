@@ -5,7 +5,7 @@
 include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/config/dbconnection.php');
 
-$collid = (array_key_exists('collid', $_POST)?$_POST['collid']:0);
+$collid = (array_key_exists('collid', $_POST)?$_POST['collid']:'');
 $imgidStart = (array_key_exists('imgidstart', $_POST)?$_POST['imgidstart']:0);
 $limit = (array_key_exists('limit', $_POST)?$_POST['limit']:10000);
 $submit = (array_key_exists('submitbutton', $_POST)?$_POST['submitbutton']:10000);
@@ -21,6 +21,7 @@ if($IS_ADMIN && $submit == 'Process Images'){
 ?>
 <form action="idigbio_media_adjustments.php" method="post">
 	<div style="margin:15px">
+		<b>Collection ID (collid):</b> <input type="text" name="collid" value="<?php echo $collid; ?>" /><br />
 		<b>Starting Image ID:</b> <input type="text" name="imgidstart" value="<?php echo $imgidEnd; ?>" /><br />
 		<b>Batch limit: </b><input type="text" name="limit" value="<?php echo $limit; ?>" />
 	</div>
