@@ -143,7 +143,7 @@ if($SYMB_UID){
 		} 
 	}
     if(!$collEditor){
-        echo '<div>Personal specimen management or collection management has not been setup for your login. Please contact the site administrator (<a href="mailto:'.$adminEmail.'">'.$adminEmail.'</a>) to activate this feature.</div>';
+        echo '<div>Personal occurrence management or collection management has not been setup for your login. Please contact the site administrator (<a href="mailto:'.$adminEmail.'">'.$adminEmail.'</a>) to activate this feature.</div>';
     }
 }
 ?>	

@@ -162,7 +162,7 @@ if($action && $isEditor){
 				if($target == 'geolocal'){ 
 					if($mode) echo '<div style="position:absolute;top:5px;right:0px;padding:10px;border:1px solid grey"><a href="politicalunits.php?collid='.$collid.'&mode=0">Main Menu</a></div>';
 					echo '<div style="width:85%;margin-bottom:15px;">Click on links provided below to list non-standardized geographical terms used within the collection. '.
-						'The numbers to the right of each geographic designation represent the number of specimens using that term. '.
+						'The numbers to the right of each geographic designation represent the number of occurrences using that term. '.
 						'Click on editing symbol (pencil) to open the occurrence editor. Use tools provided to batch update fields with corrected term. '.
 						'If the parent/child terms are not in the thesaurus, a replacement/suggestion term list will not be offered as a pulldown. '.
 						'Contact portal manager to add new terms to geographical term dictionary.</div>';

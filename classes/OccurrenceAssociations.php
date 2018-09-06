@@ -38,7 +38,7 @@ class OccurrenceAssociations extends Manager {
 		$cnt = 1;
 		while($r = $rs->fetch_object()){
 			$assocArr = $this->parseAssocSpecies($r->associatedtaxa,$r->occid);
-			if($cnt%5000 == 0) echo '<li style="margin-left:10px">'.$cnt.' specimens parsed</li>';
+			if($cnt%5000 == 0) echo '<li style="margin-left:10px">'.$cnt.' occurrences parsed</li>';
 			$cnt++;
 		}
 		$rs->free();

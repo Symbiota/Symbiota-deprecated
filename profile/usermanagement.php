@@ -428,13 +428,13 @@ if($IS_ADMIN){
 												<input type='checkbox' name='p[]' value='CollAdmin-<?php echo $collid;?>' title='Collection Administrator' />
 											</td>
 											<td align="center">
-												<input type='checkbox' name='p[]' value='CollEditor-<?php echo $collid;?>' title='Able to add and edit specimen data' <?php if(isset($userPermissions["CollEditor"][$collid])) echo "DISABLED";?> />
+												<input type='checkbox' name='p[]' value='CollEditor-<?php echo $collid;?>' title='Able to add and edit occurrence data' <?php if(isset($userPermissions["CollEditor"][$collid])) echo "DISABLED";?> />
 											</td>
 											<?php 
 											if($showRareSppOption){ 
 												?>
 												<td align="center">
-													<input type='checkbox' name='p[]' value='RareSppReader-<?php echo $collid;?>' title='Able to read specimen details for rare species' <?php if(isset($userPermissions["RareSppReader"][$collid])) echo "DISABLED";?> />
+													<input type='checkbox' name='p[]' value='RareSppReader-<?php echo $collid;?>' title='Able to read occurrence details for rare species' <?php if(isset($userPermissions["RareSppReader"][$collid])) echo "DISABLED";?> />
 												</td>
 												<?php 
 											} 
@@ -474,13 +474,13 @@ if($IS_ADMIN){
 												<input type='checkbox' name='p[]' value='CollAdmin-<?php echo $obsid;?>' title='Collection Administrator' <?php if(isset($userPermissions["CollAdmin"][$obsid])) echo "DISABLED";?> />
 											</td>
 											<td align="center">
-												<input type='checkbox' name='p[]' value='CollEditor-<?php echo $obsid;?>' title='Able to add and edit specimen data' <?php if(isset($userPermissions["CollEditor"][$obsid])) echo "DISABLED";?> />
+												<input type='checkbox' name='p[]' value='CollEditor-<?php echo $obsid;?>' title='Able to add and edit occurrence data' <?php if(isset($userPermissions["CollEditor"][$obsid])) echo "DISABLED";?> />
 											</td>
 											<?php 
 											if($showRareSppOption){ 
 												?>
 												<td align="center">
-													<input type='checkbox' name='p[]' value='RareSppReader-<?php echo $obsid;?>' title='Able to read specimen details for rare species' <?php if(isset($userPermissions["RareSppReader"][$obsid])) echo "DISABLED";?> />
+													<input type='checkbox' name='p[]' value='RareSppReader-<?php echo $obsid;?>' title='Able to read occurrence details for rare species' <?php if(isset($userPermissions["RareSppReader"][$obsid])) echo "DISABLED";?> />
 												</td>
 												<?php 
 											} 

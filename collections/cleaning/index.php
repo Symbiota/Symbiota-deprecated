@@ -60,7 +60,7 @@ if($collMap['colltype'] == 'General Observations'){
 				<h3>Duplicate Records</h3>
 				<div style="margin:0px 0px 40px 15px;">
 					<div>
-						These tools will assist in searching this collection of records for duplicate records of the same specimen.
+						These tools will assist in searching this collection of records for duplicate records of the same occurrence.
 						If duplicate records exist, this feature offers the ability to merge record values, images,
 						and data relationships into a single record.
 					</div>
@@ -215,7 +215,7 @@ if($collMap['colltype'] == 'General Observations'){
 						<?php
 						if($cleanManager->hasDuplicateClusters()){
 							echo '<li><a href="../datasets/duplicatemanager.php?collid='.$collid.'&dupedepth=3&action=listdupeconflicts">';
-							echo 'Duplicate specimens with potential identification conflicts...';
+							echo 'Duplicate occurrences with potential identification conflicts...';
 							echo '</a></li>';
 						}
 						?>

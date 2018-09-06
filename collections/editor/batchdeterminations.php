@@ -138,7 +138,7 @@ if($isEditor){
 					}
 				}
 				else{
-					alert("You cannot add more than 400 specimens to the list.");
+					alert("You cannot add more than 400 occurrences to the list.");
 				}
 				
 				$( "#fcatalognumber" ).focus();
@@ -169,7 +169,7 @@ if($isEditor){
 							document.getElementById("nomrecordlistdviv").style.display = "none";
 							document.getElementById("nomrecordstbody").innerHTML = '';
 							document.getElementById("nomsciname").value = '';
-							alert("There are no specimens identified to that taxon.");
+							alert("There are no occurrences identified to that taxon.");
 						}
 					});
 				}
@@ -198,7 +198,7 @@ if($isEditor){
 					var dbElement = dbElements[i];
 					if(dbElement.checked) return true;
 				}
-			   	alert("Please select at least one specimen!");
+			   	alert("Please select at least one occurrence!");
 		      	return false;
 			}
 
