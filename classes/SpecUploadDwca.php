@@ -19,6 +19,7 @@ class SpecUploadDwca extends SpecUploadBase{
 	}
 
 	public function uploadFile(){
+		$retPath = '';
 		if(array_key_exists('ulfnoverride',$_POST) && $_POST['ulfnoverride'] && !$this->path){
 			$this->path = $_POST['ulfnoverride'];
 		}
@@ -38,6 +39,7 @@ class SpecUploadDwca extends SpecUploadBase{
 				if(substr($this->path,-1) != '/') $this->path .= '/';
 				$this->uploadTargetPath = $this->path;
 				$this->locateBaseFolder();
+				$retPath = $this->uploadTargetPath;
 			}
 			else{
 				$this->createTargetSubDir();
@@ -47,7 +49,12 @@ class SpecUploadDwca extends SpecUploadBase{
 					if(!is_writable($this->uploadTargetPath)) $this->errorStr .= ', Permission issue: target directory is not writable';
 					$this->outputMsg('<li>'.$this->errorStr.' </li>');
 				}
-				if(!$this->unpackArchive()) $this->uploadTargetPath = '';
+				if($this->unpackArchive()){
+					$retPath = $this->uploadTargetPath;
+				}
+				else{
+					$this->uploadTargetPath = '';
+				}
 			}
 		}
 		elseif(array_key_exists("uploadfile",$_FILES)){
@@ -70,9 +77,14 @@ class SpecUploadDwca extends SpecUploadBase{
 				if(!is_writable($this->uploadTargetPath)) $this->errorStr .= ', Permission issue: target directory is not writable';
 				$this->outputMsg('<li>'.$this->errorStr.' </li>');
 			}
-			if(!$this->unpackArchive()) $this->uploadTargetPath = '';
+			if($this->unpackArchive()){
+				$retPath = $this->uploadTargetPath;
+			}
+			else{
+				$this->uploadTargetPath = '';
+			}
 		}
-		return $this->uploadTargetPath;
+		return $retPath;
 	}
 
 	private function createTargetSubDir(){
