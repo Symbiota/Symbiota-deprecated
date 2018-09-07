@@ -633,12 +633,15 @@ header("Content-Type: text/html; charset=".$CHARSET);
 								<?php
 								if($occArr['verbatimelevation']){
 									?>
-									<div>
+									<div style="margin-left:10px">
 										<b>Verbatim Elevation: </b>
 										<?php echo $occArr['verbatimelevation']; ?>
 									</div>
 									<?php
 								}
+							}
+							if($occArr['localitysecurity']){
+								echo '<div style="margin-left:10px;color:orange">Note: locality protection applied; only authorized users can view the locality details displayed above</div>';
 							}
 							if($occArr['habitat']){
 								?>

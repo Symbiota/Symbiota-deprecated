@@ -85,7 +85,7 @@ class OccurrenceListManager extends OccurrenceManager{
     					if($row->maximumelevationinmeters) $elevStr .= ' - '.$row->maximumelevationinmeters;
     					$returnArr[$row->occid]["elev"] = $elevStr;
     					$occArr[] = $row->occid;
-    					if($row->localitysecurity) $returnArr[$row->occid]['raremsg'] = 'Note: occurrence details are redacted from non-authorized users';
+    					if($row->localitysecurity) $returnArr[$row->occid]['raremsg'] = 'Note: locality details are redacted from non-authorized users';
     			}
     			else{
     				$securityStr = '<span style="color:red;">Detailed locality information protected. ';
