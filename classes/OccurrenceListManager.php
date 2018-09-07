@@ -65,7 +65,7 @@ class OccurrenceListManager extends OccurrenceManager{
     			$returnArr[$row->occid]["state"] = $this->cleanOutStr($row->stateprovince);
     			$returnArr[$row->occid]["county"] = $this->cleanOutStr($row->county);
     			$returnArr[$row->occid]["obsuid"] = $row->observeruid;
-    			if(!$row->localitysecurity|| $canReadRareSpp
+    			if(!$row->localitysecurity || $canReadRareSpp
     				|| (array_key_exists("CollEditor", $GLOBALS['USER_RIGHTS']) && in_array($row->collid,$GLOBALS['USER_RIGHTS']["CollEditor"]))
     				|| (array_key_exists("RareSppReader", $GLOBALS['USER_RIGHTS']) && in_array($row->collid,$GLOBALS['USER_RIGHTS']["RareSppReader"]))){
     					$locStr = str_replace('.,',',',$row->locality);
@@ -85,6 +85,7 @@ class OccurrenceListManager extends OccurrenceManager{
     					if($row->maximumelevationinmeters) $elevStr .= ' - '.$row->maximumelevationinmeters;
     					$returnArr[$row->occid]["elev"] = $elevStr;
     					$occArr[] = $row->occid;
+    					if($row->localitysecurity) $returnArr[$row->occid]['raremsg'] = 'Note: occurrence details are redacted from non-authorized users';
     			}
     			else{
     				$securityStr = '<span style="color:red;">Detailed locality information protected. ';
