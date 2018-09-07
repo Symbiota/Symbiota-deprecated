@@ -499,6 +499,53 @@ class ChecklistManager {
 		//echo $this->basicSql; exit;
 	}
 
+	//Checklist editing functions
+	public function addNewSpecies($dataArr){
+		if(!$this->clid) return 'ERROR adding species: checklist identifier not set';
+		$insertStatus = false;
+		$colSql = '';
+		$valueSql = '';
+		foreach($dataArr as $k =>$v){
+			$colSql .= ','.$k;
+			if($v){
+				if(is_numeric($v)){
+					$valueSql .= ','.$v;
+				}
+				else{
+					$valueSql .= ',"'.$this->cleanInStr($v).'"';
+				}
+			}
+			else{
+				$valueSql .= ',NULL';
+			}
+		}
+		$conn = MySQLiConnectionFactory::getCon('write');
+		$sql = 'INSERT INTO fmchklsttaxalink (clid'.$colSql.') VALUES ('.$this->clid.$valueSql.')';
+		if($conn->query($sql)){
+			if($this->clMetadata['type'] == 'rarespp' && $this->clMetadata['locality'] && is_numeric($dataArr['tid'])){
+				$sqlRare = 'UPDATE omoccurrences o INNER JOIN taxstatus ts1 ON o.tidinterpreted = ts1.tid '.
+					'INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '.
+					'SET o.localitysecurity = 1 '.
+					'WHERE (o.localitysecurity IS NULL OR o.localitysecurity = 0) AND (o.localitySecurityReason IS NULL) '.
+					'AND (ts1.taxauthid = 1) AND (ts2.taxauthid = 1) AND (o.stateprovince = "'.$this->clMetadata['locality'].'") AND (ts2.tid = '.$dataArr['tid'].')';
+				//echo $sqlRare; exit;
+				$conn->query($sqlRare);
+			}
+		}
+		else{
+			$mysqlErr = $conn->error;
+			$insertStatus = 'ERROR adding species: ';
+			if(strpos($mysqlErr,'Duplicate') !== false){
+				$insertStatus .= 'Species already exists within checklist';
+			}
+			else{
+				$insertStatus .= $conn->error;
+			}
+		}
+		$conn->close();
+		return $insertStatus;
+	}
+
 	//Checklist index page fucntions
 	public function getChecklists(){
 		$retArr = Array();

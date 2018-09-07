@@ -1,7 +1,7 @@
 <?php
 include_once($SERVER_ROOT.'/config/dbconnection.php');
 
-class VoucherManager {
+class ChecklistVoucherManager {
 
 	private $conn;
 	private $tid;
@@ -138,7 +138,7 @@ class VoucherManager {
 				$rsTarget->close();
 			}
 			if($rareLocality){
-				$this->setStateRare($rareLocality);
+				$this->removeStateRareStatus($rareLocality);
 			}
 		}
 		return $statusStr;
@@ -153,7 +153,7 @@ class VoucherManager {
 		$sql = 'DELETE ctl.* FROM fmchklsttaxalink ctl WHERE (ctl.tid = '.$this->tid.') AND (ctl.clid = '.$this->clid.')';
 		if($this->conn->query($sql)){
 			if($rareLocality){
-				$this->setStateRare($rareLocality);
+				$this->removeStateRareStatus($rareLocality);
 			}
 		}
 		else{
@@ -162,7 +162,7 @@ class VoucherManager {
 		return $statusStr;
 	}
 
-	private function setStateRare($rareLocality){
+	private function removeStateRareStatus($rareLocality){
 		//Remove state based security protection only if name is not on global list
 		$sql = 'SELECT IFNULL(securitystatus,0) as securitystatus FROM taxa WHERE tid = '.$this->tid;
 		//echo $sql;

@@ -1120,12 +1120,8 @@ class SpecUploadBase extends SpecUpload{
 		}
 
 		$this->outputMsg('<li style="margin-left:10px;">Protecting sensitive species...</li>');
-		if(!$occurMain->protectRareSpecies($this->collId)){
-			$errorArr = $occurMain->getErrorArr();
-			foreach($errorArr as $errorStr){
-				echo '<li style="margin-left:20px;">'.$errorStr.'</li>';
-			}
-		}
+		$protectCnt = $occurMain->protectRareSpecies($this->collId);
+		echo '<li style="margin-left:20px;">'.$protectCnt.' records protected</li>';
 
 		$this->outputMsg('<li style="margin-left:10px;">Updating statistics...</li>');
 		if(!$occurMain->updateCollectionStats($this->collId)){

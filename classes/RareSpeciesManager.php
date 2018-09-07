@@ -3,18 +3,18 @@ include_once($SERVER_ROOT.'/config/dbconnection.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceMaintenance.php');
 
 class RareSpeciesManager {
-    
+
  	private $conn;
  	private $taxaArr = array();
-    
+
     function __construct($collType = 'readonly'){
 		$this->conn = MySQLiConnectionFactory::getCon($collType);
     }
-    
+
  	function __destruct(){
 		if(!($this->conn === null)) $this->conn->close();
 	}
-    
+
 	public function getRareSpeciesList(){
  		$returnArr = Array();
 		$sql = 'SELECT t.tid, ts.Family, t.SciName, t.Author '.
@@ -36,17 +36,20 @@ class RareSpeciesManager {
 	}
 
 	public function addSpecies($tid){
+		$protectCnt = 0;
 		if(is_numeric($tid)){
 	 		$sql = 'UPDATE taxa t SET t.SecurityStatus = 1 WHERE (t.tid = '.$tid.')';
 	 		//echo $sql;
 			$this->conn->query($sql);
 			//Update specimen records
 			$occurMain = new OccurrenceMaintenance($this->conn);
-			$occurMain->protectGloballyRareSpecies();
+			$protectCnt = $occurMain->protectGloballyRareSpecies();
 		}
+		return $protectCnt;
 	}
 
 	public function deleteSpecies($tid){
+		$protectCnt = 0;
 		if(is_numeric($tid)){
 			$sql = 'UPDATE taxa t SET t.SecurityStatus = 0 WHERE (t.tid = '.$tid.')';
 	 		//echo $sql;
@@ -60,8 +63,9 @@ class RareSpeciesManager {
 			//echo $sql2; exit;
 			$this->conn->query($sql2);
 			$occurMain = new OccurrenceMaintenance($this->conn);
-			$occurMain->protectGloballyRareSpecies();
+			$protectCnt = $occurMain->protectGloballyRareSpecies();
 		}
+		return $protectCnt;
 	}
 
 	public function getStateList(){
@@ -85,7 +89,7 @@ class RareSpeciesManager {
 		$rs->free();
 		return $retArr;
 	}
-	
+
 	public function setSearchTaxon($searchTaxon){
 		$sql = 'SELECT ts.tidaccepted '.
 			'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.

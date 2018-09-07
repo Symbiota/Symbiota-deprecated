@@ -1,7 +1,6 @@
 <?php
 include_once('../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/ChecklistManager.php');
-include_once($SERVER_ROOT.'/classes/ChecklistAdmin.php');
 include_once($SERVER_ROOT.'/content/lang/checklists/checklist.'.$LANG_TAG.'.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 
@@ -57,10 +56,7 @@ if($clid){
 elseif($dynClid){
 	$clManager->setDynClid($dynClid);
 }
-$clArray = Array();
-if($clid || $dynClid){
-	$clArray = $clManager->getClMetaData();
-}
+$clArray = $clManager->getClMetaData();
 $activateKey = $KEY_MOD_IS_ACTIVE;
 $showDetails = 0;
 if($clid && $clArray["defaultSettings"]){
@@ -104,9 +100,10 @@ elseif(array_key_exists('printlist_x',$_POST)){
 $isEditor = false;
 if($IS_ADMIN || (array_key_exists("ClAdmin",$USER_RIGHTS) && in_array($clid,$USER_RIGHTS["ClAdmin"]))){
 	$isEditor = true;
-
+}
+if($isEditor){
 	//Add species to checklist
-	if(array_key_exists("tidtoadd",$_POST)){
+	if(array_key_exists("tidtoadd",$_POST) && is_numeric($_POST["tidtoadd"])){
 		$dataArr = array();
 		$dataArr["tid"] = $_POST["tidtoadd"];
 		if($_POST["familyoverride"]) $dataArr["familyoverride"] = $_POST["familyoverride"];
@@ -115,17 +112,10 @@ if($IS_ADMIN || (array_key_exists("ClAdmin",$USER_RIGHTS) && in_array($clid,$USE
 		if($_POST["notes"]) $dataArr["notes"] = $_POST["notes"];
 		if($_POST["source"]) $dataArr["source"] = $_POST["source"];
 		if($_POST["internalnotes"]) $dataArr["internalnotes"] = $_POST["internalnotes"];
-		$setRareSpp = false;
-		if($_POST["cltype"] == 'rarespp') $setRareSpp = true;
-		$clAdmin = new ChecklistAdmin();
-		$clAdmin->setClid($clid);
-		$statusStr = $clAdmin->addNewSpecies($dataArr,$setRareSpp);
+		$statusStr = $clManager->addNewSpecies($dataArr);
 	}
 }
-$taxaArray = Array();
-if($clid || $dynClid){
-	$taxaArray = $clManager->getTaxaList($pageNumber,($printMode?0:500));
-}
+$taxaArray = $clManager->getTaxaList($pageNumber,($printMode?0:500));
 ?>
 <html>
 <head>
@@ -235,7 +225,7 @@ if($clid || $dynClid){
 					    	</span>
 					        <div id="m1" onmouseover="mcancelclosetime()" onmouseout="mclosetime()">
 					        	<?php
-									$varStr = "?clid=".$clid."&dynclid=".$dynClid."&listname=".$clManager->getClName()."&taxonfilter=".$taxonFilter."&showcommon=".$showCommon.($clManager->getThesFilter()?"&thesfilter=".$clManager->getThesFilter():"");
+								$varStr = "?clid=".$clid."&dynclid=".$dynClid."&listname=".$clManager->getClName()."&taxonfilter=".$taxonFilter."&showcommon=".$showCommon.($clManager->getThesFilter()?"&thesfilter=".$clManager->getThesFilter():"");
 					        	?>
 						        <a href="../games/namegame.php<?php echo $varStr; ?>"><?php echo $LANG['NAMEGAME'];?></a>
 						        <a href="../games/flashcards.php<?php echo $varStr; ?>"><?php echo $LANG['FLASH'];?></a>
@@ -246,12 +236,34 @@ if($clid || $dynClid){
 				<?php
 			}
 			echo '<div style="clear:both;"></div>';
+			$argStr = "&clid=".$clid."&dynclid=".$dynClid.($showCommon?"&showcommon=".$showCommon:"").($showVouchers?"&showvouchers=".$showVouchers:"");
+			$argStr .= ($showAuthors?"&showauthors=".$showAuthors:"").($clManager->getThesFilter()?"&thesfilter=".$clManager->getThesFilter():"");
+			$argStr .= ($pid?"&pid=".$pid:"").($showImages?"&showimages=".$showImages:"").($taxonFilter?"&taxonfilter=".$taxonFilter:"");
+			$argStr .= ($searchCommon?"&searchcommon=".$searchCommon:"").($searchSynonyms?"&searchsynonyms=".$searchSynonyms:"");
+			$argStr .= ($showAlphaTaxa?"&showalphataxa=".$showAlphaTaxa:"");
+			$argStr .= ($defaultOverride?"&defaultoverride=".$defaultOverride:"");
 			//Do not show certain fields if Dynamic Checklist ($dynClid)
 			if($clid){
 				if($clArray['type'] == 'rarespp'){
-					echo '<div style="clear:both;">';
-					echo '<b>Sensitive species checklist for:</b> '.$clArray["locality"];
-					echo '</div>';
+					echo '<div style="clear:both;"><b>Sensitive species checklist for:</b> '.$clArray["locality"].'</div>';
+					if($isEditor && $clArray["locality"]){
+						include_once($SERVER_ROOT.'/classes/OccurrenceMaintenance.php');
+						$occurMaintenance = new OccurrenceMaintenance();
+						echo '<div style="margin-left:15px">Number of specimens pending protection: ';
+						if($action == 'protectspp'){
+							$occurMaintenance->protectStateRareSpecies($clid,$clArray["locality"]);
+							echo '0';
+						}
+						elseif($action == 'checkstatus'){
+							$protectCnt = $occurMaintenance->getStateProtectionCount($clid, $clArray["locality"]);
+							echo $protectCnt;
+							if($protectCnt) echo '<span style="margin-left:10px"><a href="checklist.php?submitaction=protectspp'.$argStr.'"><button style="font-size:70%">Protect Localities</button></a></span>';
+						}
+						else{
+							echo '<span style="margin-left:10px"><a href="checklist.php?submitaction=checkstatus'.$argStr.'"><button style="font-size:70%">Check Status</button></a></span>';
+						}
+						echo '</div>';
+					}
 				}
 				?>
 				<div style="clear:both;">
@@ -429,7 +441,6 @@ if($clid || $dynClid){
 										</div>
 										<div>
 											<input type="hidden" name="clid" value="<?php echo $clid; ?>" />
-											<input type="hidden" name="cltype" value="<?php echo $clArray['type']; ?>" />
 											<input type="hidden" name="pid" value="<?php echo $pid; ?>" />
 											<input type='hidden' name='showcommon' value='<?php echo $showCommon; ?>' />
 											<input type='hidden' name='showvouchers' value='<?php echo $showVouchers; ?>' />
@@ -526,15 +537,8 @@ if($clid || $dynClid){
 					<?php
 					$taxaLimit = ($showImages?$clManager->getImageLimit():$clManager->getTaxaLimit());
 					$pageCount = ceil($clManager->getTaxaCount()/$taxaLimit);
-					$argStr = "";
 					if($pageCount > 1 && !$printMode){
 						if(($pageNumber)>$pageCount) $pageNumber = 1;
-						$argStr .= "&clid=".$clid."&dynclid=".$dynClid.($showCommon?"&showcommon=".$showCommon:"").($showVouchers?"&showvouchers=".$showVouchers:"");
-						$argStr .= ($showAuthors?"&showauthors=".$showAuthors:"").($clManager->getThesFilter()?"&thesfilter=".$clManager->getThesFilter():"");
-						$argStr .= ($pid?"&pid=".$pid:"").($showImages?"&showimages=".$showImages:"").($taxonFilter?"&taxonfilter=".$taxonFilter:"");
-						$argStr .= ($searchCommon?"&searchcommon=".$searchCommon:"").($searchSynonyms?"&searchsynonyms=".$searchSynonyms:"");
-						$argStr .= ($showAlphaTaxa?"&showalphataxa=".$showAlphaTaxa:"");
-						$argStr .= ($defaultOverride?"&defaultoverride=".$defaultOverride:"");
 						echo "<hr /><div>".$LANG['PAGE']."<b> ".($pageNumber)."</b>".$LANG['OF']."<b>$pageCount</b>: ";
 						for($x=1;$x<=$pageCount;$x++){
 							if($x>1) echo " | ";
@@ -554,8 +558,8 @@ if($clid || $dynClid){
 						}
 						echo "</div><hr />";
 					}
-					$prevfam = '';
 					if($showImages){
+						$prevfam = '';
 						foreach($taxaArray as $tid => $sppArr){
 							$family = $sppArr['family'];
 							$tu = (array_key_exists('tnurl',$sppArr)?$sppArr['tnurl']:'');
@@ -623,6 +627,7 @@ if($clid || $dynClid){
 					}
 					else{
 						//Display taxa
+						$prevfam = '';
 						foreach($taxaArray as $tid => $sppArr){
 							if(!$showAlphaTaxa){
 								$family = $sppArr['family'];
@@ -636,10 +641,9 @@ if($clid || $dynClid){
 									$prevfam = $family;
 								}
 							}
-							$spUrl = "../taxa/index.php?taxauthid=1&taxon=$tid&clid=".$clid;
 							echo "<div id='tid-$tid' style='margin:0px 0px 3px 10px;'>";
 							echo '<div style="clear:left">';
-							if(!preg_match('/\ssp\d/',$sppArr["sciname"]) && !$printMode) echo "<a href='".$spUrl."' target='_blank'>";
+							if(!preg_match('/\ssp\d/',$sppArr["sciname"]) && !$printMode) echo '<a href="../taxa/index.php?taxauthid=1&taxon='.$tid.'&clid='.$clid.'" target="_blank">';
 							echo "<b><i>".$sppArr["sciname"]."</b></i> ";
 							if(array_key_exists("author",$sppArr)) echo $sppArr["author"];
 							if(!preg_match('/\ssp\d/',$sppArr["sciname"]) && !$printMode) echo "</a>";

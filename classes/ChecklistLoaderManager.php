@@ -137,8 +137,8 @@ class ChecklistLoaderManager {
 			}
 			fclose($fh);
 			if($cnt && $this->clMeta['type'] == 'rarespp'){
-				$occurMain = new OccurrenceMaintenance($this->conn);
-				$occurMain->protectStateRareSpecies();
+				//$occurMain = new OccurrenceMaintenance($this->conn);
+				//$occurMain->batchProtectStateRareSpecies();
 			}
 		}
 		else{

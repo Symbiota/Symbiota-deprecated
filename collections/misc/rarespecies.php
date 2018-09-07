@@ -3,7 +3,7 @@ include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/RareSpeciesManager.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 
-$submitAction = array_key_exists("submitaction",$_REQUEST)?$_REQUEST["submitaction"]:'';
+$action = array_key_exists("submitaction",$_REQUEST)?$_REQUEST["submitaction"]:'';
 $searchTaxon = array_key_exists("searchtaxon",$_POST)?$_POST["searchtaxon"]:'';
 
 $isEditor = 0;
@@ -14,10 +14,10 @@ if($IS_ADMIN || array_key_exists("RareSppAdmin",$USER_RIGHTS)){
 $rsManager = new RareSpeciesManager($isEditor?'write':'readonly');
 
 if($isEditor){
-	if($submitAction == "addspecies"){
+	if($action == "addspecies"){
 		$rsManager->addSpecies($_POST["tidtoadd"]);
 	}
-	elseif($submitAction == "deletespecies"){
+	elseif($action == "deletespecies"){
 		$rsManager->deleteSpecies($_REQUEST["tidtodel"]);
 	}
 }
@@ -130,6 +130,28 @@ if(isset($collections_misc_rarespeciesCrumbs)){
 		details below county withheld (e.g. decimal lat/long).
 		Rare, threatened, or sensitive status are the typical causes for protection though
 		species that are cherished by collectors or wild harvesters may also appear on the list.
+	</div>
+	<div>
+		<?php
+		if($isEditor){
+			include_once($SERVER_ROOT.'/classes/OccurrenceMaintenance.php');
+			$occurMaintenance = new OccurrenceMaintenance();
+			echo '<div style="margin-left:15px">Number of specimens pending protection: ';
+			if($action == 'protectspp'){
+				$occurMaintenance->protectGloballyRareSpecies();
+				echo '0';
+			}
+			elseif($action == 'checkstatus'){
+				$protectCnt = $occurMaintenance->getGlobalProtectionCount();
+				echo $protectCnt;
+				if($protectCnt) echo '<span style="margin-left:10px"><a href="rarespecies.php?submitaction=protectspp"><button style="font-size:70%">Protect Localities</button></a></span>';
+			}
+			else{
+				echo '<span style="margin-left:10px"><a href="rarespecies.php?submitaction=checkstatus"><button style="font-size:70%">Check Status</button></a></span>';
+			}
+			echo '</div>';
+		}
+		?>
 	</div>
 	<div style="clear:both">
 		<fieldset style="padding:15px;margin:15px">

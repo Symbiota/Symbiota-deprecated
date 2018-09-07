@@ -182,16 +182,55 @@ class OccurrenceMaintenance {
 
 	//Protect Rare species data
 	public function protectRareSpecies($collid = 0){
-		$this->protectGloballyRareSpecies($collid);
-		$this->protectStateRareSpecies($collid);
+		$status = 0;
+		$status = $this->protectGloballyRareSpecies($collid);
+		$status += $this->batchProtectStateRareSpecies();
+		return $status;
 	}
 
 	public function protectGloballyRareSpecies($collid = 0){
-		$status = true;
+		$status = 0;
 		//protect globally rare species
 		if($this->verbose) $this->outputMsg('Protecting globally rare species... ',1);
-		$sensitiveArr = array();
 		//Only protect names on list and synonym of accepted names
+		$sensitiveArr = $this->getSensitiveTaxa();
+
+		if($sensitiveArr){
+			$sql = 'UPDATE omoccurrences '.
+				'SET LocalitySecurity = 1 '.
+				'WHERE (LocalitySecurity IS NULL OR LocalitySecurity = 0) AND (localitySecurityReason IS NULL) AND (tidinterpreted IN('.implode(',',$sensitiveArr).')) ';
+			if($collid) $sql .= 'AND (collid = '.$collid.') ';
+			if($this->conn->query($sql)){
+				$status += $this->conn->affected_rows;
+			}
+			else{
+				$errStr = 'WARNING: unable to protect globally rare species; '.$this->conn->error;
+				$this->errorArr[] = $errStr;
+				if($this->verbose) $this->outputMsg($errStr,2);
+				$status = false;
+			}
+		}
+		return $status;
+	}
+
+	public function getGlobalProtectionCount(){
+		//Return count of specimens needing protection
+		$retCnt = 0;
+		$sensitiveArr = $this->getSensitiveTaxa();
+		if($sensitiveArr){
+			$sql = 'SELECT COUNT(*) AS cnt FROM omoccurrences '.
+				'WHERE (LocalitySecurity IS NULL OR LocalitySecurity = 0) AND (localitySecurityReason IS NULL) AND (tidinterpreted IN('.implode(',',$sensitiveArr).'))';
+			$rs = $this->conn->query($sql);
+			if($r = $rs->fetch_object()){
+				$retCnt = $r->cnt;
+			}
+			$rs->free();
+		}
+		return $retCnt;
+	}
+
+	private function getSensitiveTaxa(){
+		$sensitiveArr = array();
 		//Get names on list
 		$sql = 'SELECT DISTINCT tid FROM taxa WHERE (SecurityStatus > 0)';
 		$rs = $this->conn->query($sql);
@@ -208,13 +247,43 @@ class OccurrenceMaintenance {
 			$sensitiveArr[] = $r2->tid;
 		}
 		$rs2->free();
+		return $sensitiveArr;
+	}
 
-		if($sensitiveArr){
-			$sql2 = 'UPDATE omoccurrences o '.
-				'SET o.LocalitySecurity = 1 '.
-				'WHERE (o.LocalitySecurity IS NULL OR o.LocalitySecurity = 0) AND (o.localitySecurityReason IS NULL) AND (o.tidinterpreted IN('.implode(',',$sensitiveArr).'))';
-			if(!$this->conn->query($sql2)){
-				$errStr = 'WARNING: unable to protect globally rare species; '.$this->conn->error;
+	public function batchProtectStateRareSpecies(){
+		$status = 0;
+		//Protect state level rare species
+		if($this->verbose) $this->outputMsg('Protecting state level rare species... ',1);
+		$sql = 'SELECT clid, locality FROM fmchecklists WHERE type = "rarespp"';
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			$status += $this->protectStateRareSpecies($r->clid,$r->locality);
+		}
+		$rs->free();
+		return $status;
+	}
+
+	public function protectStateRareSpecies($clid,$locality){
+		$status = 0;
+		$occArr = array();
+		$sql = 'SELECT o.occid FROM omoccurrences o INNER JOIN taxstatus ts1 ON o.tidinterpreted = ts1.tid '.
+			'INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '.
+			'INNER JOIN fmchklsttaxalink cl ON  ts2.tid = cl.tid '.
+			'WHERE (o.localitysecurity IS NULL OR o.localitysecurity = 0) AND (o.localitySecurityReason IS NULL) '.
+			'AND (o.stateprovince = "'.$locality.'") AND (cl.clid = '.$clid.') AND (ts1.taxauthid = 1) AND (ts2.taxauthid = 1) ';
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			$occArr[] = $r->occid;
+		}
+		$rs->free();
+
+		if($occArr){
+			$sql2 = 'UPDATE omoccurrences SET localitysecurity = 1 WHERE occid IN('.implode(',',$occArr).')';
+			if($this->conn->query($sql2)){
+				$status = $this->conn->affected_rows;
+			}
+			else{
+				$errStr = 'WARNING: unable to protect state level rare species; '.$this->conn->error;
 				$this->errorArr[] = $errStr;
 				if($this->verbose) $this->outputMsg($errStr,2);
 				$status = false;
@@ -223,36 +292,22 @@ class OccurrenceMaintenance {
 		return $status;
 	}
 
-	public function protectStateRareSpecies($collid = 0){
-		$status = true;
-		//Protect state level rare species
-		if($this->verbose) $this->outputMsg('Protecting state level rare species... ',1);
-		$sql = 'SELECT o.occid FROM omoccurrences o INNER JOIN taxstatus ts1 ON o.tidinterpreted = ts1.tid '.
-			'INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '.
-			'INNER JOIN fmchecklists c ON o.stateprovince = c.locality '.
-			'INNER JOIN fmchklsttaxalink cl ON c.clid = cl.clid AND ts2.tid = cl.tid '.
-			'WHERE (o.localitysecurity IS NULL OR o.localitysecurity = 0) AND (o.localitySecurityReason IS NULL) AND (c.type = "rarespp") '.
-			'AND (ts1.taxauthid = 1) AND (ts2.taxauthid = 1) ';
-		if($collid) $sql .= ' AND o.collid IN('.$collid.') ';
-		$rs = $this->conn->query($sql);
-		$occArr = array();
-		while($r = $rs->fetch_object()){
-			$occArr[] = $r->occid;
-		}
-		$rs->free();
-
-		if($occArr){
-			$sql2 = 'UPDATE omoccurrences '.
-				'SET localitysecurity = 1 '.
-				'WHERE occid IN('.implode(',',$occArr).')';
-			if(!$this->conn->query($sql2)){
-				$errStr = 'WARNING: unable to protect state level rare species; '.$this->conn->error;
-				$this->errorArr[] = $errStr;
-				if($this->verbose) $this->outputMsg($errStr,2);
-				$status = false;
+	public function getStateProtectionCount($clid, $state){
+		$retCnt = 0;
+		if(is_numeric($clid) && $state){
+			$sql = 'SELECT COUNT(DISTINCT o.occid) AS cnt '.
+				'FROM omoccurrences o INNER JOIN taxstatus ts1 ON o.tidinterpreted = ts1.tid '.
+				'INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '.
+				'INNER JOIN fmchklsttaxalink cl ON  ts2.tid = cl.tid '.
+				'WHERE (o.localitysecurity IS NULL OR o.localitysecurity = 0) AND (o.localitySecurityReason IS NULL) '.
+				'AND (o.stateprovince = "'.$state.'") AND (cl.clid = '.$clid.') AND (ts1.taxauthid = 1) AND (ts2.taxauthid = 1) ';
+			$rs = $this->conn->query($sql);
+			if($r = $rs->fetch_object()){
+				$retCnt = $r->cnt;
 			}
+			$rs->free();
 		}
-		return $status;
+		return $retCnt;
 	}
 
 	//Update statistics
