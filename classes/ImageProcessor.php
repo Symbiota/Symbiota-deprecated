@@ -595,13 +595,10 @@ class ImageProcessor {
 			}
 		}
 		$this->logOrEcho('Protecting sensitive species...',2);
-		if(!$occurMain->protectRareSpecies()){
-			$errorArr = $occurMain->getErrorArr();
-			foreach($errorArr as $errorStr){
-				$this->logOrEcho($errorStr,1);
-			}
-		}
+		$protectCnt = $occurMain->protectRareSpecies();
+		$this->logOrEcho($protectCnt.' records protected',1);
 		*/
+
 		if($collList){
 			$this->logOrEcho('Updating collection statistics...',2);
 			foreach($collList as $collid){

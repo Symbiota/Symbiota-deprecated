@@ -1492,12 +1492,8 @@ class ImageLocalProcessor {
 			}
 
 			$this->logOrEcho('Protecting sensitive species...');
-			if(!$occurMain->protectRareSpecies()){
-				$errorArr = $occurMain->getErrorArr();
-				foreach($errorArr as $errorStr){
-					$this->logOrEcho($errorStr,1);
-				}
-			}
+			$protectCnt = $occurMain->protectRareSpecies();
+			$this->logOrEcho($protectCnt.' records protected',1);
 
 			$this->logOrEcho('Updating statistics...');
 			foreach($this->collProcessedArr as $collid){

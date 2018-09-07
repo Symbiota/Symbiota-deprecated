@@ -1,6 +1,6 @@
 <?php
 include_once('../config/symbini.php');
-include_once($SERVER_ROOT.'/classes/VoucherManager.php');
+include_once($SERVER_ROOT.'/classes/ChecklistVoucherManager.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 
 $clid = array_key_exists("clid",$_REQUEST)?$_REQUEST["clid"]:"";
@@ -13,7 +13,7 @@ if($IS_ADMIN || (array_key_exists("ClAdmin",$USER_RIGHTS) && in_array($clid,$USE
 	$isEditor = true;
 }
 
-$vManager = new VoucherManager();
+$vManager = new ChecklistVoucherManager();
 
 $status = "";
 $vManager->setTid($tid);
