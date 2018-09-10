@@ -38,13 +38,9 @@ else{
         $resetOccIndex = true;
     }
     if(isset($_REQUEST['db'])){
-        $reqDBStrStr = str_replace("(","",$_REQUEST['db']);
-        $reqDBStrStr = str_replace(")","",$reqDBStrStr);
-        if(preg_match('/^[0-9,;]+$/', $reqDBStrStr) || $reqDBStrStr == 'all'){
-            $collArr['db'] = $reqDBStrStr;
-            $stArrCollJson = json_encode($collArr);
-            $resetOccIndex = true;
-        }
+        $collArr['db'] = $_REQUEST['db'];
+        $stArrCollJson = json_encode($collArr);
+        $resetOccIndex = true;
     }
 }
 ?>
