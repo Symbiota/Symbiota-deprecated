@@ -485,7 +485,7 @@ $duManager->loadFieldMap();
 						<input type="hidden" name="processingstatus" value="<?php echo $processingStatus;?>" />
 						<input type="hidden" name="uspid" value="<?php echo $uspid;?>" />
 						<div style="margin:5px;">
-							<input type="submit" name="action" value="Transfer Records to Central Specimen Table" />
+							<input type="submit" name="action" value="Transfer Records to Central Occurrence Table" />
 						</div>
 					</form>
 				</fieldset>
