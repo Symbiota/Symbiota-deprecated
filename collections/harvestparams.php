@@ -22,7 +22,9 @@ if(isset($_REQUEST['taxa']) || isset($_REQUEST['country']) || isset($_REQUEST['s
 }
 
 if(isset($_REQUEST['db'])){
-    if(is_array($_REQUEST['db']) || $_REQUEST['db'] == 'all'){
+    $reqDBStrStr = str_replace("(","",$_REQUEST['db']);
+    $reqDBStrStr = str_replace(")","",$reqDBStrStr);
+    if(preg_match('/^[0-9,;]+$/', $reqDBStrStr) || $reqDBStrStr == 'all'){
         $collArr['db'] = $collManager->getSearchTerm('db');
         $stArrCollJson = json_encode($collArr);
     }
