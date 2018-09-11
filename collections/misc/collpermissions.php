@@ -276,9 +276,11 @@ if($collMetadata['colltype'] == 'General Observations') $isGenObs = 1;
 								$titleStr = 'Assigned by '.$pmArr['uab'].' on '.$pmArr['ts'];
 								if(count($genObsArr) > 1) $titleStr .= ' access to '.$genObsArr[$pmArr['persobscollid']];
 								echo '<span title="'.$titleStr.'">'.$pmArr['name'].'</span> ';
-								echo '<a href="collpermissions.php?collid='.$collId.'&delpersobs='.$uid.'&persobscollid='.$pmArr['persobscollid'].'" onclick="return confirm(\'Are you sure you want to delete these permissions?\');" title="Delete permissions for this user">';
-								echo '<img src="../../images/drop.png" style="width:12px;" />';
-								echo '</a>';
+								if($SYMB_UID == $pmArr['uidab']){
+									echo '<a href="collpermissions.php?collid='.$collId.'&delpersobs='.$uid.'&persobscollid='.$pmArr['persobscollid'].'" onclick="return confirm(\'Are you sure you want to delete these permissions?\');" title="Delete permissions for this user">';
+									echo '<img src="../../images/drop.png" style="width:12px;" />';
+									echo '</a>';
+								}
 								echo '</li>';
 							}
 						}

@@ -405,7 +405,7 @@ class PermissionsManager{
 
 	public function getPersonalObservationManagementArr($collid, $genObsCollidArr){
 		$retArr = array();
-		$sql = 'SELECT DISTINCT r.uid, CONCAT_WS(", ",u.lastname,u.firstname) as usrname, r.tablepk, CONCAT_WS(", ",u2.lastname,u2.firstname) as uab, r.initialtimestamp '.
+		$sql = 'SELECT DISTINCT r.uid, CONCAT_WS(", ",u.lastname,u.firstname) as usrname, r.tablepk, r.uidassignedby, CONCAT_WS(", ",u2.lastname,u2.firstname) as uab, r.initialtimestamp '.
 			'FROM userroles r INNER JOIN users u ON r.uid = u.uid '.
 			'INNER JOIN users u2 ON r.uidassignedby = u2.uid '.
 			'WHERE (r.tablepk IN('.implode(',',array_keys($genObsCollidArr)).')) AND (r.role = "CollEditor") '.
@@ -416,6 +416,7 @@ class PermissionsManager{
 		while($r = $rs->fetch_object()){
 			$retArr[$r->uid]['name'] = $r->usrname;
 			$retArr[$r->uid]['persobscollid'] = $r->tablepk;
+			$retArr[$r->uid]['uidab'] = $r->uidassignedby;
 			$retArr[$r->uid]['uab'] = $r->uab;
 			$retArr[$r->uid]['ts'] = $r->initialtimestamp;
 		}
