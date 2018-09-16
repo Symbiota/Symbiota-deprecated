@@ -8,7 +8,9 @@ class TaxonomyHarvester extends Manager{
 
 	private $taxonomicResources = array();
 	private $taxAuthId = 1;
+	private $defaultAuthor;
 	private $defaultFamily;
+	private $defaultFamilyTid;
 	private $kingdomName;
 	private $kingdomTid;
 	private $fullyResolved;
@@ -120,10 +122,48 @@ class TaxonomyHarvester extends Manager{
 			$content = $retArr['str'];
 			$resultArr = json_decode($content,true);
 			$numResults = $resultArr['number_of_results_returned'];
-			//If number of results are greater than 1, we need to evaluate which result is best suited target (e.g. Panicum debile)
 			if($numResults){
+				$targetKey = 0;
+				//If number of results are greater than 1, we need to evaluate which result is best suited target (e.g. Panicum debile)
+				if($numResults > 1){
+					$rankArr = array();
+					$skipCnt = 0;
+					foreach($resultArr['results'] as $k => $tArr){
+						if($sciName == $tArr['name']){
+							$rankArr[$k] = 0;
+							if($this->kingdomName && $this->kingdomName == $this->getColParent($tArr, 'Kingdom')) $rankArr[$k] += 2;
+							if($this->defaultFamily && $this->defaultFamily == $this->getColParent($tArr, 'Family')) $rankArr[$k] += 2;
+							if($tArr['name_status'] == 'accepted name')  $rankArr[$k] += 2;
+							if(isset($tArr['author']) && $tArr['author']){
+								if(stripos($tArr['author'],'nom. illeg.') === false) $rankArr[$k] += 2;
+								//Gets 2 points if author is the same, 1 point if 80% similar
+								if($this->defaultAuthor){
+									$author1 = str_replace(array(' ','.'), '', $this->defaultAuthor);
+									$author2 = str_replace(array(' ','.'), '', $tArr['author']);
+									similar_text($author1, $author2, $percent);
+									if($author1 == $author2) $rankArr[$k] += 2;
+									elseif($percent > 80) $rankArr[$k] += 1;
+								}
+							}
+						}
+						else{
+							//Skip if name doesn't match perfectly; after 3 mismatches, break
+							$skipCnt++;
+							if($skipCnt > 2) break;
+						}
+					}
+					asort($rankArr);
+					end($rankArr);
+					$targetKey = key($rankArr);
+					if(isset($rankArr[0]) && $rankArr[$targetKey] == $rankArr[0]) $targetKey = 0;
+				}
 				$this->logOrEcho('Taxon found within Catalog of Life',2);
-				$tid = $this->addColTaxonByResult($resultArr, $sciName);
+				if(isset($resultArr['results'][$targetKey])){
+					$tid = $this->addColTaxonByResult($resultArr['results'][$targetKey], $sciName);
+				}
+				else{
+					$this->logOrEcho('Targetted taxon return does not exist',2);
+				}
 			}
 			else{
 				$this->logOrEcho('Taxon not found',2);
@@ -143,7 +183,13 @@ class TaxonomyHarvester extends Manager{
 			$retArr = $this->getContentString($url);
 			$content = $retArr['str'];
 			$resultArr = json_decode($content,true);
-			$tid = $this->addColTaxonByResult($resultArr);
+			if(isset($resultArr['results'][0])){
+				$baseArr = $resultArr['results'][0];
+				$tid = $this->addColTaxonByResult($baseArr);
+			}
+			else{
+				$this->logOrEcho('Targetted taxon return does not exist(2)',2);
+			}
 		}
 		else{
 			$this->logOrEcho('ERROR harvesting COL name: null input identifier',1);
@@ -151,13 +197,9 @@ class TaxonomyHarvester extends Manager{
 		return $tid;
 	}
 
-	private function addColTaxonByResult($resultArr, $originalSearchStr = ''){
+	private function addColTaxonByResult($baseArr, $originalSearchStr = ''){
 		$taxonArr = array();
-		if($resultArr){
-			$baseArr = $resultArr['results'][0];
-			if(!$baseArr){
-				return 0;
-			}
+		if($baseArr){
 			$tidAccepted = 0;
 			if($baseArr['name_status'] == 'synonym' && isset($baseArr['accepted_name'])){
 				$tidAccepted = $this->addColTaxonById($baseArr['accepted_name']['id']);
@@ -193,7 +235,7 @@ class TaxonomyHarvester extends Manager{
 					$parentTid = $this->addColTaxon($parentArr['sciname']);
 					if(!$parentTid){
 						//Bad return from COL, thus lets just add as accepted for now
-						$taxonArr['family'] = $this->getColFamily($baseArr);
+						$taxonArr['family'] = $this->getColFamily($baseArr,'Family');
 						$this->buildTaxonArr($parentArr);
 						$parentTid = $this->loadNewTaxon($parentArr);
 					}
@@ -228,9 +270,9 @@ class TaxonomyHarvester extends Manager{
 		return $taxonArr;
 	}
 
-	private function getColFamily($baseArr){
-		//Returns family obtained from accepted taxon
-		$familyStr = '';
+	private function getColParent($baseArr, $parentRank){
+		//Returns parent (e.g. family) obtained from accepted taxon
+		$retStr = '';
 		$classArr = array();
 		if(array_key_exists('classification', $baseArr)){
 			$classArr = $baseArr['classification'];
@@ -240,11 +282,11 @@ class TaxonomyHarvester extends Manager{
 		}
 
 		foreach($classArr as $classNode){
-			if($classNode['rank'] == 'Family'){
-				$familyStr = $classNode['name'];
+			if($classNode['rank'] == $parentRank){
+				$retStr = $classNode['name'];
 			}
 		}
-		return $familyStr;
+		return $retStr;
 	}
 
 	private function addWormsTaxon($sciName){
@@ -574,7 +616,9 @@ class TaxonomyHarvester extends Manager{
 			$this->buildTaxonArr($taxonArr);
 		}
 		//Check to see sciname is in taxon table, but perhaps not linked to current thesaurus
-		$sql = 'SELECT tid FROM taxa WHERE sciname = "'.$taxonArr['sciname'].'"';
+		$sql = 'SELECT t.tid FROM taxa t INNER JOIN taxaenumtree e ON t.tid = e.tid WHERE (t.sciname = "'.$taxonArr['sciname'].'") ';
+		if($this->kingdomTid) $sql .= 'AND (e.parenttid = '.$this->kingdomTid.') ';
+		elseif($this->defaultFamilyTid) $sql .= 'AND (e.parenttid '.$this->defaultFamilyTid.') ';
 		$rs = $this->conn->query($sql);
 		if($r = $rs->fetch_object()){
 			$newTid = $r->tid;
@@ -693,7 +737,7 @@ class TaxonomyHarvester extends Manager{
 		//Add common names
 		if(isset($taxonArr['verns'])){
 			foreach($taxonArr['verns'] as $k => $vernArr){
-				$sqlVern = 'INSERT INTO(tid,vernacularname,language) '.
+				$sqlVern = 'INSERT INTO taxavernaculars(tid,vernacularname,language) '.
 					'VALUES('.$newTid.',"'.$vernArr['vernacularName'].'","'.$vernArr['language'].'")';
 				if(!$this->conn->query($sqlVern)){
 					$this->logOrEcho('ERROR loading vernacular '.$taxonArr['sciname'].': '.$this->conn->error,1);
@@ -766,17 +810,19 @@ class TaxonomyHarvester extends Manager{
 	}
 
 	private function setDefaultKingdom(){
-		$sql = 'SELECT t.sciname, t.tid, COUNT(e.tid) as cnt '.
-			'FROM taxa t INNER JOIN taxaenumtree e ON t.tid = e.parenttid '.
-			'WHERE t.rankid = 10 '.
-			'GROUP BY t.sciname '.
-			'ORDER BY cnt desc';
-		$rs = $this->conn->query($sql);
-		if($r = $rs->fetch_object()){
-			$this->kingdomName = $r->sciname;
-			$this->kingdomTid = $r->tid;
+		if(!$this->kingdomName || !$this->kingdomTid){
+			$sql = 'SELECT t.sciname, t.tid, COUNT(e.tid) as cnt '.
+				'FROM taxa t INNER JOIN taxaenumtree e ON t.tid = e.parenttid '.
+				'WHERE t.rankid = 10 '.
+				'GROUP BY t.sciname '.
+				'ORDER BY cnt desc';
+			$rs = $this->conn->query($sql);
+			if($r = $rs->fetch_object()){
+				$this->kingdomName = $r->sciname;
+				$this->kingdomTid = $r->tid;
+			}
+			$rs->free();
 		}
-		$rs->free();
 	}
 
 	private function getParentArr($taxonArr){
@@ -798,8 +844,7 @@ class TaxonomyHarvester extends Manager{
 					$familyStr = $this->defaultFamily;
 					if(isset($taxonArr['family']) && $taxonArr['family']) $familyStr = $taxonArr['family'];
 					if($familyStr){
-						$sqlFam = 'SELECT tid FROM taxa '.
-							'WHERE (sciname = "'.$this->defaultFamily.'") AND (rankid = 140)';
+						$sqlFam = 'SELECT tid FROM taxa WHERE (sciname = "'.$this->cleanInStr($this->defaultFamily).'") AND (rankid = 140)';
 						//echo $sqlFam;
 						$rs = $this->conn->query($sqlFam);
 						if($r = $rs->fetch_object()){
@@ -923,6 +968,7 @@ class TaxonomyHarvester extends Manager{
 			$sql = 'SELECT DISTINCT t.tid, t.author, t.rankid '.
 				'FROM taxa t INNER JOIN taxaenumtree e ON t.tid = e.tid '.
 				'WHERE (e.taxauthid = '.$this->taxAuthId.') AND (t.sciname = "'.$this->cleanInStr($sciname).'") ';
+			if($this->kingdomTid) $sql .= 'AND (e.parenttid = '.$this->kingdomTid.') ';
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
 				$tidArr[$r->tid]['author'] = $r->author;
@@ -956,7 +1002,7 @@ class TaxonomyHarvester extends Manager{
 							$goodArr[$t] = 1;
 						}
 					}
-					//Gets a 2 points if family is the same
+					//Gets 2 points if family is the same
 					if(isset($tArr['family']) && $tArr['family']){
 						if(isset($taxonArr['family']) && $taxonArr['family']){
 							if(strtolower($tArr['family']) == strtolower($taxonArr['family'])){
@@ -969,13 +1015,13 @@ class TaxonomyHarvester extends Manager{
 							}
 						}
 					}
-					//Gets a 2 points if kingdom is the same
+					//Gets 2 points if kingdom is the same
 					if($this->kingdomName && isset($tArr['kingdom']) && $tArr['kingdom']){
 						if(strtolower($tArr['kingdom']) == strtolower($this->kingdomName)){
 							$goodArr[$t] += 2;
 						}
 					}
-					//Gets a 2 points if author is the same, 1 point if 80% similar
+					//Gets 2 points if author is the same, 1 point if 80% similar
 					if(isset($taxonArr['author']) && $taxonArr['author']){
 						$author1 = str_replace(array(' ','.'), '', $taxonArr['author']);
 						$author2 = str_replace(array(' ','.'), '', $tArr['author']);
@@ -1010,6 +1056,14 @@ class TaxonomyHarvester extends Manager{
 		}
 	}
 
+	public function setKingdomTid($id){
+		if(is_numeric($id)) $this->kingdomTid = $id;
+	}
+
+	public function setKingdomName($name){
+		if(preg_match('/^[a-zA-Z]+$/', $name)) $this->kingdomName = $name;
+	}
+
 	public function setKingdom($kingdom){
 		$sql = 'SELECT sciname, tid FROM taxa t WHERE ';
 		if(is_numeric($kingdom)){
@@ -1042,8 +1096,18 @@ class TaxonomyHarvester extends Manager{
 		return $this->taxonomicResources;
 	}
 
+	public function setDefaultAuthor($str){
+		$this->defaultAuthor = $str;
+	}
+
 	public function setDefaultFamily($familyStr){
-		$this->defaultFamily = $this->cleanInStr($familyStr);
+		$this->defaultFamily = $familyStr;
+		$sql = 'SELECT tid FROM taxa WHERE (rankid = 140) AND (sciname = "'.$this->cleanInStr($familyStr).'")';
+		$rs = $this->conn->query($sql);
+		if($r = $rs->fetch_object()){
+			$this->defaultFamilyTid = $r->tid;
+		}
+		$rs->free();
 	}
 
 	public function isFullyResolved(){

@@ -7,6 +7,7 @@ if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../collections/c
 
 $collid = array_key_exists('collid',$_REQUEST)?$_REQUEST["collid"]:0;
 $autoClean = array_key_exists('autoclean',$_POST)?$_POST['autoclean']:0;
+$targetKingdom = array_key_exists('targetkingdom',$_POST)?$_POST['targetkingdom']:0;
 $taxResource = array_key_exists('taxresource',$_POST)?$_POST['taxresource']:array();
 $startIndex = array_key_exists('startindex',$_POST)?$_POST['startindex']:'';
 $limit = array_key_exists('limit',$_POST)?$_POST['limit']:20;
@@ -128,6 +129,14 @@ elseif($activeCollArr){
 					if(f.elements[i].name == "collid[]") f.elements[i].checked = cbStatus;
 				}
 			}
+
+			function verifyCleanerForm(f){
+				if(f.targetkingdom.value == ""){
+					alert("Select target kingdom for collection");
+					return false;
+				}
+				return true;
+			}
 		</script>
 		<script src="../../js/symb/shared.js?ver=1" type="text/javascript"></script>
 	</head>
@@ -215,6 +224,7 @@ elseif($activeCollArr){
 							elseif($action == 'AnalyzingNames'){
 								echo '<ul>';
 								$cleanManager->setAutoClean($autoClean);
+								$cleanManager->setTargetKingdom($targetKingdom);
 								$startIndex = $cleanManager->analyzeTaxa($taxResource, $startIndex, $limit);
 								echo '</ul>';
 							}
@@ -226,7 +236,7 @@ elseif($activeCollArr){
 					<div style="margin:20px;">
 						<fieldset style="padding:20px;">
 							<legend><b>Action Menu</b></legend>
-							<form name="maincleanform" action="taxonomycleaner.php" method="post">
+							<form name="maincleanform" action="taxonomycleaner.php" method="post" onsubmit="return verifyCleanerForm(this)">
 								<div style="margin-bottom:15px;">
 									<b>Specimen records not indexed to central taxonomic thesaurus</b>
 									<div style="margin-left:10px;">
@@ -250,6 +260,19 @@ elseif($activeCollArr){
 												}
 												?>
 											</fieldset>
+										</div>
+										<div style="margin-bottom:5px;">
+											Target Kingdom:
+											<select name="targetkingdom">
+												<option value="">Select Target Kingdom</option>
+												<option value="">--------------------------</option>
+												<?php
+												$kingdomArr = $cleanManager->getKingdomArr();
+												foreach($kingdomArr as $kTid => $kSciname){
+													echo '<option value="'.$kTid.':'.$kSciname.'" '.($targetKingdom==$kTid?'SELECTED':'').'>'.$kSciname.'</option>';
+												}
+												?>
+											</select>
 										</div>
 										<div style="margin-bottom:5px;">
 											Names Processed per Run: <input name="limit" type="text" value="<?php echo $limit; ?>" style="width:40px" />
