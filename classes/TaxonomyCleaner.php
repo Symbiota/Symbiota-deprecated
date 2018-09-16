@@ -315,7 +315,7 @@ class TaxonomyCleaner extends Manager{
 		$sql = 'UPDATE omoccurrences o INNER JOIN taxa t ON o.sciname = t.sciname '.
 			'SET o.tidinterpreted = t.tid '.
 			'WHERE (o.collid IN('.$this->collid.')) AND (o.tidinterpreted IS NULL) ';
-		if($this->targetKingdom) $sql .= 't.kingdomname = "'.$this->targetKingdom.'" ';
+		if($this->targetKingdom) $sql .= 'AND t.kingdomname = "'.$this->targetKingdom.'" ';
 		if($this->conn->query($sql)){
 			$this->logOrEcho($this->conn->affected_rows.' occurrence records mapped',1);
 		}
