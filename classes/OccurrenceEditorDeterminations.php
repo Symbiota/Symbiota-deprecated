@@ -330,7 +330,7 @@ class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 			$status = 'ERROR resetting dets to not current: '.$this->conn->error;
 			//$status .= '; '.$sqlSetCur1;
 		}
-		//Set targetted det to current
+		//Set targeted det to current
 		$sqlSetCur2 = 'UPDATE omoccurdeterminations SET iscurrent = 1 WHERE detid = '.$detId;
 		if(!$this->conn->query($sqlSetCur2)){
 			$status = 'ERROR setting target det to current: '.$this->conn->error;

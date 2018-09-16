@@ -49,7 +49,7 @@ class APIOccurEditor extends APIBase{
 			'georeferenceprotocol','georeferencesources','georeferenceverificationstatus','georeferenceremarks');
 		foreach($this->occidArr as $occid){
 			if($this->source == 'geolocate'){
-				//Set georefSource and georefBy 
+				//Set georefSource and georefBy
 				$this->dwcArr['georeferencesources'] = 'GeoLocate (CoGe)';
 				$this->dwcArr['georeferencedby'] = $this->editor;
 			}
@@ -63,22 +63,22 @@ class APIOccurEditor extends APIBase{
 				continue;
 			}
 			//if(!$oldValueArr) return '{"Result":[{"Status":"FAILURE","Error":"Occurrence identifier not valid"}]}';
-		
+
 			//limit to fields where new values are different than old values
 			$vettedOldValues = array();
 			$vettedNewValues = array();
 			foreach($this->dwcArr as $symbField => $value){
 				if(array_key_exists($symbField, $oldValueArr) && $value != $oldValueArr[$symbField]){
-					$vettedOldValues[$symbField] = $oldValueArr[$symbField]; 
+					$vettedOldValues[$symbField] = $oldValueArr[$symbField];
 					$vettedNewValues[$symbField] = $value;
 				}
 			}
-			//if(!$vettedNewValues) return '{"Result":[{"Status":"FAILURE","Error":"No targetted values have changed"}]}';
+			//if(!$vettedNewValues) return '{"Result":[{"Status":"FAILURE","Error":"No targeted values have changed"}]}';
 			if(!$vettedNewValues){
 				$this->warningArr[$occid] = 'No values have changed';
 				continue;
 			}
-			
+
 			$appliedStatus = 0;
 			//Custom adjustments applied per project based on source
 			if($this->source == 'geolocate'){
@@ -123,7 +123,7 @@ class APIOccurEditor extends APIBase{
 				$this->warningArr[$occid] = 'Duplicate edit previously submitted';
 				continue;
 			}
-			
+
 			//Version edits by adding into omoccurrevisions table
 			$sql3 = 'INSERT INTO omoccurrevisions(occid,oldValues,newValues,externalSource,externalEditor,reviewStatus,appliedStatus,externalTimestamp) '.
 				'VALUES('.$occid.',"'.$this->cleanInStr(json_encode($vettedOldValues)).'","'.$this->cleanInStr($newValueJson).'",'.
@@ -176,7 +176,7 @@ class APIOccurEditor extends APIBase{
 	}
 
 	private function applyIdentificationEdit(){
-		
+
 	}
 
 	//Setters and getters
@@ -190,7 +190,7 @@ class APIOccurEditor extends APIBase{
 			}
 		}
 	}
-	
+
 	public function setRecordID($guid){
 		$status = false;
 		$guid = preg_replace("/[^A-Za-z0-9\-]/","",$guid);
@@ -239,7 +239,7 @@ class APIOccurEditor extends APIBase{
 		}
 	}
 
-	public function setSource($s){ 	
+	public function setSource($s){
 		$this->source = $s;
 	}
 
