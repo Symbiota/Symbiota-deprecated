@@ -116,7 +116,9 @@ class TaxonomyHarvester extends Manager{
 	private function addColTaxon($sciName){
 		$tid = 0;
 		if($sciName){
-			$url = 'http://webservice.catalogueoflife.org/col/webservice?response=full&format=json&name='.str_replace(" ","%20",$sciName);
+			$adjustedName = str_ireplace(array(' subsp. ',' subsp ',' ssp. ',' ssp ',' var. ',' var ',' f. ',' fo. '), ' ', $sciName);
+			$adjustedName = str_ireplace(array('?'), ' ', $adjustedName);
+			$url = 'http://webservice.catalogueoflife.org/col/webservice?response=full&format=json&name='.str_replace(' ','%20',$adjustedName);
 			//echo $url.'<br/>';
 			$retArr = $this->getContentString($url);
 			$content = $retArr['str'];
@@ -130,7 +132,7 @@ class TaxonomyHarvester extends Manager{
 				foreach($resultArr['results'] as $k => $tArr){
 					//If number of results are greater than 1, we need to evaluate which result is best suited target (e.g. Panicum debile)
 					$rankArr[$k] = 0;
-					if($sciName != $tArr['name']){
+					if($adjustedName != $tArr['name']){
 						//Skip if name doesn't match perfectly; after 3 mismatches, break
 						$skipCnt++;
 						if($skipCnt > 2) break;
@@ -140,7 +142,11 @@ class TaxonomyHarvester extends Manager{
 					$taxonKingdom = $this->getColParent($tArr, 'Kingdom');
 					if($this->kingdomName && $this->kingdomName != $taxonKingdom){
 						unset($rankArr[$k]);
-						$this->logOrEcho('<a href="http://www.catalogueoflife.org/col/details/species/id/'.$resultArr['results'][$k]['id'].'" target="_blank">'.$sciName.'</a> skipped due to not matching targeted kingdom: '.$this->kingdomName,2);
+						$colPrefix = 'http://www.catalogueoflife.org/col/browse/tree/id/';
+						if(strpos($adjustedName,' ')) $colPrefix = 'http://www.catalogueoflife.org/col/details/species/id/';
+						$msg = '<a href="'.$colPrefix.$resultArr['results'][$k]['id'].'" target="_blank">';
+						$msg .= $sciName.'</a> skipped due to not matching targeted kingdom: '.$this->kingdomName.' (!= '.$taxonKingdom.')';
+						$this->logOrEcho($msg,2);
 						continue;
 					}
 					if($this->defaultFamily && $this->defaultFamily == $this->getColParent($tArr, 'Family')) $rankArr[$k] += 2;
@@ -168,12 +174,12 @@ class TaxonomyHarvester extends Manager{
 					$targetKey = key($rankArr);
 					if(isset($rankArr[0]) && $rankArr[$targetKey] == $rankArr[0]) $targetKey = 0;
 				}
-				$this->logOrEcho('Taxon found within Catalog of Life',2);
+				$this->logOrEcho($sciName.' found within Catalog of Life',2);
 				if(array_key_exists($targetKey, $submitArr) && $submitArr[$targetKey]){
-					$tid = $this->addColTaxonByResult($submitArr[$targetKey], $sciName);
+					$tid = $this->addColTaxonByResult($submitArr[$targetKey]);
 				}
 				else{
-					$this->logOrEcho('Targetted taxon return does not exist',2);
+					$this->logOrEcho('Targeted taxon return does not exist',2);
 				}
 			}
 			else{
@@ -199,7 +205,7 @@ class TaxonomyHarvester extends Manager{
 				$tid = $this->addColTaxonByResult($baseArr);
 			}
 			else{
-				$this->logOrEcho('Targetted taxon return does not exist(2)',2);
+				$this->logOrEcho('Targeted taxon return does not exist(2)',2);
 			}
 		}
 		else{
@@ -208,7 +214,7 @@ class TaxonomyHarvester extends Manager{
 		return $tid;
 	}
 
-	private function addColTaxonByResult($baseArr, $originalSearchStr = ''){
+	private function addColTaxonByResult($baseArr){
 		$taxonArr = array();
 		if($baseArr){
 			$tidAccepted = 0;
@@ -216,10 +222,6 @@ class TaxonomyHarvester extends Manager{
 				$tidAccepted = $this->addColTaxonById($baseArr['accepted_name']['id']);
 			}
 			$taxonArr = $this->getColNode($baseArr);
-			if($originalSearchStr && $originalSearchStr != $taxonArr['sciname']){
-				//Abort because search return contains a child of the search term
-				return false;
-			}
 			//Get parent
 			if($taxonArr['rankid'] == 10){
 				$taxonArr['parent']['tid'] = 'self';
