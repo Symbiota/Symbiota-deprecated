@@ -3,7 +3,7 @@ include_once($SERVER_ROOT.'/config/dbconnection.php');
 
 class TaxonomyUtilities {
 
-	/*
+    /*
 	 * INPUT: String representing a verbatim scientific name
 	 *        Name may have imbedded authors, cf, aff, hybrid
 	 * OUTPUT: Array containing parsed values
@@ -72,7 +72,7 @@ class TaxonomyUtilities {
 					if($retArr['unitname2'] && !preg_match('/^[\-a-z]+$/',$retArr['unitname2'])){
 						if(preg_match('/[A-Z]{1}[\-a-z]+/',$retArr['unitname2'])){
 							//Check to see if is term is genus author
-							$sql = 'SELECT tid FROM taxa WHERE unitname1 = "'.$retArr['unitname1'].'" AND unitname2 = "'.$retArr['unitname2'].'"';
+							/*$sql = 'SELECT tid FROM taxa WHERE unitname1 = "'.$retArr['unitname1'].'" AND unitname2 = "'.$retArr['unitname2'].'"';
 							$con = MySQLiConnectionFactory::getCon('readonly');
 							$rs = $con->query($sql);
 							if($rs->num_rows){
@@ -84,7 +84,7 @@ class TaxonomyUtilities {
 								unset($sciNameArr);
 							}
 							$rs->free();
-							$con->close();
+							$con->close();*/
 						}
 						if($retArr['unitname2']){
 							$retArr['unitname2'] = strtolower($retArr['unitname2']);
