@@ -564,6 +564,7 @@ class TaxonProfile extends Manager {
 			}
 
 			//Get Maps, if rank is genus level or higher
+			/* Deactivating display of static map to reduce Google charges
 			if($this->rankId > 140){
 				foreach($this->sppArray as $sn => $snArr){
 					$tid = $snArr['tid'];
@@ -575,6 +576,7 @@ class TaxonProfile extends Manager {
 					}
 				}
 			}
+			*/
 		}
 	}
 
