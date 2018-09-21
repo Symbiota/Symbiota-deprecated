@@ -186,6 +186,11 @@ $RIGHTS_TERMS_DEFS = array(
         'title' => 'CC BY-NC (Attribution-Non-Commercial)',
         'url' => 'http://creativecommons.org/licenses/by-nc/4.0/legalcode',
         'def' => 'Users can copy, redistribute the material in any medium or format, remix, transform, and build upon the material. The licensor cannot revoke these freedoms as long as you follow the license terms.'
+    ),
+    'http://creativecommons.org/licenses/by-nc-nd/4.0/' => array(
+        'title' => 'CC BY-NC-ND 4.0 (Attribution-NonCommercial-NoDerivatives 4.0 International)',
+        'url' => 'http://creativecommons.org/licenses/by-nc-nd/4.0/legalcode',
+        'def' => 'Users can copy and redistribute the material in any medium or format. The licensor cannot revoke these freedoms as long as you follow the license terms.'
     )
 );
 ?>

@@ -81,9 +81,10 @@ $GENBANK_SUB_TOOL_PATH = '';	//Path to GenBank Submission tool installation
 $ACTIVATE_GEOLOCATE_TOOLKIT = 0;	//Activates GeoLocate Toolkit located within the Processing Toolkit menu items
 
 $RIGHTS_TERMS = array(
-	'CC0 1.0 (Public-domain)' => 'http://creativecommons.org/publicdomain/zero/1.0/',
-	'CC BY (Attribution)' => 'http://creativecommons.org/licenses/by/4.0/',
-	'CC BY-NC (Attribution-Non-Commercial)' => 'http://creativecommons.org/licenses/by-nc/4.0/'
+    'CC0 1.0 (Public-domain)' => 'http://creativecommons.org/publicdomain/zero/1.0/',
+    'CC BY (Attribution)' => 'http://creativecommons.org/licenses/by/4.0/',
+    'CC BY-NC (Attribution-Non-Commercial)' => 'http://creativecommons.org/licenses/by-nc/4.0/',
+    'CC BY-NC-ND 4.0 (Attribution-NonCommercial-NoDerivatives 4.0 International)' => 'https://creativecommons.org/licenses/by-nc-nd/4.0/'
 );
 $CSS_VERSION_LOCAL = '20170414';		//Changing this variable will force a refresh of main.css styles within users browser cache for all pages
 
