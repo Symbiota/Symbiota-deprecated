@@ -144,7 +144,7 @@ if($imgArr){
 					    	<legend><b>Edit Image Details</b></legend>
 					    	<div style="margin-top:2px;">
 					    		<b>Caption:</b>
-								<input name="caption" type="text" value="<?php echo $imgArr["caption"];?>" style="width:250px;" maxlength="100">
+								<input name="caption" type="text" value="<?php echo $imgArr["caption"];?>" style="width:250px;" />
 							</div>
 							<div style="margin-top:2px;">
 								<b>Photographer User ID:</b>
@@ -160,28 +160,28 @@ if($imgArr){
 							</div>
 							<div id="iepor" style="margin-top:2px;display:<?php echo ($imgArr["photographer"]?'block':'none'); ?>;">
 								<b>Photographer (override):</b>
-								<input name="photographer" type="text" value="<?php echo $imgArr["photographer"];?>" style="width:250px;" maxlength="100" />
+								<input name="photographer" type="text" value="<?php echo $imgArr["photographer"];?>" style="width:250px;" />
 								* Will override above selection
 							</div>
 							<div style="margin-top:2px;">
 								<b>Manager:</b>
-								<input name="owner" type="text" value="<?php echo $imgArr["owner"];?>" style="width:250px;" maxlength="100" />
+								<input name="owner" type="text" value="<?php echo $imgArr["owner"];?>" style="width:250px;" />
 							</div>
 							<div style="margin-top:2px;">
 								<b>Source URL:</b>
-								<input name="sourceurl" type="text" value="<?php echo $imgArr["sourceurl"];?>" style="width:450px;" maxlength="250" />
+								<input name="sourceurl" type="text" value="<?php echo $imgArr["sourceurl"];?>" style="width:450px;" />
 							</div>
 							<div style="margin-top:2px;">
 								<b>Copyright:</b>
-								<input name="copyright" type="text" value="<?php echo $imgArr["copyright"];?>" style="width:450px;" maxlength="250" />
+								<input name="copyright" type="text" value="<?php echo $imgArr["copyright"];?>" style="width:450px;" />
 							</div>
 							<div style="margin-top:2px;">
 								<b>Rights:</b>
-								<input name="rights" type="text" value="<?php echo $imgArr["rights"];?>" style="width:450px;" maxlength="250" />
+								<input name="rights" type="text" value="<?php echo $imgArr["rights"];?>" style="width:450px;" />
 							</div>
 							<div style="margin-top:2px;">
 								<b>Locality:</b>
-								<input name="locality" type="text" value="<?php echo $imgArr["locality"];?>" style="width:550px;" maxlength="250" />
+								<input name="locality" type="text" value="<?php echo $imgArr["locality"];?>" style="width:550px;" />
 							</div>
 							<div style="margin-top:2px;">
 								<b>Occurrence Record #:</b>
@@ -190,15 +190,15 @@ if($imgArr){
 							</div>
 							<div style="margin-top:2px;">
 								<b>Notes:</b>
-								<input name="notes" type="text" value="<?php echo $imgArr["notes"];?>" style="width:550px;" maxlength="250" />
+								<input name="notes" type="text" value="<?php echo $imgArr["notes"];?>" style="width:550px;" />
 							</div>
 							<div style="margin-top:2px;">
 								<b>Sort sequence:</b>
-								<input name="sortsequence" type="text" value="<?php echo $imgArr["sortsequence"];?>" size="5" maxlength="5" />
+								<input name="sortsequence" type="text" value="<?php echo $imgArr["sortsequence"];?>" size="5" />
 							</div>
 							<div style="margin-top:2px;">
 								<b>Web Image:</b><br/>
-								<input name="url" type="text" value="<?php echo $imgArr["url"];?>" style="width:90%;" maxlength="150" />
+								<input name="url" type="text" value="<?php echo $imgArr["url"];?>" style="width:90%;" />
 								<?php if(stripos($imgArr["url"],$imageRootUrl) === 0){ ?>
 								<div style="margin-left:70px;">
 									<input type="checkbox" name="renameweburl" value="1" />
@@ -209,7 +209,7 @@ if($imgArr){
 							</div>
 							<div style="margin-top:2px;">
 								<b>Thumbnail:</b><br/>
-								<input name="thumbnailurl" type="text" value="<?php echo $imgArr["thumbnailurl"];?>" style="width:90%;" maxlength="150">
+								<input name="thumbnailurl" type="text" value="<?php echo $imgArr["thumbnailurl"];?>" style="width:90%;" />
 								<?php if(stripos($imgArr["thumbnailurl"],$imageRootUrl) === 0){ ?>
 								<div style="margin-left:70px;">
 									<input type="checkbox" name="renametnurl" value="1" />
@@ -220,7 +220,7 @@ if($imgArr){
 							</div>
 							<div style="margin-top:2px;">
 								<b>Large Image:</b><br/>
-								<input name="originalurl" type="text" value="<?php echo $imgArr["originalurl"];?>" style="width:90%;" maxlength="150">
+								<input name="originalurl" type="text" value="<?php echo $imgArr["originalurl"];?>" style="width:90%;" />
 								<?php if(stripos($imgArr["originalurl"],$imageRootUrl) === 0){ ?>
 								<div style="margin-left:80px;">
 									<input type="checkbox" name="renameorigurl" value="1" />

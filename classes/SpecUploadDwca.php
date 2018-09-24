@@ -73,8 +73,9 @@ class SpecUploadDwca extends SpecUploadBase{
 				elseif($err == 7) $msg = 'failed to write file to disk';
 				elseif($err == 8) $msg = 'a PHP extension stopped the file upload';
 
-				$this->errorStr = 'ERROR uploading file (path: '.$targetPath.')';
-				if(!is_writable($this->uploadTargetPath)) $this->errorStr .= ', Permission issue: target directory is not writable';
+				$this->errorStr = 'ERROR uploading file: ';
+				if($msg) $this->errorStr .= $msg.'; ';
+				if(!is_writable($this->uploadTargetPath)) $this->errorStr .= 'permission issue, target directory is not writable (path: '.$targetPath.')';
 				$this->outputMsg('<li>'.$this->errorStr.' </li>');
 			}
 			if($this->unpackArchive()){
