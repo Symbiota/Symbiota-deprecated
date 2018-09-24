@@ -759,7 +759,7 @@ class ProfileManager{
 				}
 				fputcsv($specFH, $r);
 			}
-    		$rs->close();
+			$rs->free();
     	}
     	fclose($specFH);
 		if($zipFile && $zipArchive){
@@ -1000,7 +1000,7 @@ class ProfileManager{
                     $pkArr['portal'][] = $r->role;
                 }
             }
-            $rs->close();
+            $rs->free();
         }
         if(in_array('SuperAdmin',$pkArr['portal'])){
             $pkArr['collections']['CollAdmin'] = $this->getCollectionArr();
@@ -1040,7 +1040,7 @@ class ProfileManager{
                 $retArr[$r->CollID]['CollectionCode'] = $r->CollectionCode;
                 $retArr[$r->CollID]['InstitutionCode'] = $r->InstitutionCode;
             }
-            $rs->close();
+            $rs->free();
         }
 
         return $retArr;
@@ -1054,7 +1054,7 @@ class ProfileManager{
             while($r = $rs->fetch_object()){
                 $retArr[$r->CLID]['ChecklistName'] = $r->Name;
             }
-            $rs->close();
+            $rs->free();
         }
 
         return $retArr;
@@ -1068,7 +1068,7 @@ class ProfileManager{
             while($r = $rs->fetch_object()){
                 $retArr[$r->pid]['ProjectName'] = $r->projname;
             }
-            $rs->close();
+            $rs->free();
         }
 
         return $retArr;
@@ -1081,7 +1081,7 @@ class ProfileManager{
         $result = $this->conn->query($sql);
         if($row = $result->fetch_object()){
             $cnt = $row->cnt;
-            $result->close();
+            $result->free();
         }
         return $cnt;
     }
@@ -1093,7 +1093,7 @@ class ProfileManager{
         $result = $this->conn->query($sql);
         if($row = $result->fetch_object()){
             $uid = $row->uid;
-            $result->close();
+            $result->free();
         }
         return $uid;
     }

@@ -465,48 +465,45 @@ $taxaArray = $clManager->getTaxaList($pageNumber,($printMode?0:500));
 							<div style="text-align:center;padding:10px">
 								<?php
 								$coordArr = $clManager->getVoucherCoordinates(0,true);
-								$googleUrl = '//maps.googleapis.com/maps/api/staticmap?size=170x170&maptype=terrain';
+								//$googleUrl = '//maps.googleapis.com/maps/api/staticmap?size=170x170&maptype=terrain';
+								$googleUrl = $CLIENT_ROOT.'/images/world.png?';
 								if(array_key_exists('GOOGLE_MAP_KEY',$GLOBALS) && $GLOBALS['GOOGLE_MAP_KEY']) $googleUrl .= '&key='.$GLOBALS['GOOGLE_MAP_KEY'];
 								if($coordArr){
-									$googleUrl .= '&markers=size:tiny|'.implode('|',$coordArr);
+									//$googleUrl .= '&markers=size:tiny|'.implode('|',$coordArr);
 									?>
-									<div>
+									<span title="Display Vouchers in Simply Map">
 										<a href="checklistmap.php?clid=<?php echo $clid.'&thesfilter='.$thesFilter.'&taxonfilter='.$taxonFilter; ?>" target="_blank">
-											<img src="<?php echo $googleUrl; ?>" style="border:0px;" /><br/>
+											<img src="<?php echo $googleUrl; ?>" style="border:0px;width:30px" />
 										</a>
-									</div>
+									</span>
+									<?php
+								}
+								if($coordArr){
+									?>
+									<span style="margin:5px">
+										<a href="../collections/map/index.php?clid=<?php echo $clid.'&cltype=vouchers&taxonfilter='.$taxonFilter; ?>&db=all&maptype=occquery&type=1&reset=1" target="_blank"><img src="../images/world.png" style="width:30px" title="<?php echo (isset($LANG['VOUCHERS_DYNAMIC_MAP'])?$LANG['VOUCHERS_DYNAMIC_MAP']:'Display Vouchers in Dynamic Map'); ?>" /></a>
+									</span>
+									<?php
+								}
+								if(false && $clArray['dynamicsql']){
+									?>
+									<span style="margin:5px">
+										<a href="../collections/map/index.php?clid=<?php echo $clid.'&cltype=all&taxonfilter='.$taxonFilter; ?>&db=all&maptype=occquery&type=1&reset=1" target="_blank">
+											<?php
+											if($coordArr){
+												echo '<img src="../images/world.png" style="width:30px" title="'.(isset($LANG['OCCUR_DYNAMIC_MAP'])?$LANG['OCCUR_DYNAMIC_MAP']:'Display All Occurrence in Dynamic Map').'" />';
+											}
+											else{
+												$polygonCoordArr = $clManager->getPolygonCoordinates();
+												$googleUrl .= '&markers=size:tiny|'.implode('|',$polygonCoordArr);
+												echo '<img src="'.$googleUrl.'" style="border:0px;" /><br/>';
+											}
+											?>
+										</a>
+									</span>
 									<?php
 								}
 								?>
-								<div style="margin-top:5px">
-									<?php
-									if($coordArr){
-										?>
-										<span style="margin:5px">
-											<a href="../collections/map/index.php?clid=<?php echo $clid.'&cltype=vouchers&taxonfilter='.$taxonFilter; ?>&db=all&maptype=occquery&type=1&reset=1" target="_blank"><img src="../images/world.png" style="width:18px" title="<?php echo (isset($LANG['VOUCHERS_DYNAMIC_MAP'])?$LANG['VOUCHERS_DYNAMIC_MAP']:'Display Vouchers in Dynamic Map'); ?>" /></a>
-										</span>
-										<?php
-									}
-									if(false && $clArray['dynamicsql']){
-										?>
-										<span style="margin:5px">
-											<a href="../collections/map/index.php?clid=<?php echo $clid.'&cltype=all&taxonfilter='.$taxonFilter; ?>&db=all&maptype=occquery&type=1&reset=1" target="_blank">
-												<?php
-												if($coordArr){
-													echo '<img src="../images/world.png" style="width:18px" title="'.(isset($LANG['OCCUR_DYNAMIC_MAP'])?$LANG['OCCUR_DYNAMIC_MAP']:'Display All Occurrence in Dynamic Map').'" />';
-												}
-												else{
-													$polygonCoordArr = $clManager->getPolygonCoordinates();
-													$googleUrl .= '&markers=size:tiny|'.implode('|',$polygonCoordArr);
-													echo '<img src="'.$googleUrl.'" style="border:0px;" /><br/>';
-												}
-												?>
-											</a>
-										</span>
-										<?php
-									}
-									?>
-								</div>
 							</div>
 						<?php
 						}

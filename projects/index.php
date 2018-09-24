@@ -376,7 +376,8 @@ if(!$researchList && !$editMode){
 							</div>
 							<?php
 						}
-						$gMapUrl = $projManager->getGoogleStaticMap("research");
+						//$gMapUrl = $projManager->getGoogleStaticMap();
+						$gMapUrl = $CLIENT_ROOT.'/images/mappoint.png';
 						if($gMapUrl){
 							?>
 							<div style="float:right;text-align:center;">
