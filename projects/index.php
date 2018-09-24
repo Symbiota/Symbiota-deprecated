@@ -382,7 +382,7 @@ if(!$researchList && !$editMode){
 							?>
 							<div style="float:right;text-align:center;">
 								<a href="../checklists/clgmap.php?pid=<?php echo $pid;?>" title="Map Checklists">
-									<img src="<?php echo $gMapUrl; ?>" title="<?php echo $LANG['MAPREP'];?>" alt="Map representation of checklists" />
+									<img src="<?php echo $gMapUrl; ?>" title="<?php echo $LANG['MAPREP'];?>" style="width:100px;" alt="Map representation of checklists" />
 									<br/>
 									<?php echo $LANG['OPENMAP'];?>
 								</a>
