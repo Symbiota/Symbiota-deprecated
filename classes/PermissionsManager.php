@@ -409,7 +409,7 @@ class PermissionsManager{
 			'FROM userroles r INNER JOIN users u ON r.uid = u.uid '.
 			'INNER JOIN users u2 ON r.uidassignedby = u2.uid '.
 			'WHERE (r.tablepk IN('.implode(',',array_keys($genObsCollidArr)).')) AND (r.role = "CollEditor") '.
-			'AND (r.uidassignedby NOT IN(SELECT uid FROM userroles WHERE role = "SuperAdmin") OR r.uidassignedby = '.$GLOBALS['SYMB_UID'].') '.
+			'AND (r.uidassignedby NOT IN(SELECT uid FROM userroles WHERE role = "SuperAdmin" AND uid != '.$GLOBALS['SYMB_UID'].')) '.
 			'AND (r.uidassignedby IN(SELECT uid FROM userroles WHERE (role = "CollAdmin") AND (tablepk = '.$collid.')) OR r.uidassignedby = '.$GLOBALS['SYMB_UID'].')';
 		//echo $sql;
 		$rs = $this->conn->query($sql);

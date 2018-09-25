@@ -286,7 +286,7 @@ $collManager->cleanOutArr($collData);
 									</a>
 									<div id="instcodeinfodialog">
 										The name (or acronym) in use by the institution having custody of the occurrence records. This field is required.
-										For more details, see <a href="http://darwincore.googlecode.com/svn/trunk/terms/index.htm#institutionCode" target="_blank">Darwin Core definition</a>.
+										For more details, see <a href="http://rs.tdwg.org/dwc/terms/index.htm#institutionCode" target="_blank">Darwin Core definition</a>.
 									</div>
 								</td>
 							</tr>
@@ -301,7 +301,7 @@ $collManager->cleanOutArr($collData);
 									</a>
 									<div id="collcodeinfodialog">
 										The name, acronym, or code identifying the collection or data set from which the record was derived. This field is optional.
-										For more details, see <a href="http://darwincore.googlecode.com/svn/trunk/terms/index.htm#collectionCode" target="_blank">Darwin Core definition</a>.
+										For more details, see <a href="http://rs.tdwg.org/dwc/terms/index.htm#collectionCode" target="_blank">Darwin Core definition</a>.
 									</div>
 								</td>
 							</tr>
@@ -444,7 +444,7 @@ $collManager->cleanOutArr($collData);
 									<div id="rightsinfodialog">
 										A legal document giving official permission to do something with the resource.
 										This field can be limited to a set of values by modifying the portal's central configuration file.
-										For more details, see <a href="http://darwincore.googlecode.com/svn/trunk/terms/index.htm#dcterms:license" target="_blank">Darwin Core definition</a>.
+										For more details, see <a href="http://rs.tdwg.org/dwc/terms/index.htm#dcterms:license" target="_blank">Darwin Core definition</a>.
 									</div>
 								</td>
 							</tr>
@@ -459,7 +459,7 @@ $collManager->cleanOutArr($collData);
 									</a>
 									<div id="rightsholderinfodialog">
 										The organization or person managing or owning the rights of the resource.
-										For more details, see <a href="http://darwincore.googlecode.com/svn/trunk/terms/index.htm#dcterms:rightsHolder" target="_blank">Darwin Core definition</a>.
+										For more details, see <a href="http://rs.tdwg.org/dwc/terms/index.htm#dcterms:rightsHolder" target="_blank">Darwin Core definition</a>.
 									</div>
 								</td>
 							</tr>
@@ -474,7 +474,7 @@ $collManager->cleanOutArr($collData);
 									</a>
 									<div id="accessrightsinfodialog">
 										Informations or a URL link to page with details explaining how one can use the data.
-										See <a href="http://darwincore.googlecode.com/svn/trunk/terms/index.htm#dcterms:accessRights" target="_blank">Darwin Core definition</a>.
+										See <a href="http://rs.tdwg.org/dwc/terms/index.htm#dcterms:accessRights" target="_blank">Darwin Core definition</a>.
 									</div>
 								</td>
 							</tr>
@@ -496,7 +496,7 @@ $collManager->cleanOutArr($collData);
 									<div id="guidinfodialog">
 										Occurrence Id is generally used for Snapshot datasets when a Global Unique Identifier (GUID) field
 										is supplied by the source database (e.g. Specify database) and the GUID is mapped to the
-										<a href="http://darwincore.googlecode.com/svn/trunk/terms/index.htm#occurrenceID" target="_blank">occurrenceId</a> field.
+										<a href="http://rs.tdwg.org/dwc/terms/index.htm#occurrenceID" target="_blank">occurrenceId</a> field.
 										The use of the Occurrence Id as the GUID is not recommended for live datasets.
 										Catalog Number can be used when the value within the catalog number field is globally unique.
 										The Symbiota Generated GUID (UUID) option will trigger the Symbiota data portal to automatically
