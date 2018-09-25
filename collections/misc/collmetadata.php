@@ -594,26 +594,27 @@ $collManager->cleanOutArr($collData);
 								?>
 								<tr>
 									<td>
-										Collection Type:
+										Dataset Type:
 									</td>
 									<td>
 										<select name="colltype">
-											<option>Preserved Specimens</option>
-											<option <?php echo ($collid && $collData["colltype"]=='Observations'?'SELECTED':''); ?>>Observations</option>
-											<option <?php echo ($collid && $collData["colltype"]=='General Observations'?'SELECTED':''); ?>>General Observations</option>
+											<option value="Preserved Specimens">Preserved Specimens</option>
+											<option <?php echo ($collid && $collData["colltype"]=='Observations'?'SELECTED':''); ?> value="Observations">Observations</option>
+											<option <?php echo ($collid && $collData["colltype"]=='General Observations'?'SELECTED':''); ?> value="General Observations">Personal Observation Management</option>
 										</select>
 										<a id="colltypeinfo" href="#" onclick="return false" title="More information about Collection Type">
 											<img src="../../images/info.png" style="width:15px;" />
 										</a>
 										<div id="colltypeinfodialog">
-											Preserve Specimens means that physical samples exist and can be inspected by researchers.
+											Preserved Specimens signify a collection type that contains physical samples that are available for inspection by researchers and taxonomic experts.
 											Use Observations when the record is not based on a physical specimen.
-											General Observations are used for setting up group projects where registered users
-											can independently manage their own dataset directly within the single collection. General Observation
-											collections are typically used by field researchers to manage their collection data and print labels
+											Personal Observation Management is a dataset where registered users
+											can independently manage their own subset of records. Records entered into this dataset are explicitly linked to the user&apos;s profile
+											and can only be edited by them. This type of collection
+											is typically used by field researchers to manage their collection data and print labels
 											prior to depositing the physical material within a collection. Even though personal collections
 											are represented by a physical sample, they are classified as &quot;observations&quot; until the
-											physical material is deposited within a publicly available collection with active curation.
+											physical material is publicly available within a collection.
 										</div>
 									</td>
 								</tr>

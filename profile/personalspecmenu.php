@@ -3,15 +3,17 @@ include_once('../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/ProfileManager.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 
-$collId = array_key_exists("collid",$_REQUEST)?$_REQUEST["collid"]:0;
-$formSubmit = array_key_exists("formsubmit",$_REQUEST)?$_REQUEST["formsubmit"]:"";
-
 $specHandler = new ProfileManager();
+$specHandler->setUid($SYMB_UID);
 
-$collArr = array();
-if($SYMB_UID){
-	$specHandler->setUid($SYMB_UID);
-	$collArr = $specHandler->getPersonalCollectionArr();
+$genArr = array();
+$cArr = array();
+$oArr = array();
+$collArr = $specHandler->getCollectionArr($SYMB_UID);
+foreach($collArr as $id => $collectionArr){
+	if($collectionArr['colltype'] == 'General Observations') $genArr[$id] = $collectionArr;
+	elseif($collectionArr['colltype'] == 'Preserved Specimens') $cArr[$id] = $collectionArr;
+	elseif($collectionArr['colltype'] == 'Observations') $oArr[$id] = $collectionArr;
 }
 
 $statusStr = '';
@@ -29,85 +31,78 @@ if($SYMB_UID){
 		<hr/>
 		<?php
 	}
-	$genArr = array();
-	if(array_key_exists('General Observations',$collArr)){
-		$genArr = $collArr['General Observations'];
-		foreach($genArr as $collId => $cName){
-			?>
-			<fieldset style="margin:15px;padding:15px;">
-				<legend style="font-weight:bold;"><b><?php echo $cName; ?></b></legend>
-				<div style="margin-left:10px">
-					Total Record Count: <?php echo $specHandler->getPersonalOccurrenceCount($collId); ?>
-				</div>
-				<ul>
-					<li>
-						<a href="../collections/editor/occurrencetabledisplay.php?collid=<?php echo $collId.'&ouid='.$SYMB_UID; ?>">
-							Display All Records
-						</a>
-					</li>
-					<li>
-						<a href="../collections/editor/occurrencetabledisplay.php?collid=<?php echo $collId.'&ouid='.$SYMB_UID; ?>&displayquery=1">
-							Search Records
-						</a>
-					</li>
-					<li>
-						<a href="../collections/editor/occurrenceeditor.php?gotomode=1&collid=<?php echo $collId; ?>">
-							Add a New Record
-						</a>
-					</li>
-					<li>
-						<a href="../collections/reports/labelmanager.php?collid=<?php echo $collId; ?>">
-							Print Labels
-						</a>
-					</li>
-					<li>
-						<a href="../collections/editor/observationsubmit.php?collid=<?php echo $collId; ?>">
-							Submit image vouchered observation
-						</a>
-					</li>
-					<li>
-						<a href="../collections/editor/editreviewer.php?display=1&collid=<?php echo $collId; ?>">
-							Review/Verify Occurrence Edits
-						</a>
-					</li>
-					<!--
-					<li>Import csv file</li>
-					 -->
-					<li>
-						<a href="#" onclick="newWindow = window.open('personalspecbackup.php?collid=<?php echo $collId; ?>','bucollid','scrollbars=1,toolbar=0,resizable=1,width=400,height=200,left=20,top=20');">
-							Backup file download (CSV extract)
-						</a>
-					</li>
-					<li>
-						<a href="../collections/misc/commentlist.php?collid=<?php echo $collId; ?>">
-							View User Comments
-						</a>
-						<?php if($commCnt = $specHandler->unreviewedCommentsExist($collId)) echo '- <span style="color:orange">'.$commCnt.' unreviewed comments</span>'; ?>
-					</li>
-					<!--
-					<li>
-						<a href="../collections/cleaning/index.php?collid=<?php echo $collId; ?>">
-							Data Cleaning Module
-						</a>
-					</li>
-					 -->
-				</ul>
-			</fieldset>
-			<?php
-		}
+	foreach($genArr as $collId => $secArr){
+		$cName = $secArr['collectionname'].' ('.$secArr['institutioncode'].($secArr['collectioncode']?'-'.$secArr['collectioncode']:'').')';
+		?>
+		<fieldset style="margin:15px;padding:15px;">
+			<legend style="font-weight:bold;"><b><?php echo $cName; ?></b></legend>
+			<div style="margin-left:10px">
+				Total Record Count: <?php echo $specHandler->getPersonalOccurrenceCount($collId); ?>
+			</div>
+			<ul>
+				<li>
+					<a href="../collections/editor/occurrencetabledisplay.php?collid=<?php echo $collId.'&ouid='.$SYMB_UID; ?>">
+						Display All Records
+					</a>
+				</li>
+				<li>
+					<a href="../collections/editor/occurrencetabledisplay.php?collid=<?php echo $collId.'&ouid='.$SYMB_UID; ?>&displayquery=1">
+						Search Records
+					</a>
+				</li>
+				<li>
+					<a href="../collections/editor/occurrenceeditor.php?gotomode=1&collid=<?php echo $collId; ?>">
+						Add a New Record
+					</a>
+				</li>
+				<li>
+					<a href="../collections/reports/labelmanager.php?collid=<?php echo $collId; ?>">
+						Print Labels
+					</a>
+				</li>
+				<li>
+					<a href="../collections/editor/observationsubmit.php?collid=<?php echo $collId; ?>">
+						Submit image vouchered observation
+					</a>
+				</li>
+				<li>
+					<a href="../collections/editor/editreviewer.php?display=1&collid=<?php echo $collId; ?>">
+						Review/Verify Occurrence Edits
+					</a>
+				</li>
+				<!--
+				<li>Import csv file</li>
+				 -->
+				<li>
+					<a href="#" onclick="newWindow = window.open('personalspecbackup.php?collid=<?php echo $collId; ?>','bucollid','scrollbars=1,toolbar=0,resizable=1,width=400,height=200,left=20,top=20');">
+						Backup file download (CSV extract)
+					</a>
+				</li>
+				<li>
+					<a href="../collections/misc/commentlist.php?collid=<?php echo $collId; ?>">
+						View User Comments
+					</a>
+					<?php if($commCnt = $specHandler->unreviewedCommentsExist($collId)) echo '- <span style="color:orange">'.$commCnt.' unreviewed comments</span>'; ?>
+				</li>
+				<!--
+				<li>
+					<a href="../collections/cleaning/index.php?collid=<?php echo $collId; ?>">
+						Data Cleaning Module
+					</a>
+				</li>
+				 -->
+			</ul>
+		</fieldset>
+		<?php
 	}
-	else{
-		echo '<div>Personal specimen management has not been setup for your login. Please contact the site administrator (<a href="mailto:'.$adminEmail.'">'.$adminEmail.'</a>) to activate this feature.</div>';
-	}
-	$cArr = array();
-	if(array_key_exists('Preserved Specimens',$collArr)){
-		$cArr = $collArr['Preserved Specimens'];
+	if($cArr){
 		?>
 		<fieldset style="margin:15px;padding:15px;">
 			<legend style="font-weight:bold;"><b>Collection Management</b></legend>
 			<ul>
 				<?php
-				foreach($cArr as $collId => $cName){
+				foreach($cArr as $collId => $secArr){
+					$cName = $secArr['collectionname'].' ('.$secArr['institutioncode'].($secArr['collectioncode']?'-'.$secArr['collectioncode']:'').')';
 					echo '<li><a href="../collections/misc/collprofiles.php?collid='.$collId.'&emode=1">'.$cName.'</a></li>';
 				}
 				?>
@@ -115,15 +110,14 @@ if($SYMB_UID){
 		</fieldset>
 		<?php
 	}
-	$oArr = array();
-	if(array_key_exists('Observations',$collArr)){
-		$oArr = $collArr['Observations'];
+	if($oArr){
 		?>
 		<fieldset style="margin:15px;padding:15px;">
 			<legend style="font-weight:bold;"><b>Observation Project Management</b></legend>
 			<ul>
 				<?php
-				foreach($oArr as $collId => $cName){
+				foreach($oArr as $collId => $secArr){
+					$cName = $secArr['collectionname'].' ('.$secArr['institutioncode'].($secArr['collectioncode']?'-'.$secArr['collectioncode']:'').')';
 					echo '<li><a href="../collections/misc/collprofiles.php?collid='.$collId.'&emode=1">'.$cName.'</a></li>';
 				}
 				?>
@@ -140,7 +134,8 @@ if($SYMB_UID){
 				<legend style="font-weight:bold;"><b>General Observation Administration</b></legend>
 				<ul>
 					<?php
-					foreach($genAdminArr as $id => $name){
+					foreach($genAdminArr as $id => $secArr){
+						$cName = $secArr['collectionname'].' ('.$secArr['institutioncode'].($secArr['collectioncode']?'-'.$secArr['collectioncode']:'').')';
 						echo '<li><a href="../collections/misc/collprofiles.php?collid='.$id.'&emode=1">'.$name.'</a></li>';
 					}
 					?>
