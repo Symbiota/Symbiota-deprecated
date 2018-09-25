@@ -286,7 +286,7 @@ $collManager->cleanOutArr($collData);
 									</a>
 									<div id="instcodeinfodialog">
 										The name (or acronym) in use by the institution having custody of the occurrence records. This field is required.
-										For more details, see <a href="http://darwincore.googlecode.com/svn/trunk/terms/index.htm#institutionCode" target="_blank">Darwin Core definition</a>.
+										For more details, see <a href="http://rs.tdwg.org/dwc/terms/index.htm#institutionCode" target="_blank">Darwin Core definition</a>.
 									</div>
 								</td>
 							</tr>
@@ -301,7 +301,7 @@ $collManager->cleanOutArr($collData);
 									</a>
 									<div id="collcodeinfodialog">
 										The name, acronym, or code identifying the collection or data set from which the record was derived. This field is optional.
-										For more details, see <a href="http://darwincore.googlecode.com/svn/trunk/terms/index.htm#collectionCode" target="_blank">Darwin Core definition</a>.
+										For more details, see <a href="http://rs.tdwg.org/dwc/terms/index.htm#collectionCode" target="_blank">Darwin Core definition</a>.
 									</div>
 								</td>
 							</tr>
@@ -444,7 +444,7 @@ $collManager->cleanOutArr($collData);
 									<div id="rightsinfodialog">
 										A legal document giving official permission to do something with the resource.
 										This field can be limited to a set of values by modifying the portal's central configuration file.
-										For more details, see <a href="http://darwincore.googlecode.com/svn/trunk/terms/index.htm#dcterms:license" target="_blank">Darwin Core definition</a>.
+										For more details, see <a href="http://rs.tdwg.org/dwc/terms/index.htm#dcterms:license" target="_blank">Darwin Core definition</a>.
 									</div>
 								</td>
 							</tr>
@@ -459,7 +459,7 @@ $collManager->cleanOutArr($collData);
 									</a>
 									<div id="rightsholderinfodialog">
 										The organization or person managing or owning the rights of the resource.
-										For more details, see <a href="http://darwincore.googlecode.com/svn/trunk/terms/index.htm#dcterms:rightsHolder" target="_blank">Darwin Core definition</a>.
+										For more details, see <a href="http://rs.tdwg.org/dwc/terms/index.htm#dcterms:rightsHolder" target="_blank">Darwin Core definition</a>.
 									</div>
 								</td>
 							</tr>
@@ -474,7 +474,7 @@ $collManager->cleanOutArr($collData);
 									</a>
 									<div id="accessrightsinfodialog">
 										Informations or a URL link to page with details explaining how one can use the data.
-										See <a href="http://darwincore.googlecode.com/svn/trunk/terms/index.htm#dcterms:accessRights" target="_blank">Darwin Core definition</a>.
+										See <a href="http://rs.tdwg.org/dwc/terms/index.htm#dcterms:accessRights" target="_blank">Darwin Core definition</a>.
 									</div>
 								</td>
 							</tr>
@@ -496,7 +496,7 @@ $collManager->cleanOutArr($collData);
 									<div id="guidinfodialog">
 										Occurrence Id is generally used for Snapshot datasets when a Global Unique Identifier (GUID) field
 										is supplied by the source database (e.g. Specify database) and the GUID is mapped to the
-										<a href="http://darwincore.googlecode.com/svn/trunk/terms/index.htm#occurrenceID" target="_blank">occurrenceId</a> field.
+										<a href="http://rs.tdwg.org/dwc/terms/index.htm#occurrenceID" target="_blank">occurrenceId</a> field.
 										The use of the Occurrence Id as the GUID is not recommended for live datasets.
 										Catalog Number can be used when the value within the catalog number field is globally unique.
 										The Symbiota Generated GUID (UUID) option will trigger the Symbiota data portal to automatically
@@ -594,26 +594,27 @@ $collManager->cleanOutArr($collData);
 								?>
 								<tr>
 									<td>
-										Collection Type:
+										Dataset Type:
 									</td>
 									<td>
 										<select name="colltype">
-											<option>Preserved Specimens</option>
-											<option <?php echo ($collid && $collData["colltype"]=='Observations'?'SELECTED':''); ?>>Observations</option>
-											<option <?php echo ($collid && $collData["colltype"]=='General Observations'?'SELECTED':''); ?>>General Observations</option>
+											<option value="Preserved Specimens">Preserved Specimens</option>
+											<option <?php echo ($collid && $collData["colltype"]=='Observations'?'SELECTED':''); ?> value="Observations">Observations</option>
+											<option <?php echo ($collid && $collData["colltype"]=='General Observations'?'SELECTED':''); ?> value="General Observations">Personal Observation Management</option>
 										</select>
 										<a id="colltypeinfo" href="#" onclick="return false" title="More information about Collection Type">
 											<img src="../../images/info.png" style="width:15px;" />
 										</a>
 										<div id="colltypeinfodialog">
-											Preserve Specimens means that physical samples exist and can be inspected by researchers.
+											Preserved Specimens signify a collection type that contains physical samples that are available for inspection by researchers and taxonomic experts.
 											Use Observations when the record is not based on a physical specimen.
-											General Observations are used for setting up group projects where registered users
-											can independently manage their own dataset directly within the single collection. General Observation
-											collections are typically used by field researchers to manage their collection data and print labels
+											Personal Observation Management is a dataset where registered users
+											can independently manage their own subset of records. Records entered into this dataset are explicitly linked to the user&apos;s profile
+											and can only be edited by them. This type of collection
+											is typically used by field researchers to manage their collection data and print labels
 											prior to depositing the physical material within a collection. Even though personal collections
 											are represented by a physical sample, they are classified as &quot;observations&quot; until the
-											physical material is deposited within a publicly available collection with active curation.
+											physical material is publicly available within a collection.
 										</div>
 									</td>
 								</tr>

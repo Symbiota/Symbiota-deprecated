@@ -289,42 +289,48 @@ if($collMetadata['colltype'] == 'General Observations') $isGenObs = 1;
 						}
 						?>
 					</ul>
-					<fieldset style="margin:40px 15px 0px 15px;padding:15px;">
-						<legend><b>New Sponsorship</b></legend>
-						<form name="addpersobsman" action="collpermissions.php" method="post" onsubmit="return verifyAddRights(this)">
-							<div>
-								<select name="uid">
-									<option value="">Select User</option>
-									<option value="">-----------------------------------</option>
+					<?php
+					if((array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collId,$USER_RIGHTS["CollAdmin"]))){
+						?>
+						<fieldset style="margin:40px 15px 0px 15px;padding:15px;">
+							<legend><b>New Sponsorship</b></legend>
+							<form name="addpersobsman" action="collpermissions.php" method="post" onsubmit="return verifyAddRights(this)">
+								<div>
+									<select name="uid">
+										<option value="">Select User</option>
+										<option value="">-----------------------------------</option>
+										<?php
+										foreach($userArr as $uid => $uName){
+											echo '<option value="'.$uid.'">'.$uName.'</option>';
+										}
+										?>
+									</select>
+								</div>
+								<div>
 									<?php
-									foreach($userArr as $uid => $uName){
-										echo '<option value="'.$uid.'">'.$uName.'</option>';
+									if(count($genObsArr) == 1){
+										echo '<input name="persobscollid" type="hidden" value="'.key($genObsArr).'" />';
+									}
+									else{
+										echo '<select name="persobscollid">';
+										echo '<option value="">Select Personal Observation Project</option>';
+										echo '<option value="">-----------------------------------</option>';
+										foreach($genObsArr as $persObsCollid => $perObsName){
+											echo '<option value="'.$persObsCollid.'">'.$perObsName.'</option>';
+										}
+										echo '</select>';
 									}
 									?>
-								</select>
-							</div>
-							<div>
-								<?php
-								if(count($genObsArr) == 1){
-									echo '<input name="persobscollid" type="hidden" value="'.key($genObsArr).'" />';
-								}
-								else{
-									echo '<select name="persobscollid">';
-									echo '<option value="">Select Personal Observation Project</option>';
-									echo '<option value="">-----------------------------------</option>';
-									foreach($genObsArr as $persObsCollid => $perObsName){
-										echo '<option value="'.$persObsCollid.'">'.$perObsName.'</option>';
-									}
-									echo '</select>';
-								}
-								?>
-							</div>
-							<div style="margin:15px;">
-								<input type="hidden" name="collid" value="<?php echo $collId; ?>" />
-								<input name="action" type="submit" value="Sponsor User" />
-							</div>
-						</form>
-					</fieldset>
+								</div>
+								<div style="margin:15px;">
+									<input type="hidden" name="collid" value="<?php echo $collId; ?>" />
+									<input name="action" type="submit" value="Sponsor User" />
+								</div>
+							</form>
+						</fieldset>
+						<?php
+					}
+					?>
 				</fieldset>
 				<?php
 			}
