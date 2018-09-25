@@ -102,7 +102,6 @@ class KeyMassUpdate extends KeyManager{
 			$tidArr[$r->tidaccepted] = $r->tidaccepted;
 		}
 		$rs->free();
-
 		if(array_key_exists('exclude', $tidLimitArr)){
 			$sql = 'SELECT DISTINCT ts.tid '.
 				'FROM taxstatus ts INNER JOIN taxstatus ts2 ON ts.tidaccepted = ts2.tidaccepted '.
@@ -120,7 +119,7 @@ class KeyMassUpdate extends KeyManager{
 			$sql2 = 'SELECT DISTINCT t.tid, t.sciname, ts.parenttid, t.rankid '.
 				'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
 				'LEFT JOIN taxaenumtree e ON t.tid = e.parenttid '.
-				'WHERE (ts.taxauthid = '.$this->taxAuthId.') AND (e.taxauthid = '.$this->taxAuthId.') AND (ts.tid = ts.tidaccepted) '.
+				'WHERE (ts.taxauthid = '.$this->taxAuthId.') AND (e.taxauthid = '.$this->taxAuthId.' OR e.taxauthid IS NULL) AND (ts.tid = ts.tidaccepted) '.
 				'AND (e.tid IN('.implode(',',$tidArr).') OR t.tid IN('.implode(',',$tidArr).')) ';
 			if($generaOnly) $sql2 .= 'AND (t.rankid BETWEEN 140 AND 180) ';
 			else  $sql2 .= 'AND (t.rankid BETWEEN 140 AND 220) ';
@@ -128,7 +127,9 @@ class KeyMassUpdate extends KeyManager{
 			//echo $sql2.'<br/>';
 			$rs2 = $this->conn->query($sql2);
 			while($r2 = $rs2->fetch_object()){
-				$this->taxaArr[$r2->parenttid][$r2->tid] = $r2->sciname;
+				$pTid = $r2->parenttid;
+				if($r2->rankid == 140) $pTid = 'p'.$r2->tid;
+				$this->taxaArr[$pTid][$r2->tid] = $r2->sciname;
 				$tidArr[$r2->tid] = $r2->tid;
 			}
 			$rs2->free();
@@ -150,7 +151,6 @@ class KeyMassUpdate extends KeyManager{
 			$this->headerStr .= '</tr>'."\n";
 			$this->headerStr .= '<tr><td align="right" colspan="'.(count($this->stateArr)+1).'"><input type="submit" name="action" value="Save Changes" onclick="submitAttrs()" /></td></tr>';
 			echo $this->headerStr;
-
 			foreach($this->taxaArr as $parentTid => $tArr){
 				if(!in_array($parentTid, $tidArr)){
 					$this->processTaxa($parentTid);
