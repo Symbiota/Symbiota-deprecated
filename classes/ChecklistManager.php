@@ -480,8 +480,9 @@ class ChecklistManager {
 					$sqlWhere .= "OR (ctl.familyoverride = '".$this->taxonFilter."') ";
 				}
 				if($this->searchSynonyms){
-					$sqlWhere .= "OR (ts.tidaccepted IN(SELECT ts2.tidaccepted FROM taxa t2 INNER JOIN taxstatus ts2 ON t2.tid = ts2.tid ".
-						"WHERE (t2.sciname Like '".$this->taxonFilter."%'))) ";
+					$sqlWhere .= "OR (ts.tidaccepted IN(SELECT ts2.tidaccepted FROM taxa t2 INNER JOIN taxstatus ts2 ON t2.tid = ts2.tid WHERE (t2.sciname Like '".$this->taxonFilter."%') ";
+					//if(substr_count($this->taxonFilter,' ') > 1) $sqlWhere .= 'AND (t2.rankid = 220 OR ts2.tid = ts2.tidaccepted) ';
+					$sqlWhere .= ")) ";
 				}
 				//Include parents
 				$sqlWhere .= 'OR (t.tid IN(SELECT e.tid '.

@@ -9,7 +9,7 @@ class TaxonomyUtilities {
 	 * OUTPUT: Array containing parsed values
 	 *         Keys: sciname, unitind1, unitname1, unitind2, unitname2, unitind3, unitname3, author, identificationqualifier, rankid
 	 */
-	public static function parseScientificName($inStr, $conn = null, $rankId = 0){
+	public static function parseScientificName($inStr, $conn = null, $rankId = 0, $kingdom = null){
 		//Converts scinetific name with author embedded into separate fields
 		$retArr = array('unitname1'=>'','unitname2'=>'','unitind3'=>'','unitname3'=>'');
 		if($inStr && is_string($inStr)){
@@ -109,13 +109,13 @@ class TaxonomyUtilities {
 						if($sciStrTest == 'f.' || $sciStrTest == 'fo.' || $sciStrTest == 'fo' || $sciStrTest == 'forma'){
 							self::setInfraNode($sciStr, $sciNameArr, $retArr, $authorArr, 'f.');
 						}
-						elseif($sciStrTest == 'var.' || $sciStrTest == 'var' || $sciStrTest == 'v.'){
+						elseif($sciStrTest == 'var.' || $sciStrTest == 'var' || $sciStrTest == 'v.' || $sciStrTest == 'variety'){
 							self::setInfraNode($sciStr, $sciNameArr, $retArr, $authorArr, 'var.');
 						}
-						elseif($sciStrTest == 'ssp.' || $sciStrTest == 'ssp' || $sciStrTest == 'subsp.' || $sciStrTest == 'subsp' || $sciStrTest == 'sudbsp.'){
+						elseif($sciStrTest == 'ssp.' || $sciStrTest == 'ssp' || $sciStrTest == 'subsp.' || $sciStrTest == 'subsp' || $sciStrTest == 'subspecies'){
 							self::setInfraNode($sciStr, $sciNameArr, $retArr, $authorArr, 'subsp.');
 						}
-						elseif(!$retArr['unitname3'] && ($rankId == 230 || preg_match('/^[a-z]{5,}$/',$sciStr))){
+						elseif($kingdom == 'Animalia' && !$retArr['unitname3'] && ($rankId == 230 || preg_match('/^[a-z]{5,}$/',$sciStr))){
 							$retArr['unitind3'] = '';
 							$retArr['unitname3'] = $sciStr;
 							unset($authorArr);
@@ -147,10 +147,10 @@ class TaxonomyUtilities {
 							if($makeConn) $conn->close();
 						}
 					}
+					if(array_key_exists('unitind3',$retArr) && $retArr['unitind3'] == 'ssp.'){
+						$retArr['unitind3'] == 'subsp.';
+					}
 				}
-			}
-			if(array_key_exists('unitind3',$retArr) && $retArr['unitind3'] == 'ssp.'){
-				$retArr['unitind3'] == 'subsp.';
 			}
 			//Build sciname, without author
 			$sciname = (isset($retArr['unitind1'])?$retArr['unitind1'].' ':'').$retArr['unitname1'].' ';
