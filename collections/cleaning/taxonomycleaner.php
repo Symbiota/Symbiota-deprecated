@@ -224,7 +224,9 @@ elseif($activeCollArr){
 							elseif($action == 'AnalyzingNames'){
 								echo '<ul>';
 								$cleanManager->setAutoClean($autoClean);
-								$cleanManager->setTargetKingdom($targetKingdom);
+								$kArr = explode(':',$targetKingdom);
+								$cleanManager->setTargetKingdomTid($kArr[0]);
+								$cleanManager->setTargetKingdomName($kArr[1]);
 								$startIndex = $cleanManager->analyzeTaxa($taxResource, $startIndex, $limit);
 								echo '</ul>';
 							}
