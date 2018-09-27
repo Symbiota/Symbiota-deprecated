@@ -6,6 +6,5 @@ header("Content-Type: text/html; charset=".$CHARSET);
 $recLimit = (isset($_REQUEST['reclimit'])?$_REQUEST['reclimit']:0);
 
 $mapManager = new OccurrenceMapManager();
-$coordArr = $mapManager->getCoordinateMap(0,$recLimit);
-$kmlFilePath = $mapManager->writeKMLFile($coordArr);
+$kmlFilePath = $mapManager->writeKMLFile($recLimit);
 ?>
