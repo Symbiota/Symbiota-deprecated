@@ -277,9 +277,42 @@ class OccurrenceMapManager extends OccurrenceManager {
 	}
 
 	//KML functions
-	public function writeKMLFile($coordArr){
-		global $DEFAULT_TITLE, $CLIENT_ROOT, $CHARSET;
-		$fileName = $DEFAULT_TITLE;
+	public function writeKMLFile($recLimit){
+		$start = 0;
+
+		//Get data
+		$coordArr = array();
+		if($this->sqlWhere){
+			$statsManager = new OccurrenceAccessStats();
+			$sql = 'SELECT DISTINCT o.occid, CONCAT_WS(" ",o.recordedby,IFNULL(o.recordnumber,o.eventdate)) AS collector, o.sciname, '.
+				'o.decimallatitude, o.decimallongitude, o.catalognumber, o.othercatalognumbers, c.institutioncode, c.collectioncode '.
+				'FROM omoccurrences o LEFT JOIN omcollections c ON o.collid = c.collid ';
+			$sql .= $this->getTableJoins($this->sqlWhere);
+			$sql .= $this->sqlWhere;
+			if(is_numeric($start) && is_numeric($recLimit) && $recLimit){
+				$sql .= "LIMIT ".$start.",".$recLimit;
+			}
+			//echo "<div>SQL: ".$sql."</div>"; exit;
+			$rs = $this->conn->query($sql);
+			$color = 'e69e67';
+			while($r = $rs->fetch_object()){
+				if(($r->decimallongitude <= 180 && $r->decimallongitude >= -180) && ($r->decimallatitude <= 90 && $r->decimallatitude >= -90)){
+					$sciname = $r->sciname;
+					if(!$sciname) $sciname = 'undefined';
+					$coordArr[$sciname][$r->occid]['instcode'] = $r->institutioncode;
+					if($r->collectioncode) $coordArr[$sciname][$r->occid]['collcode'] = $r->collectioncode;
+					if($r->catalognumber) $coordArr[$sciname][$r->occid]['catnum'] = $r->catalognumber;
+					if($r->othercatalognumbers) $coordArr[$sciname][$r->occid]['ocatnum'] = $r->othercatalognumbers;
+					$coordArr[$sciname][$r->occid]['collector'] = $r->collector;
+					$coordArr[$sciname][$r->occid]['lat'] = $r->decimallatitude;
+					$coordArr[$sciname][$r->occid]['lng'] = $r->decimallongitude;
+				}
+			}
+			$rs->free();
+		}
+
+		//Output data
+		$fileName = $GLOBALS['DEFAULT_TITLE'];
 		if($fileName){
 			if(strlen($fileName) > 10) $fileName = substr($fileName,0,10);
 			$fileName = str_replace(".","",$fileName);
@@ -292,47 +325,49 @@ class OccurrenceMapManager extends OccurrenceManager {
 		header ('Cache-Control: must-revalidate, post-check=0, pre-check=0');
 		header ('Content-type: application/vnd.google-earth.kml+xml');
 		header ('Content-Disposition: attachment; filename="'.$fileName.'"');
-		echo "<?xml version='1.0' encoding='".$CHARSET."'?>\n";
+		echo "<?xml version='1.0' encoding='".$GLOBALS['CHARSET']."'?>\n";
 		echo "<kml xmlns='http://www.opengis.net/kml/2.2'>\n";
 		echo "<Document>\n";
-		echo "<Folder>\n<name>".$DEFAULT_TITLE." Specimens - ".date('j F Y g:ia')."</name>\n";
+		echo "<Folder>\n<name>".$GLOBALS['DEFAULT_TITLE']." Specimens - ".date('j F Y g:ia')."</name>\n";
 
+		//Get and output data
 		$cnt = 0;
-		foreach($coordArr as $sciName => $contentArr){
-			$iconStr = $this->googleIconArr[$cnt%44];
-			$cnt++;
-			unset($contentArr["color"]);
-
-			echo "<Style id='sn_".$iconStr."'>\n";
-			echo "<IconStyle><scale>1.1</scale><Icon>";
-			echo "<href>http://maps.google.com/mapfiles/kml/".$iconStr.".png</href>";
-			echo "</Icon><hotSpot x='20' y='2' xunits='pixels' yunits='pixels'/></IconStyle>\n</Style>\n";
-			echo "<Style id='sh_".$iconStr."'>\n";
-			echo "<IconStyle><scale>1.3</scale><Icon>";
-			echo "<href>http://maps.google.com/mapfiles/kml/".$iconStr.".png</href>";
-			echo "</Icon><hotSpot x='20' y='2' xunits='pixels' yunits='pixels'/></IconStyle>\n</Style>\n";
-			echo "<StyleMap id='".htmlspecialchars(str_replace(" ","_",$sciName), ENT_QUOTES)."'>\n";
-			echo "<Pair><key>normal</key><styleUrl>#sn_".$iconStr."</styleUrl></Pair>";
-			echo "<Pair><key>highlight</key><styleUrl>#sh_".$iconStr."</styleUrl></Pair>";
-			echo "</StyleMap>\n";
-			echo "<Folder><name>".htmlspecialchars($sciName, ENT_QUOTES)."</name>\n";
-			foreach($contentArr as $occId => $pointArr){
-				echo "<Placemark>\n";
-				echo "<name>".htmlspecialchars($pointArr["identifier"], ENT_QUOTES)."</name>\n";
-				echo "<ExtendedData>\n";
-				echo "<Data name='institutioncode'>".htmlspecialchars($pointArr["institutioncode"], ENT_QUOTES)."</Data>\n";
-				echo "<Data name='collectioncode'>".htmlspecialchars($pointArr["collectioncode"], ENT_QUOTES)."</Data>\n";
-				echo "<Data name='catalognumber'>".htmlspecialchars($pointArr["catalognumber"], ENT_QUOTES)."</Data>\n";
-				echo "<Data name='othercatalognumbers'>".htmlspecialchars($pointArr["othercatalognumbers"], ENT_QUOTES)."</Data>\n";
-				echo "<Data name='DataSource'>Data retrieved from ".$DEFAULT_TITLE." Data Portal</Data>\n";
-				$url = "http://".$_SERVER["SERVER_NAME"].$CLIENT_ROOT."/collections/individual/index.php?occid=".$occId;
-				echo "<Data name='RecordURL'>".$url."</Data>\n";
-				echo "</ExtendedData>\n";
-				echo "<styleUrl>#".htmlspecialchars(str_replace(" ","_",$sciName), ENT_QUOTES)."</styleUrl>\n";
-				echo "<Point><coordinates>".implode(",",array_reverse(explode(",",$pointArr["latLngStr"]))).",0</coordinates></Point>\n";
-				echo "</Placemark>\n";
+		if($coordArr){
+			$statsManager = new OccurrenceAccessStats();
+			$color = 'e69e67';
+			foreach($coordArr as $sciname => $snArr){
+				$cnt++;
+				$iconStr = $this->googleIconArr[$cnt%44];
+				echo "<Style id='sn_".$iconStr."'>\n";
+				echo "<IconStyle><scale>1.1</scale><Icon>";
+				echo "<href>http://maps.google.com/mapfiles/kml/".$iconStr.".png</href>";
+				echo "</Icon><hotSpot x='20' y='2' xunits='pixels' yunits='pixels'/></IconStyle>\n</Style>\n";
+				echo "<Style id='sh_".$iconStr."'>\n";
+				echo "<IconStyle><scale>1.3</scale><Icon>";
+				echo "<href>http://maps.google.com/mapfiles/kml/".$iconStr.".png</href>";
+				echo "</Icon><hotSpot x='20' y='2' xunits='pixels' yunits='pixels'/></IconStyle>\n</Style>\n";
+				echo "<StyleMap id='".htmlspecialchars(str_replace(" ","_",$sciname), ENT_QUOTES)."'>\n";
+				echo "<Pair><key>normal</key><styleUrl>#sn_".$iconStr."</styleUrl></Pair>";
+				echo "<Pair><key>highlight</key><styleUrl>#sh_".$iconStr."</styleUrl></Pair>";
+				echo "</StyleMap>\n";
+				echo "<Folder><name>".htmlspecialchars($sciname, ENT_QUOTES)."</name>\n";
+				foreach($snArr as $occid => $recArr){
+					echo '<Placemark>';
+					echo '<name>'.htmlspecialchars($recArr['collector'], ENT_QUOTES).'</name>';
+					echo '<ExtendedData>';
+					echo '<Data name="institutioncode">'.htmlspecialchars($recArr['instcode'], ENT_QUOTES).'</Data>';
+					if(isset($recArr['collcode'])) echo '<Data name="collectioncode">'.htmlspecialchars($recArr['collcode'], ENT_QUOTES).'</Data>';
+					echo '<Data name="catalognumber">'.(isset($recArr['catnum'])?htmlspecialchars($recArr['catnum'], ENT_QUOTES):'').'</Data>';
+					if(isset($recArr['ocatnum'])) echo '<Data name="othercatalognumbers">'.htmlspecialchars($recArr['ocatnum'], ENT_QUOTES).'</Data>';
+					echo '<Data name="DataSource">Data retrieved from '.$GLOBALS['DEFAULT_TITLE'].' Data Portal</Data>';
+					echo '<Data name="RecordURL">http://'.$_SERVER['SERVER_NAME'].$GLOBALS['CLIENT_ROOT'].'/collections/individual/index.php?occid='.$occid.'</Data>';
+					echo '</ExtendedData>';
+					echo '<styleUrl>#'.htmlspecialchars(str_replace(' ','_',$sciname), ENT_QUOTES).'</styleUrl>';
+					echo '<Point><coordinates>'.$recArr['lng'].','.$recArr['lat'].'</coordinates></Point>';
+					echo '</Placemark>';
+				}
+				echo "</Folder>\n";
 			}
-			echo "</Folder>\n";
 		}
 		echo "</Folder>\n";
 		echo "</Document>\n";
