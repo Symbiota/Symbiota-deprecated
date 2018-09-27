@@ -141,14 +141,11 @@ class TaxonomyHarvester extends Manager{
 				$targetKey = 0;
 				$submitArr = array();
 				$rankArr = array();
-				$skipCnt = 0;
 				foreach($resultArr['results'] as $k => $tArr){
 					//Evaluate and rank each result to determine which is the best suited target
 					$rankArr[$k] = 0;
 					if($adjustedName != $tArr['name']){
-						//Skip if name doesn't match perfectly; after 3 mismatches, break
-						$skipCnt++;
-						if($skipCnt > 2) break;
+						unset($rankArr[$k]);
 						continue;
 					}
 					$taxonKingdom = $this->getColParent($tArr, 'Kingdom');
