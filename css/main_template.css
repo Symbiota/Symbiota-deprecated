@@ -18,35 +18,33 @@ body{
 
 }
 
-td.header{
-	color:#FFFFFF;
-	background-color:#026B6E;
+#header{
 	text-align:left;
 	padding:0px;
 }
 
-td.header a{
+#header a{
 
 }
 
-td.header a:hover{
+#header a:hover{
 
 }
 
-td.middleleft{
+#middleleft{
 }
 
-td.middleleftnomenu{
+#middleleftnomenu{
 }
 
-td.middlecenter{
+#middlecenter{
 	padding:0px;
 }
 
-td.middleright{
+#middleright{
 }
 
-td.footer{
+#footer{
 }
 
 /*Central div in the middle center table div */

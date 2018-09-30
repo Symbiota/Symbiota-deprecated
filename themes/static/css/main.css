@@ -15,31 +15,31 @@ body{
 
 }
 
-td.header{
+#header{
 
 }
 
-td.header a{
+#header a{
 
 }
 
-td.header a:hover{
+#header a:hover{
 
 }
 
-td.middleleft{
+#middleleft{
 }
 
-td.middleleftnomenu{
+#middleleftnomenu{
 }
 
-td.middlecenter{
+#middlecenter{
 }
 
-td.middleright{
+#middleright{
 }
 
-td.footer{
+#footer{
 }
 
 /*Left menu components*/
