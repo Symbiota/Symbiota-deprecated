@@ -85,6 +85,7 @@ if($SYMB_UID){
 	}
 	if(isset($ACTIVATE_EXSICCATI) && $ACTIVATE_EXSICCATI) $occManager->setExsiccatiMode(true);
 
+	//0 = not editor, 1 = admin, 2 = editor
 	if($IS_ADMIN || ($collId && array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collId,$USER_RIGHTS["CollAdmin"]))){
 		$isEditor = 1;
 	}
@@ -104,7 +105,16 @@ if($SYMB_UID){
 			}
 		}
 		elseif(array_key_exists("CollEditor",$USER_RIGHTS) && in_array($collId,$USER_RIGHTS["CollEditor"])){
+			//Is an assigned editor for this collection
 			$isEditor = 2;
+		}
+		elseif($crowdSourceMode && $occManager->isCrowdsourceEditor()){
+			//Is a crowdsourcing editor (CS status is open (=0) or CS status is pending (=5) and active user was original editor
+			$isEditor = 4;
+		}
+		elseif($collMap['publicedits']){
+			//Collection is set as allowing public edits
+			$isEditor = 4;
 		}
 		elseif(array_key_exists("CollTaxon",$USER_RIGHTS) && $occId){
 			//Check to see if this user is authorized to edit this occurrence given their taxonomic editing authority
@@ -113,9 +123,9 @@ if($SYMB_UID){
 		}
 	}
 	if($action == "Save Edits"){
-		$statusStr = $occManager->editOccurrence($_POST,($crowdSourceMode?1:$isEditor));
+		$statusStr = $occManager->editOccurrence($_POST,$isEditor);
 	}
-	if($isEditor == 1 || $isEditor == 2 || $crowdSourceMode){
+	if($isEditor && $isEditor != 3){
 		if($action == 'Save OCR'){
 			$statusStr = $occManager->insertTextFragment($_POST['imgid'],$_POST['rawtext'],$_POST['rawnotes'],$_POST['rawsource']);
 			if(is_numeric($statusStr)){
@@ -466,7 +476,7 @@ else{
 			<div id="titleDiv">
 				<?php
 				echo $collMap['collectionname'].' ('.$collMap['institutioncode'].($collMap['collectioncode']?':'.$collMap['collectioncode']:'').')';
-				if($isEditor == 1 || $isEditor == 2 || $crowdSourceMode){
+				if($isEditor && $isEditor != 3){
 					?>
 					<div id="querySymbolDiv">
 						<a href="#" title="Search / Filter" onclick="toggleQueryForm();"><img src="../../images/find.png" style="width:16px;" /></a>
@@ -477,7 +487,7 @@ else{
 			</div>
 			<?php
 		}
-		if($occId || $crowdSourceMode || ($isEditor && $collId)){
+		if($isEditor && ($occId || ($collId && $isEditor < 3))){
 			if(!$occArr && !$goToMode) $displayQuery = 1;
 			include 'includes/queryform.php';
 			?>
@@ -601,12 +611,14 @@ else{
 											(isset($collMap['collectioncode'])?'&collectioncode='.urlencode($collMap['collectioncode']):'').
 											(isset($collMap['institutioncode'])?'&institutioncode='.urlencode($collMap['institutioncode']):'').
 											'&catalognumber='.urlencode($occArr['catalognumber']);
-										?>
-										<li id="detTab">
-											<a href="includes/determinationtab.php?<?php echo $anchorVars.'&'.$detVars; ?>"
-												style="">Determination History</a>
-										</li>
-										<?php
+										if($isEditor < 4){
+											?>
+											<li id="detTab">
+												<a href="includes/determinationtab.php?<?php echo $anchorVars.'&'.$detVars; ?>"
+													style="">Determination History</a>
+											</li>
+											<?php
+										}
 										if($isEditor == 1 || $isEditor == 2){
 											?>
 											<li id="imgTab">
@@ -659,7 +671,7 @@ else{
 													<?php echo (defined('CATALOGNUMBERLABEL')?CATALOGNUMBERLABEL:'Catalog Number'); ?>
 													<a href="#" onclick="return dwcDoc('catalogNumber')"><img class="docimg" src="../../images/qmark.png" /></a>
 													<br/>
-													<input type="text" id="catalognumber" name="catalognumber" tabindex="2" maxlength="32" value="<?php echo array_key_exists('catalognumber',$occArr)?$occArr['catalognumber']:''; ?>" onchange="fieldChanged('catalognumber');<?php if(!defined('CATNUMDUPECHECK') || CATNUMDUPECHECK) echo 'searchDupesCatalogNumber(this.form,true)'; ?>" <?php if(!$isEditor || $isEditor == 3) echo 'disabled'; ?> />
+													<input type="text" id="catalognumber" name="catalognumber" tabindex="2" maxlength="32" value="<?php echo array_key_exists('catalognumber',$occArr)?$occArr['catalognumber']:''; ?>" onchange="fieldChanged('catalognumber');<?php if(!defined('CATNUMDUPECHECK') || CATNUMDUPECHECK) echo 'searchDupesCatalogNumber(this.form,true)'; ?>" <?php if($isEditor > 2) echo 'disabled'; ?> />
 												</div>
 												<div id="otherCatalogNumbersDiv">
 													<?php echo (defined('OTHERCATALOGNUMBERSLABEL')?OTHERCATALOGNUMBERSLABEL:'Other Cat. #s'); ?>
@@ -777,14 +789,14 @@ else{
 													<?php echo (defined('SCIENTIFICNAMELABEL')?SCIENTIFICNAMELABEL:'Scientific Name'); ?>
 													<a href="#" onclick="return dwcDoc('scientificName')"><img class="docimg" src="../../images/qmark.png" /></a>
 													<br/>
-													<input type="text" id="ffsciname" name="sciname" maxlength="250" tabindex="28" value="<?php echo array_key_exists('sciname',$occArr)?$occArr['sciname']:''; ?>" onchange="fieldChanged('sciname');" <?php if(!$isEditor || $isEditor == 3) echo 'disabled '; ?> />
+													<input type="text" id="ffsciname" name="sciname" maxlength="250" tabindex="28" value="<?php echo array_key_exists('sciname',$occArr)?$occArr['sciname']:''; ?>" onchange="fieldChanged('sciname');" <?php if($isEditor > 2) echo 'disabled '; ?> />
 													<input type="hidden" id="tidinterpreted" name="tidinterpreted" value="<?php echo array_key_exists('tidinterpreted',$occArr)?$occArr['tidinterpreted']:''; ?>" />
 													<?php
-													if(!$isEditor){
-														echo '<div style="clear:both;color:red;margin-left:5px;">Note: Full editing permissions are needed to edit an identification</div>';
-													}
-													elseif($isEditor == 3){
+													if($isEditor == 3){
 														echo '<div style="clear:both;color:red;margin-left:5px;">Limited editing rights: use determination tab to edit identification</div>';
+													}
+													elseif($isEditor == 4){
+														echo '<div style="clear:both;color:red;margin-left:5px;">Note: Full editing permissions are needed to edit an identification</div>';
 													}
 													?>
 												</div>
@@ -792,7 +804,7 @@ else{
 													<?php echo (defined('SCIENTIFICNAMEAUTHORSHIPLABEL')?SCIENTIFICNAMEAUTHORSHIPLABEL:'Author'); ?>
 													<a href="#" onclick="return dwcDoc('scientificNameAuthorship')"><img class="docimg" src="../../images/qmark.png" /></a>
 													<br/>
-													<input type="text" name="scientificnameauthorship" maxlength="100" tabindex="0" value="<?php echo array_key_exists('scientificnameauthorship',$occArr)?$occArr['scientificnameauthorship']:''; ?>" onchange="fieldChanged('scientificnameauthorship');" <?php if(!$isEditor || $isEditor == 3) echo 'disabled'; ?> />
+													<input type="text" name="scientificnameauthorship" maxlength="100" tabindex="0" value="<?php echo array_key_exists('scientificnameauthorship',$occArr)?$occArr['scientificnameauthorship']:''; ?>" onchange="fieldChanged('scientificnameauthorship');" <?php if($isEditor > 2) echo 'disabled'; ?> />
 												</div>
 											</div>
 											<div style="clear:both;padding:3px 0px 0px 10px;">
@@ -814,7 +826,7 @@ else{
 												<div id="identificationQualifierDiv">
 													<?php echo (defined('IDENTIFICATIONQUALIFIERLABEL')?IDENTIFICATIONQUALIFIERLABEL:'ID Qualifier'); ?>
 													<a href="#" onclick="return dwcDoc('identificationQualifier')"><img class="docimg" src="../../images/qmark.png" /></a>
-													<input type="text" name="identificationqualifier" tabindex="30" size="25" value="<?php echo array_key_exists('identificationqualifier',$occArr)?$occArr['identificationqualifier']:''; ?>" onchange="fieldChanged('identificationqualifier');" <?php if(!$isEditor || $isEditor == 3) echo 'disabled'; ?> />
+													<input type="text" name="identificationqualifier" tabindex="30" size="25" value="<?php echo array_key_exists('identificationqualifier',$occArr)?$occArr['identificationqualifier']:''; ?>" onchange="fieldChanged('identificationqualifier');" <?php if($isEditor > 2) echo 'disabled'; ?> />
 												</div>
 												<div  id="familyDiv">
 													<?php echo (defined('FAMILYLABEL')?FAMILYLABEL:'Family'); ?>
@@ -1306,9 +1318,9 @@ else{
 														<option value=''>-------------------</option>
 														<?php
 														foreach($processingStatusArr as $v){
-															//Don't display these options is editor is crowd sourced
+															//Don't display these options if editor is crowd sourced
 															$keyOut = strtolower($v);
-															if($isEditor || ($keyOut != 'reviewed' && $keyOut != 'closed')){
+															if($isEditor < 4 || ($keyOut != 'reviewed' && $keyOut != 'closed')){
 																echo '<option value="'.$keyOut.'" '.($pStatus==$keyOut?'SELECTED':'').'>'.ucwords($v).'</option>';
 															}
 														}
@@ -1386,7 +1398,7 @@ else{
 												foreach($processingStatusArr as $v){
 													$keyOut = strtolower($v);
 													//Don't display all options if editor is crowd sourced
-													if($isEditor || ($keyOut != 'reviewed' && $keyOut != 'closed')){
+													if($isEditor < 4 || ($keyOut != 'reviewed' && $keyOut != 'closed')){
 														echo '<option value="'.$keyOut.'" '.($crowdSourceMode && $keyOut == "pending review"?'SELECTED':'').'>'.ucwords($v).'</option>';
 													}
 												}
@@ -1394,7 +1406,7 @@ else{
 											</select>
 											<?php
 											if($occId){
-												if(($isEditor == 1 || $isEditor == 2) && !$crowdSourceMode){
+												if($isEditor == 1 || $isEditor == 2){
 													?>
 													<div style="float:right;">
 														<fieldset style="padding:15px;background-color:lightyellow;">
@@ -1452,18 +1464,21 @@ else{
 			}
 		}
 		else{
-			if($action == "Submit New Image"){
-				echo '<div style="font-weight:bold;font-size:130%;">';
-				echo 'ERROR: You may have tried to upload an image that was too large for the system. ';
-				echo 'There is a 10MB limit set within the application, though there may be tighter restrictions set on the server (PHP configurations). ';
-				echo 'Check with your server administrator to check on options for importing larger images. ';
-				echo 'Use the back button to return to previous page and try to upload a smaller image </div>';
-			}
-			elseif(!$collId && !$occId){
-				echo '<h2>ERROR: collection and occurrence identifiers are NULL</h2>';
+			if(!$collId && !$occId){
+				echo '<b>ERROR:</b> record identifiers are NULL';
 			}
 			elseif(!$isEditor){
-				echo '<h2>ERROR: you are not authorized to add occurrence records</h2>';
+				echo '<div style="margin:30px;">';
+				if($crowdSourceMode){
+					echo '<b>ERROR:</b> Sorry, this occurrence appears to be taken out of the Crowdsourcing queue and is not longer editable. Contact collection administrator if you think this is incorrect';
+				}
+				else{
+					echo '<b>ERROR:</b> Sorry, you are not authorized to edit occurrences within this collection. Contact collection administrator if you think this is incorrect';
+				}
+				echo '</div>';
+			}
+			elseif($isEditor == 4 && !$occId){
+				echo '<b>ERROR:</b> you are not authorized to add occurrence records';
 			}
 		}
 		?>
