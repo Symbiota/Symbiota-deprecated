@@ -1,11 +1,6 @@
 <?php
 include_once($SERVER_ROOT.'/content/lang/header.'.$LANG_TAG.'.php');
 ?>
-<link href="https://fonts.googleapis.com/css?family=EB+Garamond|Playfair+Display+SC" rel="stylesheet" />
-<style>
-	.header1 { font-family: 'EB Garamond', serif; font-size: 32px; font-style: italic; margin: 15px 10px 0px 70px; }
-	.header2 { font-family: 'Playfair Display SC', serif; font-size: 24px; margin: 0px 10px 10px 30px; }
-</style>
 <script type="text/javascript" src="<?php echo $CLIENT_ROOT; ?>/js/symb/base.js?ver=171023"></script>
 <script type="text/javascript">
 	//Uncomment following line to support toggling of database content containing DIVs with lang classes in form of: <div class="lang en">Content in English</div><div class="lang es">Content in Spanish</div>
@@ -13,14 +8,18 @@ include_once($SERVER_ROOT.'/content/lang/header.'.$LANG_TAG.'.php');
 </script>
 <table id="maintable" cellspacing="0">
 	<tr>
-		<td class="header" colspan="3">
-			<div style="background-color:black;height:110px;">
-				<div style="float:right;">
-					<img src="<?php echo $CLIENT_ROOT; ?>/images/layout/header_graphic.jpg" />
+		<td id="header" colspan="3" style="color:#FFFFFF;background-color:#026B6E;">
+			<div style="clear:both; width:100%; height:170px; border-bottom:1px solid #000000;">
+				<div style="float:left">
+					<img src="<?php echo $CLIENT_ROOT; ?>/images/layout/left_logo.jpg" style="margin:0px 30px;width:130px" />
 				</div>
-				<div style="float:left;">
-					<div class="header1">Replace this</div>
-					<div class="header2">text with Portal Title</div>
+				<div style="margin-left: 40px; color: #fff; font-family: 'Mate', serif; letter-spacing: 1px; text-shadow: 0 0 7px rgba(0,0,0,0.5);">
+					<div style="margin-top:30px; font-size:60px; line-height:48px;">
+						First Level Title
+					</div>
+					<div style="margin-top:20px; font-size:35px; font-style: italic">
+						Second Level Title
+					</div>
 				</div>
 			</div>
 			<div id="top_navbar">
@@ -98,13 +97,7 @@ include_once($SERVER_ROOT.'/content/lang/header.'.$LANG_TAG.'.php');
 						<a href="<?php echo $CLIENT_ROOT; ?>/projects/index.php" ><?php echo (isset($LANG['H_INVENTORIES'])?$LANG['H_INVENTORIES']:'Species Checklists'); ?></a>
 						<ul>
 							<li>
-								<a href="<?php echo $CLIENT_ROOT; ?>/projects/index.php?pid=516"><?php echo (isset($LANG['H_CENTRAL_AMER'])?$LANG['H_CENTRAL_AMER']:'Central America'); ?></a>
-							</li>
-							<li>
-								<a href="<?php echo $CLIENT_ROOT; ?>/projects/index.php?pid=517"><?php echo (isset($LANG['H_ECUADOR'])?$LANG['H_ECUADOR']:'Ecuador'); ?></a>
-							</li>
-							<li>
-								<a href="<?php echo $CLIENT_ROOT; ?>/projects/index.php?pid=505"><?php echo (isset($LANG['H_SUBPOLAR'])?$LANG['H_SUBPOLAR']:'Subpolar Regions'); ?></a>
+								<a href="<?php echo $CLIENT_ROOT; ?>/projects/index.php?pid=1"><?php echo (isset($LANG['H_FIRST_PROJECT'])?$LANG['H_FIRST_PROJECT']:'Checklist Project 1'); ?></a>
 							</li>
 						</ul>
 					</li>
@@ -112,13 +105,7 @@ include_once($SERVER_ROOT.'/content/lang/header.'.$LANG_TAG.'.php');
 						<a href="#" ><?php echo (isset($LANG['H_SYMBIOTA'])?$LANG['H_SYMBIOTA']:'Symbiota'); ?></a>
 						<ul>
 							<li>
-									<a href="http://symbiota.org/docs/" target="_blank" ><?php echo (isset($LANG['H_ABOUT_SYMBIOTA'])?$LANG['H_ABOUT_SYMBIOTA']:'About Symbiota'); ?></a>
-							</li>
-							<li>
 									<a href="http://symbiota.org/docs/symbiota-introduction/symbiota-help-pages/" target="_blank" ><?php echo (isset($LANG['H_HELP'])?$LANG['H_HELP']:'Help'); ?></a>
-							</li>
-							<li>
-									<a href="http://symbiota.org/docs/google-group/" target="_blank" ><?php echo (isset($LANG['H_GOOGLE_GROUP'])?$LANG['H_GOOGLE_GROUP']:'Google Group'); ?></a>
 							</li>
 							<li>
 								<a href='<?php echo $CLIENT_ROOT; ?>/sitemap.php'><?php echo (isset($LANG['H_SITEMAP'])?$LANG['H_SITEMAP']:'Sitemap'); ?></a>
@@ -141,4 +128,4 @@ include_once($SERVER_ROOT.'/content/lang/header.'.$LANG_TAG.'.php');
 		</td>
 	</tr>
 	<tr>
-		<td class='middlecenter'  colspan="3">
+		<td id='middlecenter'  colspan="3">

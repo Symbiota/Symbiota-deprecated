@@ -23,22 +23,22 @@ body{
 	font-size: 12px;
 }
 
-td.header{
+#header{
 }
 
-td.middleleft{
+#middleleft{
 	width:		160px;
 }
 
-td.middleleftnomenu{
+#middleleftnomenu{
 	width:	20px;	
 }
 
-td.middlecenter{
+#middlecenter{
  	height:	350px;		
 }
 
-td.middleright{
+#middleright{
 	width:	15px;
 }
 
@@ -58,7 +58,7 @@ td.middleright{
 
 }
 
-form div {
+form input {
 	margin-top:	2px;
 }
 

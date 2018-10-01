@@ -1,6 +1,6 @@
 <table id="maintable" cellspacing="0">
 	<tr>
-		<td class="header" colspan="3">
+		<td id="header" colspan="3">
 			<div style="clear:both;">
 				<div style="clear:both;">
 					<img style="" src="<?php echo $CLIENT_ROOT; ?>/images/layout/defaultheader.jpg" />
@@ -97,5 +97,5 @@
 		</td>
 	</tr>
     <tr>
-		<td class='middlecenter'  colspan="3">
+		<td id='middlecenter'  colspan="3">
 

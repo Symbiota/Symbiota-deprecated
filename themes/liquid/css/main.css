@@ -18,7 +18,7 @@ body{
 
 }
 
-td.header{
+#header{
 	color:#FFFFFF;
 	background-color:#026B6E;
 	text-align:left;
@@ -26,28 +26,28 @@ td.header{
 	padding-bottom:0px;
 }
 
-td.header a{
+#header a{
 
 }
 
-td.header a:hover{
+#header a:hover{
 
 }
 
-td.middleleft{
+#middleleft{
 }
 
-td.middleleftnomenu{
+#middleleftnomenu{
 }
 
-td.middlecenter{
+#middlecenter{
 	padding:0px;
 }
 
-td.middleright{
+#middleright{
 }
 
-td.footer{
+#footer{
 }
 
 /*Left menu components*/
