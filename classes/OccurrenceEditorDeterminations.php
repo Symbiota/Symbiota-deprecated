@@ -49,6 +49,7 @@ class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 	public function addDetermination($detArr,$isEditor){
 		$status = "Determination submitted successfully!";
 		if(!$this->occid) return 'ERROR: occid is null';
+		if(!$isEditor || $isEditor == 4) return 'ERROR: lack permssions to annotate occurrence';
 		$isCurrent = 0;
 		if(!array_key_exists('makecurrent',$detArr)) $detArr['makecurrent'] = 0;
 		if(!array_key_exists('printqueue',$detArr)) $detArr['printqueue'] = 0;
