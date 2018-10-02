@@ -60,7 +60,7 @@ function openIndPU(occId,clid){
 }
 
 function openMapPU(){
-	var url = 'map/googlemap.php?'+sessionStorage.querystr+'&maptype=occquery';
+	var url = 'map/googlemap.php?'+sessionStorage.querystr;
 	window.open(url,'gmap','toolbar=0,location=0,directories=0,status=0,menubar=0,scrollbars=1,resizable=1,width=1150,height=900,left=20,top=20');
 }
 
