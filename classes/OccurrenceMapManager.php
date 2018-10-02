@@ -5,19 +5,10 @@ include_once('OccurrenceAccessStats.php');
 class OccurrenceMapManager extends OccurrenceManager {
 
 	private $recordCount = 0;
-	private $googleIconArr = Array();
 	private $collArrIndex = 0;
 
 	public function __construct(){
 		parent::__construct();
-		$this->googleIconArr = array('pushpin/ylw-pushpin','pushpin/blue-pushpin','pushpin/grn-pushpin','pushpin/ltblu-pushpin',
-			'pushpin/pink-pushpin','pushpin/purple-pushpin', 'pushpin/red-pushpin','pushpin/wht-pushpin','paddle/blu-blank',
-			'paddle/grn-blank','paddle/ltblu-blank','paddle/pink-blank','paddle/wht-blank','paddle/blu-diamond','paddle/grn-diamond',
-			'paddle/ltblu-diamond','paddle/pink-diamond','paddle/ylw-diamond','paddle/wht-diamond','paddle/red-diamond','paddle/purple-diamond',
-			'paddle/blu-circle','paddle/grn-circle','paddle/ltblu-circle','paddle/pink-circle','paddle/ylw-circle','paddle/wht-circle',
-			'paddle/red-circle','paddle/purple-circle','paddle/blu-square','paddle/grn-square','paddle/ltblu-square','paddle/pink-square',
-			'paddle/ylw-square','paddle/wht-square','paddle/red-square','paddle/purple-square','paddle/blu-stars','paddle/grn-stars',
-			'paddle/ltblu-stars','paddle/pink-stars','paddle/ylw-stars','paddle/wht-stars','paddle/red-stars','paddle/purple-stars');
 		$this->readGeoRequestVariables();
 		$this->setGeoSqlWhere();
 		$this->setRecordCnt();
@@ -56,8 +47,9 @@ class OccurrenceMapManager extends OccurrenceManager {
 		}
 	}
 
-	//Coordinate retrival function
+	//Coordinate retrival functions
 	public function getCoordinateMap($start, $limit){
+		//Used within dynamic map
 		$coordArr = Array();
 		if($this->sqlWhere){
 			$statsManager = new OccurrenceAccessStats();
@@ -70,7 +62,7 @@ class OccurrenceMapManager extends OccurrenceManager {
 			if(is_numeric($start) && $limit){
 				$sql .= "LIMIT ".$start.",".$limit;
 			}
-			//echo "<div>SQL: ".$sql."</div>";
+			//echo "<div>SQL: ".$sql."</div>"; exit;
 			$result = $this->conn->query($sql);
 			$color = 'e69e67';
 			while($row = $result->fetch_object()){
@@ -104,8 +96,59 @@ class OccurrenceMapManager extends OccurrenceManager {
 		return $coordArr;
 	}
 
+	public function getMappingData($recLimit, $extraFieldArr = null){
+		//Used for simple maps occurrence and taxon maps, and also KML download functions
+		$start = 0;
+		if(!$this->sqlWhere) $this->setSqlWhere();
+		$coordArr = array();
+		if($this->sqlWhere){
+			$statsManager = new OccurrenceAccessStats();
+			$sql = 'SELECT DISTINCT o.occid, CONCAT_WS(" ",o.recordedby,IFNULL(o.recordnumber,o.eventdate)) AS collector, o.sciname, o.tidinterpreted, '.
+				'o.decimallatitude, o.decimallongitude, o.catalognumber, o.othercatalognumbers, c.institutioncode, c.collectioncode, c.colltype ';
+			if(isset($extraFieldArr) && is_array($extraFieldArr)){
+				foreach($extraFieldArr as $fieldName){
+					$sql .= ", o.".$fieldName." ";
+				}
+			}
+			$sql .= 'FROM omoccurrences o LEFT JOIN omcollections c ON o.collid = c.collid ';
+			$sql .= $this->getTableJoins($this->sqlWhere);
+			$sql .= $this->sqlWhere;
+			if(is_numeric($start) && $recLimit && is_numeric($recLimit)){
+				$sql .= "LIMIT ".$start.",".$recLimit;
+			}
+			//echo "<div>SQL: ".$sql."</div>";
+			$rs = $this->conn->query($sql);
+			while($r = $rs->fetch_assoc()){
+				if(($r['decimallongitude'] <= 180 && $r['decimallongitude'] >= -180) && ($r['decimallatitude'] <= 90 && $r['decimallatitude'] >= -90)){
+					$sciname = $r['sciname'];
+					if(!$sciname) $sciname = 'undefined';
+					$coordArr[$sciname][$r['occid']]['instcode'] = $r['institutioncode'];
+					if($r['collectioncode']) $coordArr[$sciname][$r['occid']]['collcode'] = $r['collectioncode'];
+					$collType = 'obs';
+					if(stripos($r['colltype'],'specimen')) $collType = 'spec';
+					$coordArr[$sciname][$r['occid']]['colltype'] = $collType;
+					if($r['catalognumber']) $coordArr[$sciname][$r['occid']]['catnum'] = $r['catalognumber'];
+					if($r['othercatalognumbers']) $coordArr[$sciname][$r['occid']]['ocatnum'] = $r['othercatalognumbers'];
+					if($r['tidinterpreted']) $coordArr[$sciname]['tid'] = $r['tidinterpreted'];
+					$coordArr[$sciname][$r['occid']]['collector'] = $r['collector'];
+					$coordArr[$sciname][$r['occid']]['lat'] = $r['decimallatitude'];
+					$coordArr[$sciname][$r['occid']]['lng'] = $r['decimallongitude'];
+					if(isset($extraFieldArr) && is_array($extraFieldArr)){
+						reset($extraFieldArr);
+						foreach($extraFieldArr as $fieldName){
+							if(isset($r[$fieldName])) $coordArr[$sciname][$r['occid']][$fieldName] = $r[$fieldName];
+						}
+					}
+				}
+			}
+			$rs->free();
+		}
+		return $coordArr;
+	}
+
 	//Occurrence functions
 	public function getOccurrenceArr($pageRequest,$cntPerPage){
+		//Used in occurrence listing tab within dynamic map
 		$retArr = Array();
 		if($this->sqlWhere){
 			$sql = 'SELECT o.occid, c.institutioncode, o.catalognumber, CONCAT_WS(" ",o.recordedby,o.recordnumber) AS collector, '.
@@ -276,52 +319,7 @@ class OccurrenceMapManager extends OccurrenceManager {
 		return $queryShape;
 	}
 
-	//KML functions
-	public function writeKMLFile($recLimit, $extraFieldArr){
-		$start = 0;
-
-		//Get data
-		$coordArr = array();
-		if($this->sqlWhere){
-			$statsManager = new OccurrenceAccessStats();
-			$sql = 'SELECT DISTINCT o.occid, CONCAT_WS(" ",o.recordedby,IFNULL(o.recordnumber,o.eventdate)) AS collector, o.sciname, '.
-				'o.decimallatitude, o.decimallongitude, o.catalognumber, o.othercatalognumbers, c.institutioncode, c.collectioncode ';
-			if(isset($extraFieldArr) && is_array($extraFieldArr)){
-				foreach($extraFieldArr as $fieldName){
-					$sql .= ", o.".$fieldName." ";
-				}
-			}
-			$sql .= 'FROM omoccurrences o LEFT JOIN omcollections c ON o.collid = c.collid ';
-			$sql .= $this->getTableJoins($this->sqlWhere);
-			$sql .= $this->sqlWhere;
-			if(is_numeric($start) && $recLimit && is_numeric($recLimit)){
-				$sql .= "LIMIT ".$start.",".$recLimit;
-			}
-			//echo "<div>SQL: ".$sql."</div>";
-			$rs = $this->conn->query($sql);
-			$color = 'e69e67';
-			while($r = $rs->fetch_assoc()){
-				if(($r['decimallongitude'] <= 180 && $r['decimallongitude'] >= -180) && ($r['decimallatitude'] <= 90 && $r['decimallatitude'] >= -90)){
-					$sciname = $r['sciname'];
-					if(!$sciname) $sciname = 'undefined';
-					$coordArr[$sciname][$r['occid']]['instcode'] = $r['institutioncode'];
-					if($r['collectioncode']) $coordArr[$sciname][$r['occid']]['collcode'] = $r['collectioncode'];
-					if($r['catalognumber']) $coordArr[$sciname][$r['occid']]['catnum'] = $r['catalognumber'];
-					if($r['othercatalognumbers']) $coordArr[$sciname][$r['occid']]['ocatnum'] = $r['othercatalognumbers'];
-					$coordArr[$sciname][$r['occid']]['collector'] = $r['collector'];
-					$coordArr[$sciname][$r['occid']]['lat'] = $r['decimallatitude'];
-					$coordArr[$sciname][$r['occid']]['lng'] = $r['decimallongitude'];
-					if(isset($extraFieldArr) && is_array($extraFieldArr)){
-						reset($extraFieldArr);
-						foreach($extraFieldArr as $fieldName){
-							if(isset($r[$fieldName])) $coordArr[$sciname][$r['occid']][$fieldName] = $r[$fieldName];
-						}
-					}
-				}
-			}
-			$rs->free();
-		}
-
+	public function writeKMLFile($recLimit, $extraFieldArr = null){
 		//Output data
 		$fileName = $GLOBALS['DEFAULT_TITLE'];
 		if($fileName){
@@ -343,10 +341,20 @@ class OccurrenceMapManager extends OccurrenceManager {
 
 		//Get and output data
 		$cnt = 0;
+		$coordArr = $this->getMappingData($recLimit, $extraFieldArr);
 		if($coordArr){
+			$this->googleIconArr = array('pushpin/ylw-pushpin','pushpin/blue-pushpin','pushpin/grn-pushpin','pushpin/ltblu-pushpin',
+				'pushpin/pink-pushpin','pushpin/purple-pushpin', 'pushpin/red-pushpin','pushpin/wht-pushpin','paddle/blu-blank',
+				'paddle/grn-blank','paddle/ltblu-blank','paddle/pink-blank','paddle/wht-blank','paddle/blu-diamond','paddle/grn-diamond',
+				'paddle/ltblu-diamond','paddle/pink-diamond','paddle/ylw-diamond','paddle/wht-diamond','paddle/red-diamond','paddle/purple-diamond',
+				'paddle/blu-circle','paddle/grn-circle','paddle/ltblu-circle','paddle/pink-circle','paddle/ylw-circle','paddle/wht-circle',
+				'paddle/red-circle','paddle/purple-circle','paddle/blu-square','paddle/grn-square','paddle/ltblu-square','paddle/pink-square',
+				'paddle/ylw-square','paddle/wht-square','paddle/red-square','paddle/purple-square','paddle/blu-stars','paddle/grn-stars',
+				'paddle/ltblu-stars','paddle/pink-stars','paddle/ylw-stars','paddle/wht-stars','paddle/red-stars','paddle/purple-stars');
 			$statsManager = new OccurrenceAccessStats();
 			$color = 'e69e67';
 			foreach($coordArr as $sciname => $snArr){
+				unset($snArr['tid']);
 				$cnt++;
 				$iconStr = $this->googleIconArr[$cnt%44];
 				echo "<Style id='sn_".$iconStr."'>\n";

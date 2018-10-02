@@ -1,38 +1,37 @@
 <?php
 include_once('../../config/symbini.php');
-include_once($SERVER_ROOT.'/classes/OccurrenceManager.php');
-include_once($SERVER_ROOT.'/classes/MappingShared.php');
-include_once($SERVER_ROOT.'/classes/TaxonProfileMap.php');
+include_once($SERVER_ROOT.'/classes/OccurrenceMapManager.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 
-$taxonValue = array_key_exists('taxon',$_REQUEST)?$_REQUEST['taxon']:0;
 $clid = array_key_exists('clid',$_REQUEST)?$_REQUEST['clid']:0;
-$mapType = array_key_exists('maptype',$_REQUEST)?$_REQUEST['maptype']:0;
 $gridSize = array_key_exists('gridSizeSetting',$_REQUEST)?$_REQUEST['gridSizeSetting']:10;
 $minClusterSize = array_key_exists('minClusterSetting',$_REQUEST)?$_REQUEST['minClusterSetting']:50;
 
-$sharedMapManager = new MappingShared();
-$sharedMapManager->setFieldArr(0);
+$occurManager = new OccurrenceMapManager();
+$coordArr = $occurManager->getMappingData(0);
 
-$mapWhere = '';
-$genObs = $sharedMapManager->getGenObsInfo();
-
-if($mapType == 'taxa'){
-	$taxaMapManager = new TaxonProfileMap();
-	$taxaMapManager->setTaxon($taxonValue);
-	$synMap = $taxaMapManager->getSynMap();
-	$taxaMapManager->getTaxaMap();
-	$mapWhere = $taxaMapManager->getTaxaSqlWhere();
-	$tArr = $taxaMapManager->getTaxaArr();
-	$sharedMapManager->setTaxaArr($tArr);
+//Build taxa mapping key
+$colorKey = Array();
+$taxaKey = Array();
+$taxaArr = $occurManager->getTaxaArr();
+if(array_key_exists('taxa', $taxaArr)){
+	foreach($taxaArr['taxa'] as $scinameStr => $snArr){
+		if(isset($snArr['tid'])){
+			$snTid = key($snArr['tid']);
+			$taxaKey[$snTid]['str'] = $scinameStr;
+			$taxaKey[$snTid]['target'] = $snTid;
+			if(array_key_exists('synonyms', $snArr)){
+				foreach($snArr['synonyms'] as $synTid => $synStr){
+					$taxaKey[$synTid]['str'] = $synStr;
+					$taxaKey[$synTid]['target'] = $snTid;
+				}
+			}
+		}
+		else{
+			$taxaKey['orphan'][$scinameStr] = '';
+		}
+	}
 }
-elseif($mapType == 'occquery'){
-	$occurManager = new OccurrenceManager();
-	$mapWhere = $occurManager->getSqlWhere();
-	$tArr = $occurManager->getTaxaArr();
-}
-
-$sharedMapManager->setTaxaArr($tArr);
 ?>
 <html>
 <head>
@@ -49,8 +48,8 @@ $sharedMapManager->setTaxaArr($tArr);
 		var map = null;
 		var markerClusterer = null;
 		var useLLDecimal = true;
-	    var infoWins = new Array();
-	    var puWin;
+		var infoWins = new Array();
+		var puWin;
 		var markers = [];
 
 		function initialize(){
@@ -73,14 +72,14 @@ $sharedMapManager->setTaxaArr($tArr);
 				}
 			}
 			?>
-	    	var dmOptions = {
+			var dmOptions = {
 				zoom: 3,
 				center: new google.maps.LatLng(<?php echo $latCen.','.$longCen; ?>),
 				mapTypeId: google.maps.MapTypeId.TERRAIN,
 				scaleControl: true
 			};
 
-	    	map = new google.maps.Map(document.getElementById("map_canvas"), dmOptions);
+			map = new google.maps.Map(document.getElementById("map_canvas"), dmOptions);
 
 			oms = new OverlappingMarkerSpiderfier(map);
 
@@ -108,67 +107,78 @@ $sharedMapManager->setTaxaArr($tArr);
 				closeAllInfoWins();
 			});
 
-           <?php
-			$coordExist = false;
-			$iconKeys = Array();
+		   <?php
 			$markerCnt = 0;
-			$spCnt = 1;
-			$minLng = 180;
-        	$minLat = 90;
-        	$maxLng = -180;
-        	$maxLat = -90;
-        	$coordArr = $sharedMapManager->getGeoCoords($mapWhere);
-        	foreach($coordArr as $sciName => $valueArr){
+			$spCnt = 0;
+			$minLng = 180; $minLat = 90; $maxLng = -180; $maxLat = -90;
+			$iconColors = array('fc6355','5781fc','fcf357','00e13c','e14f9e','55d7d7','ff9900','7e55fc');
+			$iconColorKey = 0;
+			foreach($coordArr as $sciName => $valueArr){
 				?>
 				markers = [];
 				<?php
-				$iconColor = $valueArr["color"];
-				if($iconColor) {
-					$iconKey = '<div><svg xmlns="http://www.w3.org/2000/svg" style="height:12px;width:12px;margin-bottom:-2px;"><g><rect x="1" y="1" width="11" height="10" fill="#'.$iconColor.'" stroke="#000000" stroke-width="1px" /></g></svg>';
-					$iconKey .= ' = <i>'.$sciName.'</i></div>';
-					$iconKeys[] = $iconKey;
-				}
-				unset($valueArr["color"]);
-				foreach($valueArr as $occId => $spArr){
-					$coordExist = true;
-					//Find max/min point values
-					$llArr = explode(',',$spArr['latLngStr']);
-					if($llArr[0] < $minLat) $minLat = $llArr[0];
-					if($llArr[0] > $maxLat) $maxLat = $llArr[0];
-					if($llArr[1] < $minLng) $minLng = $llArr[1];
-					if($llArr[1] > $maxLng) $maxLng = $llArr[1];
-					//Create marker
-					$spStr = '';
-					$functionStr = '';
-					$titleStr = $spArr['latLngStr'];
-					$type = '';
-					$displayStr = '';
-					if(is_numeric($spArr['catalognumber'])){
-						$displayStr = $spArr['institutioncode'].'-'.($spArr['collectioncode']?$spArr['collectioncode'].'-':'').$spArr['catalognumber'];
+				$iconColor = '';
+				$tid = 0;
+				if(array_key_exists('tid', $valueArr)){
+					$tid = $valueArr['tid'];
+					unset($valueArr['tid']);
+					if(isset($taxaKey[$tid]['target'])){
+						$tid = $taxaKey[$tid]['target'];
 					}
-					elseif((!$spArr['catalognumber']) && ($spArr['othercatalognumbers'])){
-						$displayStr = $spArr['institutioncode'].'-'.($spArr['collectioncode']?$spArr['collectioncode'].'-':'').$spArr['othercatalognumbers'];
-					}
-					elseif((!$spArr['catalognumber']) && (!$spArr['othercatalognumbers'])){
-						$displayStr = $spArr['institutioncode'].($spArr['collectioncode']?'-'.$spArr['collectioncode']:'').($spArr['identifier']?'-'.$spArr['identifier']:'');
+					elseif($sciName != 'undefined' && isset($taxaKey['orphan'])){
+						foreach($taxaKey['orphan'] as $nameKey => $nameRaw){
+							if(stripos($sciName,$nameKey) !== false) $tid = $nameKey;
+						}
 					}
 					else{
-						$displayStr = $spArr['catalognumber'];
+						$tid = 0;
 					}
-					if($spArr['collid'] == $genObs){
-						$displayStr = "General Observation";
-						$type = 'obs';
+				}
+				elseif($sciName != 'undefined' && isset($taxaKey['orphan'])){
+					foreach($taxaKey['orphan'] as $nameKey => $nameRaw){
+						if(stripos($sciName,$nameKey) !== false) $tid = $nameKey;
+					}
+				}
+				if(!array_key_exists($tid, $colorKey)){
+					$colorKey[$tid] = $iconColors[$iconColorKey%8];
+					$iconColorKey++;
+				}
+				$iconColor = $colorKey[$tid];
+				foreach($valueArr as $occid => $spArr){
+					//Find max/min point values
+					if($spArr['lat'] < $minLat) $minLat = $spArr['lat'];
+					if($spArr['lat'] > $maxLat) $maxLat = $spArr['lat'];
+					if($spArr['lng'] < $minLng) $minLng = $spArr['lng'];
+					if($spArr['lng'] > $maxLng) $maxLng = $spArr['lng'];
+					//Create marker
+					$displayStr = '';
+					$collCode = '';
+					if(isset($spArr['collcode']) && $spArr['collcode']) $collCode = '-'.$spArr['collcode'];
+					if(isset($spArr['catnum']) && $spArr['catnum']){
+						if(is_numeric($spArr['catnum'])){
+							$displayStr = $spArr['instcode'].$collCode.'-'.$spArr['catnum'];
+						}
+						else{
+							$displayStr = $spArr['catnum'];
+						}
+					}
+					elseif(isset($spArr['collector']) && $spArr['collector']){
+						$displayStr = $spArr['instcode'].$collCode.'-'.$spArr['collector'];
+					}
+					elseif(isset($spArr['ocatnum']) && $spArr['ocatnum']){
+						$displayStr = $spArr['instcode'].$collCode.'-'.$spArr['ocatnum'];
+					}
+					if($spArr['colltype'] == 'obs'){
 						?>
 						var markerIcon = {path:"m6.70496,0.23296l-6.70496,13.48356l13.88754,0.12255l-7.18258,-13.60611z",fillColor:"#<?php echo $iconColor; ?>",fillOpacity:1,scale:1,strokeColor:"#000000",strokeWeight:1};
 						<?php
 					}
 					else{
-						$type = 'spec';
 						?>
 						var markerIcon = {path:google.maps.SymbolPath.CIRCLE,fillColor:"#<?php echo $iconColor; ?>",fillOpacity:1,scale:7,strokeColor:"#000000",strokeWeight:1};
 						<?php
 					}
-					echo 'var m'.$markerCnt.' = getMarker('.$spArr['latLngStr'].',"'.addslashes($displayStr).'",markerIcon,"'.$type.'","'.($spArr['tidinterpreted']?$spArr['tidinterpreted']:0).'",'.$occId.','.($clid?$clid:'0').');',"\n";
+					echo 'var m'.$markerCnt.' = getMarker('.$spArr['lat'].','.$spArr['lng'].',"'.addslashes($displayStr).'",markerIcon,"'.$spArr['colltype'].'","'.(isset($spArr['tid'])?$spArr['tid']:0).'",'.$occid.','.($clid?$clid:'0').');',"\n";
 					echo 'oms.addMarker(m'.$markerCnt.');',"\n";
 					$markerCnt++;
 				}
@@ -182,10 +192,8 @@ $sharedMapManager->setTaxaArr($tArr);
 					gridSize: <?php echo $gridSize; ?>,
 					minimumClusterSize: <?php echo $minClusterSize; ?>
 				}
-
 				//Initialize clusterer with options
 				var markerCluster<?php echo $spCnt; ?> = new MarkerClusterer(map, markers, mcOptions<?php echo $spCnt; ?>);
-
 				<?php
 				$spCnt++;
 			}
@@ -196,7 +204,7 @@ $sharedMapManager->setTaxaArr($tArr);
 			if($minLng > -170) $minLng -= $padding;
 			if($maxLng < 170) $maxLng += $padding;
 			?>
-        	var bounds = new google.maps.LatLngBounds(new google.maps.LatLng(<?php echo $minLat.','.$minLng; ?>),new google.maps.LatLng(<?php echo $maxLat.','.$maxLng; ?>));
+			var bounds = new google.maps.LatLngBounds(new google.maps.LatLng(<?php echo $minLat.','.$minLng; ?>),new google.maps.LatLng(<?php echo $maxLat.','.$maxLng; ?>));
 			map.fitBounds(bounds);
 			map.panToBounds(bounds);
 		}
@@ -215,7 +223,7 @@ $sharedMapManager->setTaxaArr($tArr);
 		}
 
 		function getMarker(newLat, newLng, newTitle, newIcon, type, tid, occid, clid){
-            var m = new google.maps.Marker({
+			var m = new google.maps.Marker({
 				position: new google.maps.LatLng(newLat, newLng),
 				title: newTitle,
 				icon: newIcon,
@@ -228,54 +236,54 @@ $sharedMapManager->setTaxaArr($tArr);
 			return m;
 		}
 
-        function addRefPoint(){
-            var lat = document.getElementById("lat").value;
-            var lng = document.getElementById("lng").value;
-            var title = document.getElementById("title").value;
-            if(!useLLDecimal){
-                var latdeg = document.getElementById("latdeg").value;
-                var latmin = document.getElementById("latmin").value;
-                var latsec = document.getElementById("latsec").value;
-                var latns = document.getElementById("latns").value;
-                var longdeg = document.getElementById("longdeg").value;
-                var longmin = document.getElementById("longmin").value;
-                var longsec = document.getElementById("longsec").value;
-                var longew = document.getElementById("longew").value;
-                if(latdeg != null && longdeg != null){
-                    if(latmin == null) latmin = 0;
-                    if(latsec == null) latsec = 0;
-                    if(longmin == null) longmin = 0;
-                    if(longsec == null) longsec = 0;
-                    lat = latdeg*1 + latmin/60 + latsec/3600;
-                    lng = longdeg*1 + longmin/60 + longsec/3600;
-                    if(latns == "S") lat = lat * -1;
-                    if(longew == "W") lng = lng * -1;
-                }
-            }
-            if(lat != null && lng != null){
-                if(lat < -180 || lat > 180 || lng < -180 || lng > 180){
-                    window.alert("Latitude and Longitude must be of values between -180 and 180 (" + lat + ";" + lng + ")");
-                }
-                else{
-                    var addPoint = true;
-                    if(lng > 0) addPoint = window.confirm("Longitude is positive, which will put the marker in the eastern hemisphere (e.g. Asia).\nIs this what you want?");
-                    if(!addPoint) lng = -1*lng;
+		function addRefPoint(){
+			var lat = document.getElementById("lat").value;
+			var lng = document.getElementById("lng").value;
+			var title = document.getElementById("title").value;
+			if(!useLLDecimal){
+				var latdeg = document.getElementById("latdeg").value;
+				var latmin = document.getElementById("latmin").value;
+				var latsec = document.getElementById("latsec").value;
+				var latns = document.getElementById("latns").value;
+				var longdeg = document.getElementById("longdeg").value;
+				var longmin = document.getElementById("longmin").value;
+				var longsec = document.getElementById("longsec").value;
+				var longew = document.getElementById("longew").value;
+				if(latdeg != null && longdeg != null){
+					if(latmin == null) latmin = 0;
+					if(latsec == null) latsec = 0;
+					if(longmin == null) longmin = 0;
+					if(longsec == null) longsec = 0;
+					lat = latdeg*1 + latmin/60 + latsec/3600;
+					lng = longdeg*1 + longmin/60 + longsec/3600;
+					if(latns == "S") lat = lat * -1;
+					if(longew == "W") lng = lng * -1;
+				}
+			}
+			if(lat != null && lng != null){
+				if(lat < -180 || lat > 180 || lng < -180 || lng > 180){
+					window.alert("Latitude and Longitude must be of values between -180 and 180 (" + lat + ";" + lng + ")");
+				}
+				else{
+					var addPoint = true;
+					if(lng > 0) addPoint = window.confirm("Longitude is positive, which will put the marker in the eastern hemisphere (e.g. Asia).\nIs this what you want?");
+					if(!addPoint) lng = -1*lng;
 
-                    var iconImg = new google.maps.MarkerImage( '../../images/google/arrow.png' );
+					var iconImg = new google.maps.MarkerImage( '../../images/google/arrow.png' );
 
-                    var m = new google.maps.Marker({
-                        position: new google.maps.LatLng(lat,lng),
-                        map: map,
-                        title: title,
-                        icon: iconImg,
-                        zIndex: google.maps.Marker.MAX_ZINDEX
-                    });
-                }
-            }
-            else{
-                window.alert("Enter values in the latitude and longitude fields");
-            }
-        }
+					var m = new google.maps.Marker({
+						position: new google.maps.LatLng(lat,lng),
+						map: map,
+						title: title,
+						icon: iconImg,
+						zIndex: google.maps.Marker.MAX_ZINDEX
+					});
+				}
+			}
+			else{
+				window.alert("Enter values in the latitude and longitude fields");
+			}
+		}
 
 		function toggleLatLongDivs(){
 			var divs = document.getElementsByTagName("div");
@@ -302,8 +310,7 @@ $sharedMapManager->setTaxaArr($tArr);
 </head>
 <body style="background-color:#ffffff;width:100%" onload="initialize();">
 	<?php
-	//echo json_encode($coordArr);
-	if(!$coordExist){ //no results
+	if(!$coordArr){
 		?>
 			<div style="font-size:120%;font-weight:bold;">
 				Your query apparently does not contain any records with coordinates that can be mapped.
@@ -317,45 +324,44 @@ $sharedMapManager->setTaxaArr($tArr);
 			<div style="margin-left:20px;">
 				Rare/threatened status requires the locality coordinates be hidden.
 			</div>
-        <?php
-    }
-    ?>
-    <div id="map_canvas" style="width:100%;height:700px"></div>
-    <table title='Add Point of Reference' style="width:100%;" >
-    	<tr>
-    		<td style="width:330px" valign='top'>
-			    <fieldset>
+		<?php
+	}
+	?>
+	<div id="map_canvas" style="width:100%;height:700px"></div>
+	<table title='Add Point of Reference' style="width:100%;" >
+		<tr>
+			<td style="width:330px" valign='top'>
+				<fieldset>
 					<legend>Legend</legend>
 					<div style="float:left;">
 						<?php
-						//echo $coordArr;
-						foreach($iconKeys as $iconValue){
-							echo $iconValue;
+						foreach($colorKey as $iconKey => $colorCode){
+							echo '<div>';
+							echo '<svg xmlns="http://www.w3.org/2000/svg" style="height:12px;width:12px;margin-bottom:-2px;"><g><rect x="1" y="1" width="11" height="10" fill="#'.$colorCode.'" stroke="#000000" stroke-width="1px" /></g></svg> ';
+							if(!$iconKey) echo '= various taxa';
+							elseif(is_numeric($iconKey)) echo '= <i>'.$taxaKey[$iconKey]['str'].'</i>';
+							elseif(isset($taxaKey['orphan'][$iconKey])) echo '= <i>'.$iconKey.'</i>';
+							else echo '= various taxa';
+							echo '</div>';
 						}
 						?>
 					</div>
-					<?php
-					if($genObs){
-						?>
-						<div style="float:right;">
-							<div>
-								<svg xmlns="http://www.w3.org/2000/svg" style="height:15px;width:15px;margin-bottom:-2px;">">
-									<g>
-										<circle cx="7.5" cy="7.5" r="7" fill="white" stroke="#000000" stroke-width="1px" ></circle>
-									</g>
-								</svg> = Collection
-							</div>
-							<div>
-								<svg style="height:14px;width:14px;margin-bottom:-2px;">" xmlns="http://www.w3.org/2000/svg">
-									<g>
-										<path stroke="#000000" d="m6.70496,0.23296l-6.70496,13.48356l13.88754,0.12255l-7.18258,-13.60611z" stroke-width="1px" fill="white"/>
-									</g>
-								</svg> = General Observation
-							</div>
+					<div style="float:right;">
+						<div>
+							<svg xmlns="http://www.w3.org/2000/svg" style="height:15px;width:15px;margin-bottom:-2px;">">
+								<g>
+									<circle cx="7.5" cy="7.5" r="7" fill="white" stroke="#000000" stroke-width="1px" ></circle>
+								</g>
+							</svg> = Collection
 						</div>
-						<?php
-					}
-					?>
+						<div>
+							<svg style="height:14px;width:14px;margin-bottom:-2px;">" xmlns="http://www.w3.org/2000/svg">
+								<g>
+									<path stroke="#000000" d="m6.70496,0.23296l-6.70496,13.48356l13.88754,0.12255l-7.18258,-13.60611z" stroke-width="1px" fill="white"/>
+								</g>
+							</svg> = Observation
+						</div>
+					</div>
 				</fieldset>
 			</td>
 			<td style="width:375px;" valign='top'>

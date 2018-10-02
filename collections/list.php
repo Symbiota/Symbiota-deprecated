@@ -80,7 +80,7 @@ $occurArr = $collManager->getSpecimenMap($pageNumber,$cntPerPage);
 			});
 		}
 	</script>
-	<script src="../js/symb/collections.list.js?ver=7" type="text/javascript"></script>
+	<script src="../js/symb/collections.list.js?ver=8" type="text/javascript"></script>
 </head>
 <body>
 <?php

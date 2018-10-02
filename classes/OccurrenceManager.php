@@ -47,10 +47,10 @@ class OccurrenceManager extends OccurrenceTaxaManager {
 		return $this->sqlWhere;
 	}
 
-	private function setSqlWhere(){
+	protected function setSqlWhere(){
 		$sqlWhere = "";
 		if(array_key_exists("targetclid",$this->searchTermArr) && is_numeric($this->searchTermArr["targetclid"])){
-			//Used to exclude vouchers alredy linked to target checklist
+			//Used to exclude vouchers already linked to target checklist
 			$sqlWhere .= 'AND ('.$this->voucherManager->getSqlFrag().') ';
 			if(array_key_exists('mode', $_REQUEST) && $_REQUEST['mode'] == 'voucher'){
 				$clOccidArr = array();
@@ -543,7 +543,7 @@ class OccurrenceManager extends OccurrenceTaxaManager {
 			$this->searchTermArr["targetclid"] = $_REQUEST["targetclid"];
 			$this->setChecklistVariables($_REQUEST["targetclid"]);
 		}
-		elseif(array_key_exists('clid',$_REQUEST)){
+		elseif(array_key_exists('clid',$_REQUEST) && $_REQUEST['clid']){
 			//Limit by checklist voucher links
 			$clidIn = $_REQUEST['clid'];
 			$clidStr = '';
