@@ -10,11 +10,11 @@ $imgidStart = (array_key_exists('imgidstart', $_POST)?$_POST['imgidstart']:0);
 $limit = (array_key_exists('limit', $_POST)?$_POST['limit']:10000);
 $submit = (array_key_exists('submitbutton', $_POST)?$_POST['submitbutton']:10000);
 
-$voucherLinker = new VoucherLinker();
+$toolManager = new iDigBioMediaTools();
 $imgidEnd = 0;
 if($IS_ADMIN && $submit == 'Process Images'){
 	echo '<ol>';
-	$imgidEnd = $voucherLinker->checkImageLinks($imgidStart, $limit, $collid);
+	$imgidEnd = $toolManager->checkImageLinks($imgidStart, $limit, $collid);
 	echo '</ol>';
 }
 
@@ -31,7 +31,7 @@ if($IS_ADMIN && $submit == 'Process Images'){
 </form>
 
 <?php
-class VoucherLinker {
+class iDigBioMediaTools {
 
 	private $conn;
 
