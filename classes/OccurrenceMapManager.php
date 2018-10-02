@@ -277,7 +277,7 @@ class OccurrenceMapManager extends OccurrenceManager {
 	}
 
 	//KML functions
-	public function writeKMLFile($recLimit){
+	public function writeKMLFile($recLimit, $extraFieldArr){
 		$start = 0;
 
 		//Get data
@@ -285,27 +285,38 @@ class OccurrenceMapManager extends OccurrenceManager {
 		if($this->sqlWhere){
 			$statsManager = new OccurrenceAccessStats();
 			$sql = 'SELECT DISTINCT o.occid, CONCAT_WS(" ",o.recordedby,IFNULL(o.recordnumber,o.eventdate)) AS collector, o.sciname, '.
-				'o.decimallatitude, o.decimallongitude, o.catalognumber, o.othercatalognumbers, c.institutioncode, c.collectioncode '.
-				'FROM omoccurrences o LEFT JOIN omcollections c ON o.collid = c.collid ';
+				'o.decimallatitude, o.decimallongitude, o.catalognumber, o.othercatalognumbers, c.institutioncode, c.collectioncode ';
+			if(isset($extraFieldArr) && is_array($extraFieldArr)){
+				foreach($extraFieldArr as $fieldName){
+					$sql .= ", o.".$fieldName." ";
+				}
+			}
+			$sql .= 'FROM omoccurrences o LEFT JOIN omcollections c ON o.collid = c.collid ';
 			$sql .= $this->getTableJoins($this->sqlWhere);
 			$sql .= $this->sqlWhere;
-			if(is_numeric($start) && is_numeric($recLimit) && $recLimit){
+			if(is_numeric($start) && $recLimit && is_numeric($recLimit)){
 				$sql .= "LIMIT ".$start.",".$recLimit;
 			}
-			//echo "<div>SQL: ".$sql."</div>"; exit;
+			//echo "<div>SQL: ".$sql."</div>";
 			$rs = $this->conn->query($sql);
 			$color = 'e69e67';
-			while($r = $rs->fetch_object()){
-				if(($r->decimallongitude <= 180 && $r->decimallongitude >= -180) && ($r->decimallatitude <= 90 && $r->decimallatitude >= -90)){
-					$sciname = $r->sciname;
+			while($r = $rs->fetch_assoc()){
+				if(($r['decimallongitude'] <= 180 && $r['decimallongitude'] >= -180) && ($r['decimallatitude'] <= 90 && $r['decimallatitude'] >= -90)){
+					$sciname = $r['sciname'];
 					if(!$sciname) $sciname = 'undefined';
-					$coordArr[$sciname][$r->occid]['instcode'] = $r->institutioncode;
-					if($r->collectioncode) $coordArr[$sciname][$r->occid]['collcode'] = $r->collectioncode;
-					if($r->catalognumber) $coordArr[$sciname][$r->occid]['catnum'] = $r->catalognumber;
-					if($r->othercatalognumbers) $coordArr[$sciname][$r->occid]['ocatnum'] = $r->othercatalognumbers;
-					$coordArr[$sciname][$r->occid]['collector'] = $r->collector;
-					$coordArr[$sciname][$r->occid]['lat'] = $r->decimallatitude;
-					$coordArr[$sciname][$r->occid]['lng'] = $r->decimallongitude;
+					$coordArr[$sciname][$r['occid']]['instcode'] = $r['institutioncode'];
+					if($r['collectioncode']) $coordArr[$sciname][$r['occid']]['collcode'] = $r['collectioncode'];
+					if($r['catalognumber']) $coordArr[$sciname][$r['occid']]['catnum'] = $r['catalognumber'];
+					if($r['othercatalognumbers']) $coordArr[$sciname][$r['occid']]['ocatnum'] = $r['othercatalognumbers'];
+					$coordArr[$sciname][$r['occid']]['collector'] = $r['collector'];
+					$coordArr[$sciname][$r['occid']]['lat'] = $r['decimallatitude'];
+					$coordArr[$sciname][$r['occid']]['lng'] = $r['decimallongitude'];
+					if(isset($extraFieldArr) && is_array($extraFieldArr)){
+						reset($extraFieldArr);
+						foreach($extraFieldArr as $fieldName){
+							if(isset($r[$fieldName])) $coordArr[$sciname][$r['occid']][$fieldName] = $r[$fieldName];
+						}
+					}
 				}
 			}
 			$rs->free();
@@ -361,10 +372,16 @@ class OccurrenceMapManager extends OccurrenceManager {
 					if(isset($recArr['ocatnum'])) echo '<Data name="othercatalognumbers">'.htmlspecialchars($recArr['ocatnum'], ENT_QUOTES).'</Data>';
 					echo '<Data name="DataSource">Data retrieved from '.$GLOBALS['DEFAULT_TITLE'].' Data Portal</Data>';
 					echo '<Data name="RecordURL">http://'.$_SERVER['SERVER_NAME'].$GLOBALS['CLIENT_ROOT'].'/collections/individual/index.php?occid='.$occid.'</Data>';
+					if(isset($extraFieldArr) && is_array($extraFieldArr)){
+						reset($extraFieldArr);
+						foreach($extraFieldArr as $fieldName){
+							if(isset($recArr[$fieldName])) echo '<Data name="'.$fieldName.'">'.htmlspecialchars($recArr[$fieldName], ENT_QUOTES).'</Data>';
+						}
+					}
 					echo '</ExtendedData>';
 					echo '<styleUrl>#'.htmlspecialchars(str_replace(' ','_',$sciname), ENT_QUOTES).'</styleUrl>';
 					echo '<Point><coordinates>'.$recArr['lng'].','.$recArr['lat'].'</coordinates></Point>';
-					echo '</Placemark>';
+					echo "</Placemark>\n";
 				}
 				echo "</Folder>\n";
 			}

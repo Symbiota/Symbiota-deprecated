@@ -308,7 +308,7 @@ $occurArr = $collManager->getSpecimenMap($pageNumber,$cntPerPage);
 			<div style='margin-top:10px;'>
 				<h2><?php echo $LANG['GOOGLE_EARTH_HEADER']; ?></h2>
 			</div>
-			<form name="kmlform" action="map/googlekml.php" method="post" onsubmit="">
+			<form name="kmlform" action="map/kmlhandler.php" method="post">
 				<div style='margin:10 0 0 20;'>
 					<?php echo $LANG['GOOGLE_EARTH_DESCRIPTION'];?>
 				</div>
@@ -322,28 +322,20 @@ $occurArr = $collManager->getSpecimenMap($pageNumber,$cntPerPage);
 					</a>
 				</div>
 				<div id="fieldBox" style="display:none;">
-					<fieldset>
-						<div style="width:600px;">
-							<?php
-							$occFieldArr = Array('occurrenceid','family', 'scientificname', 'sciname',
-								'tidinterpreted', 'scientificnameauthorship', 'identifiedby', 'dateidentified', 'identificationreferences',
-								'identificationremarks', 'taxonremarks', 'identificationqualifier', 'typestatus', 'recordedby', 'recordnumber',
-								'associatedcollectors', 'eventdate', 'year', 'month', 'day', 'startdayofyear', 'enddayofyear',
-								'verbatimeventdate', 'habitat', 'substrate', 'fieldnumber','occurrenceremarks', 'associatedtaxa', 'verbatimattributes',
-								'dynamicproperties', 'reproductivecondition', 'cultivationstatus', 'establishmentmeans',
-								'lifestage', 'sex', 'individualcount', 'samplingprotocol', 'preparations',
-								'country', 'stateprovince', 'county', 'municipality', 'locality',
-								'decimallatitude', 'decimallongitude','geodeticdatum', 'coordinateuncertaintyinmeters',
-								'locationremarks', 'verbatimcoordinates', 'georeferencedby', 'georeferenceprotocol', 'georeferencesources',
-								'georeferenceverificationstatus', 'georeferenceremarks', 'minimumelevationinmeters', 'maximumelevationinmeters',
-								'verbatimelevation','language',
-								'labelproject','basisofrecord');
-							foreach($occFieldArr as $k => $v){
-								echo '<div style="float:left;margin-right:5px;">';
-								echo '<input type="checkbox" name="kmlFields[]" value="'.$v.'" />'.$v.'</div>';
-							}
-							?>
-						</div>
+					<fieldset style="padding:15px;">
+						<?php
+						$occFieldArr = Array('occurrenceid', 'identifiedby', 'dateidentified', 'identificationreferences',
+							'identificationremarks', 'taxonremarks', 'recordedby', 'recordnumber','associatedcollectors', 'eventdate', 'year', 'month', 'day',
+							'verbatimeventdate', 'habitat', 'substrate', 'occurrenceremarks', 'associatedtaxa', 'verbatimattributes',
+							'reproductivecondition', 'cultivationstatus', 'establishmentmeans','lifestage', 'sex', 'individualcount', 'samplingprotocol', 'preparations',
+							'country', 'stateprovince', 'county', 'municipality', 'locality', 'locationremarks', 'coordinateuncertaintyinmeters',
+							'verbatimcoordinates', 'georeferencedby', 'georeferenceprotocol', 'georeferencesources', 'georeferenceverificationstatus', 'georeferenceremarks',
+							'minimumelevationinmeters', 'maximumelevationinmeters', 'verbatimelevation');
+						foreach($occFieldArr as $k => $v){
+							echo '<div style="float:left;margin-right:5px;">';
+							echo '<input type="checkbox" name="kmlFields[]" value="'.$v.'" />'.$v.'</div>';
+						}
+						?>
 					</fieldset>
 				</div>
 			</form>
