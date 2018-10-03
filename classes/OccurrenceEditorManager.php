@@ -663,7 +663,6 @@ class OccurrenceEditorManager {
 			}
 			$this->occurrenceMap = $this->cleanOutArr($retArr);
 			if($this->occid){
-				echo 'ACTIVATE_EXSICCATI: '.$GLOBALS['ACTIVATE_EXSICCATI'];
 				$this->setLoanData();
 				if(isset($GLOBALS['ACTIVATE_EXSICCATI']) && $GLOBALS['ACTIVATE_EXSICCATI']) $this->setExsiccati();
 			}
