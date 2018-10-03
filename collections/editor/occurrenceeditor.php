@@ -83,7 +83,6 @@ if($SYMB_UID){
 			include('includes/config/crowdSourceVar.php');
 		}
 	}
-	if(isset($ACTIVATE_EXSICCATI) && $ACTIVATE_EXSICCATI) $occManager->setExsiccatiMode(true);
 
 	//0 = not editor, 1 = admin, 2 = editor
 	if($IS_ADMIN || ($collId && array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collId,$USER_RIGHTS["CollAdmin"]))){

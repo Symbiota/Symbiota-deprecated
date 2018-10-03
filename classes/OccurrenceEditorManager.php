@@ -21,7 +21,6 @@ class OccurrenceEditorManager {
 	private $otherCatNumIsNum = false;
 	private $qryArr = array();
 	private $crowdSourceMode = 0;
-	private $exsiccatiMode = 0;
 	private $SYMB_UID;
 	protected $errorArr = array();
 	protected $isShareConn = false;
@@ -664,8 +663,9 @@ class OccurrenceEditorManager {
 			}
 			$this->occurrenceMap = $this->cleanOutArr($retArr);
 			if($this->occid){
+				echo 'ACTIVATE_EXSICCATI: '.$GLOBALS['ACTIVATE_EXSICCATI'];
 				$this->setLoanData();
-				if($this->exsiccatiMode) $this->setExsiccati();
+				if(isset($GLOBALS['ACTIVATE_EXSICCATI']) && $GLOBALS['ACTIVATE_EXSICCATI']) $this->setExsiccati();
 			}
 		}
 	}
@@ -2110,10 +2110,6 @@ class OccurrenceEditorManager {
 
 	public function setCrowdSourceMode($m){
 		if(is_numeric($m)) $this->crowdSourceMode = $m;
-	}
-
-	public function setExsiccatiMode($exsMode){
-		if(is_numeric($exsMode)) $this->exsiccatiMode = $exsMode;
 	}
 
 	public function getErrorStr(){
