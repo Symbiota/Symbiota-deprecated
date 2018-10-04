@@ -150,8 +150,8 @@ if($editable && $action){
 		function submitAddImageForm(f){
 			var fileBox = document.getElementById("imgfile");
 			var file = fileBox.files[0];
-			if(file.size>2000000){
-				alert("The image you are trying to upload is too big, please reduce the file size to less than 2MB");
+			if(file.size>4000000){
+				alert("The image you are trying to upload is too big, please reduce the file size to less than 4MB");
 				return false;
 			}
 		}

@@ -1,6 +1,6 @@
 <?php
 include_once($SERVER_ROOT.'/config/dbconnection.php');
- 
+
 class InventoryProjectManager {
 
 	private $conn;
@@ -40,10 +40,8 @@ class InventoryProjectManager {
 	public function getProjectData(){
 		$returnArr = Array();
 		if($this->pid){
-			$sql = 'SELECT pid, projname, managers, fulldescription, notes, '.
-				'occurrencesearch, ispublic, sortsequence '.
-				'FROM fmprojects '.
-				'WHERE (pid = '.$this->pid.') ';
+			$sql = 'SELECT pid, projname, managers, fulldescription, notes, occurrencesearch, ispublic, sortsequence '.
+				'FROM fmprojects WHERE (pid = '.$this->pid.') ';
 			$rs = $this->conn->query($sql);
 			if($row = $rs->fetch_object()){
 				$this->pid = $row->pid;
@@ -105,7 +103,7 @@ class InventoryProjectManager {
 		}
 		return $this->pid;
 	}
-	
+
 	public function getResearchChecklists(){
 		global $USER_RIGHTS;
 		$retArr = Array();
@@ -134,16 +132,16 @@ class InventoryProjectManager {
 		}
 		return $retArr;
 	}
-	
+
 	public function getGoogleStaticMap(){
 		$googleUrlLocal = $this->googleUrl;
 		//$googleUrlLocal .= "&zoom=6";
 		$coordStr = implode('%7C',$this->researchCoord);
-		if(!$coordStr) return ""; 
+		if(!$coordStr) return "";
 		$googleUrlLocal .= "&markers=size:tiny%7C".$coordStr;
 		return $googleUrlLocal;
 	}
-	
+
 	//User management functions
 	public function getManagers(){
 		$retArr = array();
@@ -160,8 +158,8 @@ class InventoryProjectManager {
 			asort($retArr);
 		}
 		return $retArr;
-	} 
-	
+	}
+
 	public function addManager($uid){
 		$status = false;
 		if(is_numeric($uid) && $this->pid){
@@ -172,8 +170,8 @@ class InventoryProjectManager {
 			}
 		}
 		return $status;
-	} 
-	
+	}
+
 	public function deleteManager($uid){
 		$status = true;
 		if(is_numeric($uid) && $this->pid){
@@ -199,10 +197,10 @@ class InventoryProjectManager {
 		//asort($retArr);
 		return $retArr;
 	}
-	
+
 	//Checklist management functions
 	public function addChecklist($clid){
-		if(!is_numeric($clid)) return false; 
+		if(!is_numeric($clid)) return false;
 		$sql = 'INSERT INTO fmchklstprojlink(pid,clid) VALUES('.$this->pid.','.$clid.') ';
 		if(!$this->conn->query($sql)){
 			return 'ERROR adding checklist to project: '.$this->conn->error;
@@ -210,7 +208,7 @@ class InventoryProjectManager {
 	}
 
 	public function deleteChecklist($clid){
-		if(!is_numeric($clid)) return false; 
+		if(!is_numeric($clid)) return false;
 		$sql = 'DELETE FROM fmchklstprojlink WHERE (pid = '.$this->pid.') AND (clid = '.$clid.')';
 		if($this->conn->query($sql)){
 			return 'ERROR deleting checklist from project';
@@ -258,7 +256,7 @@ class InventoryProjectManager {
 	public function getPid(){
 		return $this->pid;
 	}
-	
+
 	public function setPid($pid){
 		if(is_numeric($pid)) $this->pid = $pid;
 	}

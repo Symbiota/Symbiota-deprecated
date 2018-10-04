@@ -62,23 +62,6 @@ $occurArr = $collManager->getSpecimenMap($pageNumber,$cntPerPage);
 				}
 			});
 		});
-
-		function addAllVouchersToCl(clidIn){
-			var occJson = document.getElementById("specoccjson").value;
-
-			$.ajax({
-				type: "POST",
-				url: "rpc/addallvouchers.php",
-				data: { clid: clidIn, jsonOccArr: occJson, tid: <?php echo ($targetTid?$targetTid:'0'); ?> }
-			}).done(function( msg ) {
-				if(msg == "1"){
-					alert("Success! All vouchers added to checklist.");
-				}
-				else{
-					alert(msg);
-				}
-			});
-		}
 	</script>
 	<script src="../js/symb/collections.list.js?ver=8" type="text/javascript"></script>
 </head>
@@ -134,13 +117,6 @@ $occurArr = $collManager->getSpecimenMap($pageNumber,$cntPerPage);
 						<input name="dltype" type="hidden" value="specimen" />
 					</form>
 					<button class="ui-button ui-widget ui-corner-all" style="margin:5px;padding:5px;cursor: pointer;" onclick="copyUrl()" title="Copy URL to Clipboard"><img src="../images/link2.png" style="width:15px" /></button>
- 					<?php
-					if($collManager->getClName() && $targetTid){
-						?>
-						<button class="ui-button ui-widget ui-corner-all" style="margin:5px;padding:5px;cursor:pointer;" onclick="addAllVouchersToCl(<?php echo $targetTid; ?>)" title="Link All Vouchers on Page"><img src="../images/voucheradd.png" style="border:solid 1px gray;height:13px;margin-right:5px;" /></button>
-						<?php
-					}
-					?>
 				</div>
 				<div style="margin:5px;">
 					<?php
