@@ -6,7 +6,7 @@
 <script src="<?php echo $clientRoot; ?>/js/superfish.min.js"></script>
 <script src="<?php echo $clientRoot; ?>/js/menu.js"></script>
 <link href="<?php echo $clientRoot; ?>/css/component.css" type="text/css" rel="stylesheet" />
-<div class="container">
+<div class="container" id="maintable">
     <div class="header-wrapper clearfix">
         <div class="top-menu-container">
             <div class="top-menu">

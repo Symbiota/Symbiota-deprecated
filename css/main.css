@@ -3,6 +3,17 @@
  * 
  **/
 
+/* override maintable from base.  Need to leave this ID in the template, as javascript references it.*/
+#maintable{
+	border-spacing: 0px;
+	width:		100%;
+	height:		auto;
+}
+
+#maintable td{
+	vertical-align: top;
+	font-size: inherit;
+}
 
 html {
 	-webkit-text-size-adjust: 100%;
