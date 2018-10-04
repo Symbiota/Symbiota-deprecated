@@ -660,14 +660,15 @@ if($clArray["locality"]){
                                             echo "<div style='font-weight:bold;'>".$sppArr["vern"]."</div>";
                                         }
                                         if(!$showAlphaTaxa){
-                                            if($family != $prevfam){
+                                            //show family name, EVEN if it has already been displayed on the previous thumbnail
+                                            //if($family != $prevfam){
                                                 ?>
                                                 <div class="familydiv" id="<?php echo $family; ?>">
                                                     [<?php echo $family; ?>]
                                                 </div>
                                                 <?php
                                                 $prevfam = $family;
-                                            }
+                                            //} //end if $prevfam
                                         }
                                         ?>
                                     </div>
