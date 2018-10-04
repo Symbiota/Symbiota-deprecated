@@ -12,6 +12,9 @@ $tabIndex = array_key_exists("tabindex",$_REQUEST)?$_REQUEST["tabindex"]:0;
 $statusStr = '';
 
 if(!$pid && array_key_exists("proj",$_GET) && is_numeric($_GET['proj'])) $pid = $_GET['proj'];
+if(!is_numeric($pid)) $pid = 0;
+if(!is_numeric($editMode)) $editMode = 0;
+if(!is_numeric($tabIndex)) $tabIndex = 0;
 
 $projManager = new InventoryProjectManager($projSubmit?'write':'readonly');
 if($pid) $projManager->setPid($pid);
@@ -199,7 +202,7 @@ if(!$researchList && !$editMode){
 			<hr/>
 			<?php
 		}
-		if($pid || $newProj){
+		if($projArr || $newProj){
 			if($isEditor && !$newProj){
 				?>
 				<div style="float:right;" title="<?php echo $LANG['TOGGLEEDIT'];?>">
@@ -422,6 +425,7 @@ if(!$researchList && !$editMode){
 			}
 		}
 		else{
+			echo '<h2 style="color:red">Project not found, see project list below</h2>';
 			echo '<h1>'.$DEFAULT_TITLE.' Projects</h1>';
 			$projectArr = $projManager->getProjectList();
 			foreach($projectArr as $pid => $projList){
