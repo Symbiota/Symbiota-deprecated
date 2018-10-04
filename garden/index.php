@@ -466,14 +466,18 @@ include($serverRoot."/header.php");
         <h2>Garden native plant search</h2>
         <h2>Search by plant name <i class="fa fa-question-circle green"></i></h2>
         <div class="garden-name-search-box">
-            Search by scientific name
-            <input type="text" id="garden-sciname-search-input" title="Enter scientific name here." />
-            <button id="garden-sciname-search-but" type="button" onclick="processNameSearch('sciname');"><i class="fa fa-search"></i></button>
+            <div class="input-label">Search by scientific name</div>
+            <div class="input-wrapper">
+                <input type="text" id="garden-sciname-search-input" title="Enter scientific name here." />
+                <button id="garden-sciname-search-but" type="button" onclick="processNameSearch('sciname');"><i class="fa fa-search"></i></button>
+            </div>
         </div>
         <div class="garden-name-search-box">
-            Search by common name
-            <input type="text" id="garden-common-search-input" title="Enter common name here." />
-            <button id="garden-common-search-but" type="button" onclick="processNameSearch('common');"><i class="fa fa-search"></i></button>
+            <div class="input-label">Search by common name</div>
+            <div class="input-wrapper">
+                <input type="text" id="garden-common-search-input" title="Enter common name here." />
+                <button id="garden-common-search-but" type="button" onclick="processNameSearch('common');"><i class="fa fa-search"></i></button>
+            </div>
         </div>
     </div>
 </div>

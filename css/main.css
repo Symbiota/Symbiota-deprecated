@@ -1299,10 +1299,16 @@ button.menu-toggle {
 
 .garden-name-search-box {
 	max-width: 540px;
-	padding: 0 20px;
+	padding: 0;
 	margin: 20px auto;
 	display: flex;
 	font-size: 20px;
+}
+.garden-name-search-box .input-wrapper{
+	display: flex;
+}
+.garden-name-search-box .input-label{
+	padding-left: 20px;
 }
 .garden-name-search-box input{
 	border: 1px solid #502E91;
@@ -1312,6 +1318,7 @@ button.menu-toggle {
 	background: #83c44b;
 	color: #ffffff;
 	border: none;
+	margin: 0;
 }
 h2 .fa.green {
 	color: #83c44b;
