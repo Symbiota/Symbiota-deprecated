@@ -468,14 +468,14 @@ include($serverRoot."/header.php");
         <div class="garden-name-search-box">
             <div class="input-label">Search by scientific name</div>
             <div class="input-wrapper">
-                <input type="text" id="garden-sciname-search-input" title="Enter scientific name here." />
+                <input type="text" id="garden-sciname-search-input" title="Enter scientific name here." autocomplete="off" />
                 <button id="garden-sciname-search-but" type="button" onclick="processNameSearch('sciname');"><i class="fa fa-search"></i></button>
             </div>
         </div>
         <div class="garden-name-search-box">
             <div class="input-label">Search by common name</div>
             <div class="input-wrapper">
-                <input type="text" id="garden-common-search-input" title="Enter common name here." />
+                <input type="text" id="garden-common-search-input" title="Enter common name here." autocomplete="off" />
                 <button id="garden-common-search-but" type="button" onclick="processNameSearch('common');"><i class="fa fa-search"></i></button>
             </div>
         </div>
