@@ -136,6 +136,8 @@ if($clArray["locality"]){
     <script src="<?php echo $CLIENT_ROOT; ?>/js/jquery.js" type="text/javascript"></script>
     <script src="<?php echo $CLIENT_ROOT; ?>/js/jquery-ui.js" type="text/javascript"></script>
     <script src="<?php echo $CLIENT_ROOT; ?>/js/jquery.popupoverlay.js" type="text/javascript"></script>
+    <script src="<?php echo $CLIENT_ROOT; ?>/js/images-loaded.js" type="text/javascript"></script>
+    <script src="https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.min.js"></script>
     <script type="text/javascript">
 		<?php include_once($SERVER_ROOT.'/config/googleanalytics.php'); ?>
 	</script>
@@ -878,12 +880,17 @@ if($clArray["locality"]){
         <?php
     }
     ?>
-<script src="https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.min.js"></script>
 <script>
-    $('.images-wrapper').masonry({
-        // options
-        itemSelector: '.grid-item',
-        columnWidth: 200
+    var container = document.querySelector('.images-wrapper');
+    var msnry;
+
+    // initialize Masonry after all images have loaded
+    imagesLoaded( container, function() {
+        msnry = new Masonry( container, {
+            // options
+            itemSelector: '.grid-item',
+            columnWidth: 200
+        });
     });
 </script>
 </body>
