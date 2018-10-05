@@ -418,6 +418,9 @@ include($serverRoot."/header.php");
             }
         }
         searchCriteriaArr = [];
+        //replace content of searchManifestWrapper with the original hidden field
+        $(".searchManifestWrapper").html('<input id="searchCriteriaManifest" type="text" value="" readonly/>');
+        //reinitialize manifest
         $('#searchCriteriaManifest').manifest({
             onRemove: function(event) {
                 for(i in searchCriteriaArr){
