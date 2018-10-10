@@ -2,7 +2,7 @@
 /*
  * Script that navigates through iDigBio media links and fixes bad full derivative links that were the result of a disk crash
  */
-include_once('../../config/symbini.php');
+include_once('../../../config/symbini.php');
 include_once($SERVER_ROOT.'/config/dbconnection.php');
 
 $collid = (array_key_exists('collid', $_POST)?$_POST['collid']:'');
@@ -14,7 +14,7 @@ $toolManager = new iDigBioMediaTools();
 $imgidEnd = 0;
 if($IS_ADMIN && $submit == 'Process Images'){
 	echo '<ol>';
-	$imgidEnd = $toolManager->checkImageLinks($imgidStart, $limit, $collid);
+	//$imgidEnd = $toolManager->checkImageLinks($imgidStart, $limit, $collid);
 	echo '</ol>';
 }
 
