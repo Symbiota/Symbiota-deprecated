@@ -8,20 +8,22 @@ include_once($SERVER_ROOT.'/config/dbconnection.php');
 $collid = (array_key_exists('collid', $_POST)?$_POST['collid']:'');
 $imgidStart = (array_key_exists('imgidstart', $_POST)?$_POST['imgidstart']:0);
 $limit = (array_key_exists('limit', $_POST)?$_POST['limit']:10000);
-$imgidStr = (array_key_exists('imgidstr', $_POST)?$_POST['imgidstr']:10000);
-$submit = (array_key_exists('submitbutton', $_POST)?$_POST['submitbutton']:10000);
+$imgidStr = (array_key_exists('imgidstr', $_POST)?$_POST['imgidstr']:'');
+$submit = (array_key_exists('submitbutton', $_POST)?$_POST['submitbutton']:'');
 
 $toolManager = new MediaTools();
 $imgidEnd = 0;
-if($IS_ADMIN && $submit == 'Process Images'){
-	$toolManager->setImgidArr($imgidStr);
-	echo '<ol>';
-	$imgidEnd = $voucherLinker->archiveImageFiles($imgidStart, $limit);
-	echo '</ol>';
+if($IS_ADMIN){
+	if($submit == 'Process Images'){
+		$toolManager->setImgidArr($imgidStr);
+		$imgidEnd = $toolManager->archiveImageFiles($imgidStart, $limit);
+	}
 }
-
+else{
+	echo '<div>Permissions issue; are you logged in?</div>';
+}
 ?>
-<form action="idigbio_media_adjustments.php" method="post">
+<form action="media_scripts.php" method="post">
 	<div style="margin:15px">
 		<div style="margin:3px">
 			<b>Collection ID (collid):</b> <input type="text" name="collid" value="<?php echo $collid; ?>" /><br />
@@ -33,7 +35,7 @@ if($IS_ADMIN && $submit == 'Process Images'){
 			<b>Batch limit: </b><input type="text" name="limit" value="<?php echo $limit; ?>" /><br />
 		</div>
 		<div style="margin:3px">
-			<b>imgids (concat multiple by commas)</b><br/>
+			<b>imgids (enter multiple values delimited by commas)</b><br/>
 			<textarea name="imgidstr" rows="8" cols="100"></textarea>
 		</div>
 	</div>
@@ -65,26 +67,37 @@ class MediaTools {
 
 	public function archiveImageFiles($imgidStart, $limit){
 		//Set stage
+		if(!$imgidStart) $imgidStart = 0;
 		if(!$this->imgidArr){
 			echo '<li>ABORTED: Image ids (imgid) not supplied</li>';
 			return false;
 		}
 		$this->archiveDir = $GLOBALS['IMAGE_ROOT_PATH'].'/archive_'.date('Y-m-d');
-		if(!mkdir($this->archiveDir)) {
-			echo '<li>ABORTED: unalbe to create archive directory ('.$this->archiveDir.')</li>';
+		if(!file_exists($this->archiveDir)){
+			if(!mkdir($this->archiveDir)) {
+				echo '<li>ABORTED: unalbe to create archive directory ('.$this->archiveDir.')</li>';
+				return false;
+			}
+		}
+		$createHeader = true;
+		if(file_exists($this->archiveDir.'/mediaArchiveReport.csv')) $createHeader = false;
+		$this->reportFH = fopen($this->archiveDir.'/mediaArchiveReport.csv', 'a');
+		if(!$this->reportFH){
+			echo '<li>ABORTED: unalbe to create archive file ('.$this->archiveDir.')</li>';
 			return false;
 		}
-		$this->reportFH = fopen($this->archiveDir.'/mediaArchiveReport.csv', 'a');
-		fputcsv($this->reportFH, array('imgid','status','path','url'));
+		if($createHeader) fputcsv($this->reportFH, array('imgid','status','path','url'));
 		//Remove images
 		$imgidFinal = $imgidStart;
-		$cnt = 1;
-		$sql = 'SELECT * FROM images i ';
+		$cnt = 0;
+		$sql = 'SELECT i.* FROM images i ';
 		if($this->collid) $sql .= 'INNER JOIN omoccurrences o ON i.occid = o.occid ';
 		$sql .= 'WHERE (i.imgid IN('.implode(',',$this->imgidArr).')) AND (i.imgid > '.$imgidStart.') ';
 		if($this->collid) $sql .= 'AND (o.collid = '.$this->collid.') ';
 		$sql .= 'ORDER BY i.imgid LIMIT '.$limit;
+		//echo $sql;
 		$rs = $this->conn->query($sql);
+		echo '<ol>';
 		while($r = $rs->fetch_assoc()){
 			$imgId = $r['imgid'];
 			//Transfer images to archive folder
@@ -95,11 +108,20 @@ class MediaTools {
 			$insertArr = $r;
 			unset($insertArr['imgid']);
 			unset($insertArr['initialtimestamp']);
-			$insSql = 'INSERT INTO images('.implode(',', array_keys($insertArr)).') VALUES("'.implode('","', $insertArr).'");';
+			$insertStr = '';
+			foreach($insertArr as $v){
+				if($v){
+					$insertStr .= ',"'.$v.'"';
+				}
+				else{
+					$insertStr .= ',NULL';
+				}
+			}
+			$insSql = 'INSERT INTO images('.implode(',', array_keys($insertArr)).') VALUES('.substr($insertStr,1).');';
 			fputcsv($this->reportFH,array($imgId,'record deleted',$insSql));
 			//Delete image from database
 			$this->conn->query('DELETE FROM images WHERE imgid = '.$imgId);
-			if($cnt%500 == 0){
+			if($cnt && $cnt%100 == 0){
 				echo '<li>'.$cnt.' image checked (imgid: '.$imgId.')</li>';
 				ob_flush();
 				flush();
@@ -107,8 +129,10 @@ class MediaTools {
 			$cnt++;
 			$imgidFinal = $imgId;
 		}
+		echo '</ol>';
 		$rs->free();
 		fclose($this->reportFH);
+		echo '<div>Done! '.$cnt.' images archived</div>';
 		return $imgidFinal;
 	}
 
@@ -119,7 +143,10 @@ class MediaTools {
 			}
 			$path = str_replace($GLOBALS['IMAGE_ROOT_URL'], $GLOBALS['IMAGE_ROOT_PATH'], $imgFilePath);
 			if(is_writable($path)){
-				rename($path,$this->archiveDir);
+				//copy($path,$this->archiveDir);
+				//unlink($path);
+				$fileName = substr($path, strrpos($path, '/'));
+				rename($path,$this->archiveDir.'/'.$fileName);
 			}
 			else{
 				fputcsv($this->reportFH,array($imgid,'unwritable',$imgFilePath,$path));
@@ -133,11 +160,12 @@ class MediaTools {
 	}
 
 	public function setImgidArr($imgidStr){
+		$imgidStr = trim($imgidStr,' ,;');
 		if($imgidStr){
-			if(preg_match('/^[\d,]$/',$imgidStr)){
+			if(preg_match('/^[\d\s,]+$/',$imgidStr)){
 				$this->imgidArr = explode(',',$imgidStr);
 			}
-			elseif(preg_match('/^[\d;]$/',$imgidStr)){
+			elseif(preg_match('/^[\d\s;]+$/',$imgidStr)){
 				$this->imgidArr = explode(';',$imgidStr);
 			}
 		}
