@@ -2,6 +2,8 @@
 /*
  * Script that navigates through submitted image ids (imgid) and removes image records from database and moves physical to an archive directory
  */
+error_reporting(E_ALL);
+ini_set('display_errors', '1');
 include_once('../../../config/symbini.php');
 include_once($SERVER_ROOT.'/config/dbconnection.php');
 
@@ -160,13 +162,12 @@ class MediaTools {
 	}
 
 	public function setImgidArr($imgidStr){
-		$imgidStr = trim($imgidStr,' ,;');
+		$imgidStr = str_replace(';', ' ', $imgidStr);
+		$imgidStr = str_replace(',', ' ', $imgidStr);
+		$imgidStr = trim(preg_replace('/\s\s+/',' ',$imgidStr),',');
 		if($imgidStr){
-			if(preg_match('/^[\d\s,]+$/',$imgidStr)){
-				$this->imgidArr = explode(',',$imgidStr);
-			}
-			elseif(preg_match('/^[\d\s;]+$/',$imgidStr)){
-				$this->imgidArr = explode(';',$imgidStr);
+			if(preg_match('/^[\d\s]+$/',$imgidStr)){
+				$this->imgidArr = explode(' ',$imgidStr);
 			}
 		}
 	}
