@@ -10,6 +10,7 @@ include_once($SERVER_ROOT.'/config/dbconnection.php');
 $collid = (array_key_exists('collid', $_POST)?$_POST['collid']:'');
 $imgidStart = (array_key_exists('imgidstart', $_POST)?$_POST['imgidstart']:0);
 $limit = (array_key_exists('limit', $_POST)?$_POST['limit']:10000);
+$archiveImages = (array_key_exists('archiveimg', $_POST)?$_POST['archiveimg']:0);
 $imgidStr = (array_key_exists('imgidstr', $_POST)?$_POST['imgidstr']:'');
 $submit = (array_key_exists('submitbutton', $_POST)?$_POST['submitbutton']:'');
 
@@ -17,41 +18,48 @@ $toolManager = new MediaTools();
 $imgidEnd = 0;
 if($IS_ADMIN){
 	if($submit == 'Process Images'){
+		if($archiveImages) $toolManager->setArchiveImages($archiveImages);
 		$toolManager->setImgidArr($imgidStr);
 		$imgidEnd = $toolManager->archiveImageFiles($imgidStart, $limit);
 	}
+	?>
+	<form action="media_scripts.php" method="post">
+		<div style="margin:15px">
+			<div style="margin:3px">
+				<b>Collection ID (collid):</b> <input type="text" name="collid" value="<?php echo $collid; ?>" /><br />
+			</div>
+			<div style="margin:3px">
+				<b>Starting Image ID:</b> <input type="text" name="imgidstart" value="<?php echo $imgidEnd; ?>" /><br />
+			</div>
+			<div style="margin:3px">
+				<b>Batch limit: </b><input type="text" name="limit" value="<?php echo $limit; ?>" /><br />
+			</div>
+			<div style="margin:3px">
+				<input type="radio" name="archiveimg" value="0" <?php echo ($archiveImages?'':'CHECKED'); ?> /> Delete Images<br />
+				<input type="radio" name="archiveimg" value="1" <?php echo ($archiveImages?'CHECKED':''); ?> /> Archive Images<br />
+			</div>
+			<div style="margin:3px">
+				<b>imgids (enter multiple values delimited by commas)</b><br/>
+				<textarea name="imgidstr" rows="8" cols="100"></textarea>
+			</div>
+		</div>
+		<div style="margin:15px">
+			<input type="submit" name="submitbutton" value="Process Images" />
+		</div>
+	</form>
+	<?php
 }
 else{
 	echo '<div>Permissions issue; are you logged in?</div>';
 }
-?>
-<form action="media_scripts.php" method="post">
-	<div style="margin:15px">
-		<div style="margin:3px">
-			<b>Collection ID (collid):</b> <input type="text" name="collid" value="<?php echo $collid; ?>" /><br />
-		</div>
-		<div style="margin:3px">
-			<b>Starting Image ID:</b> <input type="text" name="imgidstart" value="<?php echo $imgidEnd; ?>" /><br />
-		</div>
-		<div style="margin:3px">
-			<b>Batch limit: </b><input type="text" name="limit" value="<?php echo $limit; ?>" /><br />
-		</div>
-		<div style="margin:3px">
-			<b>imgids (enter multiple values delimited by commas)</b><br/>
-			<textarea name="imgidstr" rows="8" cols="100"></textarea>
-		</div>
-	</div>
-	<div style="margin:15px">
-		<input type="submit" name="submitbutton" value="Process Images" />
-	</div>
-</form>
 
-<?php
+
 class MediaTools {
 
 	private $conn;
 	private $collid;
 	private $imgidArr;
+	private $archiveImages = false;
 	private $archiveDir;
 	private $reportFH;
 	private $deleteThumbnail = false;
@@ -145,10 +153,13 @@ class MediaTools {
 			}
 			$path = str_replace($GLOBALS['IMAGE_ROOT_URL'], $GLOBALS['IMAGE_ROOT_PATH'], $imgFilePath);
 			if(is_writable($path)){
-				//copy($path,$this->archiveDir);
-				//unlink($path);
-				$fileName = substr($path, strrpos($path, '/'));
-				rename($path,$this->archiveDir.'/'.$fileName);
+				if($this->archiveImages){
+					$fileName = substr($path, strrpos($path, '/'));
+					rename($path,$this->archiveDir.'/'.$fileName);
+				}
+				else{
+					unlink($path);
+				}
 			}
 			else{
 				fputcsv($this->reportFH,array($imgid,'unwritable',$imgFilePath,$path));
@@ -170,6 +181,10 @@ class MediaTools {
 				$this->imgidArr = explode(' ',$imgidStr);
 			}
 		}
+	}
+
+	public function setArchiveImages($b){
+		if($b) $this->archiveImages = true;
 	}
 
 	public function setDeleteThumbnail($delTn){
