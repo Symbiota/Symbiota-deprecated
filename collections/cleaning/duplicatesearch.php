@@ -63,7 +63,7 @@ elseif($action == 'listdupsrecordedby'){
 				var dbElement = dbElements[i];
 				if(dbElement.checked) return true;
 			}
-		   	alert("Please select specimens to be merged!");
+		   	alert("Please select occurrences to be merged!");
 	      	return false;
 		}
 
@@ -129,7 +129,7 @@ elseif($action == 'listdupsrecordedby'){
 							<tr>
 								<th style="width:40px;">ID</th>
 								<th style="width:20px;"><input name="selectalldupes" type="checkbox" title="Select/Deselect All" onclick="selectAllDuplicates(this.form)" /></th>
-								<th><input type="checkbox" name="batchswitch" onclick="batchSwitchTargetSpecimens(this)" title="Batch switch target specimens" /></th>
+								<th><input type="checkbox" name="batchswitch" onclick="batchSwitchTargetSpecimens(this)" title="Batch switch target occurrences" /></th>
 								<th style="width:40px;">Catalog Number</th>
 								<th style="width:40px;">Other Catalog Numbers</th>
 								<th>Scientific Name</th>

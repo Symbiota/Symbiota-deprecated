@@ -338,3 +338,19 @@ $dupClusterArr = $dupManager->getClusterArr($occid);
 		</div>
 	</fieldset>
 </div>
+<div id="geneticdiv"  style="width:795px;">
+        <fieldset>
+                <legend><b>GenBank Submission</b></legend>
+		<?php
+		    if(isset($GENBANK_SUB_TOOL_PATH)){
+		        $lib_path = $GENBANK_SUB_TOOL_PATH."/genbankgen/plugin.php";
+		        include_once $lib_path;
+		        if(class_exists('\GenBankGen\Plugin')) {
+			    $defaults->SYMB_UID = $SYMB_UID;
+			    $p = new \GenBankGen\Plugin($defaults);
+			    echo $p->embed();
+		        }
+		    }
+		?>
+        </fieldset>
+</div>

@@ -180,7 +180,7 @@ if($coorArr && count($coorArr) == 4){
 			}
 			else{
 				?>
-				<div style="margin:30px"><h2>Search failed to return specimen matches</h2></div>
+				<div style="margin:30px"><h2>Search failed to return occurrence matches</h2></div>
 				<?php 
 			}
 			?>

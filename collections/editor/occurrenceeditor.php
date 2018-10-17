@@ -228,7 +228,7 @@ if($SYMB_UID){
                     if($SOLR_MODE) $solrManager->updateSOLR();
 				}
 				else{
-					$statusStr = 'ERROR linking image to new specimen: '.$occManager->getErrorStr();
+					$statusStr = 'ERROR linking image to new occurrence: '.$occManager->getErrorStr();
 				}
 			}
 			elseif($action == "Disassociate Image"){

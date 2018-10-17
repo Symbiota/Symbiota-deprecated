@@ -107,7 +107,7 @@
 				This editing module will aid you in building an SQL fragment that will be used to help link vouchers to species names within the checklist. 
 				When a dynamic SQL fragment exists, the checklist editors will have access to 
 				editing tools that will dynamically query occurrence records matching the criteria within the SQL statement. 
-				Editors can then go through the list and select the records that are to serve as specimen vouchers for that checklist.
+				Editors can then go through the list and select the records that are to serve as occurrence vouchers for that checklist.
 				See the Flora Voucher Mapping Tutorial for more details. 
 			</div>
 			<div style="margin-top:10px;">

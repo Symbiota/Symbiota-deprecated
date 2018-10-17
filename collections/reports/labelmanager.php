@@ -145,7 +145,7 @@ if($isEditor){
 					var dbElement = dbElements[i];
 					if(dbElement.checked) return true;
 				}
-			   	alert("Please select at least one specimen!");
+			   	alert("Please select at least one occurrence!");
 		      	return false;
 			}
 			
@@ -155,7 +155,7 @@ if($isEditor){
 					var dbElement = dbElements[i];
 					if(dbElement.checked) return true;
 				}
-			   	alert("Please select at least one specimen!");
+			   	alert("Please select at least one occurrence!");
 		      	return false;
 			}
 

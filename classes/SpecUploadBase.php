@@ -676,13 +676,13 @@ class SpecUploadBase extends SpecUpload{
 			//Remove specimens without links back to source
 			$sql = 'DELETE FROM uploadspectemp WHERE (occid IS NULL) AND (collid IN('.$this->collId.'))';
 			if(!$this->conn->query($sql)){
-				$this->outputMsg('<li style="margin-left:10px"><span style="color:red;">ERROR</span> deleting specimens ('.$this->conn->error.')</li>');
+				$this->outputMsg('<li style="margin-left:10px"><span style="color:red;">ERROR</span> deleting occurrences ('.$this->conn->error.')</li>');
 			}
 		}
 		else{
 			if($this->collMetadataArr["managementtype"] == 'Snapshot' || $this->uploadType == $this->SKELETAL){
 				//Match records that were processed via the portal, walked back to collection's central database, and come back to portal
-				$this->outputMsg('<li style="margin-left:10px;">Populating source identifiers (dbpk) to relink specimens processed within portal...</li>');
+				$this->outputMsg('<li style="margin-left:10px;">Populating source identifiers (dbpk) to relink occurrences processed within portal...</li>');
 				$sql = 'UPDATE uploadspectemp u INNER JOIN omoccurrences o ON (u.catalogNumber = o.catalogNumber) AND (u.collid = o.collid) '.
 					'SET u.occid = o.occid, o.dbpk = u.dbpk '.
 					'WHERE (u.collid IN('.$this->collId.')) AND (u.occid IS NULL) AND (u.catalogNumber IS NOT NULL) AND (o.catalogNumber IS NOT NULL) AND (o.dbpk IS NULL) ';

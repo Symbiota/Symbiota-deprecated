@@ -296,7 +296,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 						<li><a href="#maptab"><span>Map</span></a></li>
 						<?php
 					}
-					if($genticArr || isset($GENBANK_SUB_TOOL_PATH)) echo '<li><a href="#genetictab"><span>Genetic Data</span></a></li>';
+					if($genticArr) echo '<li><a href="#genetictab"><span>Genetic Data</span></a></li>';
 					if($dupClusterArr){
 						?>
 						<li><a href="#dupestab"><span>Duplicates</span></a></li>
@@ -870,7 +870,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
                         }
                         ?>
 						<div style="margin-top:10px;clear:both;">
-							For additional information on this specimen, please contact:
+							For additional information on this occurrence, please contact:
 							<?php
 							$emailSubject = $DEFAULT_TITLE.' occurrence: '.$occArr['catalognumber'].' ('.$occArr['othercatalognumbers'].')';
 							$emailBody = 'Specimen being referenced: http://'.$_SERVER['SERVER_NAME'].$clientRoot.'/collections/individual/index.php?occid='.$occArr['occid'];
@@ -913,7 +913,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 						</div>
 					<?php
 				}
-				if($genticArr || isset($GENBANK_SUB_TOOL_PATH)){
+				if($genticArr){
 					?>
 					<div id="genetictab">
 						<?php
@@ -931,14 +931,6 @@ header("Content-Type: text/html; charset=".$CHARSET);
 							</div>
 							<?php
 						}
-                        if(isset($GENBANK_SUB_TOOL_PATH)){
-                            include_once $GENBANK_SUB_TOOL_PATH."/genbankgen/plugin.php";
-                            if(class_exists('\GenBankGen\Plugin')) {
-                                $defaults->SYMB_UID = $SYMB_UID;
-                                $p = new \GenBankGen\Plugin($defaults);
-                                echo $p->embed();
-                            }
-                        }
 						?>
 					</div>
 					<?php

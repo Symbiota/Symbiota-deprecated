@@ -38,7 +38,7 @@ if($isEditor){
 		if($IS_ADMIN){
 			$newCollid = $collManager->submitCollAdd($_POST);
 			if(is_numeric($newCollid)){
-				$statusStr = 'New collection added successfully! <br/>Click <a href="../admin/specuploadmanagement.php?collid='.$newCollid.'&action=addprofile">here</a> to upload specimen records for this new collection.';
+				$statusStr = 'New collection added successfully! <br/>Click <a href="../admin/specuploadmanagement.php?collid='.$newCollid.'&action=addprofile">here</a> to upload occurrence records for this new collection.';
 				header('Location: collprofiles.php?collid='.$newCollid);
 			}
 			else{
@@ -138,7 +138,7 @@ $collManager->cleanOutArr($collData);
 				alert("The Symbiota Generated GUID option cannot be selected for a collection that is managed locally outside of the data portal (e.g. Snapshot management type). In this case, the GUID must be generated within the source collection database and delivered to the data portal as part of the upload process.");
 			}
 			else if(f.managementtype.value == "Aggregate" && f.guidtarget.value != "" && f.guidtarget.value != "occurrenceId"){
-				alert("An Aggregate dataset (e.g. specimens coming from multiple collections) can only have occurrenceID selected for the GUID source");
+				alert("An Aggregate dataset (e.g. occurrences coming from multiple collections) can only have occurrenceID selected for the GUID source");
 				f.guidtarget.value = 'occurrenceId';
 			}
 			if(!f.guidtarget.value){
@@ -411,7 +411,7 @@ $collManager->cleanOutArr($collData);
 										<img src="../../images/info.png" style="width:15px;" />
 									</a>
 									<div id="peditsinfodialog">
-										Checking public edits will allow any user logged into the system to modify specimen records 
+										Checking public edits will allow any user logged into the system to modify occurrence records
 										and resolve errors found within the collection. However, if the user does not have explicit 
 										authorization for the given collection, edits will not be applied until they are 
 										reviewed and approved by collection administrator.
@@ -557,7 +557,7 @@ $collManager->cleanOutArr($collData);
 										<img src="../../images/info.png" style="width:15px;" />
 									</a>
 									<div id="sourceurlinfodialog">
-										Adding a URL template here will dynamically generate and add the specimen details page a link to the 
+										Adding a URL template here will dynamically generate and add the occurrence details page a link to the
 										source record. For example, &quot;http://sweetgum.nybg.org/vh/specimen.php?irn=--DBPK--&quot;
 										will generate a url to the NYBG collection with &quot;--DBPK--&quot; being replaced with the 
 										NYBG's Primary Key (dbpk data field within the ommoccurrence table). 

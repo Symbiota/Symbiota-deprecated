@@ -78,7 +78,7 @@ if($collMap['colltype'] == 'General Observations' && $obsUid !== 0){
 		if($isEditor){
 			?>
 			<div style="margin:15px">
-				This tool will loop through all unvalidated georeferenced specimens and verify that the coordinates actually fall within the defined political units.
+				This tool will loop through all unvalidated georeferenced occurrences and verify that the coordinates actually fall within the defined political units.
 			</div>
 			<div style="margin:15px">
 				<?php

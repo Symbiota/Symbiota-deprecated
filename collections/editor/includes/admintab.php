@@ -147,9 +147,9 @@ $occManager->setOccId($occid);
 					<div id="delimgfailspan" style="display:none;style:0px 10px 10px 10px;">
 						<span style="color:red;">Warning:</span>
 						One or more images are linked to this occurrence.
-						Continuing will remove all images linked to this specimen record. 
+						Continuing will remove all images linked to this occurrence record.
 						If you prefer to leave the image in the system only linked to the taxon name, 
-						visit the Image Tab to disassociate image from specimen. 
+						visit the Image Tab to disassociate image from occurrence.
 					</div>
 					<div id="delimgappdiv" style="display:none;">
 						<span style="color:green;">Approved for deletion.</span>

@@ -7,5 +7,14 @@
 /collections/editor/includes/config/occurVarGenObsDefault.php
 /config/dbconnection.php
 /config/symbini.php
+/css/jquery-ui.css
+/css/main.css
+/css/speciesprofile.css
+/taxa/includes/config/taxaProfileElementsCustom.php
+/taxa/includes/config/taxaProfileTemplateCustom.php
+/footer.php
+/header.php
+/leftmenu.php
 /robots.txt
 .settings/org.eclipse.php.core.prefs
+/index.php
