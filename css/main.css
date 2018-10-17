@@ -3,6 +3,17 @@
  * 
  **/
 
+/* override maintable from base.  Need to leave this ID in the template, as javascript references it.*/
+#maintable{
+	border-spacing: 0px;
+	width:		100%;
+	height:		auto;
+}
+
+#maintable td{
+	vertical-align: top;
+	font-size: inherit;
+}
 
 html {
 	-webkit-text-size-adjust: 100%;
@@ -1288,10 +1299,16 @@ button.menu-toggle {
 
 .garden-name-search-box {
 	max-width: 540px;
-	padding: 0 20px;
+	padding: 0;
 	margin: 20px auto;
 	display: flex;
 	font-size: 20px;
+}
+.garden-name-search-box .input-wrapper{
+	display: flex;
+}
+.garden-name-search-box .input-label{
+	padding-left: 20px;
 }
 .garden-name-search-box input{
 	border: 1px solid #502E91;
@@ -1301,6 +1318,7 @@ button.menu-toggle {
 	background: #83c44b;
 	color: #ffffff;
 	border: none;
+	margin: 0;
 }
 h2 .fa.green {
 	color: #83c44b;
@@ -1326,6 +1344,7 @@ div.gardenSearchTable {
 }
 .divTable.gardenSearchTable .divTableBody .divTableCell {
 	font-size: 13px;
+	vertical-align: top;
 }
 .divTable.gardenSearchTable .divTableHeading {
 	background: #75B04D;
@@ -1758,7 +1777,7 @@ div.growthCol {
 	width: 100%;
 }
 div.mf_container {
-	border: 0px;
+	min-width: 100px;
 	width: 100%;
 }
 .searchResultListToggleShow {
