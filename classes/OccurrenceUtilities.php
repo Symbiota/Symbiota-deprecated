@@ -607,16 +607,34 @@ class OccurrenceUtilities {
 			$recMap['verbatimcoordinates'] = trim($vCoord);
 		}
 		//coordinate uncertainity
+		$radius = '';
+		$unitStr = '';
 		if(isset($recMap['coordinateuncertaintyinmeters']) && $recMap['coordinateuncertaintyinmeters'] && !is_numeric($recMap['coordinateuncertaintyinmeters'])){
 			if(preg_match('/([\d.-]+)\s*([a-z\']+)/i', $recMap['coordinateuncertaintyinmeters'], $m)){
+				//value is not numeric only and thus probably have units imbedded
+				$radius = $m[1];
 				$unitStr = strtolower($m[2]);
-				if($unitStr == 'mi' || $unitStr == 'mile' || $unitStr == 'miles') $recMap['coordinateuncertaintyinmeters'] = round($m[1]*1609);
-				elseif($unitStr == 'km' || $unitStr == 'kilometers') $recMap['coordinateuncertaintyinmeters'] = round($m[1]*1000);
-				elseif($unitStr == 'm' || $unitStr == 'meter' || $unitStr == 'meters') $recMap['coordinateuncertaintyinmeters'] = $m[1];
-				elseif($unitStr == 'ft' || $unitStr == 'f' || $unitStr == 'feet' || $unitStr == "'") $recMap['coordinateuncertaintyinmeters'] = round($m[1]*0.3048);
-				else $recMap['coordinateuncertaintyinmeters'] = '';
 			}
+			$recMap['coordinateuncertaintyinmeters'] = '';
 		}
+		if(isset($recMap['coordinateuncertaintyradius']) && is_numeric($recMap['coordinateuncertaintyradius']) && isset($recMap['coordinateuncertaintyunits']) && $recMap['coordinateuncertaintyunits']){
+			//uncertainity was supplied a separate values
+			$radius = $recMap['coordinateuncertaintyradius'];
+			$unitStr = strtolower($recMap['coordinateuncertaintyunits']);
+		}
+		if($radius && $unitStr && $unitStr != 'n/a' && (!isset($recMap['coordinateuncertaintyinmeters']) || !$recMap['coordinateuncertaintyinmeters'])){
+			if($unitStr == 'mi' || $unitStr == 'mile' || $unitStr == 'miles') $recMap['coordinateuncertaintyinmeters'] = round($radius*1609);
+			elseif($unitStr == 'km' || $unitStr == 'kilometers') $recMap['coordinateuncertaintyinmeters'] = round($radius*1000);
+			elseif($unitStr == 'm' || $unitStr == 'meter' || $unitStr == 'meters') $recMap['coordinateuncertaintyinmeters'] = $radius;
+			elseif($unitStr == 'ft' || $unitStr == 'f' || $unitStr == 'feet' || $unitStr == "'") $recMap['coordinateuncertaintyinmeters'] = round($radius*0.3048);
+		}
+		if(!isset($recMap['coordinateuncertaintyinmeters'])){
+			//Assume a mapping error and meters were mapped to wrong field
+			if(is_numeric($recMap['coordinateuncertaintyradius'])) $recMap['coordinateuncertaintyinmeters'] = $recMap['coordinateuncertaintyradius'];
+			elseif(is_numeric($recMap['coordinateuncertaintyunits'])) $recMap['coordinateuncertaintyinmeters'] = $recMap['coordinateuncertaintyunits'];
+		}
+		unset($recMap['coordinateuncertaintyradius']);
+		unset($recMap['coordinateuncertaintyunits']);
 		//Check to see if evelation are valid numeric values
 		if((isset($recMap['minimumelevationinmeters']) && $recMap['minimumelevationinmeters'] && !is_numeric($recMap['minimumelevationinmeters']))
 				|| (isset($recMap['maximumelevationinmeters']) && $recMap['maximumelevationinmeters'] && !is_numeric($recMap['maximumelevationinmeters']))){

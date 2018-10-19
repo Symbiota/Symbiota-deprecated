@@ -142,6 +142,9 @@ class SpecUploadBase extends SpecUpload{
 			}
 		}
 		$rs->free();
+		//Add additional fields that are used for mapping to other fields just before record is imported into uploadspectemp
+		$this->symbFields[] = 'coordinateuncertaintyradius';
+		$this->symbFields[] = 'coordinateuncertaintyunits';
 
 		switch ($this->uploadType) {
 			case $this->FILEUPLOAD:
@@ -237,10 +240,10 @@ class SpecUploadBase extends SpecUpload{
 			'cf' => 'identificationqualifier','detby'=>'identifiedby','determinor'=>'identifiedby','determinationdate'=>'dateidentified',
 			'placestatename'=>'stateprovince','state'=>'stateprovince','placecountyname'=>'county','municipiocounty'=>'county',
 			'location'=>'locality','field:localitydescription'=>'locality','latitude'=>'verbatimlatitude','longitude'=>'verbatimlongitude',
-			'elevationmeters'=>'minimumelevationinmeters','field:associatedspecies'=>'associatedtaxa',
-			'specimennotes'=>'occurrenceremarks','notes'=>'occurrenceremarks','generalnotes'=>'occurrenceremarks',
-			'plantdescription'=>'verbatimattributes','description'=>'verbatimattributes','field:habitat'=>'habitat','habitatdescription'=>'habitat',
-			'subject_references'=>'tempfield01','subject_recordid'=>'tempfield02');
+			'errorradius'=>'coordinateuncertaintyradius','errorradiusunits'=>'coordinateuncertaintyunits','elevationmeters'=>'minimumelevationinmeters',
+			'field:associatedspecies'=>'associatedtaxa','associatedspecies'=>'associatedtaxa','specimennotes'=>'occurrenceremarks','notes'=>'occurrenceremarks',
+			'generalnotes'=>'occurrenceremarks','plantdescription'=>'verbatimattributes','description'=>'verbatimattributes','field:habitat'=>'habitat',
+			'habitatdescription'=>'habitat','subject_references'=>'tempfield01','subject_recordid'=>'tempfield02');
 		if($mode == 'ident'){
 			$prefix = 'ID-';
 			$fieldMap = $this->identFieldMap;
