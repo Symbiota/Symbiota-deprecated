@@ -1405,8 +1405,8 @@ class OccurrenceEditorManager {
 	public function batchUpdateField($fieldName,$oldValue,$newValue,$buMatch){
 		$statusStr = '';
 		$fn = $this->cleanInStr($fieldName);
-		$ov = $this->cleanInStr($oldValue);
-		$nv = $this->cleanInStr($newValue);
+		$ov = $this->conn->real_escape_string($oldValue);
+		$nv = $this->conn->real_escape_string($newValue);
 		if($fn && ($ov || $nv)){
 			//Get occids (where statement can't be part of UPDATE query without error being thrown)
 			$occidArr = array();
@@ -1425,7 +1425,7 @@ class OccurrenceEditorManager {
 				//Set full replace or replace fragment
 				$nvSqlFrag = '';
 				if(!$buMatch || $ov===''){
-					$nvSqlFrag = ($nv===''?'NULL':'"'.$nv.'"');
+					$nvSqlFrag = ($nv===''?'NULL':'"'.trim($nv).'"');
 				}
 				else{
 					//Selected "Match any part of field"
@@ -1466,7 +1466,7 @@ class OccurrenceEditorManager {
 		$retCnt = 0;
 
 		$fn = $this->cleanInStr($fieldName);
-		$ov = $this->cleanInStr($oldValue);
+		$ov = $this->conn->real_escape_string($oldValue);
 
 		$sql = 'SELECT COUNT(DISTINCT o.occid) AS retcnt FROM omoccurrences o ';
 		$this->addTableJoins($sql);
