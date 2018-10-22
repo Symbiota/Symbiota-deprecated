@@ -35,6 +35,7 @@ class OccurrenceTaxaManager {
 	protected $conn	= null;
 	protected $taxaArr = array();
 	protected $taxAuthId = 1;
+	private $taxaSearchTerms = array();
 
 	public function __construct(){
 		$this->conn = MySQLiConnectionFactory::getCon('readonly');
@@ -73,9 +74,10 @@ class OccurrenceTaxaManager {
 		}
 		$this->taxaArr['search'] = $taxaStr;
 		//Initerate through taxa and process
-		$taxaArr = explode(";",$taxaStr);
-		foreach($taxaArr as $term){
+		$this->taxaSearchTerms = explode(";",$taxaStr);
+		foreach($this->taxaSearchTerms as $k => $term){
 			$searchTerm = trim($term);
+			$this->taxaSearchTerms[$k] = $searchTerm;
 			$taxaType = $defaultTaxaType;
 			if($defaultTaxaType == TaxaSearchType::ANY_NAME) {
 				$n = explode(': ',$searchTerm);
@@ -196,6 +198,7 @@ class OccurrenceTaxaManager {
 	protected function getTaxonWhereFrag(){
 		$sqlWhereTaxa = '';
 		if(isset($this->taxaArr['taxa'])){
+			$tidInArr = array();
 			foreach($this->taxaArr['taxa'] as $searchTaxon => $searchArr){
 				$taxonType = $this->taxaArr['taxontype'];
 				if(isset($searchArr['taxontype'])) $taxonType = $searchArr['taxontype'];
@@ -229,7 +232,8 @@ class OccurrenceTaxaManager {
 								$famArr[] = $r->sciname;
 							}
 							$rs->free();
-							$sqlWhereTaxa .= 'OR (o.tidinterpreted IN('.implode(',',$tidArr).')) ';
+							//$sqlWhereTaxa .= 'OR (o.tidinterpreted IN('.implode(',',$tidArr).')) ';
+							$tidInArr = array_merge($tidInArr,$tidArr);
 						}
 						if($famArr){
 							$famArr = array_unique($famArr);
@@ -242,9 +246,11 @@ class OccurrenceTaxaManager {
 						if(array_key_exists("tid",$searchArr)){
 							$rankid = current($searchArr['tid']);
 							$tidArr = array_keys($searchArr['tid']);
-							$sqlWhereTaxa .= "OR (o.tidinterpreted IN(".implode(',',$tidArr).")) ";
+							//$sqlWhereTaxa .= "OR (o.tidinterpreted IN(".implode(',',$tidArr).")) ";
+							$tidInArr = array_merge($tidInArr,$tidArr);
 							//Return matches that are not linked to thesaurus
-							if($rankid == 180) $sqlWhereTaxa .= "OR (o.sciname LIKE '".$this->cleanInStr($term)."%') ";
+							if($rankid > 219 && in_array($term, $this->taxaSearchTerms)) $sqlWhereTaxa .= "OR (o.sciname LIKE '".$this->cleanInStr($term)."%') ";
+							elseif($rankid == 180) $sqlWhereTaxa .= "OR (o.sciname LIKE '".$this->cleanInStr($term)."%') ";
 						}
 						else{
 							$term = $this->cleanInStr(trim($term,'%'));
@@ -264,11 +270,13 @@ class OccurrenceTaxaManager {
 									}
 								}
 							}
-							$sqlWhereTaxa .= 'OR (o.tidinterpreted IN('.implode(',',array_keys($synArr)).')) ';
+							//$sqlWhereTaxa .= 'OR (o.tidinterpreted IN('.implode(',',array_keys($synArr)).')) ';
+							$tidInArr = array_merge($tidInArr,array_keys($synArr));
 						}
 					}
 				}
 			}
+			if($tidInArr) $sqlWhereTaxa .= 'OR (o.tidinterpreted IN('.implode(',',$tidInArr).')) ';
 		}
 		if($sqlWhereTaxa) return "AND (".substr($sqlWhereTaxa,3).") ";
 		else return false;
