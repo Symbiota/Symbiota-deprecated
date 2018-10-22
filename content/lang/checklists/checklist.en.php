@@ -8,6 +8,13 @@ Language: English
 $LANG['NAV_HOME'] = 'Home';
 $LANG['NAMEGAME'] = 'Name Game';
 $LANG['FLASH'] = 'Flash Card Quiz';
+$LANG['SENSITIVE_SPECIES'] = 'Sensitive species checklist for';
+$LANG['NUMBER_PENDING'] = 'Number of specimens pending protection';
+$LANG['PROTECT_LOCALITY'] = 'Protect Localities';
+$LANG['CHECK_STATUS'] = 'Check Status';
+$LANG['EXCLUSION_LIST'] = 'Exclusion Species List for';
+$LANG['INCLUDE_TAXA'] = 'Includes taxa from following child checklists';
+$LANG['TAXA_EXCLUDED'] = 'Taxa explicitly excluded';
 $LANG['AUTHORS'] = 'Authors: ';
 $LANG['MOREDETS'] = 'More Details';
 $LANG['LESSDETS'] = 'Less Details';

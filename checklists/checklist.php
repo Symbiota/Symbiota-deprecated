@@ -245,11 +245,11 @@ $taxaArray = $clManager->getTaxaList($pageNumber,($printMode?0:500));
 			//Do not show certain fields if Dynamic Checklist ($dynClid)
 			if($clid){
 				if($clArray['type'] == 'rarespp'){
-					echo '<div style="clear:both;"><b>Sensitive species checklist for:</b> '.$clArray["locality"].'</div>';
+					echo '<div style="clear:both;"><b>'.(isset($LANG['SENSITIVE_SPECIES'])?$LANG['SENSITIVE_SPECIES']:'Sensitive species checklist for').':</b> '.$clArray["locality"].'</div>';
 					if($isEditor && $clArray["locality"]){
 						include_once($SERVER_ROOT.'/classes/OccurrenceMaintenance.php');
 						$occurMaintenance = new OccurrenceMaintenance();
-						echo '<div style="margin-left:15px">Number of specimens pending protection: ';
+						echo '<div style="margin-left:15px">'.(isset($LANG['NUMBER_PENDING'])?$LANG['NUMBER_PENDING']:'Number of specimens pending protection').': ';
 						if($action == 'protectspp'){
 							$occurMaintenance->protectStateRareSpecies($clid,$clArray["locality"]);
 							echo '0';
@@ -257,13 +257,34 @@ $taxaArray = $clManager->getTaxaList($pageNumber,($printMode?0:500));
 						elseif($action == 'checkstatus'){
 							$protectCnt = $occurMaintenance->getStateProtectionCount($clid, $clArray["locality"]);
 							echo $protectCnt;
-							if($protectCnt) echo '<span style="margin-left:10px"><a href="checklist.php?submitaction=protectspp'.$argStr.'"><button style="font-size:70%">Protect Localities</button></a></span>';
+							if($protectCnt){
+								echo '<span style="margin-left:10px"><a href="checklist.php?submitaction=protectspp'.$argStr.'">';
+								echo '<button style="font-size:70%">'.(isset($LANG['PROTECT_LOCALITY'])?$LANG['PROTECT_LOCALITY']:'Protect Localities').'</button>';
+								echo '</a></span>';
+							}
 						}
 						else{
-							echo '<span style="margin-left:10px"><a href="checklist.php?submitaction=checkstatus'.$argStr.'"><button style="font-size:70%">Check Status</button></a></span>';
+							echo '<span style="margin-left:10px"><a href="checklist.php?submitaction=checkstatus'.$argStr.'">';
+							echo '<button style="font-size:70%">'.(isset($LANG['CHECK_STATUS'])?$LANG['CHECK_STATUS']:'Check Status').'</button>';
+							echo '</a></span>';
 						}
 						echo '</div>';
 					}
+				}
+				elseif($clArray['type'] == 'excludespp'){
+					$parentArr = $clManager->getParentChecklist();
+					echo '<div style="clear:both;">'.(isset($LANG['EXCLUSION_LIST'])?$LANG['EXCLUSION_LIST']:'Exclusion Species List for').' <b><a href="checklist.php?pid='.$pid.'&clid='.key($parentArr).'">'.current($parentArr).'</a></b></div>';
+				}
+				if($childArr = $clManager->getChildClidArr()){
+					echo '<div style="float:left;">'.(isset($LANG['INCLUDE_TAXA'])?$LANG['INCLUDE_TAXA']:'Includes taxa from following child checklists').':</div>';
+					echo '<div style="margin-left:10px;float:left">';
+					foreach($childArr as $childClid => $childName){
+						echo '<div style="clear:both;"><b><a href="checklist.php?pid='.$pid.'&clid='.$childClid.'">'.$childName.'</a></b></div>';
+					}
+					echo '</div>';
+				}
+				if($exclusionArr = $clManager->getExclusionChecklist()){
+					echo '<div style="clear:both">'.(isset($LANG['TAXA_EXCLUDED'])?$LANG['TAXA_EXCLUDED']:'Taxa explicitly excluded').': <b><a href="checklist.php?pid='.$pid.'&clid='.key($exclusionArr).'">'.current($exclusionArr).'</a></b></div>';
 				}
 				?>
 				<div style="clear:both;">

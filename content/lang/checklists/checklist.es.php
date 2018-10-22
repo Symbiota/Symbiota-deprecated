@@ -8,6 +8,13 @@ Language: Espa�ol (Spanish)
 $LANG['NAV_HOME'] = 'Inicio';
 $LANG['NAMEGAME'] = 'Nombre del Juego';
 $LANG['FLASH'] = 'Examen con fichas';
+$LANG['SENSITIVE_SPECIES'] = 'Lista de verificaci&oacute;n de especies sensibles para';
+$LANG['NUMBER_PENDING'] = 'N&uacute;mero de espec&iacute;menes pendientes de protecci&oacute;n';
+$LANG['PROTECT_LOCALITY'] = 'Proteger localidades';
+$LANG['CHECK_STATUS'] = 'Comprobar estado';
+$LANG['EXCLUSION_LIST'] = 'Lista de especies de exclusi&oacute;n para';
+$LANG['INCLUDE_TAXA'] = 'Incluye taxa de las siguientes listas';
+$LANG['TAXA_EXCLUDED'] = 'Taxa excluida expl&iacute;citamente';
 $LANG['AUTHORS'] = 'Autores: ';
 $LANG['MOREDETS'] = 'Mas Detalles';
 $LANG['LESSDETS'] = 'Menos Detalles';

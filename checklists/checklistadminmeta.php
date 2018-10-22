@@ -61,8 +61,32 @@ if(isset($clArray["defaultsettings"]) && $clArray["defaultsettings"]){
 				alert("Rare species checklists must have a state value entered into the locality field");
 				return false;
 			}
+			else if(f.type.value == "excludespp" && f.excludeparent.value == ""){
+				alert("You need to select a parent checklist to create an Exclude Species Checklist");
+				return false;
+			}
 		}
 		return true;
+	}
+
+	function checklistTypeChanged(f){
+		if(f.type.value == "excludespp"){
+			f.excludeparent.style.display = "inline";
+			document.getElementById("accessDiv").style.display = "none";
+			document.getElementById("authorDiv").style.display = "none";
+			document.getElementById("locDiv").style.display = "none";
+			document.getElementById("inclusiveClDiv").style.display = "none";
+			document.getElementById("geoDiv").style.display = "none";
+			f.activatekey.checked = false;
+		}
+		else{
+			f.excludeparent.style.display = "none";
+			document.getElementById("accessDiv").style.display = "block";
+			document.getElementById("authorDiv").style.display = "block";
+			document.getElementById("locDiv").style.display = "block";
+			document.getElementById("inclusiveClDiv").style.display = "block";
+			document.getElementById("geoDiv").style.display = "block";
+		}
 	}
 
 	function openMappingAid() {
@@ -94,24 +118,41 @@ if(!$clid){
 				<b><?php echo $LANG['CHECKNAME'];?></b><br/>
 				<input type="text" name="name" style="width:95%" value="<?php echo $clManager->getClName();?>" />
 			</div>
-			<div>
+			<div id="authorDiv">
 				<b><?php echo $LANG['AUTHORS'];?></b><br/>
 				<input type="text" name="authors" style="width:95%" value="<?php echo ($clArray?$clArray["authors"]:''); ?>" />
 			</div>
-			<?php
-			if(isset($GLOBALS['USER_RIGHTS']['RareSppAdmin']) || $IS_ADMIN){
-				?>
-				<div>
-					<b><?php echo $LANG['CHECKTYPE'];?></b><br/>
-					<select name="type">
-						<option value="static"><?php echo $LANG['GENCHECK'];?></option>
-						<option value="rarespp" <?php echo ($clArray && $clArray["type"]=='rarespp'?'SELECTED':'') ?>><?php echo $LANG['RARETHREAT'];?></option>
-					</select>
-				</div>
-			<?php
-			}
-			?>
 			<div>
+				<b><?php echo $LANG['CHECKTYPE'];?></b><br/>
+				<?php
+				$userClArr = $clManager->getUserChecklistArr();
+				?>
+				<select name="type" onchange="checklistTypeChanged(this.form)">
+					<option value="static"><?php echo $LANG['GENCHECK'];?></option>
+					<?php
+					if($userClArr){
+						?>
+						<option value="excludespp" <?php echo ($clArray && $clArray["type"]=='excludespp'?'SELECTED':'') ?>><?php echo (isset($LANG['EXCLUDESPP'])?$LANG['EXCLUDESPP']:'Species Exclusion List'); ?></option>
+						<?php
+					}
+					if(isset($GLOBALS['USER_RIGHTS']['RareSppAdmin']) || $IS_ADMIN){
+						?>
+						<option value="rarespp" <?php echo ($clArray && $clArray["type"]=='rarespp'?'SELECTED':'') ?>><?php echo $LANG['RARETHREAT'];?></option>
+						<?php
+					}
+					?>
+				</select>
+				<select name="excludeparent" style="display:none">
+					<option value="">Select a parent checklist</option>
+					<option value="">-------------------------------</option>
+					<?php
+					foreach($userClArr as $userClid => $userClValue){
+						echo '<option value="'.$userClid.'">'.$userClValue.'</option>';
+					}
+					?>
+				</select>
+			</div>
+			<div id="locDiv">
 				<b><?php echo $LANG['LOC'];?></b><br/>
 				<input type="text" name="locality" style="width:95%" value="<?php echo ($clArray?$clArray["locality"]:''); ?>" />
 			</div>
@@ -127,7 +168,7 @@ if(!$clid){
 				<b><?php echo $LANG['NOTES'];?></b><br/>
 				<input type="text" name="notes" style="width:95%" value="<?php echo ($clArray?$clArray["notes"]:''); ?>" />
 			</div>
-			<div>
+			<div id="inclusiveClDiv">
 				<b>More Inclusive Reference Checklist:</b><br/>
 				<select name="parentclid">
 					<option value="">None Selected</option>
@@ -140,7 +181,7 @@ if(!$clid){
 					?>
 				</select>
 			</div>
-			<div style="width:100%;">
+			<div id="geoDiv" style="width:100%;">
 				<div style="float:left;">
 					<b><?php echo $LANG['LATCENT'];?></b><br/>
 					<input id="latdec" type="text" name="latcentroid" style="width:110px;" value="<?php echo ($clArray?$clArray["latcentroid"]:''); ?>" />
@@ -219,7 +260,7 @@ if(!$clid){
 					</div>
 				</fieldset>
 			</div>
-			<div style="clear:both;margin-top:15px;">
+			<div id="accessDiv" style="clear:both;margin-top:15px;">
 				<b>Access</b><br/>
 				<select name="access">
 					<option value="private"><?php echo $LANG['PRIVATE'];?></option>

@@ -44,63 +44,58 @@ class ChecklistManager {
 	public function setClid($clid){
 		if(is_numeric($clid)){
 			$this->clid = $clid;
+			$this->setMetaData();
 			//Get children checklists
-			$sqlChildBase = 'SELECT clidchild FROM fmchklstchildren WHERE clid IN(';
-			$sqlChild = $sqlChildBase.$this->clid.')';
+			$sqlBase = 'SELECT ch.clidchild, cl2.name '.
+				'FROM fmchecklists cl INNER JOIN fmchklstchildren ch ON cl.clid = ch.clid '.
+				'INNER JOIN fmchecklists cl2 ON ch.clidchild = cl2.clid '.
+				'WHERE (cl2.type != "excludespp") AND cl.clid IN(';
+			$sql = $sqlBase.$this->clid.')';
 			do{
 				$childStr = "";
-				$rsChild = $this->conn->query($sqlChild);
-				while($rChild = $rsChild->fetch_object()){
-					$this->childClidArr[] = $rChild->clidchild;
-					$childStr .= ','.$rChild->clidchild;
+				$rsChild = $this->conn->query($sql);
+				while($r = $rsChild->fetch_object()){
+					$this->childClidArr[$r->clidchild] = $r->name;
+					$childStr .= ','.$r->clidchild;
 				}
-				$sqlChild = $sqlChildBase.substr($childStr,1).')';
+				$sql = $sqlBase.substr($childStr,1).')';
 			}while($childStr);
 		}
 	}
 
-	public function setDynClid($did){
-		if(is_numeric($did)){
-			$this->dynClid = $did;
+	public function setDynClid($id){
+		if(is_numeric($id)){
+			$this->dynClid = $id;
+			$this->setDynamicMetaData();
 		}
 	}
 
-	public function getClMetaData(){
-		$sql = "";
+	private function setMetaData(){
 		if($this->clid){
 			$sql = 'SELECT c.clid, c.name, c.locality, c.publication, c.abstract, c.authors, c.parentclid, c.notes, '.
 				'c.latcentroid, c.longcentroid, c.pointradiusmeters, c.footprintwkt, c.access, c.defaultSettings, '.
 				'c.dynamicsql, c.datelastmodified, c.uid, c.type, c.initialtimestamp '.
 				'FROM fmchecklists c WHERE (c.clid = '.$this->clid.')';
-		}
-		elseif($this->dynClid){
-			$sql = "SELECT c.dynclid AS clid, c.name, c.details AS locality, c.notes, c.uid, c.type, c.initialtimestamp ".
-				"FROM fmdynamicchecklists c WHERE (c.dynclid = ".$this->dynClid.')';
-		}
-		if($sql){
 		 	$result = $this->conn->query($sql);
 			if($result){
 		 		if($row = $result->fetch_object()){
 					$this->clName = $row->name;
 					$this->clMetadata["locality"] = $row->locality;
-					//clMetadata
 					$this->clMetadata["notes"] = $row->notes;
 					$this->clMetadata["type"] = $row->type;
-					if($this->clid){
-						$this->clMetadata["publication"] = $row->publication;
-						$this->clMetadata["abstract"] = $row->abstract;
-						$this->clMetadata["authors"] = $row->authors;
-						$this->clMetadata["parentclid"] = $row->parentclid;
-						$this->clMetadata["uid"] = $row->uid;
-						$this->clMetadata["latcentroid"] = $row->latcentroid;
-						$this->clMetadata["longcentroid"] = $row->longcentroid;
-						$this->clMetadata["pointradiusmeters"] = $row->pointradiusmeters;
-						$this->clMetadata['footprintwkt'] = $row->footprintwkt;
-						$this->clMetadata["access"] = $row->access;
-						$this->clMetadata["defaultSettings"] = $row->defaultSettings;
-						$this->clMetadata["dynamicsql"] = $row->dynamicsql;
-						$this->clMetadata["datelastmodified"] = $row->datelastmodified;
-					}
+					$this->clMetadata["publication"] = $row->publication;
+					$this->clMetadata["abstract"] = $row->abstract;
+					$this->clMetadata["authors"] = $row->authors;
+					$this->clMetadata["parentclid"] = $row->parentclid;
+					$this->clMetadata["uid"] = $row->uid;
+					$this->clMetadata["latcentroid"] = $row->latcentroid;
+					$this->clMetadata["longcentroid"] = $row->longcentroid;
+					$this->clMetadata["pointradiusmeters"] = $row->pointradiusmeters;
+					$this->clMetadata['footprintwkt'] = $row->footprintwkt;
+					$this->clMetadata["access"] = $row->access;
+					$this->clMetadata["defaultSettings"] = $row->defaultSettings;
+					$this->clMetadata["dynamicsql"] = $row->dynamicsql;
+					$this->clMetadata["datelastmodified"] = $row->datelastmodified;
 		    	}
 		    	$result->free();
 			}
@@ -108,7 +103,59 @@ class ChecklistManager {
 				trigger_error('ERROR: unable to set checklist metadata => '.$sql, E_USER_ERROR);
 			}
 		}
+	}
+
+	private function setDynamicMetaData(){
+		if($this->dynClid){
+			$sql = 'SELECT name, details, notes, uid, type, initialtimestamp FROM fmdynamicchecklists WHERE (dynclid = '.$this->dynClid.')';
+			$result = $this->conn->query($sql);
+			if($result){
+				if($row = $result->fetch_object()){
+					$this->clName = $row->name;
+					$this->clMetadata["locality"] = $row->details;
+					$this->clMetadata["notes"] = $row->notes;
+					$this->clMetadata["type"] = $row->type;
+				}
+				$result->free();
+			}
+			else{
+				trigger_error('ERROR: unable to set dynamic checklist metadata => '.$sql, E_USER_ERROR);
+			}
+		}
+	}
+
+	public function getClMetaData(){
+		if(!$this->clMetadata){
+			if($this->clid) $this->setMetaData();
+			else $this->setDynamicMetaData();
+		}
 		return $this->clMetadata;
+	}
+
+	public function getParentChecklist(){
+		$parentArr = array();
+		if($this->clid){
+			$sql = 'SELECT cl.clid, cl.name FROM fmchecklists cl INNER JOIN fmchklstchildren ch ON cl.clid = ch.clid WHERE ch.clidchild = '.$this->clid;
+			$rs = $this->conn->query($sql);
+			if($r = $rs->fetch_object()){
+				$parentArr[$r->clid] = $r->name;
+			}
+			$rs->free();
+		}
+		return $parentArr;
+	}
+
+	public function getExclusionChecklist(){
+		$excludeArr = array();
+		if($this->clid){
+			$sql = 'SELECT cl.clid, cl.name FROM fmchklstchildren ch INNER JOIN fmchecklists cl ON ch.clidchild = cl.clid WHERE (cl.type = "excludespp") AND ch.clid = '.$this->clid;
+			$rs = $this->conn->query($sql);
+			if($r = $rs->fetch_object()){
+				$excludeArr[$r->clid] = $r->name;
+			}
+			$rs->free();
+		}
+		return $excludeArr;
 	}
 
 	public function echoFilterList(){
@@ -203,7 +250,7 @@ class ChecklistManager {
 			if($this->showVouchers){
 				$clidStr = $this->clid;
 				if($this->childClidArr){
-					$clidStr .= ','.implode(',',$this->childClidArr);
+					$clidStr .= ','.implode(',',array_keys($this->childClidArr));
 				}
 				$vSql = 'SELECT DISTINCT v.tid, v.occid, c.institutioncode, v.notes, o.catalognumber, o.recordedby, o.recordnumber, o.eventdate '.
 					'FROM fmvouchers v INNER JOIN omoccurrences o ON v.occid = o.occid '.
@@ -307,7 +354,7 @@ class ChecklistManager {
 			//Add children checklists to query
 			$clidStr = $this->clid;
 			if($this->childClidArr){
-				$clidStr .= ','.implode(',',$this->childClidArr);
+				$clidStr .= ','.implode(',',array_keys($this->childClidArr));
 			}
 
 			$retCnt = 0;
@@ -447,7 +494,7 @@ class ChecklistManager {
 		if($this->clid){
 			$clidStr = $this->clid;
 			if($this->childClidArr){
-				$clidStr .= ','.implode(',',$this->childClidArr);
+				$clidStr .= ','.implode(',',array_keys($this->childClidArr));
 			}
 			if($this->thesFilter){
 				$this->basicSql = 'SELECT t.tid, ctl.clid, IFNULL(ctl.familyoverride,ts.family) AS family, t.sciname, t.author, ctl.habitat, ctl.abundance, ctl.notes, ctl.source '.
