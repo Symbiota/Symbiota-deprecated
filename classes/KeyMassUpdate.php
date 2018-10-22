@@ -4,6 +4,7 @@ include_once($SERVER_ROOT.'/classes/KeyManager.php');
 class KeyMassUpdate extends KeyManager{
 
 	private $clid;
+	private $childClidArr = array();
 	private $cid;
 	private $taxaArr = array();
 	private $stateArr = array();
@@ -50,9 +51,11 @@ class KeyMassUpdate extends KeyManager{
 
 	private function getChecklistParentArr(){
 		$retArr = Array();
-		$sql = 'SELECT DISTINCT parenttid '.
-			'FROM fmchklsttaxalink c INNER JOIN taxaenumtree e ON c.tid = e.tid '.
-			'WHERE (e.taxauthid = '.$this->taxAuthId.') AND (c.clid = '.$this->clid.')';
+		$clidStr = $this->clid;
+		if($this->childClidArr){
+			$clidStr .= ','.implode(',',array_keys($this->childClidArr));
+		}
+		$sql = 'SELECT DISTINCT parenttid FROM fmchklsttaxalink c INNER JOIN taxaenumtree e ON c.tid = e.tid WHERE (e.taxauthid = '.$this->taxAuthId.') AND (c.clid IN('.$clidStr.'))';
 		//echo $sql;
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
@@ -85,8 +88,12 @@ class KeyMassUpdate extends KeyManager{
 		$rs->free();
 
 		//Get accepted taxa
+		$clidStr = $this->clid;
+		if($this->childClidArr){
+			$clidStr .= ','.implode(',',array_keys($this->childClidArr));
+		}
 		$sql = 'SELECT DISTINCT ts.tidaccepted FROM taxstatus ts INNER JOIN fmchklsttaxalink c ON ts.tid = c.tid ';
-		$sqlWhere = 'WHERE (ts.taxauthid = '.$this->taxAuthId.') AND (c.clid = '.$this->clid.') ';
+		$sqlWhere = 'WHERE (ts.taxauthid = '.$this->taxAuthId.') AND (c.clid IN('.$clidStr.')) ';
 		if(array_key_exists('include', $tidLimitArr)){
 			$sql .= 'INNER JOIN taxaenumtree e1 ON ts.tid = e1.tid ';
 			$sqlWhere .= ' AND (e1.taxauthid = '.$this->taxAuthId.') AND (e1.parenttid IN('.implode(',',$tidLimitArr['include']).')) ';
@@ -107,7 +114,7 @@ class KeyMassUpdate extends KeyManager{
 				'FROM taxstatus ts INNER JOIN taxstatus ts2 ON ts.tidaccepted = ts2.tidaccepted '.
 				'INNER JOIN fmchklsttaxalink c ON ts2.tid = c.tid '.
 				'INNER JOIN taxaenumtree e ON ts.tid = e.tid '.
-				'WHERE (ts.taxauthid = 1) AND (ts2.taxauthid = 1) AND (c.clid = 1) AND (e.taxauthid = 1) AND (e.parenttid IN('.implode(',',$tidLimitArr['exclude']).'))';
+				'WHERE (ts.taxauthid = 1) AND (ts2.taxauthid = 1) AND (c.clid IN('.$clidStr.')) AND (e.taxauthid = 1) AND (e.parenttid IN('.implode(',',$tidLimitArr['exclude']).'))';
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
 				unset($tidArr[$r->tid]);
@@ -248,10 +255,14 @@ class KeyMassUpdate extends KeyManager{
 	//Misc functions
 	public function getTaxaQueryList(){
 		$retArr = Array();
+		$clidStr = $this->clid;
+		if($this->childClidArr){
+			$clidStr .= ','.implode(',',array_keys($this->childClidArr));
+		}
 		$sql = 'SELECT DISTINCT t.tid, t.sciname '.
 			'FROM fmchklsttaxalink c INNER JOIN taxaenumtree e ON c.tid = e.tid '.
 			'INNER JOIN taxa t ON e.parenttid = t.tid '.
-			'WHERE (c.clid = '.$this->clid.') AND (t.rankid < 180) AND (e.taxauthid = 1) '.
+			'WHERE (c.clid IN('.$clidStr.')) AND (t.rankid < 180) AND (e.taxauthid = 1) '.
 			'ORDER BY t.sciname ';
 		//echo $sql;
 		$rs = $this->conn->query($sql);
@@ -281,7 +292,24 @@ class KeyMassUpdate extends KeyManager{
 	}
 
 	public function setClid($clid){
-		if(is_numeric($clid)) $this->clid = $clid;
+		if(is_numeric($clid)){
+			$this->clid = $clid;
+			//Get children checklists
+			$sqlBase = 'SELECT ch.clidchild, cl2.name '.
+				'FROM fmchecklists cl INNER JOIN fmchklstchildren ch ON cl.clid = ch.clid '.
+				'INNER JOIN fmchecklists cl2 ON ch.clidchild = cl2.clid '.
+				'WHERE (cl2.type != "excludespp") AND cl.clid IN(';
+			$sql = $sqlBase.$this->clid.')';
+			do{
+				$childStr = "";
+				$rsChild = $this->conn->query($sql);
+				while($r = $rsChild->fetch_object()){
+					$this->childClidArr[$r->clidchild] = $r->name;
+					$childStr .= ','.$r->clidchild;
+				}
+				$sql = $sqlBase.substr($childStr,1).')';
+			}while($childStr);
+		}
 	}
 }
 ?>

@@ -48,13 +48,13 @@ $headingArr = $charManager->getHeadingArr();
 		}
 	</script>
 	<style type="text/css">
-		input{ autocomplete: off; } 
+		input{ autocomplete: off; }
 	</style>
 </head>
 <body>
 	<!-- This is inner text! -->
-	<div style="width:700px">
-		<?php 
+	<div  id="innertext" style="width:700px;padding:15px">
+		<?php
 		if($statusStr){
 			?>
 			<hr/>
@@ -62,7 +62,7 @@ $headingArr = $charManager->getHeadingArr();
 				<?php echo $statusStr; ?>
 			</div>
 			<hr/>
-			<?php 
+			<?php
 		}
 		if($isEditor){
 			?>
@@ -89,13 +89,13 @@ $headingArr = $charManager->getHeadingArr();
 				</form>
 			</div>
 			<div>
-				<?php 
+				<?php
 				if($headingArr){
 					?>
 					<fieldset>
 						<legend><b>Existing Headings</b></legend>
 						<ul>
-							<?php 
+							<?php
 							foreach($headingArr as $headingId => $headArr){
 								echo '<li><a href="#" onclick="toggle(\'headingedit-'.$headingId.'\');">'.$headArr['name'].' <img src="../../images/edit.png" style="width:13px" /></a></li>';
 								?>
@@ -129,19 +129,19 @@ $headingArr = $charManager->getHeadingArr();
 										</form>
 									</fieldset>
 								</div>
-								<?php 
+								<?php
 							}
 							?>
 						</ul>
 					</fieldset>
-					<?php 
+					<?php
 				}
 				else{
 					echo '<div style="font-weight:bold;font-size:120%;">There are no existing character headings</div>';
 				}
 				?>
 			</div>
-			<?php 
+			<?php
 		}
 		else{
 			echo '<h2>You are not authorized to add characters</h2>';
