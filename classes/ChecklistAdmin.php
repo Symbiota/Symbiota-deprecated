@@ -88,17 +88,24 @@ class ChecklistAdmin{
 		}
 		$sql = "INSERT INTO fmchecklists (".substr($sqlInsert,1).") VALUES (".substr($sqlValues,1).")";
 
-		$newClId = 0;
+		$newClid = 0;
 		if($this->conn->query($sql)){
-			$newClId = $this->conn->insert_id;
+			$newClid = $this->conn->insert_id;
 			//Set permissions to allow creater to be an editor
-			$this->conn->query('INSERT INTO userroles (uid, role, tablename, tablepk) VALUES('.$GLOBALS["SYMB_UID"].',"ClAdmin","fmchecklists",'.$newClId.') ');
-			//$this->conn->query("INSERT INTO userpermissions (uid, pname) VALUES(".$GLOBALS["symbUid"].",'ClAdmin-".$newClId."') ");
+			$this->conn->query('INSERT INTO userroles (uid, role, tablename, tablepk) VALUES('.$GLOBALS["SYMB_UID"].',"ClAdmin","fmchecklists",'.$newClid.') ');
+			//$this->conn->query("INSERT INTO userpermissions (uid, pname) VALUES(".$GLOBALS["symbUid"].",'ClAdmin-".$newClid."') ");
 			$newPManager = new ProfileManager();
 			$newPManager->setUserName($GLOBALS['USERNAME']);
 			$newPManager->authenticate();
+			if($postArr['type'] == 'excludespp' && $postArr['excludeparent']){
+				//If is an exclusion checklists, link to parent checklist
+				$sql2 = 'INSERT INTO fmchklstchildren(clid, clidchild, modifiedUid) VALUES('.$postArr['excludeparent'].','.$newClid.','.$GLOBALS["SYMB_UID"].') ';
+				if(!$this->conn->query($sql2)){
+					echo 'ERROR linking exclusion checklist to parent: '.$this->conn->error;
+				}
+			}
 		}
-		return $newClId;
+		return $newClid;
 	}
 
 	public function editMetaData($postArr){
@@ -261,17 +268,16 @@ class ChecklistAdmin{
 		return $retArr;
 	}
 
-	public function getChildSelectArr(){
+	public function getUserChecklistArr(){
 		$retArr = array();
 		$clidStr = '';
 		if(isset($GLOBALS['USER_RIGHTS']) && $GLOBALS['USER_RIGHTS']['ClAdmin']){
 			$clidStr = implode(',',$GLOBALS['USER_RIGHTS']['ClAdmin']);
 		}
 		if($clidStr){
-			$sql = 'SELECT clid, name '.
-				'FROM fmchecklists '.
-				'WHERE clid <> '.$this->clid.' AND clid IN('.$clidStr.') '.
-				'ORDER BY name';
+			$sql = 'SELECT clid, name FROM fmchecklists WHERE (clid IN('.$clidStr.')) AND (type != "excludespp") ';
+			if($this->clid) $sql .= 'AND (clid <> '.$this->clid.') ';
+			$sql .= 'ORDER BY name';
 			//echo $sql;
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
@@ -370,7 +376,7 @@ class ChecklistAdmin{
 	//Get list data
 	public function getReferenceChecklists(){
 		$retArr = array();
-		$sql = 'SELECT clid, name FROM fmchecklists WHERE access = "public" ';
+		$sql = 'SELECT clid, name FROM fmchecklists WHERE (access = "public") AND (type != "excludespp") ';
 		$clArr = array();
 		if(isset($GLOBALS['USER_RIGHTS']['ClAdmin'])){
 			$clidStr = implode(',',$GLOBALS['USER_RIGHTS']['ClAdmin']);
@@ -485,8 +491,7 @@ class ChecklistAdmin{
 			//Get project and checklist IDs from userpermissions
 			$clStr = '';
 			$projStr = '';
-			$sql = 'SELECT role,tablepk FROM userroles '.
-				'WHERE (uid = '.$uid.') AND (role = "ClAdmin" OR role = "ProjAdmin") ';
+			$sql = 'SELECT role,tablepk FROM userroles WHERE (uid = '.$uid.') AND (role = "ClAdmin" OR role = "ProjAdmin") ';
 			//$sql = 'SELECT pname FROM userpermissions '.
 			//	'WHERE (uid = '.$uid.') AND (pname LIKE "ClAdmin-%" OR pname LIKE "ProjAdmin-%") ';
 			$rs = $this->conn->query($sql);
@@ -497,9 +502,7 @@ class ChecklistAdmin{
 			$rs->free();
 			if($clStr){
 				//Get checklists
-				$sql = 'SELECT clid, name FROM fmchecklists '.
-						'WHERE (clid IN('.substr($clStr,1).')) '.
-						'ORDER BY name';
+				$sql = 'SELECT clid, name FROM fmchecklists WHERE (clid IN('.substr($clStr,1).')) ORDER BY name';
 				$rs = $this->conn->query($sql);
 				while($row = $rs->fetch_object()){
 					$returnArr['cl'][$row->clid] = $row->name;
@@ -508,10 +511,7 @@ class ChecklistAdmin{
 			}
 			if($projStr){
 				//Get projects
-				$sql = 'SELECT pid, projname '.
-						'FROM fmprojects '.
-						'WHERE (pid IN('.substr($projStr,1).')) '.
-						'ORDER BY projname';
+				$sql = 'SELECT pid, projname FROM fmprojects WHERE (pid IN('.substr($projStr,1).')) ORDER BY projname';
 				$rs = $this->conn->query($sql);
 				while($row = $rs->fetch_object()){
 					$returnArr['proj'][$row->pid] = $row->projname;

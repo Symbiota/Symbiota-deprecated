@@ -32,7 +32,7 @@ $clManager->setClid($clid);
 						<option value="">Select Child Checklist</option>
 						<option value="">-------------------------------</option>
 						<?php
-						$clArr = $clManager->getChildSelectArr();
+						$clArr = $clManager->getUserChecklistArr();
 						foreach($clArr as $k => $name){
 							echo '<option value="'.$k.'">'.$name.'</option>';
 						}
