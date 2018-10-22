@@ -9,6 +9,7 @@ class KeyDataManager extends Manager {
 	private $taxonFilter;
 	private $uid;
 	private $clid;
+	private $childClidArr = array();
 	private $clName;
 	private $clTitle;
 	private $clAuthors;
@@ -232,7 +233,11 @@ class KeyDataManager extends Manager {
 				}
 				else{
 					$sqlFromBase .= 'INNER JOIN fmchklsttaxalink clk ON ts1.tid = clk.tid ';
-					$sqlWhere .= 'AND (clk.clid = '.$this->clid.') ';
+					$clidStr = $this->clid;
+					if($this->childClidArr){
+						$clidStr .= ','.implode(',',array_keys($this->childClidArr));
+					}
+					$sqlWhere .= 'AND (clk.clid IN('.$clidStr.')) ';
 				}
 			}
 			//If a taxon limit has been set, add taxon value to sql
@@ -284,21 +289,23 @@ class KeyDataManager extends Manager {
 
 	public function getTaxaFilterList(){
 		$returnArr = Array();
-		$sql = "SELECT DISTINCT nt.UnitName1, ts.Family ";
-		if($this->clid && $this->clType == "static"){
-			$sql .= "FROM (taxstatus ts INNER JOIN taxa nt ON ts.tid = nt.tid) INNER JOIN fmchklsttaxalink cltl ON nt.TID = cltl.TID ".
-					"WHERE (cltl.CLID = ".$this->clid.") ";
+		$sql = 'SELECT DISTINCT nt.UnitName1, ts.Family ';
+		if($this->clid && $this->clType == 'static'){
+			$clidStr = $this->clid;
+			if($this->childClidArr){
+				$clidStr .= ','.implode(',',array_keys($this->childClidArr));
+			}
+			$sql .= 'FROM (taxstatus ts INNER JOIN taxa nt ON ts.tid = nt.tid) INNER JOIN fmchklsttaxalink cltl ON nt.TID = cltl.TID WHERE (cltl.CLID IN('.$clidStr.')) ';
 		}
 		else if($this->dynClid){
-			$sql .= "FROM (taxstatus ts INNER JOIN taxa nt ON ts.tid = nt.tid) INNER JOIN fmdyncltaxalink dcltl ON nt.TID = dcltl.TID ".
-					"WHERE (dcltl.dynclid = ".$this->dynClid.") ";
+			$sql .= 'FROM (taxstatus ts INNER JOIN taxa nt ON ts.tid = nt.tid) INNER JOIN fmdyncltaxalink dcltl ON nt.TID = dcltl.TID WHERE (dcltl.dynclid = '.$this->dynClid.') ';
 		}
 		else{
 			$sql .= "FROM (((taxstatus ts INNER JOIN taxa nt ON ts.tid = nt.tid) ".
-					"INNER JOIN fmchklsttaxalink cltl ON nt.TID = cltl.TID) ".
-					"INNER JOIN fmchecklists cl ON cltl.CLID = cl.CLID) ".
-					"INNER JOIN fmchklstprojlink clpl ON cl.CLID = clpl.clid ".
-					"WHERE (clpl.pid = ".$this->pid.") ";
+				"INNER JOIN fmchklsttaxalink cltl ON nt.TID = cltl.TID) ".
+				"INNER JOIN fmchecklists cl ON cltl.CLID = cl.CLID) ".
+				"INNER JOIN fmchklstprojlink clpl ON cl.CLID = clpl.clid ".
+				"WHERE (clpl.pid = ".$this->pid.") ";
 		}
 		$sql .= 'AND (ts.taxauthid = 1)';
 		//echo $sql.'<br/>'; exit;
@@ -318,37 +325,51 @@ class KeyDataManager extends Manager {
 		return $returnArr;
 	}
 
-	public function setClValue($clv){
+	public function setClValue($clid){
 		$sql = "";
 		if($this->dynClid){
-			$sql = 'SELECT d.name, d.details, d.type '.
-					'FROM fmdynamicchecklists d WHERE (dynclid = '.$this->dynClid.')';
+			$sql = 'SELECT d.name, d.details, d.type FROM fmdynamicchecklists d WHERE (dynclid = '.$this->dynClid.')';
 			$result = $this->conn->query($sql);
 			if($row = $result->fetch_object()){
 				$this->clName = $row->name;
 				$this->clType = $row->type;
 			}
-			$result->close();
-		}
-		else{
-			if(is_numeric($clv)){
-				$sql = "SELECT cl.CLID, cl.Name, cl.Authors, cl.Type, cl.dynamicsql FROM fmchecklists cl WHERE (cl.CLID = ".$clv.")";
-			}
-			else{
-				$sql = "SELECT cl.CLID, cl.Name, cl.Authors, cl.Type, cl.dynamicsql ".
-						"FROM fmchecklists cl WHERE (cl.Name = '".$this->cleanInStr($clv)."') OR (cl.Title = '".$this->cleanInStr($clv)."')";
-			}
-			$result = $this->conn->query($sql);
-			if($row = $result->fetch_object()){
-				$this->clid = $row->CLID;
-				$this->clName = $row->Name;
-				$this->clAuthors = $row->Authors;
-				$this->clType = ($row->Type?$row->Type:'static');
-				$this->dynamicSql = $row->dynamicsql;
-			}
 			$result->free();
 		}
+		else{
+			if(is_numeric($clid)){
+				$this->clid = $clid;
+				$this->setMetaData();
+				//Get children checklists
+				$sqlBase = 'SELECT ch.clidchild, cl2.name '.
+					'FROM fmchecklists cl INNER JOIN fmchklstchildren ch ON cl.clid = ch.clid '.
+					'INNER JOIN fmchecklists cl2 ON ch.clidchild = cl2.clid '.
+					'WHERE (cl2.type != "excludespp") AND cl.clid IN(';
+				$sql = $sqlBase.$this->clid.')';
+				do{
+					$childStr = "";
+					$rsChild = $this->conn->query($sql);
+					while($r = $rsChild->fetch_object()){
+						$this->childClidArr[$r->clidchild] = $r->name;
+						$childStr .= ','.$r->clidchild;
+					}
+					$sql = $sqlBase.substr($childStr,1).')';
+				}while($childStr);
+			}
+		}
 		return $this->clid;
+	}
+
+	private function setMetaData(){
+		$sql = "SELECT name, authors, type, dynamicsql FROM fmchecklists WHERE (clid = ".$this->clid.")";
+		$rs = $this->conn->query($sql);
+		if($row = $rs->fetch_object()){
+			$this->clName = $row->name;
+			$this->clAuthors = $row->authors;
+			$this->clType = ($row->type?$row->type:'static');
+			$this->dynamicSql = $row->dynamicsql;
+		}
+		$rs->free();
 	}
 
 	public function setAttrs($attrs){

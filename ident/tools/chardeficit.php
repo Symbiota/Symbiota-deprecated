@@ -2,14 +2,14 @@
 include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/KeyCharDeficitManager.php');
 header("Content-Type: text/html; charset=".$CHARSET);
- 
-$action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:""; 
-$langValue = array_key_exists("lang",$_REQUEST)?$_REQUEST["lang"]:""; 
-$projValue = array_key_exists("proj",$_REQUEST)?$_REQUEST["proj"]:""; 
-$clValue = array_key_exists("cl",$_REQUEST)?$_REQUEST["cl"]:""; 
-$cfValue = array_key_exists("cf",$_REQUEST)?$_REQUEST["cf"]:""; 
+
+$action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:"";
+$langValue = array_key_exists("lang",$_REQUEST)?$_REQUEST["lang"]:"";
+$projValue = array_key_exists("proj",$_REQUEST)?$_REQUEST["proj"]:"";
+$clid = array_key_exists("clid",$_REQUEST)?$_REQUEST["clid"]:"";
+$cfValue = array_key_exists("cf",$_REQUEST)?$_REQUEST["cf"]:"";
 $cidValue = array_key_exists("cid",$_REQUEST)?$_REQUEST["cid"]:"";
-  
+
 $cdManager = new KeyCharDeficitManager();
 if($langValue) $cdManager->setLanguage($langValue);
 if($projValue) $cdManager->setProject($projValue);
@@ -43,7 +43,7 @@ if($IS_ADMIN || array_key_exists("KeyEditor",$USER_RIGHTS) || array_key_exists("
 	</script>
 </head>
 <body>
-<?php
+	<?php
 	$displayLeftMenu = (isset($ident_tools_chardeficitMenu)?$ident_tools_chardeficitMenu:"true");
 	include($SERVER_ROOT.'/header.php');
 	if(isset($ident_tools_chardeficitCrumbs)){
@@ -52,92 +52,93 @@ if($IS_ADMIN || array_key_exists("KeyEditor",$USER_RIGHTS) || array_key_exists("
 		echo "<b>Character Deficit Editor</b>";
 		echo "</div>";
 	}
-?>
+	?>
 	<!-- This is inner text! -->
 	<div id="innertext">
   		<form action="chardeficit.php" method="get">
-<?php 
- 	if($editable){
-?>
-		<table width="700" border="0">
-    <tr>
-      <td width="200" valign="top">
-			<div style='margin-top:1em;font-weight:bold;'>Checklist:</div>
-		  	<select name="cl"> 
-		  		<?php 
-		  			$selectList = Array();
-		  			$selectList = $cdManager->getClQueryList();
-		  			echo "<option>--Select a Checklist--</option>";
-		  			foreach($selectList as $key => $value){
-		  				$selectStr = $key==$clValue?"SELECTED":"";
-		  				echo "<option value='".$key."' $selectStr>$value</option>";
-		  			}
-		  		?>
-		  	</select>
-		  	<br/>
-			<div style='margin-top:1em;font-weight:bold;'>Filter Character List:</div>
-				<select name="cf">
-		  		<?php 
-		  			$selectList = Array();
-		  			$selectList = $cdManager->getTaxaQueryList();
-		  			echo "<option>--Select a Taxon--</option>";
-		  			foreach($selectList as $key => $value){
-		  				$selectStr = $key==$cfValue?"SELECTED":"";
-		  				echo "<option value='".$key."' $selectStr>$value</option>\n";
-		  			}
-		  		?>
-		  	</select><br/>
-				<div style='margin-top:1em;'><input type='submit' name='action' id='submit' value='Get Characters' /></div>
-	
-	  		<hr size="2"/>
-			<input type='submit' name='action' id='submit' value='Get Species List'/>
-			<div style="margin:10px 0px 10px 0px;height:250px; width:190; overflow : auto;border:black solid 1px;">
-	  		<?php
-				if($cfValue != "--Select a Taxon--"){
-	  				if($action=="Get Characters" || $action=="Get Species List"){
-			  			$cList = $cdManager->getCharList($cfValue, $cidValue);
-			  			foreach($cList as $value){
-			  				echo $value."\n";
-			  			}
-		  			}
-		  			else{
-		  				echo "<h2>Character List Empty</h2>";
-		  			}
-				}
-				else{
-	  				echo "<h2>Select as Taxon</h2>";
-				}
-	  		?>
-			</div>
-			<input type='submit' name='action' id='submit' value='Get Species List' />
-      </td>
-			<td width='20' background='../../images/brown_hor_strip.gif'></td>
-      <td valign="top">
-      	<?php
-	      	if($action=="Get Species List" && $cfValue != "--Select a Taxon--"){
-	      		$tList = $cdManager->getTaxaList($cidValue, $cfValue, $clValue);								//family => Array(tid => sciname)
-	      		if($tList){
-					echo "<h3>Species Count: ".$cdManager->getTaxaCount()."</h3>\n";
-	      			foreach($tList as $f=>$sArr){
-	      				echo "<div style='margin-top:1em;font-size:125%;'>$f</div>\n";
-	      				foreach($sArr as $idValue => $spValue){
-	      					echo "<div style=''>&nbsp;&nbsp;<a href='editor.php?tid=".$idValue."&lang=English&lang=English' target='_blank'>$spValue</a> ";
-	      					echo "(<a href=\"#\" onclick=\"openPopup('editor.php?tid=".$idValue."&char=".$cidValue."','technical');\">@</a>)</div>\n";
-	      				}
-	      			}
-	      		}
-	      		else{
-	      			echo "<h2>No taxa were returned.</h2>";
-	      		}
-	      	}
-      		else{
-      			echo "<h2>List Empty.</h2>";
-      		}
+			<?php
+		 	if($editable){
 				?>
-	  	</td>
-    </tr>
-  </table>
-  </form>
+		<table width="700" border="0">
+			<tr>
+				<td width="200" valign="top">
+					<div style='margin-top:1em;font-weight:bold;'>Checklist:</div>
+				  	<select name="clid">
+				  		<?php
+				  			$selectList = Array();
+				  			$selectList = $cdManager->getClQueryList();
+				  			echo "<option>--Select a Checklist--</option>";
+				  			foreach($selectList as $key => $value){
+				  				$selectStr = $key==$clid?"SELECTED":"";
+				  				echo "<option value='".$key."' $selectStr>$value</option>";
+				  			}
+				  		?>
+				  	</select>
+				  	<br/>
+					<div style='margin-top:1em;font-weight:bold;'>Filter Character List:</div>
+						<select name="cf">
+				  		<?php
+				  			$selectList = Array();
+				  			$selectList = $cdManager->getTaxaQueryList();
+				  			echo "<option>--Select a Taxon--</option>";
+				  			foreach($selectList as $key => $value){
+				  				$selectStr = $key==$cfValue?"SELECTED":"";
+				  				echo "<option value='".$key."' $selectStr>$value</option>\n";
+				  			}
+				  		?>
+				  	</select><br/>
+						<div style='margin-top:1em;'><input type='submit' name='action' id='submit' value='Get Characters' /></div>
+
+			  		<hr size="2"/>
+					<input type='submit' name='action' id='submit' value='Get Species List'/>
+					<div style="margin:10px 0px 10px 0px;height:250px; width:190; overflow : auto;border:black solid 1px;">
+			  		<?php
+						if($cfValue != "--Select a Taxon--"){
+			  				if($action=="Get Characters" || $action=="Get Species List"){
+					  			$cList = $cdManager->getCharList($cfValue, $cidValue);
+					  			foreach($cList as $value){
+					  				echo $value."\n";
+					  			}
+				  			}
+				  			else{
+				  				echo "<h2>Character List Empty</h2>";
+				  			}
+						}
+						else{
+			  				echo "<h2>Select as Taxon</h2>";
+						}
+			  		?>
+					</div>
+					<input type='submit' name='action' id='submit' value='Get Species List' />
+				</td>
+				<td width='20' background='../../images/brown_hor_strip.gif'>&nbsp;</td>
+				<td valign="top">
+			  		<?php
+				  	if($action=="Get Species List" && $cfValue != "--Select a Taxon--"){
+				  		$cdManager->setClid($clid);
+				  		$tList = $cdManager->getTaxaList($cidValue, $cfValue);								//family => Array(tid => sciname)
+				  		if($tList){
+							echo "<h3>Species Count: ".$cdManager->getTaxaCount()."</h3>\n";
+				  			foreach($tList as $f=>$sArr){
+				  				echo "<div style='margin-top:1em;font-size:125%;'>$f</div>\n";
+				  				foreach($sArr as $idValue => $spValue){
+				  					echo "<div style=''>&nbsp;&nbsp;<a href='editor.php?tid=".$idValue."&lang=English&lang=English' target='_blank'>$spValue</a> ";
+				  					echo "(<a href=\"#\" onclick=\"openPopup('editor.php?tid=".$idValue."&char=".$cidValue."','technical');\">@</a>)</div>\n";
+				  				}
+				  			}
+				  		}
+				  		else{
+				  			echo "<h2>No taxa were returned.</h2>";
+				  		}
+				  	}
+			  		else{
+			  			echo "<h2>List Empty.</h2>";
+			  		}
+					?>
+				</td>
+			</tr>
+		</table>
+	</form>
 <?php
  }
  else{  //Not editable
@@ -146,5 +147,5 @@ if($IS_ADMIN || array_key_exists("KeyEditor",$USER_RIGHTS) || array_key_exists("
  ?>
 </div>
 <?php include($SERVER_ROOT.'/footer.php'); ?>
-  </body>
+</body>
 </html>

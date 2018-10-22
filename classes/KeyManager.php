@@ -81,45 +81,41 @@ class KeyManager{
 	protected function getChildrenArr($tid){
 		//Return list of accepted taxa, not including target
 		$retArr = Array();
-		if(is_numeric($tid)){
-			$targetStr = $tid;
-			do{
-				if(isset($targetList)) unset($targetList);
-				$targetList = Array();
-				$sql = 'SELECT t.tid '.
-					'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
-					'WHERE (ts.taxauthid = '.$this->taxAuthId.') AND (ts.ParentTID In ('.$targetStr.')) AND (ts.tid = ts.tidaccepted)';
-				$rs = $this->conn->query($sql);
-				while($row = $rs->fetch_object()){
-					$targetList[] = $row->tid;
-			    }
-			    $rs->free();
-				if($targetList){
-					$targetStr = implode(",", $targetList);
-					$retArr = array_merge($retArr, $targetList);
-				}
-			}while($targetList);
-		}
+		$targetStr = $tid;
+		do{
+			if(isset($targetList)) unset($targetList);
+			$targetList = Array();
+			$sql = 'SELECT t.tid '.
+				'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
+				'WHERE (ts.taxauthid = '.$this->taxAuthId.') AND (ts.ParentTID In ('.$targetStr.')) AND (ts.tid = ts.tidaccepted)';
+			$rs = $this->conn->query($sql);
+			while($row = $rs->fetch_object()){
+				$targetList[] = $row->tid;
+		    }
+		    $rs->free();
+			if($targetList){
+				$targetStr = implode(",", $targetList);
+				$retArr = array_merge($retArr, $targetList);
+			}
+		}while($targetList);
 		return $retArr;
 	}
 
 	protected function getParentArr($tid){
  		$retArr = Array();
- 		if(is_numeric($tid)){
-			$targetTid = $tid;
-			while($targetTid){
-				//$sql = 'SELECT parenttid FROM taxaenumtree WHERE taxauthid = 1 AND (tid = '.$this->tid.')';
-				$sql = 'SELECT parenttid FROM taxstatus WHERE (taxauthid = '.$this->taxAuthId.') AND (tid = '.$targetTid.')';
-				//echo $sql;
-				$rs = $this->conn->query($sql);
-			    if($row = $rs->fetch_object()){
-			    	if(!$row->parenttid || $targetTid == $row->parenttid) break;
-					$targetTid = $row->parenttid;
-					if($targetTid) $retArr[] = $targetTid;
-			    }
-			}
-			$rs->free();
- 		}
+		$targetTid = $tid;
+		while($targetTid){
+			//$sql = 'SELECT parenttid FROM taxaenumtree WHERE taxauthid = 1 AND (tid = '.$this->tid.')';
+			$sql = 'SELECT parenttid FROM taxstatus WHERE (taxauthid = '.$this->taxAuthId.') AND (tid = '.$targetTid.')';
+			//echo $sql;
+			$rs = $this->conn->query($sql);
+		    if($row = $rs->fetch_object()){
+		    	if(!$row->parenttid || $targetTid == $row->parenttid) break;
+				$targetTid = $row->parenttid;
+				if($targetTid) $retArr[] = $targetTid;
+		    }
+		}
+		$rs->free();
 		return $retArr;
 	}
 
