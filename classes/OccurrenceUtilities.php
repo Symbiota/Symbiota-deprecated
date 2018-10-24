@@ -630,8 +630,8 @@ class OccurrenceUtilities {
 		}
 		if(!isset($recMap['coordinateuncertaintyinmeters'])){
 			//Assume a mapping error and meters were mapped to wrong field
-			if(is_numeric($recMap['coordinateuncertaintyradius'])) $recMap['coordinateuncertaintyinmeters'] = $recMap['coordinateuncertaintyradius'];
-			elseif(is_numeric($recMap['coordinateuncertaintyunits'])) $recMap['coordinateuncertaintyinmeters'] = $recMap['coordinateuncertaintyunits'];
+			if(isset($recMap['coordinateuncertaintyradius']) && is_numeric($recMap['coordinateuncertaintyradius'])) $recMap['coordinateuncertaintyinmeters'] = $recMap['coordinateuncertaintyradius'];
+			elseif(isset($recMap['coordinateuncertaintyunits']) && is_numeric($recMap['coordinateuncertaintyunits'])) $recMap['coordinateuncertaintyinmeters'] = $recMap['coordinateuncertaintyunits'];
 		}
 		unset($recMap['coordinateuncertaintyradius']);
 		unset($recMap['coordinateuncertaintyunits']);

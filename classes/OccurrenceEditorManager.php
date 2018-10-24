@@ -541,7 +541,7 @@ class OccurrenceEditorManager {
 			$sql = 'SELECT COUNT(DISTINCT o.occid) AS reccnt FROM omoccurrences o ';
 			$this->addTableJoins($sql);
 			$sql .= $this->sqlWhere;
-			//echo '<div>'.$sql.'</div>'; exit;
+			//echo '<div>'.$sql.'</div>';
 			$rs = $this->conn->query($sql);
 			if($r = $rs->fetch_object()){
 				$recCnt = $r->reccnt;
@@ -626,9 +626,9 @@ class OccurrenceEditorManager {
 			}
 		}
 		if($sqlFrag){
-			//$sql = 'SELECT DISTINCT o.occid, o.collid, o.'.implode(',o.',$this->occFieldArr).' FROM omoccurrences o '.$sqlFrag;
-			$sql = 'SELECT o.occid, o.collid, o.'.implode(',o.',$this->occFieldArr).' FROM omoccurrences o '.$sqlFrag;
-			//echo "<div>".$sql."</div>"; exit;
+			$sql = 'SELECT DISTINCT o.occid, o.collid, o.'.implode(',o.',$this->occFieldArr).' FROM omoccurrences o '.$sqlFrag;
+			//$sql = 'SELECT o.occid, o.collid, o.'.implode(',o.',$this->occFieldArr).' FROM omoccurrences o '.$sqlFrag;
+			//echo "<div>".$sql."</div>";
 			$previousOccid = 0;
 			$rs = $this->conn->query($sql);
 			$rsCnt = 0;
