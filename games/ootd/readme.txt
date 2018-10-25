@@ -30,7 +30,7 @@ $gameInfo = $gameManager->setOOTD($oodID,$ootdGameChecklist);
 		<?php echo $ootdGameTitle; ?>
 	</div>
 	<a href="<?php echo $CLIENT_ROOT; ?>/games/ootd/index.php?oodid=<?php echo $oodID.'&cl='.$ootdGameChecklist.'&title='.$ootdGameTitle.'&type='.$ootdGameType; ?>">
-		<img src="<?php echo $CLIENT_ROOT; ?>/temp/ootd/<?php echo $oodID; ?>_organism300_1.jpg?ver=<?php echo date('YmdH'); ?>" style="width:250px;border:0px;" />
+		<img src="<?php echo $gameInfo['images'][0]; ?>" style="width:250px;border:0px;" />
 	</a><br/>
 	<b>What is this <?php echo $ootdGameType; ?>?</b><br/>
 	<a href="<?php echo $CLIENT_ROOT; ?>/games/ootd/index.php?oodid=<?php echo $oodID.'&cl='.$ootdGameChecklist.'&title='.$ootdGameTitle.'&type='.$ootdGameType; ?>">

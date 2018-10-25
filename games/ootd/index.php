@@ -107,10 +107,10 @@ if($submitAction){
 					<div class = "dailypicture" align = "center">
 						<div>
 							<div style="vertical-align:middle;">
-								<a href="javascript:chgImg(1)"><img src="../../temp/ootd/<?php echo $oodID; ?>_organism300_1.jpg?ver=<?php echo $cacheRefresh; ?>" name="slideshow" id="slideshow" style="width:500px;" ></a><br />
+								<a href="#" onclick="chgImg(1); return false;"><img src="<?php echo $imageArr[0]; ?>" name="slideshow" id="slideshow" style="width:500px;" ></a><br />
 							</div><br />
-							<a href="javascript:chgImg(-1)">Previous</a> &nbsp;|&nbsp;
-							<a href="javascript:chgImg(1)">Next</a>
+							<a href="#" onclick="chgImg(-1); return false;">Previous</a> &nbsp;|&nbsp;
+							<a href="#" onclick="chgImg(1); return false;">Next</a>
 						</div>
 					</div>
 					<div style="margin-left:auto;margin-right:auto;font-size:18px;text-align:center;margin-top:20px;margin-bottom:20px;" >
