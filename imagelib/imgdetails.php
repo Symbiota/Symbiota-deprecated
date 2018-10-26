@@ -77,8 +77,8 @@ if($imgArr){
 	<link type="text/css" href="../css/jquery-ui.css" rel="Stylesheet" />
 	<script src="../js/jquery.js" type="text/javascript"></script>
 	<script src="../js/jquery-ui.js" type="text/javascript"></script>
-	<script src="../js/symb/imagelib.imgdetails.js?ver=150910" type="text/javascript"></script>
 	<script src="../js/symb/shared.js" type="text/javascript"></script>
+	<script src="../js/symb/api.taxonomy.taxasuggest.js?ver=3" type="text/javascript"></script>
 </head>
 <body>
 	<div id="fb-root"></div>
@@ -90,6 +90,30 @@ if($imgArr){
 			js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.0";
 			fjs.parentNode.insertBefore(js, fjs);
 		}(document, 'script', 'facebook-jssdk'));
+
+		function verifyEditForm(f){
+		    if(f.url.value.replace(/\s/g, "") == "" ){
+		        window.alert("ERROR: File path must be entered");
+		        return false;
+		    }
+		    return true;
+		}
+
+		function verifyChangeTaxonForm(f){
+			var sciName = f.targettaxon.value.replace(/^\s+|\s+$/g, "");
+		    if(sciName == ""){
+		        window.alert("Enter a taxon name to which the image will be transferred");
+		    }
+			else{
+				validateTaxon(f,true);
+			}
+		    return false;	//Submit takes place in the validateTaxon method
+		}
+
+		function openOccurrenceSearch(target) {
+			occWindow=open("../collections/misc/occurrencesearch.php?targetid="+target,"occsearch","resizable=1,scrollbars=0,width=750,height=500,left=20,top=20");
+			if (occWindow.opener == null) occWindow.opener = self;
+		}
 	</script>
 	<?php
 	$displayLeftMenu = (isset($taxa_imgdetailsMenu)?$taxa_imgdetailsMenu:false);
@@ -240,9 +264,8 @@ if($imgArr){
 					    	<legend><b>Transfer Image to a Different Scientific Name</b></legend>
 							<div style="font-weight:bold;">
 								Transfer to Taxon:
-								<input type="text" id="targettaxon" name="targettaxon" size="40" />
-								<input type="hidden" id="targettid" name="targettid" value="" />
-
+								<input type="text" id="taxa" name="targettaxon" size="40" />
+								<input type="hidden" id="tid" name="targettid" value="" />
 								<input type="hidden" name="sourcetid" value="<?php echo $imgArr["tid"];?>" />
 								<input type="hidden" name="imgid" value="<?php echo $imgId; ?>" />
 								<input type="hidden" name="submitaction" value="Transfer Image" />

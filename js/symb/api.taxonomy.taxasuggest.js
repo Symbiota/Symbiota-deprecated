@@ -89,3 +89,38 @@ function verifyQuickSearch(f){
 	}
 	return true;
 }
+
+function validateTaxon(f,submitForm){ 
+	if(f.taxa.value == ""){
+		//alert("Enter a scientific name");
+		return false;
+	}
+	else{
+		$.ajax({
+			type: "POST",
+			url: "../api/taxonomy/gettaxon.php",
+			dataType: "json",
+			data: { sciname: f.taxa.value }
+		}).done(function( taxaObj ) {
+			//alert(JSON.stringify(taxaObj));
+			//alert(Object.keys(taxaObj).length)
+			var retCnt = Object.keys(taxaObj).length;
+			if(retCnt == 0){
+				alert("ERROR: Scientific name does not exist in database. Did you spell it correctly? If so, contact your data administrator to add this species to the Taxonomic Thesaurus.");
+			}
+			else{
+				if(retCnt == 1){
+					f.tid.value = Object.keys(taxaObj)[0];
+					if(submitForm) f.submit();
+				}
+				else{
+					f.tid.value = Object.keys(taxaObj)[0];
+					if(submitForm) f.submit();
+					//alert(Object.keys(taxaObj)[0]);
+					//alert(Object.keys(taxaObj)[1]);
+				}
+			}
+		});
+		return false;
+	}
+}
