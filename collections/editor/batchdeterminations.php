@@ -192,7 +192,7 @@ if($isEditor){
 					return false;
 				}
 				if(f.dateidentified.value == ""){
-					alert("Determination Date field must have a value (enter 'unknown' if not defined)");
+					alert("Determination Date field must have a value (enter 's.d.' if not defined)");
 					return false;
 				}
 				return true;

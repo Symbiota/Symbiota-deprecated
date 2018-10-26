@@ -3,7 +3,7 @@ include_once($SERVER_ROOT.'/config/dbconnection.php');
 include_once($SERVER_ROOT."/classes/ImageShared.php");
 
 class ImageDetailManager {
-	
+
 	private $conn;
 	private $imgId;
 
@@ -17,7 +17,7 @@ class ImageDetailManager {
  	public function __destruct(){
 		if(!($this->conn === null)) $this->conn->close();
 	}
- 	
+
 	public function getImageMetadata(){
 		$retArr = Array();
 		if($this->imgId){
@@ -52,7 +52,7 @@ class ImageDetailManager {
 				$retArr["occid"] = $row->occid;
 				$retArr["username"] = $row->username;
 			}
-			$rs->close();
+			$rs->free();
 		}
 		return $retArr;
 	}
@@ -137,7 +137,7 @@ class ImageDetailManager {
 		$copyRight = $this->cleanInStr($postArr["copyright"]);
 		$rights = $this->cleanInStr($postArr["rights"]);
 		$sortSequence = (array_key_exists("sortsequence",$postArr)?$postArr["sortsequence"]:0);
-		
+
 		$sql = 'UPDATE images '.
 			'SET caption = '.($caption?'"'.$caption.'"':'NULL').', url = "'.$url.'", thumbnailurl = '.($tnUrl?'"'.$tnUrl.'"':'NULL').','.
 			'originalurl = '.($origUrl?'"'.$origUrl.'"':'NULL').', photographer = '.($photographer?'"'.$photographer.'"':"NULL").','.
@@ -152,21 +152,23 @@ class ImageDetailManager {
 		}
 		return $status;
 	}
-	
+
 	public function changeTaxon($targetTid,$sourceTid){
 		$status = '';
-		$sql = 'UPDATE images SET tid = '.$targetTid.', sortsequence = 50 WHERE imgid = '.$this->imgId.' AND tid = '.$sourceTid;
-		if(!$this->conn->query($sql)){
-			$sql = 'SELECT i.imgid '.
-				'FROM images i INNER JOIN images i2 ON i.url = i2.url '.
-				'WHERE (i.tid = '.$targetTid.') AND (i2.imgid = '.$this->imgId.')';
-			$rs = $this->conn->query($sql);  
-			if($rs->num_rows){
-				//Transfer is not happening because image is already mapped to that taxon
-				$sql2 = 'DELETE FROM images WHERE (imgid = '.$this->imgId.') AND (tid = '.$sourceTid.')';
-				$this->conn->query($sql2);
+		if(is_numeric($targetTid) && is_numeric($sourceTid)){
+			$sql = 'UPDATE images SET tid = '.$targetTid.', sortsequence = 50 WHERE imgid = '.$this->imgId.' AND tid = '.$sourceTid;
+			if(!$this->conn->query($sql)){
+				$sql = 'SELECT i.imgid '.
+					'FROM images i INNER JOIN images i2 ON i.url = i2.url '.
+					'WHERE (i.tid = '.$targetTid.') AND (i2.imgid = '.$this->imgId.')';
+				$rs = $this->conn->query($sql);
+				if($rs->num_rows){
+					//Transfer is not happening because image is already mapped to that taxon
+					$sql2 = 'DELETE FROM images WHERE (imgid = '.$this->imgId.') AND (tid = '.$sourceTid.')';
+					$this->conn->query($sql2);
+				}
+				$rs->free();
 			}
-			$rs->close();
 		}
 		return $status;
 	}
@@ -191,7 +193,7 @@ class ImageDetailManager {
 		while($row = $result->fetch_object()){
 			echo "<option value='".$row->uid."' ".($row->uid == $userId?"SELECTED":"").">".$row->fullname."</option>\n";
 		}
-		$result->close();
+		$result->free();
 	}
 
  	private function cleanOutStr($str){

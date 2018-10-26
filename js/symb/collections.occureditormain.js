@@ -1140,7 +1140,7 @@ function verifyDetForm(f){
 		return false;
 	}
 	if(f.dateidentified.value == ""){
-		alert("Determination Date field must have a value (enter 'unknown' if not defined)");
+		alert("Determination Date field must have a value (enter 's.d.' if not defined)");
 		return false;
 	}
 	if(f.sortsequence && !isNumeric(f.sortsequence.value)){
