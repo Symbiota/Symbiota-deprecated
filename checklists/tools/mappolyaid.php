@@ -47,7 +47,7 @@ else{
 		<title><?php echo $DEFAULT_TITLE; ?> - Coordinate Aid</title>
 		<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
 		<script src="//maps.googleapis.com/maps/api/js?v=3.exp&libraries=drawing<?php echo (isset($GOOGLE_MAP_KEY) && $GOOGLE_MAP_KEY?'&key='.$GOOGLE_MAP_KEY:''); ?>"></script>
-		<script src="<?php echo $CLIENT_ROOT; ?>/js/symb/wktpolygontools.js" type="text/javascript"></script>
+		<script src="<?php echo $CLIENT_ROOT; ?>/js/symb/wktpolygontools.js?ver=1" type="text/javascript"></script>
 		<script type="text/javascript">
 			var map;
 			var selectedShape = null;
@@ -193,6 +193,11 @@ else{
 				return !isNaN(parseFloat(n)) && isFinite(n);
 			}
 
+			function reformatCoordinates(f){
+				reformCoordinates(f);
+				resetPolygon();
+			}
+
 			function resetPolygon(){
 				if(selectedShape) selectedShape.setMap(null);
 				setPolygon();
@@ -222,7 +227,7 @@ else{
 					var latlngArr = mvcString.split(",");
 					coordinates.push(parseFloat(latlngArr[0]).toFixed(6)+" "+parseFloat(latlngArr[1]).toFixed(6));
 				}
-				if(coordinates[0] != coordinates[i]) coordinates.push(coordinates[0]);
+				//if(coordinates[0] != coordinates[i-1]) coordinates.push(coordinates[0]);
 				var coordStr = coordinates.toString();
 				if(coordStr && coordStr != "" && coordStr != undefined){
 					document.getElementById("footprintwkt").value = "POLYGON (("+coordStr+"))";
@@ -296,7 +301,7 @@ else{
 						<a href="#" onclick="toggle('helptext')"><img alt="Display Help Text" src="../../images/qmark_big.png" style="width:15px;" /></a><br/>
 						<button name="formsubmit" type="submit" value="save" onclick="deleteSelectedShape(this.form)">Delete Selected Shape</button><br/>
 						<button type="button" onclick="resetPolygon()">Redraw Polygon</button><br/>
-						<button type="button" onclick="reformCoordinates(this.form);">Reformat Coordinates</button>
+						<button type="button" onclick="reformatCoordinates(this.form);">Reformat Coordinates</button>
 					</div>
 					<?php
 				}
