@@ -1,6 +1,6 @@
 <?php
 include_once($serverRoot.'/config/dbconnection.php');
- 
+
 class OccurrenceGeoLocate {
 
 	private $conn;
@@ -41,7 +41,7 @@ class OccurrenceGeoLocate {
 	private function getTrsOccurrences($limit){
 		$retArr = array();
 		if($this->collid){
-			$sql = 'SELECT occid, country, stateprovince, county, verbatimCoordinates, '. 
+			$sql = 'SELECT occid, country, stateprovince, county, verbatimCoordinates, '.
 				'if(verbatimCoordinates like "%TRS:%", trim(substr(verbatimCoordinates, instr(verbatimCoordinates, "TRS:")+4, length(verbatimCoordinates))), verbatimCoordinates) AS verbcoords '.
 				'FROM omoccurrences '.$this->getTrsSqlWhere();
 			if($limit) $sql .= 'LIMIT '.$limit;
@@ -56,7 +56,7 @@ class OccurrenceGeoLocate {
 		}
 		return $retArr;
 	}
-	
+
 	private function getTrsSqlWhere(){
 		$sql = 'WHERE (collid = '.$this->collid.') AND (county IS NOT NULL) AND (decimalLatitude IS NULL) '.
 			'AND (locality regexp "T\\.? ?[0-9]{1,3}?[NS]\\.?,? ?R\\.? ?[0-9]{1,3} ?[EW]\\.?,? ?.*" '.
@@ -83,8 +83,8 @@ class OccurrenceGeoLocate {
 		if($occArr){
 			foreach($occArr as $occid => $oArr){
 				//Cleaning tasks
-				
-				
+
+
 			}
 		}
 	}
@@ -93,8 +93,8 @@ class OccurrenceGeoLocate {
 		if($occArr){
 			foreach($occArr as $occid => $oArr){
 				//Cleaning tasks
-				
-				
+
+
 			}
 		}
 	}
@@ -102,11 +102,11 @@ class OccurrenceGeoLocate {
 	private function submitTrsOccurrencesToGeoLocate($occArr){
 		$retArr = array();
 		//Process to submit occurrence array to GeoLocate
-		
-		
+
+
 		return $retArr;
 	}
-	
+
 	//Batch georeference localities using GeoLocate tools
 	public function batchGeoLocateLocalities($limit = 100){
 		$occArr = $this->getOccurrences();
@@ -140,8 +140,8 @@ class OccurrenceGeoLocate {
 		if($occArr){
 			foreach($occArr as $occid => $oArr){
 				//Cleaning tasks
-				
-				
+
+
 			}
 		}
 	}
@@ -150,8 +150,8 @@ class OccurrenceGeoLocate {
 		if($occArr){
 			foreach($occArr as $occid => $oArr){
 				//Cleaning tasks
-				
-				
+
+
 			}
 		}
 	}
@@ -159,11 +159,11 @@ class OccurrenceGeoLocate {
 	private function submitOccurrencesToGeoLocate($occArr){
 		$retArr = array();
 		//Process to submit occurrence array to GeoLocate
-		
-		
+
+
 		return $retArr;
 	}
-	
+
 	public function loadOccurrences($postArr){
 		$sql = 'UPDATE occurrences ';
 		foreach($postArr as $fieldName => $fieldValue){
@@ -173,7 +173,7 @@ class OccurrenceGeoLocate {
 			$decLng = '';
 			$coordErr = '';
 			if(is_numeric($occid) && is_numeric($decLat) && is_numeric($decLng) && is_numeric($coordErr)){
-				$sql .= 'SET decimallatitude = '.$decLat.', decimallongitude = '.$decLng.', coordinateErrorInMeters = '.$coordErr.
+				$sql .= 'SET decimallatitude = '.$decLat.', decimallongitude = '.$decLng.', coordinateUncertaintyInMeters = '.$coordErr.
 					', georeferenceSource = CONCAT("Batch georeferences using GeoLocate services (",curdate(),")") '.
 					'WHERE (occid = '.$occid.') AND (decimallatitude IS NULL) AND (decimallongitude IS NULL) ';
 				if(!$this->conn->query($sql)){
@@ -197,7 +197,7 @@ class OccurrenceGeoLocate {
 			$rs->free();
 		}
 	}
-	
+
 	public function setFilterArr($inArr){
 		$this->filterArr = $inArr;
 	}
