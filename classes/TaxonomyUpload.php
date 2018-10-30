@@ -177,19 +177,19 @@ class TaxonomyUpload{
 
 				//Process and load taxon units data ($childParentArr)
 				foreach($childParentArr as $taxon => $tArr){
-					$sql = 'INSERT IGNORE INTO uploadtaxa(scinameinput,rankid,parentstr,family,acceptance) '.
-						'VALUES ("'.$taxon.'",'.$tArr['r'].',"'.$tArr['p'].'",'.(array_key_exists('f',$tArr)?'"'.$tArr['f'].'"':'NULL').',1)';
+					$sql = 'INSERT IGNORE INTO uploadtaxa(scinameinput,sciname,rankid,parentstr,family,acceptance) '.
+						'VALUES ("'.$taxon.'","'.$taxon.'",'.$tArr['r'].',"'.$tArr['p'].'",'.(array_key_exists('f',$tArr)?'"'.$tArr['f'].'"':'NULL').',1)';
 					if(!$this->conn->query($sql)){
 						$this->outputMsg('ERROR loading taxonunit: '.$this->conn->error);
 					}
 				}
 				$this->outputMsg($recordCnt.' taxon records pre-processed');
-				$this->removeUploadFile();
 			}
 			else{
 				$this->outputMsg('ERROR: Scientific name is not mapped to &quot;scinameinput&quot;');
 			}
 			fclose($fh);
+			$this->removeUploadFile();
 			$this->setUploadCount();
 		}
 		else{
@@ -391,8 +391,8 @@ class TaxonomyUpload{
 			$this->outputMsg('ERROR: '.$this->conn->error,1);
 		}
 		$sql = 'UPDATE uploadtaxa u INNER JOIN taxa t ON u.acceptedstr = t.sciname '.
-				'SET u.tidaccepted = t.tid '.
-				'WHERE u.tidaccepted IS NULL';
+			'SET u.tidaccepted = t.tid '.
+			'WHERE u.tidaccepted IS NULL';
 		if(!$this->conn->query($sql)){
 			$this->outputMsg('ERROR: '.$this->conn->error,1);
 		}
