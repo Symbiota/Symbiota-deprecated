@@ -279,7 +279,7 @@ $smManager = new SiteMapManager();
 							?>
 							<li><?php echo $LANG['EDITTAXPL'];?> <a href="taxa/taxonomy/taxonomydisplay.php"><?php echo $LANG['TAXTREEVIEW'];?></a></li>
 							<li><a href="taxa/taxonomy/taxonomyloader.php"><?php echo $LANG['ADDTAXANAME'];?></a></li>
-							<li><a href="taxa/taxonomy/taxaloader.php"><?php echo $LANG['BATCHTAXA'];?></a></li>
+							<li><a href="taxa/taxonomy/batchloader.php"><?php echo $LANG['BATCHTAXA'];?></a></li>
 							<?php
 							if($IS_ADMIN || array_key_exists("Taxonomy",$USER_RIGHTS)){
 								?>

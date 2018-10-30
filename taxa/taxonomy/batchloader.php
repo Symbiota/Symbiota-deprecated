@@ -2,7 +2,7 @@
 include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/TaxonomyUpload.php');
 header("Content-Type: text/html; charset=".$CHARSET);
-if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl='.$CLIENT_ROOT.'/taxa/taxonomy/taxaloader.php');
+if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl='.$CLIENT_ROOT.'/taxa/taxonomy/batchloader.php');
 ini_set('max_execution_time', 3600);
 
 $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:"";
@@ -27,7 +27,7 @@ if($isEditor){
 	else{
 		$loaderManager->setUploadFile($ulOverride);
 	}
-	
+
 	if(array_key_exists("sf",$_REQUEST)){
 		//Grab field mapping, if mapping form was submitted
  		$targetFields = $_REQUEST["tf"];
@@ -36,7 +36,7 @@ if($isEditor){
 			if($targetFields[$x] && $sourceFields[$x]) $fieldMap[$sourceFields[$x]] = $targetFields[$x];
 		}
 	}
-	
+
 	if($action == 'downloadcsv'){
 		$loaderManager->exportUploadTaxa();
 		exit;
@@ -75,7 +75,7 @@ if($isEditor){
 				}
 			}
 		}
-	
+
 		function verifyItisUploadForm(f){
 			if(f.uploadfile.value == "" && f.uloverride.value == ""){
 				alert("Please enter a path value of the file you wish to upload");
@@ -83,7 +83,7 @@ if($isEditor){
 			}
 			return true;
 		}
-	
+
 		function verifyUploadForm(f){
 			var inputValue = f.uploadfile.value;
 			if(inputValue == "") inputValue = f.uloverride.value;
@@ -95,11 +95,11 @@ if($isEditor){
 				if(inputValue.indexOf(".csv") == -1 && inputValue.indexOf(".CSV") == -1 && inputValue.indexOf(".zip") == -1){
 					alert("Upload file must be a CSV or ZIP file");
 					return false;
-				}			
+				}
 			}
 			return true;
 		}
-	
+
 		function checkTransferForm(f){
 			return true;
 		}
@@ -113,18 +113,18 @@ if(isset($taxa_admin_taxaloaderCrumbs)){
 	if($taxa_admin_taxaloaderCrumbs){
 		echo '<div class="navpath">';
 		echo $taxa_admin_taxaloaderCrumbs;
-		echo ' <b>Taxa Batch Loader</b>'; 
+		echo ' <b>Taxa Batch Loader</b>';
 		echo '</div>';
 	}
 }
 else{
 	?>
 	<div class="navpath">
-		<a href="../../index.php">Home</a> &gt;&gt; 
-		<a href="taxonomydisplay.php"><b>Taxonomic Tree Viewer</b></a> &gt;&gt; 
-		<a href="taxaloader.php"><b>Taxa Batch Loader</b></a> 
+		<a href="../../index.php">Home</a> &gt;&gt;
+		<a href="taxonomydisplay.php"><b>Taxonomic Tree Viewer</b></a> &gt;&gt;
+		<a href="batchloader.php"><b>Taxa Batch Loader</b></a>
 	</div>
-	<?php 
+	<?php
 }
 
 if($isEditor){
@@ -133,14 +133,14 @@ if($isEditor){
 		<h1>Taxonomic Name Batch Loader</h1>
 		<div style="margin:30px;">
 			<div style="margin-bottom:30px;">
-				This page allows a Taxonomic Administrator to batch upload taxonomic data files. 
-				See <a href="http://symbiota.org/docs/loading-taxonomic-data/">Symbiota Documentation</a> 
+				This page allows a Taxonomic Administrator to batch upload taxonomic data files.
+				See <a href="http://symbiota.org/docs/loading-taxonomic-data/">Symbiota Documentation</a>
 				pages for more details on the Taxonomic Thesaurus layout.
-			</div> 
-			<?php 
+			</div>
+			<?php
 			if($action == 'Map Input File' || $action == 'Verify Mapping'){
 				?>
-				<form name="mapform" action="taxaloader.php" method="post">
+				<form name="mapform" action="batchloader.php" method="post">
 					<fieldset style="width:90%;">
 						<legend style="font-weight:bold;font-size:120%;">Taxa Upload Form</legend>
 						<div style="margin:10px;">
@@ -169,7 +169,7 @@ if($isEditor){
 										<select name="tf[]" style="background:<?php echo (array_key_exists($sField,$fieldMap)?"":"yellow");?>">
 											<option value="">Field Unmapped</option>
 											<option value="">-------------------------</option>
-											<?php 
+											<?php
 											$mappedTarget = (array_key_exists($sField,$fieldMap)?$fieldMap[$sField]:"");
 											$selStr = "";
 											if($mappedTarget=="unmapped") $selStr = "SELECTED";
@@ -196,7 +196,7 @@ if($isEditor){
 										</select>
 									</td>
 								</tr>
-								<?php 
+								<?php
 							}
 							?>
 						</table>
@@ -211,7 +211,7 @@ if($isEditor){
 						</div>
 					</fieldset>
 				</form>
-				<?php 
+				<?php
 			}
 			elseif(substr($action,0,6) == 'Upload' || $action == 'Analyze Taxa'){
 				echo '<ul>';
@@ -229,14 +229,14 @@ if($isEditor){
 				$reportArr = $loaderManager->analysisUpload();
 				echo '</ul>';
 				?>
-				<form name="transferform" action="taxaloader.php" method="post" onsubmit="return checkTransferForm(this)">
+				<form name="transferform" action="batchloader.php" method="post" onsubmit="return checkTransferForm(this)">
 					<fieldset style="width:450px;">
 						<legend style="font-weight:bold;font-size:120%;">Transfer Taxa To Central Table</legend>
 						<div style="margin:10px;">
-							Review upload statistics below before activating. Use the download option to review and/or adjust for reload if necessary.  
+							Review upload statistics below before activating. Use the download option to review and/or adjust for reload if necessary.
 						</div>
 						<div style="margin:10px;">
-							<?php 
+							<?php
 							$statArr = $loaderManager->getStatArr();
 							if($statArr){
 								if(isset($statArr['upload'])) echo '<u>Taxa uploaded</u>: <b>'.$statArr['upload'].'</b><br/>';
@@ -247,19 +247,19 @@ if($isEditor){
 								echo '<u>Non-accepted taxa</u>: <b>'.(isset($statArr['nonaccepted'])?$statArr['nonaccepted']:0).'</b><br/>';
 								if(isset($statArr['bad'])){
 									?>
-									<fieldset style="margin:15px;padding:15px;"> 
+									<fieldset style="margin:15px;padding:15px;">
 										<legend><b>Problematic taxa</b></legend>
 										<div style="margin-bottom:10px">
-											These taxa are marked as FAILED within the notes field and will not load until problems have been resolved. 
-											You may want to download the data (link below), fix the bad relationships, and then reload. 
+											These taxa are marked as FAILED within the notes field and will not load until problems have been resolved.
+											You may want to download the data (link below), fix the bad relationships, and then reload.
 										</div>
-										<?php  
+										<?php
 										foreach($statArr['bad'] as $msg => $cnt){
 											echo '<div style="margin-left:10px"><u>'.$msg.'</u>: <b>'.$cnt.'</b></div>';
 										}
 										?>
 									</fieldset>
-									<?php 
+									<?php
 								}
 							}
 							else{
@@ -267,12 +267,12 @@ if($isEditor){
 							}
 							?>
 						</div>
-						<!-- 
+						<!--
 						<div style="margin:10px;">
-							Target Thesaurus: 
+							Target Thesaurus:
 							<select name="taxauthid">
-								<?php 
-								$taxonAuthArr = $loaderManager->getTaxAuthorityArr(); 
+								<?php
+								$taxonAuthArr = $loaderManager->getTaxAuthorityArr();
 								foreach($taxonAuthArr as $k => $v){
 									echo '<option value="'.$k.'" '.($k==$taxAuthId?'SELECTED':'').'>'.$v.'</option>'."\n";
 								}
@@ -285,11 +285,11 @@ if($isEditor){
 							<input type="submit" name="action" value="Activate Taxa" />
 						</div>
 						<div style="float:right;margin:10px;">
-							<a href="taxaloader.php?action=downloadcsv" target="_blank">Download CSV Taxa File</a>
+							<a href="batchloader.php?action=downloadcsv" target="_blank">Download CSV Taxa File</a>
 						</div>
 					</fieldset>
 				</form>
-				<?php 
+				<?php
 			}
 			elseif($action == "Activate Taxa"){
 				echo '<ul>';
@@ -301,16 +301,16 @@ if($isEditor){
 			else{
 				?>
 				<div>
-					<form name="uploadform" action="taxaloader.php" method="post" enctype="multipart/form-data" onsubmit="return verifyUploadForm(this)">
+					<form name="uploadform" action="batchloader.php" method="post" enctype="multipart/form-data" onsubmit="return verifyUploadForm(this)">
 						<fieldset style="width:90%;">
 							<legend style="font-weight:bold;font-size:120%;">Taxa Upload Form</legend>
 							<div style="margin:10px;">
-								Flat structured, CSV (comma delimited) text files can be uploaded here. 
-								Scientific name is the only required field below genus rank. 
-								However, family, author, and rankid (as defined in taxonunits table) are always advised. 
+								Flat structured, CSV (comma delimited) text files can be uploaded here.
+								Scientific name is the only required field below genus rank.
+								However, family, author, and rankid (as defined in taxonunits table) are always advised.
 								For upper level taxa, parents and rankids need to be included in order to build the taxonomic hierarchy.
-								Large data files can be compressed as a ZIP file before import. 
-								If the file upload step fails without displaying an error message, it is possible that the 
+								Large data files can be compressed as a ZIP file before import.
+								If the file upload step fails without displaying an error message, it is possible that the
 								file size exceeds the file upload limits set within your PHP installation (see your php configuration file).
 							</div>
 							<input type='hidden' name='MAX_FILE_SIZE' value='100000000' />
@@ -322,18 +322,18 @@ if($isEditor){
 									</div>
 								</div>
 								<div class="overrideopt" style="display:none;">
-									<b>Full File Path:</b> 
+									<b>Full File Path:</b>
 									<div style="margin:10px;">
 										<input name="uloverride" type="text" size="50" /><br/>
-										* This option is for manual upload of a data file. 
+										* This option is for manual upload of a data file.
 										Enter full path to data file located on working server.
-									</div>   
+									</div>
 								</div>
 								<div style="margin:10px;">
-									Target Thesaurus: 
+									Target Thesaurus:
 									<select name="taxauthid">
-										<?php 
-										$taxonAuthArr = $loaderManager->getTaxAuthorityArr(); 
+										<?php
+										$taxonAuthArr = $loaderManager->getTaxAuthorityArr();
 										foreach($taxonAuthArr as $k => $v){
 											echo '<option value="'.$k.'" '.($k==$taxAuthId?'SELECTED':'').'>'.$v.'</option>'."\n";
 										}
@@ -350,20 +350,20 @@ if($isEditor){
 						</fieldset>
 					</form>
 				</div>
-				<!-- 
+				<!--
 				<div>
-					<form name="itisuploadform" action="taxaloader.php" method="post" enctype="multipart/form-data" onsubmit="return verifyItisUploadForm(this)">
+					<form name="itisuploadform" action="batchloader.php" method="post" enctype="multipart/form-data" onsubmit="return verifyItisUploadForm(this)">
 						<fieldset style="width:90%;">
 							<legend style="font-weight:bold;font-size:120%;">ITIS Upload File</legend>
 							<div style="margin:10px;">
 								ITIS data extract from the <a href="http://www.itis.gov/access.html" target="_blank">ITIS Download Page</a> can be uploaded
-								using this function. Note that the file needs to be in their single file pipe-delimited format 
-								(example: <a href="CyprinidaeItisExample.bin">CyprinidaeItisExample.bin</a>). 
-								File might have .csv extension, even though it is NOT comma delimited. 
-								This upload option is not guaranteed to work if the ITIS download format change often. 
-								Large data files can be compressed as a ZIP file before import. 
-								If the file upload step fails without displaying an error message, it is possible that the 
-								file size exceeds the file upload limits set within your PHP installation (see your php configuration file). 
+								using this function. Note that the file needs to be in their single file pipe-delimited format
+								(example: <a href="CyprinidaeItisExample.bin">CyprinidaeItisExample.bin</a>).
+								File might have .csv extension, even though it is NOT comma delimited.
+								This upload option is not guaranteed to work if the ITIS download format change often.
+								Large data files can be compressed as a ZIP file before import.
+								If the file upload step fails without displaying an error message, it is possible that the
+								file size exceeds the file upload limits set within your PHP installation (see your php configuration file).
 								If synonyms and vernaculars are included, these data will also be incorporated into the upload process.
 							</div>
 							<input type='hidden' name='MAX_FILE_SIZE' value='100000000' />
@@ -374,10 +374,10 @@ if($isEditor){
 								</div>
 							</div>
 							<div class="itisoverrideopt" style="display:none;">
-								<b>Full File Path:</b> 
+								<b>Full File Path:</b>
 								<div style="margin:10px;">
 									<input name="uloverride" type="text" size="50" /><br/>
-									* This option is for manual upload of a data file. 
+									* This option is for manual upload of a data file.
 									Enter full path to data file located on working server.
 								</div>
 							</div>
@@ -390,20 +390,20 @@ if($isEditor){
 						</fieldset>
 					</form>
 				</div>
-				-->				
+				-->
 				<div>
-					<form name="analyzeform" action="taxaloader.php" method="post">
+					<form name="analyzeform" action="batchloader.php" method="post">
 						<fieldset style="width:90%;">
 							<legend style="font-weight:bold;font-size:120%;">Clean and Analyze</legend>
 							<div style="margin:10px;">
-								If taxa information was loaded into the UploadTaxa table using other means, 
-								one can use this form to clean and analyze taxa names in preparation to loading into the taxonomic tables (taxa, taxstatus).  
+								If taxa information was loaded into the UploadTaxa table using other means,
+								one can use this form to clean and analyze taxa names in preparation to loading into the taxonomic tables (taxa, taxstatus).
 							</div>
 							<div style="margin:10px;">
-								Target Thesaurus: 
+								Target Thesaurus:
 								<select name="taxauthid">
-									<?php 
-									$taxonAuthArr = $loaderManager->getTaxAuthorityArr(); 
+									<?php
+									$taxonAuthArr = $loaderManager->getTaxAuthorityArr();
 									foreach($taxonAuthArr as $k => $v){
 										echo '<option value="'.$k.'" '.($k==$taxAuthId?'SELECTED':'').'>'.$v.'</option>'."\n";
 									}
@@ -416,19 +416,19 @@ if($isEditor){
 						</fieldset>
 					</form>
 				</div>
-				<?php 
+				<?php
 			}
 			?>
 		</div>
 	</div>
-	<?php  
+	<?php
 }
 else{
 	?>
 	<div style='font-weight:bold;margin:30px;'>
 		You do not have permissions to batch upload taxonomic data
 	</div>
-	<?php 
+	<?php
 }
 include($SERVER_ROOT.'/footer.php');
 ?>

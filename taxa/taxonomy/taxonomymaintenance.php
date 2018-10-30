@@ -7,7 +7,7 @@ if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../taxa/taxonomy
 $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:"";
 
 $harvesterManager = new TaxonomyHarvester();
- 
+
 $isEditor = false;
 if($IS_ADMIN || array_key_exists("Taxonomy",$USER_RIGHTS)){
 	$isEditor = true;
@@ -60,17 +60,17 @@ if(isset($taxa_admin_taxonomydisplayCrumbs)){
 	if($taxa_admin_taxonomydisplayCrumbs){
 		echo '<div class="navpath">';
 		echo $taxa_admin_taxonomydisplayCrumbs;
-		echo ' <b>Taxonomic Tree Viewer</b>'; 
+		echo ' <b>Taxonomic Tree Viewer</b>';
 		echo '</div>';
 	}
 }
 else{
 	?>
 	<div class="navpath">
-		<a href="../../index.php">Home</a> &gt;&gt; 
-		<a href="taxaloader.php"><b>Taxonomic Tree Viewer</b></a> 
+		<a href="../../index.php">Home</a> &gt;&gt;
+		<a href="taxonomydisplay.php"><b>Taxonomic Tree Viewer</b></a>
 	</div>
-	<?php 
+	<?php
 }
 ?>
 	<!-- This is inner text! -->
@@ -83,24 +83,24 @@ else{
 				<?php echo $statusStr; ?>
 			</div>
 			<hr/>
-			<?php 
+			<?php
 		}
 		if($isEditor){
 			?>
 
 
-			<?php 
+			<?php
 		}
 		else{
 			?>
 			<div style="margin:30px;font-weight:bold;font-size:120%;">
 				You do not have permission to view this page. Please contact your portal administrator
 			</div>
-			<?php 
+			<?php
 		}
 		?>
 	</div>
-	<?php 
+	<?php
 	include($SERVER_ROOT.'/footer.php');
 	?>
 </body>
