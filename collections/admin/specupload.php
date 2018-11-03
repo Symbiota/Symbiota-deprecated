@@ -710,6 +710,7 @@ $duManager->loadFieldMap();
 														<?php
 													}
 													?>
+													<div style="margin:5px">* Adding multiple terms separated by semi-colon will filter as an OR condition</div>
 												</fieldset>
 											</div>
 											<div>
