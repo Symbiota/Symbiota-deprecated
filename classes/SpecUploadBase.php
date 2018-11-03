@@ -1535,7 +1535,15 @@ class SpecUploadBase extends SpecUpload{
 
 	public function addFilterCondition($columnName, $condition, $value){
 		if($columnName && ($value || $condition == 'ISNULL' || $condition == 'NOTNULL')){
-			$this->filterArr[strtolower($columnName)][$condition][] = strtolower($value);
+			if($value){
+				$valueArr = explode(';', $value);
+				foreach($valueArr as $v){
+					$this->filterArr[strtolower($columnName)][$condition][] = strtolower(trim($v));
+				}
+			}
+			else{
+				$this->filterArr[strtolower($columnName)][$condition][] = '';
+			}
 		}
 	}
 
