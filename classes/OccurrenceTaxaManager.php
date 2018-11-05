@@ -48,23 +48,6 @@ class OccurrenceTaxaManager {
 	}
 
 	protected function setTaxonRequestVariable($inputArr = null){
-		//Set usage of taxonomic thesaurus
-		$this->taxaArr['usethes'] = 0;
-		if(isset($inputArr['usethes']) && $inputArr['usethes']){
-			$this->taxaArr['usethes'] = 1;
-		}
-		elseif(array_key_exists('usethes',$_REQUEST) && $_REQUEST['usethes']){
-			$this->taxaArr['usethes'] = 1;
-		}
-		//Set default taxa type
-		$defaultTaxaType = TaxaSearchType::SCIENTIFIC_NAME;
-		if(isset($inputArr['taxontype']) && is_numeric($inputArr['taxontype'])){
-			$defaultTaxaType = $inputArr['taxontype'];
-		}
-		elseif(array_key_exists('taxontype',$_REQUEST) && is_numeric($_REQUEST['taxontype'])){
-			$defaultTaxaType = $_REQUEST['taxontype'];
-		}
-		$this->taxaArr['taxontype'] = $defaultTaxaType;
 		//Set taxa search terms
 		if(isset($inputArr['taxa']) && $inputArr['taxa']){
 			$taxaStr = $this->cleanInputStr($inputArr["taxa"]);
@@ -72,71 +55,94 @@ class OccurrenceTaxaManager {
 		else{
 			$taxaStr = str_replace(",",";",$this->cleanInputStr($_REQUEST["taxa"]));
 		}
-		$this->taxaArr['search'] = $taxaStr;
-		//Initerate through taxa and process
-		$this->taxaSearchTerms = explode(";",$taxaStr);
-		foreach($this->taxaSearchTerms as $k => $term){
-			$searchTerm = trim($term);
-			$this->taxaSearchTerms[$k] = $searchTerm;
-			$taxaType = $defaultTaxaType;
-			if($defaultTaxaType == TaxaSearchType::ANY_NAME) {
-				$n = explode(': ',$searchTerm);
-				if (count($n) > 1) {
-					$taxaType = TaxaSearchType::taxaSearchTypeFromAnyNameSearchTag($n[0]);
-					$searchTerm = $n[1];
-				}
-				else{
-					$taxaType = TaxaSearchType::SCIENTIFIC_NAME;
-				}
+		if($taxaStr){
+			$this->taxaArr['search'] = $taxaStr;
+			//Set usage of taxonomic thesaurus
+			$this->taxaArr['usethes'] = 0;
+			if(isset($inputArr['usethes']) && $inputArr['usethes']){
+				$this->taxaArr['usethes'] = 1;
 			}
-			if($taxaType == TaxaSearchType::COMMON_NAME){
-				$searchTerm = ucfirst($searchTerm);
-				$this->setSciNamesByVerns($searchTerm);
+			elseif(array_key_exists('usethes',$_REQUEST) && $_REQUEST['usethes']){
+				$this->taxaArr['usethes'] = 1;
 			}
-			else{
-				$sql = 'SELECT t.sciname, t.tid, t.rankid FROM taxa t ';
-				if(is_numeric($searchTerm)){
-					if($this->taxaArr['usethes']){
-						$sql .= 'INNER JOIN taxstatus ts ON t.tid = ts.tidaccepted WHERE (ts.taxauthid = '.$this->taxAuthId.') AND (ts.tid = '.$searchTerm.')';
+			//Set default taxa type
+			$defaultTaxaType = TaxaSearchType::SCIENTIFIC_NAME;
+			if(isset($inputArr['taxontype']) && is_numeric($inputArr['taxontype'])){
+				$defaultTaxaType = $inputArr['taxontype'];
+			}
+			elseif(array_key_exists('taxontype',$_REQUEST) && is_numeric($_REQUEST['taxontype'])){
+				$defaultTaxaType = $_REQUEST['taxontype'];
+			}
+			$this->taxaArr['taxontype'] = $defaultTaxaType;
+			//Initerate through taxa and process
+			$this->taxaSearchTerms = explode(";",$taxaStr);
+			foreach($this->taxaSearchTerms as $k => $term){
+				$searchTerm = $this->cleanInputStr($term);
+				if(!$searchTerm){
+					unset($this->taxaSearchTerms);
+					continue;
+				}
+				$this->taxaSearchTerms[$k] = $searchTerm;
+				$taxaType = $defaultTaxaType;
+				if($defaultTaxaType == TaxaSearchType::ANY_NAME) {
+					$n = explode(': ',$searchTerm);
+					if (count($n) > 1) {
+						$taxaType = TaxaSearchType::taxaSearchTypeFromAnyNameSearchTag($n[0]);
+						$searchTerm = $n[1];
 					}
 					else{
-						$sql .= 'WHERE (t.tid = '.$searchTerm.')';
+						$taxaType = TaxaSearchType::SCIENTIFIC_NAME;
 					}
+				}
+				if($taxaType == TaxaSearchType::COMMON_NAME){
+					$searchTerm = ucfirst($searchTerm);
+					$this->setSciNamesByVerns($searchTerm);
 				}
 				else{
-					if($this->taxaArr['usethes']){
-						$sql .= 'INNER JOIN taxstatus ts ON t.tid = ts.tidaccepted '.
-							'INNER JOIN taxa t2 ON ts.tid = t2.tid '.
-							'WHERE (ts.taxauthid = '.$this->taxAuthId.') AND (t2.sciname IN("'.$this->cleanInStr($searchTerm).'"))';
-					}
-					else{
-						$sql .= 'WHERE t.sciname IN("'.$this->cleanInStr($searchTerm).'")';
-					}
-				}
-				$rs = $this->conn->query($sql);
-				if($rs->num_rows){
-					while($r = $rs->fetch_object()){
-						$this->taxaArr['taxa'][$r->sciname]['tid'][$r->tid] = $r->rankid;
-						if($r->rankid == 140){
-							$taxaType = TaxaSearchType::FAMILY_ONLY;
-						}
-						elseif($r->rankid < 180){
-							$taxaType = TaxaSearchType::TAXONOMIC_GROUP;
+					$sql = 'SELECT t.sciname, t.tid, t.rankid FROM taxa t ';
+					if(is_numeric($searchTerm)){
+						if($this->taxaArr['usethes']){
+							$sql .= 'INNER JOIN taxstatus ts ON t.tid = ts.tidaccepted WHERE (ts.taxauthid = '.$this->taxAuthId.') AND (ts.tid = '.$searchTerm.')';
 						}
 						else{
-							$taxaType = TaxaSearchType::SCIENTIFIC_NAME;
+							$sql .= 'WHERE (t.tid = '.$searchTerm.')';
 						}
-						$this->taxaArr['taxa'][$r->sciname]['taxontype'] = $taxaType;
 					}
+					else{
+						if($this->taxaArr['usethes']){
+							$sql .= 'INNER JOIN taxstatus ts ON t.tid = ts.tidaccepted '.
+								'INNER JOIN taxa t2 ON ts.tid = t2.tid '.
+								'WHERE (ts.taxauthid = '.$this->taxAuthId.') AND (t2.sciname IN("'.$this->cleanInStr($searchTerm).'"))';
+						}
+						else{
+							$sql .= 'WHERE t.sciname IN("'.$this->cleanInStr($searchTerm).'")';
+						}
+					}
+					$rs = $this->conn->query($sql);
+					if($rs->num_rows){
+						while($r = $rs->fetch_object()){
+							$this->taxaArr['taxa'][$r->sciname]['tid'][$r->tid] = $r->rankid;
+							if($r->rankid == 140){
+								$taxaType = TaxaSearchType::FAMILY_ONLY;
+							}
+							elseif($r->rankid < 180){
+								$taxaType = TaxaSearchType::TAXONOMIC_GROUP;
+							}
+							else{
+								$taxaType = TaxaSearchType::SCIENTIFIC_NAME;
+							}
+							$this->taxaArr['taxa'][$r->sciname]['taxontype'] = $taxaType;
+						}
+					}
+					else{
+						$this->taxaArr['taxa'][$searchTerm]['taxontype'] = $taxaType;
+					}
+					$rs->free();
 				}
-				else{
-					$this->taxaArr['taxa'][$searchTerm]['taxontype'] = $taxaType;
-				}
-				$rs->free();
 			}
-		}
-		if($this->taxaArr['usethes']){
-			$this->setSynonyms();
+			if($this->taxaArr['usethes']){
+				$this->setSynonyms();
+			}
 		}
 	}
 
@@ -313,6 +319,10 @@ class OccurrenceTaxaManager {
 
 	protected function cleanInputStr($str){
 		if(stripos($str, 'sleep(') !== false) return '';
+		$str = preg_replace('/%%+/', '%',$str);
+		$str = preg_replace('/^[\s%]+/', '',$str);
+		$str = trim($str,' ,;');
+		if($str == '%') $str = '';
 		return strip_tags(trim($str));
 	}
 
