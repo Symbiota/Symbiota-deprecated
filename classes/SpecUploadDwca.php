@@ -485,8 +485,13 @@ class SpecUploadDwca extends SpecUploadBase{
 							$filterIndex = array_shift($filterIndexArr);
 							$targetValue = trim(strtolower($recordArr[$filterIndex]));
 							foreach($condArr as $cond => $valueArr){
-								foreach($valueArr as $str){
-									if(strpos($str,';')) $valueArr = array_merge($valueArr,explode(';',$str));
+								foreach($valueArr as $k => $str){
+									if(strpos($str,';')){
+										unset($valueArr[$k]);
+										foreach(explode(';',$str) as $subStr){
+											$valueArr[] = trim($subStr);
+										}
+									}
 								}
 								if($cond == 'ISNULL'){
 									if($targetValue){
