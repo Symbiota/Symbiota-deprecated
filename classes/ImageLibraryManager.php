@@ -312,7 +312,7 @@ class ImageLibraryManager extends OccurrenceTaxaManager{
 		if(array_key_exists("db",$this->searchTermArr) && $this->searchTermArr['db']){
 			$sqlWhere .= OccurrenceSearchSupport::getDbWhereFrag($this->cleanInStr($this->searchTermArr['db']));
 		}
-		if($this->taxaArr){
+		if(isset($this->taxaArr['taxa'])){
 			$sqlWhereTaxa = '';
 			foreach($this->taxaArr['taxa'] as $searchTaxon => $searchArr){
 				$taxonType = $this->taxaArr['taxontype'];

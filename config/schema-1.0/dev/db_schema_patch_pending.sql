@@ -11,6 +11,9 @@ ALTER TABLE `uploadtaxa`
 ALTER TABLE `uploadspectemp` 
   CHANGE COLUMN `basisOfRecord` `basisOfRecord` VARCHAR(32) NULL DEFAULT NULL COMMENT 'PreservedSpecimen, LivingSpecimen, HumanObservation' ;
 
+ALTER TABLE `uploadspectemp` 
+  ADD INDEX `Index_uploadspec_othercatalognumbers` (`otherCatalogNumbers` ASC);
+
 
 ALTER TABLE `taxstatus` 
   DROP INDEX `Index_hierarchy`;
