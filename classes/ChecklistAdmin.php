@@ -139,7 +139,7 @@ class ChecklistAdmin{
 				}
 			}
 			else{
-				$setSql .= ', '.$fieldName.' = NULL';
+				if($fieldName != 'name' && $fieldName != 'type' && $fieldName != 'access') $setSql .= ', '.$fieldName.' = NULL';
 			}
 		}
 		$sql = 'UPDATE fmchecklists SET '.substr($setSql,2).' WHERE (clid = '.$this->clid.')';
