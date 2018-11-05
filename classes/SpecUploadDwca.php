@@ -485,6 +485,9 @@ class SpecUploadDwca extends SpecUploadBase{
 							$filterIndex = array_shift($filterIndexArr);
 							$targetValue = trim(strtolower($recordArr[$filterIndex]));
 							foreach($condArr as $cond => $valueArr){
+								foreach($valueArr as $str){
+									if(strpos($str,';')) $valueArr = array_merge($valueArr,explode(';',$str));
+								}
 								if($cond == 'ISNULL'){
 									if($targetValue){
 										$addRecord = false;
@@ -581,60 +584,78 @@ class SpecUploadDwca extends SpecUploadBase{
 						flush();
 					}
 
-					//Upload identification history
-					if($this->includeIdentificationHistory){
-						$this->outputMsg('<li>Loading identification history extension... </li>');
-						if($this->uploadType == $this->RESTOREBACKUP){
-							$this->identFieldMap['occid']['field'] = 'coreid';
-							$this->identFieldMap['sciname']['field'] = 'scientificname';
-							$this->identFieldMap['initialtimestamp']['field'] = 'modified';
+					if($this->getTransferCount()){
+						//Upload identification history
+						if($this->includeIdentificationHistory){
+							$this->outputMsg('<li>Loading identification history extension... </li>');
+							if($this->uploadType == $this->RESTOREBACKUP){
+								$this->identFieldMap['occid']['field'] = 'coreid';
+								$this->identFieldMap['sciname']['field'] = 'scientificname';
+								$this->identFieldMap['initialtimestamp']['field'] = 'modified';
+							}
+							foreach($this->metaArr['ident']['fields'] as $k => $v){
+								$this->identSourceArr[$k] = strtolower($v);
+							}
+							$this->uploadExtension('ident',$this->identFieldMap,$this->identSourceArr);
+							$this->outputMsg('<li style="margin-left:10px;">Complete: '.$this->identTransferCount.' records loaded</li>');
 						}
-						foreach($this->metaArr['ident']['fields'] as $k => $v){
-							$this->identSourceArr[$k] = strtolower($v);
+
+						//Upload images
+						if($this->includeImages){
+							$this->outputMsg('<li>Loading image extension... </li>');
+							$this->setImageSourceArr();
+							if($this->uploadType == $this->RESTOREBACKUP){
+								$this->imageFieldMap['occid']['field'] = 'coreid';
+								$this->imageFieldMap['originalurl']['field'] = 'accessuri';
+								$this->imageFieldMap['thumbnailurl']['field'] = 'thumbnailaccessuri';
+								$this->imageFieldMap['url']['field'] = 'goodqualityaccessuri';
+								$this->imageFieldMap['owner']['field'] = 'creator';
+							}
+							$this->conn->query('SET autocommit=0');
+							$this->conn->query('SET unique_checks=0');
+							$this->conn->query('SET foreign_key_checks=0');
+							$this->uploadExtension('image',$this->imageFieldMap,$this->imageSourceArr);
+							$this->conn->query('COMMIT');
+							$this->conn->query('SET autocommit=1');
+							$this->conn->query('SET unique_checks=1');
+							$this->conn->query('SET foreign_key_checks=1');
+
+							//Remove images that don't have an occurrence record in uploadspectemp table
+							$sql = 'DELETE ui.* '.
+								'FROM uploadimagetemp ui LEFT JOIN uploadspectemp u ON ui.collid = u.collid AND ui.dbpk = u.dbpk '.
+								'WHERE (ui.occid IS NULL) AND (ui.collid = '.$this->collId.') AND (u.collid IS NULL)';
+							if($this->conn->query($sql)){
+								$this->outputMsg('<li style="margin-left:10px;">Removing images associated with excluded occurrence records... </li>');
+							}
+							else{
+								$this->outputMsg('<li style="margin-left:20px;">WARNING deleting orphaned uploadimagetemp records: '.$this->conn->error.'</li> ');
+							}
+							$this->setImageTransferCount();
+							$this->outputMsg('<li style="margin-left:10px;">Complete: '.$this->imageTransferCount.' records loaded</li>');
 						}
-						$this->uploadExtension('ident',$this->identFieldMap,$this->identSourceArr);
-						$this->outputMsg('<li style="margin-left:10px;">Complete: '.$this->identTransferCount.' records loaded</li>');
+
+						//Do some cleanup
+						$this->cleanUpload();
+
+						if($finalTransfer){
+							$this->finalTransfer();
+						}
 					}
-
-					//Upload images
-					if($this->includeImages){
-						$this->outputMsg('<li>Loading image extension... </li>');
-						$this->setImageSourceArr();
-						if($this->uploadType == $this->RESTOREBACKUP){
-							$this->imageFieldMap['occid']['field'] = 'coreid';
-							$this->imageFieldMap['originalurl']['field'] = 'accessuri';
-							$this->imageFieldMap['thumbnailurl']['field'] = 'thumbnailaccessuri';
-							$this->imageFieldMap['url']['field'] = 'goodqualityaccessuri';
-							$this->imageFieldMap['owner']['field'] = 'creator';
-						}
-						$this->conn->query('SET autocommit=0');
-						$this->conn->query('SET unique_checks=0');
-						$this->conn->query('SET foreign_key_checks=0');
-						$this->uploadExtension('image',$this->imageFieldMap,$this->imageSourceArr);
-						$this->conn->query('COMMIT');
-						$this->conn->query('SET autocommit=1');
-						$this->conn->query('SET unique_checks=1');
-						$this->conn->query('SET foreign_key_checks=1');
-
-						//Remove images that don't have an occurrence record in uploadspectemp table
-						$sql = 'DELETE ui.* '.
-							'FROM uploadimagetemp ui LEFT JOIN uploadspectemp u ON ui.collid = u.collid AND ui.dbpk = u.dbpk '.
-							'WHERE (ui.occid IS NULL) AND (ui.collid = '.$this->collId.') AND (u.collid IS NULL)';
-						if($this->conn->query($sql)){
-							$this->outputMsg('<li style="margin-left:10px;">Removing images associated with excluded occurrence records... </li>');
+					else{
+						if($this->filterArr){
+							$outStr = '';
+							foreach($this->filterArr as $fName => $cArr){
+								foreach($cArr as $cond => $vArr){
+									foreach($vArr as $str){
+										$outStr .= '; '.$fName.' '.$cond.' '.$str;
+									}
+								}
+							}
+							$this->outputMsg('<li>ABORTED due to no occurrences matched based on filter criteria: '.trim($outStr,'; ').'</li>');
 						}
 						else{
-							$this->outputMsg('<li style="margin-left:20px;">WARNING deleting orphaned uploadimagetemp records: '.$this->conn->error.'</li> ');
+							$this->outputMsg('<li>ABORTED: no occurrences imported</li>');
 						}
-						$this->setImageTransferCount();
-						$this->outputMsg('<li style="margin-left:10px;">Complete: '.$this->imageTransferCount.' records loaded</li>');
-					}
-
-					//Do some cleanup
-					$this->cleanUpload();
-
-					if($finalTransfer){
-						$this->finalTransfer();
 					}
 
 					//Remove all upload files and directories
