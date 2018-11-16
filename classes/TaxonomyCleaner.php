@@ -642,7 +642,7 @@ class TaxonomyCleaner extends Manager{
 			"INNER JOIN taxa t2 ON ts2.tid = t2.tid) ".
 			"LEFT JOIN kmdescr d2 ON (d1.CID = d2.CID) AND (t2.TID = d2.TID) ".
 			"WHERE (ts1.taxauthid = 1) AND (ts2.taxauthid = 1) AND (ts2.tid = ts2.tidaccepted) ".
-			"AND (t2.tid = $tid) And (d2.CID Is Null)";
+			"AND (t2.tid = $tid) AND (t2.rankid < 221) AND (d2.CID Is Null)";
 		$this->conn->query($sqlAdd1);
 
 		//Set inheritance for all children of target

@@ -612,7 +612,7 @@ class ImageProcessor {
 		}
 		$occurMain->__destruct();
 
-		$this->logOrEcho('Populating global unique identifiers (GUIDs) for all records...',2);
+		$this->logOrEcho('Populating recordID UUIDs for all records...',2);
 		$uuidManager = new UuidFactory($this->conn);
 		$uuidManager->setSilent(1);
 		$uuidManager->populateGuids();

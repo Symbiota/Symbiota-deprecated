@@ -141,6 +141,25 @@ class TaxonomyUpload{
 							}
 							if($valIn) $inputArr[$targetField] = $valIn;
 						}
+						//If rankid is not defined, determine rankid from taxonrank value
+						if(!isset($inputArr['rankid']) || !$inputArr['rankid']){
+							if(isset($inputArr['unitind3']) && $inputArr['unitind3']){
+								$sql = 'SELECT rankid FROM taxonunits WHERE rankname = ("'.$this->cleanInStr($inputArr['unitind3']).'") ';
+								$rs = $this->conn->query($sql);
+								if($r = $rs->fetch_object()){
+									$inputArr['rankid'] = $r->rankid;
+								}
+								$rs->free();
+							}
+						}
+						//Some cleaning
+						if(isset($inputArr['unitind3']) && $inputArr['unitind3']){
+							if($inputArr['unitind3'] == 'ssp.' || $inputArr['unitind3'] == 'ssp' || $inputArr['unitind3'] == 'subsp' || $inputArr['unitind3'] == 'subspecies') $inputArr['unitind3'] == 'subsp.';
+							if($inputArr['unitind3'] == 'var' || $inputArr['unitind3'] == 'variety') $inputArr['unitind3'] == 'var.';
+							if($inputArr['unitind3'] == 'f' || $inputArr['unitind3'] == 'fo.' || $inputArr['unitind3'] == 'forma') $inputArr['unitind3'] == 'f.';
+							if(!isset($inputArr['unitname3']) || !$inputArr['unitname3']) unset($inputArr['unitind3']);
+						}
+						//Insert record into uploadtaxa table
 						if(array_key_exists('scinameinput', $inputArr)){
 							$sciArr = TaxonomyUtilities::parseScientificName($inputArr['scinameinput'],$this->conn,(isset($inputArr['rankid'])?$inputArr['rankid']:0));
 							foreach($sciArr as $sciKey => $sciValue){
@@ -148,6 +167,7 @@ class TaxonomyUpload{
 							}
 							$sql1 = ''; $sql2 = '';
 							unset($inputArr['identificationqualifier']);
+							if($childParentArr && isset($childParentArr[$inputArr['sciname']]['r']) && $childParentArr[$inputArr['sciname']]['r'] == $inputArr['rankid']) $childParentArr[$inputArr['sciname']]['s'] = 'skip';
 							foreach($inputArr as $k => $v){
 								$sql1 .= ','.$k;
 								$inValue = $this->cleanInStr($v);
@@ -177,6 +197,7 @@ class TaxonomyUpload{
 
 				//Process and load taxon units data ($childParentArr)
 				foreach($childParentArr as $taxon => $tArr){
+					if(isset($tArr['s'])) continue;
 					$sql = 'INSERT IGNORE INTO uploadtaxa(scinameinput,sciname,rankid,parentstr,family,acceptance) '.
 						'VALUES ("'.$taxon.'","'.$taxon.'",'.$tArr['r'].',"'.$tArr['p'].'",'.(array_key_exists('f',$tArr)?'"'.$tArr['f'].'"':'NULL').',1)';
 					if(!$this->conn->query($sql)){
@@ -359,6 +380,10 @@ class TaxonomyUpload{
 	}
 
 	public function cleanUpload(){
+		$sql = 'UPDATE uploadtaxa SET unitind3 = NULL WHERE unitind3 IS NOT NULL AND unitname3 IS NULL';
+		if(!$this->conn->query($sql)){
+			$this->outputMsg('ERROR: '.$this->conn->error,1);
+		}
 
 		$sql = 'UPDATE uploadtaxa u INNER JOIN uploadtaxa u2 ON u.sourceParentId = u2.sourceId '.
 			'SET u.parentstr = u2.sciname '.
@@ -526,7 +551,7 @@ class TaxonomyUpload{
 		$sql = 'INSERT IGNORE INTO uploadtaxa (scinameinput, SciName, family, RankId, UnitName1, parentstr, Source) '.
 			'SELECT DISTINCT ut.parentstr, ut.parentstr, ut.family, 180 as r, ut.unitname1, ut.family, ut.source '.
 			'FROM uploadtaxa ut LEFT JOIN uploadtaxa ut2 ON ut.parentstr = ut2.sciname '.
-			'WHERE ut.parentstr <> "" AND ut.parentstr IS NOT NULL AND ISNULL(ut.parenttid) AND ut.family IS NOT NULL AND ut.rankid = 220 AND ISNULL(ut2.sciname)';
+			'WHERE ut.parentstr <> "" AND ut.parentstr IS NOT NULL AND ut.parenttid IS NULL AND ut.family IS NOT NULL AND ut.rankid = 220 AND ut2.sciname IS NULL';
 		$this->conn->query($sql);
 		$sql = 'UPDATE uploadtaxa up LEFT JOIN taxa t ON up.parentstr = t.sciname '.
 			'SET up.parenttid = t.tid '.
