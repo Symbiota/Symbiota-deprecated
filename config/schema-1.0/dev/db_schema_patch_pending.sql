@@ -5,6 +5,9 @@ ALTER TABLE `fmprojects`
 
 
 ALTER TABLE `uploadtaxa` 
+  CHANGE COLUMN `UnitInd3` `UnitInd3` VARCHAR(45) NULL DEFAULT NULL ;
+
+ALTER TABLE `uploadtaxa` 
   DROP INDEX `UNIQUE_sciname` ,
   ADD UNIQUE INDEX `UNIQUE_sciname` (`SciName` ASC, `RankId` ASC, `Author` ASC, `AcceptedStr` ASC);
 

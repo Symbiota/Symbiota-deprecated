@@ -1134,7 +1134,7 @@ class SpecUploadBase extends SpecUpload{
 			}
 		}
 
-		$this->outputMsg('<li style="margin-left:10px;">Populating global unique identifiers (GUIDs) for all records... </li>');
+		$this->outputMsg('<li style="margin-left:10px;">Populating recordID UUIDs for all records... </li>');
 		$uuidManager = new UuidFactory();
 		$uuidManager->setSilent(1);
 		$uuidManager->populateGuids();

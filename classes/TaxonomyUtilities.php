@@ -9,7 +9,7 @@ class TaxonomyUtilities {
 	 * OUTPUT: Array containing parsed values
 	 *         Keys: sciname, unitind1, unitname1, unitind2, unitname2, unitind3, unitname3, author, identificationqualifier, rankid
 	 */
-	public static function parseScientificName($inStr, $conn = null, $rankId = 0, $kingdom = null){
+	public static function parseScientificName($inStr, $conn = null, $rankId = 0, $kingdomName = null){
 		//Converts scinetific name with author embedded into separate fields
 		$retArr = array('unitname1'=>'','unitname2'=>'','unitind3'=>'','unitname3'=>'');
 		if($inStr && is_string($inStr)){
@@ -115,7 +115,7 @@ class TaxonomyUtilities {
 						elseif($sciStrTest == 'ssp.' || $sciStrTest == 'ssp' || $sciStrTest == 'subsp.' || $sciStrTest == 'subsp' || $sciStrTest == 'subspecies'){
 							self::setInfraNode($sciStr, $sciNameArr, $retArr, $authorArr, 'subsp.');
 						}
-						elseif($kingdom == 'Animalia' && !$retArr['unitname3'] && ($rankId == 230 || preg_match('/^[a-z]{5,}$/',$sciStr))){
+						elseif($kingdomName == 'Animalia' && !$retArr['unitname3'] && ($rankId == 230 || preg_match('/^[a-z]{5,}$/',$sciStr))){
 							$retArr['unitind3'] = '';
 							$retArr['unitname3'] = $sciStr;
 							unset($authorArr);
@@ -134,9 +134,7 @@ class TaxonomyUtilities {
 							$sql = 'SELECT unitind3 FROM taxa '.
 								'WHERE unitname1 = "'.$retArr['unitname1'].'" AND unitname2 = "'.$retArr['unitname2'].'" AND unitname3 = "'.$firstWord.'" ';
 							//echo $sql.'<br/>';
-							$makeConn = false;
-							if($conn === null) $makeConn = true;
-							if($makeConn) $conn = MySQLiConnectionFactory::getCon('readonly');
+							if($conn === null) $conn = MySQLiConnectionFactory::getCon('readonly');
 							$rs = $conn->query($sql);
 							if($r = $rs->fetch_object()){
 								$retArr['unitind3'] = $r->unitind3;
@@ -144,7 +142,7 @@ class TaxonomyUtilities {
 								$retArr['author'] = implode(' ',$arr);
 							}
 							$rs->free();
-							if($makeConn) $conn->close();
+							if(!($this->conn === false)) $conn->close();
 						}
 					}
 					if(array_key_exists('unitind3',$retArr) && $retArr['unitind3'] == 'ssp.'){
@@ -152,11 +150,7 @@ class TaxonomyUtilities {
 					}
 				}
 			}
-			//Build sciname, without author
-			$sciname = (isset($retArr['unitind1'])?$retArr['unitind1'].' ':'').$retArr['unitname1'].' ';
-			$sciname .= (isset($retArr['unitind2'])?$retArr['unitind2'].' ':'').$retArr['unitname2'].' ';
-			$sciname .= $retArr['unitind3'].' '.$retArr['unitname3'];
-			$retArr['sciname'] = trim($sciname);
+			//Set taxon rankid
 			if($rankId && is_numeric($rankId)){
 				$retArr['rankid'] = $rankId;
 			}
@@ -181,6 +175,11 @@ class TaxonomyUtilities {
 					}
 				}
 			}
+			//Build sciname, without author
+			$sciname = (isset($retArr['unitind1'])?$retArr['unitind1'].' ':'').$retArr['unitname1'].' ';
+			$sciname .= (isset($retArr['unitind2'])?$retArr['unitind2'].' ':'').$retArr['unitname2'].' ';
+			$sciname .= trim($retArr['unitind3'].' '.$retArr['unitname3']);
+			$retArr['sciname'] = trim($sciname);
 		}
 		return $retArr;
 	}

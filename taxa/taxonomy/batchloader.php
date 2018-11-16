@@ -155,6 +155,7 @@ if($isEditor){
 								</th>
 							</tr>
 							<?php
+							$translationMap = array('division'=>'phylum','sciname'=>'scinameinput','scientific name'=>'scinameinput','acceptedname'=>'acceptedstr');
 							$sArr = $loaderManager->getSourceArr();
 							$tArr = $loaderManager->getTargetArr();
 							asort($tArr);
@@ -178,14 +179,16 @@ if($isEditor){
 												$selStr = 0;
 											}
 											foreach($tArr as $k => $tField){
-												if($selStr !== 0 && $tField == "scinameinput" && (strtolower($sField == "sciname") || strtolower($sField) == "scientific name")){
-													$selStr = "SELECTED";
-												}
-												elseif($selStr !== 0 && $mappedTarget && $mappedTarget == $tField){
-													$selStr = "SELECTED";
-												}
-												elseif($selStr !== 0 && $tField==$sField && $tField != "sciname"){
-													$selStr = "SELECTED";
+												if($selStr !== 0){
+													if($mappedTarget && $mappedTarget == $tField){
+														$selStr = "SELECTED";
+													}
+													elseif($tField==$sField && $tField != "sciname"){
+														$selStr = "SELECTED";
+													}
+													elseif(isset($translationMap[strtolower($sField)]) && $translationMap[strtolower($sField)] == $tField){
+														$selStr = "SELECTED";
+													}
 												}
 												echo '<option value="'.$k.'" '.($selStr?$selStr:'').'>'.$tField."</option>\n";
 												if($selStr){
