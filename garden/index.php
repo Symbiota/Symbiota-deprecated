@@ -142,7 +142,7 @@ include($serverRoot."/header.php");
                 textbox.text(ui.values[0]+ ' - '+ ui.values[1]);
             },
             stop: function( event, ui ) {
-                if(ui.value != 0){
+                if(ui.values[1] != 0){
                     var valLabel = 'Max height '+ui.values[0]+' - '+ui.values[1]+' ft';
                     var valCode = '140--'+ui.values[0]+','+ui.values[1];
                     var optionObj = {name:valLabel, nameCode:valCode};
@@ -164,10 +164,9 @@ include($serverRoot."/header.php");
         });
 
         $("#widthSlider").slider({
-            range: "min",
+            range: true,
             min: 0,
             max: 15,
-            value: 0,
             create: function() {
                 var textbox = $("#width-label");
                 textbox.text("Any");
@@ -175,13 +174,12 @@ include($serverRoot."/header.php");
             step: 1,
             slide: function(event, ui) {
                 var textbox = $("#width-label");
-                if(ui.value == 0) textbox.text("Any");
-                else textbox.text(ui.value);
+                textbox.text(ui.values[0]+ ' - '+ ui.values[1]);
             },
             stop: function( event, ui ) {
-                if(ui.value != 0){
-                    var valLabel = 'Max width '+ui.value+' ft';
-                    var valCode = '738--'+ui.value;
+                if(ui.values[1] != 0){
+                    var valLabel = 'Max width '+ui.values[0]+' - '+ui.values[1]+' ft';
+                    var valCode = '738--'+ui.values[0]+','+ui.values[1];
                     var optionObj = {name:valLabel, nameCode:valCode};
                     //remove any items from searchCriteriaArray that have nameCode
                     //starting with 738--
@@ -675,9 +673,12 @@ include($serverRoot."/header.php");
                                             <div id="widthSlider">
                                                 <div id="width-handle" class="ui-slider-handle">
                                                     <div class="custom-label-bar"></div>
-                                                    <div id="width-label" class="custom-label"></div>
+                                                </div>
+                                                <div id="width-handle" class="ui-slider-handle">
+                                                    <div class="custom-label-bar"></div>
                                                 </div>
                                             </div>
+                                            <div id="width-label" ></div>
                                             <div class="feature-slider-label">
                                                 Width
                                             </div>
