@@ -581,41 +581,41 @@ include($serverRoot."/header.php");
                             <div class="divTableBody">
                                 <div class="divTableRow">
                                     <div class="divTableCell">
-                                        <input class="featureCheckBox" type="checkbox" onchange="processOption('682--1');" id="682--1">
-                                        <div id="682--1Div" class="featureCheckBoxDiv">
-                                            <label id="682--1Label" class="featureCheckBoxLabel moisture1" for="682--1">Occasional</label>
+                                        <input class="featureCheckBox" type="checkbox" onchange="processOption('683--1');" id="683--1">
+                                        <div id="683--1Div" class="featureCheckBoxDiv">
+                                            <label id="683--1Label" class="featureCheckBoxLabel moisture1" for="683--1">Occasional</label>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="divTableRow">
                                     <div class="divTableCell">
-                                        <input class="featureCheckBox" type="checkbox" onchange="processOption('682--2');" id="682--2">
-                                        <div id="682--2Div" class="featureCheckBoxDiv">
-                                            <label id="682--2Label" class="featureCheckBoxLabel moisture2" for="682--2">Moderate</label>
+                                        <input class="featureCheckBox" type="checkbox" onchange="processOption('683--2');" id="683--2">
+                                        <div id="683--2Div" class="featureCheckBoxDiv">
+                                            <label id="683--2Label" class="featureCheckBoxLabel moisture2" for="683--2">Moderate</label>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="divTableRow">
                                     <div class="divTableCell">
-                                        <input class="featureCheckBox" type="checkbox" onchange="processOption('682--3');" id="682--3">
-                                        <div id="682--3Div" class="featureCheckBoxDiv">
-                                            <label id="682--3Label" class="featureCheckBoxLabel moisture3" for="682--3">Regular</label>
+                                        <input class="featureCheckBox" type="checkbox" onchange="processOption('683--3');" id="683--3">
+                                        <div id="683--3Div" class="featureCheckBoxDiv">
+                                            <label id="683--3Label" class="featureCheckBoxLabel moisture3" for="683--3">Regular</label>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="divTableRow">
                                     <div class="divTableCell">
-                                        <input class="featureCheckBox" type="checkbox" onchange="processOption('682--4');" id="682--4">
-                                        <div id="682--4Div" class="featureCheckBoxDiv">
-                                            <label id="682--4Label" class="featureCheckBoxLabel moisture5" for="682--4">Frequent</label>
+                                        <input class="featureCheckBox" type="checkbox" onchange="processOption('683--4');" id="683--4">
+                                        <div id="683--4Div" class="featureCheckBoxDiv">
+                                            <label id="683--4Label" class="featureCheckBoxLabel moisture5" for="683--4">Frequent</label>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="divTableRow">
                                     <div class="divTableCell">
-                                        <input class="featureCheckBox" type="checkbox" onchange="processOption('682--5');" id="682--5">
-                                        <div id="682--5Div" class="featureCheckBoxDiv">
-                                            <label id="682--5Label" class="featureCheckBoxLabel moisture4" for="682--5">Wet</label>
+                                        <input class="featureCheckBox" type="checkbox" onchange="processOption('683--5');" id="683--5">
+                                        <div id="683--5Div" class="featureCheckBoxDiv">
+                                            <label id="683--5Label" class="featureCheckBoxLabel moisture4" for="683--5">Wet</label>
                                         </div>
                                     </div>
                                 </div>
