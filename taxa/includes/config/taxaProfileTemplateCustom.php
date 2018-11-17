@@ -66,24 +66,21 @@ if($taxonRank){
         $leftColumnElements = Array($OSUspeciesNavDiv,$OSUfamilyDiv,$vernacularsDiv,$synonymsDiv,$centralImageDiv,$mapThumbDiv);
         $rightColumnElements = Array($descTabsDiv);
         $bottomRowElements = Array($OSUimgBoxDiv,$OSUobsImgDiv,$OSUspecImgDiv);
-        $footerRowElements = Array();
-        //$OSUwebLinksDiv is removed from footer
+        $footerRowElements = Array($OSUwebLinksDiv);
     }
     elseif($taxonRank == 180){
         $topRowElements = Array($OSUtopSpacerDiv,$editButtonDiv,$OSUscinameHeaderDiv);
         $leftColumnElements = Array($OSUspeciesNavDiv,$OSUfamilyDiv,$vernacularsDiv,);
         $rightColumnElements = Array($descTabsDiv);
         $bottomRowElements = Array($OSUimgBoxDiv);
-        $footerRowElements = Array();
-	    //$OSUwebLinksDiv is removed from footer
+        $footerRowElements = Array($OSUwebLinksDiv);
     }
     else{
         $topRowElements = Array($OSUtopSpacerDiv,$editButtonDiv,$OSUscinameHeaderDiv);
         $leftColumnElements = Array($OSUspeciesNavDiv,$vernacularsDiv);
         $rightColumnElements = Array($descTabsDiv);
         $bottomRowElements = Array($OSUimgBoxDiv);
-        $footerRowElements = Array();
-	    //$OSUwebLinksDiv is removed from footer
+        $footerRowElements = Array($OSUwebLinksDiv);
     }
 }
 elseif($taxonValue){
