@@ -129,10 +129,9 @@ include($serverRoot."/header.php");
             );
 
         $("#heightSlider").slider({
-            range: "min",
+            range: true,
             min: 0,
             max: 200,
-            value: 0,
             create: function() {
                 var textbox = $("#height-label");
                 textbox.text("Any");
@@ -144,10 +143,17 @@ include($serverRoot."/header.php");
             },
             stop: function( event, ui ) {
                 if(ui.value != 0){
-                    var valLabel = 'Max height '+ui.value+' ft';
-                    var valCode = '690--'+ui.value;
+                    var valLabel = 'Max height '+ui.values[0]+' - '+ui.values[1]+' ft';
+                    var valCode = '140--'+ui.values[0]+','+ui.values[1];
                     var optionObj = {name:valLabel, nameCode:valCode};
+                    console.log(optionObj);
+                    //remove any items from searchCriteriaArray that have nameCode
+                    //starting with 140--
+
+
+                    //push new option to search array
                     searchCriteriaArr.push(optionObj);
+                    console.log(searchCriteriaArr);
                     $('#searchCriteriaManifest').manifest('add',valLabel);
                     getSearchResults();
                 }
@@ -635,9 +641,12 @@ include($serverRoot."/header.php");
                                             <div id="heightSlider">
                                                 <div id="height-handle" class="ui-slider-handle">
                                                     <div class="custom-label-bar"></div>
-                                                    <div id="height-label" class="custom-label"></div>
+                                                </div>
+                                                <div id="height-handle" class="ui-slider-handle">
+                                                    <div class="custom-label-bar"></div>
                                                 </div>
                                             </div>
+                                            <div id="height-label"></div>
                                             <div class="feature-slider-label">
                                                 Height (ft)
                                             </div>
