@@ -303,7 +303,7 @@ if($action){
 						<select id="imagecount" name="imagecount">
 							<option value="all" <?php echo ((array_key_exists("imagecount",$previousCriteria))&&($previousCriteria["imagecount"]=='all')?'SELECTED ':''); ?>>All images</option>
 							<option value="taxon" <?php echo ((array_key_exists("imagecount",$previousCriteria))&&($previousCriteria["imagecount"]=='taxon')?'SELECTED ':''); ?>>One per taxon</option>
-							<option value="specimen" <?php echo ((array_key_exists("imagecount",$previousCriteria))&&($previousCriteria["imagecount"]=='specimen')?'SELECTED ':''); ?>>One per specimen</option>
+							<option value="specimen" <?php echo ((array_key_exists("imagecount",$previousCriteria))&&($previousCriteria["imagecount"]=='specimen')?'SELECTED ':''); ?>>One per occurrence</option>
 						</select>
 					</div>
 					<div style="margin-top:5px;">
@@ -323,7 +323,7 @@ if($action){
 									<input type='radio' name='imagetype' value='all' <?php if((!array_key_exists("imagetype",$previousCriteria)) || (array_key_exists("imagetype",$previousCriteria) && $previousCriteria["imagetype"] == 'all')) echo "CHECKED"; ?> > All Images
 								</div>
 								<div style="margin-top:5px;">
-									<input type='radio' name='imagetype' value='specimenonly' <?php if(array_key_exists("imagetype",$previousCriteria) && $previousCriteria["imagetype"] == 'specimenonly') echo "CHECKED"; ?> > Specimen Images 
+									<input type='radio' name='imagetype' value='specimenonly' <?php if(array_key_exists("imagetype",$previousCriteria) && $previousCriteria["imagetype"] == 'specimenonly') echo "CHECKED"; ?> > Occurrence Images
 								</div>
 								<div style="margin-top:5px;">
 									<input type='radio' name='imagetype' value='observationonly' <?php if(array_key_exists("imagetype",$previousCriteria) && $previousCriteria["imagetype"] == 'observationonly') echo "CHECKED"; ?> > Image Vouchered Observations

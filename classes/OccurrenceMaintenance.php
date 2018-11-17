@@ -266,7 +266,7 @@ class OccurrenceMaintenance {
 		$speciesCnt = 0;
 		if($full){
 			$statsArr = Array();
-			if($this->verbose) $this->outputMsg('Calculating specimen, georeference, family, genera, and species counts... ',1);
+			if($this->verbose) $this->outputMsg('Calculating occurrence, georeference, family, genera, and species counts... ',1);
 			$sql = 'SELECT COUNT(o.occid) AS SpecimenCount, COUNT(o.decimalLatitude) AS GeorefCount, '.
 				'COUNT(DISTINCT o.family) AS FamilyCount, COUNT(o.typeStatus) AS TypeCount, '.
 				'COUNT(DISTINCT CASE WHEN t.RankId >= 180 THEN t.UnitName1 ELSE NULL END) AS GeneraCount, '.
@@ -288,7 +288,7 @@ class OccurrenceMaintenance {
 			}
 			$rs->free();
 
-			if($this->verbose) $this->outputMsg('Calculating number of specimens imaged... ',1);
+			if($this->verbose) $this->outputMsg('Calculating number of occurrences imaged... ',1);
 			$sql = 'SELECT count(DISTINCT o.occid) as imgcnt '.
 				'FROM omoccurrences o INNER JOIN images i ON o.occid = i.occid '.
 				'WHERE (o.collid IN('.$collid.')) ';
@@ -369,7 +369,7 @@ class OccurrenceMaintenance {
 			}
 		}
 		else{
-			if($this->verbose) $this->outputMsg('Calculating specimen, georeference, family, genera, and species counts... ',1);
+			if($this->verbose) $this->outputMsg('Calculating occurrence, georeference, family, genera, and species counts... ',1);
 			$sql = 'SELECT COUNT(o.occid) AS SpecimenCount, COUNT(o.decimalLatitude) AS GeorefCount, COUNT(DISTINCT o.family) AS FamilyCount, '.
 				'COUNT(DISTINCT CASE WHEN t.RankId >= 180 THEN t.UnitName1 ELSE NULL END) AS GeneraCount, '.
 				'COUNT(DISTINCT CASE WHEN t.RankId = 220 THEN t.SciName ELSE NULL END) AS SpeciesCount '.

@@ -46,7 +46,7 @@ $(document).ready(function () {
                 <div class="centered">Identification tool allowing user to select recognizable characters</div>
             </div>
         </a>
-        <a href="<?php echo $clientRoot; ?>/projects/index.php?pid=3" class="home-box plant-box">
+        <a href="<?php echo $clientRoot; ?>/projects/index.php" class="home-box plant-box">
             <img src="images/layout/plant-inventories-box.jpg" alt="Plant Inventories">
             <h3>Plant Inventories</h3>
             <div class="box-overlay">

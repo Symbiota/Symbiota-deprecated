@@ -1562,13 +1562,15 @@ class DwcArchiverCore extends Manager{
 			}
 			$statsManager = new OccurrenceAccessStats();
 			while($r = $rs->fetch_assoc()){
-				//Set occurrence GUID based on GUID target
-				$guidTarget = $this->collArr[$r['collid']]['guidtarget'];
-				if($guidTarget == 'catalogNumber'){
-					$r['occurrenceID'] = $r['catalogNumber'];
-				}
-				elseif($guidTarget == 'symbiotaUUID'){
-					$r['occurrenceID'] = $r['recordId'];
+				if(!$r['occurrenceID']){
+					//Set occurrence GUID based on GUID target, but only if occurrenceID field isn't already populated
+					$guidTarget = $this->collArr[$r['collid']]['guidtarget'];
+					if($guidTarget == 'catalogNumber'){
+						$r['occurrenceID'] = $r['catalogNumber'];
+					}
+					elseif($guidTarget == 'symbiotaUUID'){
+						$r['occurrenceID'] = $r['recordId'];
+					}
 				}
 				if($this->limitToGuids && (!$r['occurrenceID'] || !$r['basisOfRecord'])){
 					// Skip record because there is no occurrenceID guid

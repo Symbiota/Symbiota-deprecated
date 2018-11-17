@@ -173,7 +173,7 @@ if($export){
 	$textrun = $section->addTextRun('sendwhom');
 	if($english){
 		$textrun->addText(htmlspecialchars('We are sending you '.($numBoxes == 1?'1 box ':$numBoxes.' boxes ')),'sendwhomFont');
-		$textrun->addText(htmlspecialchars('containing '.($numSpecimens == 1?'1 specimen. ':$numSpecimens.' specimens. ')),'sendwhomFont');
+		$textrun->addText(htmlspecialchars('containing '.($numSpecimens == 1?'1 occurrence. ':$numSpecimens.' occurrences. ')),'sendwhomFont');
 		if(($loanType == 'in' && $invoiceArr['shippingmethodreturn']) || $invoiceArr['shippingmethod']){
 			$textrun->addText(htmlspecialchars(($numBoxes == 1?'This package was ':'These packages were ').'delivered via '.($loanType == 'in'?$invoiceArr['shippingmethodreturn']:$invoiceArr['shippingmethod']).'. '),'sendwhomFont');
 		}

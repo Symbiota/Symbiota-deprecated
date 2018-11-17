@@ -726,7 +726,7 @@ if($action != "Update Statistics"){
 										<ul style="margin:0px;padding-left:10px;">
 											<?php
 											echo "<li>";
-											echo ($results['SpecimenCount']?number_format($results['SpecimenCount']):0)." specimen records";
+											echo ($results['SpecimenCount']?number_format($results['SpecimenCount']):0)." occurrence records";
 											echo "</li>";
 											echo "<li>";
 											$percGeo = '';

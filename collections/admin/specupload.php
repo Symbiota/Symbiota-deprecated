@@ -478,21 +478,21 @@ $duManager->loadFieldMap();
 
 						?>
 					</div>
-					<form name="finaltransferform" action="specupload.php" method="post" style="margin-top:10px;" onsubmit="return confirm('Are you sure you want to transfer records from temporary table to central specimen table?');">
+					<form name="finaltransferform" action="specupload.php" method="post" style="margin-top:10px;" onsubmit="return confirm('Are you sure you want to transfer records from temporary table to central occurrence table?');">
 						<input type="hidden" name="collid" value="<?php echo $collid;?>" />
 						<input type="hidden" name="uploadtype" value="<?php echo $uploadType; ?>" />
 						<input type="hidden" name="verifyimages" value="<?php echo ($verifyImages?'1':'0'); ?>" />
 						<input type="hidden" name="processingstatus" value="<?php echo $processingStatus;?>" />
 						<input type="hidden" name="uspid" value="<?php echo $uspid;?>" />
 						<div style="margin:5px;">
-							<input type="submit" name="action" value="Transfer Records to Central Specimen Table" />
+							<input type="submit" name="action" value="Transfer Records to Central Occurrence Table" />
 						</div>
 					</form>
 				</fieldset>
 				<?php
 			}
 	 	}
-		elseif($action == 'Transfer Records to Central Specimen Table' || $finalTransfer){
+		elseif($action == 'Transfer Records to Central Occurrence Table' || $finalTransfer){
 			echo '<ul>';
 			$duManager->finalTransfer();
 			echo '</ul>';

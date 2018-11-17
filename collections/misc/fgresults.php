@@ -65,7 +65,7 @@ if($isEditor){
                 var dbElement = dbElements[i];
                 if(dbElement.checked) return true;
             }
-            alert("Please select specimens to be determined!");
+            alert("Please select occurrences to be determined!");
             return false;
         }
 

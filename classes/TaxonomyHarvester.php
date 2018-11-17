@@ -8,7 +8,9 @@ class TaxonomyHarvester extends Manager{
 
 	private $taxonomicResources = array();
 	private $taxAuthId = 1;
+	private $defaultAuthor;
 	private $defaultFamily;
+	private $defaultFamilyTid;
 	private $kingdomName;
 	private $kingdomTid;
 	private $fullyResolved;
@@ -114,15 +116,71 @@ class TaxonomyHarvester extends Manager{
 	private function addColTaxon($sciName){
 		$tid = 0;
 		if($sciName){
-			$url = 'http://webservice.catalogueoflife.org/col/webservice?response=full&format=json&name='.str_replace(" ","%20",$sciName);
+			$adjustedName = str_ireplace(array(' subsp. ',' subsp ',' ssp. ',' ssp ',' var. ',' var ',' f. ',' fo. '), ' ', $sciName);
+			$adjustedName = str_ireplace(array('?'), ' ', $adjustedName);
+			$url = 'http://webservice.catalogueoflife.org/col/webservice?response=full&format=json&name='.str_replace(' ','%20',$adjustedName);
 			//echo $url.'<br/>';
 			$retArr = $this->getContentString($url);
 			$content = $retArr['str'];
 			$resultArr = json_decode($content,true);
 			$numResults = $resultArr['number_of_results_returned'];
 			if($numResults){
-				$this->logOrEcho('Taxon found within Catalog of Life',2);
-				$tid = $this->addColTaxonByResult($resultArr, $sciName);
+				$targetKey = 0;
+				$submitArr = array();
+				$rankArr = array();
+				$skipCnt = 0;
+				foreach($resultArr['results'] as $k => $tArr){
+					//If number of results are greater than 1, we need to evaluate which result is best suited target (e.g. Panicum debile)
+					$rankArr[$k] = 0;
+					if($adjustedName != $tArr['name']){
+						//Skip if name doesn't match perfectly; after 3 mismatches, break
+						$skipCnt++;
+						if($skipCnt > 2) break;
+						continue;
+					}
+					//if($this->kingdomName && $this->kingdomName == $this->getColParent($tArr, 'Kingdom')) $rankArr[$k] += 2;
+					$taxonKingdom = $this->getColParent($tArr, 'Kingdom');
+					if($this->kingdomName && $this->kingdomName != $taxonKingdom){
+						unset($rankArr[$k]);
+						$colPrefix = 'http://www.catalogueoflife.org/col/browse/tree/id/';
+						if(strpos($adjustedName,' ')) $colPrefix = 'http://www.catalogueoflife.org/col/details/species/id/';
+						$msg = '<a href="'.$colPrefix.$resultArr['results'][$k]['id'].'" target="_blank">';
+						$msg .= $sciName.'</a> skipped due to not matching targeted kingdom: '.$this->kingdomName.' (!= '.$taxonKingdom.')';
+						$this->logOrEcho($msg,2);
+						continue;
+					}
+					if($this->defaultFamily && $this->defaultFamily == $this->getColParent($tArr, 'Family')) $rankArr[$k] += 2;
+					if($tArr['name_status'] == 'accepted name')  $rankArr[$k] += 2;
+					if(isset($tArr['author']) && $tArr['author']){
+						//if(stripos($tArr['author'],'nom. illeg.') === false) $rankArr[$k] += 2;
+						if(stripos($tArr['author'],'nom. illeg.') !== false){
+							unset($rankArr[$k]);
+							continue;
+						}
+						//Gets 2 points if author is the same, 1 point if 80% similar
+						if($this->defaultAuthor){
+							$author1 = str_replace(array(' ','.'), '', $this->defaultAuthor);
+							$author2 = str_replace(array(' ','.'), '', $tArr['author']);
+							similar_text($author1, $author2, $percent);
+							if($author1 == $author2) $rankArr[$k] += 2;
+							elseif($percent > 80) $rankArr[$k] += 1;
+						}
+					}
+					$submitArr[$k] = $resultArr['results'][$k];
+				}
+				if($rankArr){
+					asort($rankArr);
+					end($rankArr);
+					$targetKey = key($rankArr);
+					if(isset($rankArr[0]) && $rankArr[$targetKey] == $rankArr[0]) $targetKey = 0;
+				}
+				$this->logOrEcho($sciName.' found within Catalog of Life',2);
+				if(array_key_exists($targetKey, $submitArr) && $submitArr[$targetKey]){
+					$tid = $this->addColTaxonByResult($submitArr[$targetKey]);
+				}
+				else{
+					$this->logOrEcho('Targeted taxon return does not exist',2);
+				}
 			}
 			else{
 				$this->logOrEcho('Taxon not found',2);
@@ -142,7 +200,13 @@ class TaxonomyHarvester extends Manager{
 			$retArr = $this->getContentString($url);
 			$content = $retArr['str'];
 			$resultArr = json_decode($content,true);
-			$tid = $this->addColTaxonByResult($resultArr);
+			if(isset($resultArr['results'][0])){
+				$baseArr = $resultArr['results'][0];
+				$tid = $this->addColTaxonByResult($baseArr);
+			}
+			else{
+				$this->logOrEcho('Targeted taxon return does not exist(2)',2);
+			}
 		}
 		else{
 			$this->logOrEcho('ERROR harvesting COL name: null input identifier',1);
@@ -150,22 +214,14 @@ class TaxonomyHarvester extends Manager{
 		return $tid;
 	}
 
-	private function addColTaxonByResult($resultArr, $originalSearchStr = ''){
+	private function addColTaxonByResult($baseArr){
 		$taxonArr = array();
-		if($resultArr){
-			$baseArr = $resultArr['results'][0];
-			if(!$baseArr){
-				return 0;
-			}
+		if($baseArr){
 			$tidAccepted = 0;
 			if($baseArr['name_status'] == 'synonym' && isset($baseArr['accepted_name'])){
 				$tidAccepted = $this->addColTaxonById($baseArr['accepted_name']['id']);
 			}
 			$taxonArr = $this->getColNode($baseArr);
-			if($originalSearchStr && $originalSearchStr != $taxonArr['sciname']){
-				//Abort because search return contains a child of the search term
-				return false;
-			}
 			//Get parent
 			if($taxonArr['rankid'] == 10){
 				$taxonArr['parent']['tid'] = 'self';
@@ -192,7 +248,7 @@ class TaxonomyHarvester extends Manager{
 					$parentTid = $this->addColTaxon($parentArr['sciname']);
 					if(!$parentTid){
 						//Bad return from COL, thus lets just add as accepted for now
-						$taxonArr['family'] = $this->getColFamily($baseArr);
+						$taxonArr['family'] = $this->getColParent($baseArr,'Family');
 						$this->buildTaxonArr($parentArr);
 						$parentTid = $this->loadNewTaxon($parentArr);
 					}
@@ -227,9 +283,9 @@ class TaxonomyHarvester extends Manager{
 		return $taxonArr;
 	}
 
-	private function getColFamily($baseArr){
-		//Returns family obtained from accepted taxon
-		$familyStr = '';
+	private function getColParent($baseArr, $parentRank){
+		//Returns parent (e.g. family) obtained from accepted taxon
+		$retStr = '';
 		$classArr = array();
 		if(array_key_exists('classification', $baseArr)){
 			$classArr = $baseArr['classification'];
@@ -239,11 +295,11 @@ class TaxonomyHarvester extends Manager{
 		}
 
 		foreach($classArr as $classNode){
-			if($classNode['rank'] == 'Family'){
-				$familyStr = $classNode['name'];
+			if($classNode['rank'] == $parentRank){
+				$retStr = $classNode['name'];
 			}
 		}
-		return $familyStr;
+		return $retStr;
 	}
 
 	private function addWormsTaxon($sciName){
@@ -573,7 +629,8 @@ class TaxonomyHarvester extends Manager{
 			$this->buildTaxonArr($taxonArr);
 		}
 		//Check to see sciname is in taxon table, but perhaps not linked to current thesaurus
-		$sql = 'SELECT tid FROM taxa WHERE sciname = "'.$taxonArr['sciname'].'"';
+		$sql = 'SELECT tid FROM taxa WHERE (sciname = "'.$taxonArr['sciname'].'") ';
+		if($this->kingdomName) $sql .= 'AND (kingdomname = "'.$this->kingdomName.'" OR kingdomname IS NULL) ';
 		$rs = $this->conn->query($sql);
 		if($r = $rs->fetch_object()){
 			$newTid = $r->tid;
@@ -648,19 +705,26 @@ class TaxonomyHarvester extends Manager{
 						$this->logOrEcho('ERROR adding new tid to taxaenumtree (step 1): '.$this->conn->error,1);
 					}
 					$sqlHier2 = 'INSERT IGNORE INTO taxaenumtree(tid,parenttid,taxauthid) '.
-						'SELECT '.$newTid.' AS tid, parenttid, taxauthid FROM taxaenumtree WHERE tid = '.$parentTid;
+						'SELECT '.$newTid.' AS tid, parenttid, taxauthid FROM taxaenumtree WHERE (taxauthid = '.$this->taxAuthId.') AND (tid = '.$parentTid.')';
 					if(!$this->conn->query($sqlHier2)){
 						$this->logOrEcho('ERROR adding new tid to taxaenumtree (step 2): '.$this->conn->error,1);
+					}
+					$sqlKing = 'UPDATE taxa t INNER JOIN taxaenumtree e ON t.tid = e.tid '.
+						'INNER JOIN taxa t2 ON e.parenttid = t2.tid '.
+						'SET t.kingdomname = t2.sciname '.
+						'WHERE (e.taxauthid = '.$this->taxAuthId.') AND (t.tid = '.$newTid.') AND (t2.rankid = 10)';
+					if(!$this->conn->query($sqlKing)){
+						$this->logOrEcho('ERROR updating kingdom string: '.$this->conn->error,1);
 					}
 					//Display action message
 					$taxonDisplay = $taxonArr['sciname'];
 					if(isset($GLOBALS['USER_RIGHTS']['Taxonomy'])){
-						$taxonDisplay = '<a href="'.$GLOBALS['CLIENT_ROOT'].'/taxa/admin/taxonomyeditor.php?tid='.$newTid.'" target="_blank">'.$taxonArr['sciname'].'</a>';
+						$taxonDisplay = '<a href="'.$GLOBALS['CLIENT_ROOT'].'/taxa/taxonomy/taxoneditor.php?tid='.$newTid.'" target="_blank">'.$taxonArr['sciname'].'</a>';
 					}
 					$accStr = 'accepted';
 					if($tidAccepted != $newTid){
 						if(isset($GLOBALS['USER_RIGHTS']['Taxonomy'])){
-							$accStr = 'synonym of taxon <a href="'.$GLOBALS['CLIENT_ROOT'].'/taxa/admin/taxonomyeditor.php?tid='.$tidAccepted.'" target="_blank">#'.$tidAccepted.'</a>';
+							$accStr = 'synonym of taxon <a href="'.$GLOBALS['CLIENT_ROOT'].'/taxa/taxonomy/taxoneditor.php?tid='.$tidAccepted.'" target="_blank">#'.$tidAccepted.'</a>';
 						}
 						else{
 							$accStr = 'synonym of taxon #'.$tidAccepted;
@@ -692,7 +756,7 @@ class TaxonomyHarvester extends Manager{
 		//Add common names
 		if(isset($taxonArr['verns'])){
 			foreach($taxonArr['verns'] as $k => $vernArr){
-				$sqlVern = 'INSERT INTO(tid,vernacularname,language) '.
+				$sqlVern = 'INSERT INTO taxavernaculars(tid,vernacularname,language) '.
 					'VALUES('.$newTid.',"'.$vernArr['vernacularName'].'","'.$vernArr['language'].'")';
 				if(!$this->conn->query($sqlVern)){
 					$this->logOrEcho('ERROR loading vernacular '.$taxonArr['sciname'].': '.$this->conn->error,1);
@@ -765,17 +829,19 @@ class TaxonomyHarvester extends Manager{
 	}
 
 	private function setDefaultKingdom(){
-		$sql = 'SELECT t.sciname, t.tid, COUNT(e.tid) as cnt '.
-			'FROM taxa t INNER JOIN taxaenumtree e ON t.tid = e.parenttid '.
-			'WHERE t.rankid = 10 '.
-			'GROUP BY t.sciname '.
-			'ORDER BY cnt desc';
-		$rs = $this->conn->query($sql);
-		if($r = $rs->fetch_object()){
-			$this->kingdomName = $r->sciname;
-			$this->kingdomTid = $r->tid;
+		if(!$this->kingdomName || !$this->kingdomTid){
+			$sql = 'SELECT t.sciname, t.tid, COUNT(e.tid) as cnt '.
+				'FROM taxa t INNER JOIN taxaenumtree e ON t.tid = e.parenttid '.
+				'WHERE (t.rankid = 10) AND (e.taxauthid = '.$this->taxAuthId.') '.
+				'GROUP BY t.sciname '.
+				'ORDER BY cnt desc';
+			$rs = $this->conn->query($sql);
+			if($r = $rs->fetch_object()){
+				$this->kingdomName = $r->sciname;
+				$this->kingdomTid = $r->tid;
+			}
+			$rs->free();
 		}
-		$rs->free();
 	}
 
 	private function getParentArr($taxonArr){
@@ -797,8 +863,7 @@ class TaxonomyHarvester extends Manager{
 					$familyStr = $this->defaultFamily;
 					if(isset($taxonArr['family']) && $taxonArr['family']) $familyStr = $taxonArr['family'];
 					if($familyStr){
-						$sqlFam = 'SELECT tid FROM taxa '.
-							'WHERE (sciname = "'.$this->defaultFamily.'") AND (rankid = 140)';
+						$sqlFam = 'SELECT tid FROM taxa WHERE (sciname = "'.$this->cleanInStr($this->defaultFamily).'") AND (rankid = 140)';
 						//echo $sqlFam;
 						$rs = $this->conn->query($sqlFam);
 						if($r = $rs->fetch_object()){
@@ -861,9 +926,9 @@ class TaxonomyHarvester extends Manager{
 			}
 			if($unitname3){
 				//Look for infraspecific species with different rank indicators
-				$sql = 'SELECT tid, sciname FROM taxa '.
-					'WHERE (unitname1 = "'.$unitname1.'") AND (unitname2 = "'.$unitname2.'") AND (unitname3 = "'.$unitname3.'") '.
-					'ORDER BY sciname';
+				$sql = 'SELECT tid, sciname FROM taxa WHERE (unitname1 = "'.$unitname1.'") AND (unitname2 = "'.$unitname2.'") AND (unitname3 = "'.$unitname3.'") ';
+				if($this->kingdomName) $sql .= 'AND (kingdomname = "'.$this->kingdomName.'" OR kingdomname IS NULL) ';
+				$sql .= 'ORDER BY sciname';
 				//echo $sql.'<br/>';
 				$rs = $this->conn->query($sql);
 				while($row = $rs->fetch_object()){
@@ -878,7 +943,9 @@ class TaxonomyHarvester extends Manager{
 					$searchStr = substr($unitname1,0,4).'%';
 					$searchStr .= ' '.substr($unitname2,0,4).'%';
 					if(count($unitname3) > 2) $searchStr .= ' '.substr($unitname3,0,5).'%';
-					$sql = 'SELECT tid, sciname FROM taxa WHERE (sciname LIKE "'.$searchStr.'") ORDER BY sciname LIMIT 15';
+					$sql = 'SELECT tid, sciname FROM taxa WHERE (sciname LIKE "'.$searchStr.'") ';
+					if($this->kingdomName) $sql .= 'AND (kingdomname = "'.$this->kingdomName.'" OR kingdomname IS NULL) ';
+					$sql .= 'ORDER BY sciname LIMIT 15';
 					//echo $sql.'<br/>';
 					$rs = $this->conn->query($sql);
 					while($row = $rs->fetch_object()){
@@ -890,7 +957,9 @@ class TaxonomyHarvester extends Manager{
 
 				if(!$retArr){
 					//Look for matches based on same edithet but different genus
-					$sql = 'SELECT tid, sciname FROM taxa WHERE (sciname LIKE "'.substr($unitname1,0,2).'% '.$unitname2.'") ORDER BY sciname';
+					$sql = 'SELECT tid, sciname FROM taxa WHERE (sciname LIKE "'.substr($unitname1,0,2).'% '.$unitname2.'") ';
+					if($this->kingdomName) $sql .= 'AND (kingdomname = "'.$this->kingdomName.'" OR kingdomname IS NULL) ';
+					$sql .= 'ORDER BY sciname';
 					//echo $sql.'<br/>';
 					$rs = $this->conn->query($sql);
 					while($row = $rs->fetch_object()){
@@ -900,7 +969,9 @@ class TaxonomyHarvester extends Manager{
 				}
 			}
 			//Get soundex matches
-			$sql = 'SELECT tid, sciname FROM taxa WHERE SOUNDEX(sciname) = SOUNDEX("'.$taxonStr.'") ORDER BY sciname LIMIT 5';
+			$sql = 'SELECT tid, sciname FROM taxa WHERE SOUNDEX(sciname) = SOUNDEX("'.$taxonStr.'") ';
+			if($this->kingdomName) $sql .= 'AND (kingdomname = "'.$this->kingdomName.'" OR kingdomname IS NULL) ';
+			$sql .= 'ORDER BY sciname LIMIT 5';
 			//echo $sql;
 			$rs = $this->conn->query($sql);
 			while($row = $rs->fetch_object()){
@@ -919,9 +990,7 @@ class TaxonomyHarvester extends Manager{
 			$sciname = $taxonArr['sciname'];
 			$tidArr = array();
 			//Get tid, author, and rankid
-			$sql = 'SELECT DISTINCT t.tid, t.author, t.rankid '.
-				'FROM taxa t INNER JOIN taxaenumtree e ON t.tid = e.tid '.
-				'WHERE (e.taxauthid = '.$this->taxAuthId.') AND (t.sciname = "'.$this->cleanInStr($sciname).'") ';
+			$sql = 'SELECT tid, author, rankid FROM taxa WHERE (sciname = "'.$this->cleanInStr($sciname).'") ';
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
 				$tidArr[$r->tid]['author'] = $r->author;
@@ -955,7 +1024,7 @@ class TaxonomyHarvester extends Manager{
 							$goodArr[$t] = 1;
 						}
 					}
-					//Gets a 2 points if family is the same
+					//Gets 2 points if family is the same
 					if(isset($tArr['family']) && $tArr['family']){
 						if(isset($taxonArr['family']) && $taxonArr['family']){
 							if(strtolower($tArr['family']) == strtolower($taxonArr['family'])){
@@ -968,13 +1037,13 @@ class TaxonomyHarvester extends Manager{
 							}
 						}
 					}
-					//Gets a 2 points if kingdom is the same
+					//Gets 2 points if kingdom is the same
 					if($this->kingdomName && isset($tArr['kingdom']) && $tArr['kingdom']){
 						if(strtolower($tArr['kingdom']) == strtolower($this->kingdomName)){
 							$goodArr[$t] += 2;
 						}
 					}
-					//Gets a 2 points if author is the same, 1 point if 80% similar
+					//Gets 2 points if author is the same, 1 point if 80% similar
 					if(isset($taxonArr['author']) && $taxonArr['author']){
 						$author1 = str_replace(array(' ','.'), '', $taxonArr['author']);
 						$author2 = str_replace(array(' ','.'), '', $tArr['author']);
@@ -1009,20 +1078,12 @@ class TaxonomyHarvester extends Manager{
 		}
 	}
 
-	public function setKingdom($kingdom){
-		$sql = 'SELECT sciname, tid FROM taxa t WHERE ';
-		if(is_numeric($kingdom)){
-			$sql .= '(tid = '.$kingdom.') ';
-		}
-		else{
-			$sql .= '(sciname = "'.$this->cleanInStr($kingdom).'") ';
-		}
-		$rs = $this->conn->query($sql);
-		if($r = $rs->fetch_object()){
-			$this->kingdomName = $r->sciname;
-			$this->kingdomTid = $r->tid;
-		}
-		$rs->free();
+	public function setKingdomTid($id){
+		if(is_numeric($id)) $this->kingdomTid = $id;
+	}
+
+	public function setKingdomName($name){
+		if(preg_match('/^[a-zA-Z]+$/', $name)) $this->kingdomName = $name;
 	}
 
 	public function setTaxonomicResources($resourceArr){
@@ -1041,8 +1102,18 @@ class TaxonomyHarvester extends Manager{
 		return $this->taxonomicResources;
 	}
 
+	public function setDefaultAuthor($str){
+		$this->defaultAuthor = $str;
+	}
+
 	public function setDefaultFamily($familyStr){
-		$this->defaultFamily = $this->cleanInStr($familyStr);
+		$this->defaultFamily = $familyStr;
+		$sql = 'SELECT tid FROM taxa WHERE (rankid = 140) AND (sciname = "'.$this->cleanInStr($familyStr).'")';
+		$rs = $this->conn->query($sql);
+		if($r = $rs->fetch_object()){
+			$this->defaultFamilyTid = $r->tid;
+		}
+		$rs->free();
 	}
 
 	public function isFullyResolved(){

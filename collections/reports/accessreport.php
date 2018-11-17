@@ -112,8 +112,8 @@ else{
 		<div id="innertext" style="min-width:1100px">
 			<div>
 				<div style="float:left;font-size:120%"><b><u>User Access Statistics</u></b></div>
-				<div id="desc_details" style="clear:both;display:none;width:500px;">Displays general user access statistics for all specimens within collection.
-					Download = any specimen download excluding data backups and custom downloads made by collection administrators (e.g. via Data Management Menu),
+				<div id="desc_details" style="clear:both;display:none;width:500px;">Displays general user access statistics for all occurrences within collection.
+					Download = any occurrence download excluding data backups and custom downloads made by collection administrators (e.g. via Data Management Menu),
 					Full View = viewing full record via occurrence details page,
 					List View = viewing basic field data through a list view (e.g. default occurrence listing tab within the general search interface),
 					Map View = occurrence represented as a dot within any of the map-based search interfaces

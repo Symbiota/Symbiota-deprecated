@@ -175,7 +175,7 @@ else{
 	<div id="">
 		<div style="width:725px;clear:both;margin-bottom:5px;">
 			<div style="float:right;">
-				<div class='button' style='margin:15px 15px 0px 0px;width:13px;height:13px;' title='Download specimen data'>
+				<div class='button' style='margin:15px 15px 0px 0px;width:13px;height:13px;' title='Download occurrence data'>
 					<a id='dllink' href=''>
 						<img src='../images/dl.png'/>
 					</a>

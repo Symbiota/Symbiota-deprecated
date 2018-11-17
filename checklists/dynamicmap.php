@@ -136,7 +136,7 @@ elseif($coordRange > 40){
 					More Details
 				</span>
 				<span id="moreinfo" style="display:none;">
-					If a radius is defined, species lists are generated using specimen data collected within the defined area. 
+					If a radius is defined, species lists are generated using occurrence data collected within the defined area.
 					If a radius is not supplied, the area is sampled in concentric rings until the sample size is determined to 
 					best represent the local species diversity. In other words, poorly collected areas will have a larger radius sampled. 
 					Setting the taxon filter will limit the return to species found within that taxonomic group.

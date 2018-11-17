@@ -84,7 +84,7 @@ $indManager->setOccid($occid);
 						else{
 							?>
 							<div style='margin:20px;'>
-								Unable to use this specimen record as a voucher because  
+								Unable to use this occurrence record as a voucher because
 								scientific name counld not be verified in the taxonomic thesaurus (misspelled?)
 							</div>
 							<?php 

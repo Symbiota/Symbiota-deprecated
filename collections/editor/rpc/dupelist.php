@@ -114,7 +114,7 @@ $dupArr = $dupeManager->getDupeList($recordedBy, $recordNumber, $eventDate, $cat
 				}
 			}
 			else{
-				echo '<div style="margin:20px;font-weight:bold">No specimens found matching search criteria</div>';
+				echo '<div style="margin:20px;font-weight:bold">No occurrences found matching search criteria</div>';
 			}
 			?>
 		</fieldset>

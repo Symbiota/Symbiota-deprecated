@@ -46,24 +46,24 @@ if($stArrCollJson || $stArrSearchJson){
 ?>
 <div>
     <div class='button' style='margin:10px;float:right;width:13px;height:13px;' title='<?php echo $LANG['DOWNLOAD_TITLE']; ?>'>
-		<a href='download/index.php?starr=<?php echo $stArrSearchJson; ?>&jsoncollstarr=<?php echo $stArrCollJson; ?>&dltype=checklist&taxonFilterCode=<?php echo $taxonFilter; ?>'>
+		<a href='download/index.php?starr=<?php echo htmlentities($stArrSearchJson, ENT_QUOTES | ENT_HTML5, 'UTF-8'); ?>&jsoncollstarr=<?php echo htmlentities($stArrCollJson, ENT_QUOTES | ENT_HTML5, 'UTF-8'); ?>&dltype=checklist&taxonFilterCode=<?php echo $taxonFilter; ?>'>
 			<img width="15px" src="../images/dl.png" />
 		</a>
 	</div>
-	<?php 
+	<?php
 	if($KEY_MOD_IS_ACTIVE){
 	?>
 		<div class='button' style='margin:10px;float:right;width:13px;height:13px;' title='<?php echo $LANG['OPEN_KEY']; ?>'>
-			<a href='checklistsymbiota.php?starr=<?php echo $stArrSearchJson; ?>&jsoncollstarr=<?php echo $stArrCollJson; ?>&taxonfilter=<?php echo $taxonFilter; ?>&interface=key'>
+			<a href='checklistsymbiota.php?starr=<?php echo htmlentities($stArrSearchJson, ENT_QUOTES | ENT_HTML5, 'UTF-8'); ?>&jsoncollstarr=<?php echo htmlentities($stArrCollJson, ENT_QUOTES | ENT_HTML5, 'UTF-8'); ?>&taxonfilter=<?php echo $taxonFilter; ?>&interface=key'>
 				<img width='15px' src='../images/key.png'/>
 			</a>
 		</div>
-	<?php 
+	<?php
 	}
 	if($FLORA_MOD_IS_ACTIVE){
 	?>
 		<div class='button' style='margin:10px;float:right;width:13px;height:13px;' title='<?php echo $LANG['OPEN_CHECKLIST_EXPLORER']; ?>'>
-			<a href='checklistsymbiota.php?starr=<?php echo $stArrSearchJson; ?>&jsoncollstarr=<?php echo $stArrCollJson; ?>&taxonfilter=<?php echo $taxonFilter; ?>&interface=checklist'>
+			<a href='checklistsymbiota.php?starr=<?php echo htmlentities($stArrSearchJson, ENT_QUOTES | ENT_HTML5, 'UTF-8'); ?>&jsoncollstarr=<?php echo htmlentities($stArrCollJson, ENT_QUOTES | ENT_HTML5, 'UTF-8'); ?>&taxonfilter=<?php echo $taxonFilter; ?>&interface=checklist'>
 				<img width='15px' src='../images/list.png'/>
 			</a>
 		</div>
@@ -91,7 +91,7 @@ if($stArrCollJson || $stArrSearchJson){
 		$undFamilyArray = Array();
 		if(array_key_exists("undefined",$checklistArr)){
 			$undFamilyArray = $checklistArr["undefined"];
-			unset($checklistArr["undefined"]); 
+			unset($checklistArr["undefined"]);
 		}
 		ksort($checklistArr);
 		foreach($checklistArr as $family => $sciNameArr){
