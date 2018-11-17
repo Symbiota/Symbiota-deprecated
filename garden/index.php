@@ -157,6 +157,8 @@ include($serverRoot."/header.php");
                     //push new option to search array
                     searchCriteriaArr.push(optionObj);
                     //console.log(searchCriteriaArr);
+                    //remove old manifest item, and add new one.
+                    $('#searchCriteriaManifest').manifest('remove', '.mf_item:contains("Max height")');
                     $('#searchCriteriaManifest').manifest('add',valLabel);
                     getSearchResults();
                 }
@@ -191,6 +193,8 @@ include($serverRoot."/header.php");
                     }
                     //push new option to search array
                     searchCriteriaArr.push(optionObj);
+                    //remove old manifest item, and add new one.
+                    $('#searchCriteriaManifest').manifest('remove', '.mf_item:contains("Max width")');
                     $('#searchCriteriaManifest').manifest('add',valLabel);
                     getSearchResults();
                 }
