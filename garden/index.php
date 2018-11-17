@@ -552,25 +552,25 @@ include($serverRoot."/header.php");
                             <div class="divTableBody">
                                 <div class="divTableRow">
                                     <div class="divTableCell">
-                                        <input class="featureCheckBox" type="checkbox" onchange="processOption('681--1');" id="681--1">
-                                        <div id="681--1Div" class="featureCheckBoxDiv">
-                                            <label id="681--1Label" class="featureCheckBoxLabel sunlight1" for="681--1">Sun</label>
+                                        <input class="featureCheckBox" type="checkbox" onchange="processOption('680--1');" id="680--1">
+                                        <div id="680--1Div" class="featureCheckBoxDiv">
+                                            <label id="680--1Label" class="featureCheckBoxLabel sunlight1" for="680--1">Sun</label>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="divTableRow">
                                     <div class="divTableCell">
-                                        <input class="featureCheckBox" type="checkbox" onchange="processOption('681--2');" id="681--2">
-                                        <div id="681--2Div" class="featureCheckBoxDiv">
-                                            <label id="681--2Label" class="featureCheckBoxLabel sunlight3" for="681--2">Part sun</label>
+                                        <input class="featureCheckBox" type="checkbox" onchange="processOption('680--2');" id="680--2">
+                                        <div id="680--2Div" class="featureCheckBoxDiv">
+                                            <label id="680--2Label" class="featureCheckBoxLabel sunlight3" for="680--2">Part sun</label>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="divTableRow">
                                     <div class="divTableCell">
-                                        <input class="featureCheckBox" type="checkbox" onchange="processOption('681--3');" id="681--3">
-                                        <div id="681--3Div" class="featureCheckBoxDiv">
-                                            <label id="681--3Label" class="featureCheckBoxLabel sunlight4" for="681--3">Shade</label>
+                                        <input class="featureCheckBox" type="checkbox" onchange="processOption('680--3');" id="680--3">
+                                        <div id="680--3Div" class="featureCheckBoxDiv">
+                                            <label id="680--3Label" class="featureCheckBoxLabel sunlight4" for="680--3">Shade</label>
                                         </div>
                                     </div>
                                 </div>
