@@ -51,10 +51,13 @@ class GardenSearchManager {
                 }
                 $tempStr = '('.implode(' OR ',$tempArr).')';
             }
-            elseif($char == 690 || $char == 738){
+            elseif($char == 140 || $char == 738){ //is height or width, set range
                 $tempArr = array();
                 foreach($this->searchParamsArr[$char] as $cs){
-                    $tempArr[] = '(t.TID IN(SELECT TID FROM kmdescr WHERE (CID = '.$char.' AND CS = '.$cs.')))';
+	                list($min, $max) = explode(",", $cs);
+	                $tempArr[] = '(t.TID IN(SELECT TID FROM kmdescr WHERE (CID = '.$char.' AND (CS >= '.$min.' AND CS <= '.$max.'))))';
+
+	                //$tempArr[] = '(t.TID IN(SELECT TID FROM kmdescr WHERE (CID = '.$char.' AND CS = '.$cs.')))';
                 }
                 $tempStr = '('.implode(' OR ',$tempArr).')';
             }
