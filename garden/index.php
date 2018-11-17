@@ -146,14 +146,17 @@ include($serverRoot."/header.php");
                     var valLabel = 'Max height '+ui.values[0]+' - '+ui.values[1]+' ft';
                     var valCode = '140--'+ui.values[0]+','+ui.values[1];
                     var optionObj = {name:valLabel, nameCode:valCode};
-                    console.log(optionObj);
                     //remove any items from searchCriteriaArray that have nameCode
                     //starting with 140--
-
-
+                    for (var j = 0; j < searchCriteriaArr.length; j++){
+                        var myNameCode = searchCriteriaArr[j].nameCode;
+                        if ( myNameCode.indexOf("140--") !== -1) {
+                            searchCriteriaArr.splice(j, 1);
+                        }
+                    }
                     //push new option to search array
                     searchCriteriaArr.push(optionObj);
-                    console.log(searchCriteriaArr);
+                    //console.log(searchCriteriaArr);
                     $('#searchCriteriaManifest').manifest('add',valLabel);
                     getSearchResults();
                 }
@@ -180,6 +183,15 @@ include($serverRoot."/header.php");
                     var valLabel = 'Max width '+ui.value+' ft';
                     var valCode = '738--'+ui.value;
                     var optionObj = {name:valLabel, nameCode:valCode};
+                    //remove any items from searchCriteriaArray that have nameCode
+                    //starting with 738--
+                    for (var j = 0; j < searchCriteriaArr.length; j++){
+                        var myNameCode = searchCriteriaArr[j].nameCode;
+                        if ( myNameCode.indexOf("738--") !== -1) {
+                            searchCriteriaArr.splice(j, 1);
+                        }
+                    }
+                    //push new option to search array
                     searchCriteriaArr.push(optionObj);
                     $('#searchCriteriaManifest').manifest('add',valLabel);
                     getSearchResults();
