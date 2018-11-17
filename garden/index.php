@@ -140,8 +140,7 @@ include($serverRoot."/header.php");
             step: 1,
             slide: function(event, ui) {
                 var textbox = $("#height-label");
-                if(ui.value == 0) textbox.text("Any");
-                else textbox.text(ui.value);
+                textbox.text(ui.values[0]+ ' - '+ ui.values[1]);
             },
             stop: function( event, ui ) {
                 if(ui.value != 0){
