@@ -846,5 +846,15 @@ class OSUTaxaManager {
         }
         return $retArr;
     }
+	public function isGardenProfile(){
+		$sql="SELECT t.CLID from fmchklsttaxalink t WHERE t.CLID = 54 AND t.TID = ".$this->con->escape_string($this->tid);
+		//echo $sql;
+		$result = $this->con->query($sql);
+		if($row = $result->fetch_object()){
+			return $row->CLID == 54;
+		}
+		$result->close();
+		return false;
+	}
 }
 ?>

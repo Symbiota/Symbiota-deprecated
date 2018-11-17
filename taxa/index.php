@@ -107,6 +107,8 @@ else{
 <?php
 $displayLeftMenu = false;
 include($SERVER_ROOT.'/header.php');
+//is page a garden page?
+$isGardenProfile = $OSUManager ? $OSUManager->isGardenProfile() : false;
 ?>
 <div id="innertable">
     <div id="toprow">
