@@ -206,16 +206,6 @@ include($serverRoot."/header.php");
             active:false,
             heightStyle: "content"
         });
-        $("#usesPane").accordion({
-            collapsible: true,
-            active:false,
-            heightStyle: "content"
-        });
-        $("#wildlifePane").accordion({
-            collapsible: true,
-            active:false,
-            heightStyle: "content"
-        });
         $("#morePane").accordion({
             collapsible: true,
             active:false,
@@ -832,107 +822,119 @@ include($serverRoot."/header.php");
                     <?php
                 }
                 ?>
-            </div>
-        </div>
-        <?php
-    }
-
-    if($landscapeUseArr || $cultivationPrefArr){
-        ?>
-        <div id="usesPane" class="advSearchPane">
-            <h3>Uses</h3>
-            <div>
-                <?php
-                if($landscapeUseArr){
-                    ?>
-                    <div class="advSearchOptionWrapper">
-                        <div class="advSearchOptionHeader">
-                            Landscape uses
-                            <hr />
-                        </div>
-                        <?php
-                        foreach($landscapeUseArr as $opt => $optArr){
-                            $cId = $optArr['cid'];
-                            $csId = $optArr['cs'];
-                            $optId = $cId.'--'.$csId;
-                            $onchange = "processOption('".$optId."');";
-                            echo '<input class="advSearchOptCheckBox" type="checkbox" onchange="'.$onchange.'" id="'.$optId.'">';
-                            echo '<div id="'.$optId.'Div" class="advSearchOptCheckBoxDiv unselectable">';
-                            echo '<label id="'.$optId.'Label" class="advSearchOptCheckBoxLabel" for="'.$optId.'">'.$opt.'</label>';
-                            echo '</div>';
-                        }
-                        ?>
+                <div class="advSearchOptionWrapper">
+                    <div class="advSearchOptionHeader">
+                        Wildlife Support
+                        <hr />
                     </div>
-                    <?php
-                }
-                if($cultivationPrefArr){
-                    ?>
-                    <div class="advSearchOptionWrapper">
-                        <div class="advSearchOptionHeader">
-                            Other cultivation preferences
-                            <hr />
-                        </div>
-                        <?php
-                        foreach($cultivationPrefArr as $opt => $optArr){
-                            $cId = $optArr['cid'];
-                            $csId = $optArr['cs'];
-                            $optId = $cId.'--'.$csId;
-                            $onchange = "processOption('".$optId."');";
-                            echo '<input class="advSearchOptCheckBox" type="checkbox" onchange="'.$onchange.'" id="'.$optId.'">';
-                            echo '<div id="'.$optId.'Div" class="advSearchOptCheckBoxDiv unselectable">';
-                            echo '<label id="'.$optId.'Label" class="advSearchOptCheckBoxLabel" for="'.$optId.'">'.$opt.'</label>';
-                            echo '</div>';
-                        }
-                        ?>
+                    <input class="advSearchOptCheckBox" type="checkbox" onchange="processOption('685--2');" id="685--2">
+                    <div id="685--2Div" class="advSearchOptCheckBoxDiv unselectable with-icons">
+                        <div class="wildlifeOptIconDiv wildlife2"></div>
+                        <label id="685--2Label" class="advSearchOptCheckBoxLabel" for="685--2">Pollinators</label>
                     </div>
-                    <?php
-                }
-                ?>
+                    <input class="advSearchOptCheckBox" type="checkbox" onchange="processOption('685--1');" id="685--1">
+                    <div id="685--1Div" class="advSearchOptCheckBoxDiv unselectable with-icons">
+                        <div class="wildlifeOptIconDiv wildlife4"></div>
+                        <label id="685--1Label" class="advSearchOptCheckBoxLabel" for="685--1">Butterfly nectar source</label>
+                    </div>
+                    <input class="advSearchOptCheckBox" type="checkbox" onchange="processOption('685--6');" id="685--6">
+                    <div id="685--6Div" class="advSearchOptCheckBoxDiv unselectable with-icons">
+                        <div class="wildlifeOptIconDiv wildlife1"></div>
+                        <label id="685--6Label" class="advSearchOptCheckBoxLabel" for="685--6">Hummingbirds</label>
+                    </div>
+                    <input class="advSearchOptCheckBox" type="checkbox" onchange="processOption('685--3');" id="685--3">
+                    <div id="685--3Div" class="advSearchOptCheckBoxDiv unselectable with-icons">
+                        <div class="wildlifeOptIconDiv wildlife5"></div>
+                        <label id="685--3Label" class="advSearchOptCheckBoxLabel" for="685--3">Pest-eating insects</label>
+                    </div>
+                    <input class="advSearchOptCheckBox" type="checkbox" onchange="processOption('685--5');" id="685--5">
+                    <div id="685--5Div" class="advSearchOptCheckBoxDiv unselectable with-icons">
+                        <div class="wildlifeOptIconDiv wildlife3"></div>
+                        <label id="685--5Label" class="advSearchOptCheckBoxLabel" for="685--5">Butterfly larval host</label>
+                    </div>
+                </div>
             </div>
         </div>
         <?php
     }
     ?>
 
-    <div id="wildlifePane" class="advSearchPane">
-        <h3>Wildlife Support</h3>
-        <div>
-            <div class="advSearchOptionWrapper">
-                <input class="advSearchOptCheckBox" type="checkbox" onchange="processOption('685--2');" id="685--2">
-                <div id="685--2Div" class="advSearchOptCheckBoxDiv unselectable">
-                    <div class="wildlifeOptIconDiv wildlife2"></div>
-                    <label id="685--2Label" class="advSearchOptCheckBoxLabel" for="685--2">Pollinators</label>
-                </div>
-                <input class="advSearchOptCheckBox" type="checkbox" onchange="processOption('685--1');" id="685--1">
-                <div id="685--1Div" class="advSearchOptCheckBoxDiv unselectable">
-                    <div class="wildlifeOptIconDiv wildlife4"></div>
-                    <label id="685--1Label" class="advSearchOptCheckBoxLabel" for="685--1">Butterfly nectar source</label>
-                </div>
-                <input class="advSearchOptCheckBox" type="checkbox" onchange="processOption('685--6');" id="685--6">
-                <div id="685--6Div" class="advSearchOptCheckBoxDiv unselectable">
-                    <div class="wildlifeOptIconDiv wildlife1"></div>
-                    <label id="685--6Label" class="advSearchOptCheckBoxLabel" for="685--6">Hummingbirds</label>
-                </div>
-                <input class="advSearchOptCheckBox" type="checkbox" onchange="processOption('685--3');" id="685--3">
-                <div id="685--3Div" class="advSearchOptCheckBoxDiv unselectable">
-                    <div class="wildlifeOptIconDiv wildlife5"></div>
-                    <label id="685--3Label" class="advSearchOptCheckBoxLabel" for="685--3">Pest-eating insects</label>
-                </div>
-                <input class="advSearchOptCheckBox" type="checkbox" onchange="processOption('685--5');" id="685--5">
-                <div id="685--5Div" class="advSearchOptCheckBoxDiv unselectable">
-                    <div class="wildlifeOptIconDiv wildlife3"></div>
-                    <label id="685--5Label" class="advSearchOptCheckBoxLabel" for="685--5">Butterfly larval host</label>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <?php
-    if($propagationArr || $plantBehaviorArr){
+    if($propagationArr || $plantBehaviorArr || $landscapeUseArr || $cultivationPrefArr){
         ?>
         <div id="morePane" class="advSearchPane">
             <h3>Growth & Maintenance</h3>
             <div>
+		            <?php
+		            if($landscapeUseArr){
+			            ?>
+                        <div class="advSearchOptionWrapper">
+                            <div class="advSearchOptionHeader">
+                                Landscape uses
+                                <hr />
+                            </div>
+				            <?php
+				            foreach($landscapeUseArr as $opt => $optArr){
+					            $cId = $optArr['cid'];
+					            $csId = $optArr['cs'];
+					            $optId = $cId.'--'.$csId;
+					            $onchange = "processOption('".$optId."');";
+					            echo '<input class="advSearchOptCheckBox" type="checkbox" onchange="'.$onchange.'" id="'.$optId.'">';
+					            echo '<div id="'.$optId.'Div" class="advSearchOptCheckBoxDiv unselectable">';
+					            echo '<label id="'.$optId.'Label" class="advSearchOptCheckBoxLabel" for="'.$optId.'">'.$opt.'</label>';
+					            echo '</div>';
+				            }
+				            ?>
+                        </div>
+			            <?php
+		            }
+		            if($cultivationPrefArr){
+			            ?>
+                        <div class="advSearchOptionWrapper">
+                            <div class="advSearchOptionHeader">
+                                Other cultivation preferences
+                                <hr />
+                            </div>
+				            <?php
+				            foreach($cultivationPrefArr as $opt => $optArr){
+					            $cId = $optArr['cid'];
+					            $csId = $optArr['cs'];
+					            $optId = $cId.'--'.$csId;
+					            $onchange = "processOption('".$optId."');";
+					            echo '<input class="advSearchOptCheckBox" type="checkbox" onchange="'.$onchange.'" id="'.$optId.'">';
+					            echo '<div id="'.$optId.'Div" class="advSearchOptCheckBoxDiv unselectable">';
+					            echo '<label id="'.$optId.'Label" class="advSearchOptCheckBoxLabel" for="'.$optId.'">'.$opt.'</label>';
+					            echo '</div>';
+				            }
+				            ?>
+                        </div>
+			            <?php
+		            }
+		            ?>
+	            <?php
+	            if($plantBehaviorArr){
+		            ?>
+                    <div class="advSearchOptionWrapper">
+                        <div class="advSearchOptionHeader">
+                            Plant Behavior
+                            <hr />
+                        </div>
+			            <?php
+			            foreach($plantBehaviorArr as $opt => $optArr){
+				            $cId = $optArr['cid'];
+				            $csId = $optArr['cs'];
+				            $optId = $cId.'--'.$csId;
+				            $onchange = "processOption('".$optId."');";
+				            echo '<input class="advSearchOptCheckBox" type="checkbox" onchange="'.$onchange.'" id="'.$optId.'">';
+				            echo '<div id="'.$optId.'Div" class="advSearchOptCheckBoxDiv unselectable">';
+				            echo '<label id="'.$optId.'Label" class="advSearchOptCheckBoxLabel" for="'.$optId.'">'.$opt.'</label>';
+				            echo '</div>';
+			            }
+			            ?>
+                    </div>
+		            <?php
+	            }
+	            ?>
                 <?php
                 if($propagationArr){
                     ?>
@@ -956,35 +958,16 @@ include($serverRoot."/header.php");
                     </div>
                     <?php
                 }
-                if($plantBehaviorArr){
-                    ?>
-                    <div class="advSearchOptionWrapper">
-                        <div class="advSearchOptionHeader">
-                            Plant Behavior
-                            <hr />
-                        </div>
-                        <?php
-                        foreach($plantBehaviorArr as $opt => $optArr){
-                            $cId = $optArr['cid'];
-                            $csId = $optArr['cs'];
-                            $optId = $cId.'--'.$csId;
-                            $onchange = "processOption('".$optId."');";
-                            echo '<input class="advSearchOptCheckBox" type="checkbox" onchange="'.$onchange.'" id="'.$optId.'">';
-                            echo '<div id="'.$optId.'Div" class="advSearchOptCheckBoxDiv unselectable">';
-                            echo '<label id="'.$optId.'Label" class="advSearchOptCheckBoxLabel" for="'.$optId.'">'.$opt.'</label>';
-                            echo '</div>';
-                        }
-                        ?>
-                    </div>
-                    <?php
-                }
                 ?>
+
             </div>
         </div>
         <?php
     }
 
-    if($availabilityArr){
+    //removed dynamic availability, but left here in case it needs to be restored.
+    //replaced with static panel
+    if($availabilityArr && 1==2 ){
         ?>
         <div id="availabilityPane" class="advSearchPane">
             <h3>Commercial availability</h3>
@@ -1009,6 +992,15 @@ include($serverRoot."/header.php");
         <?php
     }
     ?>
+
+    <div id="availabilityPane" class="advSearchPane">
+        <h3>Commercial availability</h3>
+        <div>
+            <div class="advSearchOptionWrapper">
+				static content for commercial availability goes here
+            </div>
+        </div>
+    </div>
 </div>
 <div class="results-wrapper" id="results-wrapper">
     <div class="results-content">

@@ -1692,6 +1692,9 @@ div.growthCol {
 	width: 100%;
 	margin: 20px auto 10px;
 }
+.advSearchPane .ui-accordion-content {
+	padding-top: 0 !important;
+}
 #availabilityPane {
 	width: 100%;
 	margin: 20px auto 10px;
@@ -1704,6 +1707,7 @@ div.growthCol {
 .advSearchOptionHeader {
 	width: 100%;
 	clear: both;
+	padding-top: 20px;
 }
 .advSearchOptCheckBox {
 	position: absolute;
@@ -1715,11 +1719,16 @@ div.growthCol {
 }
 .advSearchOptCheckBoxDiv {
 	background: white;
+	display: inline-block;
+	float: left;
+	padding: 5px;
+	margin: 10px 10px 10px 0;
+	font-size: 13px;
+	border: 1px solid gray;
+}
+.advSearchOptCheckBoxDiv.with-icons {
 	display: flex;
 	align-items: center;
-	float:left;
-	padding: 15px;
-	margin: 10px;
 }
 .selectedOption {
 	background: #D4E6C8;
