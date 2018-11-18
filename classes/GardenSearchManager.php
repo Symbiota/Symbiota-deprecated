@@ -52,15 +52,25 @@ class GardenSearchManager {
                 $tempStr = '('.implode(' OR ',$tempArr).')';
             }
             elseif($char == 140 || $char == 738){ //is height or width, set range
-                $tempArr = array();
-                foreach($this->searchParamsArr[$char] as $cs){
-	                list($min, $max) = explode(",", $cs);
-	                $tempArr[] = '(t.TID IN(SELECT TID FROM kmdescr WHERE (CID = '.$char.' AND (CS >= '.$min.' AND CS <= '.$max.'))))';
+	            $tempArr = array();
+	            foreach($this->searchParamsArr[$char] as $cs){
+		            list($min, $max) = explode(",", $cs);
+		            $tempArr[] = '(t.TID IN(SELECT TID FROM kmdescr WHERE (CID = '.$char.' AND (CS >= '.$min.' AND CS <= '.$max.'))))';
 
-	                //$tempArr[] = '(t.TID IN(SELECT TID FROM kmdescr WHERE (CID = '.$char.' AND CS = '.$cs.')))';
-                }
-                $tempStr = '('.implode(' OR ',$tempArr).')';
+		            //$tempArr[] = '(t.TID IN(SELECT TID FROM kmdescr WHERE (CID = '.$char.' AND CS = '.$cs.')))';
+	            }
+	            $tempStr = '('.implode(' OR ',$tempArr).')';
             }
+            //elseif($char == 569){ //is bloom month
+	        //    $tempArr = array();
+	        //    foreach($this->searchParamsArr[$char] as $cs){
+		    //        list($min, $max) = explode(",", $cs);
+		    //        $tempArr[] = '(t.TID IN(SELECT TID FROM kmdescr WHERE (CID = '.$char.' AND (CS >= '.$min.' AND CS <= '.$max.'))))';
+			//
+		    //        //$tempArr[] = '(t.TID IN(SELECT TID FROM kmdescr WHERE (CID = '.$char.' AND CS = '.$cs.')))';
+	        //    }
+	        //    $tempStr = '('.implode(' OR ',$tempArr).')';
+            //}
             else{
                 $tempStr = '(t.TID IN(SELECT TID FROM kmdescr WHERE (CID = '.$char.' AND CS IN('.implode(',',$this->searchParamsArr[$char]).'))))';
             }
@@ -73,19 +83,21 @@ class GardenSearchManager {
         $this->sql = '';
         $sqlWhere = 'WHERE ('.implode(' AND ',$this->sqlWhereArr).') ';
         if($this->display == 'grid'){
-            $sqlSelect = 'SELECT t.TID, t.SciName, i.thumbnailurl ';
+            $sqlSelect = 'SELECT t.TID, t.SciName ';
             $sqlFrom = 'FROM taxa AS t LEFT JOIN taxaenumtree AS te ON t.TID = te.parenttid ';
-            $sqlFrom .= 'LEFT JOIN images AS i ON (te.tid = i.tid OR t.TID = i.tid) ';
+            //joining with images is SLOW!  Comment out next line, and run additional query in loop
+            //$sqlFrom .= 'LEFT JOIN images AS i ON (te.tid = i.tid OR t.TID = i.tid) ';
             if(isset($this->searchParamsArr['common'])) $sqlFrom .= 'LEFT JOIN taxavernaculars AS v ON t.TID = v.TID ';
             //$sqlWhere .= 'AND te.taxauthid = 1 ';
-            $sqlSuffix = 'ORDER BY t.SciName, i.sortsequence ';
+            $sqlSuffix = 'ORDER BY t.SciName ';
         }
         elseif($this->display == 'list'){
-            $sqlSelect = 'SELECT t.TID, t.SciName, i.thumbnailurl, v.VernacularName, kd.CID, ks.CharStateName, ks.cs ';
+            $sqlSelect = 'SELECT t.TID, t.SciName, v.VernacularName, kd.CID, ks.CharStateName, ks.cs ';
             $sqlFrom = 'FROM taxa AS t LEFT JOIN taxavernaculars AS v ON t.TID = v.TID ';
+	        //joining with images is SLOW!  Comment out next line, and run additional query in loop
 	        $sqlFrom .= 'LEFT JOIN kmdescr AS kd ON t.TID = kd.TID ';
             $sqlFrom .= 'LEFT JOIN kmcs AS ks ON kd.CID = ks.cid AND kd.CS = ks.cs ';
-	        $sqlFrom .= 'LEFT JOIN images AS i ON (t.TID = i.tid) ';
+	        //$sqlFrom .= 'LEFT JOIN images AS i ON (t.TID = i.tid) ';
             //$sqlWhere .= 'AND (kd.CID IN(137,681,682,690,738,684)) ';
             $sqlSuffix = 'ORDER BY t.SciName ';
         }
@@ -100,23 +112,26 @@ class GardenSearchManager {
             $tid = $row->TID;
             if(!isset($returnArr[$tid]['sciname'])) $returnArr[$tid]['sciname'] = $row->SciName;
             if($this->display == 'grid'){
-                if(!isset($returnArr[$tid]['url'])){
-                    $imgThumbnail = $row->thumbnailurl;
-                    if(array_key_exists("IMAGE_DOMAIN",$GLOBALS)){
-                        if(substr($imgThumbnail,0,1)=="/") $imgThumbnail = $GLOBALS["IMAGE_DOMAIN"].$imgThumbnail;
-                    }
-                    $returnArr[$tid]['url'] = $imgThumbnail;
+            	//run query on images table to get thumbnail image.
+	            //SELECT i.thumbnailurl FROM images AS i WHERE tid = $tid ORDER BY i.sortsequence LIMIT 1
+	            $sql="SELECT i.thumbnailurl FROM images AS i WHERE tid = ".$this->conn->escape_string($tid) . " ORDER BY i.sortsequence LIMIT 1";
+	            $imgThumbnail = $this->conn->query($sql)->fetch_object()->thumbnailurl;
+                //prepend image domain if image does not already contain a domain
+                if(array_key_exists("IMAGE_DOMAIN",$GLOBALS)){
+                    if(substr($imgThumbnail,0,1)=="/") $imgThumbnail = $GLOBALS["IMAGE_DOMAIN"].$imgThumbnail;
                 }
+                $returnArr[$tid]['url'] = $imgThumbnail;
             }
             elseif($this->display == 'list'){
                 $cid = $row->CID;
-	            if(!isset($returnArr[$tid]['url'])){
-		            $imgThumbnail = $row->thumbnailurl;
-		            if(array_key_exists("IMAGE_DOMAIN",$GLOBALS)){
-			            if(substr($imgThumbnail,0,1)=="/") $imgThumbnail = $GLOBALS["IMAGE_DOMAIN"].$imgThumbnail;
-		            }
-		            $returnArr[$tid]['url'] = $imgThumbnail;
+	            //run query on images table to get thumbnail image.
+	            //SELECT i.thumbnailurl FROM images AS i WHERE tid = $tid ORDER BY i.sortsequence LIMIT 1
+	            $sql="SELECT i.thumbnailurl FROM images AS i WHERE tid = ".$this->conn->escape_string($tid) . " ORDER BY i.sortsequence LIMIT 1";
+	            $imgThumbnail = $this->conn->query($sql)->fetch_object()->thumbnailurl;
+	            if(array_key_exists("IMAGE_DOMAIN",$GLOBALS)){
+		            if(substr($imgThumbnail,0,1)=="/") $imgThumbnail = $GLOBALS["IMAGE_DOMAIN"].$imgThumbnail;
 	            }
+		            $returnArr[$tid]['url'] = $imgThumbnail;
                 if(!isset($returnArr[$tid]['common'])) $returnArr[$tid]['common'] = $row->VernacularName;
                 if(!isset($returnArr[$tid]['type']) && $cid == 137) {
 	                $returnArr[$tid]['type'] = $row->CharStateName;
