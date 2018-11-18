@@ -114,8 +114,9 @@ class GardenSearchManager {
             if($this->display == 'grid'){
             	//run query on images table to get thumbnail image.
 	            //SELECT i.thumbnailurl FROM images AS i WHERE tid = $tid ORDER BY i.sortsequence LIMIT 1
-	            $sql="SELECT i.thumbnailurl FROM images AS i WHERE tid = ".$this->conn->escape_string($tid) . " ORDER BY i.sortsequence LIMIT 1";
-	            $imgThumbnail = $this->conn->query($sql)->fetch_object()->thumbnailurl;
+	            $sql="SELECT i.thumbnailurl, i.url FROM images AS i WHERE tid = ".$this->conn->escape_string($tid) . " ORDER BY i.sortsequence LIMIT 1";
+	            //show large image instead of thumbnail in grid, as thumb is too small
+	            $imgThumbnail = $this->conn->query($sql)->fetch_object()->url;
                 //prepend image domain if image does not already contain a domain
                 if(array_key_exists("IMAGE_DOMAIN",$GLOBALS)){
                     if(substr($imgThumbnail,0,1)=="/") $imgThumbnail = $GLOBALS["IMAGE_DOMAIN"].$imgThumbnail;
