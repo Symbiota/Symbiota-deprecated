@@ -32,11 +32,11 @@
 }
 
 #leftcolumn.genus{
-	width:			auto;
+	width:			33%;
 }
 
 #leftcolumn.higher{
-	width:			auto;
+	width:			33%;
 }
 
 #rightcolumn{
@@ -199,7 +199,9 @@
 	height:			auto;
 	width:			auto;
 }
-
+#desctabs .ui-tabs-panel {
+	width: 100%;
+}
 #desctabs.species{
 	display:		none;
 }
