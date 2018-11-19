@@ -92,7 +92,7 @@ class ChecklistAdmin{
 		if($this->conn->query($sql)){
 			$newClid = $this->conn->insert_id;
 			//Set permissions to allow creater to be an editor
-			$this->conn->query('INSERT INTO userroles (uid, role, tablename, tablepk) VALUES('.$GLOBALS["SYMB_UID"].',"ClAdmin","fmchecklists",'.$newClid.') ');
+			$this->conn->query('INSERT INTO userroles (uid, role, tablename, tablepk,uidassignedby) VALUES('.$GLOBALS["SYMB_UID"].',"ClAdmin","fmchecklists",'.$newClid.','.$GLOBALS["SYMB_UID"].') ');
 			//$this->conn->query("INSERT INTO userpermissions (uid, pname) VALUES(".$GLOBALS["symbUid"].",'ClAdmin-".$newClid."') ");
 			$newPManager = new ProfileManager();
 			$newPManager->setUserName($GLOBALS['USERNAME']);
@@ -168,7 +168,7 @@ class ChecklistAdmin{
 	public function deleteChecklist($delClid){
 		$statusStr = true;
 		$sql1 = 'SELECT uid FROM userroles '.
-			'WHERE (role = "ClAdmin") AND (tablename = "fmchecklists") AND (tablepk = "'.$delClid.'") AND uid <> '.$GLOBALS['SYMB_UID'];
+			'WHERE (role = "ClAdmin") AND (tablepk = "'.$delClid.'") AND uid <> '.$GLOBALS['SYMB_UID'];
 		$rs1 = $this->conn->query($sql1);
 		if($rs1->num_rows == 0){
 			$sql2 = "DELETE FROM fmvouchers WHERE (clid = ".$delClid.')';
@@ -178,7 +178,7 @@ class ChecklistAdmin{
 					$sql4 = "DELETE FROM fmchecklists WHERE (clid = ".$delClid.')';
 					if($this->conn->query($sql4)){
 						//Delete userpermissions reference once patch is submitted
-						$sql5 = 'DELETE FROM userroles WHERE (role = "ClAdmin") AND (tablename = "fmchecklists") AND (tablepk = "'.$delClid.'")';
+						$sql5 = 'DELETE FROM userroles WHERE (role = "ClAdmin") AND (tablepk = "'.$delClid.'")';
 						$this->conn->query($sql5);
 					}
 					else{
@@ -335,16 +335,19 @@ class ChecklistAdmin{
 	//Editor management
 	public function getEditors(){
 		$editorArr = array();
-		$sql = 'SELECT u.uid, CONCAT(CONCAT_WS(", ",u.lastname,u.firstname)," (",l.username,")") as uname '.
+		$sql = 'SELECT u.uid, CONCAT_WS(", ",u.lastname,u.firstname) AS uname, l.username, CONCAT_WS(", ",u2.lastname,u2.firstname) AS assignedby '.
 			'FROM userroles ur INNER JOIN users u ON ur.uid = u.uid '.
-			'INNER JOIN userlogin l ON u.uid = l.uid '.
-			'WHERE (ur.role = "ClAdmin") AND (ur.tablename = "fmchecklists") AND (ur.tablepk = '.$this->clid.') '.
+			'LEFT JOIN userlogin l ON u.uid = l.uid '.
+			'LEFT JOIN users u2 ON ur.uidassignedby = u2.uid '.
+			'WHERE (ur.role = "ClAdmin") AND (ur.tablepk = '.$this->clid.') '.
 			'ORDER BY u.lastname,u.firstname';
 		if($rs = $this->conn->query($sql)){
 			while($r = $rs->fetch_object()){
 				$uName = $r->uname;
 				if(strlen($uName) > 60) $uName = substr($uName,0,60);
-				$editorArr[$r->uid] = $r->uname;
+				if($r->username) $uName .= ' ('.$r->username.')';
+				$editorArr[$r->uid]['name'] = $uName;
+				$editorArr[$r->uid]['assignedby'] = $r->assignedby;
 			}
 			$rs->free();
 		}
@@ -354,8 +357,7 @@ class ChecklistAdmin{
 	public function addEditor($u){
 		$statusStr = '';
 		if(is_numeric($u) && $this->clid){
-			$sql = 'INSERT INTO userroles(uid,role,tablename,tablepk) '.
-				'VALUES('.$u.',"ClAdmin","fmchecklists",'.$this->clid.')';
+			$sql = 'INSERT INTO userroles(uid,role,tablename,tablepk,uidassignedby) VALUES('.$u.',"ClAdmin","fmchecklists",'.$this->clid.','.$GLOBALS["SYMB_UID"].')';
 			if(!$this->conn->query($sql)){
 				$statusStr = 'ERROR: unable to add editor; SQL: '.$this->conn->error;
 			}
@@ -365,8 +367,7 @@ class ChecklistAdmin{
 
 	public function deleteEditor($u){
 		$statusStr = '';
-		$sql = 'DELETE FROM userroles '.
-			'WHERE (uid = '.$u.') AND (role = "ClAdmin") AND (tablename = "fmchecklists") AND (tablepk = '.$this->clid.') ';
+		$sql = 'DELETE FROM userroles WHERE (uid = '.$u.') AND (role = "ClAdmin") AND (tablepk = '.$this->clid.') ';
 		if(!$this->conn->query($sql)){
 			$statusStr = 'ERROR: unable to remove editor; SQL: '.$this->conn->error;
 		}

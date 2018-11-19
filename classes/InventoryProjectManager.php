@@ -163,8 +163,7 @@ class InventoryProjectManager {
 	public function addManager($uid){
 		$status = false;
 		if(is_numeric($uid) && $this->pid){
-			$sql = 'INSERT INTO userroles(role,tablename,tablepk,uid) '.
-				'VALUES("ProjAdmin","fmprojects",'.$this->pid.','.$uid.') ';
+			$sql = 'INSERT INTO userroles(role,tablename,tablepk,uid,uidassignedby) VALUES("ProjAdmin","fmprojects",'.$this->pid.','.$uid.','.$GLOBALS["SYMB_UID"].') ';
 			if(!$this->conn->query($sql)){
 				$this->errorStr = 'ERROR adding manager: '.$this->conn->error;
 			}
