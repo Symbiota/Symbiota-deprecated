@@ -192,18 +192,19 @@ class PermissionsManager{
 	}
 
 	public function addPermission($uid,$role,$tablePk,$secondaryVariable = ''){
-		global $SYMB_UID;
 		$statusStr = '';
 		if(is_numeric($uid)){
-			$sql = 'SELECT uid,role,tablepk,secondaryVariable,uidassignedby '.
-				'FROM userroles WHERE (uid = '.$uid.') AND (role = "'.$role.'") ';
+			if(!$tablePk){
+				if($role == 'ClAdmin') $tablePk = 'fmchecklists';
+				if($role == 'ProjAdmin') $tablePk = 'fmprojects';
+			}
+			$sql = 'SELECT uid,role,tablepk,secondaryVariable,uidassignedby FROM userroles WHERE (uid = '.$uid.') AND (role = "'.$role.'") ';
 			if($tablePk) $sql .= 'AND (tablepk = '.$tablePk.') ';
 			if($secondaryVariable) $sql .= 'AND (secondaryVariable = '.$secondaryVariable.') ';
 			$rs = $this->conn->query($sql);
 			if(!$rs->num_rows){
 				$sql1 = 'INSERT INTO userroles(uid,role,tablepk,secondaryVariable,uidassignedby) '.
-					'VALUES('.$uid.',"'.$role.'",'.($tablePk?$tablePk:'NULL').','.
-					($secondaryVariable?'"'.$secondaryVariable.'"':'NULL').','.$SYMB_UID.')';
+					'VALUES('.$uid.',"'.$role.'",'.($tablePk?'"'.$tablePk.'"':'NULL').','.($secondaryVariable?'"'.$secondaryVariable.'"':'NULL').','.$GLOBALS["SYMB_UID"].')';
 				//$sql = 'INSERT INTO userpermissions(uid,pname,assignedby,secondaryVariable) '.
 				//	'VALUES('.$uid.',"'.$pname.'","'.$paramsArr['un'].'")';
 				//echo $sql1;

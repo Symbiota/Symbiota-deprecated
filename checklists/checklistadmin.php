@@ -138,10 +138,10 @@ if($clid && $isEditor){
 				?>
 				<ul>
 					<?php
-					foreach($editorArr as $uid => $uName){
+					foreach($editorArr as $uid => $uNameArr){
 						?>
 						<li>
-							<?php echo $uName; ?>
+							<?php echo '<span title="'.($uNameArr['assignedby']?'Assigned by '.$uNameArr['assignedby']:'').'">'.$uNameArr['name'].'</span>'; ?>
 							<a href="checklistadmin.php?clid=<?php echo $clid.'&deleteuid='.$uid.'&pid='.$pid.'&tabindex='.$tabIndex; ?>" onclick="return confirm(<?php echo $LANG['REMOVEEDITPRIVCONFIRM'];?>);" title="<?php echo $LANG['DELETETHISU'];?>">
 								<img src="../images/drop.png" style="width:12px;" />
 							</a>

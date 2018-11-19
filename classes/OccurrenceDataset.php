@@ -254,8 +254,7 @@ class OccurrenceDataset {
 			$rs->free();
 		}
 		if($uid && is_numeric($uid)){
-			$sql1 = 'INSERT INTO userroles(uid,role,tablename,tablepk) '.
-				'VALUES('.$uid.',"'.$role.'","omoccurdatasets",'.$dsid.')';
+			$sql1 = 'INSERT INTO userroles(uid,role,tablename,tablepk,uidassignedby) VALUES('.$uid.',"'.$role.'","omoccurdatasets",'.$dsid.','.$GLOBALS["SYMB_UID"].')';
 			if(!$this->conn->query($sql1)){
 				$this->errorArr[] = 'ERROR adding new user: '.$this->conn->error;
 				return false;
