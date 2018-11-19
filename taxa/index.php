@@ -289,7 +289,7 @@ include($SERVER_ROOT.'/header.php');
 					<?php
 					if($isEditor){
 						?>
-						<div style='float:right;'>
+						<div style='float:right;margin-top:-20px;'>
 							<a href="profile/tpeditor.php?tid=<?php echo $taxonManager->getTid(); ?>" title="<?php echo (isset($LANG['EDIT_TAXON_DATA'])?$LANG['EDIT_TAXON_DATA']:'Edit Taxon Data'); ?>">
 								<img style='border:0px;' src='../images/edit.png'/>
 							</a>
