@@ -61,16 +61,6 @@ class GardenSearchManager {
 	            }
 	            $tempStr = '('.implode(' OR ',$tempArr).')';
             }
-            //elseif($char == 569){ //is bloom month
-	        //    $tempArr = array();
-	        //    foreach($this->searchParamsArr[$char] as $cs){
-		    //        list($min, $max) = explode(",", $cs);
-		    //        $tempArr[] = '(t.TID IN(SELECT TID FROM kmdescr WHERE (CID = '.$char.' AND (CS >= '.$min.' AND CS <= '.$max.'))))';
-			//
-		    //        //$tempArr[] = '(t.TID IN(SELECT TID FROM kmdescr WHERE (CID = '.$char.' AND CS = '.$cs.')))';
-	        //    }
-	        //    $tempStr = '('.implode(' OR ',$tempArr).')';
-            //}
             else{
                 $tempStr = '(t.TID IN(SELECT TID FROM kmdescr WHERE (CID = '.$char.' AND CS IN('.implode(',',$this->searchParamsArr[$char]).'))))';
             }
@@ -89,7 +79,7 @@ class GardenSearchManager {
             //$sqlFrom .= 'LEFT JOIN images AS i ON (te.tid = i.tid OR t.TID = i.tid) ';
             if(isset($this->searchParamsArr['common'])) $sqlFrom .= 'LEFT JOIN taxavernaculars AS v ON t.TID = v.TID ';
             //$sqlWhere .= 'AND te.taxauthid = 1 ';
-            $sqlSuffix = 'ORDER BY t.SciName ';
+            $sqlSuffix = 'GROUP BY t.TID ORDER BY t.SciName ';
         }
         elseif($this->display == 'list'){
             $sqlSelect = 'SELECT t.TID, t.SciName, v.VernacularName, kd.CID, ks.CharStateName, ks.cs ';
@@ -99,7 +89,7 @@ class GardenSearchManager {
             $sqlFrom .= 'LEFT JOIN kmcs AS ks ON kd.CID = ks.cid AND kd.CS = ks.cs ';
 	        //$sqlFrom .= 'LEFT JOIN images AS i ON (t.TID = i.tid) ';
             //$sqlWhere .= 'AND (kd.CID IN(137,681,682,690,738,684)) ';
-            $sqlSuffix = 'ORDER BY t.SciName ';
+            $sqlSuffix = 'GROUP BY t.TID ORDER BY t.SciName ';
         }
         $this->sql = $sqlSelect.$sqlFrom.$sqlWhere.$sqlSuffix;
     }
@@ -113,7 +103,6 @@ class GardenSearchManager {
             if(!isset($returnArr[$tid]['sciname'])) $returnArr[$tid]['sciname'] = $row->SciName;
             if($this->display == 'grid'){
             	//run query on images table to get thumbnail image.
-	            //SELECT i.thumbnailurl FROM images AS i WHERE tid = $tid ORDER BY i.sortsequence LIMIT 1
 	            $sql="SELECT i.thumbnailurl, i.url FROM images AS i WHERE tid = ".$this->conn->escape_string($tid) . " ORDER BY i.sortsequence LIMIT 1";
 	            //show large image instead of thumbnail in grid, as thumb is too small
 	            $imgThumbnail = $this->conn->query($sql)->fetch_object()->url;
@@ -126,7 +115,6 @@ class GardenSearchManager {
             elseif($this->display == 'list'){
                 $cid = $row->CID;
 	            //run query on images table to get thumbnail image.
-	            //SELECT i.thumbnailurl FROM images AS i WHERE tid = $tid ORDER BY i.sortsequence LIMIT 1
 	            $sql="SELECT i.thumbnailurl FROM images AS i WHERE tid = ".$this->conn->escape_string($tid) . " ORDER BY i.sortsequence LIMIT 1";
 	            $imgThumbnail = $this->conn->query($sql)->fetch_object()->thumbnailurl;
 	            if(array_key_exists("IMAGE_DOMAIN",$GLOBALS)){
