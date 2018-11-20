@@ -997,7 +997,7 @@ include($serverRoot."/header.php");
         <h3>Commercial availability</h3>
         <div>
             <div class="advSearchOptionWrapper">
-				static content for commercial availability goes here
+                We are looking forward to presenting the businesses that sell this plant. Contact us if you’re interested in helping to develop this resource!
             </div>
         </div>
     </div>
