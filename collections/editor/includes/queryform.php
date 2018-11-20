@@ -190,7 +190,7 @@ else{
 					'verbatimAttributes'=>'Description','disposition'=>'Disposition','dynamicProperties'=>'Dynamic Properties',
 					'maximumElevationInMeters'=>'Elevation Maximum (m)','minimumElevationInMeters'=>'Elevation Minimum (m)',
 					'establishmentMeans'=>'Establishment Means','family'=>'Family','fieldNotes'=>'Field Notes','fieldnumber'=>'Field Number',
-					'genus'=>'Genus','geodeticDatum'=>'Geodetic Datum','georeferenceProtocol'=>'Georeference Protocol',
+					'geodeticDatum'=>'Geodetic Datum','georeferenceProtocol'=>'Georeference Protocol',
 					'georeferenceRemarks'=>'Georeference Remarks','georeferenceSources'=>'Georeference Sources',
 					'georeferenceVerificationStatus'=>'Georeference Verification Status','georeferencedBy'=>'Georeferenced By','habitat'=>'Habitat',
 					'identificationQualifier'=>'Identification Qualifier','identificationReferences'=>'Identification References',
@@ -201,7 +201,7 @@ else{
 					'username'=>'Modified By','municipality'=>'Municipality','occurrenceRemarks'=>'Notes (Occurrence Remarks)','ocrFragment'=>'OCR Fragment',
 					'otherCatalogNumbers'=>'Other Catalog Numbers','ownerInstitutionCode'=>'Owner Code','preparations'=>'Preparations',
 					'reproductiveCondition'=>'Reproductive Condition','samplingEffort'=>'Sampling Effort','samplingProtocol'=>'Sampling Protocol',
-					'sciname'=>'Scientific Name','sex'=>'Sex','specificEpithet'=>'Specific Epithet','stateProvince'=>'State/Province',
+					'sciname'=>'Scientific Name','sex'=>'Sex','stateProvince'=>'State/Province',
 					'substrate'=>'Substrate','taxonRemarks'=>'Taxon Remarks','typeStatus'=>'Type Status','verbatimCoordinates'=>'Verbatim Coordinates',
 					'verbatimEventDate'=>'Verbatim Date','verbatimDepth'=>'Verbatim Depth','verbatimElevation'=>'Verbatim Elevation');
 			}
