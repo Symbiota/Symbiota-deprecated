@@ -4,18 +4,29 @@ ALTER TABLE `fmprojects`
   CHANGE COLUMN `fulldescription` `fulldescription` VARCHAR(5000) NULL DEFAULT NULL ;
 
 
+ALTER TABLE `uploadspectemp` 
+  CHANGE COLUMN `basisOfRecord` `basisOfRecord` VARCHAR(32) NULL DEFAULT NULL COMMENT 'PreservedSpecimen, LivingSpecimen, HumanObservation' ;
+
+ALTER TABLE `uploadspectemp` 
+  ADD INDEX `Index_uploadspec_othercatalognumbers` (`otherCatalogNumbers` ASC);
+
+ALTER TABLE `uploadimagetemp` 
+  CHANGE COLUMN `specimengui` `sourceIdentifier` VARCHAR(45) NULL DEFAULT NULL;
+
+ALTER TABLE `uploadimagetemp` 
+  ADD COLUMN `sourceUrl` VARCHAR(255) NULL AFTER `owner`,
+  ADD COLUMN `referenceurl` VARCHAR(255) NULL AFTER `sourceUrl`,
+  ADD COLUMN `copyright` VARCHAR(255) NULL AFTER `referenceurl`,
+  ADD COLUMN `accessrights` VARCHAR(255) NULL AFTER `copyright`,
+  ADD COLUMN `rights` VARCHAR(255) NULL AFTER `accessrights`,
+  ADD COLUMN `locality` VARCHAR(250) NULL AFTER `rights`;
+
 ALTER TABLE `uploadtaxa` 
   CHANGE COLUMN `UnitInd3` `UnitInd3` VARCHAR(45) NULL DEFAULT NULL ;
 
 ALTER TABLE `uploadtaxa` 
   DROP INDEX `UNIQUE_sciname` ,
   ADD UNIQUE INDEX `UNIQUE_sciname` (`SciName` ASC, `RankId` ASC, `Author` ASC, `AcceptedStr` ASC);
-
-ALTER TABLE `uploadspectemp` 
-  CHANGE COLUMN `basisOfRecord` `basisOfRecord` VARCHAR(32) NULL DEFAULT NULL COMMENT 'PreservedSpecimen, LivingSpecimen, HumanObservation' ;
-
-ALTER TABLE `uploadspectemp` 
-  ADD INDEX `Index_uploadspec_othercatalognumbers` (`otherCatalogNumbers` ASC);
 
 
 ALTER TABLE `taxstatus` 
