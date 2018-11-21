@@ -193,7 +193,7 @@ class SpecUploadBase extends SpecUpload{
 				$this->identSymbFields[] = 'coreid';
 
 				//Get image metadata
-				$skipImageFields = array('tid','photographeruid','imagetype','occid','dbpk','specimenguid','collid','username','sortsequence','initialtimestamp');
+				$skipImageFields = array('tid','photographeruid','imagetype','occid','dbpk','specimengui','collid','username','sortsequence','initialtimestamp');
 				if($this->uploadType == $this->RESTOREBACKUP){
 					unset($skipImageFields);
 					$skipImageFields = array();
@@ -257,7 +257,9 @@ class SpecUploadBase extends SpecUpload{
 			$fieldMap = $this->imageFieldMap;
 			$symbFields = $this->imageSymbFields;
 			$sourceArr = $this->imageSourceArr;
-			$translationMap = array('accessuri'=>'originalurl','thumbnailaccessuri'=>'thumbnailurl','goodqualityaccessuri'=>'url','creator'=>'owner');
+			$translationMap = array('accessuri'=>'originalurl','thumbnailaccessuri'=>'thumbnailurl','goodqualityaccessuri'=>'url',
+				'creator'=>'owner','providermanagedid'=>'sourceidentifier','usageterms'=>'copyright','webstatement'=>'accessrights',
+				'comments'=>'notes','associatedspecimenreference'=>'referenceurl');
 		}
 
 		//Build a Source => Symbiota field Map
@@ -1039,11 +1041,27 @@ class SpecUploadBase extends SpecUpload{
 				//Set image transfer count
 				$this->setImageTransferCount();
 
+				//Get shared field names for transferring between image tables
+				$imageFieldArr = array();
+				$rs1 = $this->conn->query('SHOW COLUMNS FROM uploadimagetemp');
+				while($r1 = $rs1->fetch_object()){
+					$imageFieldArr[strtolower($r1->Field)] = 0;
+				}
+				$rs1->free();
+				$rs2 = $this->conn->query('SHOW COLUMNS FROM images');
+				while($r2 = $rs2->fetch_object()){
+					$fieldName = strtolower($r2->Field);
+					if(array_key_exists($fieldName, $imageFieldArr)) $imageFieldArr[$fieldName] = 1;
+				}
+				$rs2->free();
+				foreach($imageFieldArr as $k => $v){
+					if(!$v) unset($imageFieldArr[$k]);
+				}
+				unset($imageFieldArr['sortsequence']);
+				unset($imageFieldArr['initialtimestamp']);
 				//Load images
-				$sql = 'INSERT INTO images(url,thumbnailurl,originalurl,archiveurl,occid,tid,format,caption,photographer,owner,sourceIdentifier,notes ) '.
-					'SELECT url,thumbnailurl,originalurl,archiveurl,occid,tid,format,caption,photographer,owner,specimengui,notes '.
-					'FROM uploadimagetemp '.
-					'WHERE (occid IS NOT NULL) AND (collid = '.$this->collId.')';
+				$sql = 'INSERT INTO images('.implode(',',array_keys($imageFieldArr)).') '.
+					'SELECT '.implode(',',array_keys($imageFieldArr)).' FROM uploadimagetemp WHERE (occid IS NOT NULL) AND (collid = '.$this->collId.')';
 				if($this->conn->query($sql)){
 					$this->outputMsg('<li style="margin-left:10px;">'.$this->imageTransferCount.' images transferred</li> ');
 				}
@@ -1342,9 +1360,9 @@ class SpecUploadBase extends SpecUpload{
 				$sql = 'INSERT INTO uploadimagetemp(collid'.$sqlFragments['fieldstr'].') '.
 					'VALUES('.$this->collId.$sqlFragments['valuestr'].')';
 				//echo $sql.'<br/>';
-				$this->conn->query('SET autocommit=0');
-				$this->conn->query('SET unique_checks=0');
-				$this->conn->query('SET foreign_key_checks=0');
+				//$this->conn->query('SET autocommit=0');
+				//$this->conn->query('SET unique_checks=0');
+				//$this->conn->query('SET foreign_key_checks=0');
 				if($this->conn->query($sql)){
 					$this->imageTransferCount++;
 					$repInt = 1000;
@@ -1356,10 +1374,10 @@ class SpecUploadBase extends SpecUpload{
 					$this->outputMsg("<li style='margin-left:10px;'>Error: ".$this->conn->error."</li>");
 					$this->outputMsg("<li style='margin:0px 0px 10px 10px;'>SQL: $sql</li>");
 				}
-				$this->conn->query('COMMIT');
-				$this->conn->query('SET autocommit=1');
-				$this->conn->query('SET unique_checks=1');
-				$this->conn->query('SET foreign_key_checks=1');
+				//$this->conn->query('COMMIT');
+				//$this->conn->query('SET autocommit=1');
+				//$this->conn->query('SET unique_checks=1');
+				//$this->conn->query('SET foreign_key_checks=1');
 			}
 		}
 	}
