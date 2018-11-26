@@ -127,7 +127,7 @@ class SpecUploadFile extends SpecUploadBase{
 						$recMap[$symbField] = $valueStr;
 					}
 				}
-				if($this->uploadType == $this->SKELETAL && !$recMap['catalognumber']){
+				if($this->uploadType == $this->SKELETAL && !isset($recMap['catalognumber']) && !isset($recMap['othercatalognumbers'])){
 					//Skip loading record
 					unset($recMap);
 					continue;

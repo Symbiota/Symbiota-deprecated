@@ -229,7 +229,7 @@ $duManager->loadFieldMap();
 			var tfArr = [];
 			var idTfArr = [];
 			var imTfArr = [];
-			var lacksCatalogNumber = true;
+			var catalogNumberIndex = 0;
 			var possibleMappingErr = false;
 			for(var i=0;i<f.length;i++){
 				var obj = f.elements[i];
@@ -299,17 +299,32 @@ $duManager->loadFieldMap();
 						}
 					}
 				}
-				if(lacksCatalogNumber && obj.name == "tf[]"){
+				if(obj.name == "tf[]"){
 					//Is skeletal file upload
 					if(obj.value == "catalognumber"){
-						lacksCatalogNumber = false;
+						catalogNumberIndex = catalogNumberIndex + 1;
+					}
+					else if(obj.value == "othercatalognumbers"){
+						catalogNumberIndex = catalogNumberIndex + 2;
 					}
 				}
 			}
-			if(lacksCatalogNumber && f.uploadtype.value == 7){
-				//Skeletal records require catalog number to be mapped
-				alert("ERROR: Catalog Number is required for Skeletal File Uploads");
-				return false;
+			if(f.uploadtype.value == 7){
+				if(catalogNumberIndex == 0){
+					//Skeletal records require catalog number to be mapped
+					alert("ERROR: catalogNumber or otherCatalogNumbers is required for Skeletal File Uploads");
+					return false;
+				}
+				else if(f.matchcatnum.checked == false && f.matchothercatnum.checked == false){
+					alert("ERROR: select which identifier will be used for record matching (required for Skeletal File imports)");
+					return false;
+				}
+				else{
+					if((catalogNumberIndex == 1 && f.matchcatnum.checked == false) || (catalogNumberIndex == 2 && f.matchothercatnum.checked == false)){
+						alert("ERROR: identifier record matching does not match import fields (required for Skeletal File imports)");
+						return false;
+					}
+				}
 			}
 			if(possibleMappingErr){
 				return confirm("Does the first row of the input file contain the column names? It appears that you may be mapping directly to the first row of active data rather than a header row. If so, the first row of data will be lost and some columns might be skipped. Select OK to proceed, or cancel to abort");
@@ -384,7 +399,7 @@ $duManager->loadFieldMap();
 			echo "<ul style='margin:10px;font-weight:bold;'>";
 			$duManager->uploadData($finalTransfer);
 			echo "</ul>";
-			if($duManager->getTransferCount() && !$finalTransfer){
+			if(!$finalTransfer){
 				?>
 				<fieldset style="margin:15px;">
 					<legend style="<?php if($uploadType == $SKELETAL) echo 'background-color:lightgreen'; ?>"><b>Pending Data Transfer Report</b></legend>
@@ -923,7 +938,7 @@ $duManager->loadFieldMap();
 									if($isLiveData || $uploadType == $SKELETAL){
 										?>
 										<div>
-											<input name="matchcatnum" type="checkbox" value="1" checked <?php echo ($uploadType == $SKELETAL?'DISABLED':''); ?> />
+											<input name="matchcatnum" type="checkbox" value="1" checked />
 											Match on Catalog Number
 										</div>
 										<div>
