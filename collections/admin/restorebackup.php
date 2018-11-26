@@ -247,7 +247,7 @@ include($SERVER_ROOT.'/header.php');
 								echo '<div>Occurrences pending transfer: '.$reportArr['occur'];
 								if($reportArr['occur']){
 									echo ' <a href="uploadviewer.php?collid='.$collid.'" target="_blank" title="Preview 1st 1000 Records"><img src="../../images/list.png" style="width:12px;" /></a>';
-									echo ' <a href="uploadcsv.php?collid='.$collid.'" target="_self" title="Download Records"><img src="../../images/dl.png" style="width:12px;" /></a>';
+									echo ' <a href="uploadexport.php?collid='.$collid.'" target="_self" title="Download Records"><img src="../../images/dl.png" style="width:12px;" /></a>';
 								}
 								echo '</div>';
 								echo '<div style="margin-left:15px;">';
@@ -255,7 +255,7 @@ include($SERVER_ROOT.'/header.php');
 								echo $reportArr['update'];
 								if($reportArr['update']){
 									echo ' <a href="uploadviewer.php?collid='.$collid.'&searchvar=occid:ISNOTNULL" target="_blank" title="Preview 1st 1000 Records"><img src="../../images/list.png" style="width:12px;" /></a>';
-									echo ' <a href="uploadcsv.php?collid='.$collid.'&searchvar=occid:ISNOTNULL" target="_self" title="Download Records"><img src="../../images/dl.png" style="width:12px;" /></a>';
+									echo ' <a href="uploadexport.php?collid='.$collid.'&searchvar=occid:ISNOTNULL" target="_self" title="Download Records"><img src="../../images/dl.png" style="width:12px;" /></a>';
 								}
 								echo '</div>';
 								if($reportArr['new']){
@@ -263,7 +263,7 @@ include($SERVER_ROOT.'/header.php');
 									echo $reportArr['new'];
 									if($reportArr['new']){
 										echo ' <a href="uploadviewer.php?collid='.$collid.'&searchvar=new" target="_blank" title="Preview 1st 1000 Records"><img src="../../images/list.png" style="width:12px;" /></a>';
-										echo ' <a href="uploadcsv.php?collid='.$collid.'&searchvar=new" target="_self" title="Download Records"><img src="../../images/dl.png" style="width:12px;" /></a>';
+										echo ' <a href="uploadexport.php?collid='.$collid.'&searchvar=new" target="_self" title="Download Records"><img src="../../images/dl.png" style="width:12px;" /></a>';
 									}
 									echo '</div>';
 								}
@@ -272,7 +272,7 @@ include($SERVER_ROOT.'/header.php');
 									echo $reportArr['exist'];
 									if($reportArr['exist']){
 										echo ' <a href="uploadviewer.php?collid='.$collid.'&searchvar=exist" target="_blank" title="Preview 1st 1000 Records"><img src="../../images/list.png" style="width:12px;" /></a>';
-										echo ' <a href="uploadcsv.php?collid='.$collid.'&searchvar=exist" target="_self" title="Download Records"><img src="../../images/dl.png" style="width:12px;" /></a>';
+										echo ' <a href="uploadexport.php?collid='.$collid.'&searchvar=exist" target="_self" title="Download Records"><img src="../../images/dl.png" style="width:12px;" /></a>';
 									}
 									echo '</div>';
 									echo '<div style="margin-left:15px;">';

@@ -173,12 +173,21 @@ class SpecUpload{
 			//echo "<div>".$sql."</div>"; exit;
 			$rs = $this->conn->query($sql);
 			if($rs->num_rows){
+				//Determine which fields have data
+				$fieldMap = array();
+				while($r = $rs->fetch_assoc()){
+					foreach($r as $k => $v){
+						if($v && $v !== '0') $fieldMap[$k] = '';
+					}
+				}
+				//Export only fields with data
+				$rs->data_seek(0);
 				while($r = $rs->fetch_assoc()){
 					if($outputHeader){
-						fputcsv($outstream,array_keys($r));
+						fputcsv($outstream,array_keys($fieldMap));
 						$outputHeader = false;
 					}
-					fputcsv($outstream,$r);
+					fputcsv($outstream,array_intersect_key($r, $fieldMap));
 				}
 			}
 			else{
