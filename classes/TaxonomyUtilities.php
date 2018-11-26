@@ -42,6 +42,8 @@ class TaxonomyUtilities {
 			$inStr = preg_replace('/\s\s+/',' ',$inStr);
 
 			$sciNameArr = explode(' ',$inStr);
+			$okToCloseConn = true;
+			if($conn !== null) $okToCloseConn = false;
 			if(count($sciNameArr)){
 				if(strtolower($sciNameArr[0]) == 'x'){
 					//Genus level hybrid
@@ -72,9 +74,9 @@ class TaxonomyUtilities {
 					if($retArr['unitname2'] && !preg_match('/^[\-a-z]+$/',$retArr['unitname2'])){
 						if(preg_match('/[A-Z]{1}[\-a-z]+/',$retArr['unitname2'])){
 							//Check to see if is term is genus author
-							$con = MySQLiConnectionFactory::getCon('readonly');
-							$sql = 'SELECT tid FROM taxa WHERE unitname1 = "'.$con->real_escape_string($retArr['unitname1']).'" AND unitname2 = "'.$con->real_escape_string($retArr['unitname2']).'"';
-							$rs = $con->query($sql);
+							if($conn === null) $conn = MySQLiConnectionFactory::getCon('readonly');
+							$sql = 'SELECT tid FROM taxa WHERE unitname1 = "'.$conn->real_escape_string($retArr['unitname1']).'" AND unitname2 = "'.$conn->real_escape_string($retArr['unitname2']).'"';
+							$rs = $conn->query($sql);
 							if($rs->num_rows){
 								if(isset($retArr['author'])) unset($retArr['author']);
 							}
@@ -84,7 +86,6 @@ class TaxonomyUtilities {
 								unset($sciNameArr);
 							}
 							$rs->free();
-							$con->close();
 						}
 						if($retArr['unitname2']){
 							$retArr['unitname2'] = strtolower($retArr['unitname2']);
@@ -131,8 +132,7 @@ class TaxonomyUtilities {
 						$arr = explode(' ',$retArr['author']);
 						$firstWord = array_shift($arr);
 						if(preg_match('/^[a-z]{2,}$/',$firstWord)){
-							$sql = 'SELECT unitind3 FROM taxa '.
-								'WHERE unitname1 = "'.$retArr['unitname1'].'" AND unitname2 = "'.$retArr['unitname2'].'" AND unitname3 = "'.$firstWord.'" ';
+							$sql = 'SELECT unitind3 FROM taxa WHERE unitname1 = "'.$conn->real_escape_string($retArr['unitname1']).'" AND unitname2 = "'.$conn->real_escape_string($retArr['unitname2']).'" AND unitname3 = "'.$conn->real_escape_string($firstWord).'" ';
 							//echo $sql.'<br/>';
 							if($conn === null) $conn = MySQLiConnectionFactory::getCon('readonly');
 							$rs = $conn->query($sql);
@@ -142,7 +142,6 @@ class TaxonomyUtilities {
 								$retArr['author'] = implode(' ',$arr);
 							}
 							$rs->free();
-							if(!($this->conn === false)) $conn->close();
 						}
 					}
 					if(array_key_exists('unitind3',$retArr) && $retArr['unitind3'] == 'ssp.'){
@@ -150,6 +149,7 @@ class TaxonomyUtilities {
 					}
 				}
 			}
+			if($conn !== null && $okToCloseConn) $conn->close();
 			//Set taxon rankid
 			if($rankId && is_numeric($rankId)){
 				$retArr['rankid'] = $rankId;
