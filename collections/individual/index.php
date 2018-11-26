@@ -551,13 +551,13 @@ header("Content-Type: text/html; charset=".$CHARSET);
 						if($occArr['country']) $localityStr1 .= $occArr['country'].', ';
 						if($occArr['stateprovince']) $localityStr1 .= $occArr['stateprovince'].', ';
 						if($occArr['county']) $localityStr1 .= $occArr['county'].', ';
-						if($occArr['municipality']) $localityStr1 .= $occArr['municipality'].', ';
 						?>
 						<div>
 							<b>Locality:</b>
 							<?php
 							if($displayLocality){
-								$localityStr1 .= $occArr['locality'];
+                                if($occArr['municipality']) $localityStr1 .= $occArr['municipality'].', ';
+							    $localityStr1 .= $occArr['locality'];
 							}
 							else{
 								$localityStr1 .= '<span style="color:red;">Detailed locality information protected.';
