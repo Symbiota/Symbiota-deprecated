@@ -309,8 +309,10 @@ body{
 	margin:	4px 0px 2px 0px;
 }
 
-#localityDiv input{
-	width: 97%;
+#localityDiv textarea{
+	height:	15px;
+	width: 95%;
+	height: 22px; 
 }
 
 #localSecurityDiv{
@@ -580,11 +582,7 @@ body{
 #associatedTaxaDiv textarea{
 	height:	15px;
 	width:	95%;
-}
-
-#associatedTaxaDiv img{
-	width:	15px;
-	border:	0px;
+	height: 22px; 
 }
 
 #verbatimAttributesDiv{
@@ -607,10 +605,6 @@ body{
 #occurrenceRemarksDiv span{
 	margin-left: 5px;
 	cursor: pointer;
-}
-
-#occurrenceRemarksDiv img{
-	width:15px;
 }
 
 #dynamicPropertiesDiv{
@@ -810,6 +804,10 @@ body{
 }
 
 /* Button Controls */
+#bottomSubmitDiv{
+	padding:10px;
+}
+
 #addButtonDiv{
 	width:		450px;
 	border:		1px solid black;
@@ -827,6 +825,11 @@ img.docimg {
 	border:			0px;
 	width:			9px;
 	margin-bottom:	2px; 
+}
+
+img.editimg { 
+	border:			0px;
+	width:			15px;
 }
 
 table { 
