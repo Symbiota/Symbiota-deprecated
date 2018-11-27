@@ -196,7 +196,6 @@ class SpecUpload{
 			$rs->free();
 		}
 		fclose($outstream);
-		return $retArr;
 	}
 
 	public function getPendingImportData($start, $limit, $searchVariables = ''){

@@ -1,15 +1,30 @@
 <?php
-include_once('../../config/symbini.php'); 
+include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/SpecUpload.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 
 $collid = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
+$searchVar = array_key_exists('searchvar',$_REQUEST)?$_REQUEST['searchvar']:'';
+$action = array_key_exists('action',$_REQUEST)?$_REQUEST['action']:'';
 $recLimit = array_key_exists('reclimit',$_REQUEST)?$_REQUEST['reclimit']:1000;
 $pageIndex = array_key_exists('pageindex',$_REQUEST)?$_REQUEST['pageindex']:0;
-$searchVar = array_key_exists('searchvar',$_REQUEST)?$_REQUEST['searchvar']:'';
 
 $uploadManager = new SpecUpload();
 $uploadManager->setCollId($collid);
+
+$isEditor = 0;
+if($SYMB_UID){
+	if($IS_ADMIN || (array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collid,$USER_RIGHTS["CollAdmin"]))){
+		$isEditor = 1;
+	}
+	if($isEditor){
+		if($action == 'export'){
+			$uploadManager->exportPendingImport($searchVar);
+			exit;
+		}
+	}
+}
+
 $collMap = $uploadManager->getCollInfo();
 
 $headerMapBase = array('catalognumber' => 'Catalog Number','occurrenceid' => 'Occurrence ID',
@@ -25,7 +40,7 @@ $headerMapBase = array('catalognumber' => 'Catalog Number','occurrenceid' => 'Oc
 	'georeferenceverificationstatus' => 'Georef Verification Status','georeferenceremarks' => 'Georef Remarks',
 	'minimumelevationinmeters' => 'Min. Elev. (m)','maximumelevationinmeters' => 'Max. Elev. (m)','verbatimelevation' => 'Verbatim Elev.',
 	'habitat' => 'Habitat','substrate' => 'Substrate','occurrenceremarks' => 'Notes','associatedtaxa' => 'Associated Taxa',
-	'verbatimattributes' => 'Description','lifestage' => 'Life Stage', 'sex' => 'Sex', 'individualcount' => 'Individual Count', 
+	'verbatimattributes' => 'Description','lifestage' => 'Life Stage', 'sex' => 'Sex', 'individualcount' => 'Individual Count',
 	'samplingprotocol' => 'Sampling Protocol', 'preparations' => 'Preparations', 'reproductivecondition' => 'Reproductive Condition',
 	'typestatus' => 'Type Status','cultivationstatus' => 'Cultivation Status','establishmentmeans' => 'Establishment Means',
 	'disposition' => 'disposition','duplicatequantity' => 'Duplicate Qty','datelastmodified' => 'Date Last Modified',
@@ -34,18 +49,13 @@ if($collMap['managementtype'] == 'Snapshot'){
 	$headerMapBase['dbpk'] = 'Source Identifier';
 }
 
-//$recCnt = $uploadManager->getUploadCount();
-$isEditor = 0;
-//$navStr = '<div style="float:right;">';
-if($SYMB_UID){
-	//Set variables
-	if($IS_ADMIN || (array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collid,$USER_RIGHTS["CollAdmin"]))){
-		$isEditor = 1;
-	}
 /*
+$recCnt = $uploadManager->getUploadCount();
+$navStr = '<div style="float:right;">';
+if($SYMB_UID){
 	if(($pageIndex) >= $recLimit){
-		$navStr .= '<a href="uploadviewer.php?collid='.$collid.'&reclimit='.$reclimit.'&pageindex=0" title="First page">|&lt;&lt;</a> | ';
-		$navStr .= '<a href="uploadviewer.php?collid='.$collid.'&reclimit='.$reclimit.'&pageindex='.($pageIndex-1).'" title="Previous '.$recLimit.' record">&lt;&lt;</a>';
+		$navStr .= '<a href="uploadreviewer.php?collid='.$collid.'&reclimit='.$reclimit.'&pageindex=0" title="First page">|&lt;&lt;</a> | ';
+		$navStr .= '<a href="uploadreviewer.php?collid='.$collid.'&reclimit='.$reclimit.'&pageindex='.($pageIndex-1).'" title="Previous '.$recLimit.' record">&lt;&lt;</a>';
 	}
 	else{
 		$navStr .= '|&lt;&lt;</a> | &lt;&lt;';
@@ -55,15 +65,15 @@ if($SYMB_UID){
 	$navStr .= (($pageIndex*$recLimit)+1).'-'.($recCnt<$highRange?$recCnt:$highRange).' of '.$recCnt.' records';
 	$navStr .= ' | ';
 	if($recCnt > $highRange){
-		$navStr .= '<a href="uploadviewer.php?collid='.$collid.'&reclimit='.$reclimit.'&pageindex='.($pageIndex+1).'" title="Next '.$recLimit.' records">&gt;&gt;</a> | ';
-		$navStr .= '<a href="uploadviewer.php?collid='.$collid.'&reclimit='.$reclimit.'&pageindex='.($recCnt/$recLimit).'" title="Last page">&gt;&gt;|</a>';
+		$navStr .= '<a href="uploadreviewer.php?collid='.$collid.'&reclimit='.$reclimit.'&pageindex='.($pageIndex+1).'" title="Next '.$recLimit.' records">&gt;&gt;</a> | ';
+		$navStr .= '<a href="uploadreviewer.php?collid='.$collid.'&reclimit='.$reclimit.'&pageindex='.($recCnt/$recLimit).'" title="Last page">&gt;&gt;|</a>';
 	}
 	else{
 		$navStr .= '&gt;&gt; | &gt;&gt;|';
 	}
 	$navStr .= '</div>';
-*/
 }
+*/
 ?>
 <html>
 <head>
@@ -80,7 +90,7 @@ if($SYMB_UID){
 <body style="margin-left: 0px; margin-right: 0px;background-color:white;">
 	<!-- inner text -->
 	<div id="">
-		<?php 
+		<?php
 		if($isEditor){
 			if($collMap){
 				echo '<h2>'.$collMap['name'].' ('.$collMap['institutioncode'].($collMap['collectioncode']?':'.$collMap['collectioncode']:'').')</h2>';
@@ -101,13 +111,13 @@ if($SYMB_UID){
 				?>
 				<table class="styledtable" style="font-family:Arial;font-size:12px;">
 					<tr>
-						<?php 
+						<?php
 						foreach($headerMap as $k => $v){
 							echo '<th>'.$v.'</th>';
 						}
 						?>
 					</tr>
-					<?php 
+					<?php
 					$cnt = 0;
 					foreach($recArr as $id => $occArr){
 						if($occArr['sciname']) $occArr['sciname'] = '<i>'.$occArr['sciname'].'</i> ';
@@ -131,14 +141,14 @@ if($SYMB_UID){
 				<div style="width:790px;">
 					<?php //echo $navStr; ?>
 				</div>
-				<?php 
+				<?php
 			}
 			else{
 				?>
 				<div style="font-weight:bold;font-size:120%;margin:25px;">
 					No records have been uploaded
 				</div>
-				<?php 
+				<?php
 			}
 		}
 		else{
