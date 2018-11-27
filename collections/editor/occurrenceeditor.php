@@ -406,12 +406,12 @@ else{
     <?php
     if($crowdSourceMode == 1){
 		?>
-		<link href="includes/config/occureditorcrowdsource.css?ver=1802" type="text/css" rel="stylesheet" id="editorCssLink" />
+		<link href="includes/config/occureditorcrowdsource.css?ver=1811" type="text/css" rel="stylesheet" id="editorCssLink" />
 		<?php
     }
     else{
 		?>
-		<link href="../../css/occureditor.css?ver=170601" type="text/css" rel="stylesheet" id="editorCssLink" />
+		<link href="../../css/occureditor.css?ver=181127" type="text/css" rel="stylesheet" id="editorCssLink" />
 		<?php
 		if(isset($CSSARR)){
 			foreach($CSSARR as $cssVal){
@@ -724,7 +724,7 @@ else{
 													<input type="text" name="verbatimeventdate" tabindex="19" maxlength="255" value="<?php echo array_key_exists('verbatimeventdate',$occArr)?$occArr['verbatimeventdate']:''; ?>" onchange="verbatimEventDateChanged(this)" />
 												</div>
 												<div id="dateToggleDiv">
-													<a href="#" onclick="toggle('dateextradiv');return false;"><img src="../../images/editplus.png" style="width:15px;" /></a>
+													<a href="#" onclick="toggle('dateextradiv');return false;"><img class="editimg" src="../../images/editplus.png" /></a>
 												</div>
 												<?php
 												if(array_key_exists('loan',$occArr)){
@@ -845,7 +845,7 @@ else{
 													<input type="text" name="dateidentified" maxlength="45" tabindex="34" value="<?php echo array_key_exists('dateidentified',$occArr)?$occArr['dateidentified']:''; ?>" onchange="fieldChanged('dateidentified');" />
 												</div>
 												<div id="idrefToggleDiv" onclick="toggle('idrefdiv');">
-													<img src="../../images/editplus.png" style="width:15px;" />
+													<img class="editimg" src="../../images/editplus.png" />
 												</div>
 											</div>
 											<div  id="idrefdiv">
@@ -896,11 +896,11 @@ else{
 											</div>
 											<div id="localityDiv">
 												<?php echo (defined('LOCALITYLABEL')?LOCALITYLABEL:'Locality'); ?>
-												<a href="#" onclick="return dwcDoc('locality')"><img class="docimg" src="../../images/qmark.png" /></a>
+												<a href="#" onclick="return dwcDoc('locality')"><img class="docimg" src="../../images/qmark.png" style="width:9px" /></a>
 												<br />
-												<input type="text" id="fflocality" name="locality" tabindex="46" value="<?php echo array_key_exists('locality',$occArr)?$occArr['locality']:''; ?>" onchange="fieldChanged('locality');" />
+												<textarea id="fflocality" name="locality" tabindex="46" onchange="fieldChanged('locality');"><?php echo array_key_exists('locality',$occArr)?$occArr['locality']:''; ?></textarea>
 												<a id="localityExtraToggle" onclick="toggle('localityExtraDiv');">
-													<img src="../../images/editplus.png" style="width:15px;" />
+													<img class="editimg" src="../../images/editplus.png" />
 												</a>
 											</div>
 											<?php
@@ -1032,7 +1032,7 @@ else{
 													</div>
 												</div>
 												<div id="georefExtraToggleDiv" onclick="toggle('georefExtraDiv');">
-													<img src="../../images/editplus.png" style="width:15px;" />
+													<img class="editimg" src="../../images/editplus.png" />
 												</div>
 											</div>
 											<?php
@@ -1128,12 +1128,12 @@ else{
 											?>
 											<div id="associatedTaxaDiv">
 												<?php echo (defined('ASSOCIATEDTAXALABEL')?ASSOCIATEDTAXALABEL:'Associated Taxa'); ?>
-												<a href="#" onclick="return dwcDoc('associatedTaxa')"><img class="docimg" src="../../images/qmark.png" style="width:9px;margin-bottom:2px" /></a>
+												<a href="#" onclick="return dwcDoc('associatedTaxa')"><img class="docimg" src="../../images/qmark.png" /></a>
 												<br/>
-												<textarea name="associatedtaxa" tabindex="84" onchange="fieldChanged('associatedtaxa');" style="height:22px;"><?php echo array_key_exists('associatedtaxa',$occArr)?$occArr['associatedtaxa']:''; ?></textarea>
+												<textarea name="associatedtaxa" tabindex="84" onchange="fieldChanged('associatedtaxa');"><?php echo array_key_exists('associatedtaxa',$occArr)?$occArr['associatedtaxa']:''; ?></textarea>
 												<?php
 												if(!isset($ACTIVATEASSOCTAXAAID) || $ACTIVATEASSOCTAXAAID){
-													echo '<a href="#" onclick="openAssocSppAid();return false;"><img src="../../images/list.png" /></a>';
+													echo '<a href="#" onclick="openAssocSppAid();return false;"><img class="editimg" src="../../images/list.png" /></a>';
 												}
 												?>
 											</div>
@@ -1145,11 +1145,11 @@ else{
 											</div>
 											<div id="occurrenceRemarksDiv">
 												<?php echo (defined('OCCURRENCEREMARKSLABEL')?OCCURRENCEREMARKSLABEL:'Notes (Occurrence Remarks)'); ?>
-												<a href="#" onclick="return dwcDoc('occurrenceRemarks')"><img class="docimg" src="../../images/qmark.png" style="width:9px;margin-bottom:2px" /></a>
+												<a href="#" onclick="return dwcDoc('occurrenceRemarks')"><img class="docimg" src="../../images/qmark.png" /></a>
 												<br/>
 												<input type="text" name="occurrenceremarks" tabindex="88" value="<?php echo array_key_exists('occurrenceremarks',$occArr)?$occArr['occurrenceremarks']:''; ?>" onchange="fieldChanged('occurrenceremarks');" title="Occurrence Remarks" />
 												<span id="dynPropToggleSpan" onclick="toggle('dynamicPropertiesDiv');">
-													<img src="../../images/editplus.png" />
+													<img class="editimg" src="../../images/editplus.png" />
 												</span>
 											</div>
 											<div id="dynamicPropertiesDiv">
@@ -1383,7 +1383,7 @@ else{
 											}
 										}
 										?>
-										<div style="padding:10px;">
+										<div id="bottomSubmitDiv">
 											<input type="hidden" name="occid" value="<?php echo $occId; ?>" />
 											<input type="hidden" name="collid" value="<?php echo $collId; ?>" />
 											<input type="hidden" name="observeruid" value="<?php echo $SYMB_UID; ?>" />
