@@ -132,9 +132,9 @@ class TaxonomyUtilities {
 						$arr = explode(' ',$retArr['author']);
 						$firstWord = array_shift($arr);
 						if(preg_match('/^[a-z]{2,}$/',$firstWord)){
+							if($conn === null) $conn = MySQLiConnectionFactory::getCon('readonly');
 							$sql = 'SELECT unitind3 FROM taxa WHERE unitname1 = "'.$conn->real_escape_string($retArr['unitname1']).'" AND unitname2 = "'.$conn->real_escape_string($retArr['unitname2']).'" AND unitname3 = "'.$conn->real_escape_string($firstWord).'" ';
 							//echo $sql.'<br/>';
-							if($conn === null) $conn = MySQLiConnectionFactory::getCon('readonly');
 							$rs = $conn->query($sql);
 							if($r = $rs->fetch_object()){
 								$retArr['unitind3'] = $r->unitind3;
