@@ -136,7 +136,7 @@ if($SYMB_UID){
 					<?php
 					foreach($genAdminArr as $id => $secArr){
 						$cName = $secArr['collectionname'].' ('.$secArr['institutioncode'].($secArr['collectioncode']?'-'.$secArr['collectioncode']:'').')';
-						echo '<li><a href="../collections/misc/collprofiles.php?collid='.$id.'&emode=1">'.$name.'</a></li>';
+						echo '<li><a href="../collections/misc/collprofiles.php?collid='.$id.'&emode=1">'.$cName.'</a></li>';
 					}
 					?>
 				</ul>
