@@ -100,7 +100,7 @@ else{
 				?>
 				<div style="margin:2px;">
 					<?php
-					if($isGenObs && $IS_ADMIN){
+					if($isGenObs && ($IS_ADMIN || ($collId && array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collId,$USER_RIGHTS["CollAdmin"])))){
 						?>
 						<span style="margin-right:25px;">
 							<input type="checkbox" name="q_observeruid" value="<?php echo $SYMB_UID; ?>" <?php echo ($qObserverUid?'CHECKED':''); ?> />
