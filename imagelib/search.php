@@ -129,7 +129,7 @@ if($action == 'search'){
 					<div style="clear:both;margin-bottom:5px;">
 						Photographer:
 						<select name="phuid">
-							<option value="">All Photogrpahers</option>
+							<option value="">All Image Contributors</option>
 							<option value="">-----------------------------</option>
 							<?php
 							$uidList = $imgLibManager->getPhotographerUidArr();
