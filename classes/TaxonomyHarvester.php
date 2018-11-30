@@ -274,6 +274,12 @@ class TaxonomyHarvester extends Manager{
 		else{
 			$this->logOrEcho('ERROR harvesting COL name: null result',1);
 		}
+		if(isset($taxonArr['source']) && $taxonArr['source']){
+			$taxonArr['source'] = $taxonArr['source'].' (added via CoL API)';
+		}
+		else{
+			$taxonArr['source'] = 'Catalog of Life (added via API)';
+		}
 		return $this->loadNewTaxon($taxonArr, $tidAccepted);
 	}
 
@@ -341,6 +347,7 @@ class TaxonomyHarvester extends Manager{
 		$taxonArr= Array();
 		$acceptedTid = 0;
 		$url = 'http://www.marinespecies.org/rest/AphiaRecordByAphiaID/'.$id;
+		//echo $url.'<br/>';
 		if($resultStr = $this->getWormsReturnStr($this->getContentString($url),$url)){
 			$taxonArr= $this->getWormsNode(json_decode($resultStr,true));
 			if($taxonArr['acceptance'] == 'unaccepted' && isset($taxonArr['validID'])){
@@ -356,12 +363,28 @@ class TaxonomyHarvester extends Manager{
 				if($parentStr = $this->getWormsReturnStr($this->getContentString($url),$url)){
 					$parentArr = json_decode($parentStr,true);
 					if($parentID = $this->getWormParentID($parentArr, $id)){
-						if($parentTid = $this->addWormsTaxonByID($parentID)){
+						$parentTid = $this->getTid($parentArr);
+						if(!$parentTid) $parentTid = $this->addWormsTaxonByID($parentID);
+						if($parentTid){
 							$taxonArr['parent'] = array('tid' => $parentTid);
 						}
 					}
 				}
 			}
+		}
+		//Get reference source
+		if(!isset($taxonArr['source']) || !$taxonArr['source']){
+			$url = 'http://www.marinespecies.org/rest/AphiaSourcesByAphiaID/'.$id;
+			if($sourceStr = $this->getWormsReturnStr($this->getContentString($url),$url)){
+				$sourceArr = json_decode($sourceStr,true);
+				foreach($sourceArr as $innerArr){
+					if(isset($innerArr['reference']) && $innerArr['reference']) $taxonArr['source'] = $innerArr['reference'];
+					break;
+				}
+			}
+		}
+		if(!isset($taxonArr['source']) || !$taxonArr['source']){
+			$taxonArr['source'] = 'WoRMS (added via API)';
 		}
 		return $this->loadNewTaxon($taxonArr, $acceptedTid);
 	}
@@ -517,6 +540,12 @@ class TaxonomyHarvester extends Manager{
 				}
 			}
 		}
+		if(isset($taxonArr['source']) && $taxonArr['source']){
+			$taxonArr['source'] = $taxonArr['source'].' (added via TROPICOS API)';
+		}
+		else{
+			$taxonArr['source'] = 'TROPICOS (added via API)';
+		}
 		return $this->loadNewTaxon($taxonArr);
 	}
 
@@ -614,6 +643,12 @@ class TaxonomyHarvester extends Manager{
 		else{
 			$this->logOrEcho('Taxon ID not found ('.$eolTaxonId.')',2);
 			return false;
+		}
+		if(isset($taxonArr['source']) && $taxonArr['source']){
+			$taxonArr['source'] = $taxonArr['source'].' (added via EOL API)';
+		}
+		else{
+			$taxonArr['source'] = 'EOL (added via API)';
 		}
 		return $this->loadNewTaxon($taxonArr);
 	}
@@ -1004,8 +1039,10 @@ class TaxonomyHarvester extends Manager{
 
 	public function getTid($taxonArr){
 		$tid = 0;
-		if(isset($taxonArr['sciname']) && $taxonArr['sciname']){
-			$sciname = $taxonArr['sciname'];
+		$sciname = '';
+		if(isset($taxonArr['sciname']) && $taxonArr['sciname']) $sciname = $taxonArr['sciname'];
+		if(!$sciname && isset($taxonArr['scientificname']) && $taxonArr['scientificname']) $sciname = $taxonArr['scientificname'];
+		if($sciname){
 			$tidArr = array();
 			//Get tid, author, and rankid
 			$sql = 'SELECT tid, author, rankid FROM taxa WHERE (sciname = "'.$this->cleanInStr($sciname).'") ';
