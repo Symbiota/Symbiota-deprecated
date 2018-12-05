@@ -15,14 +15,12 @@ $dwcaManager = new DwcArchiverPublisher();
 $collManager = new OccurrenceCollectionProfile();
 
 $publishGBIF = false;
-$publishIDIGBIO = false;
 $collArr = array();
 if($collid){
 	$collManager->setCollid($collid);
 	$dwcaManager->setCollArr($collid);
 	$collArr = current($collManager->getCollectionMetadata());
 	if($collArr['publishtogbif']) $publishGBIF = true;
-	if($collArr['publishtoidigbio']) $publishIDIGBIO = true;
 }
 
 $includeDets = 1;
@@ -49,9 +47,6 @@ elseif($action){
 }
 
 $idigbioKey = $collManager->getIdigbioKey();
-if($publishIDIGBIO && !$idigbioKey){
-	$idigbioKey = $collManager->findIdigbioKey($collArr['guid']);
-}
 
 $isEditor = 0;
 if($IS_ADMIN || (array_key_exists('CollAdmin',$USER_RIGHTS) && in_array($collid,$USER_RIGHTS['CollAdmin']))){
@@ -262,9 +257,11 @@ include($SERVER_ROOT. '/header.php');
 			}
 		}
 		$dwcUri = '';
-		if($dwcaArr = $dwcaManager->getDwcaItems($collid)){
+		$dwcaArr = $dwcaManager->getDwcaItems($collid);
+		if($dwcaArr){
 			$dArr = current($dwcaArr);
 			$dwcUri = ($dArr['collid'] == $collid?$dArr['link']:'');
+			if(!$idigbioKey) $idigbioKey = $collManager->findIdigbioKey($collArr['guid']);
 			?>
 			<div style="margin:10px;">
 				<div>
@@ -286,7 +283,7 @@ include($SERVER_ROOT. '/header.php');
 			<?php
 		}
 		else{
-			echo '<div style="margin:20px;font-weight:bold;color:orange;">No data archives have been published for this collection</div>';
+			echo '<div style="margin:20px;font-weight:bold;color:orange;">A Darwin Core Archive has not yet been published for this collection</div>';
 		}
 		?>
 		<fieldset style="margin:15px;padding:15px;">
@@ -393,7 +390,7 @@ include($SERVER_ROOT. '/header.php');
 					<?php
 				}
 			}
-			if($publishIDIGBIO && $idigbioKey && $dwcUri){
+			if($idigbioKey && $dwcUri){
 				$dataUrl = 'https://www.idigbio.org/portal/recordsets/'.$idigbioKey;
 				?>
 				<div style="margin:10px;">
