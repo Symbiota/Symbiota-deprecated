@@ -372,7 +372,7 @@ class TaxonProfile extends Manager {
 				$retStr .= '<div id="tab-links" class="sptab" style="width:94%;">';
 				$retStr .= '<ul style="margin-top: 50px">';
 				foreach($this->taxaLinks as $l){
-					$urlStr = str_replace('--SCINAME--',urlencode($this->sciName),$l['url']);
+					$urlStr = str_replace('--SCINAME--',rawurlencode($this->sciName),$l['url']);
 					$retStr .= '<li><a href="'.$urlStr.'" target="_blank">'.$l['title'].'</a></li>';
 					if($l['notes']) $retStr .= ' '.$l['notes'];
 				}
