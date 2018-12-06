@@ -564,6 +564,12 @@ div.spptext{
 	padding: 0;
 	margin-left: -15px;
 }
+.garden-collections h4 {
+    font-weight: bold;
+    font-size: 18px;
+    color: #4e1e97;
+    margin-top: 30px;
+}
 .garden-commercial {
 	margin-top: 30px;
 }

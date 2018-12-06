@@ -1193,6 +1193,9 @@ button.menu-toggle {
 	margin: 0 auto;
 	padding-left: 30px;
 }
+#printPageButton {
+    float: right;
+}
 .garden-header-wrapper h2 {
 	color: #ffffff;
 	font-size: 30px;
