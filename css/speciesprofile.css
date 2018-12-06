@@ -500,3 +500,77 @@ div.spptext{
         width: auto !important;
     }
 }
+
+/*--------------------------------------------------------------
+# Garden Detail
+--------------------------------------------------------------*/
+.garden-content-wrapper {
+	width: 100%;
+	max-width: 1100px;
+	margin: 0 auto;
+	padding: 30px 20px;
+	overflow: hidden;
+}
+.garden-page-header h1,
+.garden-page-header h2 {
+	text-align: center;
+	margin-bottom: 40px;
+}
+.garden-left {
+	width: 34%;
+	float: left;
+	padding-right: 20px;
+	margin-bottom: 30px;
+}
+.garden-image {
+	width: 66%;
+	float: left;
+	margin-bottom: 30px;
+}
+.garden-image .photographer {
+	text-align: right;
+}
+.garden-left hr {
+	height: 2px;
+}
+.garden-desc p:first-child:first-letter {
+	float: left;
+	font-size: 68px;
+	line-height: 50px;
+	padding-top: 4px;
+	padding-right: 8px;
+	padding-left: 3px;
+}
+.garden-facts {
+	margin: 20px 0;
+	float: left;
+	width: 60%;
+	padding-right: 10px;
+}
+.garden-collections {
+	margin: 20px 0;
+	float: left;
+	width: 40%;
+	padding-left: 10px;
+}
+.garden-collections .home-box h3 {
+	font-size: 18px;
+}
+.garden-collections .home-box {
+	flex: 0 1 calc(50% - 30px);
+	margin: 15px;
+}
+.garden-collections .home-boxes {
+	padding: 0;
+	margin-left: -15px;
+}
+.garden-commercial {
+	margin-top: 30px;
+}
+.garden-icons img {
+	width: 30px;
+	vertical-align: middle;
+}
+@media screen and (max-width:700px){
+
+}

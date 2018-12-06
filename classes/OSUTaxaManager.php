@@ -846,15 +846,183 @@ class OSUTaxaManager {
         }
         return $retArr;
     }
-	public function isGardenProfile(){
-		$sql="SELECT t.CLID from fmchklsttaxalink t WHERE t.CLID = 54 AND t.TID = ".$this->con->escape_string($this->tid);
-		//echo $sql;
-		$result = $this->con->query($sql);
-		if($row = $result->fetch_object()){
-			return $row->CLID == 54;
-		}
-		$result->close();
-		return false;
-	}
+    public function isGardenProfile(){
+        $sql="SELECT t.CLID from fmchklsttaxalink t WHERE t.CLID = 54 AND t.TID = ".$this->con->escape_string($this->tid);
+        //echo $sql;
+        $result = $this->con->query($sql);
+        if($row = $result->fetch_object()){
+            return $row->CLID == 54;
+        }
+        $result->close();
+        return false;
+    }
+
+    private function addImageDomain($image_url) {
+        //type can be url or thumbnailurl
+        if(array_key_exists("IMAGE_DOMAIN",$GLOBALS)){
+            //Images with relative paths are on another server
+            if(substr($image_url,0,1)=="/") $image_url = $GLOBALS["IMAGE_DOMAIN"].$image_url;
+        }
+        return $image_url;
+    }
+
+
+    public function mainGardenImage(){
+        //get image with imagetag PrimaryGarden
+        $sql="SELECT i.*, it.keyvalue FROM images i Left Join imagetag it ON i.imgid = it.imgid where i.tid=".$this->con->escape_string($this->tid) . "  AND it.keyvalue='PrimaryGarden' ORDER BY i.sortsequence ASC LIMIT 1 ";
+        //echo $sql;exit();
+        $result = $this->con->query($sql);
+        if($result && $row = $result->fetch_object()){
+            $image["url"] = $this->addImageDomain($row->url );
+            $image["thumbnailurl"] = $this->addImageDomain($row->thumbnailurl );
+            $image["photographer"] = $row->photographer;
+            $image["image_type"] = "GardenProfile";
+            return $image;
+        }
+
+
+        //if not, get first image
+        $sql="SELECT i.* from images i WHERE i.tid = ".$this->con->escape_string($this->tid) . " ORDER BY i.sortsequence ASC LIMIT 1 ";
+        //echo $sql;
+        $result = $this->con->query($sql);
+        if($result && $row = $result->fetch_object()){
+            $image["url"] = $this->addImageDomain($row->url );
+            $image["thumbnailurl"] = $this->addImageDomain($row->thumbnailurl );
+            $image["photographer"] = $row->photographer;
+            $image["image_type"] = "Original";
+            return $image;
+        }
+
+
+        $result->close();
+        return false;
+    }
+    public function getAllAttribs() {
+        $sql = "Select d.cid, c.charname, cs.charstatename, cs.cs FROM kmdescr d ";
+        $sql .= "Left Join kmcharacters c ON c.CID = d.CID ";
+        $sql .= "Left Join kmcs as cs ON d.CS = cs.cs AND cs.cid = d.cid ";
+        $sql .= "where tid = ";
+        $sql .= $this->con->escape_string($this->tid);
+        $sql .= " order by  d.cid, cs.cs ";
+        //echo $sql;
+        $result = $this->con->query($sql);
+
+        while ($row = $result->fetch_array()) {
+            $tmp[$row["cid"]][] = array(
+                "charname" => $row["charname"],
+                "charstatename" => $row["charstatename"],
+                "cs" => $row["cs"] );
+        }
+        //var_dump($tmp);
+        $attribs["min_height"] = min(array_column($tmp["140"], 'charstatename'));
+        $attribs["max_height"] = max(array_column($tmp["140"], 'charstatename'));
+        $attribs["min_width"] = min(array_column($tmp["738"], 'charstatename'));
+        $attribs["max_width"] = max(array_column($tmp["738"], 'charstatename'));
+        $attribs["type"] = ucwords($tmp["100"][0]['charstatename'] . " " . $tmp["137"][0]['charstatename']);
+        $attribs["bloom_months"] = implode(", ",array_map(function($a){
+            return $a["charstatename"];
+        },$tmp[165]));
+        $num_commercial = count($tmp[209]);
+        $attribs["flower_color"] = ucwords(implode(", ",array_map(function($a){
+            return $a["charstatename"];
+        },$tmp[612])));
+        $attribs["commercial_availability"] = '';
+        implode(", ",$tmp[678]);
+        for($i=1;$i<=ceil($num_commercial/10);$i++) {
+            $attribs["commercial_availability"].= "<img src=\"" . $clientRoot . "/images/Marketbasket.png\" alt=\"Commercial Availability\" >";
+        }
+        $attribs["garden_type"] = implode(", ",array_map(function($a){
+            return $a["charstatename"];
+        },$tmp[678]));
+        $attribs["landscape_uses"] = implode(", ",array_map(function($a){
+            return $a["charstatename"];
+        },$tmp[679]));
+        $attribs["ease_of_growth"] = implode(", ",array_map(function($a){
+            return $a["charstatename"];
+        },$tmp[684]));
+        $attribs["sunlight"] = "";
+        $attribs["sunlight_array"] = "";
+        foreach ($tmp[680] as $value) { //sunlight
+            switch ($value['charstatename']) {
+                case "sun":
+                    $attribs["sunlight"] .= "<img src=\"" . $clientRoot . "/images/sunlight_icon4.png\" alt=\"Sun\" >";
+                    $attribs["sunlight_array"][]= $value['charstatename'];
+                    break;
+                case "part shade":
+                    $attribs["sunlight"] .= "<img src=\"" . $clientRoot . "/images/sunlight_icon3.png\" alt=\"Part Shade\" >";
+                    $attribs["sunlight_array"][]= $value['charstatename'];
+                    break;
+                case "shade":
+                    $attribs["sunlight"] .= "<img src=\"" . $clientRoot . "/images/sunlight_icon1.png\" alt=\"Shade\" >";
+                    $attribs["sunlight_array"][]= $value['charstatename'];
+                    break;
+            }
+            $attribs["sunlight_string"] =  implode(", ", $attribs["sunlight_array"]);
+        }
+        $attribs["moisture"] = "";
+        $attribs["moisture_string"] = "";
+        foreach ($tmp[683] as $value) { //moisture
+            switch ($value['charstatename']) {
+                case "dry":
+                    $attribs["moisture"].= "<img src=\"" . $clientRoot . "/images/moisture_icon1.png\" alt=\"Dry\" >";
+                    $attribs["moisture_array"][]= $value['charstatename'];
+                    break;
+                case "moist":
+                    $attribs["moisture"].= "<img src=\"" . $clientRoot . "/images/moisture_icon3.png\" alt=\"Moist\" >";
+                    $attribs["moisture_array"][]= $value['charstatename'];
+                    break;
+                case "wet":
+                    $attribs["moisture"].= "<img src=\"" . $clientRoot . "/images/moisture_icon4.png\" alt=\"Wet\" >";
+                    $attribs["moisture_array"][]= $value['charstatename'];
+                    break;
+            }
+            $attribs["moisture_string"] =  implode(", ", $attribs["moisture_array"]);
+        }
+        $attribs["wildlife"] = "";
+        $attribs["wildlife_string"] = "";
+        foreach ($tmp[685] as $value) { //wildlife/insect support
+            switch ($value['cs']) {
+                case "1":
+                    $attribs["wildlife"] .= "<img src=\"" . $clientRoot . "/images/wildlife_icon4.png\" alt=\"Butterfly\" >";
+                    $attribs["wildlife_array"][]= $value['charstatename'];
+                    break;
+                case "2":
+                    $attribs["wildlife"] .= "<img src=\"" . $clientRoot . "/images/wildlife_icon2.png\" alt=\"Bee\" >";
+                    $attribs["wildlife_array"][]= $value['charstatename'];
+                    break;
+                case "3":
+                    $attribs["wildlife"] .= "<img src=\"" . $clientRoot . "/images/wildlife_icon5.png\" alt=\"Insect\" >";
+                    $attribs["wildlife_array"][]= $value['charstatename'];
+                    break;
+                case "5":
+                    $attribs["wildlife"] .= "<img src=\"" . $clientRoot . "/images/wildlife_icon3.png\" alt=\"Caterpillar\" >";
+                    $attribs["wildlife_array"][]= $value['charstatename'];
+                    break;
+                case "6":
+                    $attribs["wildlife"] .= "<img src=\"" . $clientRoot . "/images/wildlife_icon1.png\" alt=\"Hummingbirds\" >";
+                    $attribs["wildlife_array"][]= $value['charstatename'];
+                    break;
+            }
+            $attribs["wildlife_string"] =  implode(", ", $attribs["wildlife_array"]);
+        }
+        $attribs["growth_rate"] = implode(", ",array_map(function($a){
+            return $a["charstatename"];
+        },$tmp[687]));
+        $attribs["plant_behavior"] = implode(", ",array_map(function($a){
+            return $a["charstatename"];
+        },$tmp[688]));
+        $attribs["spreads_vigorously"] = implode(", ",array_map(function($a){
+            return $a["charstatename"];
+        },$tmp[739]));
+        $attribs["propogation"] = implode(", ",array_map(function($a){
+            return $a["charstatename"];
+        },$tmp[740]));
+        $attribs["other_cultivation_factors"] = implode(", ",array_map(function($a){
+            return $a["charstatename"];
+        },$tmp[767]));
+        //var_dump($attribs);
+        return $attribs;
+    }
+
 }
 ?>

@@ -367,7 +367,7 @@ include($serverRoot."/header.php");
             var sciname = res[i].sciname;
             if(display == "grid"){
                 html += '<div class="searchresultgridcell">';
-                html += '<a href="../taxa/index.php?taxon='+i+'" target="_blank">';
+                html += '<a href="../taxa/garden.php?taxon='+i+'" target="_blank">';
                 if(res[i].url) html += '<img class="searchresultgridimage" src="'+res[i].url+'" title="'+sciname+'" alt="'+sciname+' image" />';
                 html += '<div class="searchresultgridsciname">'+sciname+'</div>';
                 html += '</a>';
@@ -376,7 +376,7 @@ include($serverRoot."/header.php");
             if(display == "list"){
                 html += '<div class="searchResultListMainRow">';
                 html += '<div class="searchResultListSciname">';
-                html += '<a href="../taxa/index.php?taxon='+i+'" target="_blank">'+sciname+'</a>';
+                html += '<a href="../taxa/garden.php?taxon='+i+'" target="_blank">'+sciname+'</a>';
                 html += '</div>';
                 html += '<div class="searchResultListCommon">'+(res[i].common?res[i].common:"")+'</div>';
                 html += '<div class="searchResultListToggle">';
@@ -1066,8 +1066,18 @@ include($serverRoot."/header.php");
         </a>
     </div>
 </div>
-
-
+<div class="metro-wrapper">
+    <div class="inner-content">
+        <hr />
+        <div class="metro-col1"> </div>
+        <div class="metro-col2">
+            <div class="col-content">
+                <p>Metro is a primary contributor to OregonFlora's Gardening with Native Plants and supports efforts to protect clean
+                    air, water and habitat in greater portland.</p>
+            </div>
+        </div>
+    </div>
+</div>
 <?php
 include($serverRoot."/footer.php");
 ?>
