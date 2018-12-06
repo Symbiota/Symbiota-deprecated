@@ -48,6 +48,26 @@ ob_start();
         $parentLink = "index.php?taxon=" . $taxonManager->getParentTid() . "&cl=" . $taxonManager->getClid() . "&proj=" . $projValue . "&taxauthid=" . $taxAuthId;
         echo "<a href='" . $parentLink . "'><img id='parenttaxonicon' src='../images/toparent.png' title='Go to Parent' /></a>";
     }
+
+    //if subtaxa exist
+    $OSUManager = new OSUTaxaManager();
+    if($taxAuthId || $taxAuthId === "0") $OSUManager->setTaxAuthId($taxAuthId);
+    if($clValue) $OSUManager->setClName($clValue);
+    if($projValue) $OSUManager->setProj($projValue);
+    if($lang) $OSUManager->setLanguage($lang);
+    if($taxonValue) {
+        $OSUManager->setTaxon($taxonValue);
+        $OSUManager->setAttributes();
+    }
+    $arr = $OSUManager->getSppArray();
+    if(is_array($arr)){
+        $show_down_arrow = false;
+        foreach($arr as $arr1)
+        {
+            if(!in_array($OSUManager->getTid(),$arr1)) $show_down_arrow = true;
+        }
+        if($show_down_arrow) echo "   <a href='#imagebox'><img id='parenttaxonicon' src='../images/tochild.png' title='Go to Subtaxa' /></a>";
+    }
     ?>
 </div>
 <?php
@@ -137,6 +157,7 @@ if($taxonValue) {
     ?>
     <div>
         <?php
+
         if($sppArr = $OSUManager->getSppArray()){
             $cnt = 0;
             ksort($sppArr);
