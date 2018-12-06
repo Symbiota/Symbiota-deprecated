@@ -141,51 +141,57 @@ if($taxonValue) {
             $cnt = 0;
             ksort($sppArr);
             foreach($sppArr as $sciNameKey => $subArr){
-                echo "<div class='spptaxon'>";
-                echo "<div class='spptaxonbox'>";
-                echo "<a href='index.php?taxon=".$subArr["tid"]."&taxauthid=".$taxAuthId.($clValue?"&cl=".$clValue:"")."'>";
-                echo "<i>".$sciNameKey."</i>";
-                echo "</a></div>\n";
-                echo "<div class='sppimg'>";
+                if($subArr['tid'] != $OSUManager->getTid()){
+                    {
+                        //var_dump($subArr);
+                        echo "<div class='spptaxon'>";
+                        echo "<div class='spptaxonbox'>";
+                        echo "<a href='index.php?taxon=".$subArr["tid"]."&taxauthid=".$taxAuthId.($clValue?"&cl=".$clValue:"")."'>";
+                        echo "<i>".$sciNameKey."</i>";
+                        echo "</a></div>\n";
+                        echo "<div class='sppimg'>";
 
-                if(array_key_exists("url",$subArr)){
-                    $imgUrl = $subArr["url"];
-                    if(array_key_exists("imageDomain",$GLOBALS) && substr($imgUrl,0,1)=="/"){
-                        $imgUrl = $GLOBALS["imageDomain"].$imgUrl;
-                    }
-                    echo "<a href='index.php?taxon=".$subArr["tid"]."&taxauthid=".$taxAuthId.($clValue?"&cl=".$clValue:"")."'>";
+                        if(array_key_exists("url",$subArr)){
+                            $imgUrl = $subArr["url"];
+                            if(array_key_exists("imageDomain",$GLOBALS) && substr($imgUrl,0,1)=="/"){
+                                $imgUrl = $GLOBALS["imageDomain"].$imgUrl;
+                            }
+                            echo "<a href='index.php?taxon=".$subArr["tid"]."&taxauthid=".$taxAuthId.($clValue?"&cl=".$clValue:"")."'>";
 
-                    if($subArr["thumbnailurl"]){
-                        $imgUrl = $subArr["thumbnailurl"];
-                        if(array_key_exists("imageDomain",$GLOBALS) && substr($subArr["thumbnailurl"],0,1)=="/"){
-                            $imgUrl = $GLOBALS["imageDomain"].$subArr["thumbnailurl"];
+                            if($subArr["thumbnailurl"]){
+                                $imgUrl = $subArr["thumbnailurl"];
+                                if(array_key_exists("imageDomain",$GLOBALS) && substr($subArr["thumbnailurl"],0,1)=="/"){
+                                    $imgUrl = $GLOBALS["imageDomain"].$subArr["thumbnailurl"];
+                                }
+                            }
+                            echo '<img class="taxonimage" src="'.$imgUrl.'" title="'.$subArr['caption'].'" alt="Image of '.$sciNameKey.'" />';
+                            echo '</a>';
+                            echo '<div id="imgphotographer" title="'.$LANG['PHOTOGRAPHER'].': '.$subArr['photographer'].'">';
+                            echo '</div>';
                         }
+                        elseif($isEditor){
+                            echo '<div class="spptext"><a href="admin/tpeditor.php?category=imageadd&tid='.$subArr['tid'].'">'.$LANG['ADD_IMAGE'].'!</a></div>';
+                        }
+                        else{
+                            echo '<div class="spptext">'.$LANG['IMAGE_NOT_AVAILABLE'].'</div>';
+                        }
+                        echo "</div>\n";
+
+                        //Display thumbnail map
+                        echo '<div class="sppmap">';
+                        if(array_key_exists("map",$subArr) && $subArr["map"]){
+                            echo '<img src="'.$subArr['map'].'" title="'.$spDisplay.'" alt="'.$spDisplay.'" />';
+                        }
+                        elseif($taxonManager->getRankId()>140){
+                            echo '<div class="spptext">'.$LANG['MAP_NOT_AVAILABLE'].'</div>';
+                        }
+                        echo '</div>';
+
+                        echo "</div>";
+                        $cnt++;
                     }
-                    echo '<img class="taxonimage" src="'.$imgUrl.'" title="'.$subArr['caption'].'" alt="Image of '.$sciNameKey.'" />';
-                    echo '</a>';
-                    echo '<div id="imgphotographer" title="'.$LANG['PHOTOGRAPHER'].': '.$subArr['photographer'].'">';
-                    echo '</div>';
-                }
-                elseif($isEditor){
-                    echo '<div class="spptext"><a href="admin/tpeditor.php?category=imageadd&tid='.$subArr['tid'].'">'.$LANG['ADD_IMAGE'].'!</a></div>';
-                }
-                else{
-                    echo '<div class="spptext">'.$LANG['IMAGE_NOT_AVAILABLE'].'</div>';
-                }
-                echo "</div>\n";
 
-                //Display thumbnail map
-                echo '<div class="sppmap">';
-                if(array_key_exists("map",$subArr) && $subArr["map"]){
-                    echo '<img src="'.$subArr['map'].'" title="'.$spDisplay.'" alt="'.$spDisplay.'" />';
                 }
-                elseif($taxonManager->getRankId()>140){
-                    echo '<div class="spptext">'.$LANG['MAP_NOT_AVAILABLE'].'</div>';
-                }
-                echo '</div>';
-
-                echo "</div>";
-                $cnt++;
             }
         }
         ?>
