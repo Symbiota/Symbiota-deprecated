@@ -127,7 +127,7 @@ $isGardenProfile = $OSUManager ? $OSUManager->isGardenProfile() : false;
             }
             ?>
             <?php
-            if($isGardenProfile){
+            if($isGardenProfile && 1==0){//disabled
                 ?>
                 <div class="garden-link">
                     <a href="garden.php?taxon=<?php echo $OSUManager->getTid(); ?>"  class="btn light-purple-btn">Garden Profile Page</a>
