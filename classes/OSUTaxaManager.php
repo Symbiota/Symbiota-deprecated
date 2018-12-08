@@ -1,6 +1,31 @@
 <?php
 include_once($SERVER_ROOT.'/config/dbconnection.php');
-
+if (! function_exists('array_column')) {
+    function array_column(array $input, $columnKey, $indexKey = null) {
+        $array = array();
+        foreach ($input as $value) {
+            if ( !array_key_exists($columnKey, $value)) {
+                trigger_error("Key \"$columnKey\" does not exist in array");
+                return false;
+            }
+            if (is_null($indexKey)) {
+                $array[] = $value[$columnKey];
+            }
+            else {
+                if ( !array_key_exists($indexKey, $value)) {
+                    trigger_error("Key \"$indexKey\" does not exist in array");
+                    return false;
+                }
+                if ( ! is_scalar($value[$indexKey])) {
+                    trigger_error("Key \"$indexKey\" does not contain scalar value");
+                    return false;
+                }
+                $array[$value[$indexKey]] = $value[$columnKey];
+            }
+        }
+        return $array;
+    }
+}
 class OSUTaxaManager {
 
     private $submittedTid;
@@ -929,7 +954,7 @@ class OSUTaxaManager {
         $attribs["commercial_availability"] = '';
         implode(", ",$tmp[678]);
         for($i=1;$i<=ceil($num_commercial/10);$i++) {
-            $attribs["commercial_availability"].= "<img src=\"" . $clientRoot . "/images/Marketbasket.png\" alt=\"Commercial Availability\" >";
+            $attribs["commercial_availability"].= "<img src=\"../images/Marketbasket.png\" alt=\"Commercial Availability\" >";
         }
         $attribs["garden_type"] = implode(", ",array_map(function($a){
             return $a["charstatename"];
@@ -945,15 +970,15 @@ class OSUTaxaManager {
         foreach ($tmp[680] as $value) { //sunlight
             switch ($value['charstatename']) {
                 case "sun":
-                    $attribs["sunlight"] .= "<img src=\"" . $clientRoot . "/images/sunlight_icon4.png\" alt=\"Sun\" >";
+                    $attribs["sunlight"] .= "<img src=\"../images/sunlight_icon4.png\" alt=\"Sun\" >";
                     $attribs["sunlight_array"][]= $value['charstatename'];
                     break;
                 case "part shade":
-                    $attribs["sunlight"] .= "<img src=\"" . $clientRoot . "/images/sunlight_icon3.png\" alt=\"Part Shade\" >";
+                    $attribs["sunlight"] .= "<img src=\"../images/sunlight_icon3.png\" alt=\"Part Shade\" >";
                     $attribs["sunlight_array"][]= $value['charstatename'];
                     break;
                 case "shade":
-                    $attribs["sunlight"] .= "<img src=\"" . $clientRoot . "/images/sunlight_icon1.png\" alt=\"Shade\" >";
+                    $attribs["sunlight"] .= "<img src=\"../images/sunlight_icon1.png\" alt=\"Shade\" >";
                     $attribs["sunlight_array"][]= $value['charstatename'];
                     break;
             }
@@ -964,15 +989,15 @@ class OSUTaxaManager {
         foreach ($tmp[683] as $value) { //moisture
             switch ($value['charstatename']) {
                 case "dry":
-                    $attribs["moisture"].= "<img src=\"" . $clientRoot . "/images/moisture_icon1.png\" alt=\"Dry\" >";
+                    $attribs["moisture"].= "<img src=\"../images/moisture_icon1.png\" alt=\"Dry\" >";
                     $attribs["moisture_array"][]= $value['charstatename'];
                     break;
                 case "moist":
-                    $attribs["moisture"].= "<img src=\"" . $clientRoot . "/images/moisture_icon3.png\" alt=\"Moist\" >";
+                    $attribs["moisture"].= "<img src=\"../images/moisture_icon3.png\" alt=\"Moist\" >";
                     $attribs["moisture_array"][]= $value['charstatename'];
                     break;
                 case "wet":
-                    $attribs["moisture"].= "<img src=\"" . $clientRoot . "/images/moisture_icon4.png\" alt=\"Wet\" >";
+                    $attribs["moisture"].= "<img src=\"../images/moisture_icon4.png\" alt=\"Wet\" >";
                     $attribs["moisture_array"][]= $value['charstatename'];
                     break;
             }
@@ -983,23 +1008,23 @@ class OSUTaxaManager {
         foreach ($tmp[685] as $value) { //wildlife/insect support
             switch ($value['cs']) {
                 case "1":
-                    $attribs["wildlife"] .= "<img src=\"" . $clientRoot . "/images/wildlife_icon4.png\" alt=\"Butterfly\" >";
+                    $attribs["wildlife"] .= "<img src=\"../images/wildlife_icon4.png\" alt=\"Butterfly\" >";
                     $attribs["wildlife_array"][]= $value['charstatename'];
                     break;
                 case "2":
-                    $attribs["wildlife"] .= "<img src=\"" . $clientRoot . "/images/wildlife_icon2.png\" alt=\"Bee\" >";
+                    $attribs["wildlife"] .= "<img src=\"../images/wildlife_icon2.png\" alt=\"Bee\" >";
                     $attribs["wildlife_array"][]= $value['charstatename'];
                     break;
                 case "3":
-                    $attribs["wildlife"] .= "<img src=\"" . $clientRoot . "/images/wildlife_icon5.png\" alt=\"Insect\" >";
+                    $attribs["wildlife"] .= "<img src=\"../images/wildlife_icon5.png\" alt=\"Insect\" >";
                     $attribs["wildlife_array"][]= $value['charstatename'];
                     break;
                 case "5":
-                    $attribs["wildlife"] .= "<img src=\"" . $clientRoot . "/images/wildlife_icon3.png\" alt=\"Caterpillar\" >";
+                    $attribs["wildlife"] .= "<img src=\"../images/wildlife_icon3.png\" alt=\"Caterpillar\" >";
                     $attribs["wildlife_array"][]= $value['charstatename'];
                     break;
                 case "6":
-                    $attribs["wildlife"] .= "<img src=\"" . $clientRoot . "/images/wildlife_icon1.png\" alt=\"Hummingbirds\" >";
+                    $attribs["wildlife"] .= "<img src=\"../images/wildlife_icon1.png\" alt=\"Hummingbirds\" >";
                     $attribs["wildlife_array"][]= $value['charstatename'];
                     break;
             }
