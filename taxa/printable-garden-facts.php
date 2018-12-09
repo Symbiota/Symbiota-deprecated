@@ -119,7 +119,9 @@ $displayLeftMenu = false;
             <strong>Bloom time: </strong><?php echo $attribs['bloom_months'] ?><br>
             <strong>Light: </strong><?php echo $attribs['sunlight_string'] ?><br>
             <strong>Moisture: </strong><?php echo $attribs['moisture_string'] ?><br>
-            <strong>Wildlife support: </strong><?php echo $attribs['wildlife_string'] ?><br>
+            <?php if(isset($attribs['wildlife_string']) && $attribs['wildlife_string'] != ''){ ?>
+                <strong>Wildlife support: </strong><?php echo $attribs['wildlife_string'] ?><br>
+        <?php } ?>
         </p>
         <h3>Growth and Maintenance</h3>
         <p>
@@ -142,7 +144,7 @@ $displayLeftMenu = false;
         <?php if(is_array($collections)) { ?>
             <div class="home-boxes">
                 <?php foreach ($collections as $collection) { ?>
-                    <a href="<?php echo $clientRoot; ?>/checklists/checklist.php?cl=<?php echo $collection['cid'] ?>&pid=3" class="home-box image-box">
+                    <a href="<?php echo $clientRoot; ?>/checklists/checklist.php?cl=<?php echo $collection['clid'] ?>&pid=3" class="home-box image-box">
                         <img src="<?php echo $collection['iconurl']; ?>" alt="<?php echo $collection['name'] ?>">
                         <h3><?php echo $collection['name'] ?></h3>
                         <div class="box-overlay">

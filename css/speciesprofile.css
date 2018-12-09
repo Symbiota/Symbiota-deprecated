@@ -536,6 +536,15 @@ div.spptext{
 	border-bottom: 1px solid #cccccc;
 	padding-bottom: 4px;
 }
+.garden-left h1.section {
+	padding-bottom: 20px;
+}
+.garden-left p.section {
+	padding-bottom: 10px;
+}
+.garden-desc {
+	margin-top: 30px;
+}
 .garden-desc p:first-child:first-letter {
 	float: left;
 	color: #4e1e97;
