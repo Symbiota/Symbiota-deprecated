@@ -1049,5 +1049,23 @@ class OSUTaxaManager {
         return $attribs;
     }
 
+    public function gardenCollections()
+    {
+        $collections = array();
+        $sql = "SELECT c.clid, c.name, c.title, c.iconurl FROM fmchecklists c Left Join fmchklsttaxalink t ON c.CLID = t.CLID WHERE c.parentclid=54 AND t.TID =  ".$this->con->escape_string($this->tid);
+        //echo $sql;exit();
+        $result = $this->con->query($sql);
+
+        while($row = $result->fetch_object()){
+            $collections[] = array(
+                "clid" => $row->clid,
+                "name" => $row->name,
+                "title" => $row->title,
+                "iconurl" => $row->iconurl,
+            );
+        }
+        return $collections;
+    }
+
 }
 ?>

@@ -72,6 +72,7 @@ if(!$isGardenProfile) {
 }
 $garden_image = $OSUManager->mainGardenImage();
 $attribs = $OSUManager->getAllAttribs();
+$collections = $OSUManager->gardenCollections();
 
 ?>
 
@@ -119,20 +120,19 @@ include($SERVER_ROOT.'/header.php');
 <div class="garden-content-wrapper">
     <div class="garden-page-header">
         <a href="printable-garden-facts.php?taxon=<?php echo $taxonManager->getTid(); ?>" class="btn light-purple-btn pull-right" target="_blank">Printable Fact Sheet</a>
-        <h1><strong><em><?php echo $spDisplay; ?></em></strong><br>
-        <?php echo $vernStr; ?></h1>
     </div>
     <div class="garden-left">
-        <p><?php echo $attribs['type'] ?></p>
-        <p>Grows up to <?php echo $attribs['max_height'] ?>'h x <?php echo $attribs['max_width'] ?>'w</p>
-        <p class="garden-icons">Cultivation Tolerance<br>
+        <h1 class="section"><strong><em><?php echo $spDisplay; ?></em></strong><br>
+            <?php echo $vernStr; ?></h1>
+        <p class="section"><?php echo $attribs['type'] ?></p>
+        <p class="section">Grows up to <?php echo $attribs['max_height'] ?>'h x <?php echo $attribs['max_width'] ?>'w</p>
+        <p class="section garden-icons">Cultivation Tolerance<br>
             <?php echo $attribs['moisture'] ?>
             <?php echo $attribs['sunlight'] ?>
         </p>
-        <p>Ease of growth: <?php echo $attribs['ease_of_growth'] ?></p>
-        <p class="garden-icons">Commercial availaility: <?php echo $attribs['commercial_availability'] ?></p>
-        <p class="garden-icons">Wildlife support<br><?php echo $attribs['wildlife'] ?></p>
-        <hr>
+        <p class="section">Ease of growth: <?php echo $attribs['ease_of_growth'] ?></p>
+<!--        <p class="section garden-icons">Commercial availaility: --><?php //echo $attribs['commercial_availability'] ?><!--</p>-->
+        <p class="section garden-icons">Wildlife support<br><?php echo $attribs['wildlife'] ?></p>
         <div class="garden-desc">
             <?php echo $garden_content; ?>
         </div>
@@ -169,43 +169,19 @@ include($SERVER_ROOT.'/header.php');
     </div>
     <div class="garden-collections">
         <h4>Plant collections containing <?php echo $vernaculars; ?></h4>
+        <?php if(is_array($collections)) { ?>
         <div class="home-boxes">
-            <a href="<?php echo $clientRoot; ?>/checklists/checklist.php?cl=14796&pid=3" class="home-box image-box">
-                <img src="<?php echo $clientRoot; ?>/images/layout/Meadowscape_sm.jpg" alt="Meadowscape">
-                <h3>Meadowscape</h3>
-                <div class="box-overlay">
-                    <div class="centered">A sun-loving mix of flowering herbs, perennials, and grasses</div>
-                </div>
-            </a>
-            <a href="<?php echo $clientRoot; ?>/checklists/checklist.php?cl=14797" class="home-box image-box">
-                <img src="<?php echo $clientRoot; ?>/images/layout/Pollinator_garden_sm.jpg" alt="Pollinator Garden">
-                <h3>Pollinator Garden</h3>
-                <div class="box-overlay">
-                    <div class="centered">A focus on flowers that provide nectar or pollen to native bees and other insect pollinators</div>
-                </div>
-            </a>
-            <a href="<?php echo $clientRoot; ?>/checklists/checklist.php?cl=14798&pid=3" class="home-box image-box">
-                <img src="<?php echo $clientRoot; ?>/images/layout/Rock_garden_sm.jpg" alt="Rock Garden">
-                <h3>Rock Garden</h3>
-                <div class="box-overlay">
-                    <div class="centered">Plants that bring color and texture to rocky, well-drained landscapes</div>
-                </div>
-            </a>
-            <a href="<?php echo $clientRoot; ?>/checklists/checklist.php?cl=14799&pid=3" class="home-box image-box">
-                <img src="<?php echo $clientRoot; ?>/images/layout/Water_features_garden_sm.jpg" alt="Rain Garden">
-                <h3>Rain Garden</h3>
-                <div class="box-overlay">
-                    <div class="centered">Plants suited to the edge of a pond or stream, or moist soils nearby</div>
-                </div>
-            </a>
-            <a href="<?php echo $clientRoot; ?>/checklists/checklist.php?cl=14800&pid=3" class="home-box image-box">
-                <img src="<?php echo $clientRoot; ?>/images/layout/Woodland_garden_sm.jpg" alt="Woodland Garden">
-                <h3>Woodland Garden</h3>
-                <div class="box-overlay">
-                    <div class="centered">Understory ferns, herbs, and shrubs to complete a wooded planting</div>
-                </div>
-            </a>
+            <?php foreach ($collections as $collection) { ?>
+                <a href="<?php echo $clientRoot; ?>/checklists/checklist.php?cl=<?php echo $collection['cid'] ?>&pid=3" class="home-box image-box">
+                    <img src="<?php echo $collection['iconurl']; ?>" alt="<?php echo $collection['name'] ?>">
+                    <h3><?php echo $collection['name'] ?></h3>
+                    <div class="box-overlay">
+                        <div class="centered"><?php echo $collection['title'] ?></div>
+                    </div>
+                </a>
+            <?php }?>
         </div>
+        <?php } //end if collections ?>
     </div>
 </div>
 <div class="metro-wrapper">

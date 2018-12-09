@@ -511,10 +511,9 @@ div.spptext{
 	padding: 30px 20px;
 	overflow: hidden;
 }
-.garden-page-header h1,
-.garden-page-header h2 {
-	text-align: center;
-	margin-bottom: 40px;
+.garden-page-header  {
+	overflow: hidden;
+	margin-bottom: 10px;
 }
 .garden-left {
 	width: 34%;
@@ -533,8 +532,13 @@ div.spptext{
 .garden-left hr {
 	height: 2px;
 }
+.garden-left .section {
+	border-bottom: 1px solid #cccccc;
+	padding-bottom: 4px;
+}
 .garden-desc p:first-child:first-letter {
 	float: left;
+	color: #4e1e97;
 	font-size: 68px;
 	line-height: 50px;
 	padding-top: 4px;
@@ -556,6 +560,10 @@ div.spptext{
 .garden-collections .home-box h3 {
 	font-size: 18px;
 }
+.garden-collections .home-box  {
+	max-width: 200px;
+	display: block;
+}
 .garden-collections .home-box {
 	flex: 0 1 calc(50% - 30px);
 	margin: 15px;
@@ -570,6 +578,11 @@ div.spptext{
     color: #4e1e97;
     margin-top: 30px;
 }
+.garden-collections .home-boxes img {
+	width: 200px;
+	height: 200px;
+	object-fit: cover;
+}
 .garden-commercial {
 	margin-top: 30px;
 }
@@ -577,6 +590,20 @@ div.spptext{
 	width: 30px;
 	vertical-align: middle;
 }
+@media screen and (max-width:900px){
+
+	.garden-collections .home-boxes {
+		display: block;
+	}
+}
 @media screen and (max-width:700px){
 
+	.garden-facts {
+		width: 100%;
+		float: none;
+	}
+	.garden-collections {
+		width: 100%;
+		float: none;
+	}
 }
