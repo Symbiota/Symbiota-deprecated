@@ -80,13 +80,16 @@ function openPopup(urlStr,windowName){
 function showImagesChecked(f){
 	if(f.showimages.checked){
 		document.getElementById("wordicondiv").style.display = "none";
+		f.showsynonyms.checked = false;
+		document.getElementById("showsynonymsdiv").style.display = "none"; 
 		f.showvouchers.checked = false;
 		document.getElementById("showvouchersdiv").style.display = "none"; 
 		f.showauthors.checked = false;
 		document.getElementById("showauthorsdiv").style.display = "none"; 
 	}
 	else{
-		document.getElementById("wordicondiv").style.display = "block";
+		document.getElementById("wordicondiv").style.display = "block";		
+		document.getElementById("showsynonymsdiv").style.display = "block"; 
 		document.getElementById("showvouchersdiv").style.display = "block"; 
 		document.getElementById("showauthorsdiv").style.display = "block"; 
 	}

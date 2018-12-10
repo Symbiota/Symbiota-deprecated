@@ -17,13 +17,14 @@ class ChecklistManager {
 	private $language = "English";
 	private $thesFilter = 0;
 	private $taxonFilter;
-	private $showAuthors;
-	private $showCommon;
-	private $showImages;
-	private $showVouchers;
-	private $showAlphaTaxa;
-	private $searchCommon;
-	private $searchSynonyms;
+	private $showAuthors = false;
+	private $showCommon = false;
+	private $showSynonyms = false;
+	private $showImages = false;
+	private $showVouchers = false;
+	private $showAlphaTaxa = false;
+	private $searchCommon = false;
+	private $searchSynonyms = true;
 	private $filterArr = Array();
 	private $imageLimit = 100;
 	private $taxaLimit = 500;
@@ -177,10 +178,11 @@ class ChecklistManager {
 	public function getTaxaList($pageNumber = 1,$retLimit = 500){
 		if(!$this->clid && !$this->dynClid) return;
 		//Get species list
-		$speciesPrev="";$taxonPrev="";
-		$tidReturn = Array();
+		$speciesPrev="";
+		$taxonPrev="";
         $genusCntArr = Array();
         $familyCntArr = Array();
+        $speciesRankNeededArr = array();
 		if($this->showImages && $retLimit) $retLimit = $this->imageLimit;
 		if(!$this->basicSql) $this->setClSql();
 		$result = $this->conn->query($this->basicSql);
@@ -188,6 +190,8 @@ class ChecklistManager {
 			$family = strtoupper($row->family);
 			if(!$family) $family = 'Family Incertae Sedis';
 			$this->filterArr[$family] = '';
+			$taxonGroup = $family;
+			if($this->showAlphaTaxa) $taxonGroup = $row->unitname1;
 			$tid = $row->tid;
 			$sciName = $this->cleanOutStr($row->sciname);
 			$taxonTokens = explode(" ",$sciName);
@@ -202,6 +206,12 @@ class ChecklistManager {
 			}
 			if(!$retLimit || ($this->taxaCount >= (($pageNumber-1)*$retLimit) && $this->taxaCount <= ($pageNumber)*$retLimit)){
 				if(count($taxonTokens) == 1) $sciName .= " sp.";
+				if($row->rankid > 220 && !array_key_exists($row->parenttid, $this->taxaList)){
+					$this->taxaList[$row->parenttid]['taxongroup'] = $taxonGroup;
+					$this->taxaList[$row->parenttid]['family'] = $family;
+					//$this->taxaList[$row->parenttid]['clid'] = $row->clid;
+					$speciesRankNeededArr[] = $row->parenttid;
+				}
 				if($this->showVouchers){
 					$clStr = "";
 					if($row->habitat) $clStr = ", ".$row->habitat;
@@ -210,13 +220,13 @@ class ChecklistManager {
 					if($row->source) $clStr .= ", <u>source</u>: ".$row->source;
 					if($clStr) $this->taxaList[$tid]["notes"] = substr($clStr,2);
 				}
-				$this->taxaList[$tid]["sciname"] = $sciName;
-				$this->taxaList[$tid]["family"] = $family;
+				$this->taxaList[$tid]['sciname'] = $sciName;
+				$this->taxaList[$tid]['family'] = $family;
+				$this->taxaList[$tid]['taxongroup'] = '<i>'.$taxonGroup.'</i>';
 				if(isset($this->taxaList[$tid]['clid'])) $this->taxaList[$tid]['clid'] = $this->taxaList[$tid]['clid'].','.$row->clid;
 				else $this->taxaList[$tid]['clid'] = $row->clid;
-				$tidReturn[] = $tid;
 				if($this->showAuthors){
-					$this->taxaList[$tid]["author"] = $this->cleanOutStr($row->author);
+					$this->taxaList[$tid]['author'] = $this->cleanOutStr($row->author);
 				}
     		}
             if(!in_array($family,$familyCntArr)){
@@ -245,9 +255,9 @@ class ChecklistManager {
 			unset($this->filterArr);
 			return $this->getTaxaList(1,$retLimit);
 		}
-		//Get voucher data; note that dynclid list won't have vouchers
 		if($this->taxaList){
 			if($this->showVouchers){
+				//Get voucher data; note that dynclid list won't have vouchers
 				$clidStr = $this->clid;
 				if($this->childClidArr){
 					$clidStr .= ','.implode(',',array_keys($this->childClidArr));
@@ -284,20 +294,31 @@ class ChecklistManager {
 				}
 				$vResult->free();
 			}
-			if($this->showImages) $this->setImages($tidReturn);
-			if($this->showCommon) $this->setVernaculars($tidReturn);
+			if($this->showImages) $this->setImages();
+			if($this->showCommon) $this->setVernaculars();
+			if($this->showSynonyms) $this->setSynonyms();
+			if($speciesRankNeededArr){
+				//Get infraspecific species ranked taxa that are not explicited linked into checklist
+				$sql = 'SELECT tid, sciname, author FROM taxa WHERE tid IN('.implode(',',$speciesRankNeededArr).')';
+				$rs = $this->conn->query($sql);
+				while($r = $rs->fetch_object()){
+					$this->taxaList[$r->tid]['sciname'] = $r->sciname;
+					$this->taxaList[$r->tid]['author'] = $r->author;
+				}
+				$rs->free();
+			}
 		}
 		return $this->taxaList;
 	}
 
-	private function setImages($tidReturn){
-		if($tidReturn){
+	private function setImages(){
+		if($this->taxaList){
 			$sql = 'SELECT i2.tid, i.url, i.thumbnailurl FROM images i INNER JOIN '.
 				'(SELECT ts1.tid, SUBSTR(MIN(CONCAT(LPAD(i.sortsequence,6,"0"),i.imgid)),7) AS imgid '.
 				'FROM taxstatus ts1 INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '.
 				'INNER JOIN images i ON ts2.tid = i.tid '.
 				'WHERE i.sortsequence < 500 AND ts1.taxauthid = 1 AND ts2.taxauthid = 1 '.
-				'AND (ts1.tid IN('.implode(',',$tidReturn).')) '.
+				'AND (ts1.tid IN('.implode(',',array_keys($this->taxaList)).')) '.
 				'GROUP BY ts1.tid) i2 ON i.imgid = i2.imgid';
 			//echo $sql;
 			$rs = $this->conn->query($sql);
@@ -329,13 +350,13 @@ class ChecklistManager {
 		}
 	}
 
-	private function setVernaculars($tidReturn){
-		if($tidReturn){
+	private function setVernaculars(){
+		if($this->taxaList){
 			$tempVernArr = array();
 			$sql = 'SELECT ts1.tid, v.vernacularname '.
 				'FROM taxstatus ts1 INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '.
 				'INNER JOIN taxavernaculars v ON ts2.tid = v.tid '.
-				'WHERE ts1.taxauthid = 1 AND ts2.taxauthid = 1 AND (ts1.tid IN('.implode(',',$tidReturn).')) ';
+				'WHERE ts1.taxauthid = 1 AND ts2.taxauthid = 1 AND (ts1.tid IN('.implode(',',array_keys($this->taxaList)).')) ';
 			if($this->language) $sql .= 'AND v.language = "'.$this->language.'" ';
 			$sql .= 'ORDER BY v.sortsequence DESC ';
 			//echo $sql; exit;
@@ -344,6 +365,27 @@ class ChecklistManager {
 				if($r->vernacularname) $this->taxaList[$r->tid]['vern'] = $this->cleanOutStr($r->vernacularname);
 			}
 			$rs->free();
+		}
+	}
+
+	private function setSynonyms(){
+		if($this->taxaList){
+			$tempArr = array();
+			$sql = 'SELECT ts.tid, t.sciname, t.author '.
+				'FROM taxstatus ts INNER JOIN taxstatus ts2 ON ts.tidaccepted = ts2.tidaccepted '.
+				'INNER JOIN taxa t ON ts2.tid = t.tid '.
+				'WHERE (ts.taxauthid = '.($this->thesFilter?$this->thesFilter:'1').') AND (ts2.taxauthid = '.($this->thesFilter?$this->thesFilter:'1').') '.
+				'AND (ts.tid IN('.implode(',',array_keys($this->taxaList)).')) AND (ts.tid != ts2.tid) '.
+				'ORDER BY t.sciname';
+			//echo $sql;
+			$rs = $this->conn->query($sql);
+			while($r = $rs->fetch_object()){
+				$tempArr[$r->tid][] = '<i>'.$r->sciname.'</i>'.($this->showAuthors?' '.$r->author:'');
+			}
+			$rs->free();
+			foreach($tempArr as $k => $vArr){
+				$this->taxaList[$k]['syn'] = implode(', ',$vArr);
+			}
 		}
 	}
 
@@ -496,21 +538,20 @@ class ChecklistManager {
 			if($this->childClidArr){
 				$clidStr .= ','.implode(',',array_keys($this->childClidArr));
 			}
+			$this->basicSql = 'SELECT t.tid, ctl.clid, IFNULL(ctl.familyoverride,ts.family) AS family, t.sciname, t.author, t.unitname1, t.rankid, ctl.habitat, ctl.abundance, ctl.notes, ctl.source, ts.parenttid ';
 			if($this->thesFilter){
-				$this->basicSql = 'SELECT t.tid, ctl.clid, IFNULL(ctl.familyoverride,ts.family) AS family, t.sciname, t.author, ctl.habitat, ctl.abundance, ctl.notes, ctl.source '.
-					'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tidaccepted '.
+				$this->basicSql .= 'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tidaccepted '.
 					'INNER JOIN fmchklsttaxalink ctl ON ts.tid = ctl.tid '.
 			  		'WHERE (ts.taxauthid = '.$this->thesFilter.') AND (ctl.clid IN ('.$clidStr.')) ';
 			}
 			else{
-				$this->basicSql = 'SELECT t.tid, ctl.clid, IFNULL(ctl.familyoverride,ts.family) AS family, t.sciname, t.author, ctl.habitat, ctl.abundance, ctl.notes, ctl.source '.
-					'FROM taxa t INNER JOIN fmchklsttaxalink ctl ON t.tid = ctl.tid '.
+				$this->basicSql .= 'FROM taxa t INNER JOIN fmchklsttaxalink ctl ON t.tid = ctl.tid '.
 					'INNER JOIN taxstatus ts ON t.tid = ts.tid '.
 			  		'WHERE (ts.taxauthid = 1) AND (ctl.clid IN ('.$clidStr.')) ';
 			}
 		}
 		else{
-			$this->basicSql = 'SELECT t.tid, ctl.dynclid as clid, ts.family, t.sciname, t.author '.
+			$this->basicSql = 'SELECT t.tid, ctl.dynclid as clid, ts.family, t.sciname, t.author, t.unitname1, t.rankid, ts.parenttid '.
 				'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
 				'INNER JOIN fmdyncltaxalink ctl ON t.tid = ctl.tid '.
     	  		'WHERE (ts.taxauthid = '.($this->thesFilter?$this->thesFilter:'1').') AND (ctl.dynclid = '.$this->dynClid.') ';
@@ -725,32 +766,36 @@ class ChecklistManager {
 		$this->taxonFilter = preg_replace('/\s{1}[\D]{1}\s{1}/i', ' _ ', $term);
 	}
 
-	public function setShowAuthors($value = 1){
-		$this->showAuthors = $value;
+	public function setShowAuthors($bool){
+		if($bool) $this->showAuthors = true;
 	}
 
-	public function setShowCommon($value = 1){
-		$this->showCommon = $value;
+	public function setShowCommon($bool){
+		if($bool) $this->showCommon = true;
 	}
 
-	public function setShowImages($value = 1){
-		$this->showImages = $value;
+	public function setShowSynonyms($bool){
+		if($bool) $this->showSynonyms = true;
 	}
 
-	public function setShowVouchers($value = 1){
-		$this->showVouchers = $value;
+	public function setShowImages($bool){
+		if($bool) $this->showImages = true;
 	}
 
-	public function setShowAlphaTaxa($value = 1){
-		$this->showAlphaTaxa = $value;
+	public function setShowVouchers($bool){
+		if($bool) $this->showVouchers = true;
 	}
 
-	public function setSearchCommon($value = 1){
-		$this->searchCommon = $value;
+	public function setShowAlphaTaxa($bool){
+		if($bool) $this->showAlphaTaxa = true;
 	}
 
-	public function setSearchSynonyms($value = 1){
-		$this->searchSynonyms = $value;
+	public function setSearchCommon($bool){
+		if($bool) $this->searchCommon = true;
+	}
+
+	public function setSearchSynonyms($bool){
+		if($bool) $this->searchSynonyms = true;
 	}
 
 	public function getClid(){
