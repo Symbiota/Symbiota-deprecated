@@ -232,7 +232,29 @@ if($clArray["locality"]){
             width: 100%;
             color: #f3f3f3;
         }
+        .checklist-left {
+            width: 50%;
+            float: left;
+            padding-right: 10px;
+        }
+        .checklist-right {
+            width: 50%;
+            float: left;
+            padding-left: 10px;
+        }
 
+        @media screen and (max-width:700px){
+            .checklist-left {
+                width: 100%;
+                float: none;
+                padding: 0;
+            }
+            .checklist-right {
+                width: 100%;
+                float: none;
+                padding: 0;
+            }
+        }
         @-webkit-keyframes spin {
             0% { -webkit-transform: rotate(0deg); }
             100% { -webkit-transform: rotate(360deg); }
@@ -299,42 +321,9 @@ if($clArray["locality"]){
 				<?php 
 			}
 			?>
-			<div style="float:left;color:#990000;font-size:20px;font-weight:bold;">
-				<a href="checklist.php?cl=<?php echo $clValue."&proj=".$pid."&dynclid=".$dynClid; ?>">
-					<?php echo $clManager->getClName(); ?>
-				</a>
-			</div>
-			<?php 
-			if($activateKey && !$printMode){
-				?>
-				<div style="float:left;padding:5px;">
-					<a href="../ident/key.php?cl=<?php echo $clValue."&proj=".$pid."&dynclid=".$dynClid;?>&taxon=All+Species">
-						<img src='../images/key.png' style="width:15px;border:0px;" title='Open Symbiota Key' />
-					</a>
-				</div>
-				<?php 
-			}
-			if(!$printMode && $taxaArray){
-				?>
-				<div style="padding:5px;">
-					<ul id="sddm">
-					    <li>
-					    	<span onmouseover="mopen('m1')" onmouseout="mclosetime()">
-					    		<img src="../images/games/games.png" style="height:17px;" title="Access Species List Games" />
-					    	</span>
-					        <div id="m1" onmouseover="mcancelclosetime()" onmouseout="mclosetime()">
-					        	<?php
-									$varStr = "?clid=".$clid."&dynclid=".$dynClid."&listname=".$clManager->getClName()."&taxonfilter=".$taxonFilter."&showcommon=".$showCommon.($clManager->getThesFilter()?"&thesfilter=".$clManager->getThesFilter():"");
-					        	?>
-						        <a href="../games/namegame.php<?php echo $varStr; ?>"><?php echo $LANG['NAMEGAME'];?></a>
-						        <a href="../games/flashcards.php<?php echo $varStr; ?>"><?php echo $LANG['FLASH'];?></a>
-					        </div>
-					    </li>
-					</ul>
-				</div>
-				<div style="clear:both;"></div>
-				<?php
-			}
+
+
+            <?php
 			//Do not show certain fields if Dynamic Checklist ($dynClid)
 			if($clValue){
 				if($clArray['type'] == 'rarespp'){
@@ -356,26 +345,114 @@ if($clArray["locality"]){
 					echo "<div><span style='font-weight:bold;'>".(isset($LANG['CITATION'])?$LANG['CITATION']:'Citation').":</span> ".$pubStr."</div>";
 				}
 			}
-		
-			if(($locStr || ($clValue && ($clArray["latcentroid"] || $clArray["abstract"])) || $clArray["notes"])){
-				?>
-				<div class="moredetails" style="<?php echo (($showDetails || $printMode)?'display:none;':''); ?>color:blue;cursor:pointer;" onclick="toggle('moredetails')"><?php echo $LANG['MOREDETS'];?></div>
-				<div class="moredetails" style="display:<?php echo (($showDetails && !$printMode)?'block':'none'); ?>;color:blue;cursor:pointer;" onclick="toggle('moredetails')"><?php echo $LANG['LESSDETS'];?></div>
-				<div class="moredetails" style="display:<?php echo (($showDetails || $printMode)?'block':'none'); ?>;">
-					<?php 
-					if($locStr){
-						echo "<div><span style='font-weight:bold;'>".$LANG['LOC']."</span>".$locStr."</div>";
-					}
-					if($clValue && $clArray["abstract"]){
-						echo "<div><span style='font-weight:bold;'>".$LANG['ABSTRACT']."</span>".$clArray["abstract"]."</div>";
-					}
-					if($clValue && $clArray["notes"]){
-						echo "<div><span style='font-weight:bold;'>Notes: </span>".$clArray["notes"]."</div>";
-					}
-					?>
-				</div>
-				<?php 
-			}
+			if($clValue && $clArray["parentclid"]== 54 && $clArray["iconurl"] !='') {//garden collection ?>
+                <div class="checklist-left">
+                    <img src="<?php echo $clArray['iconurl'] ?>" alt="<?php echo $clArray['iconurl'] ?>">
+                </div>
+                <div class="checklist-right">
+                    <div style="float:left;color:#990000;font-size:20px;font-weight:bold;">
+                        <a href="checklist.php?cl=<?php echo $clValue."&proj=".$pid."&dynclid=".$dynClid; ?>">
+                            <?php echo $clManager->getClName(); ?>
+                        </a>
+                    </div>
+                    <?php
+                    if($activateKey && !$printMode){
+                        ?>
+                        <div style="float:left;padding:5px;">
+                            <a href="../ident/key.php?cl=<?php echo $clValue."&proj=".$pid."&dynclid=".$dynClid;?>&taxon=All+Species">
+                                <img src='../images/key.png' style="width:15px;border:0px;" title='Open Symbiota Key' />
+                            </a>
+                        </div>
+                        <?php
+                    }
+                    if(!$printMode && $taxaArray){
+                        ?>
+                        <div style="padding:5px;">
+                            <ul id="sddm">
+                                <li>
+					    	<span onmouseover="mopen('m1')" onmouseout="mclosetime()">
+					    		<img src="../images/games/games.png" style="height:17px;" title="Access Species List Games" />
+					    	</span>
+                                    <div id="m1" onmouseover="mcancelclosetime()" onmouseout="mclosetime()">
+                                        <?php
+                                        $varStr = "?clid=".$clid."&dynclid=".$dynClid."&listname=".$clManager->getClName()."&taxonfilter=".$taxonFilter."&showcommon=".$showCommon.($clManager->getThesFilter()?"&thesfilter=".$clManager->getThesFilter():"");
+                                        ?>
+                                        <a href="../games/namegame.php<?php echo $varStr; ?>"><?php echo $LANG['NAMEGAME'];?></a>
+                                        <a href="../games/flashcards.php<?php echo $varStr; ?>"><?php echo $LANG['FLASH'];?></a>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                        <div style="clear:both;"></div>
+                        <?php
+                    } ?>
+                    <div class="abstract"><?php echo $clArray['abstract'] ?></div>
+                </div>
+                <hr style="clear: both;">
+             <?php }else { ?>
+                <div style="float:left;color:#990000;font-size:20px;font-weight:bold;">
+                    <a href="checklist.php?cl=<?php echo $clValue."&proj=".$pid."&dynclid=".$dynClid; ?>">
+                        <?php echo $clManager->getClName(); ?>
+                    </a>
+                </div>
+                <?php
+                if($activateKey && !$printMode){
+                    ?>
+                    <div style="float:left;padding:5px;">
+                        <a href="../ident/key.php?cl=<?php echo $clValue."&proj=".$pid."&dynclid=".$dynClid;?>&taxon=All+Species">
+                            <img src='../images/key.png' style="width:15px;border:0px;" title='Open Symbiota Key' />
+                        </a>
+                    </div>
+                    <?php
+                }
+                if(!$printMode && $taxaArray){
+                    ?>
+                    <div style="padding:5px;">
+                        <ul id="sddm">
+                            <li>
+					    	<span onmouseover="mopen('m1')" onmouseout="mclosetime()">
+					    		<img src="../images/games/games.png" style="height:17px;" title="Access Species List Games" />
+					    	</span>
+                                <div id="m1" onmouseover="mcancelclosetime()" onmouseout="mclosetime()">
+                                    <?php
+                                    $varStr = "?clid=".$clid."&dynclid=".$dynClid."&listname=".$clManager->getClName()."&taxonfilter=".$taxonFilter."&showcommon=".$showCommon.($clManager->getThesFilter()?"&thesfilter=".$clManager->getThesFilter():"");
+                                    ?>
+                                    <a href="../games/namegame.php<?php echo $varStr; ?>"><?php echo $LANG['NAMEGAME'];?></a>
+                                    <a href="../games/flashcards.php<?php echo $varStr; ?>"><?php echo $LANG['FLASH'];?></a>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <div style="clear:both;"></div>
+                    <?php
+                } ?>
+
+                <?php
+                if (($locStr || ($clValue && ($clArray["latcentroid"] || $clArray["abstract"])) || $clArray["notes"])) {
+                    ?>
+                    <div class="moredetails"
+                         style="<?php echo(($showDetails || $printMode) ? 'display:none;' : ''); ?>color:blue;cursor:pointer;"
+                         onclick="toggle('moredetails')"><?php echo $LANG['MOREDETS']; ?></div>
+                    <div class="moredetails"
+                         style="display:<?php echo(($showDetails && ! $printMode) ? 'block' : 'none'); ?>;color:blue;cursor:pointer;"
+                         onclick="toggle('moredetails')"><?php echo $LANG['LESSDETS']; ?></div>
+                    <div class="moredetails"
+                         style="display:<?php echo(($showDetails || $printMode) ? 'block' : 'none'); ?>;">
+                        <?php
+                        if ($locStr) {
+                            echo "<div><span style='font-weight:bold;'>".$LANG['LOC']."</span>".$locStr."</div>";
+                        }
+                        if ($clValue && $clArray["abstract"]) {
+                            echo "<div><span style='font-weight:bold;'>".$LANG['ABSTRACT']."</span>".$clArray["abstract"]."</div>";
+                        }
+                        if ($clValue && $clArray["notes"]) {
+                            echo "<div><span style='font-weight:bold;'>Notes: </span>".$clArray["notes"]."</div>";
+                        }
+                        ?>
+                    </div>
+                    <?php
+                }
+            }
 			if($statusStr){ 
 				?>
 				<hr />

@@ -89,7 +89,7 @@ class ChecklistManager {
 			$sql = "SELECT c.clid, c.name, c.locality, c.publication, ".
 				"c.abstract, c.authors, c.parentclid, c.notes, ".
 				"c.latcentroid, c.longcentroid, c.pointradiusmeters, c.footprintwkt, c.access, c.defaultSettings, ".
-				"c.dynamicsql, c.datelastmodified, c.uid, c.type, c.initialtimestamp ".
+				"c.dynamicsql, c.datelastmodified, c.uid, c.type, c.initialtimestamp , c.title , c.iconurl ".
 				"FROM fmchecklists c WHERE (c.clid = ".$this->clid.')';
 		}
 		elseif($this->dynClid){
@@ -117,7 +117,9 @@ class ChecklistManager {
 						$retArr["access"] = $row->access;
 						$retArr["defaultSettings"] = $row->defaultSettings;
 						$retArr["dynamicsql"] = $row->dynamicsql;
-						$retArr["datelastmodified"] = $row->datelastmodified;
+                        $retArr["datelastmodified"] = $row->datelastmodified;
+                        $retArr["title"] = $row->title;
+                        $retArr["iconurl"] = $row->iconurl;
 					}
 		    	}
 		    	$result->free();
