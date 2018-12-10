@@ -242,6 +242,15 @@ if($clArray["locality"]){
             float: left;
             padding-left: 10px;
         }
+        .checklist-right .abstract p:first-child:first-letter {
+            float: left;
+            color: #4e1e97;
+            font-size: 68px;
+            line-height: 50px;
+            padding-top: 4px;
+            padding-right: 8px;
+            padding-left: 3px;
+        }
 
         @media screen and (max-width:700px){
             .checklist-left {
@@ -386,7 +395,7 @@ if($clArray["locality"]){
                         <div style="clear:both;"></div>
                         <?php
                     } ?>
-                    <div class="abstract"><?php echo $clArray['abstract'] ?></div>
+                    <div class="abstract"><p><?php echo $clArray['abstract'] ?></p></div>
                 </div>
                 <hr style="clear: both;">
              <?php }else { ?>
