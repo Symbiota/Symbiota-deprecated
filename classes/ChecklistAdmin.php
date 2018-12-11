@@ -52,6 +52,7 @@ class ChecklistAdmin{
 	public function createChecklist($postArr){
 		$defaultViewArr = Array();
 		$defaultViewArr["ddetails"] = array_key_exists("ddetails",$postArr)?1:0;
+		$defaultViewArr["dsynonyms"] = array_key_exists("dsynonyms",$postArr)?1:0;
 		$defaultViewArr["dcommon"] = array_key_exists("dcommon",$postArr)?1:0;
 		$defaultViewArr["dimages"] = array_key_exists("dimages",$postArr)?1:0;
 		$defaultViewArr["dvouchers"] = array_key_exists("dvouchers",$postArr)?1:0;
@@ -113,6 +114,7 @@ class ChecklistAdmin{
 		$setSql = "";
 		$defaultViewArr = Array();
 		$defaultViewArr["ddetails"] = array_key_exists("ddetails",$postArr)?1:0;
+		$defaultViewArr["dsynonyms"] = array_key_exists("dsynonyms",$postArr)?1:0;
 		$defaultViewArr["dcommon"] = array_key_exists("dcommon",$postArr)?1:0;
 		$defaultViewArr["dimages"] = array_key_exists("dimages",$postArr)?1:0;
 		$defaultViewArr["dvouchers"] = array_key_exists("dvouchers",$postArr)?1:0;

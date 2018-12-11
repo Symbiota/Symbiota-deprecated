@@ -49,6 +49,7 @@ $LANG['POLYGON_NOT_DEFINED'] = 'Pol&iacute;gono definida<br/>Haga clic en globo 
 $LANG['POLYGON_READY'] = 'Pol&iacute;gono cambiado y listas para guardar';
 $LANG['DEFAULTDISPLAY'] = 'Ajustes de Vista por Defecto';
 $LANG['SHOWDETAILS'] = 'Mostrar Detalles';
+$LANG['DISPLAY_SYNONYMS'] = 'Mostrar Sin&oacute;nimos';
 $LANG['COMMON'] = ' Nombres comunes';
 $LANG['DISPLAYIMG'] = 'Mostrar como Im&aacute;genes';
 $LANG['NOTESVOUC'] = 'Notas &amp; Vouchers';

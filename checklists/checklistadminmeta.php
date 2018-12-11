@@ -217,20 +217,25 @@ if(!$clid){
 				<fieldset style="width:300px;">
 					<legend><b><?php echo $LANG['DEFAULTDISPLAY'];?></b></legend>
 					<div>
-						<!-- Display Details: 0 = false, 1 = true  -->
-						<input name='ddetails' id='ddetails' type='checkbox' value='1' <?php echo (($defaultArr&&$defaultArr["ddetails"])?"checked":""); ?> />
-						<?php echo $LANG['SHOWDETAILS'];?>
+						<?php
+						echo "<input id='dsynonyms' name='dsynonyms' type='checkbox' value='1' ".(isset($defaultArr["dsynonyms"])?"checked":"")." /> ".$LANG['DISPLAY_SYNONYMS'];
+						?>
 					</div>
 					<div>
 						<?php
 						//Display Common Names: 0 = false, 1 = true
-						if($displayCommonNames) echo "<input id='dcommon' name='dcommon' type='checkbox' value='1' ".(($defaultArr&&$defaultArr["dcommon"])?"checked":"")." /> ".$LANG['COMMON'];
+						if($DISPLAY_COMMON_NAMES) echo "<input id='dcommon' name='dcommon' type='checkbox' value='1' ".(($defaultArr&&$defaultArr["dcommon"])?"checked":"")." /> ".$LANG['COMMON'];
 						?>
 					</div>
 					<div>
 						<!-- Display as Images: 0 = false, 1 = true  -->
 						<input name='dimages' id='dimages' type='checkbox' value='1' <?php echo (($defaultArr&&$defaultArr["dimages"])?"checked":""); ?> onclick="showImagesDefaultChecked(this.form);" />
 						<?php echo $LANG['DISPLAYIMG'];?>
+					</div>
+					<div>
+						<!-- Display Details: 0 = false, 1 = true  -->
+						<input name='ddetails' id='ddetails' type='checkbox' value='1' <?php echo (($defaultArr&&$defaultArr["ddetails"])?"checked":""); ?> />
+						<?php echo $LANG['SHOWDETAILS'];?>
 					</div>
 					<div>
 						<!-- Display as Vouchers: 0 = false, 1 = true  -->
