@@ -131,7 +131,7 @@ include($SERVER_ROOT.'/header.php');
             <?php echo $attribs['sunlight'] ?>
         </p>
         <p class="section">Ease of growth: <?php echo $attribs['ease_of_growth'] ?></p>
-<!--        <p class="section garden-icons">Commercial availaility: --><?php //echo $attribs['commercial_availability'] ?><!--</p>-->
+        <p class="section garden-icons">Commercial availaility: <?php echo $attribs['commercial_availability'] ?></p>
         <?php if(isset($attribs['wildlife_string']) && $attribs['wildlife_string'] != ''){ ?>
             <p class="section garden-icons">Wildlife support<br><?php echo $attribs['wildlife'] ?></p>
         <?php } ?>

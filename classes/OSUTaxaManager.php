@@ -951,11 +951,6 @@ class OSUTaxaManager {
         $attribs["flower_color"] = ucwords(implode(", ",array_map(function($a){
             return $a["charstatename"];
         },$tmp[612])));
-        $attribs["commercial_availability"] = '';
-        implode(", ",$tmp[678]);
-        for($i=1;$i<=ceil($num_commercial/10);$i++) {
-            $attribs["commercial_availability"].= "<img src=\"../images/Marketbasket.png\" alt=\"Commercial Availability\" >";
-        }
         $attribs["garden_type"] = implode(", ",array_map(function($a){
             return $a["charstatename"];
         },$tmp[678]));
@@ -982,8 +977,8 @@ class OSUTaxaManager {
                     $attribs["sunlight_array"][]= $value['charstatename'];
                     break;
             }
-            $attribs["sunlight_string"] =  implode(", ", $attribs["sunlight_array"]);
         }
+        $attribs["sunlight_string"] =  implode(", ", $attribs["sunlight_array"]);
         $attribs["moisture"] = "";
         $attribs["moisture_string"] = "";
         foreach ($tmp[683] as $value) { //moisture
@@ -1001,8 +996,8 @@ class OSUTaxaManager {
                     $attribs["moisture_array"][]= $value['charstatename'];
                     break;
             }
-            $attribs["moisture_string"] =  implode(", ", $attribs["moisture_array"]);
         }
+        $attribs["moisture_string"] =  implode(", ", $attribs["moisture_array"]);
         $attribs["wildlife"] = "";
         $attribs["wildlife_string"] = "";
         foreach ($tmp[685] as $value) { //wildlife/insect support
@@ -1028,8 +1023,8 @@ class OSUTaxaManager {
                     $attribs["wildlife_array"][]= $value['charstatename'];
                     break;
             }
-            $attribs["wildlife_string"] =  implode(", ", $attribs["wildlife_array"]);
         }
+        $attribs["wildlife_string"] =  implode(", ", $attribs["wildlife_array"]);
         $attribs["growth_rate"] = implode(", ",array_map(function($a){
             return $a["charstatename"];
         },$tmp[687]));
@@ -1042,6 +1037,24 @@ class OSUTaxaManager {
         $attribs["propogation"] = implode(", ",array_map(function($a){
             return $a["charstatename"];
         },$tmp[740]));
+        $attribs["commercial_availability"] = '';
+        switch ($tmp[746][0]['charstatename']) {
+            case "low":
+                $num_baskets = 1;
+                break;
+            case "medium":
+                $num_baskets = 2;
+                break;
+            case "high":
+                $num_baskets = 3;
+                break;
+            default:
+                $num_baskets = 0;
+                break;
+        }
+        for($i=1;$i<=ceil($num_baskets);$i++) {
+            $attribs["commercial_availability"].= "<img src=\"../images/commercial_icon.png\" alt=\"Commercial Availability\" >";
+        }
         $attribs["other_cultivation_factors"] = implode(", ",array_map(function($a){
             return $a["charstatename"];
         },$tmp[767]));
