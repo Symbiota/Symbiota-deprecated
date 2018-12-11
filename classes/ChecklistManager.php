@@ -207,7 +207,7 @@ class ChecklistManager {
 			if(!$retLimit || ($this->taxaCount >= (($pageNumber-1)*$retLimit) && $this->taxaCount <= ($pageNumber)*$retLimit)){
 				if(count($taxonTokens) == 1) $sciName .= " sp.";
 				if($row->rankid > 220 && !array_key_exists($row->parenttid, $this->taxaList)){
-					$this->taxaList[$row->parenttid]['taxongroup'] = $taxonGroup;
+					$this->taxaList[$row->parenttid]['taxongroup'] = '<i>'.$taxonGroup.'</i>';
 					$this->taxaList[$row->parenttid]['family'] = $family;
 					//$this->taxaList[$row->parenttid]['clid'] = $row->clid;
 					$speciesRankNeededArr[] = $row->parenttid;
@@ -225,9 +225,7 @@ class ChecklistManager {
 				$this->taxaList[$tid]['taxongroup'] = '<i>'.$taxonGroup.'</i>';
 				if(isset($this->taxaList[$tid]['clid'])) $this->taxaList[$tid]['clid'] = $this->taxaList[$tid]['clid'].','.$row->clid;
 				else $this->taxaList[$tid]['clid'] = $row->clid;
-				if($this->showAuthors){
-					$this->taxaList[$tid]['author'] = $this->cleanOutStr($row->author);
-				}
+				if($this->showAuthors) $this->taxaList[$tid]['author'] = $this->cleanOutStr($row->author);
     		}
             if(!in_array($family,$familyCntArr)){
                 $familyCntArr[] = $family;
@@ -303,7 +301,7 @@ class ChecklistManager {
 				$rs = $this->conn->query($sql);
 				while($r = $rs->fetch_object()){
 					$this->taxaList[$r->tid]['sciname'] = $r->sciname;
-					$this->taxaList[$r->tid]['author'] = $r->author;
+					if($this->showAuthors) $this->taxaList[$r->tid]['author'] = $r->author;
 				}
 				$rs->free();
 			}
@@ -380,7 +378,7 @@ class ChecklistManager {
 			//echo $sql;
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
-				$tempArr[$r->tid][] = '<i>'.$r->sciname.'</i>'.($this->showAuthors?' '.$r->author:'');
+				$tempArr[$r->tid][] = '<i>'.$r->sciname.'</i>'.($this->showAuthors && $r->author?' '.$r->author:'');
 			}
 			$rs->free();
 			foreach($tempArr as $k => $vArr){
