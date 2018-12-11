@@ -49,6 +49,7 @@ $LANG['POLYGON_NOT_DEFINED'] = 'Polygon footprint not defined<br/>Click globe to
 $LANG['POLYGON_READY'] = 'Polygon changed/removed<br/>and ready to be saved';
 $LANG['DEFAULTDISPLAY'] = 'Default Display Settings';
 $LANG['SHOWDETAILS'] = 'Show Details';
+$LANG['DISPLAY_SYNONYMS'] = 'Display Synonyms';
 $LANG['COMMON'] = 'Display Common Names';
 $LANG['DISPLAYIMG'] = 'Display as Images';
 $LANG['NOTESVOUC'] = 'Show Notes &amp; Vouchers';
