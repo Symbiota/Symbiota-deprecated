@@ -125,6 +125,9 @@ $taxaArray = $clManager->getTaxaList($pageNumber,($printMode?0:500));
 	<title><?php echo $DEFAULT_TITLE; ?><?php echo $LANG['RESCHECK'];?><?php echo $clManager->getClName(); ?></title>
 	<link href="../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
+	<?php
+	//include_once('../headinclude.php');
+	?>
 	<link type="text/css" href="../css/jquery-ui.css" rel="stylesheet" />
 	<script type="text/javascript" src="../js/jquery.js"></script>
 	<script type="text/javascript" src="../js/jquery-ui.js"></script>
@@ -575,7 +578,7 @@ $taxaArray = $clManager->getTaxaList($pageNumber,($printMode?0:500));
 						echo '<b>';
 						echo $LANG['TOTTAX'];
 						echo '<span class="printoff"> (<a href="http://symbiota.org/docs/symbiota-species-checklist-data-fields/" target="_blank" >';
-						echo '<span style="font-style:italic;color:green" title="A species name and a single infraspecific taxon is assumed to reference a parent-child relationship of a sinlge taxon. Infraspecific taxa only increase taxa counts when more than one have been added to the checklists for a given species. For more information, click here." >?</span>';
+						echo '<span style="font-style:italic;color:green" title="A species name and a single infraspecific taxon is assumed to reference a parent-child relationship of a sinlge taxon. Infraspecific taxa only increase taxa counts when more than one have been added to the checklists for a given species. For more information, click here." >details</span>';
 						echo '</a>)</span>';
 						echo '</b>: ';
 						echo $clManager->getTaxaCount();
