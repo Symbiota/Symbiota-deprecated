@@ -45,6 +45,14 @@ class ChecklistAdmin{
 				$retArr["hasfootprintwkt"] = ($row->footprintwkt?'1':'0');
 			}
 			$result->free();
+			if($retArr['type'] == 'excludespp'){
+				$sql = 'SELECT clid FROM fmchklstchildren WHERE clidchild = '.$this->clid;
+				$rs = $this->conn->query($sql);
+				while($r = $rs->fetch_object()){
+					$retArr['excludeparent'] = $r->clid;
+				}
+				$rs->free();
+			}
 		}
 		return $retArr;
 	}
@@ -158,6 +166,11 @@ class ChecklistAdmin{
 					if(!$this->conn->query($sql)){
 						$statusStr = 'Error updating rare state species: '.$this->conn->error;
 					}
+				}
+			}elseif($postArr['type'] == 'excludespp' && is_numeric($postArr['excludeparent'])){
+				$sql = 'UPDATE fmchklstchildren SET clid = '.$postArr['excludeparent'].' WHERE clidchild = '.$this->clid;
+				if(!$this->conn->query($sql)){
+					$statusStr = 'Error updating parent checklist for exclusion species list: '.$this->conn->error;
 				}
 			}
 		}
