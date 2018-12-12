@@ -19,6 +19,12 @@ if(isset($clArray["defaultsettings"]) && $clArray["defaultsettings"]){
 }
 ?>
 <script type="text/javascript">
+
+	var f = document.getElementById("checklisteditform");
+	if(f.type.value == "excludespp"){
+		setExclusionChecklistMode(f);
+	}
+
 	function validateChecklistForm(f){
 		if(f.name.value == ""){
 			alert("Checklist name field must have a value");
@@ -71,13 +77,7 @@ if(isset($clArray["defaultsettings"]) && $clArray["defaultsettings"]){
 
 	function checklistTypeChanged(f){
 		if(f.type.value == "excludespp"){
-			f.excludeparent.style.display = "inline";
-			document.getElementById("accessDiv").style.display = "none";
-			document.getElementById("authorDiv").style.display = "none";
-			document.getElementById("locDiv").style.display = "none";
-			document.getElementById("inclusiveClDiv").style.display = "none";
-			document.getElementById("geoDiv").style.display = "none";
-			f.activatekey.checked = false;
+			setExclusionChecklistMode(f);
 		}
 		else{
 			f.excludeparent.style.display = "none";
@@ -87,6 +87,16 @@ if(isset($clArray["defaultsettings"]) && $clArray["defaultsettings"]){
 			document.getElementById("inclusiveClDiv").style.display = "block";
 			document.getElementById("geoDiv").style.display = "block";
 		}
+	}
+
+	function setExclusionChecklistMode(f){
+		f.excludeparent.style.display = "inline";
+		document.getElementById("accessDiv").style.display = "none";
+		document.getElementById("authorDiv").style.display = "none";
+		document.getElementById("locDiv").style.display = "none";
+		document.getElementById("inclusiveClDiv").style.display = "none";
+		document.getElementById("geoDiv").style.display = "none";
+		f.activatekey.checked = false;
 	}
 
 	function openMappingAid() {
@@ -142,15 +152,21 @@ if(!$clid){
 					}
 					?>
 				</select>
-				<select name="excludeparent" style="display:none">
-					<option value="">Select a parent checklist</option>
-					<option value="">-------------------------------</option>
-					<?php
-					foreach($userClArr as $userClid => $userClValue){
-						echo '<option value="'.$userClid.'">'.$userClValue.'</option>';
-					}
+				<?php
+				if($userClArr){
 					?>
-				</select>
+					<select name="excludeparent" style="<?php echo ($clid && isset($clArray['excludeparent'])?'':'display:none'); ?>">
+						<option value="">Select a parent checklist</option>
+						<option value="">-------------------------------</option>
+						<?php
+						foreach($userClArr as $userClid => $userClValue){
+							echo '<option value="'.$userClid.'" '.(isset($clArray['excludeparent'])&&$userClid==$clArray['excludeparent']?'SELECTED':'').'>'.$userClValue.'</option>';
+						}
+						?>
+					</select>
+					<?php
+				}
+				?>
 			</div>
 			<div id="locDiv">
 				<b><?php echo $LANG['LOC'];?></b><br/>
