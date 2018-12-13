@@ -29,6 +29,12 @@ ALTER TABLE `uploadtaxa`
   ADD UNIQUE INDEX `UNIQUE_sciname` (`SciName` ASC, `RankId` ASC, `Author` ASC, `AcceptedStr` ASC);
 
 
+ALTER TABLE `taxa` 
+  ADD COLUMN `locked` INT NULL AFTER `Hybrid`;
+
+ALTER TABLE `taxstatus` 
+  ADD COLUMN `modifiedBy` VARCHAR(45) NULL AFTER `SortSequence`;
+
 ALTER TABLE `taxstatus` 
   DROP INDEX `Index_hierarchy`;
 

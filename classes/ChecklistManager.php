@@ -97,8 +97,8 @@ class ChecklistManager {
 					$this->clMetadata["defaultSettings"] = $row->defaultSettings;
 					$this->clMetadata["dynamicsql"] = $row->dynamicsql;
 					$this->clMetadata["datelastmodified"] = $row->datelastmodified;
-		    	}
-		    	$result->free();
+				}
+				$result->free();
 			}
 			else{
 				trigger_error('ERROR: unable to set checklist metadata => '.$sql, E_USER_ERROR);
@@ -164,7 +164,7 @@ class ChecklistManager {
 	}
 
 	public function getTaxonAuthorityList(){
-    	$taxonAuthList = Array();
+		$taxonAuthList = Array();
 		$sql = "SELECT ta.taxauthid, ta.name FROM taxauthority ta WHERE (ta.isactive <> 0)";
  		$rs = $this->conn->query($sql);
 		while ($row = $rs->fetch_object()){
@@ -180,9 +180,9 @@ class ChecklistManager {
 		//Get species list
 		$speciesPrev="";
 		$taxonPrev="";
-        $genusCntArr = Array();
-        $familyCntArr = Array();
-        $speciesRankNeededArr = array();
+		$genusCntArr = Array();
+		$familyCntArr = Array();
+		$speciesRankNeededArr = array();
 		if($this->showImages && $retLimit) $retLimit = $this->imageLimit;
 		if(!$this->basicSql) $this->setClSql();
 		$result = $this->conn->query($this->basicSql);
@@ -226,25 +226,25 @@ class ChecklistManager {
 				if(isset($this->taxaList[$tid]['clid'])) $this->taxaList[$tid]['clid'] = $this->taxaList[$tid]['clid'].','.$row->clid;
 				else $this->taxaList[$tid]['clid'] = $row->clid;
 				if($this->showAuthors) $this->taxaList[$tid]['author'] = $this->cleanOutStr($row->author);
-    		}
-            if(!in_array($family,$familyCntArr)){
-                $familyCntArr[] = $family;
-            }
-            if(!in_array($taxonTokens[0],$genusCntArr)){
-                $genusCntArr[] = $taxonTokens[0];
-            }
+			}
+			if(!in_array($family,$familyCntArr)){
+				$familyCntArr[] = $family;
+			}
+			if(!in_array($taxonTokens[0],$genusCntArr)){
+				$genusCntArr[] = $taxonTokens[0];
+			}
 			$this->filterArr[$taxonTokens[0]] = "";
-    		if(count($taxonTokens) > 1 && $taxonTokens[0]." ".$taxonTokens[1] != $speciesPrev){
-    			$this->speciesCount++;
-    			$speciesPrev = $taxonTokens[0]." ".$taxonTokens[1];
-    		}
-    		if(!$taxonPrev || strpos($sciName,$taxonPrev) === false){
-    			$this->taxaCount++;
-    		}
-    		$taxonPrev = implode(" ",$taxonTokens);
+			if(count($taxonTokens) > 1 && $taxonTokens[0]." ".$taxonTokens[1] != $speciesPrev){
+				$this->speciesCount++;
+				$speciesPrev = $taxonTokens[0]." ".$taxonTokens[1];
+			}
+			if(!$taxonPrev || strpos($sciName,$taxonPrev) === false){
+				$this->taxaCount++;
+			}
+			$taxonPrev = implode(" ",$taxonTokens);
 		}
-        $this->familyCount = count($familyCntArr);
-        $this->genusCount = count($genusCntArr);
+		$this->familyCount = count($familyCntArr);
+		$this->genusCount = count($genusCntArr);
 		$this->filterArr = array_keys($this->filterArr);
 		sort($this->filterArr);
 		$result->free();
@@ -260,13 +260,13 @@ class ChecklistManager {
 				if($this->childClidArr){
 					$clidStr .= ','.implode(',',array_keys($this->childClidArr));
 				}
-				$vSql = 'SELECT DISTINCT v.tid, v.occid, c.institutioncode, v.notes, o.catalognumber, o.recordedby, o.recordnumber, o.eventdate '.
+				$vSql = 'SELECT DISTINCT v.tid, v.occid, c.institutioncode, v.notes, o.catalognumber, o.recordedby, o.recordnumber, o.eventdate, o.collid '.
 					'FROM fmvouchers v INNER JOIN omoccurrences o ON v.occid = o.occid '.
 					'INNER JOIN omcollections c ON o.collid = c.collid '.
 					'WHERE (v.clid IN ('.$clidStr.')) AND v.tid IN('.implode(',',array_keys($this->taxaList)).') '.
 					'ORDER BY o.collid';
 				if($this->thesFilter){
-					$vSql = 'SELECT DISTINCT ts.tidaccepted AS tid, v.occid, c.institutioncode, v.notes, o.catalognumber, o.recordedby, o.recordnumber, o.eventdate '.
+					$vSql = 'SELECT DISTINCT ts.tidaccepted AS tid, v.occid, c.institutioncode, v.notes, o.catalognumber, o.recordedby, o.recordnumber, o.eventdate, o.collid '.
 						'FROM fmvouchers v INNER JOIN omoccurrences o ON v.occid = o.occid '.
 						'INNER JOIN omcollections c ON o.collid = c.collid '.
 						'INNER JOIN taxstatus ts ON v.tid = ts.tid '.
@@ -437,8 +437,8 @@ class ChecklistManager {
 				try{
 					//Grab voucher points
 					$sql2 = 'SELECT DISTINCT v.tid, o.occid, o.decimallatitude, o.decimallongitude, '.
-							'CONCAT(o.recordedby," (",IFNULL(o.recordnumber,o.eventdate),")") as notes '.
-							'FROM omoccurrences o INNER JOIN fmvouchers v ON o.occid = v.occid ';
+						'CONCAT(o.recordedby," (",IFNULL(o.recordnumber,o.eventdate),")") as notes '.
+						'FROM omoccurrences o INNER JOIN fmvouchers v ON o.occid = v.occid ';
 					if($tid){
 						$sql2 .= 'WHERE v.tid = '.$tid.' AND v.clid IN ('.$clidStr.') AND o.decimallatitude IS NOT NULL AND o.decimallongitude IS NOT NULL '.
 							'AND (o.localitysecurity = 0 OR o.localitysecurity IS NULL) ';
@@ -501,10 +501,10 @@ class ChecklistManager {
 	}
 
 	public function downloadChecklistCsv(){
-    	if(!$this->basicSql) $this->setClSql();
+		if(!$this->basicSql) $this->setClSql();
 		//Output checklist
-    	$fileName = $this->clName."_".time().".csv";
-    	header ('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+		$fileName = $this->clName."_".time().".csv";
+		header ('Cache-Control: must-revalidate, post-check=0, pre-check=0');
 		header ('Content-Type: text/csv');
 		header ("Content-Disposition: attachment; filename=\"$fileName\"");
 		$this->showAuthors = 1;
@@ -528,7 +528,7 @@ class ChecklistManager {
 		else{
 			echo "Recordset is empty.\n";
 		}
-    }
+	}
 
 	private function setClSql(){
 		if($this->clid){
@@ -552,7 +552,7 @@ class ChecklistManager {
 			$this->basicSql = 'SELECT t.tid, ctl.dynclid as clid, ts.family, t.sciname, t.author, t.unitname1, t.rankid, ts.parenttid '.
 				'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
 				'INNER JOIN fmdyncltaxalink ctl ON t.tid = ctl.tid '.
-    	  		'WHERE (ts.taxauthid = '.($this->thesFilter?$this->thesFilter:'1').') AND (ctl.dynclid = '.$this->dynClid.') ';
+		  		'WHERE (ts.taxauthid = '.($this->thesFilter?$this->thesFilter:'1').') AND (ctl.dynclid = '.$this->dynClid.') ';
 		}
 		if($this->taxonFilter){
 			if($this->searchCommon){
@@ -751,7 +751,7 @@ class ChecklistManager {
 	}
 
 	//Setters and getters
-    public function setThesFilter($filt){
+	public function setThesFilter($filt){
 		$this->thesFilter = $filt;
 	}
 

@@ -264,7 +264,7 @@ include($SERVER_ROOT.'/header.php');
 				<td style="width:250px;vertical-align:top;">
 					<?php
 					$displayName = $taxonManager->getSciName();
-					if($taxonRank == 180) $displayName = '<i>'.$displayName.'</i> spp. ';
+					if($taxonRank == 180) $displayName = '<i>'.$displayName.'</i> ';
 					if($taxonRank > 140){
 						$parentLink = "index.php?tid=".$taxonManager->getParentTid()."&clid=".$clid."&pid=".$pid."&taxauthid=".$taxAuthId;
 						$displayName .= ' <a href="'.$parentLink.'">';
