@@ -122,7 +122,7 @@ $taxaArray = $clManager->getTaxaList($pageNumber,($printMode?0:500));
 <html>
 <head>
 	<meta charset="<?php echo $CHARSET; ?>">
-	<title><?php echo $DEFAULT_TITLE; ?><?php echo $LANG['RESCHECK'];?><?php echo $clManager->getClName(); ?></title>
+	<title><?php echo $DEFAULT_TITLE; ?><?php echo $LANG['RESCHECK'];?>: <?php echo $clManager->getClName(); ?></title>
 	<link href="../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 	<?php
@@ -304,14 +304,16 @@ $taxaArray = $clManager->getTaxaList($pageNumber,($printMode?0:500));
 				if($exclusionArr = $clManager->getExclusionChecklist()){
 					echo '<div class="printoff" style="clear:both">'.(isset($LANG['TAXA_EXCLUDED'])?$LANG['TAXA_EXCLUDED']:'Taxa explicitly excluded').': <b><a href="checklist.php?pid='.$pid.'&clid='.key($exclusionArr).'">'.current($exclusionArr).'</a></b></div>';
 				}
-				?>
-				<div style="clear:both;">
-					<span style="font-weight:bold;">
-						<?php echo $LANG['AUTHORS'];?>
-					</span>
-					<?php echo $clArray["authors"]; ?>
-				</div>
-				<?php
+				if($clArray['type'] != 'excludespp'){
+					?>
+					<div style="clear:both;">
+						<span style="font-weight:bold;">
+							<?php echo $LANG['AUTHORS']; ?>:
+						</span>
+						<?php echo $clArray["authors"]; ?>
+					</div>
+					<?php
+				}
 				if($clArray["publication"]){
 					$pubStr = $clArray["publication"];
 					if(substr($pubStr,0,4)=='http' && !strpos($pubStr,' ')) $pubStr = '<a href="'.$pubStr.'" target="_blank">'.$pubStr."</a>";
@@ -325,16 +327,20 @@ $taxaArray = $clManager->getTaxaList($pageNumber,($printMode?0:500));
 				<div class="moredetails printoff" style="display:<?php echo (($showDetails)?'block':'none'); ?>;color:blue;cursor:pointer;" onclick="toggle('moredetails')"><?php echo $LANG['LESSDETS'];?></div>
 				<div class="moredetails" style="display:<?php echo (($showDetails || $printMode)?'block':'none'); ?>;">
 					<?php
-					$locStr = $clArray["locality"];
-					if($clid && $clArray["latcentroid"]) $locStr .= " (".$clArray["latcentroid"].", ".$clArray["longcentroid"].")";
-					if($locStr){
-						echo "<div><span style='font-weight:bold;'>".$LANG['LOC']."</span>".$locStr."</div>";
+					if($clArray['type'] != 'excludespp'){
+						$locStr = $clArray["locality"];
+						if($clid && $clArray["latcentroid"]) $locStr .= " (".$clArray["latcentroid"].", ".$clArray["longcentroid"].")";
+						if($locStr){
+							echo "<div><span style='font-weight:bold;'>".$LANG['LOCALITY'].": </span>".$locStr."</div>";
+						}
 					}
 					if($clid && $clArray["abstract"]){
-						echo "<div><span style='font-weight:bold;'>".$LANG['ABSTRACT']."</span>".$clArray["abstract"]."</div>";
+						$abstractTitle = $LANG['ABSTRACT'];
+						if($clArray['type'] == 'excludespp') $abstractTitle = $LANG['COMMENTS'];
+						echo "<div><span style='font-weight:bold;'>".$abstractTitle.": </span>".$clArray["abstract"]."</div>";
 					}
-					if($clid && $clArray["notes"]){
-						echo "<div><span style='font-weight:bold;'>Notes: </span>".$clArray["notes"]."</div>";
+					if($clid && $clArray['notes']){
+						echo '<div><span style="font-weight:bold;">'.(isset($LANG['NOTES'])?$LANG['NOTES']:'Notes').': </span>'.$clArray['notes'].'</div>';
 					}
 					?>
 				</div>
@@ -363,7 +369,7 @@ $taxaArray = $clManager->getTaxaList($pageNumber,($printMode?0:500));
 								<!-- Taxon Filter option -->
 								<div id="taxonfilterdiv">
 									<div>
-										<b><?php echo $LANG['SEARCH'];?></b>
+										<b><?php echo $LANG['SEARCH'];?>:</b>
 										<input type="text" id="taxonfilter" name="taxonfilter" value="<?php echo $taxonFilter;?>" size="20" />
 									</div>
 									<div>
@@ -373,13 +379,13 @@ $taxaArray = $clManager->getTaxaList($pageNumber,($printMode?0:500));
 												echo "<input type='checkbox' name='searchcommon' value='1'".($searchCommon?"checked":"")."/> ".$LANG['COMMON']."<br/>";
 											}
 											?>
-											<input type="checkbox" name="searchsynonyms" value="1"<?php echo ($searchSynonyms?"checked":"");?>/> <?php echo $LANG['SYNON'];?>
+											<input type="checkbox" name="searchsynonyms" value="1"<?php echo ($searchSynonyms?"checked":"");?>/> <?php echo $LANG['SYNONYMS'];?>
 										</div>
 									</div>
 								</div>
 								<!-- Thesaurus Filter -->
 								<div>
-									<b><?php echo $LANG['FILTER'];?></b><br/>
+									<b><?php echo $LANG['FILTER'];?>:</b><br/>
 									<select name='thesfilter'>
 										<option value='0'><?php echo $LANG['OGCHECK'];?></option>
 										<?php
@@ -455,32 +461,32 @@ $taxaArray = $clManager->getTaxaList($pageNumber,($printMode?0:500));
 								<fieldset style='margin:5px 0px 5px 5px;background-color:#FFFFCC;'>
 									<legend><b><?php echo $LANG['NEWSPECIES'];?></b></legend>
 									<div>
-										<b><?php echo $LANG['TAXON'];?>:</b><br/>
+										<b><?php echo $LANG['TAXON']; ?>:</b><br/>
 										<input type="text" id="speciestoadd" name="speciestoadd" style="width:174px;" />
 										<input type="hidden" id="tidtoadd" name="tidtoadd" value="" />
 									</div>
 									<div>
-										<b><?php echo $LANG['FAMOVER'];?></b><br/>
+										<b><?php echo $LANG['FAMILYOVERRIDE']; ?>:</b><br/>
 										<input type="text" name="familyoverride" style="width:122px;" title="Only enter if you want to override current family" />
 									</div>
 									<div>
-										<b><?php echo $LANG['HABITAT'];?></b><br/>
+										<b><?php echo $LANG['HABITAT']; ?>:</b><br/>
 										<input type="text" name="habitat" style="width:170px;" />
 									</div>
 									<div>
-										<b><?php echo $LANG['ABUN'];?></b><br/>
+										<b><?php echo $LANG['ABUNDANCE']; ?>:</b><br/>
 										<input type="text" name="abundance" style="width:145px;" />
 									</div>
 									<div>
-										<b><?php echo $LANG['NOTES'];?></b><br/>
+										<b><?php echo $LANG['NOTES']; ?>:</b><br/>
 										<input type="text" name="notes" style="width:175px;" />
 									</div>
 									<div style="padding:2px;">
-										<b><?php echo $LANG['INTNOTES'];?></b><br/>
+										<b><?php echo $LANG['INTNOTES']; ?>:</b><br/>
 										<input type="text" name="internalnotes" style="width:126px;" title="Displayed to administrators only" />
 									</div>
 									<div>
-										<b><?php echo $LANG['SOURCE'];?></b><br/>
+										<b><?php echo $LANG['SOURCE']; ?>:</b><br/>
 										<input type="text" name="source" style="width:167px;" />
 									</div>
 									<div>
@@ -589,7 +595,7 @@ $taxaArray = $clManager->getTaxaList($pageNumber,($printMode?0:500));
 					$pageCount = ceil($clManager->getTaxaCount()/$taxaLimit);
 					if($pageCount > 1){
 						if(($pageNumber)>$pageCount) $pageNumber = 1;
-						echo '<hr /><div class="printoff">'.$LANG['PAGE']."<b> ".($pageNumber)."</b>".$LANG['OF']."<b>$pageCount</b>: ";
+						echo '<hr /><div class="printoff">'.$LANG['PAGE'].'<b> '.($pageNumber).'</b> '.$LANG['OF'].' <b>'.$pageCount.'</b>: ';
 						for($x=1;$x<=$pageCount;$x++){
 							if($x>1) echo " | ";
 							if(($pageNumber) == $x){
@@ -742,13 +748,13 @@ $taxaArray = $clManager->getTaxaList($pageNumber,($printMode?0:500));
 									foreach($voucherArr[$tid] as $occid => $collName){
 										$voucStr .= ', ';
 										if($voucCnt == 4 && !$printMode){
-											$voucStr .= '<a href="#" id="morevouch-'.$tid.'" onclick="return toggleVoucherDiv('.$tid.');">'.$LANG['MORE'].'</a>'.
+											$voucStr .= '<a href="#" id="morevouch-'.$tid.'" onclick="return toggleVoucherDiv('.$tid.');">'.$LANG['MORE'].'...</a>'.
 												'<span id="voucdiv-'.$tid.'" style="display:none;">';
 										}
 										$voucStr .= '<a href="#" onclick="return openIndividualPopup('.$occid.')">'.$collName."</a>\n";
 										$voucCnt++;
 									}
-									if($voucCnt > 4 && !$printMode) $voucStr .= '</span><a href="#" id="lessvouch-'.$tid.'" style="display:none;" onclick="return toggleVoucherDiv('.$tid.');">'.$LANG['LESS'].'</a>';
+									if($voucCnt > 4 && !$printMode) $voucStr .= '</span><a href="#" id="lessvouch-'.$tid.'" style="display:none;" onclick="return toggleVoucherDiv('.$tid.');">...'.$LANG['LESS'].'</a>';
 									$voucStr = substr($voucStr,2);
 								}
 								$noteStr = '';
@@ -766,7 +772,7 @@ $taxaArray = $clManager->getTaxaList($pageNumber,($printMode?0:500));
 					$taxaLimit = ($showImages?$clManager->getImageLimit():$clManager->getTaxaLimit());
 					if($clManager->getTaxaCount() > (($pageNumber)*$taxaLimit)){
 						echo '<div class="printoff" style="margin:20px;clear:both;">';
-						echo '<a href="checklist.php?pagenumber='.($pageNumber+1).$argStr.'">'.$LANG['DISPLAYNEXT'].''.$taxaLimit.''.$LANG['TAXA'].'</a></div>';
+						echo '<a href="checklist.php?pagenumber='.($pageNumber+1).$argStr.'"> '.$LANG['DISPLAYNEXT'].' '.$taxaLimit.' '.$LANG['TAXA'].'...</a></div>';
 					}
 					if(!$taxaArray) echo "<h1 style='margin:40px;'>".$LANG['NOTAXA']."</h1>";
 					?>
@@ -777,7 +783,7 @@ $taxaArray = $clManager->getTaxaList($pageNumber,($printMode?0:500));
 		else{
 			?>
 			<div style="color:red;">
-				<?php echo $LANG['CHECKNULL'];?>
+				<?php echo $LANG['CHECKNULL']; ?>!
 			</div>
 			<?php
 		}
