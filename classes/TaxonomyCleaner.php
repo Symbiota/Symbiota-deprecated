@@ -70,7 +70,7 @@ class TaxonomyCleaner extends Manager{
 		$this->logOrEcho("Starting taxa check ");
 		$sql = 'SELECT sciname, family, scientificnameauthorship, count(*) as cnt '.$this->getSqlFragment();
 		if($startIndex) $sql .= 'AND (sciname > "'.$this->cleanInStr($startIndex).'") ';
-		$sql .= 'GROUP BY sciname, family ORDER BY sciname LIMIT '.$limit;
+		$sql .= 'GROUP BY sciname, family, scientificnameauthorship LIMIT '.$limit;
 		//echo $sql; exit;
 		if($rs = $this->conn->query($sql)){
 			//Check name through taxonomic resources
@@ -198,7 +198,7 @@ class TaxonomyCleaner extends Manager{
 
 		$this->logOrEcho('Indexing names based on mathcing trinomials without taxonRank designation...');
 		$triCnt = 0;
-		$sql = 'SELECT DISTINCT o.sciname, t.tid '.
+		$sql = 'SELECT DISTINCT o.sciname, t.tid, t.rankid '.
 			'FROM omoccurrences o INNER JOIN taxa t ON o.sciname = CONCAT_WS(" ",t.unitname1,t.unitname2,t.unitname3) '.
 			'WHERE (o.collid IN('.$this->collid.')) AND (t.rankid IN(230,240)) AND (o.sciname LIKE "% % %") AND (o.tidinterpreted IS NULL) ';
 		if($this->targetKingdomName) $sql .= 'AND (t.kingdomname = "'.$this->targetKingdomName.'") ';
