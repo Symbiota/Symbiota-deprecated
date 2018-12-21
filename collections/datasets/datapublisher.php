@@ -338,7 +338,7 @@ include($SERVER_ROOT. '/header.php');
 				else{
 					?>
 					<div style="margin:10px;">
-						You have selected to have this collection's DwC archives published to GBIF. Please go to the
+						You have selected for this collection's DwC archive data package to be published to GBIF. Please go to the
 						<a href="https://www.gbif.org/become-a-publisher" target="_blank">GBIF Endorsement Request page</a> to
 						register your institution with GBIF and enter the Publisher Key provided by GBIF below. If your institution already exists within the
 						GBIF Organization lookup, a GBIF Publisher Key has already been assigned. The key is the remaining part of

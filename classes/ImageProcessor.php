@@ -56,6 +56,7 @@ class ImageProcessor {
 		}
 	}
 
+	//iPlant functions
 	public function batchProcessIPlantImages(){
 		//Start processing images for each day from the start date to the current date
 		$status = false;
@@ -77,7 +78,6 @@ class ImageProcessor {
 		if($this->logMode == 1) echo '</ul>';
 	}
 
-	//iPlant functions
 	public function processIPlantImages($pmTerm, $postArr){
 		set_time_limit(1000);
 		$lastRunDate = $postArr['startdate'];

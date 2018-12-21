@@ -17,7 +17,7 @@ $dupeType = substr($occidQuery,0,5);
 $occArr = array();
 if(!$submitAction && $occidQuery){
 	$occArr = $dupeManager->getDupesOccid(substr($occidQuery,6));
-	unset($occArr[$curOccid]);  
+	unset($occArr[$curOccid]);
 }
 
 $onLoadStr = '';
@@ -31,7 +31,7 @@ if($submitAction){
 	}
 	if($isEditor){
 		if($submitAction == 'mergerecs'){
-			if(!$dupeManager->mergeRecords($curOccid,$occIdMerge)){
+			if(!$dupeManager->mergeRecords($occIdMerge,$curOccid)){
 				$statusStr = $dupeManager->getErrorStr();
 			}
 			$onLoadStr = 'reloadParent();close()';
@@ -118,7 +118,7 @@ if(!$IS_ADMIN){
 			function reloadParent(){
 				opener.pendingDataEdits = false;
 				var qForm = opener.document.queryform;
-				qForm.occid.value = <?php echo $curOccid; ?>;
+				qForm.occid.value = <?php echo $occIdMerge; ?>;
 				if(opener.document.fullform.occindex) qForm.occindex.value = opener.document.fullform.occindex.value;
 				opener.document.queryform.submit();
 				//opener.location.reload();
@@ -164,6 +164,8 @@ if(!$IS_ADMIN){
 					echo '<span style="color:orange;">Possible Matching Duplicate EVENTS</span>';
 				}
 				echo '</div><hr/>';
+				//Experimental devleopment, not yet used
+				/*
 				?>
 				<div id="tableview" style="display:none;">
 					<table class="styledtable" style="font-family:Arial;font-size:12px;">
@@ -214,6 +216,9 @@ if(!$IS_ADMIN){
 						?>
 					</table>
 				</div>
+				<?php
+				*/
+				?>
 				<div id="paragraphview" style="display:block;">
 					<?php
 					foreach($occArr as $occId => $occObj){

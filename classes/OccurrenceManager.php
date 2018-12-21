@@ -369,6 +369,7 @@ class OccurrenceManager extends OccurrenceTaxaManager {
 		if($sqlWhere){
 			if(!array_key_exists("includecult",$this->searchTermArr)){
 				$sqlWhere .= "AND (o.cultivationStatus IS NULL OR o.cultivationStatus = 0) ";
+				$this->displaySearchArr[] = 'excluding cultivated/captive occurrences';
 			}
 			else{
 				$this->displaySearchArr[] = 'includes cultivated/captive occurrences';
