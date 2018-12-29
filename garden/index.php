@@ -446,6 +446,12 @@ include($serverRoot."/header.php");
                 }
             }
         });
+        $("#widthSlider").slider("values", 0, 0);
+        $("#widthSlider").slider("values", 1, 0);
+        $("#heightSlider").slider("values", 0, 0);
+        $("#heightSlider").slider("values", 1, 0);
+        $("#garden-sciname-search-input").val('');
+        $("#garden-common-search-input").val('');
         document.getElementById("resultCount").innerHTML = 0;
         document.getElementById("reultsDiv").style.display = 'none';
     }
