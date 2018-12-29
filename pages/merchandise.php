@@ -25,16 +25,15 @@ include( $serverRoot . "/header.php" );
 <div class="inner-content">
     <!-- place static page content here. -->
 <h1>Merchandise</h1>
-
-    <h2>Order Our Books and App</h2>
     <div class="col-wrapper">
         <div class="our-books">
             <h3>Flora of Oregon</h3>
+            <p>A detailed  reference containing plant descriptions, identification keys, pen and ink illustrations, and front chapters covering diverse topics. The three-volume set is the first comprehensive flora for the state in almost 60 years.</p>
             <div class="vol1">
                 <img src="../images/layout/flora-of-oregon-book.jpg" alt="Flora of Oregon Vol 1" class="image-left">
                 <strong>Flora of Oregon
                     Volume 1:</strong>
-                Pteridophytes, Gymnosperms, and Monocots <br>
+                Pteridophytes, Gymnosperms, and Monocots <br><br>
                 <a href="https://shop.brit.org/products/floraoforegon1" class="btn" target="_blank">Order Online</a>
             </div>
             <div class="vol2">
@@ -42,12 +41,12 @@ include( $serverRoot . "/header.php" );
                 <strong>Flora of Oregon
                     Volume 2:</strong>
                 Dicots Adoxaceae - Fagaceae <br><br>
-                <span class="btn">Available late 2018</span>
+                <span class="btn">Available late 2019</span>
             </div>
             <p>A comprehensive reference containing plant descriptions, pen and ink illustrations, and front chapters covering diverse topics. Do you have your copy of Flora of Oregon?</p>
         </div>
         <div class="our-app">
-            <h3>Oregon Wildflowers App</h3>
+            <h3><br>Oregon Wildflowers App</h3>
             <a href="http://www.highcountryapps.com/OregonWildflowers.aspx" target="_blank"><img src="../images/layout/oregon-wildflowers-app.jpg" alt="Oregon Wildflowers App" class="image-left"></a>
             <div>
                 <p>An identification guide to over 1,050 wildflowers, shrubs and vines across the state. Works

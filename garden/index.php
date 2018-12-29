@@ -1004,7 +1004,47 @@ include($serverRoot."/header.php");
         <h3>Commercial availability</h3>
         <div>
             <div class="advSearchOptionWrapper">
-                We are looking forward to presenting the businesses that sell this plant. Contact us if you’re interested in helping to develop this resource!
+                <p>We are looking forward to presenting details about businesses in the regions below and the native species they sell. Contact us if you&rsquo;re interested in helping to develop this resource! (Business contact information)</p>
+                <div class="advSearchOptionHeader">Portland Metro<hr></div>
+                <ul class="inline">
+                    <li>Aurora Nursery</li>
+                    <li>BeaverLake Nursery</li>
+                    <li>Bosky Dell Nursery</li>
+                    <li>Echo Valley Natives</li>
+                    <li>Humble Roots Farm &amp; Nursery</li>
+                    <li>Livingscape Nursery</li>
+                    <li>Portland Nursery</li>
+                    <li>Scholls Valley Native Nursery</li>
+                    <li>Valley Growers Nursery &amp; Landscape</li>
+                </ul>
+                <div class="advSearchOptionHeader">Willamette Valley<hr></div>
+                <ul class="inline">
+                    <li>Balance Restoration Nursery</li>
+                    <li>Brooks Tree Farm</li>
+                    <li>Champoeg Nursery</li>
+                    <li>Doak Creek Native Plant Nursery</li>
+                    <li>Native Grounds Nursery</li>
+                    <li>Oak Point Nursery</li>
+                    <li>Sevenoaks Native Nursery</li>
+                    <li>Shonnard&rsquo;s Nursery</li>
+                    <li>Trillium Gardens</li>
+                    <li>Willamette Gardens</li>
+                    <li>Willamette Wildlings</li>
+                </ul>
+                <div class="advSearchOptionHeader">Eastern Oregon<hr></div>
+                <ul class="inline">
+                    <li>Clearwater Native Nursery</li>
+                    <li>Western Native Plants/Rock Bottom Ranch</li>
+                    <li>Wintercreek Restoration &amp; Nursery</li>
+                </ul>
+                <div class="advSearchOptionHeader">Southern Oregon<hr></div>
+                <ul class="inline">
+                    <li>Althouse Nursery</li>
+                    <li>Forestfarm Nursery</li>
+                    <li>Klamath-Siskiyou Native Seeds</li>
+                    <li>Plant Oregon : Wagner Creek</li>
+                    <li>Shooting Star Nursery</li>
+                </ul>
             </div>
         </div>
     </div>
@@ -1059,7 +1099,7 @@ include($serverRoot."/header.php");
         </a>
         <a href="<?php echo $clientRoot; ?>/checklists/checklist.php?cl=14799&pid=3" class="home-box image-box">
             <img src="<?php echo $clientRoot; ?>/images/layout/Water_features_garden_sm.jpg" alt="Rain Garden">
-            <h3>Rain Garden</h3>
+            <h3>Rain & Water Garden</h3>
             <div class="box-overlay">
                 <div class="centered">Plants suited to the edge of a pond or stream, or moist soils nearby</div>
             </div>

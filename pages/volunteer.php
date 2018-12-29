@@ -2,6 +2,13 @@
 //error_reporting(E_ALL);
 include_once( "../config/symbini.php" );
 header( "Content-Type: text/html; charset=" . $charset );
+
+function obfuscate($email) {
+    //build the mailto link
+    $unencrypted_link = '<a href="mailto:'.$email.'">'.$email.'</a>';
+    //put them together and encrypt
+    return '<script type="text/javascript">Rot13.write(\''.str_rot13($unencrypted_link).'\');</script><noscript>'.$noscript_link . '</noscript>';
+}
 ?>
 <html>
 <head>
@@ -14,6 +21,41 @@ header( "Content-Type: text/html; charset=" . $charset );
 		<?php include_once( $serverRoot . '/config/googleanalytics.php' ); ?>
     </script>
 
+    <script>
+        Rot13 = {
+            map: null,
+
+            convert: function(a) {
+                Rot13.init();
+
+                var s = "";
+                for (i=0; i < a.length; i++) {
+                    var b = a.charAt(i);
+                    s += ((b>='A' && b<='Z') || (b>='a' && b<='z') ? Rot13.map[b] : b);
+                }
+                return s;
+            },
+
+            init: function() {
+                if (Rot13.map != null)
+                    return;
+
+                var map = new Array();
+                var s   = "abcdefghijklmnopqrstuvwxyz";
+
+                for (i=0; i<s.length; i++)
+                    map[s.charAt(i)] = s.charAt((i+13)%26);
+                for (i=0; i<s.length; i++)
+                    map[s.charAt(i).toUpperCase()] = s.charAt((i+13)%26).toUpperCase();
+
+                Rot13.map = map;
+            },
+
+            write: function(a) {
+                document.write(Rot13.convert(a));
+            }
+        }
+    </script>
 </head>
 <body>
 <?php
@@ -26,9 +68,7 @@ include( $serverRoot . "/header.php" );
     <!-- place static page content here. -->
     <h1>Volunteer</h1>
     <p>We welcome volunteers of all ages and skill levels. There are a variety of ways to participate: data entry, technical editing, program assistance, and event planning can be done at our location or remotely. Field work opportunities of weed control, data gathering, and planting are periodically scheduled; check this page for availability.</p>
-    <p>Contributions of species lists and digital images of identified plants are also accepted.</p>
-    <p>To share plant occurrence information or to volunteer, contact us at : opf you would like to contribute species lists, photographs, or other information to OregonFlora, or if you would like to volunteer, contact us at
-        <a href="mailto:info@oregonflora.org">info@oregonflora.org</a></p>
+    <p>If you would like to contribute species lists, photographs, or other information to OregonFlora, or if you would like to volunteer, contact us at <?php echo obfuscate('ofpflora@oregonflora.org'); ?>.</p>
     <div>
         <img src="images/volunteer1.jpg" alt="Volunteer">
         <img src="images/volunteer2.jpg" alt="Volunteer">

@@ -302,7 +302,7 @@ img.image-right {
 	width: auto;
 }
 .content-wrapper > .inner-content {
-	padding-top: 30px;
+    padding: 30px 0;
 }
 .inner-content {
 	max-width: 1100px;
@@ -337,10 +337,9 @@ img.image-right {
 	flex-wrap: wrap;
 	justify-content: center;
 }
-.thumb-wrapper > img {
-	max-width: 300px;
+.thumb-wrapper img {
+	max-width: 250px;
 	height: auto;
-	margin: 20px;
 }
 .sponsor-wrapper {
 	display: flex;
@@ -1214,7 +1213,15 @@ button.menu-toggle {
 .garden-content .home-boxes {
 	padding-top: 30px;
 }
-
+ul.inline {
+	margin: 0;
+	padding: 0;
+	list-style-type: none;
+}
+ul.inline li {
+	display: inline-block;
+	margin-right: 20px;
+}
 
 /* search results */
 .searchResultTable {
