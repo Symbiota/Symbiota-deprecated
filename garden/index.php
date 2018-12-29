@@ -341,7 +341,7 @@ include($serverRoot."/header.php");
             document.getElementById("reultsDiv").style.display = 'block';
         }
         else{
-            document.getElementById("results-wrapper").style.display = 'none';
+            //document.getElementById("results-wrapper").style.display = 'none';
         }
         //console.log('loaded');
         $('body').removeClass('with-overlay');
@@ -446,7 +446,8 @@ include($serverRoot."/header.php");
                 }
             }
         });
-        document.getElementById("results-wrapper").style.display = 'none';
+        document.getElementById("resultCount").innerHTML = 0;
+        document.getElementById("reultsDiv").style.display = 'none';
     }
 </script>
 <div class="native-banner-wrapper">
