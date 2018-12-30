@@ -75,7 +75,7 @@
                     </li>
                     <li class="menu-item-has-children"><a href="#">About</a>
                         <ul>
-                            <li><a href="<?php echo $clientRoot; ?>/pages/mission.php">Mission</a></li>
+                            <li><a href="<?php echo $clientRoot; ?>/pages/mission.php">Mission and History</a></li>
                             <li><a href="<?php echo $clientRoot; ?>/pages/contact.php">Contact Info</a></li>
                             <li><a href="<?php echo $clientRoot; ?>/pages/project-participants.php">Project Participants</a></li>
                         </ul>
