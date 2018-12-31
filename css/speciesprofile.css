@@ -3,12 +3,13 @@
 	max-width: 1100px;
 	margin: 0 auto;
 	padding: 0 20px;
+	display: block;
 }
 
 #toprow{
 	width:				100%;
 	padding-top:		15px;
-	display:			table-row;
+	display:			block;
 	clear:				both;
 }
 
@@ -24,7 +25,7 @@
 }
 
 #leftcolumn{
-	display:		table-cell;
+	display:		block;
 }
 
 #leftcolumn.species{
