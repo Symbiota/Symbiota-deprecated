@@ -96,7 +96,7 @@ $collections = $OSUManager->gardenCollections();
         }
     </style>
 </head>
-<body>
+<body class="printable">
 <?php
 $displayLeftMenu = false;
 //include($SERVER_ROOT.'/header.php');
@@ -104,6 +104,7 @@ $displayLeftMenu = false;
 <div class="garden-content-wrapper">
     <div class="garden-page-header">
         <a id="printPageButton" href="Javascript:;"  onclick="window.print()" class="btn light-purple-btn pull-right" target="_blank">Print</a>
+        <img src="<?php echo $clientRoot; ?>/images/layout/new-logo.png" alt="Oregon Flora">
         <h1><strong><em><?php echo $spDisplay; ?></em></strong><br>
         <?php echo $vernaculars; ?></h1>
     </div>
@@ -113,7 +114,7 @@ $displayLeftMenu = false;
         </div>
         <h3>Plant Facts</h3>
         <p>
-            <strong>Plant type: </strong><?php echo $attribs['type'] ?><br>
+            <strong>Plant type: </strong><?php echo strtolower($attribs['type']) ?><br>
             <strong>Size at maturity: </strong><?php echo $attribs['min_height'] ?>-<?php echo $attribs['max_height'] ?>' high x <?php echo $attribs['min_width'] ?>-<?php echo $attribs['max_width'] ?>' wide<br>
             <strong>Flower color: </strong><?php echo $attribs['flower_color'] ?><br>
             <strong>Bloom time: </strong><?php echo $attribs['bloom_months'] ?><br>

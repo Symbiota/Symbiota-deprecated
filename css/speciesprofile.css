@@ -511,9 +511,16 @@ div.spptext{
 	padding: 30px 20px;
 	overflow: hidden;
 }
+.printable .garden-facts {
+	margin-top: 0px;
+}
 .garden-page-header  {
 	overflow: hidden;
 	margin-bottom: 10px;
+}
+.printable .garden-page-header img {
+	float: left;
+	margin-right: 10px;
 }
 .garden-left {
 	width: 34%;
@@ -526,7 +533,7 @@ div.spptext{
 	float: left;
 	margin-bottom: 30px;
 }
-.garden-image .photographer {
+.garden-image .photographer, .printable .photographer {
 	text-align: right;
 }
 .garden-left hr {
@@ -559,6 +566,12 @@ div.spptext{
 	float: left;
 	width: 60%;
 	padding-right: 10px;
+}
+.garden-facts h3 {
+	margin-top: 30px;
+}
+.garden-icons img {
+	margin-left: 10px;
 }
 .garden-collections {
 	margin: 20px 0;

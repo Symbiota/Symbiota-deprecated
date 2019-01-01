@@ -981,6 +981,10 @@ class OSUTaxaManager {
         $attribs["sunlight_string"] =  implode(", ", $attribs["sunlight_array"]);
         $attribs["moisture"] = "";
         $attribs["moisture_string"] = "";
+        //if needed sort array, but the query sorts by cs, so should not be needed
+        //usort($tmp[683], function($a, $b) {
+        //    return $a['cs'] - $b['cs'];
+        //});
         foreach ($tmp[683] as $value) { //moisture
             switch ($value['charstatename']) {
                 case "dry":
@@ -997,7 +1001,17 @@ class OSUTaxaManager {
                     break;
             }
         }
-        $attribs["moisture_string"] =  implode(", ", $attribs["moisture_array"]);
+        $min_moisture = min(array_column($tmp["683"], 'cs'));
+        $max_moisture = max(array_column($tmp["683"], 'cs'));
+        $min_moisture_key = array_search($min_moisture, array_column($tmp["683"], 'cs'));
+        $max_moisture_key = array_search($max_moisture, array_column($tmp["683"], 'cs'));
+        if( $min_moisture == $max_moisture ) {
+            $attribs["moisture_string"] = $tmp["683"][$min_moisture_key]['charstatename'];
+        }else{
+            $attribs["moisture_string"] = $tmp["683"][$min_moisture_key]['charstatename'] . " to " . $tmp["683"][$max_moisture_key]['charstatename'];
+        }
+
+        $attribs["moisture_list"] =  implode(", ", $attribs["moisture_array"]);
         $attribs["wildlife"] = "";
         $attribs["wildlife_string"] = "";
         foreach ($tmp[685] as $value) { //wildlife/insect support

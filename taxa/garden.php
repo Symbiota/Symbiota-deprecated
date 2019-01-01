@@ -126,7 +126,7 @@ include($SERVER_ROOT.'/header.php');
             <?php echo $vernStr; ?></h1>
         <p class="section"><?php echo $attribs['type'] ?></p>
         <p class="section">Grows up to <?php echo $attribs['max_height'] ?>'h x <?php echo $attribs['max_width'] ?>'w</p>
-        <p class="section garden-icons">Cultivation Tolerance<br>
+        <p class="section garden-icons">Cultivation tolerances<br>
             <?php echo $attribs['moisture'] ?>
             <?php echo $attribs['sunlight'] ?>
         </p>
@@ -145,9 +145,9 @@ include($SERVER_ROOT.'/header.php');
     </div>
     <?php echo $OSUobsImgDiv; ?>
     <div class="garden-facts">
-        <h3>Facts</h3>
+        <h3>Plant Facts</h3>
         <p>
-            <strong>Plant type: </strong><?php echo $attribs['type'] ?><br>
+            <strong>Plant type: </strong><?php echo strtolower($attribs['type']) ?><br>
             <strong>Size at maturity: </strong><?php echo $attribs['min_height'] ?>-<?php echo $attribs['max_height'] ?>' high x <?php echo $attribs['min_width'] ?>-<?php echo $attribs['max_width'] ?>' wide<br>
             <strong>Flower color: </strong><?php echo $attribs['flower_color'] ?><br>
             <strong>Bloom time: </strong><?php echo $attribs['bloom_months'] ?><br>
