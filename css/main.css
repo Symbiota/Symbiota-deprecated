@@ -1872,7 +1872,7 @@ div.mf_container {
 .metro-wrapper .metro-col1 {
 	background: url("../images/metro_logo.png") no-repeat;
 	background-size: contain;
-	width: 105px;
+	width: 80px;
 	height: 41px;
 	padding: 10px;
 	float: left;
@@ -1880,7 +1880,8 @@ div.mf_container {
 .metro-wrapper .metro-col2 {
 	padding: 10px 20px;
 	float: left;
-	width: calc(100% - 125px);
+	width: calc(100% - 100px);
+	font-size: 14px;
 }
 
 
@@ -1944,7 +1945,7 @@ div.mf_container {
 .a_editTitle {
 	font-size: 10px;
 }
-a_authors {
+.a_authors {
 	margin-left: auto;
 }
 

@@ -168,7 +168,7 @@ include($SERVER_ROOT.'/header.php');
         </p>
         <div class="garden-commercial">
             <h3>Commercial Availability</h3>
-            <p>We are looking forward to presenting the business that sell this plant.  Contact us if you are interested in helping to develop this resource!</p>
+            <p>We are looking forward to presenting the businesses that sell this plant.  Contact us if you are interested in helping to develop this resource!</p>
         </div>
     </div>
     <div class="garden-collections">

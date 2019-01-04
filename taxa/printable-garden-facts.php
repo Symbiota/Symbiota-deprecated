@@ -129,13 +129,15 @@ $displayLeftMenu = false;
             <strong>Ease of cultivation: </strong><?php echo $attribs['ease_of_growth'] ?><br>
             <strong>Spreads vigorously: </strong><?php echo $attribs['spreads_vigorously'] ?><br>
             <strong>Landscape uses: </strong><?php echo $attribs['landscape_uses'] ?><br>
+            <?php if($attribs['other_cultivation_factors'] != '') { ?>
             <strong>Other cultivation factors: </strong><?php echo $attribs['other_cultivation_factors'] ?><br>
+            <?php }?>
             <strong>Plant behavior: </strong><?php echo $attribs['plant_behavior'] ?><br>
             <strong>Propagation: </strong><?php echo $attribs['propogation'] ?><br>
         </p>
         <div class="garden-commercial">
             <h3>Commercial Availability</h3>
-            <p>We are looking forward to presenting the business that sell this plant.  Contact us if you are interested in helping to develop this resource!</p>
+            <p>We are looking forward to presenting the businesses that sell this plant.  Contact us if you are interested in helping to develop this resource!</p>
         </div>
     </div>
     <div class="garden-collections">
