@@ -44,7 +44,7 @@ ob_start();
     </span>
     <?php echo $taxonManager->getAuthor(); ?>
     <?php
-    if($taxonRank > 180){
+    if($taxonRank > 140){
         $parentLink = "index.php?taxon=" . $taxonManager->getParentTid() . "&cl=" . $taxonManager->getClid() . "&proj=" . $projValue . "&taxauthid=" . $taxAuthId;
         echo "<a href='" . $parentLink . "'><img id='parenttaxonicon' src='../images/toparent.png' title='Go to Parent' /></a>";
     }
