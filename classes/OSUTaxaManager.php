@@ -939,10 +939,10 @@ class OSUTaxaManager {
                 "cs" => $row["cs"] );
         }
         //var_dump($tmp);
-        $attribs["min_height"] = min(array_column($tmp["140"], 'charstatename'));
-        $attribs["max_height"] = max(array_column($tmp["140"], 'charstatename'));
-        $attribs["min_width"] = min(array_column($tmp["738"], 'charstatename'));
-        $attribs["max_width"] = max(array_column($tmp["738"], 'charstatename'));
+        $attribs["min_height"] = is_array($tmp["140"]) ? min(array_column($tmp["140"], 'charstatename')) : '';
+        $attribs["max_height"] = is_array($tmp["140"]) ? max(array_column($tmp["140"], 'charstatename')) : '';
+        $attribs["min_width"] = is_array($tmp["140"]) ? min(array_column($tmp["738"], 'charstatename')) : '';
+        $attribs["max_width"] = is_array($tmp["140"]) ? max(array_column($tmp["738"], 'charstatename')) : '';
         $attribs["type"] = ucwords($tmp["100"][0]['charstatename'] . " " . $tmp["137"][0]['charstatename']);
         $attribs["bloom_months"] = implode(", ",array_map(function($a){
             return $a["charstatename"];
