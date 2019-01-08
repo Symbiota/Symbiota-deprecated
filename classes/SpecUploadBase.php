@@ -450,11 +450,11 @@ class SpecUploadBase extends SpecUpload{
 		//Run custom cleaning Stored Procedure, if one exists
 		if($this->storedProcedure){
 			if($this->conn->query('CALL '.$this->storedProcedure)){
-				$this->outputMsg('<li style="margin-left:10px;">Stored procedure executed: '.$this->storedProcedure.'</li>');
+				$this->outputMsg('<li>Stored procedure executed: '.$this->storedProcedure.'</li>');
 				if($this->conn->more_results()) $this->conn->next_result();
 			}
 			else{
-				$this->outputMsg('<li style="margin-left:10px;"><span style="color:red;">ERROR: Stored Procedure failed ('.$this->storedProcedure.'): '.$this->conn->error.'</span></li>');
+				$this->outputMsg('<li><span style="color:red;">ERROR: Stored Procedure failed ('.$this->storedProcedure.'): '.$this->conn->error.'</span></li>');
 			}
 		}
 

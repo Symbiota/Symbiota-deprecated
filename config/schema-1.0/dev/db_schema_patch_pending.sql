@@ -48,6 +48,9 @@ ALTER TABLE `taxstatus`
 ALTER TABLE `taxstatus` 
 ADD INDEX `Index_tid` (`tid` ASC);
 
+ALTER TABLE `taxaresourcelinks` 
+  ADD UNIQUE INDEX `UNIQUE_taxaresource` (`tid` ASC, `sourcename` ASC);
+
 
 ALTER TABLE `images` 
   ADD INDEX `Index_images_datelastmod` (`InitialTimeStamp` ASC);
