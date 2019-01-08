@@ -206,7 +206,7 @@ class ChecklistManager {
 			}
 			if(!$retLimit || ($this->taxaCount >= (($pageNumber-1)*$retLimit) && $this->taxaCount <= ($pageNumber)*$retLimit)){
 				if(count($taxonTokens) == 1) $sciName .= " sp.";
-				if($row->rankid > 220 && !array_key_exists($row->parenttid, $this->taxaList)){
+				if($row->rankid > 220 && $this->clMetadata['type'] != 'rarespp' && !array_key_exists($row->parenttid, $this->taxaList)){
 					$this->taxaList[$row->parenttid]['taxongroup'] = '<i>'.$taxonGroup.'</i>';
 					$this->taxaList[$row->parenttid]['family'] = $family;
 					//$this->taxaList[$row->parenttid]['clid'] = $row->clid;
@@ -295,8 +295,8 @@ class ChecklistManager {
 			if($this->showImages) $this->setImages();
 			if($this->showCommon) $this->setVernaculars();
 			if($this->showSynonyms) $this->setSynonyms();
-			if($speciesRankNeededArr){
-				//Get infraspecific species ranked taxa that are not explicited linked into checklist
+			if($speciesRankNeededArr && $this->clMetadata['type'] != 'rarespp'){
+				//Get species ranked taxa that are not explicited linked into checklist
 				$sql = 'SELECT tid, sciname, author FROM taxa WHERE tid IN('.implode(',',$speciesRankNeededArr).')';
 				$rs = $this->conn->query($sql);
 				while($r = $rs->fetch_object()){
