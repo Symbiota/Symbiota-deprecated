@@ -1,8 +1,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,300i,400,400i,600,600i,700,700i" rel="stylesheet">
 <link rel='stylesheet' href='//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css' type='text/css' media='all' />
-<script src="<?php echo $clientRoot; ?>/js/jquery-ui-1.12.1/external/jquery/jquery.js"></script>
-<script src="<?php echo $clientRoot; ?>/js/jquery-ui-1.12.1/jquery-ui.js"></script>
 <script src="<?php echo $clientRoot; ?>/js/superfish.min.js"></script>
 <script src="<?php echo $clientRoot; ?>/js/menu.js"></script>
 <link href="<?php echo $clientRoot; ?>/css/component.css" type="text/css" rel="stylesheet" />
