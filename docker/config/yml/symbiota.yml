@@ -1,0 +1,67 @@
+# See ${SYMBIOTA_ROOT}/docker/config/*.php for variable descriptions
+
+symbini:
+  core:
+    default_lang: 'en'
+    proj_id: 1
+    cat_id: 0
+    page_title: Symbiota
+    tid_focus:
+    admin_email: somebody@somehost.com
+    portal_guid: 21013e21595742f2bb705c0e62cfeff0
+    security_key: bcb6c85831a5480496b94d2a21c93fcb
+  data:
+    url_path_root: /
+    url_path_images: /image
+    image_domain:
+  nlp:
+    lbcc_activated: 0
+    salix_activated: 0
+  modules:
+    occurrence_active: 1
+    flora_active: 1
+    key_active: 1
+    tracking_active: 0
+    filtered_push_active: 0
+  geoserver:
+    url:
+    record_layer:
+  solr:
+    url:
+    full_import_interval: 24
+  gbif:
+    username:
+    password:
+    ocr_key:
+  misc:
+    google:
+      analytics_key:
+      map_key:
+      map_zoom: 6
+      boundaries:
+    spacial:
+      initial_center:
+      initial_zoom:
+    taxon_profile:
+      map_center:
+      map_zoom:
+    recaptcha:
+      public_key:
+      private_key:
+    georeference_political_divisions: false
+    eol_key:
+    taxonomic_authorities:
+      COL:
+      WoRMS:
+    quick_host_entry_active: 0
+    portal_taxa_desc:
+    glossary_export_banner:
+    dyn_checklist_radius: 10
+    display_common_names: 1
+    exsiccati_active: 0
+    checklist_fg_export_active: 0
+    fieldguide:
+      active: 0
+      api_key:
+    genbank_tool_path:
+    geolocate_toolkit_active: 0

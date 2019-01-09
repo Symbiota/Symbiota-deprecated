@@ -1,0 +1,22 @@
+navigation:
+  show_checklists_menu: 0
+  show_glossary_index_banner: 0
+  collections:
+    show_index_menu: 0
+    show_harvest_params_menu: 0
+    show_list_menu: 0
+    show_checklist_menu: 0
+    show_download_menu: 0
+    show_maps_menu: 0
+    show_loans_index_menu: 0
+  ident:
+    show_key_menu: 0
+    show_chardeficit_menu: 0
+    show_mass_update_menu: 0
+    show_editor_menu: 0
+  taxa:
+    show_index_menu: 0
+    show_admin_tpeditor_menu: 0
+  agents:
+    show_index_menu: true
+    index_crumbs: []

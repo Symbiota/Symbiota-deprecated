@@ -1,0 +1,11 @@
+database:
+  host: db
+  port: 3306
+  name: symbiota
+  users:
+    readonly:
+      username: readonly
+      password: password
+    readwrite:
+      username: readwrite
+      password: password
