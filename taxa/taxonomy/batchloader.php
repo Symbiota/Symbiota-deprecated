@@ -5,10 +5,11 @@ header("Content-Type: text/html; charset=".$CHARSET);
 if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl='.$CLIENT_ROOT.'/taxa/taxonomy/batchloader.php');
 ini_set('max_execution_time', 3600);
 
-$action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:"";
-$ulFileName = array_key_exists("ulfilename",$_REQUEST)?$_REQUEST["ulfilename"]:"";
-$ulOverride = array_key_exists("uloverride",$_REQUEST)?$_REQUEST["uloverride"]:"";
+$action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:'';
+$ulFileName = array_key_exists("ulfilename",$_REQUEST)?$_REQUEST["ulfilename"]:'';
+$ulOverride = array_key_exists("uloverride",$_REQUEST)?$_REQUEST["uloverride"]:'';
 $taxAuthId = (array_key_exists('taxauthid',$_REQUEST)?$_REQUEST['taxauthid']:1);
+$kingdomName = (array_key_exists('kingdomname',$_REQUEST)?$_REQUEST['kingdomname']:'');
 
 $isEditor = false;
 if($IS_ADMIN || array_key_exists("Taxonomy",$USER_RIGHTS)){
@@ -17,6 +18,7 @@ if($IS_ADMIN || array_key_exists("Taxonomy",$USER_RIGHTS)){
 
 $loaderManager = new TaxonomyUpload();
 $loaderManager->setTaxaAuthId($taxAuthId);
+$loaderManager->setKingdomName($kingdomName);
 
 $status = "";
 $fieldMap = Array();
@@ -97,6 +99,35 @@ if($isEditor){
 					return false;
 				}
 			}
+			if(f.kingdomname.value == ""){
+				alert("Select a Target Kingdom");
+				return false;
+			}
+			return true;
+		}
+
+		function verifyMapForm(f){
+			var sfArr = [];
+			var tfArr = [];
+			for(var i=0;i<f.length;i++){
+				var obj = f.elements[i];
+				if(obj.name == "sf[]"){
+					if(sfArr.indexOf(obj.value) > -1){
+						alert("ERROR: Source field names must be unique (duplicate field: "+obj.value+")");
+						return false;
+					}
+					sfArr[sfArr.length] = obj.value;
+				}
+				else if(obj.value != "" && obj.value != "unmapped"){
+					if(obj.name == "tf[]"){
+						if(tfArr.indexOf(obj.value) > -1){
+							alert("ERROR: Can't map to the same target field more than once ("+obj.value+")");
+							return false;
+						}
+						tfArr[tfArr.length] = obj.value;
+					}
+				}
+			}
 			return true;
 		}
 
@@ -140,12 +171,12 @@ if($isEditor){
 			<?php
 			if($action == 'Map Input File' || $action == 'Verify Mapping'){
 				?>
-				<form name="mapform" action="batchloader.php" method="post">
+				<form name="mapform" action="batchloader.php" method="post" onsubmit="return verifyMapForm(this)">
 					<fieldset style="width:90%;">
 						<legend style="font-weight:bold;font-size:120%;">Taxa Upload Form</legend>
 						<div style="margin:10px;">
 						</div>
-						<table style="border:1px solid black">
+						<table class="styledtable" style="width:450px">
 							<tr>
 								<th>
 									Source Field
@@ -155,7 +186,8 @@ if($isEditor){
 								</th>
 							</tr>
 							<?php
-							$translationMap = array('division'=>'phylum','sciname'=>'scinameinput','scientific name'=>'scinameinput','acceptedname'=>'acceptedstr');
+							$translationMap = array('phylum'=>'division','division'=>'phylum','sciname'=>'scinameinput','scientificname'=>'scinameinput',
+								'scientificnameauthorship'=>'author','acceptedname'=>'acceptedstr','vernacularname'=>'vernacular');
 							$sArr = $loaderManager->getSourceArr();
 							$tArr = $loaderManager->getTargetArr();
 							asort($tArr);
@@ -180,13 +212,14 @@ if($isEditor){
 											}
 											foreach($tArr as $k => $tField){
 												if($selStr !== 0){
+													$sTestField = str_replace(array(' ','_'), '', $sField);
 													if($mappedTarget && $mappedTarget == $tField){
 														$selStr = "SELECTED";
 													}
-													elseif($tField==$sField && $tField != "sciname"){
+													elseif($tField==$sTestField && $tField != "sciname"){
 														$selStr = "SELECTED";
 													}
-													elseif(isset($translationMap[strtolower($sField)]) && $translationMap[strtolower($sField)] == $tField){
+													elseif(isset($translationMap[strtolower($sTestField)]) && $translationMap[strtolower($sTestField)] == $tField){
 														$selStr = "SELECTED";
 													}
 												}
@@ -206,11 +239,16 @@ if($isEditor){
 						<div>
 							* Fields in yellow have not yet been verified
 						</div>
+						<div style="margin-top:10px">
+							<b>Target Kingdom:</b> <?php echo $kingdomName; ?><br/>
+							<b>Target Thesaurus:</b> <?php echo $loaderManager->getTaxAuthorityName(); ?>
+						</div>
 						<div style="margin:10px;">
 							<input type="submit" name="action" value="Verify Mapping" />
 							<input type="submit" name="action" value="Upload Taxa" />
 							<input type="hidden" name="taxauthid" value="<?php echo $taxAuthId;?>" />
 							<input type="hidden" name="ulfilename" value="<?php echo $loaderManager->getFileName();?>" />
+							<input type="hidden" name="kingdomname" value="<?php echo $kingdomName; ?>" />
 						</div>
 					</fieldset>
 				</form>
@@ -238,27 +276,31 @@ if($isEditor){
 						<div style="margin:10px;">
 							Review upload statistics below before activating. Use the download option to review and/or adjust for reload if necessary.
 						</div>
+						<div style="margin:10px">
+							Target Kingdom: <b><?php echo $kingdomName; ?></b><br/>
+							Target Thesaurus: <b><?php echo $loaderManager->getTaxAuthorityName(); ?></b>
+						</div>
 						<div style="margin:10px;">
 							<?php
 							$statArr = $loaderManager->getStatArr();
 							if($statArr){
-								if(isset($statArr['upload'])) echo '<u>Taxa uploaded</u>: <b>'.$statArr['upload'].'</b><br/>';
-								echo '<u>Total taxa</u>: <b>'.$statArr['total'].'</b> (includes new parent taxa)<br/>';
-								echo '<u>Taxa already in thesaurus</u>: <b>'.(isset($statArr['exist'])?$statArr['exist']:0).'</b><br/>';
-								echo '<u>New taxa</u>: <b>'.(isset($statArr['new'])?$statArr['new']:0).'</b><br/>';
-								echo '<u>Accepted taxa</u>: <b>'.(isset($statArr['accepted'])?$statArr['accepted']:0).'</b><br/>';
-								echo '<u>Non-accepted taxa</u>: <b>'.(isset($statArr['nonaccepted'])?$statArr['nonaccepted']:0).'</b><br/>';
+								if(isset($statArr['upload'])) echo 'Taxa uploaded: <b>'.$statArr['upload'].'</b><br/>';
+								echo 'Total taxa: <b>'.$statArr['total'].'</b> (includes new parent taxa)<br/>';
+								echo 'Taxa already in thesaurus: <b>'.(isset($statArr['exist'])?$statArr['exist']:0).'</b><br/>';
+								echo 'New taxa: <b>'.(isset($statArr['new'])?$statArr['new']:0).'</b><br/>';
+								echo 'Accepted taxa: <b>'.(isset($statArr['accepted'])?$statArr['accepted']:0).'</b><br/>';
+								echo 'Non-accepted taxa: <b>'.(isset($statArr['nonaccepted'])?$statArr['nonaccepted']:0).'</b><br/>';
 								if(isset($statArr['bad'])){
 									?>
 									<fieldset style="margin:15px;padding:15px;">
 										<legend><b>Problematic taxa</b></legend>
 										<div style="margin-bottom:10px">
-											These taxa are marked as FAILED within the notes field and will not load until problems have been resolved.
+											These taxa are marked as FAILED and will not load until problems have been resolved.
 											You may want to download the data (link below), fix the bad relationships, and then reload.
 										</div>
 										<?php
 										foreach($statArr['bad'] as $msg => $cnt){
-											echo '<div style="margin-left:10px"><u>'.$msg.'</u>: <b>'.$cnt.'</b></div>';
+											echo '<div style="margin-left:10px">'.$msg.': <b>'.$cnt.'</b></div>';
 										}
 										?>
 									</fieldset>
@@ -285,6 +327,7 @@ if($isEditor){
 						-->
 						<div style="margin:10px;">
 							<input type="hidden" name="taxauthid" value="<?php echo $taxAuthId;?>" />
+							<input name="kingdomname" type="hidden" value="<?php echo $kingdomName; ?>" />
 							<input type="submit" name="action" value="Activate Taxa" />
 						</div>
 						<div style="float:right;margin:10px;">
@@ -319,7 +362,6 @@ if($isEditor){
 							<input type='hidden' name='MAX_FILE_SIZE' value='100000000' />
 							<div>
 								<div class="overrideopt">
-									<b>Upload File:</b>
 									<div style="margin:10px;">
 										<input id="genuploadfile" name="uploadfile" type="file" size="40" />
 									</div>
@@ -328,12 +370,11 @@ if($isEditor){
 									<b>Full File Path:</b>
 									<div style="margin:10px;">
 										<input name="uloverride" type="text" size="50" /><br/>
-										* This option is for manual upload of a data file.
-										Enter full path to data file located on working server.
+										* This option is for manual upload of a data file. Enter full path to data file located on working server.
 									</div>
 								</div>
 								<div style="margin:10px;">
-									Target Thesaurus:
+									<b>Target Thesaurus:</b>
 									<select name="taxauthid">
 										<?php
 										$taxonAuthArr = $loaderManager->getTaxAuthorityArr();
@@ -342,6 +383,24 @@ if($isEditor){
 										}
 										?>
 									</select>
+								</div>
+								<div style="margin:10px;">
+									<b>Target Kingdom:</b>
+									<?php
+									$kingdomArr = $loaderManager->getKingdomArr();
+									if(count($kingdomArr) == 1){
+										echo '<input name="kingdomname" type="hidden" value="'.array_shift($kingdomArr).'" />';
+									}
+									else{
+										echo '<select name="kingdomname">';
+										echo '<option value="">Select Kingdom</option>';
+										echo '<option value="">----------------------</option>';
+										foreach($kingdomArr as $k => $kingdomName){
+											echo '<option>'.$kingdomName.'</option>';
+										}
+										echo '</select>';
+									}
+									?>
 								</div>
 								<div style="margin:10px;">
 									<input type="submit" name="action" value="Map Input File" />
@@ -412,6 +471,22 @@ if($isEditor){
 									}
 									?>
 								</select>
+							</div>
+							<div style="margin:10px;">
+								<b>Kingdom Target:</b>
+								<?php
+								$kingdomArr = $loaderManager->getKingdomArr();
+								if(count($kingdomArr) == 1){
+									echo '<input name="kingdomname" type="hidden" value="'.array_shift($kingdomArr).'" />';
+								}
+								else{
+									echo '<select name="kingdomname">';
+									foreach($kingdomArr as $k => $kingdomName){
+										echo '<option>'.$kingdomName.'</option>';
+									}
+									echo '</select>';
+								}
+								?>
 							</div>
 							<div style="margin:10px;">
 								<input type="submit" name="action" value="Analyze Taxa" />
