@@ -943,14 +943,14 @@ class OSUTaxaManager {
         $attribs["max_height"] = is_array($tmp["140"]) ? max(array_column($tmp["140"], 'charstatename')) : '';
         $attribs["min_width"] = is_array($tmp["140"]) ? min(array_column($tmp["738"], 'charstatename')) : '';
         $attribs["max_width"] = is_array($tmp["140"]) ? max(array_column($tmp["738"], 'charstatename')) : '';
-        $attribs["type"] = ucwords($tmp["100"][0]['charstatename'] . " " . $tmp["137"][0]['charstatename']);
+        $attribs["type"] = ucwords($tmp["100"][0]['charstatename'] ). " " . $tmp["137"][0]['charstatename'];
         $attribs["bloom_months"] = implode(", ",array_map(function($a){
             return $a["charstatename"];
         },$tmp[165]));
         $num_commercial = count($tmp[209]);
-        $attribs["flower_color"] = ucwords(implode(", ",array_map(function($a){
+        $attribs["flower_color"] = implode(", ",array_map(function($a){
             return $a["charstatename"];
-        },$tmp[612])));
+        },$tmp[612]));
         $attribs["garden_type"] = implode(", ",array_map(function($a){
             return $a["charstatename"];
         },$tmp[678]));
@@ -965,7 +965,7 @@ class OSUTaxaManager {
         foreach ($tmp[680] as $value) { //sunlight
             switch ($value['charstatename']) {
                 case "sun":
-                    $attribs["sunlight"] .= "<img src=\"../images/sunlight_icon4.png\" alt=\"Sun\" >";
+                    $attribs["sunlight"] .= "<img src=\"../images/sunlight_icon1.png\" alt=\"Sun\" >";
                     $attribs["sunlight_array"][]= $value['charstatename'];
                     break;
                 case "part shade":
@@ -973,7 +973,7 @@ class OSUTaxaManager {
                     $attribs["sunlight_array"][]= $value['charstatename'];
                     break;
                 case "shade":
-                    $attribs["sunlight"] .= "<img src=\"../images/sunlight_icon1.png\" alt=\"Shade\" >";
+                    $attribs["sunlight"] .= "<img src=\"../images/sunlight_icon4.png\" alt=\"Shade\" >";
                     $attribs["sunlight_array"][]= $value['charstatename'];
                     break;
             }

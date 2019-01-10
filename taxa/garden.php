@@ -149,8 +149,12 @@ include($SERVER_ROOT.'/header.php');
         <p>
             <strong>Plant type: </strong><?php echo strtolower($attribs['type']) ?><br>
             <strong>Size at maturity: </strong><?php echo $attribs['min_height'] ?>-<?php echo $attribs['max_height'] ?>' high x <?php echo $attribs['min_width'] ?>-<?php echo $attribs['max_width'] ?>' wide<br>
+            <?php if( $attribs['flower_color'] != '' ){ ?>
             <strong>Flower color: </strong><?php echo $attribs['flower_color'] ?><br>
+            <?php } ?>
+            <?php if( $attribs['bloom_months'] != '' ){ ?>
             <strong>Bloom time: </strong><?php echo $attribs['bloom_months'] ?><br>
+            <?php } ?>
             <strong>Light: </strong><?php echo $attribs['sunlight_string'] ?><br>
             <strong>Moisture: </strong><?php echo $attribs['moisture_string'] ?><br>
             <?php if(isset($attribs['wildlife_string']) && $attribs['wildlife_string'] != ''){ ?>
@@ -162,7 +166,9 @@ include($SERVER_ROOT.'/header.php');
             <strong>Ease of cultivation: </strong><?php echo $attribs['ease_of_growth'] ?><br>
             <strong>Spreads vigorously: </strong><?php echo $attribs['spreads_vigorously'] ?><br>
             <strong>Landscape uses: </strong><?php echo $attribs['landscape_uses'] ?><br>
-            <strong>Other cultivation factors: </strong><?php echo $attribs['other_cultivation_factors'] ?><br>
+            <?php if( $attribs['other_cultivation_factors'] != '' ){ ?>
+                <strong>Other cultivation factors: </strong><?php echo $attribs['other_cultivation_factors'] ?><br>
+            <?php } ?>
             <strong>Plant behavior: </strong><?php echo $attribs['plant_behavior'] ?><br>
             <strong>Propagation: </strong><?php echo $attribs['propogation'] ?><br>
         </p>
@@ -170,6 +176,8 @@ include($SERVER_ROOT.'/header.php');
             <h3>Commercial Availability</h3>
             <p>We are looking forward to presenting the businesses that sell this plant.  Contact us if you are interested in helping to develop this resource!</p>
         </div>
+        <p>
+            <a href="index.php?taxon=<?php echo $taxonManager->getTid(); ?>" class="btn light-purple-btn">Core profile page</a></p>
     </div>
     <div class="garden-collections">
         <h4>Plant collections containing <?php echo $vernaculars; ?></h4>

@@ -326,6 +326,7 @@ include($serverRoot."/header.php");
     }
 
     function processResults(res){
+        console.log('processing');
         var resultArr = [];
         var reccnt = 0;
         //alert(resultArr);
@@ -335,15 +336,16 @@ include($serverRoot."/header.php");
         }
         if(reccnt > 0){
             var resulthtml = buildResultHtml(resultArr);
-            document.getElementById("resultCount").innerHTML = reccnt;
             document.getElementById("reultsDiv").innerHTML = resulthtml;
             document.getElementById("results-wrapper").style.display = 'block';
             document.getElementById("reultsDiv").style.display = 'block';
         }
         else{
+            document.getElementById("reultsDiv").innerHTML = '';
             //document.getElementById("results-wrapper").style.display = 'none';
         }
         //console.log('loaded');
+        document.getElementById("resultCount").innerHTML = reccnt;
         $('body').removeClass('with-overlay');
     }
 
