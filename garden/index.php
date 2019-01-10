@@ -452,6 +452,8 @@ include($serverRoot."/header.php");
         $("#heightSlider").slider("values", 1, 0);
         $("#garden-sciname-search-input").val('');
         $("#garden-common-search-input").val('');
+        $("#height-label").text("Any");
+        $("#width-label").text("Any");
         document.getElementById("resultCount").innerHTML = 0;
         document.getElementById("reultsDiv").style.display = 'none';
     }
