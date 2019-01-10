@@ -106,15 +106,8 @@ class TaxonomyUtilities {
 					$authorArr = array();
 					//cycles through the final terms to evaluate and extract infraspecific data
 					while($sciStr = array_shift($sciNameArr)){
-						$sciStrTest = strtolower($sciStr);
-						if($sciStrTest == 'f.' || $sciStrTest == 'fo.' || $sciStrTest == 'fo' || $sciStrTest == 'forma'){
-							self::setInfraNode($sciStr, $sciNameArr, $retArr, $authorArr, 'f.');
-						}
-						elseif($sciStrTest == 'var.' || $sciStrTest == 'var' || $sciStrTest == 'v.' || $sciStrTest == 'variety'){
-							self::setInfraNode($sciStr, $sciNameArr, $retArr, $authorArr, 'var.');
-						}
-						elseif($sciStrTest == 'ssp.' || $sciStrTest == 'ssp' || $sciStrTest == 'subsp.' || $sciStrTest == 'subsp' || $sciStrTest == 'subspecies'){
-							self::setInfraNode($sciStr, $sciNameArr, $retArr, $authorArr, 'subsp.');
+						if($testArr = self::cleanInfra($sciStr)){
+							self::setInfraNode($sciStr, $sciNameArr, $retArr, $authorArr, $testArr['infra']);
 						}
 						elseif($kingdomName == 'Animalia' && !$retArr['unitname3'] && ($rankId == 230 || preg_match('/^[a-z]{5,}$/',$sciStr))){
 							$retArr['unitind3'] = '';
@@ -144,9 +137,6 @@ class TaxonomyUtilities {
 							$rs->free();
 						}
 					}
-					if(array_key_exists('unitind3',$retArr) && $retArr['unitind3'] == 'ssp.'){
-						$retArr['unitind3'] == 'subsp.';
-					}
 				}
 			}
 			if($conn !== null && $okToCloseConn) $conn->close();
@@ -175,11 +165,48 @@ class TaxonomyUtilities {
 					}
 				}
 			}
+			if($kingdomName == 'Animalia'){
+				if($retArr['unitind3']){
+					$retArr['unitind3'] = '';
+					if($retArr['rankid'] > 220) $retArr['rankid'] = 230;
+				}
+			}
 			//Build sciname, without author
 			$sciname = (isset($retArr['unitind1'])?$retArr['unitind1'].' ':'').$retArr['unitname1'].' ';
 			$sciname .= (isset($retArr['unitind2'])?$retArr['unitind2'].' ':'').$retArr['unitname2'].' ';
 			$sciname .= trim($retArr['unitind3'].' '.$retArr['unitname3']);
 			$retArr['sciname'] = trim($sciname);
+		}
+		return $retArr;
+	}
+
+	public static function cleanInfra($testStr){
+		$retArr = array();
+		$testStr = str_replace(array('-','_',' '),'',$testStr);
+		$testStr = strtolower(trim($testStr,'.'));
+		if($testStr == 'cultivated' || $testStr == 'cv' ){
+			$retArr['infra'] = 'cv.';
+			$retArr['rankid'] = 300;
+		}
+		elseif($testStr == 'subform' || $testStr == 'subforma' || $testStr == 'subf' || $testStr == 'subfo'){
+			$retArr['infra'] = 'subf.';
+			$retArr['rankid'] = 270;
+		}
+		elseif($testStr == 'forma' || $testStr == 'f' || $testStr == 'fo'){
+			$retArr['infra'] = 'f.';
+			$retArr['rankid'] = 260;
+		}
+		elseif($testStr == 'subvariety' || $testStr == 'subvar' || $testStr == 'subv' || $testStr == 'sv'){
+			$retArr['infra'] = 'subvar.';
+			$retArr['rankid'] = 250;
+		}
+		elseif($testStr == 'variety' || $testStr == 'var' || $testStr == 'v'){
+			$retArr['infra'] = 'var.';
+			$retArr['rankid'] = 240;
+		}
+		elseif($testStr == 'subspecies' || $testStr == 'ssp' || $testStr == 'subsp'){
+			$retArr['infra'] = 'subsp.';
+			$retArr['rankid'] = 230;
 		}
 		return $retArr;
 	}
@@ -297,6 +324,29 @@ class TaxonomyUtilities {
 		//Return endIndex plus one
 		$endIndex++;
 		return $endIndex;
+	}
+
+	public static function linkOccurrenceTaxa($conn = null){
+		if(!$conn) $conn = MySQLiConnectionFactory::getCon("write");
+
+		$sql1 = 'UPDATE omoccurrences o INNER JOIN taxa t ON o.sciname = t.sciname AND o.scientificnameauthorship = t.author SET o.TidInterpreted = t.tid WHERE (o.TidInterpreted IS NULL)';
+		if(!$conn->query($sql1)){
+			echo '<div>ERROR indexing occurrences by matching sciname and author</div>';
+		}
+
+		$sql2 = 'UPDATE omoccurrences o INNER JOIN taxa t ON o.sciname = t.sciname '.
+			'INNER JOIN taxaenumtree e ON t.tid = e.tid '.
+			'INNER JOIN taxa t2 ON e.parenttid = t2.tid '.
+			'SET o.TidInterpreted = t.tid '.
+			'WHERE (o.TidInterpreted IS NULL) AND (t2.rankid = 140) AND (ts.sciname = o.family)';
+		if(!$conn->query($sql2)){
+			echo '<div>ERROR indexing occurrences by matching sciname and family</div>';
+		}
+
+		$sql3 = 'UPDATE omoccurrences o INNER JOIN taxa t ON o.sciname = t.sciname SET o.TidInterpreted = t.tid WHERE (o.TidInterpreted IS NULL)';
+		if(!$conn->query($sql3)){
+			echo '<div>ERROR indexing occurrences by matching just sciname</div>';
+		}
 	}
 }
 ?>
