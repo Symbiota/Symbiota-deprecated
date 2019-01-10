@@ -8,7 +8,7 @@ $curOccid = (array_key_exists('curoccid',$_GET)?$_REQUEST["curoccid"]:0);
 $collId = (array_key_exists('collid',$_GET)?$_GET['collid']:0);
 $cNum = (array_key_exists('cnum',$_GET)?$_GET['cnum']:'');
 
-$occIdMerge = (array_key_exists('occidmerge',$_GET)?$_GET['occidmerge']:'');
+$occIdMerge = (array_key_exists('occidmerge',$_GET)?$_GET['occidmerge']:0);
 $submitAction = (array_key_exists('submitaction',$_GET)?$_GET['submitaction']:'');
 
 $dupeManager = new OccurrenceDuplicate();

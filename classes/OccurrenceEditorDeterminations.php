@@ -101,7 +101,7 @@ class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 					'identificationQualifier, identificationReferences, identificationRemarks, sortsequence) '.
 					'SELECT occid, IFNULL(identifiedby,"unknown") AS idby, IFNULL(dateidentified,"s.d.") AS di, '.
 					'sciname, scientificnameauthorship, identificationqualifier, identificationreferences, identificationremarks, 10 AS sortseq '.
-					'FROM omoccurrences WHERE (occid = '.$this->occid.')';
+					'FROM omoccurrences WHERE (occid = '.$this->occid.') AND (identifiedBy IS NOT NULL OR dateIdentified IS NOT NULL OR sciname IS NOT NULL)';
 				//echo "<div>".$sqlInsert."</div>";
 				if($this->conn->query($sqlInsert)){
 					//Create and insert Symbiota GUID for determination(UUID)
@@ -273,10 +273,9 @@ class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 		//Make sure determination data within omoccurrences is in omoccurdeterminations. If already there, INSERT will fail and nothing lost
 		$sqlInsert = 'INSERT INTO omoccurdeterminations(occid, identifiedBy, dateIdentified, sciname, scientificNameAuthorship, '.
 			'identificationQualifier, identificationReferences, identificationRemarks, sortsequence) '.
-			'SELECT occid, IFNULL(identifiedby,"unknown") AS idby, '.
-			'IFNULL(dateidentified,"s.d.") AS iddate, sciname, scientificnameauthorship, '.
+			'SELECT occid, IFNULL(identifiedby,"unknown") AS idby, IFNULL(dateidentified,"s.d.") AS iddate, sciname, scientificnameauthorship, '.
 			'identificationqualifier, identificationreferences, identificationremarks, 10 AS sortseq '.
-			'FROM omoccurrences WHERE (occid = '.$this->occid.')';
+			'FROM omoccurrences WHERE (occid = '.$this->occid.') AND (identifiedBy IS NOT NULL OR dateIdentified IS NOT NULL OR sciname IS NOT NULL)';
 		if($this->conn->query($sqlInsert)){
 			//Create and insert Symbiota GUID for determination(UUID)
 			$guid = UuidFactory::getUuidV4();
