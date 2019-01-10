@@ -72,112 +72,9 @@ if($action){
 	<link href="../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/jquery-ui.css" type="text/css" rel="Stylesheet" />
-	<script src="../js/jquery.js" type="text/javascript"></script>
-	<script src="../js/jquery-ui.js" type="text/javascript"></script>
-	<script src="../js/jquery.manifest.js" type="text/javascript"></script>
-	<script src="../js/jquery.marcopolo.js" type="text/javascript"></script>
-	<script src="../js/symb/images.index.js?ver=20170711" type="text/javascript"></script>
 	<meta name='keywords' content='' />
 	<script type="text/javascript">
 		<?php include_once($SERVER_ROOT.'/config/googleanalytics.php'); ?>
-	</script>
-	<script type="text/javascript">
-		var phArr = <?php echo (isset($previousCriteria["phjson"])&&$previousCriteria["phjson"]?"JSON.parse('".$previousCriteria["phjson"]."')":"new Array()"); ?>;
-
-        jQuery(document).ready(function($) {
-			$('#tabs').tabs({
-				active: <?php echo (($imageArr || $taxaList)?'2':'0'); ?>,
-				beforeLoad: function( event, ui ) {
-					$(ui.panel).html("<p>Loading...</p>");
-				}
-			});
-			
-			$('#photographer').manifest({
-				required: true,
-				marcoPolo: {
-					url: 'rpc/imagesearchautofill.php',
-					data: {
-						t: 'photographer'
-					},
-					formatItem: function (data){
-						return data.name;
-					}
-				}
-			});
-			
-			<?php
-			if($stArr){
-				if(array_key_exists("nametype",$previousCriteria) && $previousCriteria["nametype"] != "3"){
-					?>
-					if(document.getElementById('taxastr').value){
-						var qtaxaArr = document.getElementById('taxastr').value.split(",");
-						for(i = 0; i < qtaxaArr.length; i++){
-							$('#taxa').manifest('add',qtaxaArr[i]);
-						}
-					}
-					<?php
-				}
-				elseif(array_key_exists("nametype",$previousCriteria) && $previousCriteria["nametype"] == "3"){
-					?>
-					if(document.getElementById('taxastr').value){
-						var qtaxaArr = document.getElementById('taxastr').value.split(",");
-						for(i = 0; i < qtaxaArr.length; i++){
-							$('#common').manifest('add',qtaxaArr[i]);
-						}
-					}
-					<?php
-				}
-				?>
-				if(document.getElementById('countrystr').value){
-					var qcountryArr = document.getElementById('countrystr').value.split(",");
-					for(i = 0; i < qcountryArr.length; i++){
-						$('#country').manifest('add',qcountryArr[i]);
-					}
-				}
-				if(document.getElementById('statestr').value){
-					var qstateArr = document.getElementById('statestr').value.split(",");
-					for(i = 0; i < qstateArr.length; i++){
-						$('#state').manifest('add',qstateArr[i]);
-					}
-				}
-				if(document.getElementById('keywordstr').value){
-					var qkeywordArr = document.getElementById('keywordstr').value.split(",");
-					for(i = 0; i < qkeywordArr.length; i++){
-						$('#keywords').manifest('add',qkeywordArr[i]);
-					}
-				}
-				if(document.getElementById('phjson').value){
-					var qphArr = JSON.parse(document.getElementById('phjson').value);
-					for(i = 0; i < qphArr.length; i++){
-						$('#photographer').manifest('add',qphArr[i].name);
-					}
-				}
-				<?php
-			}
-			?>
-			
-			$('#photographer').on('marcopoloselect', function (event, data, $item, initial) {
-				phArr.push({name:data.name,id:data.id});
-			});
-			
-			$('#photographer').on('manifestremove',function (event, data, $item){
-				for (i = 0; i < phArr.length; i++) {
-					if(phArr[i].name == data){
-						phArr.splice(i,1);
-					}
-				}
-			});
-			<?php
-			
-			if($view == 'thumbnail' && !$imageArr){
-				echo "alert('There were no images matching your search critera');";
-			}
-			?>
-		});
-		
-		var starr = JSON.stringify(<?php echo $jsonStArr; ?>);
-		var view = '<?php echo $view; ?>';
-		var selectedFamily = '';
 	</script>
 </head>
 <body>
@@ -198,7 +95,110 @@ if($action){
 		echo '<b>Image Search</b>';
 		echo "</div>";
 	}
-	?> 
+	?>
+
+    <script src="../js/jquery.manifest.js" type="text/javascript"></script>
+    <script src="../js/jquery.marcopolo.js" type="text/javascript"></script>
+    <script src="../js/symb/images.index.js?ver=20170711" type="text/javascript"></script>
+
+    <script type="text/javascript">
+        var phArr = <?php echo (isset($previousCriteria["phjson"])&&$previousCriteria["phjson"]?"JSON.parse('".$previousCriteria["phjson"]."')":"new Array()"); ?>;
+
+        jQuery(document).ready(function($) {
+            $('#tabs').tabs({
+                active: <?php echo (($imageArr || $taxaList)?'2':'0'); ?>,
+                beforeLoad: function( event, ui ) {
+                    $(ui.panel).html("<p>Loading...</p>");
+                }
+            });
+
+            $('#photographer').manifest({
+                required: true,
+                marcoPolo: {
+                    url: 'rpc/imagesearchautofill.php',
+                    data: {
+                        t: 'photographer'
+                    },
+                    formatItem: function (data){
+                        return data.name;
+                    }
+                }
+            });
+
+            <?php
+            if($stArr){
+            if(array_key_exists("nametype",$previousCriteria) && $previousCriteria["nametype"] != "3"){
+            ?>
+            if(document.getElementById('taxastr').value){
+                var qtaxaArr = document.getElementById('taxastr').value.split(",");
+                for(i = 0; i < qtaxaArr.length; i++){
+                    $('#taxa').manifest('add',qtaxaArr[i]);
+                }
+            }
+            <?php
+            }
+            elseif(array_key_exists("nametype",$previousCriteria) && $previousCriteria["nametype"] == "3"){
+            ?>
+            if(document.getElementById('taxastr').value){
+                var qtaxaArr = document.getElementById('taxastr').value.split(",");
+                for(i = 0; i < qtaxaArr.length; i++){
+                    $('#common').manifest('add',qtaxaArr[i]);
+                }
+            }
+            <?php
+            }
+            ?>
+            if(document.getElementById('countrystr').value){
+                var qcountryArr = document.getElementById('countrystr').value.split(",");
+                for(i = 0; i < qcountryArr.length; i++){
+                    $('#country').manifest('add',qcountryArr[i]);
+                }
+            }
+            if(document.getElementById('statestr').value){
+                var qstateArr = document.getElementById('statestr').value.split(",");
+                for(i = 0; i < qstateArr.length; i++){
+                    $('#state').manifest('add',qstateArr[i]);
+                }
+            }
+            if(document.getElementById('keywordstr').value){
+                var qkeywordArr = document.getElementById('keywordstr').value.split(",");
+                for(i = 0; i < qkeywordArr.length; i++){
+                    $('#keywords').manifest('add',qkeywordArr[i]);
+                }
+            }
+            if(document.getElementById('phjson').value){
+                var qphArr = JSON.parse(document.getElementById('phjson').value);
+                for(i = 0; i < qphArr.length; i++){
+                    $('#photographer').manifest('add',qphArr[i].name);
+                }
+            }
+            <?php
+            }
+            ?>
+
+            $('#photographer').on('marcopoloselect', function (event, data, $item, initial) {
+                phArr.push({name:data.name,id:data.id});
+            });
+
+            $('#photographer').on('manifestremove',function (event, data, $item){
+                for (i = 0; i < phArr.length; i++) {
+                    if(phArr[i].name == data){
+                        phArr.splice(i,1);
+                    }
+                }
+            });
+            <?php
+
+            if($view == 'thumbnail' && !$imageArr){
+                echo "alert('There were no images matching your search critera');";
+            }
+            ?>
+        });
+
+        var starr = JSON.stringify(<?php echo $jsonStArr; ?>);
+        var view = '<?php echo $view; ?>';
+        var selectedFamily = '';
+    </script>
 	<!-- This is inner text! -->
 	<div id="innertext">
 		<div id="tabs" style="margin:0px;">
