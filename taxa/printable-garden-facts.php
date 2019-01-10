@@ -94,6 +94,30 @@ $collections = $OSUManager->gardenCollections();
                 display: none;
             }
         }
+        .garden-facts, .garden-collections {
+            width: 100%;
+            float: none;
+        }
+        .garden-desc {
+            margin-top: 0;
+        }
+        .printable-logo {
+            text-align: right;
+            margin-bottom: 20px;
+        }
+
+        .col-wrapper {
+            overflow: hidden;
+            clear: both;
+        }
+        .col1 {
+            float: left;
+            width: 47%;
+        }
+        .col2 {
+            float: right;
+            width: 47%;
+        }
     </style>
 </head>
 <body class="printable">
@@ -102,72 +126,69 @@ $displayLeftMenu = false;
 //include($SERVER_ROOT.'/header.php');
 ?>
 <div class="garden-content-wrapper">
-    <div class="garden-page-header">
         <a id="printPageButton" href="Javascript:;"  onclick="window.print()" class="btn light-purple-btn pull-right" target="_blank">Print</a>
-        <img src="<?php echo $clientRoot; ?>/images/layout/new-logo.png" alt="Oregon Flora">
+    <div class="garden-print-col-wrapper">
         <h1><strong><em><?php echo $spDisplay; ?></em></strong><br>
-        <?php echo $vernaculars; ?></h1>
-    </div>
-    <div class="garden-facts">
-        <div class="garden-desc">
-            <?php echo $garden_content; ?>
+            <?php echo $vernaculars; ?></h1>
+        <div class="garden-facts">
+            <div class="garden-desc" style="width: 49%;float: left;">
+                <?php echo $garden_content; ?>
+                <h3>Plant Facts</h3>
+                <p>
+                    <strong>Plant type: </strong><?php echo strtolower($attribs['type']) ?><br>
+                    <strong>Size at maturity: </strong><?php echo $attribs['min_height'] ?>-<?php echo $attribs['max_height'] ?>' high x <?php echo $attribs['min_width'] ?>-<?php echo $attribs['max_width'] ?>' wide<br>
+                    <?php if($attribs['flower_color'] != '') { ?>
+                        <strong>Flower color: </strong><?php echo $attribs['flower_color'] ?><br>
+                    <?php } ?>
+                    <?php if($attribs['bloom_months'] != '') { ?>
+                        <strong>Bloom time: </strong><?php echo $attribs['bloom_months'] ?><br>
+                    <?php } ?>
+                    <strong>Light: </strong><?php echo $attribs['sunlight_string'] ?><br>
+                    <strong>Moisture: </strong><?php echo $attribs['moisture_string'] ?><br>
+                    <?php if(isset($attribs['wildlife_string']) && $attribs['wildlife_string'] != ''){ ?>
+                        <strong>Wildlife support: </strong><?php echo $attribs['wildlife_string'] ?><br>
+                    <?php } ?>
+                </p>
+            </div>
+            <div class="garden-photo" style="width: 49%;float: right;">
+                <img style="display: block;width: 86px;margin: 0 auto;margin-bottom: 20px;" src="<?php echo $clientRoot; ?>/images/layout/new-logo.png" alt="Oregon Flora">
+                <img src="<?php echo $garden_image['url'] ?>" title="<?php echo $spDisplay; ?> image" alt="<?php echo $vernaculars; ?> image" />
+                <div class="photographer"><?php echo $garden_image['photographer'] ?>&nbsp;&nbsp;<?php //echo $garden_image['image_type'] ?></div>
+            </div>
         </div>
-        <h3>Plant Facts</h3>
-        <p>
-            <strong>Plant type: </strong><?php echo strtolower($attribs['type']) ?><br>
-            <strong>Size at maturity: </strong><?php echo $attribs['min_height'] ?>-<?php echo $attribs['max_height'] ?>' high x <?php echo $attribs['min_width'] ?>-<?php echo $attribs['max_width'] ?>' wide<br>
-            <strong>Flower color: </strong><?php echo $attribs['flower_color'] ?><br>
-            <strong>Bloom time: </strong><?php echo $attribs['bloom_months'] ?><br>
-            <strong>Light: </strong><?php echo $attribs['sunlight_string'] ?><br>
-            <strong>Moisture: </strong><?php echo $attribs['moisture_string'] ?><br>
-            <?php if(isset($attribs['wildlife_string']) && $attribs['wildlife_string'] != ''){ ?>
-                <strong>Wildlife support: </strong><?php echo $attribs['wildlife_string'] ?><br>
-        <?php } ?>
-        </p>
-        <h3>Growth and Maintenance</h3>
-        <p>
-            <strong>Ease of cultivation: </strong><?php echo $attribs['ease_of_growth'] ?><br>
-            <strong>Spreads vigorously: </strong><?php echo $attribs['spreads_vigorously'] ?><br>
-            <strong>Landscape uses: </strong><?php echo $attribs['landscape_uses'] ?><br>
-            <?php if($attribs['other_cultivation_factors'] != '') { ?>
-            <strong>Other cultivation factors: </strong><?php echo $attribs['other_cultivation_factors'] ?><br>
-            <?php }?>
-            <strong>Plant behavior: </strong><?php echo $attribs['plant_behavior'] ?><br>
-            <strong>Propagation: </strong><?php echo $attribs['propogation'] ?><br>
-        </p>
+        <div class="col-wrapper">
+            <div class="col1">
+                <h3>Growth and Maintenance</h3>
+                <p>
+                    <strong>Ease of cultivation: </strong><?php echo $attribs['ease_of_growth'] ?><br>
+                    <strong>Spreads vigorously: </strong><?php echo $attribs['spreads_vigorously'] ?><br>
+                    <strong>Landscape uses: </strong><?php echo $attribs['landscape_uses'] ?><br>
+                    <?php if($attribs['other_cultivation_factors'] != '') { ?>
+                        <strong>Other cultivation factors: </strong><?php echo $attribs['other_cultivation_factors'] ?><br>
+                    <?php }?>
+                    <strong>Plant behavior: </strong><?php echo $attribs['plant_behavior'] ?><br>
+                    <strong>Propagation: </strong><?php echo $attribs['propogation'] ?><br>
+                </p></div>
+            <div class="col2">
+                <?php if(is_array($collections)) { ?>
+                    <h4>Plant collections containing <?php echo $vernaculars; ?></h4>
+                    <p>
+                        <?php foreach ($collections as $collection) { ?>
+                            <strong><?php echo $collection['name'] ?></strong> -
+                            <?php echo $collection['title'] ?><br>
+                        <?php }?>
+                    </p>
+                <?php } //end if collections ?>
+            </div>
+        </div>
         <div class="garden-commercial">
             <h3>Commercial Availability</h3>
             <p>We are looking forward to presenting the businesses that sell this plant.  Contact us if you are interested in helping to develop this resource!</p>
         </div>
-    </div>
-    <div class="garden-collections">
-            <img src="<?php echo $garden_image['url'] ?>" title="<?php echo $spDisplay; ?> image" alt="<?php echo $vernaculars; ?> image" />
-            <div class="photographer"><?php echo $garden_image['photographer'] ?>&nbsp;&nbsp;<?php //echo $garden_image['image_type'] ?></div>
-        <h4>Plant collections containing <?php echo $vernaculars; ?></h4>
-        <?php if(is_array($collections)) { ?>
-            <div class="home-boxes">
-                <?php foreach ($collections as $collection) { ?>
-                    <a href="<?php echo $clientRoot; ?>/checklists/checklist.php?cl=<?php echo $collection['clid'] ?>&pid=3" class="home-box image-box">
-                        <img src="<?php echo $collection['iconurl']; ?>" alt="<?php echo $collection['name'] ?>">
-                        <h3><?php echo $collection['name'] ?></h3>
-                        <div class="box-overlay">
-                            <div class="centered"><?php echo $collection['title'] ?></div>
-                        </div>
-                    </a>
-                <?php }?>
-            </div>
-        <?php } //end if collections ?>
-    </div>
-</div>
-<div class="metro-wrapper">
-    <div class="inner-content">
-        <hr />
-        <div class="metro-col1"> </div>
-        <div class="metro-col2">
-            <div class="col-content">
-                <p>Metro is a primary contributor to OregonFlora's Gardening with Native Plants and supports efforts to protect clean
-                    air, water and habitat in greater portland.</p>
-            </div>
+        <div style="font-size: 12px;">
+            <hr />
+            <p><img src="<?php echo $clientRoot; ?>/images/metro_logo.png" style="vertical-align: bottom;width: 60px;margin-right: 10px;margin-bottom: 20px;float: left;"> Metro is a primary contributor to OregonFlora's Gardening with Native Plants and supports efforts to protect clean
+                air, water and habitat in greater portland.</p>
         </div>
     </div>
 </div>
