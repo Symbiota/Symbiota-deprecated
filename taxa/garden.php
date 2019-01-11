@@ -203,7 +203,7 @@ include($SERVER_ROOT.'/header.php');
         <div class="metro-col2">
             <div class="col-content">
                 <p>Metro is a primary contributor to OregonFlora's Gardening with Native Plants and supports efforts to protect clean
-                    air, water and habitat in greater portland.</p>
+                    air, water and habitat in greater Portland.</p>
             </div>
         </div>
     </div>

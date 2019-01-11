@@ -992,7 +992,8 @@ include($serverRoot."/header.php");
         <h3>Commercial availability</h3>
         <div>
             <div class="advSearchOptionWrapper">
-                <p>We are looking forward to presenting details about businesses in the regions below and the native species they sell. Contact us if you&rsquo;re interested in helping to develop this resource! (Business contact information)</p>
+                <p>We are looking forward to presenting details about businesses in the regions below and the native species they sell. Contact us if you&rsquo;re interested in helping to develop this resource! (<a
+                            href="<?php echo $clientRoot; ?>/pages/pdfs/Nurserylist_20190102.pdf"></a>)</p>
                 <div class="advSearchOptionHeader">Portland Metro<hr></div>
                 <ul class="inline">
                     <li>Aurora Nursery</li>
@@ -1108,7 +1109,7 @@ include($serverRoot."/header.php");
         <div class="metro-col2">
             <div class="col-content">
                 <p>Metro is a primary contributor to OregonFlora's Gardening with Native Plants and supports efforts to protect clean
-                    air, water and habitat in greater portland.</p>
+                    air, water and habitat in greater Portland.</p>
             </div>
         </div>
     </div>

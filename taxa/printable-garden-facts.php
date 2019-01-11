@@ -188,7 +188,7 @@ $displayLeftMenu = false;
         <div style="font-size: 12px;">
             <hr />
             <p><img src="<?php echo $clientRoot; ?>/images/metro_logo.png" style="vertical-align: bottom;width: 60px;margin-right: 10px;margin-bottom: 20px;float: left;"> Metro is a primary contributor to OregonFlora's Gardening with Native Plants and supports efforts to protect clean
-                air, water and habitat in greater portland.</p>
+                air, water and habitat in greater Portland.</p>
         </div>
     </div>
 </div>

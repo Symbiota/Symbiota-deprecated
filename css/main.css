@@ -1709,6 +1709,12 @@ div.growthCol {
 	width: 100%;
 	margin: 20px auto 10px;
 }
+#availabilityPane p, #availabilityPane li {
+	font-size: 13px;
+}
+#availabilityPane .advSearchOptionWrapper {
+	padding-top: 20px;
+}
 .advSearchOptionWrapper {
 	width: 100%;
 	margin: auto;
