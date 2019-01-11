@@ -881,6 +881,16 @@ class OSUTaxaManager {
         $result->close();
         return false;
     }
+    public function getNativity(){
+        $sql="SELECT t.Nativity from fmchklsttaxalink t WHERE t.CLID = 1 AND t.TID = ".$this->con->escape_string($this->tid);
+        //echo $sql;
+        $result = $this->con->query($sql);
+        if($row = $result->fetch_object()){
+            return $row->Nativity;
+        }
+        $result->close();
+        return false;
+    }
 
     private function addImageDomain($image_url) {
         //type can be url or thumbnailurl

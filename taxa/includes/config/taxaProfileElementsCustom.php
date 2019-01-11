@@ -71,6 +71,8 @@ ob_start();
     ?>
 </div>
 <?php
+$nativity = $OSUManager->getNativity();
+$nativityDiv = $nativity ? '<div id="nativity">' . ucfirst($nativity) . '</div>' : '';
 $OSUspeciesNavDiv = ob_get_clean();
 
 ob_start();
