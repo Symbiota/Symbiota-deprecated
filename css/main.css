@@ -300,6 +300,7 @@ img.image-right {
 --------------------------------------------------------------*/
 .content-wrapper {
 	width: auto;
+	margin-bottom: 30px;
 }
 .content-wrapper > .inner-content {
     padding: 30px 0;

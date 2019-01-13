@@ -41,6 +41,9 @@ class GardenSearchManager {
                 $tempArr = array();
                 foreach($this->searchParamsArr[$char] as $cs){
                     $tempArr[] = '(t.SciName LIKE "'.$cs.'%")';
+                    $tempArr[] = '(t.TID IN(
+SELECT te.tid FROM taxa AS t LEFT JOIN taxaenumtree AS te ON t.TID = te.parenttid WHERE (((t.SciName)="'.$cs.'"))
+UNION SELECT t.tid FROM taxa as t WHERE (((t.SciName)="'.$cs.'"))))';
                 }
                 $tempStr = '('.implode(' OR ',$tempArr).')';
             }
