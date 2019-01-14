@@ -101,9 +101,12 @@ if($isEditor){
 				var dbElements = document.getElementsByName("occid[]");
 				for(i = 0; i < dbElements.length; i++){
 					var dbElement = dbElements[i];
-					if(dbElement.checked) return true;
+					if(dbElement.checked){
+						var quantityObj = document.getElementsByName("q-"+dbElement.value);
+						if(quantityObj && quantityObj[0].value > 0) return true;
+					}
 				}
-			   	alert("Please select at least one specimen!");
+			   	alert("At least one specimen checkbox needs to be selected with a label quantity greater than 0");
 			  	return false;
 			}
 
@@ -317,7 +320,7 @@ if($isEditor){
 									<table class="styledtable" style="font-family:Arial;font-size:12px;">
 										<tr>
 											<th></th>
-											<th>#</th>
+											<th title="Label quantity">Qty</th>
 											<th>Collector</th>
 											<th>Scientific Name</th>
 											<th>Locality</th>
@@ -332,7 +335,7 @@ if($isEditor){
 													<input type="checkbox" name="occid[]" value="<?php echo $occId; ?>" />
 												</td>
 												<td>
-													<input type="text" name="q-<?php echo $occId; ?>" value="<?php echo $recArr["q"]; ?>" style="width:20px;border:inset;" />
+													<input type="text" name="q-<?php echo $occId; ?>" value="<?php echo $recArr["q"]; ?>" style="width:20px;border:inset;" title="Label quantity" />
 												</td>
 												<td>
 													<a href="#" onclick="openIndPopup(<?php echo $occId; ?>); return false;">
