@@ -91,7 +91,7 @@ UNION SELECT t.tid FROM taxa as t WHERE (((t.SciName)="'.$cs.'"))))';
 	        $sqlFrom .= 'LEFT JOIN kmdescr AS kd ON t.TID = kd.TID ';
             $sqlFrom .= 'LEFT JOIN kmcs AS ks ON kd.CID = ks.cid AND kd.CS = ks.cs ';
 	        //$sqlFrom .= 'LEFT JOIN images AS i ON (t.TID = i.tid) ';
-            //$sqlWhere .= 'AND (kd.CID IN(137,681,682,690,738,684)) ';
+            //$sqlWhere .= 'AND (kd.CID IN(137,680,683,140,738,684)) ';
             $sqlSuffix = 'GROUP BY t.TID ORDER BY t.SciName ';
         }
         $this->sql = $sqlSelect.$sqlFrom.$sqlWhere.$sqlSuffix;
@@ -124,33 +124,42 @@ UNION SELECT t.tid FROM taxa as t WHERE (((t.SciName)="'.$cs.'"))))';
 		            if(substr($imgThumbnail,0,1)=="/") $imgThumbnail = $GLOBALS["IMAGE_DOMAIN"].$imgThumbnail;
 	            }
 		            $returnArr[$tid]['url'] = $imgThumbnail;
+	            //build additional attribute values
+                $attribs = $this->getGridAttribs($this->conn->escape_string($tid));
+                $returnArr[$tid]['type'] = $attribs['type'];
+                $returnArr[$tid]['sunlight'] = $attribs['sunlight'];
+                $returnArr[$tid]['moisture'] = $attribs['moisture'];
+                $returnArr[$tid]['maxheight'] = $attribs['maxheight'];
+                $returnArr[$tid]['maxwidth'] = $attribs['maxwidth'];
+                $returnArr[$tid]['ease'] = $attribs['ease'];
+
                 if(!isset($returnArr[$tid]['common'])) $returnArr[$tid]['common'] = $row->VernacularName;
-                if(!isset($returnArr[$tid]['type']) && $cid == 137) {
-	                $returnArr[$tid]['type'] = $row->CharStateName;
-	                if($row->cs == 3) $returnArr[$tid]['type_class'] = "planttype1";
-	                if($row->cs == 2) $returnArr[$tid]['type_class'] = "planttype2";
-	                if($row->cs == 6) $returnArr[$tid]['type_class'] = "planttype3";
-	                if($row->cs == 1) $returnArr[$tid]['type_class'] = "planttype4";
-	                if($row->cs == 4) $returnArr[$tid]['type_class'] = "planttype5";
-	                if($row->cs == 5) $returnArr[$tid]['type_class'] = "planttype6";
-                }
-                if(!isset($returnArr[$tid]['light']) && $cid == 681) {
-                	$returnArr[$tid]['light'] = $row->CharStateName;
-	                if($row->cs == 1) $returnArr[$tid]['light_class'] = "sunlight1";
-	                if($row->cs == 3) $returnArr[$tid]['light_class'] = "sunlight2";
-	                if($row->cs == 4) $returnArr[$tid]['light_class'] = "sunlight3";
-                }
-                if(!isset($returnArr[$tid]['moisture']) && $cid == 682) {
-                	$returnArr[$tid]['moisture'] = $row->CharStateName;
-	                if($row->cs == 1) $returnArr[$tid]['moisture_class'] = "moisture1";
-	                if($row->cs == 2) $returnArr[$tid]['moisture_class'] = "moisture2";
-	                if($row->cs == 3) $returnArr[$tid]['moisture_class'] = "moisture3";
-	                if($row->cs == 4) $returnArr[$tid]['moisture_class'] = "moisture5";
-	                if($row->cs == 5) $returnArr[$tid]['moisture_class'] = "moisture4";
-                }
-                if(!isset($returnArr[$tid]['ease']) && $cid == 684) $returnArr[$tid]['ease'] = $row->CharStateName;
-                if(!isset($returnArr[$tid]['maxheight']) && $cid == 690) $returnArr[$tid]['maxheight'] = $row->CharStateName;
-                if(!isset($returnArr[$tid]['maxwidth']) && $cid == 738) $returnArr[$tid]['maxwidth'] = $row->CharStateName;
+                //if(!isset($returnArr[$tid]['type']) && $cid == 137) {
+	            //    $returnArr[$tid]['type'] = $row->CharStateName;
+	            //    if($row->cs == 3) $returnArr[$tid]['type_class'] = "planttype1";
+	            //    if($row->cs == 2) $returnArr[$tid]['type_class'] = "planttype2";
+	            //    if($row->cs == 6) $returnArr[$tid]['type_class'] = "planttype3";
+	            //    if($row->cs == 1) $returnArr[$tid]['type_class'] = "planttype4";
+	            //    if($row->cs == 4) $returnArr[$tid]['type_class'] = "planttype5";
+	            //    if($row->cs == 5) $returnArr[$tid]['type_class'] = "planttype6";
+                //}
+                //if(!isset($returnArr[$tid]['light']) && $cid == 680) {
+                //	$returnArr[$tid]['light'] = $row->CharStateName;
+	            //    if($row->cs == 1) $returnArr[$tid]['light_class'] = "sunlight1";
+	            //    if($row->cs == 3) $returnArr[$tid]['light_class'] = "sunlight2";
+	            //    if($row->cs == 4) $returnArr[$tid]['light_class'] = "sunlight3";
+                //}
+                //if(!isset($returnArr[$tid]['moisture']) && $cid == 683) {
+                //	$returnArr[$tid]['moisture'] = $row->CharStateName;
+	            //    if($row->cs == 1) $returnArr[$tid]['moisture_class'] = "moisture1";
+	            //    if($row->cs == 2) $returnArr[$tid]['moisture_class'] = "moisture2";
+	            //    if($row->cs == 3) $returnArr[$tid]['moisture_class'] = "moisture3";
+	            //    if($row->cs == 4) $returnArr[$tid]['moisture_class'] = "moisture5";
+	            //    if($row->cs == 5) $returnArr[$tid]['moisture_class'] = "moisture4";
+                //}
+                //if(!isset($returnArr[$tid]['ease']) && $cid == 684) $returnArr[$tid]['ease'] = $row->CharStateName;
+                //if(!isset($returnArr[$tid]['maxheight']) && $cid == 140) $returnArr[$tid]['maxheight'] = $row->CharStateName;
+                //if(!isset($returnArr[$tid]['maxwidth']) && $cid == 738) $returnArr[$tid]['maxwidth'] = $row->CharStateName;
 
             }
         }
@@ -173,6 +182,83 @@ UNION SELECT t.tid FROM taxa as t WHERE (((t.SciName)="'.$cs.'"))))';
 
     public function setDisplay($dis){
         $this->display = $dis;
+    }
+
+    public function getGridAttribs($tid) {
+        $sql = "Select d.cid, c.charname, cs.charstatename, cs.cs FROM kmdescr d ";
+        $sql .= "Left Join kmcharacters c ON c.CID = d.CID ";
+        $sql .= "Left Join kmcs as cs ON d.CS = cs.cs AND cs.cid = d.cid ";
+        $sql .= "where tid = ";
+        $sql .= $this->conn->escape_string($tid);
+        $sql .= " order by  d.cid, cs.cs ";
+        //echo $sql;
+        $result = $this->conn->query($sql);
+
+        while ($row = $result->fetch_array()) {
+            $tmp[$row["cid"]][] = array(
+                "charname" => $row["charname"],
+                "charstatename" => $row["charstatename"],
+                "cs" => $row["cs"] );
+        }
+        //var_dump($tmp);
+        foreach ($tmp[137] as $value) { //habit
+            switch ($value['charstatename']) {
+                case "tree":
+                    $attribs["type"] .= "<img src='../images/plant_type_icon1.png' alt='Tree' >";
+                    break;
+                case "shrub":
+                    $attribs["type"] .= "<img src='../images/plant_type_icon2.png' alt='Shrub' >";
+                    break;
+                case "vine":
+                    $attribs["type"] .= "<img src='../images/plant_type_icon2.png' alt='Vine' >";
+                    break;
+                case "herb":
+                    $attribs["type"] .= "<img src='../images/plant_type_icon4.png' alt='Herb' >";
+                    break;
+                case "grass or grass-like":
+                    $attribs["type"] .= "<img src='../images/plant_type_icon5.png' alt='Grass or grass-like' >";
+                    break;
+                case "fern or fern ally":
+                    $attribs["type"] .= "<img src='../images/plant_type_icon6.png' alt='Fern or fern ally' >";
+                    break;
+            }
+        }
+        foreach ($tmp[680] as $value) { //sunlight
+            switch ($value['charstatename']) {
+                case "sun":
+                    $attribs["sunlight"] .= "<img src='../images/sunlight_icon1.png' alt='Sun' >";
+                    break;
+                case "part shade":
+                    $attribs["sunlight"] .= "<img src='../images/sunlight_icon3.png' alt='Part Shade' >";
+                    break;
+                case "shade":
+                    $attribs["sunlight"] .= "<img src='../images/sunlight_icon4.png' alt='Shade' >";
+                    break;
+            }
+        }
+        foreach ($tmp[683] as $value) { //moisture
+            switch ($value['charstatename']) {
+                case "dry":
+                    $attribs["moisture"].= "<img src='../images/moisture_icon1.png' alt='Dry' >";
+                    break;
+                case "moist":
+                    $attribs["moisture"].= "<img src='../images/moisture_icon3.png' alt='Moist' >";
+                    break;
+                case "wet":
+                    $attribs["moisture"].= "<img src='../images/moisture_icon4.png' alt='Wet' >";
+                    break;
+            }
+        }
+        $attribs["minheight"] = is_array($tmp["140"]) ? min(array_column($tmp["140"], 'charstatename')) : '';
+        $attribs["maxheight"] = is_array($tmp["140"]) ? max(array_column($tmp["140"], 'charstatename')) : '';
+        $attribs["minwidth"] = is_array($tmp["140"]) ? min(array_column($tmp["738"], 'charstatename')) : '';
+        $attribs["maxwidth"] = is_array($tmp["140"]) ? max(array_column($tmp["738"], 'charstatename')) : '';
+        $attribs["ease"] = implode(", ",array_map(function($a){
+            return $a["charstatename"];
+        },$tmp[684]));
+
+        //var_dump($attribs);
+        return $attribs;
     }
 }
 ?>

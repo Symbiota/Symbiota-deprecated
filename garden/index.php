@@ -365,7 +365,7 @@ include($serverRoot."/header.php");
             html += '<div class="searchResultTable">';
         }
         for(i in res){
-            //console.log(res[i]);
+            console.log(res[i]);
             var sciname = res[i].sciname;
             if(display == "grid"){
                 html += '<div class="searchresultgridcell">';
@@ -388,12 +388,12 @@ include($serverRoot."/header.php");
                 html += '</div>';
                 html += '<div id="hiddenListDiv'+i+'" class="searchResultListHiddenRow">';
                 if(res[i].url) html += '<img class="searchResultListImage" src="'+res[i].url+'" title="'+sciname+'" alt="'+sciname+' image" />';
-                html += '<div class="searchResultListType list-icon '+(res[i].type_class?res[i].type_class:"")+'">'+(res[i].type?res[i].type:"")+'</div>';
-                html += '<div class="dsearchResultListLight list-icon '+(res[i].light_class?res[i].light_class:"")+'">'+(res[i].light?res[i].light+" light":"")+'</div>';
-                html += '<div class="searchResultListMoisture list-icon '+(res[i].moisture_class?res[i].moisture_class:"asef")+'">'+(res[i].moisture?res[i].moisture+" moisture":"")+'</div>';
-                html += '<div class="searchResultListMaxheight">'+(res[i].maxheight?res[i].maxheight+" ft. Max. Height":"")+'</div>';
-                html += '<div class="searchResultListMaxwidth">'+(res[i].maxwidth?res[i].maxwidth+" ft. Max. Width":"")+'</div>';
-                html += '<div class="searchResultListEase">'+(res[i].ease?res[i].ease:"")+'</div>';
+                html += '<div class="list-icon-type">'+(res[i].type?res[i].type:"")+'</div>';
+                html += '<div class="list-icon-light">'+(res[i].sunlight?res[i].sunlight:"")+'</div>';
+                html += '<div class="list-icon-moisture">'+(res[i].moisture?res[i].moisture:"")+'</div>';
+                html += '<div class="list-max-height">'+(res[i].maxheight?res[i].maxheight+" ft. Max. Height":"")+'</div>';
+                html += '<div class="list-max-width">'+(res[i].maxwidth?res[i].maxwidth+" ft. Max. Width":"")+'</div>';
+                html += '<div class="list-ease">'+(res[i].ease?res[i].ease:"")+'</div>';
                 html += '</div>';
             }
         }

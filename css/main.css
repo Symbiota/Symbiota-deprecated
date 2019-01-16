@@ -1294,6 +1294,7 @@ ul.inline li {
 .searchResultListHiddenRow > div{
 	padding-right: 10px;
 	display: inline-block;
+	vertical-align: middle;
 }
 .searchResultListSciname {
 	font-style: italic;
