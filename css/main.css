@@ -113,6 +113,7 @@ h2 {
 h3 {
 	font-size: 24px;
 	margin: 0 0 12px 0;
+	color: #4e1e97;
 }
 h4 {
 	font-size: 20px;
@@ -309,6 +310,9 @@ img.image-right {
 	max-width: 1100px;
 	margin: 0 auto;
 	padding: 0 20px;
+}
+.inner-content ul li {
+	margin-bottom: 10px;
 }
 .garden-content {
 	max-width: 1100px;

@@ -992,8 +992,8 @@ include($serverRoot."/header.php");
         <h3>Commercial availability</h3>
         <div>
             <div class="advSearchOptionWrapper">
-                <p>We are looking forward to presenting details about businesses in the regions below and the native species they sell. Contact us if you&rsquo;re interested in helping to develop this resource! (<a
-                            href="<?php echo $clientRoot; ?>/pages/pdfs/Nurserylist_20190102.pdf"></a>)</p>
+                <p>We are looking forward to presenting details about businesses in the regions below and the native species they sell. Contact us if you&rsquo;re interested in helping to develop this resource! <span style="float: right;color: #502e91 !important;">(<a
+                                href="<?php echo $clientRoot; ?>/pages/pdfs/Nurserylist_20190102.pdf" style="color: #502e91 !important;" target="_blank">Business contact information</a>)</span></p>
                 <div class="advSearchOptionHeader">Portland Metro<hr></div>
                 <ul class="inline">
                     <li>Aurora Nursery</li>

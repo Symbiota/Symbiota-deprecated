@@ -41,9 +41,8 @@ include( $serverRoot . "/header.php" );
                 <strong>Flora of Oregon
                     Volume 2:</strong>
                 Dicots Adoxaceae - Fagaceae <br><br>
-                <span class="btn">Available late 2019</span>
+                <a href="pdfs/SponsorshipBrochure.pdf " class="btn" target="_blank">Available late 2019</a>
             </div>
-            <p>A comprehensive reference containing plant descriptions, pen and ink illustrations, and front chapters covering diverse topics. Do you have your copy of Flora of Oregon?</p>
         </div>
         <div class="our-app">
             <h3><br>Oregon Wildflowers App</h3>

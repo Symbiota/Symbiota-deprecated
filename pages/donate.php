@@ -56,7 +56,7 @@ include( $serverRoot . "/header.php" );
             <div class="caption">Inform land management decisions</div>
         </div>
         <div class="caption-wrapper">
-            <img src="images/donate3.jpg" alt="">
+            <img src="images/Donate child photo_2.jpg" alt="">
             <div class="caption">Engage with plants!</div>
         </div>
     </div>

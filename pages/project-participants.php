@@ -78,7 +78,7 @@ include( $serverRoot . "/header.php" );
     <p>Katie Mitchell, Database manager, botanist</p>
     <p><?php echo obfuscate('mitchelk@science.oregonstate.edu'); ?></p>
     <p>&nbsp;</p>
-    <p>John Myers, illustrator</p>
+    <p>John Myers, Illustrator</p>
     <p><?php echo obfuscate('myersj8@oregonstate.edu'); ?></p>
     <p>&nbsp;</p>
     <p>Tanya Harvey, <em>Flora of Oregon</em> Graphic Designer</p>
@@ -94,7 +94,7 @@ include( $serverRoot . "/header.php" );
     <p>&nbsp;</p>
     <h2>Project Associates</h2>
     <p>The <a target="_blank" href="http://npsoregon.org/">Native Plant Society of Oregon (NPSO)</a> has been a sponsor of OregonFlora since the project’s inception in 1994. The Society and its chapters provide financial support and promote the exchange of plant observation data and photographs.</p>
-    <p>Our close ties with the <a target="_blank" href="http://oregonstate.edu/dept/botany/herbarium/">OSU Herbarium</a> are mutually beneficial--the Herbarium excels as a dynamic resource with exceptional depth in its Oregon collections, and the Flora Project enhances their value with careful taxonomic analysis.</p>
+    <p>Our close ties with the <a target="_blank" href="http://oregonstate.edu/dept/botany/herbarium/">OSU Herbarium</a> are mutually beneficial &mdash; the Herbarium excels as a dynamic resource with exceptional depth in its Oregon collections, and the Flora Project enhances their value with careful taxonomic analysis.</p>
     <p>This website uses the <a target="_blank" href="http://symbiota.org/docs/">Symbiota</a> platform with customized modules. Our website is hosted at the <a target="_blank" href="http://my.science.oregonstate.edu/">College of Science Information Network</a> (COSINe) at Oregon State University.</p>
     <p>We collaborate and share information with numerous groups: academic institutions, federal agencies (Oregon/Washington Bureau of Land Management, US Forest Service), state organizations (Oregon Natural Heritage Information Center), Metro, Native Plant Society of Oregon, and individuals.</p>
     <p>&nbsp;</p>
