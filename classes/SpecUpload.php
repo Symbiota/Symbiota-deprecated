@@ -463,11 +463,11 @@ class SpecUpload{
 				else{
 					$logPath .= 'dataupload';
 				}
-				$logPath .= '_'.date('Ymd').".log";
+				$logPath .= '_'.date('Y-m-d').".log";
 				$this->logFH = fopen($logPath, 'a');
 				$this->outputMsg('Start time: '.date('Y-m-d h:i:s A'));
-				$this->outputMsg('REMOTE_ADDR: '.$_SERVER['REMOTE_ADDR']);
-				$this->outputMsg('QUERY_STRING: '.$_SERVER['QUERY_STRING']);
+				if(isset($_SERVER['REMOTE_ADDR'])) $this->outputMsg('REMOTE_ADDR: '.$_SERVER['REMOTE_ADDR']);
+				if(isset($_SERVER['QUERY_STRING'])) $this->outputMsg('QUERY_STRING: '.$_SERVER['QUERY_STRING']);
 			}
 		}
 	}

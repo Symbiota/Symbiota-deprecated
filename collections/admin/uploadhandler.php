@@ -30,9 +30,8 @@ if($argc){
 				}
 			}
 		}
-
 		$harvestManager = new SpecUploadDwca();
-		$harvestManager->setVerboseMode(0);
+		$harvestManager->setVerboseMode(2,'scheduledHarvests');
 		$harvestManager->setCollId($collid);
 		$harvestManager->setUspid($uspid);
 		$harvestManager->setUploadType(8);

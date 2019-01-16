@@ -1136,26 +1136,26 @@ class SpecUploadBase extends SpecUpload{
 		if(!$occurMain->generalOccurrenceCleaning($this->collId)){
 			$errorArr = $occurMain->getErrorArr();
 			foreach($errorArr as $errorStr){
-				echo '<li style="margin-left:20px;">'.$errorStr.'</li>';
+				$this->outputMsg('<li style="margin-left:20px;">'.$errorStr.'</li>');
 			}
 		}
 
 		$this->outputMsg('<li style="margin-left:10px;">Protecting sensitive species...</li>');
 		$protectCnt = $occurMain->protectRareSpecies($this->collId);
-		echo '<li style="margin-left:20px;">'.$protectCnt.' records protected</li>';
+		$this->outputMsg('<li style="margin-left:20px;">'.$protectCnt.' records protected</li>');
 
 		$this->outputMsg('<li style="margin-left:10px;">Updating statistics...</li>');
 		if(!$occurMain->updateCollectionStats($this->collId)){
 			$errorArr = $occurMain->getErrorArr();
 			foreach($errorArr as $errorStr){
-				echo '<li style="margin-left:20px;">'.$errorStr.'</li>';
+				$this->outputMsg('<li style="margin-left:20px;">'.$errorStr.'</li>');
 			}
 		}
 
 		$this->outputMsg('<li style="margin-left:10px;">Populating recordID UUIDs for all records... </li>');
 		$uuidManager = new UuidFactory();
 		$uuidManager->setSilent(1);
-		$uuidManager->populateGuids();
+		$uuidManager->populateGuids($this->collId);
 
 		if($this->imageTransferCount){
 			$this->outputMsg('<li style="margin-left:10px;color:orange">WARNING: Image thumbnails may need to be created using the <a href="../../imagelib/admin/thumbnailbuilder.php?collid='.$this->collId.'">Images Thumbnail Builder</a></li>');
