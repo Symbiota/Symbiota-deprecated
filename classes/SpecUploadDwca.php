@@ -584,10 +584,6 @@ class SpecUploadDwca extends SpecUploadBase{
 					$this->conn->query('SET unique_checks=1');
 					$this->conn->query('SET foreign_key_checks=1');
 					$this->outputMsg('<li style="margin-left:10px;">Complete: '.$this->getTransferCount().' occurrence records loaded</li>');
-					if($this->verboseMode){
-						ob_flush();
-						flush();
-					}
 
 					if($this->getTransferCount()){
 						//Upload identification history
