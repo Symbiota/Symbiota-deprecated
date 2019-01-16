@@ -686,7 +686,7 @@ class OccurrenceUtilities {
 		}
 		if(array_key_exists("taxonrank",$recMap)){
 			$tr = strtolower($recMap["taxonrank"]);
-			if($tr == 'species' || !$recMap["specificepithet"]) $recMap["taxonrank"] = '';
+			if($tr == 'species' || !isset($recMap["specificepithet"]) || !$recMap["specificepithet"]) $recMap["taxonrank"] = '';
 			if($tr == 'subspecies') $recMap["taxonrank"] = 'subsp.';
 			if($tr == 'variety') $recMap["taxonrank"] = 'var.';
 			if($tr == 'forma') $recMap["taxonrank"] = 'f.';
