@@ -214,48 +214,48 @@ if($clid && $isEditor){
 		</div>
 	</div>
 	<!--
-				<div id="pointtab">
-					<fieldset>
-						<legend><b>Add New Point</b></legend>
-						<form name="pointaddform" target="checklistadmin.php" method="post" onsubmit="return verifyPointAddForm(this)">
-							Taxon<br/>
-							<select name="pointtid" onchange="togglePoint(this.form);">
-								<option value="">Select Taxon</option>
-								<option value="">-----------------------</option>
-								<?php
-	$taxaArr = $clManager->getTaxa();
-	foreach($taxaArr as $tid => $sn){
-		echo '<option value="'.$tid.'">'.$sn.'</option>';
-	}
-	?>
-							</select>
-							<div id="pointlldiv" style="display:none;">
-								<div style="float:left;">
-									Latitude Centroid<br/>
-									<input id="latdec" type="text" name="pointlat" style="width:110px;" value="" />
-								</div>
-								<div style="float:left;margin-left:5px;">
-									Longitude Centroid<br/>
-									<input id="lngdec" type="text" name="pointlng" style="width:110px;" value="" />
-								</div>
-								<div style="float:left;margin:15px 0px 0px 10px;cursor:pointer;" onclick="openPointAid(<?php echo $clArray["latcentroid"].','.$clArray["longcentroid"]?>);">
-									<img src="../images/world.png" style="width:12px;" />
-								</div>
-								<div style="clear:both;">
-									Notes:<br/>
-									<input type="text" name="notes" style="width:95%" value="" />
-								</div>
-								<div>
-									<input name="submitaction" type="submit" value="Add Point" />
-									<input type="hidden" name="tabindex" value="2" />
-									<input type="hidden" name="pid" value="<?php echo $pid; ?>" />
-									<input type="hidden" name="clid" value="<?php echo $clid; ?>" />
-								</div>
-							</div>
-						</form>
-					</fieldset>
+	<div id="pointtab">
+		<fieldset>
+			<legend><b>Add New Point</b></legend>
+			<form name="pointaddform" target="checklistadmin.php" method="post" onsubmit="return verifyPointAddForm(this)">
+				Taxon<br/>
+				<select name="pointtid" onchange="togglePoint(this.form);">
+					<option value="">Select Taxon</option>
+					<option value="">-----------------------</option>
+					<?php
+					$taxaArr = $clManager->getTaxa();
+					foreach($taxaArr as $tid => $sn){
+						echo '<option value="'.$tid.'">'.$sn.'</option>';
+					}
+					?>
+				</select>
+				<div id="pointlldiv" style="display:none;">
+					<div style="float:left;">
+						Latitude Centroid<br/>
+						<input id="latdec" type="text" name="pointlat" style="width:110px;" value="" />
+					</div>
+					<div style="float:left;margin-left:5px;">
+						Longitude Centroid<br/>
+						<input id="lngdec" type="text" name="pointlng" style="width:110px;" value="" />
+					</div>
+					<div style="float:left;margin:15px 0px 0px 10px;cursor:pointer;" onclick="openPointAid(<?php echo $clArray["latcentroid"].','.$clArray["longcentroid"]?>);">
+						<img src="../images/world.png" style="width:12px;" />
+					</div>
+					<div style="clear:both;">
+						Notes:<br/>
+						<input type="text" name="notes" style="width:95%" value="" />
+					</div>
+					<div>
+						<input name="submitaction" type="submit" value="Add Point" />
+						<input type="hidden" name="tabindex" value="2" />
+						<input type="hidden" name="pid" value="<?php echo $pid; ?>" />
+						<input type="hidden" name="clid" value="<?php echo $clid; ?>" />
+					</div>
 				</div>
- -->
+			</form>
+		</fieldset>
+	</div>
+	-->
 	<?php
 	if($voucherProjects){
 		?>
