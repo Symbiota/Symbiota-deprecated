@@ -250,12 +250,14 @@ class ChecklistVoucherAdmin {
 	//Listing function for tabs
 	public function getVoucherCnt(){
 		$vCnt = 0;
-		$sql = 'SELECT count(*) AS vcnt FROM fmvouchers WHERE (clid = '.$this->clid.')';
-		$rs = $this->conn->query($sql);
-		while($r = $rs->fetch_object()){
-			$vCnt = $r->vcnt;
+		if($this->clid){
+			$sql = 'SELECT count(*) AS vcnt FROM fmvouchers WHERE (clid = '.$this->clid.')';
+			$rs = $this->conn->query($sql);
+			while($r = $rs->fetch_object()){
+				$vCnt = $r->vcnt;
+			}
+			$rs->free();
 		}
-		$rs->free();
 		return $vCnt;
 	}
 
@@ -671,6 +673,41 @@ class ChecklistVoucherAdmin {
 		}
 	}
 
+	public function downloadAllOccurrenceCsv(){
+		if($this->clid){
+			$fileName = $this->getExportFileName().'.csv';
+			if($sqlFrag = $this->getSqlFrag()){
+				$fieldArr = array('tid'=>'t.tid AS taxonID', 'family'=>'IFNULL(ctl.familyoverride,ts.family) AS family', 'scientificName'=>'t.sciname', 'author'=>'t.author AS scientificNameAuthorship');
+				$fieldArr['clhabitat'] = 'ctl.habitat AS cl_habitat';
+				$fieldArr['clabundance'] = 'ctl.abundance';
+				$fieldArr['clNotes'] = 'ctl.notes';
+				$fieldArr['clSource'] = 'ctl.source';
+				$fieldArr['editorNotes'] = 'ctl.internalnotes';
+				$fieldArr = array_merge($fieldArr,$this->getOccurrenceFieldArr());
+				$fieldArr['family'] = 'ts.family';
+				$fieldArr['scientificName'] = 't.sciName AS scientificName';
+
+				$localitySecurityFields = $this->getLocalitySecurityArr();
+
+				$clidStr = $this->clid;
+				if($this->childClidArr){
+					$clidStr .= ','.implode(',',$this->childClidArr);
+				}
+
+				$sql = 'SELECT DISTINCT '.implode(',',$fieldArr).', o.localitysecurity, o.collid '.
+					'FROM fmchklsttaxalink ctl INNER JOIN taxa t ON ctl.tid = t.tid '.
+					'INNER JOIN taxstatus ts ON ctl.tid = ts.tid '.
+					'LEFT JOIN taxstatus ts2 ON ts.tidaccepted = ts2.tidaccepted '.
+					'LEFT JOIN omoccurrences o ON ts2.tid = o.tidinterpreted '.
+					'LEFT JOIN omcollections c ON o.collid = c.collid '.
+					'LEFT JOIN guidoccurrences g ON o.occid = g.occid '.
+					$this->getTableJoinFrag($sqlFrag).
+					'WHERE ('.$sqlFrag.') AND (ts.taxauthid = 1) AND (ts2.taxauthid = 1) AND (ctl.clid IN('.$clidStr.')) ';
+				$this->exportCsv($fileName,$sql,$localitySecurityFields);
+			}
+		}
+	}
+
 	private function exportCsv($fileName,$sql,$localitySecurityFields = null){
 		header ('Cache-Control: must-revalidate, post-check=0, pre-check=0');
 		header ('Content-Type: text/csv');
@@ -875,6 +912,17 @@ class ChecklistVoucherAdmin {
 
 	public function getMissingTaxaCount(){
 		return $this->missingTaxaCount;
+	}
+
+	public function vouchersExist(){
+		$bool = false;
+		if($this->clid){
+			$sql = 'SELECT tid FROM fmvouchers WHERE (clid = '.$this->clid.') LIMIT 1';
+			$rs = $this->conn->query($sql);
+			if($rs->num_rows) $bool = true;
+			$rs->free();
+		}
+		return $bool;
 	}
 
 	private function isRareSpeciesReader(){

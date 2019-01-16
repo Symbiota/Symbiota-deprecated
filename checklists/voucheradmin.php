@@ -38,7 +38,6 @@ if($IS_ADMIN || (array_key_exists("ClAdmin",$USER_RIGHTS) && in_array($clid,$USE
 }
 $clManager->setCollectionVariables();
 ?>
-
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET; ?>"/>
@@ -58,7 +57,6 @@ $clManager->setCollectionVariables();
 		li{margin:5px;}
 	</style>
 </head>
-
 <body>
 <?php
 $displayLeftMenu = false;
@@ -69,7 +67,6 @@ include($SERVER_ROOT.'/header.php');
 	<a href="checklist.php?clid=<?php echo $clid.'&pid='.$pid; ?>"><?php echo $LANG['RETURNCHECK'];?></a> &gt;&gt;
 	<b><?php echo $LANG['CHECKADMIN'];?></b>
 </div>
-
 <!-- This is inner text! -->
 <div id='innertext'>
 <div style="color:#990000;font-size:20px;font-weight:bold;margin:0px 10px 10px 0px;">
@@ -87,7 +84,6 @@ if($statusStr){
 	<hr />
 <?php
 }
-
 if($clid && $isEditor){
 	$termArr = $clManager->getQueryVariablesArr();
 	$collList = $clManager->getCollectionList();
@@ -99,7 +95,7 @@ if($clid && $isEditor){
 			?>
 			<span style="margin-left:10px;"><a href="#" onclick="toggle('sqlbuilderdiv');return false;" title="Edit Search Statement"><img src="../images/edit.png" style="width:15px;border:0px;"/></a></span>
 		</div>
-	<?php
+		<?php
 	}
 	?>
 	<div id="sqlbuilderdiv" style="display:<?php echo ($termArr?'none':'block'); ?>;margin-top:15px;">
@@ -377,14 +373,22 @@ if($clid && $isEditor){
 					<ul>
 						<li><a href="voucherreporthandler.php?rtype=fullcsv&clid=<?php echo $clid; ?>"><?php echo $LANG['FULLSPECLIST'];?></a></li>
 						<li><a href="checklist.php?printmode=1&showvouchers=0&defaultoverride=1&clid=<?php echo $clid; ?>" target="_blank"><?php echo $LANG['FULLPRINT'];?></a></li>
-						<li><a href="voucherreporthandler.php?rtype=fullvoucherscsv&clid=<?php echo $clid; ?>"><?php echo $LANG['FULLSPECLISTVOUCHER'];?></a></li>
-						<li><a href="checklist.php?printmode=1&showvouchers=1&defaultoverride=1&clid=<?php echo $clid; ?>" target="_blank"><?php echo $LANG['FULLPRINTVOUCHER'];?></a></li>
+						<?php
+						$vouchersExist = $clManager->vouchersExist();
+						if($vouchersExist){
+							?>
+							<li><a href="voucherreporthandler.php?rtype=fullvoucherscsv&clid=<?php echo $clid; ?>"><?php echo $LANG['FULLSPECLISTVOUCHER'];?></a></li>
+							<li><a href="checklist.php?printmode=1&showvouchers=1&defaultoverride=1&clid=<?php echo $clid; ?>" target="_blank"><?php echo $LANG['FULLPRINTVOUCHER'];?></a></li>
+							<li>
+								<a href="#" onclick="openPopup('../collections/download/index.php?searchvar=<?php echo urlencode('clid='.$clid); ?>&noheader=1','repvouchers');return false;">
+									<?php echo (isset($LANG['VOUCHERONLY'])?$LANG['VOUCHERONLY']:'Occurrence vouchers only (DwC-A, CSV, Tab-delimited)'); ?>
+								</a>
+							</li>
+							<?php
+						}
+						?>
+						<li><a href="voucherreporthandler.php?rtype=fullalloccurcsv&clid=<?php echo $clid; ?>"><?php echo $LANG['FULLSPECLISTALLOCCUR'];?></a></li>
 						<li><a href="voucherreporthandler.php?rtype=pensoftxlsx&clid=<?php echo $clid; ?>" target="_blank"><?php echo (isset($LANG['PENSOFT_XLSX_EXPORT'])?$LANG['PENSOFT_XLSX_EXPORT']:'Pensoft Excel Export');?></a></li>
-						<li>
-							<a href="#" onclick="openPopup('../collections/download/index.php?searchvar=<?php echo urlencode('clid='.$clid); ?>&noheader=1','repvouchers');return false;">
-								<?php echo (isset($LANG['VOUCHERONLY'])?$LANG['VOUCHERONLY']:'Occurrence vouchers only (DwC-A, CSV, Tab-delimited)'); ?>
-							</a>
-						</li>
 						<li><?php echo $LANG['SPECMISSINGTITLE'];?></li>
 					</ul>
 					<ul style="margin:-10 0px 0px 25px;list-style-type:circle">

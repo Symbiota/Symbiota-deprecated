@@ -47,24 +47,36 @@ if($spprid) $specManager->setProjVariables($spprid);
 					});
 				}
 
+				uploadTypeChanged();
 			});
 
 			function uploadTypeChanged(){
-				var uploadType = document.getElementById('projecttype').value;
+				var f = document.getElementById('editproj');
+				var uploadType = f.projecttype.value;
 				if(uploadType == 'local'){
 					$("div.profileDiv").show();
 					$("#titleDiv").show();
 					$("#sourcePathInfoIplant").hide();
 					$("#chooseFileDiv").hide();
-					if($("[name='sourcepath']").val() == "-- Use Default Path --") $("[name='sourcepath']").val("");
-					$("#profileEditSubmit").val("Save Profile");
+					if(f.sourcepath.value == "-- Use Default Path --") f.sourcepath.value = "";
+					f.profileEditSubmit.value = "Save Profile";
 					$("#submitDiv").show();
 				}
 				else if(uploadType == 'file'){
-					$("div.profileDiv").hide();
-					$("#chooseFileDiv").show();
-					$("#profileEditSubmit").val("Analyze Image Data File");
-					$("#submitDiv").show();
+					if(f.spprid.value){
+						$("div.profileDiv").hide();
+						$("#titleDiv").hide();
+						$("#chooseFileDiv").show();
+						$("#specKeyPatternDiv").show();
+						//$("#patternReplaceDiv").show();
+						//$("#replaceStrDiv").show();
+						f.profileEditSubmit.value = "Analyze Image Data File";
+						$("#submitDiv").show();
+					}
+					else{
+						$("#profileEditSubmit").val("Save Profile");
+
+					}
 				}
 				else if(uploadType == 'idigbio'){
 					$("div.profileDiv").hide();
@@ -266,7 +278,7 @@ if($spprid) $specManager->setProjVariables($spprid);
 						$projectType = $specManager->getProjectType();
 						?>
 						<div id="editdiv" style="display:<?php echo ($spprid?'none':'block'); ?>;position:relative;">
-							<form name="editproj" action="index.php" enctype="multipart/form-data" method="post" onsubmit="return validateProjectForm(this);">
+							<form id="editproj" name="editproj" action="index.php" enctype="multipart/form-data" method="post" onsubmit="return validateProjectForm(this);">
 								<fieldset style="padding:15px">
 									<legend><b><?php echo ($spprid?'Edit':'New'); ?> Profile</b></legend>
 									<?php
@@ -285,7 +297,7 @@ if($spprid) $specManager->setProjVariables($spprid);
 												<b>Image Mapping Type:</b>
 											</div>
 											<div style="float:left;">
-												<select name="projecttype" id="projecttype" style="width:300px;" onchange="uploadTypeChanged()" <?php echo ($spprid?'DISABLED':'');?>>
+												<select name="projecttype" id="projecttype" style="width:300px;" onchange="uploadTypeChanged(this.form)" <?php echo ($spprid?'DISABLED':'');?>>
 													<option value="">----------------------</option>
 													<option value="local">Local Image Mapping</option>
 													<option value="file">Upload Image Mapping File</option>

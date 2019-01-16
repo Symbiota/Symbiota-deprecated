@@ -234,7 +234,7 @@ if(!$clid){
 					<legend><b><?php echo $LANG['DEFAULTDISPLAY'];?></b></legend>
 					<div>
 						<?php
-						echo "<input id='dsynonyms' name='dsynonyms' type='checkbox' value='1' ".(isset($defaultArr["dsynonyms"])?"checked":"")." /> ".$LANG['DISPLAY_SYNONYMS'];
+						echo "<input id='dsynonyms' name='dsynonyms' type='checkbox' value='1' ".(isset($defaultArr["dsynonyms"])&&$defaultArr["dsynonyms"]?"checked":"")." /> ".$LANG['DISPLAY_SYNONYMS'];
 						?>
 					</div>
 					<div>
