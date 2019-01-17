@@ -81,24 +81,24 @@ if($spprid) $specManager->setProjVariables($spprid);
 				else if(uploadType == 'idigbio'){
 					$("div.profileDiv").hide();
 					$("#titleDiv").show();
-					$("[name='title']").val("iDigBio CSV upload");
+					f.title.value = "iDigBio CSV upload";
 					$("#specKeyPatternDiv").show();
 					$("#patternReplaceDiv").show();
 					$("#replaceStrDiv").show();
-					if($("[name='sourcepath']").val() == "-- Use Default Path --") $("[name='sourcepath']").val("");
+					if(f.sourcepath.value == "-- Use Default Path --") f.sourcepath.value = "";
 					$("#profileEditSubmit").val("Save Profile");
 					$("#submitDiv").show();
 				}
 				else if(uploadType == 'iplant'){
 					$("div.profileDiv").hide();
 					$("#titleDiv").show();
-					$("[name='title']").val("iPlant Image Processing");
+					f.title.value = "iPlant Image Processing";
 					$("#specKeyPatternDiv").show();
 					$("#patternReplaceDiv").show();
 					$("#replaceStrDiv").show();
 					$("#sourcePathDiv").show();
 					$("#sourcePathInfoIplant").show();
-					if($("[name='sourcepath']").val() == "") $("[name='sourcepath']").val("-- Use Default Path --");
+					if(f.sourcepath.value == "") f.sourcepath.value = "-- Use Default Path --";
 					$("#profileEditSubmit").val("Save Profile");
 					$("#submitDiv").show();
 				}
@@ -177,7 +177,7 @@ if($spprid) $specManager->setProjVariables($spprid);
 						return false;
 					}
 				}
-				if($("[name='matchcatalognumber']").prop("checked") == false && $("[name='matchothercatalognumbers']").prop("checked") == false){
+				if(f.matchcatalognumber.checked == false && f.matchothercatalognumbers.checked == false){
 					alert("At least one of the Match Term checkboxes need to be checked");
 					return false;
 				}

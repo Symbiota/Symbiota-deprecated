@@ -403,9 +403,6 @@ header("Content-Type: text/html; charset=".$CHARSET);
 						</div>
 						<div>
 							<b>Taxon:</b>
-							<?php
-							echo ($occArr['identificationqualifier']?$occArr['identificationqualifier']." ":"");
-							?>
 							<i><?php echo $occArr['sciname']; ?></i> <?php echo $occArr['scientificnameauthorship']; ?>
 							<?php
 							if($occArr['tidinterpreted']){
@@ -413,6 +410,9 @@ header("Content-Type: text/html; charset=".$CHARSET);
 							}
 							?>
 							<br/>
+							<?php
+							if($occArr['identificationqualifier']) echo '<b>Identification Qualifier:</b> '.$occArr['identificationqualifier'].'<br/>';
+							?>
 							<b>Family:</b> <?php echo $occArr['family']; ?>
 						</div>
 						<div>
