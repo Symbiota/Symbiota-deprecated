@@ -990,7 +990,7 @@ class OSUTaxaManager {
         }
         $attribs["sunlight_string"] =  implode(", ", $attribs["sunlight_array"]);
         $attribs["watering_string"] = '';
-        if(is_array($tmp["682"]){
+        if(is_array($tmp["682"])){
             $min_watering = min(array_column($tmp["682"], 'cs'));
             $max_watering = max(array_column($tmp["682"], 'cs'));
             $min_watering_key = array_search($min_watering, array_column($tmp["682"], 'cs'));
