@@ -157,7 +157,7 @@ if($taxonValue) {
         echo "</legend>";
     }
     ?>
-    <div>
+    <div class="box-wrapper">
         <?php
 
         if($sppArr = $OSUManager->getSppArray()){

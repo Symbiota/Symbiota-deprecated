@@ -381,7 +381,10 @@ div.spptab{
 	border:		1px dotted grey;
 	vertical-align: middle;
 }
-
+.box-wrapper {
+	display: flex;
+	flex-wrap: wrap;
+}
 div.imgthumb{
 	margin: 		5px;
 	height:		220px;
@@ -431,7 +434,7 @@ div.mapthumb a:hover img {
 div.spptaxon{
 	text-align: 	center;
 	width:			170px;
-	height:			340px;
+	height:			auto;
 	float:	 		left;
 	border: 		1px dotted gray;
 	margin:			5px;
@@ -442,7 +445,7 @@ div.sppimg{
 	margin-left: 	auto;
 	margin-right: 	auto;
 	width:			160px;
-	height:			150px;
+	height:			auto;
 	overflow:		hidden;
 }
 
@@ -461,7 +464,7 @@ div.sppmap{
 	margin-right: 	auto;
 	border: 	0px;
 	width: 	160px;
-	height:	160px;
+	height:	auto;
 	text-align: center;
 }
 
