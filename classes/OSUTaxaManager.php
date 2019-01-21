@@ -951,8 +951,8 @@ class OSUTaxaManager {
         //var_dump($tmp);
         $attribs["min_height"] = is_array($tmp["140"]) ? min(array_column($tmp["140"], 'charstatename')) : '';
         $attribs["max_height"] = is_array($tmp["140"]) ? max(array_column($tmp["140"], 'charstatename')) : '';
-        $attribs["min_width"] = is_array($tmp["140"]) ? min(array_column($tmp["738"], 'charstatename')) : '';
-        $attribs["max_width"] = is_array($tmp["140"]) ? max(array_column($tmp["738"], 'charstatename')) : '';
+        $attribs["min_width"] = is_array($tmp["738"]) ? min(array_column($tmp["738"], 'charstatename')) : '';
+        $attribs["max_width"] = is_array($tmp["738"]) ? max(array_column($tmp["738"], 'charstatename')) : '';
         $attribs["type"] = ucwords($tmp["100"][0]['charstatename'] ). " " . $tmp["137"][0]['charstatename'];
         $attribs["bloom_months"] = implode(", ",array_map(function($a){
             return $a["charstatename"];
@@ -989,22 +989,18 @@ class OSUTaxaManager {
             }
         }
         $attribs["sunlight_string"] =  implode(", ", $attribs["sunlight_array"]);
-
-
-
-
-        $min_watering = min(array_column($tmp["682"], 'cs'));
-        $max_watering = max(array_column($tmp["682"], 'cs'));
-        $min_watering_key = array_search($min_watering, array_column($tmp["682"], 'cs'));
-        $max_watering_key = array_search($max_watering, array_column($tmp["682"], 'cs'));
-        if( $min_watering == $max_watering ) {
-            $attribs["watering_string"] = $tmp["682"][$min_watering_key]['charstatename'];
-        }else{
-            $attribs["watering_string"] = $tmp["682"][$min_watering_key]['charstatename'] . " to " . $tmp["682"][$max_watering_key]['charstatename'];
+        $attribs["watering_string"] = '';
+        if(is_array($tmp["682"]){
+            $min_watering = min(array_column($tmp["682"], 'cs'));
+            $max_watering = max(array_column($tmp["682"], 'cs'));
+            $min_watering_key = array_search($min_watering, array_column($tmp["682"], 'cs'));
+            $max_watering_key = array_search($max_watering, array_column($tmp["682"], 'cs'));
+            if ($min_watering == $max_watering) {
+                $attribs["watering_string"] = $tmp["682"][$min_watering_key]['charstatename'];
+            } else {
+                $attribs["watering_string"] = $tmp["682"][$min_watering_key]['charstatename']." to ".$tmp["682"][$max_watering_key]['charstatename'];
+            }
         }
-
-
-
         $attribs["moisture"] = "";
         $attribs["moisture_string"] = "";
         //if needed sort array, but the query sorts by cs, so should not be needed
@@ -1027,16 +1023,17 @@ class OSUTaxaManager {
                     break;
             }
         }
-        $min_moisture = min(array_column($tmp["683"], 'cs'));
-        $max_moisture = max(array_column($tmp["683"], 'cs'));
-        $min_moisture_key = array_search($min_moisture, array_column($tmp["683"], 'cs'));
-        $max_moisture_key = array_search($max_moisture, array_column($tmp["683"], 'cs'));
-        if( $min_moisture == $max_moisture ) {
-            $attribs["moisture_string"] = $tmp["683"][$min_moisture_key]['charstatename'];
-        }else{
-            $attribs["moisture_string"] = $tmp["683"][$min_moisture_key]['charstatename'] . " to " . $tmp["683"][$max_moisture_key]['charstatename'];
+        if(is_array($tme['683'])) {
+            $min_moisture = min(array_column($tmp["683"], 'cs'));
+            $max_moisture = max(array_column($tmp["683"], 'cs'));
+            $min_moisture_key = array_search($min_moisture, array_column($tmp["683"], 'cs'));
+            $max_moisture_key = array_search($max_moisture, array_column($tmp["683"], 'cs'));
+            if( $min_moisture == $max_moisture ) {
+                $attribs["moisture_string"] = $tmp["683"][$min_moisture_key]['charstatename'];
+            }else{
+                $attribs["moisture_string"] = $tmp["683"][$min_moisture_key]['charstatename'] . " to " . $tmp["683"][$max_moisture_key]['charstatename'];
+            }
         }
-
         $attribs["moisture_list"] =  implode(", ", $attribs["moisture_array"]);
         $attribs["wildlife"] = "";
         $attribs["wildlife_string"] = "";
