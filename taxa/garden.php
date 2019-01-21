@@ -147,30 +147,50 @@ include($SERVER_ROOT.'/header.php');
     <div class="garden-facts">
         <h3>Plant Facts</h3>
         <p>
-            <strong>Plant type: </strong><?php echo strtolower($attribs['type']) ?><br>
+            <?php if( $attribs['type'] != '' ){ ?>
+                <strong>Plant type: </strong><?php echo strtolower($attribs['type']) ?><br>
+            <?php } ?>
             <strong>Size at maturity: </strong><?php echo $attribs['min_height'] ?>-<?php echo $attribs['max_height'] ?>' high x <?php echo $attribs['min_width'] ?>-<?php echo $attribs['max_width'] ?>' wide<br>
             <?php if( $attribs['flower_color'] != '' ){ ?>
-            <strong>Flower color: </strong><?php echo $attribs['flower_color'] ?><br>
+                <strong>Flower color: </strong><?php echo $attribs['flower_color'] ?><br>
             <?php } ?>
             <?php if( $attribs['bloom_months'] != '' ){ ?>
-            <strong>Bloom time: </strong><?php echo $attribs['bloom_months'] ?><br>
+                <strong>Bloom time: </strong><?php echo $attribs['bloom_months'] ?><br>
             <?php } ?>
-            <strong>Light: </strong><?php echo $attribs['sunlight_string'] ?><br>
-            <strong>Moisture: </strong><?php echo $attribs['moisture_string'] ?><br>
+            <?php if( $attribs['sunlight_string'] != '' ){ ?>
+                <strong>Light: </strong><?php echo $attribs['sunlight_string'] ?><br>
+            <?php } ?>
+            <?php if( $attribs['moisture_string'] != '' ){ ?>
+                <strong>Moisture: </strong><?php echo $attribs['moisture_string'] ?>
+                <?php if( $attribs['watering_string'] != '' ){ ?>
+                    ; <?php echo $attribs['watering_string'] ?> summer water
+                <?php } ?>
+                <br>
+            <?php } ?>
             <?php if(isset($attribs['wildlife_string']) && $attribs['wildlife_string'] != ''){ ?>
                 <strong>Wildlife support: </strong><?php echo $attribs['wildlife_string'] ?><br>
             <?php } ?>
         </p>
         <h3>Growth and Maintenance</h3>
         <p>
-            <strong>Ease of cultivation: </strong><?php echo $attribs['ease_of_growth'] ?><br>
-            <strong>Spreads vigorously: </strong><?php echo $attribs['spreads_vigorously'] ?><br>
-            <strong>Landscape uses: </strong><?php echo $attribs['landscape_uses'] ?><br>
+            <?php if( $attribs['ease_of_growth'] != '' ){ ?>
+                <strong>Ease of cultivation: </strong><?php echo $attribs['ease_of_growth'] ?><br>
+            <?php } ?>
+            <?php if( $attribs['spreads_vigorously'] != '' ){ ?>
+                <strong>Spreads vigorously: </strong><?php echo $attribs['spreads_vigorously'] ?><br>
+            <?php } ?>
+            <?php if( $attribs['landscape_uses'] != '' ){ ?>
+                <strong>Landscape uses: </strong><?php echo $attribs['landscape_uses'] ?><br>
+            <?php } ?>
             <?php if( $attribs['other_cultivation_factors'] != '' ){ ?>
                 <strong>Other cultivation factors: </strong><?php echo $attribs['other_cultivation_factors'] ?><br>
             <?php } ?>
-            <strong>Plant behavior: </strong><?php echo $attribs['plant_behavior'] ?><br>
-            <strong>Propagation: </strong><?php echo $attribs['propogation'] ?><br>
+            <?php if( $attribs['plant_behavior'] != '' ){ ?>
+                <strong>Plant behavior: </strong><?php echo $attribs['plant_behavior'] ?><br>
+            <?php } ?>
+            <?php if( $attribs['propogation'] != '' ){ ?>
+                <strong>Propagation: </strong><?php echo $attribs['propogation'] ?><br>
+            <?php } ?>
         </p>
         <div class="garden-commercial">
             <h3>Commercial Availability</h3>

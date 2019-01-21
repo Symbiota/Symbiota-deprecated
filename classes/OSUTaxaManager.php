@@ -938,7 +938,7 @@ class OSUTaxaManager {
         $sql .= "Left Join kmcs as cs ON d.CS = cs.cs AND cs.cid = d.cid ";
         $sql .= "where tid = ";
         $sql .= $this->con->escape_string($this->tid);
-        $sql .= " order by  d.cid, cs.cs ";
+        $sql .= " order by  d.cid, cs.SortSequence ";
         //echo $sql;
         $result = $this->con->query($sql);
 
@@ -989,6 +989,22 @@ class OSUTaxaManager {
             }
         }
         $attribs["sunlight_string"] =  implode(", ", $attribs["sunlight_array"]);
+
+
+
+
+        $min_watering = min(array_column($tmp["682"], 'cs'));
+        $max_watering = max(array_column($tmp["682"], 'cs'));
+        $min_watering_key = array_search($min_watering, array_column($tmp["682"], 'cs'));
+        $max_watering_key = array_search($max_watering, array_column($tmp["682"], 'cs'));
+        if( $min_watering == $max_watering ) {
+            $attribs["watering_string"] = $tmp["682"][$min_watering_key]['charstatename'];
+        }else{
+            $attribs["watering_string"] = $tmp["682"][$min_watering_key]['charstatename'] . " to " . $tmp["682"][$max_watering_key]['charstatename'];
+        }
+
+
+
         $attribs["moisture"] = "";
         $attribs["moisture_string"] = "";
         //if needed sort array, but the query sorts by cs, so should not be needed

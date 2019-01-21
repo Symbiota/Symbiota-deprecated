@@ -93,6 +93,8 @@ $collections = $OSUManager->gardenCollections();
             #printPageButton {
                 display: none;
             }
+            @page { margin: 0; }
+            body { margin: 0.8cm; }
         }
         .garden-facts, .garden-collections {
             width: 100%;
@@ -118,6 +120,10 @@ $collections = $OSUManager->gardenCollections();
             float: right;
             width: 47%;
         }
+        .garden-content-wrapper {
+            padding-top: 0;
+            padding-bottom: 0;
+        }
     </style>
 </head>
 <body class="printable">
@@ -130,46 +136,67 @@ $displayLeftMenu = false;
     <div class="garden-print-col-wrapper">
         <h1><strong><em><?php echo $spDisplay; ?></em></strong><br>
             <?php echo $vernaculars; ?></h1>
-        <div class="garden-facts">
-            <div class="garden-desc" style="width: 49%;float: left;">
-                <?php echo $garden_content; ?>
-                <h3>Plant Facts</h3>
-                <p>
-                    <strong>Plant type: </strong><?php echo strtolower($attribs['type']) ?><br>
-                    <strong>Size at maturity: </strong><?php echo $attribs['min_height'] ?>-<?php echo $attribs['max_height'] ?>' high x <?php echo $attribs['min_width'] ?>-<?php echo $attribs['max_width'] ?>' wide<br>
-                    <?php if($attribs['flower_color'] != '') { ?>
-                        <strong>Flower color: </strong><?php echo $attribs['flower_color'] ?><br>
-                    <?php } ?>
-                    <?php if($attribs['bloom_months'] != '') { ?>
-                        <strong>Bloom time: </strong><?php echo $attribs['bloom_months'] ?><br>
-                    <?php } ?>
-                    <strong>Light: </strong><?php echo $attribs['sunlight_string'] ?><br>
-                    <strong>Moisture: </strong><?php echo $attribs['moisture_string'] ?><br>
-                    <?php if(isset($attribs['wildlife_string']) && $attribs['wildlife_string'] != ''){ ?>
-                        <strong>Wildlife support: </strong><?php echo $attribs['wildlife_string'] ?><br>
-                    <?php } ?>
-                </p>
-            </div>
-            <div class="garden-photo" style="width: 49%;float: right;">
-                <img style="display: block;width: 86px;margin: 0 auto;margin-bottom: 20px;" src="<?php echo $clientRoot; ?>/images/layout/new-logo.png" alt="Oregon Flora">
-                <img src="<?php echo $garden_image['url'] ?>" title="<?php echo $spDisplay; ?> image" alt="<?php echo $vernaculars; ?> image" />
-                <div class="photographer"><?php echo $garden_image['photographer'] ?>&nbsp;&nbsp;<?php //echo $garden_image['image_type'] ?></div>
-            </div>
-        </div>
         <div class="col-wrapper">
             <div class="col1">
+                <div class="garden-desc">
+                    <?php echo $garden_content; ?>
+                    <h3>Plant Facts</h3>
+                    <p>
+                        <?php if($attribs['type'] != '') { ?>
+                            <strong>Plant type: </strong><?php echo strtolower($attribs['type']) ?><br>
+                        <?php } ?>
+                        <strong>Size at maturity: </strong><?php echo $attribs['min_height'] ?>-<?php echo $attribs['max_height'] ?>' high x <?php echo $attribs['min_width'] ?>-<?php echo $attribs['max_width'] ?>' wide<br>
+                        <?php if($attribs['flower_color'] != '') { ?>
+                            <strong>Flower color: </strong><?php echo $attribs['flower_color'] ?><br>
+                        <?php } ?>
+                        <?php if($attribs['bloom_months'] != '') { ?>
+                            <strong>Bloom time: </strong><?php echo $attribs['bloom_months'] ?><br>
+                        <?php } ?>
+                        <?php if($attribs['sunlight_string'] != '') { ?>
+                            <strong>Light: </strong><?php echo $attribs['sunlight_string'] ?><br>
+                        <?php } ?>
+                        <?php if($attribs['moisture_string'] != '') { ?>
+                            <strong>Moisture: </strong><?php echo $attribs['moisture_string'] ?><br>
+                        <?php } ?>
+                        <?php if(isset($attribs['wildlife_string']) && $attribs['wildlife_string'] != ''){ ?>
+                            <strong>Wildlife support: </strong><?php echo $attribs['wildlife_string'] ?><br>
+                        <?php } ?>
+                    </p>
+                </div>
                 <h3>Growth and Maintenance</h3>
                 <p>
-                    <strong>Ease of cultivation: </strong><?php echo $attribs['ease_of_growth'] ?><br>
-                    <strong>Spreads vigorously: </strong><?php echo $attribs['spreads_vigorously'] ?><br>
+                    <?php if($attribs['ease_of_growth'] != '') { ?>
+                        <strong>Ease of cultivation: </strong><?php echo $attribs['ease_of_growth'] ?><br>
+                    <?php } ?>
+                    <?php if($attribs['spreads_vigorously'] != '') { ?>
+                        <strong>Spreads vigorously: </strong><?php echo $attribs['spreads_vigorously'] ?><br>
+                    <?php } ?>
+                    <?php if($attribs['landscape_uses'] != '') { ?>
                     <strong>Landscape uses: </strong><?php echo $attribs['landscape_uses'] ?><br>
+                    <?php } ?>
                     <?php if($attribs['other_cultivation_factors'] != '') { ?>
                         <strong>Other cultivation factors: </strong><?php echo $attribs['other_cultivation_factors'] ?><br>
                     <?php }?>
-                    <strong>Plant behavior: </strong><?php echo $attribs['plant_behavior'] ?><br>
-                    <strong>Propagation: </strong><?php echo $attribs['propogation'] ?><br>
-                </p></div>
+                    <?php if($attribs['plant_behavior'] != '') { ?>
+                        <strong>Plant behavior: </strong><?php echo $attribs['plant_behavior'] ?><br>
+                    <?php } ?>
+                    <?php if($attribs['propogation'] != '') { ?>
+                        <strong>Propagation: </strong><?php echo $attribs['propogation'] ?><br>
+                    <?php } ?>
+                </p>
+                <div class="garden-commercial">
+                    <h3>Commercial Availability</h3>
+                    <p>We are looking forward to presenting the businesses that sell this plant.  Contact us if you are interested in helping to develop this resource!</p>
+                </div>
+            </div>
             <div class="col2">
+                <div class="garden-facts">
+                    <div class="garden-photo">
+                        <img style="display: block;width: 86px;margin: 0 auto;margin-bottom: 20px;" src="<?php echo $clientRoot; ?>/images/layout/new-logo.png" alt="Oregon Flora">
+                        <img src="<?php echo $garden_image['url'] ?>" title="<?php echo $spDisplay; ?> image" alt="<?php echo $vernaculars; ?> image" />
+                        <div class="photographer"><?php echo $garden_image['photographer'] ?>&nbsp;&nbsp;<?php //echo $garden_image['image_type'] ?></div>
+                    </div>
+                </div>
                 <?php if(is_array($collections)) { ?>
                     <h4>Plant collections containing <?php echo $vernaculars; ?></h4>
                     <p>
@@ -180,10 +207,6 @@ $displayLeftMenu = false;
                     </p>
                 <?php } //end if collections ?>
             </div>
-        </div>
-        <div class="garden-commercial">
-            <h3>Commercial Availability</h3>
-            <p>We are looking forward to presenting the businesses that sell this plant.  Contact us if you are interested in helping to develop this resource!</p>
         </div>
         <div style="font-size: 12px;">
             <hr />
