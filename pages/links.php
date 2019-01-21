@@ -29,9 +29,9 @@ include( $serverRoot . "/header.php" );
     <p><a href="http://oregonstate.edu/dept/botany/herbarium/">Oregon State University Herbarium</a><br>
         <a href="https://oregondigital.org/sets/herbarium">OSU Herbarium Type Specimens</a> &nbsp;&nbsp;&nbsp;   Images of the OSU Herbarium type specimens and their published descriptions<br>
         <a href="http://www.carexworkinggroup.com/index.html">Carex Working Group</a><br>
-        <a href="https://inr.oregonstate.edu/orbic/rare-species/rare-species-oregon-publications">Rare, Threatened & Endangered Species of Oregon</a>   Oregon Biodiversity Information Center, OSU Institute for Natural Resources<br>
+        <a href="https://inr.oregonstate.edu/orbic/rare-species/rare-species-oregon-publications">Rare, Threatened & Endangered Species of Oregon</a>  &nbsp;&nbsp;&nbsp;   Oregon Biodiversity Information Center, OSU Institute for Natural Resources<br>
         <a href="https://sites.google.com/site/orimapresources/">Oregon iMapInvasives</a> &nbsp;&nbsp;&nbsp;   GIS-based reporting and querying tool<br>
-        <a href="http://oregonexplorer.info/"> Oregon Explorer</a> Natural Resources Digital Library, OSU Institute for Natural Resources</p>
+        <a href="http://oregonexplorer.info/"> Oregon Explorer</a> &nbsp;&nbsp;&nbsp;  Natural Resources Digital Library, OSU Institute for Natural Resources</p>
 
     <h2>Regional, National</h2>
     <p><a target="_blank" href="http://ucjeps.berkeley.edu/interchange.html">the Jepson Interchange</a>  &nbsp;&nbsp;&nbsp;  California floristics data from the Jepson Herbarium, Univ. California Berkeley<br>
@@ -42,7 +42,7 @@ include( $serverRoot . "/header.php" );
         <a target="_blank" href="https://plants.sc.egov.usda.gov/java/">USDA PLANTS Database</a></p>
     <h2>Photo Collections</h2>
     <p><a target="_blank" href="http://www.botany.hawaii.edu/faculty/carr/ofp/ofp_index.htm">Dr. Gerald Carr’s Oregon plant images</a><br>
-        <a target="_blank" href="http://biology.burke.washington.edu/herbarium/imagecollection.php">University of Washington Herbarium Image Collection</a>  Burke Museum<br>
+        <a target="_blank" href="http://biology.burke.washington.edu/herbarium/imagecollection.php">University of Washington Herbarium Image Collection</a> &nbsp;&nbsp;&nbsp;   Burke Museum<br>
         <a target="_blank" href="https://calphotos.berkeley.edu/flora/">CalPhotos: Plants</a> </p>
     <h2>Native Plant Societies</h2>
     <a target="_blank" href="http://www.npsoregon.org/">Oregon</a><br>

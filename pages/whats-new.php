@@ -40,7 +40,7 @@ include( $serverRoot . "/header.php" );
             <img src="images/WhatsNew_Restoring_3c.jpg" alt="">
         </div>
     </div>
-    <p>We are restoring this pasture on the Oregon State University dairy farm to a wetland by retaining water using a sandbag dam and seeding it with 21 species of native grasses and herbs.</p>
+    <p>We are restoring this pasture on the Oregon State University dairy farm to a wetland by retaining water using a sandbag dam and seeding it with 23 species of native grasses and herbs.</p>
     <p>&nbsp;</p>
     <p><em>Flora of Oregon Volume 2</em></p>
     <p>There are descriptions and identification keys for 1,680 taxa of dicots in this volume. Notable groups include the legumes (Fabaceae), the stonecrop family (Crassulaceae), the mustards (Brassicaceae), and the sunflower family (Asteraceae), which comprises 12% of the state&rsquo;s flora!</p>

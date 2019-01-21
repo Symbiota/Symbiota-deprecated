@@ -304,10 +304,10 @@ img.image-right {
 	margin-bottom: 30px;
 }
 .content-wrapper > .inner-content {
-    padding: 30px 0;
+    padding: 30px 20px;
 }
 .inner-content {
-	max-width: 1100px;
+	max-width: 1120px;
 	margin: 0 auto;
 	padding: 0 20px;
 }
@@ -600,6 +600,9 @@ ul.square-bullets {
 	background: #b04e2c;
 	color: #ffffff;
 	padding: 20px;
+}
+.books-wrapper h3 {
+	color: #ffffff;
 }
 .books-wrapper .col-wrapper {
 	display: flex;

@@ -32,17 +32,25 @@ include( $serverRoot . "/header.php" );
     <ul>
         <li>all extant native taxa</li>
         <li>native taxa thought to have gone extinct in Oregon in historical times</li>
-        <li>exotic (non-native), cultivated, or weedy taxa that have naturalized</li>
+        <li>non-native (exotic) plants arising from cultivation,  and  other  human-driven introductions that have naturalized</li>
         <li>interspecific hybrids that are frequent or self-maintaining</li>
-        <li>infrequently collected exotic taxa (e.g., ballast plants and current waifs)</li>
+        <li>infrequently collected non-native taxa (e.g., ballast plants and current waifs)</li>
         <li>unnamed taxa in process of being described</li>
     </ul>
     <p>We define <strong>&ldquo;native&rdquo;</strong> as a plant taxon which has established in the landscape independently from direct or indirect human intervention. Native species include those found in Oregon that are new to science and recently described, are disjunct in Oregon if it is considered native in a nearby state, and/or are&mdash;to the best of our knowledge&mdash;considered an element of Oregon plant life prior to European settlement.</p>
-    <p>A <strong>non-native</strong>, or exotic plant is one from distant parts of North America or from other continents that established in Oregon post-European settlement. Examples include weeds, aliens, naturalized escapes, waifs, and ballast plants.</p>
+    <p>A non-native, or exotic plant is one we define as one that has established in Oregon after European settlement. Examples include weeds, naturalized escapes, waifs, and ballast plants.</p>
     <p>Two categories of non-native plants fall within the scope of the project:</p>
     <ul>
-        <li>Escaped cultivated plants: agricultural and garden taxa that have persisted in the wild for at least 3-5 years and have spread beyond the area where it was originally cultivated.</li>
-        <li>Noncultivated exotic plants: weeds (nuisance alien taxa), waifs (solitary or small groups of alien plants persisting for only one season), ballast plants (waifs growing on ship ballast).</li>
+        <li>Naturalized plants: non-native taxa that have established in nature where population(s) are known to have persisted in the wild for at least 5 years and are sexually reproducing</li>
+        <li>Non-naturalized plants
+            <ul>
+                <li>Waifs (solitary or small groups of non-native plants persisting for only one season)</li>
+                <li>Ballast plants (waifs growing on ship ballast dump site)</li>
+                <li>Plants escaping from cultivation but not establishing in a wild area</li>
+                <li>Plants persisting where formerly cultivated</li>
+            </ul>
+
+        </li>
     </ul>
     <p>&nbsp;</p>
     <h2>History</h2>
@@ -69,6 +77,7 @@ include( $serverRoot . "/header.php" );
     <p>John &amp; Betty Soreng Environmental Fund of the Oregon Community Foundation</p>
     <p>Metro</p>
     <p>Native Plant Society of Oregon</p>
+    <p>Natural History Museum Fund, Oregon State University</p>
     <p>OR/WA Bureau of Land Management</p>
     <p>Oregon Dept. Agriculture, Specialty Crops Block Grant</p>
     <p>Oregon Natural Resources Conservation Service</p>

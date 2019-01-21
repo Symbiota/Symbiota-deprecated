@@ -44,7 +44,7 @@ include( $serverRoot . "/header.php" );
                 <a href="pdfs/SponsorshipBrochure.pdf " class="btn" target="_blank">Available late 2019</a>
             </div>
         </div>
-        <div class="our-app">
+        <div class="our-app" style="clear: both;">
             <h3><br>Oregon Wildflowers App</h3>
             <a href="http://www.highcountryapps.com/OregonWildflowers.aspx" target="_blank"><img src="../images/layout/oregon-wildflowers-app.jpg" alt="Oregon Wildflowers App" class="image-left"></a>
             <div>
