@@ -686,9 +686,10 @@ class OSUTaxaManager {
 
         $googleUrl = '//maps.googleapis.com/maps/api/staticmap?size=256x256&maptype=terrain';
         if(array_key_exists('GOOGLE_MAP_KEY',$GLOBALS) && $GLOBALS['GOOGLE_MAP_KEY']) $googleUrl .= '&key='.$GLOBALS['GOOGLE_MAP_KEY'];
-        if($latDist < 3 || $longDist < 3) {
-            $googleUrl .= "&zoom=6";
-        }
+        //if($latDist < 3 || $longDist < 3) {
+        //    $googleUrl .= "&zoom=6";
+        //}
+        $googleUrl .= '&center=44.156944,-120.490556&zoom=6';
         $coordStr = implode("|",$mapArr);
         if(!$coordStr) return "";
         $googleUrl .= "&markers=".$coordStr;
