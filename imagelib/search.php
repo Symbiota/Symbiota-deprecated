@@ -260,43 +260,43 @@ if($action){
 							<input type="text" id="photographer" style="width:450px;" name="photographer" value="" title="Separate multiple photographers w/ commas" />
 						</div>
 					</div>
-					<div style="clear:both;margin:5 0 5 0;"><hr /></div>
-					<?php
-					$tagArr = $imgLibManager->getTagArr();
-					if($tagArr){
-						?>
-						<div>
-							Image Tags: 
-							<select id="tags" style="width:350px;" name="tags" >
-								<option value="">Select Tag</option>
-								<option value="">--------------</option>
-								<?php 
-								foreach($tagArr as $k){
-									echo '<option value="'.$k.'" '.((array_key_exists("tags",$previousCriteria))&&($previousCriteria["tags"]==$k)?'SELECTED ':'').'>'.$k.'</option>';
-								}
-								?>
-							</select>
-						</div>
-						<?php
-					}
-					?>
-					<div style="margin-top:5px;">
-						<div style="float:left;margin-right:8px;padding-top:8px;">
-							Image Keywords: 
-						</div>
-						<div style="float:left;margin-bottom:10px;">
-							<input type="text" id="keywords" style="width:350px;" name="keywords" value="" title="Separate multiple keywords w/ commas" />
-						</div>
-					</div>
-                    <div style="clear:both;margin-top:5px;">
-                        <div style="float:left;margin-right:8px;padding-top:8px;">
-                            Date Uploaded:
-                        </div>
-                        <div style="float:left;margin-bottom:10px;">
-                            <input type="text" id="uploaddate1" size="32" name="uploaddate1" style="width:100px;" value="<?php echo (array_key_exists("uploaddate1",$previousCriteria)?$previousCriteria["uploaddate1"]:''); ?>" title="Single date or start date of range" /> -
-                            <input type="text" id="uploaddate2" size="32" name="uploaddate2" style="width:100px;" value="<?php echo (array_key_exists("uploaddate2",$previousCriteria)?$previousCriteria["uploaddate2"]:''); ?>" title="End date of range; leave blank if searching for single date" />
-                        </div>
-                    </div>
+<!--					<div style="clear:both;margin:5 0 5 0;"><hr /></div>-->
+<!--					--><?php
+//					$tagArr = $imgLibManager->getTagArr();
+//					if($tagArr){
+//						?>
+<!--						<div>-->
+<!--							Image Tags: -->
+<!--							<select id="tags" style="width:350px;" name="tags" >-->
+<!--								<option value="">Select Tag</option>-->
+<!--								<option value="">--------------</option>-->
+<!--								--><?php //
+//								foreach($tagArr as $k){
+//									echo '<option value="'.$k.'" '.((array_key_exists("tags",$previousCriteria))&&($previousCriteria["tags"]==$k)?'SELECTED ':'').'>'.$k.'</option>';
+//								}
+//								?>
+<!--							</select>-->
+<!--						</div>-->
+<!--						--><?php
+//					}
+//					?>
+<!--					<div style="margin-top:5px;">-->
+<!--						<div style="float:left;margin-right:8px;padding-top:8px;">-->
+<!--							Image Keywords: -->
+<!--						</div>-->
+<!--						<div style="float:left;margin-bottom:10px;">-->
+<!--							<input type="text" id="keywords" style="width:350px;" name="keywords" value="" title="Separate multiple keywords w/ commas" />-->
+<!--						</div>-->
+<!--					</div>-->
+<!--                    <div style="clear:both;margin-top:5px;">-->
+<!--                        <div style="float:left;margin-right:8px;padding-top:8px;">-->
+<!--                            Date Uploaded:-->
+<!--                        </div>-->
+<!--                        <div style="float:left;margin-bottom:10px;">-->
+<!--                            <input type="text" id="uploaddate1" size="32" name="uploaddate1" style="width:100px;" value="--><?php //echo (array_key_exists("uploaddate1",$previousCriteria)?$previousCriteria["uploaddate1"]:''); ?><!--" title="Single date or start date of range" /> --->
+<!--                            <input type="text" id="uploaddate2" size="32" name="uploaddate2" style="width:100px;" value="--><?php //echo (array_key_exists("uploaddate2",$previousCriteria)?$previousCriteria["uploaddate2"]:''); ?><!--" title="End date of range; leave blank if searching for single date" />-->
+<!--                        </div>-->
+<!--                    </div>-->
 					<div style="clear:both;margin:5 0 5 0;"><hr /></div>
 					<div style="margin-top:5px;">
 						Limit Image Counts: 
@@ -328,9 +328,9 @@ if($action){
 								<div style="margin-top:5px;">
 									<input type='radio' name='imagetype' value='observationonly' <?php if(array_key_exists("imagetype",$previousCriteria) && $previousCriteria["imagetype"] == 'observationonly') echo "CHECKED"; ?> > Image Vouchered Observations
 								</div>
-								<div style="margin-top:5px;">
-									<input type='radio' name='imagetype' value='fieldonly' <?php if(array_key_exists("imagetype",$previousCriteria) && $previousCriteria["imagetype"] == 'fieldonly') echo "CHECKED"; ?> > Field Images (lacking specific locality details)
-								</div>
+<!--								<div style="margin-top:5px;">-->
+<!--									<input type='radio' name='imagetype' value='fieldonly' --><?php //if(array_key_exists("imagetype",$previousCriteria) && $previousCriteria["imagetype"] == 'fieldonly') echo "CHECKED"; ?><!-- > Field Images (lacking specific locality details)-->
+<!--								</div>-->
 							</td>
 						</tr>
 					</table>
