@@ -22,7 +22,7 @@ include( $serverRoot . "/header.php" );
 
 <!-- if you need a full width colum, just put it outside of .inner-content -->
 <!-- .inner-content makes a column max width 1100px, centered in the viewport -->
-<div class="inner-content">
+<div class="inner-content links-page">
     <!-- place static page content here. -->
     <h1>Recommended online resources</h1>
     <h2>Oregon Plant Data</h2>
