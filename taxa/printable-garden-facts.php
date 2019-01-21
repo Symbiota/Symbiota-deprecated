@@ -145,7 +145,35 @@ $displayLeftMenu = false;
                         <?php if($attribs['type'] != '') { ?>
                             <strong>Plant type: </strong><?php echo strtolower($attribs['type']) ?><br>
                         <?php } ?>
-                        <strong>Size at maturity: </strong><?php echo $attribs['min_height'] ?>-<?php echo $attribs['max_height'] ?>' high x <?php echo $attribs['min_width'] ?>-<?php echo $attribs['max_width'] ?>' wide<br>
+                        <strong>Size at maturity: </strong>
+                        <?php $height_string = ''; $width_string = ''; $joiner = ''; ?>
+                        <?php if(!isset($attribs['min_height']) || $attribs['min_height'] == 0 || $attribs['min_height'] == $attribs['max_height']) {
+                            if(isset($attribs['max_height']) && $attribs['max_height'] !=''){
+                                $height_string .= $attribs['max_height'] . '&apos; high';
+                            }
+                        }else{
+                            $height_string .=  $attribs['min_height'];
+                            if(isset($attribs['max_height']) && $attribs['max_height'] !=''){
+                                $height_string .=  '-' . $attribs['max_height'];
+                            }
+                            $height_string .=  '&apos; high';
+                        } ?>
+                        <?php if(!isset($attribs['min_width']) || $attribs['min_width'] == 0 || $attribs['min_width'] == $attribs['max_width']) {
+                            if(isset($attribs['max_width']) && $attribs['max_width'] !=''){
+                                $width_string .= $attribs['max_width'] . '&apos; wide';
+                            }
+                        }else{
+                            $width_string .=  $attribs['min_width'];
+                            if(isset($attribs['max_width']) && $attribs['max_width'] !=''){
+                                $width_string .=  '-' . $attribs['max_width'];
+                            }
+                            $width_string .=  '&apos; wide';
+                        }
+                        if($width_string !='' && $height_string !=''){ $joiner = ' x ';}
+                        $height_width_string = $height_string . $joiner . $width_string;
+                        ?>
+
+                        <?php echo $height_width_string; ?><br>
                         <?php if($attribs['flower_color'] != '') { ?>
                             <strong>Flower color: </strong><?php echo $attribs['flower_color'] ?><br>
                         <?php } ?>
