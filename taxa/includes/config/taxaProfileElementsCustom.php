@@ -151,8 +151,8 @@ if($taxonValue) {
     if($clValue){
         echo "<legend>";
         echo $LANG['SPECIES_WITHIN'].' <b>'.$taxonManager->getClName().'</b>&nbsp;&nbsp;';
-        if($taxonManager->getParentClid()){
-            echo '<a href="index.php?taxon=' .$taxonManager->getParentTid() . '&cl='.$taxonManager->getParentClid().'&taxauthid='.$taxAuthId.'" title="'.$LANG['GO_TO'].' '.$taxonManager->getParentName().' '.$LANG['CHECKLIST'].'"><img id="parenttaxonicon" src="../images/toparent.png" title="Go to Parent" /></a>';
+        if($taxonManager->getClid()){
+            echo '<a href="../checklists/checklist.php?cl='.$taxonManager->getClid().'&pid=3" title="'.$LANG['GO_TO'].' '.$taxonManager->getClName().' '.$LANG['CHECKLIST'].'"><img id="parenttaxonicon" src="../images/toparent.png" title="Go to Checklist" /></a>';
         }
         echo "</legend>";
     }
