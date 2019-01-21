@@ -131,7 +131,7 @@ include($serverRoot."/header.php");
         $("#heightSlider").slider({
             range: true,
             min: 0,
-            max: 200,
+            max: 51,
             create: function() {
                 var textbox = $("#height-label");
                 textbox.text("Any");
@@ -139,11 +139,15 @@ include($serverRoot."/header.php");
             step: 1,
             slide: function(event, ui) {
                 var textbox = $("#height-label");
-                textbox.text(ui.values[0]+ ' - '+ ui.values[1]);
+                var max;
+                if (ui.values[1] == 51) {max = "50+"}else{ max = ui.values[1]}
+                textbox.text(ui.values[0]+ ' - '+ max);
             },
             stop: function( event, ui ) {
                 if(ui.values[1] != 0){
-                    var valLabel = 'Max height '+ui.values[0]+' - '+ui.values[1]+' ft';
+                    var max;
+                    if (ui.values[1] == 51) {max = "50+"}else{ max = ui.values[1]}
+                    var valLabel = 'Max height '+ui.values[0]+' - '+max+' ft';
                     var valCode = '140--'+ui.values[0]+','+ui.values[1];
                     var optionObj = {name:valLabel, nameCode:valCode};
                     //remove any items from searchCriteriaArray that have nameCode
@@ -326,7 +330,7 @@ include($serverRoot."/header.php");
     }
 
     function processResults(res){
-        console.log('processing');
+        //console.log('processing');
         var resultArr = [];
         var reccnt = 0;
         //alert(resultArr);
@@ -589,7 +593,7 @@ include($serverRoot."/header.php");
                                     <div class="divTableCell">
                                         <input class="featureCheckBox" type="checkbox" onchange="processOption('680--2');" id="680--2">
                                         <div id="680--2Div" class="featureCheckBoxDiv">
-                                            <label id="680--2Label" class="featureCheckBoxLabel sunlight3" for="680--2">Part sun</label>
+                                            <label id="680--2Label" class="featureCheckBoxLabel sunlight3" for="680--2">Part shade</label>
                                         </div>
                                     </div>
                                 </div>
@@ -641,7 +645,7 @@ include($serverRoot."/header.php");
                                     <div class="divTableCell unselectable">
                                         <div class="feature-slider-range">
                                             <div class="feature-slider-low-value">Any</div>
-                                            <div class="feature-slider-high-value">200</div>
+                                            <div class="feature-slider-high-value">50+</div>
                                         </div>
                                         <div class="feature-slider-wrapper unselectable">
                                             <div id="heightSlider">
