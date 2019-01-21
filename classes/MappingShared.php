@@ -176,11 +176,11 @@ class MappingShared{
 
 			echo "<Style id='sn_".$iconStr."'>\n";
             echo "<IconStyle><scale>1.1</scale><Icon>";
-			echo "<href>http://maps.google.com/mapfiles/kml/".$iconStr.".png</href>";
+			echo "<href>https://maps.google.com/mapfiles/kml/".$iconStr.".png</href>";
 			echo "</Icon><hotSpot x='20' y='2' xunits='pixels' yunits='pixels'/></IconStyle>\n</Style>\n";
 			echo "<Style id='sh_".$iconStr."'>\n";
             echo "<IconStyle><scale>1.3</scale><Icon>";
-			echo "<href>http://maps.google.com/mapfiles/kml/".$iconStr.".png</href>";
+			echo "<href>https://maps.google.com/mapfiles/kml/".$iconStr.".png</href>";
 			echo "</Icon><hotSpot x='20' y='2' xunits='pixels' yunits='pixels'/></IconStyle>\n</Style>\n";
 			echo "<StyleMap id='".str_replace(" ","_",$sciName)."'>\n";
             echo "<Pair><key>normal</key><styleUrl>#sn_".$iconStr."</styleUrl></Pair>";

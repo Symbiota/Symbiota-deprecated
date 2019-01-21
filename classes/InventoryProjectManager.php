@@ -12,7 +12,7 @@ class InventoryProjectManager {
 
 	public function __construct($connType = 'readonly'){
 		$this->conn = MySQLiConnectionFactory::getCon($connType);
-		$this->googleUrl = "http://maps.google.com/maps/api/staticmap?size=120x150&maptype=terrain";
+		$this->googleUrl = "https://maps.google.com/maps/api/staticmap?size=120x150&maptype=terrain";
 		if(array_key_exists('GOOGLE_MAP_KEY',$GLOBALS) && $GLOBALS['GOOGLE_MAP_KEY']) $this->googleUrl .= '&key='.$GLOBALS['GOOGLE_MAP_KEY'];
 	}
 
