@@ -391,8 +391,8 @@ include($serverRoot."/header.php");
                 html += '<div class="list-icon-type">'+(res[i].type?res[i].type:"")+'</div>';
                 html += '<div class="list-icon-light">'+(res[i].sunlight?res[i].sunlight:"")+'</div>';
                 html += '<div class="list-icon-moisture">'+(res[i].moisture?res[i].moisture:"")+'</div>';
-                html += '<div class="list-max-height">'+(res[i].maxheight?res[i].maxheight+" ft. Max. Height":"")+'</div>';
-                html += '<div class="list-max-width">'+(res[i].maxwidth?res[i].maxwidth+" ft. Max. Width":"")+'</div>';
+                html += '<div class="list-max-height">'+(res[i].height_string)+'</div>';
+                html += '<div class="list-max-width">'+(res[i].width_string)+'</div>';
                 html += '<div class="list-ease">'+(res[i].ease?res[i].ease:"")+'</div>';
                 html += '</div>';
             }

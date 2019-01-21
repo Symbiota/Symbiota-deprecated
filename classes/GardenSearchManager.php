@@ -155,8 +155,8 @@ UNION SELECT t.tid FROM taxa as t WHERE (((t.SciName)="'.$cs.'"))))';
                 $returnArr[$tid]['type'] = $attribs['type'];
                 $returnArr[$tid]['sunlight'] = $attribs['sunlight'];
                 $returnArr[$tid]['moisture'] = $attribs['moisture'];
-                $returnArr[$tid]['maxheight'] = $attribs['maxheight'];
-                $returnArr[$tid]['maxwidth'] = $attribs['maxwidth'];
+                $returnArr[$tid]['height_string'] = $attribs['height_string'];
+                $returnArr[$tid]['width_string'] = $attribs['width_string'];
                 $returnArr[$tid]['ease'] = $attribs['ease'];
 
                 if(!isset($returnArr[$tid]['common'])) $returnArr[$tid]['common'] = $row->VernacularName;
@@ -211,6 +211,7 @@ UNION SELECT t.tid FROM taxa as t WHERE (((t.SciName)="'.$cs.'"))))';
     }
 
     public function getGridAttribs($tid) {
+        $attribs = array();
         $sql = "Select d.cid, c.charname, cs.charstatename, cs.cs FROM kmdescr d ";
         $sql .= "Left Join kmcharacters c ON c.CID = d.CID ";
         $sql .= "Left Join kmcs as cs ON d.CS = cs.cs AND cs.cid = d.cid ";
@@ -277,10 +278,16 @@ UNION SELECT t.tid FROM taxa as t WHERE (((t.SciName)="'.$cs.'"))))';
         }
         $attribs["minheight"] = is_array($tmp["140"]) ? min(array_column($tmp["140"], 'charstatename')) : '';
         $attribs["maxheight"] = is_array($tmp["140"]) ? max(array_column($tmp["140"], 'charstatename')) : '';
+        $attribs["height_string"] = !empty($attribs['minheight']) && !($attribs['minheight'] == $attribs['maxheight']) ? $attribs["minheight"] . "-" : "";
+        $attribs["height_string"] .= $attribs["maxheight"];
+        $attribs["height_string"] .= (isset($attribs["minheight"]) || isset($attribs["maxheight"])) ? "H;" : "";
         $attribs["minwidth"] = is_array($tmp["140"]) ? min(array_column($tmp["738"], 'charstatename')) : '';
         $attribs["maxwidth"] = is_array($tmp["140"]) ? max(array_column($tmp["738"], 'charstatename')) : '';
+        $attribs["width_string"] = !empty($attribs['minwidth']) && !($attribs['minwidth'] == $attribs['maxwidth']) ? $attribs["minwidth"] . "-" : "";
+        $attribs["width_string"] .= $attribs["maxwidth"];
+        $attribs["width_string"] .= (isset($attribs["minwidth"]) || isset($attribs["maxwidth"])) ? "W" : "";
         $attribs["ease"] = implode(", ",array_map(function($a){
-            return $a["charstatename"];
+            return ucwords($a["charstatename"]);
         },$tmp[684]));
 
         //var_dump($attribs);
