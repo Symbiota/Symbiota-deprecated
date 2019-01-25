@@ -498,26 +498,25 @@ class OccurrenceMapManager extends OccurrenceManager {
 		return $retVar;
 	}
 
-	public function getMysqlVersion(){
-		$version = array();
-		$output = '';
-		if(mysqli_get_server_info($this->conn)){
-			$output = mysqli_get_server_info($this->conn);
-		}
-		else{
-			$output = shell_exec('mysql -V');
-		}
-		if($output){
-			if(strpos($output,'MariaDB') !== false){
-				$version["db"] = 'MariaDB';
+	public function hasFullSpatialSupport(){
+		$serverStr = '';
+		if(mysqli_get_server_info($this->conn)) $serverStr = mysqli_get_server_info($this->conn);
+		else $serverStr = shell_exec('mysql -V');
+		if($serverStr){
+			if(strpos($serverStr,'MariaDB') !== false) return true;
+			else{	//db = mysql;
+				preg_match('@[0-9]+\.[0-9]+\.[0-9]+@',$serverStr,$m);
+				$mysqlVerNums = explode(".", $m[0]);
+				if($mysqlVerNums[0] > 5) return true;
+				elseif($mysqlVerNums[0] == 5){
+					if($mysqlVerNums[1] > 6) return true;
+					elseif($mysqlVerNums[1] == 6){
+						if($mysqlVerNums[2] >= 1) return true;
+					}
+				}
 			}
-			else{
-				$version["db"] = 'mysql';
-				preg_match('@[0-9]+\.[0-9]+\.[0-9]+@',$output,$ver);
-				$version["ver"] = $ver[0];
-			}
 		}
-		return $version;
+		return false;
 	}
 
 	//Misc support functions

@@ -15,30 +15,6 @@ $searchVar = $mapManager->getQueryTermStr();
 $showTaxaBut = 1;
 
 $obsIDs = $mapManager->getObservationIds();
-$spatial = false;
-
-$mysqlVersion = $mapManager->getMysqlVersion();
-if($mysqlVersion){
-	if($mysqlVersion["db"] == 'MariaDB'){
-		$spatial = true;
-	}
-	elseif($mysqlVersion["db"] == 'mysql'){
-		$mysqlVerNums = explode(".", $mysqlVersion["ver"]);
-		if($mysqlVerNums[0] > 5){
-			$spatial = true;
-		}
-		elseif($mysqlVerNums[0] == 5){
-			if($mysqlVerNums[1] > 6){
-				$spatial = true;
-			}
-			elseif($mysqlVerNums[1] == 6){
-				if($mysqlVerNums[2] >= 1){
-					$spatial = true;
-				}
-			}
-		}
-	}
-}
 
 $gridSize = (array_key_exists('gridSizeSetting',$_REQUEST)&&$_REQUEST['gridSizeSetting']?$_REQUEST['gridSizeSetting']:60);
 $minClusterSize = (array_key_exists('minClusterSetting',$_REQUEST)&&$_REQUEST['minClusterSetting']?$_REQUEST['minClusterSetting']:10);
@@ -266,13 +242,7 @@ if(!array_key_exists("pointlat",$_REQUEST)) $_REQUEST["pointlat"] = '';
 				drawingControlOptions: {
 					position: google.maps.ControlPosition.TOP_CENTER,
 					drawingModes: [
-						<?php
-							if($spatial){
-								?>
-								google.maps.drawing.OverlayType.POLYGON,
-								<?php
-							}
-						?>
+						<?php if($mapManager->hasFullSpatialSupport()) echo 'google.maps.drawing.OverlayType.POLYGON,'; ?>
 						google.maps.drawing.OverlayType.RECTANGLE,
 						google.maps.drawing.OverlayType.CIRCLE
 					]
@@ -1129,7 +1099,7 @@ if(!array_key_exists("pointlat",$_REQUEST)) $_REQUEST["pointlat"] = '';
 					<?php
 					/*
 					echo "MySQL Version: ".$mysqlVersion;
-					echo $spatial?"yes":"no";
+					echo $mapManager->hasFullSpatialSupport()?"yes":"no";
 					echo "Request: ".json_encode($_REQUEST);
 					echo "mapWhere: ".$mapWhere;
 					echo "coordArr: ".json_encode($coordArr);
