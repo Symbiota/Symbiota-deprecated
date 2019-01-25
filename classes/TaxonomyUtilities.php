@@ -45,14 +45,14 @@ class TaxonomyUtilities {
 			$okToCloseConn = true;
 			if($conn !== null) $okToCloseConn = false;
 			if(count($sciNameArr)){
-				if(strtolower($sciNameArr[0]) == 'x'){
+				if(strtolower($sciNameArr[0]) == 'x' || ord($sciNameArr[0]) == 215){
 					//Genus level hybrid
 					$retArr['unitind1'] = array_shift($sciNameArr);
 				}
 				//Genus
 				$retArr['unitname1'] = ucfirst(strtolower(array_shift($sciNameArr)));
 				if(count($sciNameArr)){
-					if(strtolower($sciNameArr[0]) == 'x'){
+					if(strtolower($sciNameArr[0]) == 'x' || ord($sciNameArr[0]) == 215){
 						//Species level hybrid
 						$retArr['unitind2'] = array_shift($sciNameArr);
 						$retArr['unitname2'] = array_shift($sciNameArr);
@@ -71,8 +71,8 @@ class TaxonomyUtilities {
 						//Specific Epithet
 						$retArr['unitname2'] = array_shift($sciNameArr);
 					}
-					if($retArr['unitname2'] && !preg_match('/^[\-a-z]+$/',$retArr['unitname2'])){
-						if(preg_match('/[A-Z]{1}[\-a-z]+/',$retArr['unitname2'])){
+					if($retArr['unitname2'] && !preg_match('/^[\-\'a-z]+$/',$retArr['unitname2'])){
+						if(preg_match('/[A-Z]{1}[\-\'a-z]+/',$retArr['unitname2'])){
 							//Check to see if is term is genus author
 							if($conn === null) $conn = MySQLiConnectionFactory::getCon('readonly');
 							$sql = 'SELECT tid FROM taxa WHERE unitname1 = "'.$conn->real_escape_string($retArr['unitname1']).'" AND unitname2 = "'.$conn->real_escape_string($retArr['unitname2']).'"';
@@ -82,6 +82,7 @@ class TaxonomyUtilities {
 							}
 							else{
 								//Second word is likely author, thus assume assume author has been reach and stop process
+								$retArr['author'] = trim($retArr['unitname2'].' '.implode(' ', $sciNameArr));
 								$retArr['unitname2'] = '';
 								unset($sciNameArr);
 							}
@@ -89,8 +90,9 @@ class TaxonomyUtilities {
 						}
 						if($retArr['unitname2']){
 							$retArr['unitname2'] = strtolower($retArr['unitname2']);
-							if(!preg_match('/^[a-z]+$/',$retArr['unitname2'])){
+							if(!preg_match('/^[\-\'a-z]+$/',$retArr['unitname2'])){
 								//Second word unlikely an epithet
+								$retArr['author'] = trim($retArr['unitname2'].' '.implode(' ', $sciNameArr));
 								$retArr['unitname2'] = '';
 								unset($sciNameArr);
 							}
@@ -124,7 +126,7 @@ class TaxonomyUtilities {
 					if(!$retArr['unitname3'] && $retArr['author']){
 						$arr = explode(' ',$retArr['author']);
 						$firstWord = array_shift($arr);
-						if(preg_match('/^[a-z]{2,}$/',$firstWord)){
+						if(preg_match('/^[\-\'a-z]{2,}$/',$firstWord)){
 							if($conn === null) $conn = MySQLiConnectionFactory::getCon('readonly');
 							$sql = 'SELECT unitind3 FROM taxa WHERE unitname1 = "'.$conn->real_escape_string($retArr['unitname1']).'" AND unitname2 = "'.$conn->real_escape_string($retArr['unitname2']).'" AND unitname3 = "'.$conn->real_escape_string($firstWord).'" ';
 							//echo $sql.'<br/>';
