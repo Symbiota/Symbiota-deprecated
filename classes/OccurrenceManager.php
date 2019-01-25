@@ -181,7 +181,7 @@ class OccurrenceManager extends OccurrenceTaxaManager {
 				$radius = $pointArr[2];
 				if($pointArr[3] == 'km') $radius *= 0.6214;
 				/*
-				//Formula approximates a bounding box; bounding box is for efficiency, will test practicality of doing a radius query in future
+				//Formula approximates a bounding box; bounding box is for efficiency
 				$latRadius = $radius / 69.1;
 				$longRadius = cos($pointArr[0]/57.3)*($radius/69.1);
 				$lat1 = $pointArr[0] - $latRadius;

@@ -1,13 +1,13 @@
 <?php
 include_once('../config/symbini.php');
-include_once($SERVER_ROOT.'/classes/DynamicChecklistManager.php');
+//include_once($SERVER_ROOT.'/classes/DynamicChecklistManager.php');
 header('Content-Type: text/html; charset='.$CHARSET);
 
 $tid = array_key_exists('tid',$_REQUEST)?$_REQUEST['tid']:0;
 $taxa = array_key_exists('taxa',$_REQUEST)?$_REQUEST['taxa']:'';
 $interface = array_key_exists('interface',$_REQUEST)&&$_REQUEST['interface']?$_REQUEST['interface']:'checklist';
 
-$dynClManager = new DynamicChecklistManager();
+//$dynClManager = new DynamicChecklistManager();
 
 $latCen = 41.0;
 $longCen = -95.0;
