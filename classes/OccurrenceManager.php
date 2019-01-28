@@ -124,7 +124,7 @@ class OccurrenceManager extends OccurrenceTaxaManager {
 				}
 				else{
 					$term = $this->cleanInStr(trim(str_ireplace(' county',' ',$value),'%'));
-					if(strlen($term) < 4) $term .= ' ';
+					//if(strlen($term) < 4) $term .= ' ';
 					$tempArr[] = '(o.county LIKE "'.$term.'%")';
 				}
 			}
