@@ -1,6 +1,7 @@
 <?php
 include_once($SERVER_ROOT.'/config/dbconnection.php');
 
+//Look into integrating into ChecklistVoucherAdmin, ChecklistAdmin, or ChecklistManager
 class ChecklistVoucherManager {
 
 	private $conn;

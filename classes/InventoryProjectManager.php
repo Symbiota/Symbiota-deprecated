@@ -20,23 +20,6 @@ class InventoryProjectManager {
 		if(!($this->conn === null)) $this->conn->close();
 	}
 
-	public function getProjectList(){
-		$returnArr = Array();
-		$sql = 'SELECT pid, projname, managers, fulldescription '.
-			'FROM fmprojects '.
-			'WHERE ispublic = 1 '.
-			'ORDER BY projname';
-		$rs = $this->conn->query($sql);
-		while($row = $rs->fetch_object()){
-			$projId = $row->pid;
-			$returnArr[$projId]["projname"] = $row->projname;
-			$returnArr[$projId]["managers"] = $row->managers;
-			$returnArr[$projId]["descr"] = $row->fulldescription;
-		}
-		$rs->free();
-		return $returnArr;
-	}
-
 	public function getProjectData(){
 		$returnArr = Array();
 		if($this->pid){
@@ -57,10 +40,20 @@ class InventoryProjectManager {
 				}
 			}
 			$rs->free();
+			//Temporarly needed as a separate call until db_schema_patch-1.1.sql is applied
+			$sql = 'SELECT headerurl FROM fmprojects WHERE (pid = '.$this->pid.')';
+			$rs = $this->conn->query($sql);
+			if($rs){
+				if($r = $rs->fetch_object()){
+					$returnArr['headerurl'] = $r->headerurl;
+				}
+				$rs->free();
+			}
 		}
 		return $returnArr;
 	}
 
+	//Project editing functions
 	public function submitProjEdits($projArr){
 		$fieldArr = array('projname', 'displayname', 'managers', 'fulldescription', 'notes', 'ispublic', 'parentpid', 'sortsequence');
 		$sql = "";
@@ -102,44 +95,6 @@ class InventoryProjectManager {
 			$this->errorStr = 'ERROR creating new project: '.$this->conn->error;
 		}
 		return $this->pid;
-	}
-
-	public function getResearchChecklists(){
-		global $USER_RIGHTS;
-		$retArr = Array();
-		if($this->pid){
-			$sql = 'SELECT c.clid, c.name, c.latcentroid, c.longcentroid, c.access '.
-				'FROM fmchklstprojlink cpl INNER JOIN fmchecklists c ON cpl.clid = c.clid '.
-				'WHERE (cpl.pid = '.$this->pid.') AND ((c.access != "private")';
-			if(array_key_exists('ClAdmin',$USER_RIGHTS)){
-				$sql .= ' OR (c.clid IN ('.implode(',',$USER_RIGHTS['ClAdmin']).'))) ';
-			}
-			else{
-				$sql .= ') ';
-			}
-			$sql .= "ORDER BY c.SortSequence, c.name";
-			//echo $sql;
-			$rs = $this->conn->query($sql);
-			$cnt = 0;
-			while($row = $rs->fetch_object()){
-				$retArr[$row->clid] = $row->name.($row->access == 'private'?' <span title="Viewable only to editors">(private)</span>':'');
-				if($cnt < 50 && $row->latcentroid){
-					$this->researchCoord[] = $row->latcentroid.','.$row->longcentroid;
-				}
-				$cnt++;
-			}
-			$rs->free();
-		}
-		return $retArr;
-	}
-
-	public function getGoogleStaticMap(){
-		$googleUrlLocal = $this->googleUrl;
-		//$googleUrlLocal .= "&zoom=6";
-		$coordStr = implode('%7C',$this->researchCoord);
-		if(!$coordStr) return "";
-		$googleUrlLocal .= "&markers=size:tiny%7C".$coordStr;
-		return $googleUrlLocal;
 	}
 
 	//User management functions
@@ -214,7 +169,62 @@ class InventoryProjectManager {
 		}
 	}
 
-	//Misc functions
+	//Data retrival functions
+	public function getProjectList(){
+		$returnArr = Array();
+		$sql = 'SELECT pid, projname, managers, fulldescription '.
+				'FROM fmprojects '.
+				'WHERE ispublic = 1 '.
+				'ORDER BY projname';
+		$rs = $this->conn->query($sql);
+		while($row = $rs->fetch_object()){
+			$projId = $row->pid;
+			$returnArr[$projId]["projname"] = $row->projname;
+			$returnArr[$projId]["managers"] = $row->managers;
+			$returnArr[$projId]["descr"] = $row->fulldescription;
+		}
+		$rs->free();
+		return $returnArr;
+	}
+
+	public function getResearchChecklists(){
+		global $USER_RIGHTS;
+		$retArr = Array();
+		if($this->pid){
+			$sql = 'SELECT c.clid, c.name, c.latcentroid, c.longcentroid, c.access '.
+					'FROM fmchklstprojlink cpl INNER JOIN fmchecklists c ON cpl.clid = c.clid '.
+					'WHERE (cpl.pid = '.$this->pid.') AND ((c.access != "private")';
+			if(array_key_exists('ClAdmin',$USER_RIGHTS)){
+				$sql .= ' OR (c.clid IN ('.implode(',',$USER_RIGHTS['ClAdmin']).'))) ';
+			}
+			else{
+				$sql .= ') ';
+			}
+			$sql .= "ORDER BY c.SortSequence, c.name";
+			//echo $sql;
+			$rs = $this->conn->query($sql);
+			$cnt = 0;
+			while($row = $rs->fetch_object()){
+				$retArr[$row->clid] = $row->name.($row->access == 'private'?' <span title="Viewable only to editors">(private)</span>':'');
+				if($cnt < 50 && $row->latcentroid){
+					$this->researchCoord[] = $row->latcentroid.','.$row->longcentroid;
+				}
+				$cnt++;
+			}
+			$rs->free();
+		}
+		return $retArr;
+	}
+
+	public function getGoogleStaticMap(){
+		$googleUrlLocal = $this->googleUrl;
+		//$googleUrlLocal .= "&zoom=6";
+		$coordStr = implode('%7C',$this->researchCoord);
+		if(!$coordStr) return "";
+		$googleUrlLocal .= "&markers=size:tiny%7C".$coordStr;
+		return $googleUrlLocal;
+	}
+
 	public function getClAddArr(){
 		global $USER_RIGHTS;
 		$returnArr = Array();
