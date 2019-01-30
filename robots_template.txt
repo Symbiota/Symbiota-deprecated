@@ -15,6 +15,5 @@ Allow: /portal/projects/index.php
 Allow: /portal/sitemap.php    
   
 Disallow: /portal/collections/list.php  
-Disallow: /portal/ident/loadingcl.php  
 Disallow: /portal/temp/  
 Disallow: /portal/images/
