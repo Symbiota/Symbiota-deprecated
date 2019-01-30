@@ -103,6 +103,15 @@ class ChecklistManager {
 			else{
 				trigger_error('ERROR: unable to set checklist metadata => '.$sql, E_USER_ERROR);
 			}
+			//Temporarly needed as a separate call until db_schema_patch-1.1.sql is applied
+			$sql = 'SELECT headerurl FROM fmchecklists WHERE (clid = '.$this->clid.')';
+			$rs = $this->conn->query($sql);
+			if($rs){
+				if($r = $rs->fetch_object()){
+					$this->clMetadata['headerurl'] = $r->headerurl;
+				}
+				$rs->free();
+			}
 		}
 	}
 

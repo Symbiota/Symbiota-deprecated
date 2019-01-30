@@ -177,6 +177,8 @@ if(!$researchList && !$editMode){
 </head>
 <body>
 	<?php
+	$HEADER_URL = '';
+	if(isset($projArr['headerurl']) && $projArr['headerurl']) $HEADER_URL = $CLIENT_ROOT.$projArr['headerurl'];
 	$displayLeftMenu = (isset($projects_indexMenu)?$projects_indexMenu:"true");
 	include($SERVER_ROOT.'/header.php');
 	echo "<div class='navpath'>";
