@@ -1166,7 +1166,8 @@ class SpecUploadBase extends SpecUpload{
 		//Only import record if at least one of the minimal fields have data
 		$recMap = OccurrenceUtilities::occurrenceArrayCleaning($recMap);
 		$loadRecord = false;
-		if(isset($recMap['dbpk']) && $recMap['dbpk']) $loadRecord = true;
+		if($this->uploadType == $this->NFNUPLOAD) $loadRecord = true;
+		elseif(isset($recMap['dbpk']) && $recMap['dbpk']) $loadRecord = true;
 		elseif(isset($recMap['catalognumber']) && $recMap['catalognumber']) $loadRecord = true;
 		elseif(isset($recMap['othercatalognumbers']) && $recMap['othercatalognumbers']) $loadRecord = true;
 		elseif(isset($recMap['occurrenceid']) && $recMap['occurrenceid']) $loadRecord = true;
@@ -1590,6 +1591,27 @@ class SpecUploadBase extends SpecUpload{
 	}
 
 	//Misc functions
+	protected function copyChunked($from, $to){
+		/*
+		 * If transfers fail for large files, you may need to increase following php.ini variables:
+		 * 		max_input_time, max_execution_time, default_socket_timeout
+		 */
+
+		//2 meg at a time
+		$buffer_size = 2097152;		//1048576;
+		$byteCount = 0;
+		$fin = fopen($from, "rb");
+		$fout = fopen($to, "w");
+		if($fin && $fout){
+			while(!feof($fin)) {
+				$byteCount += fwrite($fout, fread($fin, $buffer_size));
+			}
+		}
+		fclose($fin);
+		fclose($fout);
+		return $byteCount;
+	}
+
 	private function getMimeType($url){
 		if(!strstr($url, "http")){
 			$url = "http://".$url;
