@@ -44,6 +44,7 @@ class SpecUploadDwca extends SpecUploadBase{
 			else{
 				$this->createTargetSubDir();
 				$targetPath = $this->uploadTargetPath.'dwca.zip';
+				//if(!$this->copyChunked($this->path,$targetPath)){
 				if(!copy($this->path,$targetPath)){
 					$this->errorStr = 'ERROR uploading file (path: '.$targetPath.')';
 					if(!is_writable($this->uploadTargetPath)) $this->errorStr .= ', Permission issue: target directory is not writable';
