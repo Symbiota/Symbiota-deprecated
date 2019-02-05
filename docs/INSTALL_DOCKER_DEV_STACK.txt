@@ -25,9 +25,10 @@ TO INSTALL THE DEVELOPMENT DOCKER STACK INCLUDED WITH THIS SOFTWARE
         preference
 * Start the Docker development stack:
     a. Start the Docker CLI on your system (if it is not already running)
-    b. Navigate to the compose directory of this Symbiota installation
-    c. Run: docker-compose up -d
-    d. The first time the development stack is started it will take longer to start as both of the
+    b. Navigate to the root directory of this Symbiota installation
+    c. On Mac or Linux machines run: docker-compose up -d
+    d. On Windows machines run: docker-compose -f docker-compose-windows.yml up -d
+    e. The first time the development stack is started it will take longer to start as both of the
         docker images are built
 * Once the development stack is running, use a database management application (such as MySQL Workbench)
     to connect to your database container using the following parameters:
@@ -48,9 +49,9 @@ TO INSTALL THE DEVELOPMENT DOCKER STACK INCLUDED WITH THIS SOFTWARE
     directory can be used to back up your database or transfer it to another system.
 * Your Symbiota stack is now configured and running. You can access it through at browser at:
     http://localhost
-* To shut down your docker development stack navigate to the root directory of this Symbiota installation
-    and run:
-    docker-compose down
+* To shut down your docker development stack navigate to the root directory of this Symbiota installation:
+    a. On Mac or Linux machines run: docker-compose down
+    b. On Windows machines run: docker-compose -f docker-compose-windows.yml down
 * To restart the stack simply follow the instructions to Start the Docker development stack above.
 
 Enjoy!
