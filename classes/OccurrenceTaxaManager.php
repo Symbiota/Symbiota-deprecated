@@ -219,7 +219,14 @@ class OccurrenceTaxaManager {
 				elseif($taxonType == TaxaSearchType::FAMILY_ONLY){
 					//$sqlWhereTaxa .= 'OR ((o.family = "'.$searchTaxon.'") OR (o.sciname = "'.$searchTaxon.'")) ';
 					//$sqlWhereTaxa .= 'OR (((ts.family = "'.$searchTaxon.'") AND (ts.taxauthid = '.$this->taxAuthId.')) OR (o.family = "'.$searchTaxon.'") OR (o.sciname = "'.$searchTaxon.'")) ';
-					$sqlWhereTaxa .= 'OR (((ts.family = "'.$searchTaxon.'") AND (ts.taxauthid = '.$this->taxAuthId.')) OR o.sciname = "'.$searchTaxon.'") ';
+					//$sqlWhereTaxa .= 'OR (((ts.family = "'.$searchTaxon.'") AND (ts.taxauthid = '.$this->taxAuthId.')) OR o.sciname = "'.$searchTaxon.'") ';
+					if(isset($searchArr['tid'])){
+						$tidArr = array_keys($searchArr['tid']);
+						$sqlWhereTaxa .= 'OR ((ts.taxauthid = '.$this->taxAuthId.') AND ((ts.family = "'.$searchTaxon.'") OR (ts.tid IN('.implode(',', $tidArr).')))) ';
+					}
+					else{
+						$sqlWhereTaxa .= 'OR ((o.family = "'.$searchTaxon.'") OR (o.sciname = "'.$searchTaxon.'")) ';
+					}
 				}
 				else{
 					if($taxonType == TaxaSearchType::COMMON_NAME){
