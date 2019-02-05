@@ -25,7 +25,7 @@ TO INSTALL THE DEVELOPMENT DOCKER STACK INCLUDED WITH THIS SOFTWARE
         preference
 * Start the Docker development stack:
     a. Start the Docker CLI on your system (if it is not already running)
-    b. Navigate to the root directory of this Symbiota installation
+    b. Navigate to the compose directory of this Symbiota installation
     c. Run: docker-compose up -d
     d. The first time the development stack is started it will take longer to start as both of the
         docker images are built
