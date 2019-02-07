@@ -260,6 +260,7 @@ if($action == 'search'){
 								<div>
 									<?php
 									$sciname = $imgArr['sciname'];
+									if(!$sciname && $imgArr['occid'] && $occArr[$imgArr['occid']]['sciname']) $sciname = $occArr[$imgArr['occid']]['sciname'];
 									if($sciname){
 										if(strpos($imgArr['sciname'],' ')) $sciname = '<i>'.$sciname.'</i>';
 										if($imgArr['tid']) echo '<a href="#" onclick="openTaxonPopup('.$imgArr['tid'].');return false;" >';
@@ -269,8 +270,13 @@ if($action == 'search'){
 									}
 									if($imgArr['occid']){
 										echo '<a href="#" onclick="openIndPU('.$imgArr['occid'].');return false;">';
-										if(strpos($occArr[$imgArr['occid']]['catnum'], $collArr[$occArr[$imgArr['occid']]['collid']]) !== 0) echo $collArr[$occArr[$imgArr['occid']]['collid']].': ';
-										echo $occArr[$imgArr['occid']]['catnum'];
+										if($occArr[$imgArr['occid']]['recordedby']){
+											echo $occArr[$imgArr['occid']]['recordedby'];
+										}
+										else{
+											if(strpos($occArr[$imgArr['occid']]['catnum'], $collArr[$occArr[$imgArr['occid']]['collid']]) !== 0) echo $collArr[$occArr[$imgArr['occid']]['collid']].': ';
+											echo $occArr[$imgArr['occid']]['catnum'];
+										}
 										echo '</a>';
 									}
 									elseif($imgArr['uid']){
