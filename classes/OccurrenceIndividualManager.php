@@ -168,8 +168,7 @@ class OccurrenceIndividualManager extends Manager{
 
 	private function loadImages(){
 		global $imageDomain;
-		$sql = 'SELECT imgid, url, thumbnailurl, originalurl, notes, caption FROM images '.
-			'WHERE (occid = '.$this->occid.') ORDER BY sortsequence';
+		$sql = 'SELECT imgid, url, thumbnailurl, originalurl, sourceurl, notes, caption FROM images WHERE (occid = '.$this->occid.') ORDER BY sortsequence';
 		$result = $this->conn->query($sql);
 		if($result){
 			while($row = $result->fetch_object()){
@@ -187,6 +186,7 @@ class OccurrenceIndividualManager extends Manager{
 				$this->occArr['imgs'][$imgId]['url'] = $url;
 				$this->occArr['imgs'][$imgId]['tnurl'] = $tnUrl;
 				$this->occArr['imgs'][$imgId]['lgurl'] = $lgUrl;
+				$this->occArr['imgs'][$imgId]['sourceurl'] = $row->sourceurl;
 				$this->occArr['imgs'][$imgId]['caption'] = $row->caption;
 			}
 			$result->free();

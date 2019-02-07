@@ -308,7 +308,7 @@ class ImageProcessor {
 		$fullPath = $GLOBALS['SERVER_ROOT'].(substr($GLOBALS['SERVER_ROOT'],-1) != '/'?'/':'').'temp/data/'.$fileName;
 		if($fh = fopen($fullPath,'rb')){
 			$translationMap = array('catalognumber' => 'catalognumber', 'url' => 'url', 'thumbnailurl' => 'thumbnailurl',
-				'originalurl' => 'originalurl', 'thumbnail' => 'thumbnailurl', 'large' => 'originalurl', 'web' => 'url');
+				'originalurl' => 'originalurl', 'thumbnail' => 'thumbnailurl', 'large' => 'originalurl', 'web' => 'url', 'sourceurl' => 'sourceurl');
 			$headerArr = fgetcsv($fh,0,',');
 			foreach($headerArr as $i => $sourceField){
 				if($sourceField != 'collid'){
@@ -324,6 +324,7 @@ class ImageProcessor {
 					echo '<option value="originalurl" '.(isset($translationMap[$sourceField]) && $translationMap[$sourceField]=='originalurl'?'SELECTED':'').'>Large Image URL (required)</option>';
 					echo '<option value="url" '.(isset($translationMap[$sourceField]) && $translationMap[$sourceField]=='url'?'SELECTED':'').'>Web Image URL</option>';
 					echo '<option value="thumbnailurl" '.(isset($translationMap[$sourceField]) && $translationMap[$sourceField]=='thumbnailurl'?'SELECTED':'').'>Thumbnail URL</option>';
+					echo '<option value="sourceurl" '.(isset($translationMap[$sourceField]) && $translationMap[$sourceField]=='sourceurl'?'SELECTED':'').'>Source URL</option>';
 					echo '</select>';
 					echo '</td></tr>';
 				}
@@ -345,6 +346,7 @@ class ImageProcessor {
 					$url = (isset($fieldMap['url'])?$this->cleanInStr($recordArr[$fieldMap['url']]):'');
 					if(!$url) $url = 'empty';
 					$thumbnailUrl = (isset($fieldMap['thumbnailurl'])?$this->cleanInStr($recordArr[$fieldMap['thumbnailurl']]):'');
+					$sourceUrl = (isset($fieldMap['sourceurl'])?$this->cleanInStr($recordArr[$fieldMap['sourceurl']]):'');
 					if($catalogNumber && $originalUrl){
 						echo '<li>Processing catalogNumber: '.$catalogNumber.'</li>';
 						//Get catalogNumber
@@ -367,7 +369,8 @@ class ImageProcessor {
 									$oFileName = substr(strrchr($r1->originalurl, "/"), 1);
 									if($oFileName == $origFileName || $uFileName == $urlFileName || $oFileName == $urlFileName || $uFileName == $origFileName){
 										$sql2 = 'UPDATE images '.
-											'SET url = "'.$url.'", originalurl = "'.$originalUrl.'", thumbnailurl = '.($thumbnailUrl?'"'.$thumbnailUrl.'"':'NULL').' '.
+											'SET url = "'.$url.'", originalurl = "'.$originalUrl.'", thumbnailurl = '.($thumbnailUrl?'"'.$thumbnailUrl.'"':'NULL').', '.
+											'sourceurl = '.($sourceUrl?'"'.$sourceUrl.'"':'NULL').' '.
 											'WHERE imgid = '.$r1->imgid;
 										if($this->conn->query($sql2)){
 											echo '<li style="margin-left:10px">Existing image replaced with new image mapping: <a href="../editor/occurrenceeditor.php?occid='.$occid.'" target="_blank">'.$catalogNumber.'</a></li>';
@@ -400,8 +403,8 @@ class ImageProcessor {
 						}
 						foreach($occArr as $occid){
 							//Load image URLs
-							$sqlInsert = 'INSERT INTO images(occid,url,originalurl,thumbnailurl) '.
-								'VALUES('.$occid.',"'.$url.'","'.$originalUrl.'",'.($thumbnailUrl?'"'.$thumbnailUrl.'"':'NULL').')';
+							$sqlInsert = 'INSERT INTO images(occid,url,originalurl,thumbnailurl,sourceurl) '.
+								'VALUES('.$occid.',"'.$url.'","'.$originalUrl.'",'.($thumbnailUrl?'"'.$thumbnailUrl.'"':'NULL').','.($sourceUrl?'"'.$sourceUrl.'"':'NULL').')';
 							if($this->conn->query($sqlInsert)){
 								echo '<li style="margin-left:10px">Image URLs linked to: <a href="../editor/occurrenceeditor.php?occid='.$occid.'" target="_blank">'.$catalogNumber.'</a></li>';
 							}
