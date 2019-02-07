@@ -1167,6 +1167,7 @@ class SpecUploadBase extends SpecUpload{
 		$recMap = OccurrenceUtilities::occurrenceArrayCleaning($recMap);
 		$loadRecord = false;
 		if($this->uploadType == $this->NFNUPLOAD) $loadRecord = true;
+		elseif(isset($recMap['occid']) && $recMap['occid']) $loadRecord = true;
 		elseif(isset($recMap['dbpk']) && $recMap['dbpk']) $loadRecord = true;
 		elseif(isset($recMap['catalognumber']) && $recMap['catalognumber']) $loadRecord = true;
 		elseif(isset($recMap['othercatalognumbers']) && $recMap['othercatalognumbers']) $loadRecord = true;
