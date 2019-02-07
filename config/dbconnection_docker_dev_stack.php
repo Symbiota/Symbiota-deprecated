@@ -3,7 +3,7 @@ class MySQLiConnectionFactory {
     static $SERVERS = array(
       array(
 			'type' => 'readonly',
-			'host' => 'mariadb',
+			'host' => 'mysql',
 			'username' => 'root',
 			'password' => 'password',
 			'database' => 'symbiota',
@@ -11,7 +11,7 @@ class MySQLiConnectionFactory {
         ),
         array(
 			'type' => 'write',
-			'host' => 'mariadb',
+			'host' => 'mysql',
 			'username' => 'root',
 			'password' => 'password',
 			'database' => 'symbiota',
