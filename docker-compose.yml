@@ -9,7 +9,7 @@ services:
       - ./docker/apache/vhosts:/etc/apache2/sites-enabled
       - ./:/home/wwwroot/symbiota
     depends_on:
-      - mariadb
+      - mysql
     ports:
       - 80:80
 
