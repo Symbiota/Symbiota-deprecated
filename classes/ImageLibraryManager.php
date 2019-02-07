@@ -253,10 +253,12 @@ class ImageLibraryManager extends OccurrenceTaxaManager{
 		if($occArr){
 			//Get occurrence data
 			$collArr = array();
-			$sql2 = 'SELECT occid, catalognumber, stateprovince, collid FROM omoccurrences WHERE occid IN('.implode(',',$occArr).')';
+			$sql2 = 'SELECT occid, catalognumber, sciname, recordedby, stateprovince, collid FROM omoccurrences WHERE occid IN('.implode(',',$occArr).')';
 			$rs2 = $this->conn->query($sql2);
 			while($r2 = $rs2->fetch_object()){
 				$retArr['occ'][$r2->occid]['catnum'] = $r2->catalognumber;
+				$retArr['occ'][$r2->occid]['sciname'] = $r2->sciname;
+				$retArr['occ'][$r2->occid]['recordedby'] = $r2->recordedby;
 				$retArr['occ'][$r2->occid]['stateprovince'] = $r2->stateprovince;
 				$retArr['occ'][$r2->occid]['collid'] = $r2->collid;
 				$collArr[$r2->collid] = $r2->collid;
