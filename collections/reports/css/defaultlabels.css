@@ -66,6 +66,10 @@ p.printbreak {
 	font-weight:bold;
 }
 
+.municipality {
+	font-weight:bold;
+}
+
 .associatedtaxa {
 	font-style:italic;
 }

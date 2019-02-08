@@ -102,7 +102,7 @@ class MediaTools {
 		$cnt = 0;
 		$sql = 'SELECT i.* FROM images i ';
 		if($this->collid) $sql .= 'INNER JOIN omoccurrences o ON i.occid = o.occid ';
-		$sql .= 'WHERE (i.imgid IN('.implode(',',$this->imgidArr).')) AND (i.imgid > '.$imgidStart.') ';
+		$sql .= 'WHERE (i.imgid IN('.trim(implode(',',$this->imgidArr),', ').')) AND (i.imgid > '.$imgidStart.') ';
 		if($this->collid) $sql .= 'AND (o.collid = '.$this->collid.') ';
 		$sql .= 'ORDER BY i.imgid LIMIT '.$limit;
 		//echo $sql;
@@ -142,7 +142,7 @@ class MediaTools {
 		echo '</ol>';
 		$rs->free();
 		fclose($this->reportFH);
-		echo '<div>Done! '.$cnt.' images archived</div>';
+		echo '<div>Done! '.$cnt.' images '.($this->archiveImages?'archived':'deleted').'</div>';
 		return $imgidFinal;
 	}
 
