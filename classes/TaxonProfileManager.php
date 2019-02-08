@@ -647,7 +647,7 @@ class TaxonProfileManager {
 			$latDist = $maxLat - $minLat;
 			$longDist = $maxLong - $minLong;
 
-			$googleUrl = '//maps.googleapis.com/maps/api/staticmap?size=256x256&maptype=terrain';
+			$googleUrl = '//maps.googleapis.com/maps/api/staticmap?size=380x380&maptype=terrain';
 			if(array_key_exists('GOOGLE_MAP_KEY',$GLOBALS) && $GLOBALS['GOOGLE_MAP_KEY']) $googleUrl .= '&key='.$GLOBALS['GOOGLE_MAP_KEY'];
             if(array_key_exists('TAXON_PROFILE_MAP_CENTER',$GLOBALS) && $GLOBALS['TAXON_PROFILE_MAP_CENTER']) $googleUrl .= '&center='.$GLOBALS['TAXON_PROFILE_MAP_CENTER'];
 			if(array_key_exists('TAXON_PROFILE_MAP_ZOOM',$GLOBALS) && $GLOBALS['TAXON_PROFILE_MAP_ZOOM']) {
