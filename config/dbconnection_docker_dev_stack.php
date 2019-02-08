@@ -25,7 +25,7 @@ class MySQLiConnectionFactory {
         for ($i = 0, $n = count(MySQLiConnectionFactory::$SERVERS); $i < $n; $i++) {
             $server = MySQLiConnectionFactory::$SERVERS[$i];
             if($server['type'] == $type){
-				$connection = new mysqli($server['host'], $server['username'], $server['password'], $server['database'], $server['port']);
+				$connection = new mysqli($server['host'], $server['username'], $server['password'], $server['database']);
                 if(mysqli_connect_errno()){
 					throw new Exception('Could not connect to any databases! Please try again later.');
                 }

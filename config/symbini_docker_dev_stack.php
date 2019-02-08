@@ -10,7 +10,7 @@ $PORTAL_GUID = '8453b446-8f84-4949-a587-3e8b9678dc0b';				//Typically a UUID
 $SECURITY_KEY = '424a9fc6-9454-4bce-acba-e32656da8a63';				//Typically a UUID used to verify access to certain web service
 
 $CLIENT_ROOT = '';				//URL path to project root folder (relative path w/o domain, e.g. '/seinet')
-$SERVER_ROOT = '/home/wwwroot/symbiota';				//Full path to Symbiota project root folder
+$SERVER_ROOT = '/symbiota';				//Full path to Symbiota project root folder
 $TEMP_DIR_ROOT = $SERVER_ROOT.'/temp';				//Must be writable by Apache; will use system default if not specified
 $LOG_PATH = $SERVER_ROOT.'/content/logs';					//Must be writable by Apache; will use <SYMBIOTA_ROOT>/temp/logs if not specified
 
