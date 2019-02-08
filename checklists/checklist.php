@@ -719,8 +719,12 @@ if($clArray["locality"]){
 							?>
 							<div class="grid-item">
 								<div class="image-item">
-									<?php 
-									$spUrl = "../taxa/index.php?taxauthid=1&taxon=$tid&cl=".$clid;
+									<?php
+                                    if($clValue && $clArray["parentclid"]== 54) {//garden collection
+                                        $spUrl = "../taxa/garden.php?taxauthid=1&taxon=$tid&cl=".$clid;
+                                    }else{
+                                        $spUrl = "../taxa/index.php?taxauthid=1&taxon=$tid&cl=".$clid;
+                                    }
 									if($imgSrc){
 										$imgSrc = (array_key_exists("imageDomain",$GLOBALS)&&substr($imgSrc,0,4)!="http"?$GLOBALS["imageDomain"]:"").$imgSrc;
 										if(!$printMode) echo "<a href='".$spUrl."' target='_blank'>";
@@ -779,7 +783,11 @@ if($clArray["locality"]){
 									$prevfam = $family;
 								}
 							}
-							$spUrl = "../taxa/index.php?taxauthid=1&taxon=$tid&cl=".$clid;
+                            if($clValue && $clArray["parentclid"]== 54) {//garden collection
+                                $spUrl = "../taxa/garden.php?taxauthid=1&taxon=$tid&cl=".$clid;
+                            }else{
+                                $spUrl = "../taxa/index.php?taxauthid=1&taxon=$tid&cl=".$clid;
+                            }
 							echo "<div id='tid-$tid' style='margin:0px 0px 3px 10px;'>";
 							echo '<div style="clear:left">';
 							if(!preg_match('/\ssp\d/',$sppArr["sciname"]) && !$printMode) echo "<a href='".$spUrl."' target='_blank'>";
