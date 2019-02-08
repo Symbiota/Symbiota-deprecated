@@ -39,7 +39,7 @@ else{
 	<html>
 		<head>
 			<title><?php echo $DEFAULT_TITLE; ?> Labels</title>
-			<link href="css/defaultlabels.css" type="text/css" rel="stylesheet" />
+			<link href="css/defaultlabels.css?ver=2" type="text/css" rel="stylesheet" />
 			<style type="text/css">
 				<?php
 				if($rowsPerPage != 1){
@@ -192,7 +192,7 @@ else{
 										<?php
 										$countyStr = trim($occArr['county']);
 										if($countyStr){
-											if(!stripos($occArr['county'],' County') && !stripos($occArr['county'],' Parish')) $countyStr .= ' County';
+											//if(!stripos($occArr['county'],' County') && !stripos($occArr['county'],' Parish')) $countyStr .= ' County';
 											$countyStr .= ', ';
 										}
 										?>
