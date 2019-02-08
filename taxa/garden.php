@@ -188,10 +188,10 @@ include($SERVER_ROOT.'/header.php');
             <?php if( $attribs['sunlight_string'] != '' ){ ?>
                 <strong>Light: </strong><?php echo $attribs['sunlight_string'] ?><br>
             <?php } ?>
-            <?php if( $attribs['moisture_string'] != '' ){ ?>
+            <?php if( $attribs['moisture_string'] != '' || $attribs['watering_string'] != '' ){ ?>
                 <strong>Moisture: </strong><?php echo $attribs['moisture_string'] ?>
                 <?php if( $attribs['watering_string'] != '' ){ ?>
-                    ; <?php echo $attribs['watering_string'] ?> summer water
+                    <?php echo $attribs['moisture_string'] != '' ? ';' : '' ?> <?php echo $attribs['watering_string'] ?> summer water
                 <?php } ?>
                 <br>
             <?php } ?>
