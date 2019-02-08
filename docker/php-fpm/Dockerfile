@@ -11,6 +11,7 @@ RUN apt-get update \
         php7.3-odbc \
         php7.3-zip \
         php-yaml \
+        php-xml \
         libjpeg-dev \
         libpng-dev \
         libpq-dev \
