@@ -573,6 +573,9 @@ ul.square-bullets {
 	color: #ffffff;
 	font-size: 30px;
 }
+.garden-wrapper a:link, .garden-wrapper a:active, .garden-wrapper a:hover {
+	color: #ffffff;
+}
 /* end garden section */
 
 /* news section */
@@ -1190,7 +1193,6 @@ button.menu-toggle {
 	display: flex;
 	flex-wrap: wrap;
 	justify-content: space-between;
-	height: 566px;
 }
 .garden-header-wrapper .col2 {
 	flex: 1;
@@ -1697,9 +1699,7 @@ div.growthCol {
 	text-align: center;
 	display: none;
 }
-#advSearchWrapper {
-	display: none;
-}
+
 :focus {
 	outline: 0;
 }
@@ -2173,7 +2173,7 @@ a:hover {
 }
 #site-content .ui-state-default, #site-content .ui-widget-content .ui-state-default, #site-content .ui-widget-header .ui-state-default {
 	border: 1px solid #d3d3d3;
-	background: #C7E0B5;
+	background: #74B147;
 	font-weight: normal;
 	color: white;
 }
@@ -2181,4 +2181,10 @@ a:hover {
 	border: 1px solid #d3d3d3;
 	background: white;
 	font-weight: normal;
+}
+
+#advSearchWrapper {
+	max-width: 800px;
+	margin: 0 auto;
+	padding: 0;
 }

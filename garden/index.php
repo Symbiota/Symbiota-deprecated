@@ -239,20 +239,6 @@ include($serverRoot."/header.php");
         });
     });
 
-    function toggleAdvSearch(){
-        var toggleSwitch = document.getElementById('advSearchToggle');
-        if(toggleSwitch.checked){
-            document.getElementById("showAdvSearchFilters").style.display = 'none';
-            document.getElementById("hideAdvSearchFilters").style.display = 'block';
-            document.getElementById("advSearchWrapper").style.display = 'block';
-        }
-        else{
-            document.getElementById("showAdvSearchFilters").style.display = 'block';
-            document.getElementById("hideAdvSearchFilters").style.display = 'none';
-            document.getElementById("advSearchWrapper").style.display = 'none';
-        }
-    }
-
     function processOption(id){
         var divId = id+'Div';
         var labelId = id+'Label';
@@ -469,38 +455,20 @@ include($serverRoot."/header.php");
         <h2>Gardening with Natives</h2>
     </div>
 </div>
-<div class="garden-header-wrapper clearfix">
-    <div class="col1">
-        <div class="col-content">
-            <h2>What is a native?</h2>
-            <p>Oregon native plants are those which occur or historically occurred naturally in our state, and established in the
-                landscape independently of direct or indirect human intervention.</p>
-            <h2>Why plant natives?</h2>
-            <p>Native plants are wise gardening choices. If planted in a habitat comparable to their natural one, they will:</p>
-            <ul class="square-bullets white-bullets">
-                <li>Use less water, fertilizer, and pesticides when established.</li>
-                <li>Capture the unique character of a region by preserving its biological heritage and maintaining genetic diversity.</li>
-                <li>Provide food and habitat for native pollinators, birds, and other animals.</li>
-                <li>Serve as biodiversity corridors, connecting distant natural areas with critical strands of native habitat
-                    through urban areas.</li>
-            </ul>
-        </div>
-    </div>
-    <div class="col2">&nbsp;</div>
-</div>
 <div class="garden-content">
     <div class="garden-name-search-wrapper">
-        <h2>Garden native plant search</h2>
-        <h2>Search by plant name <i class="fa fa-question-circle green"></i></h2>
+        <h2>Garden Native Plant Search <i class="fa fa-question-circle green"></i></h2>
+        <span class="garden-feature-search-text">Select any combination of features within one or more categories. Results are immediately displayed below.</span>
+        <h2>Search by plant name</h2>
         <div class="garden-name-search-box">
-            <div class="input-label">Search by scientific name</div>
+            <div class="input-label">Scientific name</div>
             <div class="input-wrapper">
                 <input type="text" id="garden-sciname-search-input" title="Enter scientific name here." autocomplete="off" />
                 <button id="garden-sciname-search-but" type="button" onclick="processNameSearch('sciname');"><i class="fa fa-search"></i></button>
             </div>
         </div>
         <div class="garden-name-search-box">
-            <div class="input-label">Search by common name</div>
+            <div class="input-label">Common name</div>
             <div class="input-wrapper">
                 <input type="text" id="garden-common-search-input" title="Enter common name here." autocomplete="off" />
                 <button id="garden-common-search-but" type="button" onclick="processNameSearch('common');"><i class="fa fa-search"></i></button>
@@ -510,8 +478,6 @@ include($serverRoot."/header.php");
 </div>
 <div class="garden-content">
     <div class="basic-feature-search-wrapper">
-        <h2>Search by plant features <i class="fa fa-question-circle green"></i></h2>
-        <span class="garden-feature-search-text">Filter for any combination of features within one or more categories</span>
         <div class="divTable gardenSearchTable">
             <div class="divTableHeading">
                 <div class="divTableRow">
@@ -724,13 +690,6 @@ include($serverRoot."/header.php");
     </div>
 </div>
 <div class="garden-content">
-    <div class="advanced-toggle-wrapper">
-        <input id="advSearchToggle" class="advSearchToggleCheck" onchange="toggleAdvSearch();" type="checkbox">
-        <label for="advSearchToggle" class="advSearchToggleLabel unselectable">
-            <div id="showAdvSearchFilters">More Filters +</div>
-            <div id="hideAdvSearchFilters">Less Filters -</div>
-        </label>
-    </div>
 </div>
 <div id="advSearchWrapper" class="garden-content">
     <?php
@@ -1105,6 +1064,25 @@ include($serverRoot."/header.php");
             </div>
         </a>
     </div>
+</div>
+<div class="garden-header-wrapper clearfix">
+    <div class="col1">
+        <div class="col-content">
+            <h2>What is a native?</h2>
+            <p>Oregon native plants are those which occur or historically occurred naturally in our state, and established in the
+                landscape independently of direct or indirect human intervention.</p>
+            <h2>Why plant natives?</h2>
+            <p>Native plants are wise gardening choices. If planted in a habitat comparable to their natural one, they will:</p>
+            <ul class="square-bullets white-bullets">
+                <li>Use less water, fertilizer, and pesticides when established.</li>
+                <li>Capture the unique character of a region by preserving its biological heritage and maintaining genetic diversity.</li>
+                <li>Provide food and habitat for native pollinators, birds, and other animals.</li>
+                <li>Serve as biodiversity corridors, connecting distant natural areas with critical strands of native habitat
+                    through urban areas.</li>
+            </ul>
+        </div>
+    </div>
+    <div class="col2">&nbsp;</div>
 </div>
 <div class="metro-wrapper">
     <div class="inner-content">
