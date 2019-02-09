@@ -24,6 +24,7 @@ include($serverRoot."/header.php");
 $(document).ready(function () {
     $('.slider').bxSlider({
         auto: true,
+        pause: 6000,
         stopAutoOnClick: true,
         controls: true,
         slideWidth: 600
@@ -79,14 +80,8 @@ $(document).ready(function () {
 <div class="whois-wrapper">
     <div class="inner-content">
         <div class="col1">
-            <h2>Who is OregonFlora?</h2>
-            <p>LWe are a passionate group of scientists based at Oregon State University whose mission is to provide accurate information about our state’s vascular plants. We communicate data to a broad audience through our website, custom data requests, and the Flora of Oregon books. People with a wide range of plant expertise are also a part of our team—more than 1,000 volunteers have shared photos, reviewed data, prepared floristic treatments and submitted lists of plants observed on hikes. Some of our key programmatic partners include:</p>
-            <ul>
-                <li>Native Plant Society of Oregon</li>
-                <li>OR/WA Bureau of Land Management</li>
-                <li>Metro</li>
-                <li>OSU Herbarium</li>
-            </ul>
+            <h2>Who We Are</h2>
+            <p>OregonFlora makes information about Oregon plants accessible to diverse audiences. We focus on the vascular plants of the state—ferns, conifers, grasses, herbs, and trees—that grow in the wild. We communicate data through our website, app, custom data requests, and the <i>Flora of Oregon</i> books. We collaborate with scientists, restorationists, gardeners, land managers, and plant enthusiasts of all ages. Volunteers are an important part of our team—please join us!</p>
         </div>
         <div class="col2">
             <div class="slider">
@@ -94,25 +89,26 @@ $(document).ready(function () {
                 <div><img src="images/layout/volunteers-plant.jpg" alt="Volunteers Plant" class="bordered"></div>
                 <div><img src="images/layout/lady-photographer.jpg" alt="Lady Photographer" class="bordered"></div>
             </div>
-            <div class="caption">
-                More than 1,000 volunteers shared photos, reviewed data and submitted lists of plants seen on hikes. Plants have also been included from studies by university researchers, the Native Plant Society of Oregon and state and federal agencies.
-            </div>
+<!--            <div class="caption"> -->
+<!--            </div>-->
         </div>
     </div>
 </div>
 <div class="welcome-wrapper">
     <div class="inner-content">
         <div class="col1">
-            <h2>Welcome to our new site!
-                Here’s what’s changed</h2>
-            <p>OregonFlora has joined forces with Symbiota to present our website as a Symbiota portal! Symbiota is an open source content management system that allows us to collaborate and share data with diverse biodiversity collections, and to tailor the information we present to the needs of our website users. </p>
-            <ul class="square-bullets purple-bullets">
-                <li>Taxon profile pages—comprehensive information about a plant gathered in one location. Find accepted names and synonyms, native/exotic status, images, distribution map, and external links for each of the ~4,700 species, subspecies, and varieties of Oregon vascular plants. Use the Plant Taxon Search box in the header to navigate to the page of your choice or click on a species name in other website tools to link to its profile page.</li>
-                <li>Mapping –a spatial mapping tool. Enter search parameters such as plant names or collectors to retrieve records statewide or draw a shape on the map to limit your results to a defined region. Import and export datasets for analysis.</li>
-                <li>Interactive key—identification tool for all plants in the state. Define the general area of your unknown plant and select its recognizable characters to narrow the possibilities. </li>
-                <li>Inventories—plant occurrences of a defined place presented as a checklist and an interactive key.</li>
-                <li>OSU Herbarium—all databased specimen records of angiosperms and bryophytes in a searchable, downloadable format.</li>
-            </ul>
+            <h2>Welcome to our new site! Here’s what you’ll find</h2>
+            <p>OregonFlora has joined forces with <a href="http://symbiota.org/docs/wp-content/uploads/Symbiota_Dec_27_2017.pdf" target="_blank">Symbiota</a> o present our website as a Symbiota portal! It’s easy to collaborate, share data, and tailor the information we present to meet your needs with these features:</p>
+            <h2>Taxon profile pages</h2>
+            <p>Comprehensive information, gathered in one location—for each of the ~4,700 vascular plants in the state! Select a page using the Plant Taxon Search box in the header or in links throughout the website. Learn how here [a hyperlink to the forthcoming video].</p>
+            <h2>Mapping</h2>
+            <p>Draw a shape on the interactive map to learn what plant diversity is found there, or enter plant names to view their distribution across Oregon and beyond. Learn how here.</p>
+            <h2>Interactive key</h2>
+            <p>An identification tool based on the plant features you recognize! Start with a list of species from the surrounding area, then select characters that match your unknown plant to narrow the possibilities. Learn how here.</p>
+            <h2>Plant Inventories</h2>
+            <p>Species lists for defined places, presented as a checklist and an interactive key. Learn more here.</p>
+            <h2>OSU Herbarium</h2>
+            <p>All databased specimen records of OSU Herbarium’s vascular plants, mosses, lichens, fungi, and algae in a searchable, downloadable format. Learn more here.</p>
         </div>
         <div class="col2">
             <div class="video-wrapper">
@@ -126,15 +122,14 @@ $(document).ready(function () {
         <div class="col1">&nbsp;</div>
         <div class="col2">
             <div class="col-content">
-                <h2>Gardening with Natives</h2>
-                <p>Learn which of Oregon’s 3,450 native species are commercially available, their characteristics, and where they naturally occur.</p>
+                <h2><a href="garden/index.php">Gardening with Natives</a></h2>
+                <p>Almost 75% of Oregon’s plants are native. Discover hundreds of native species that are cultivated and commercially available for use in gardens and landscapes.</p>
                 <ul class="square-bullets white-bullets">
-                    <li>Search for plants using 23 characteristics for selection, such as type of plant, sunlight and moisture needs, size, and ease of growth.</li>
+                    <li>Search for plants that will meet your gardening needs by selecting from 17 characteristics, such as sunlight and moisture needs, size, wildlife support, and ease of growth.</li>
                     <li>Browse collections of plants suitable for unique garden and landscape objectives, including pollinator gardens, meadowscapes, and more.</li>
-                    <li>Link to garden-focused profile pages with photos and cultivation details.</li>
+                    <li>Link to printable garden-focused profile pages with photos and cultivation details.</li>
                 </ul>
-                <p>Native plants are wise gardening choices, letting you create a landscape that reflects the unique character of the soils, climate, and plant communities of your region. Once established, many native species require less maintenance, irrigation, and fertilizer.</p>
-                <a href="/gardening-with-natives.php" class="btn light-purple-btn full-width-btn">Learn More about
+                <a href="garden/index.php" class="btn light-purple-btn full-width-btn">Learn More about
                     Gardening with Natives</a>
             </div>
         </div>
@@ -146,10 +141,13 @@ $(document).ready(function () {
         </div>
         <div class="col2">
             <h2>News and Events</h2>
-            <ul>
-                <li><a href="https://www.facebook.com/OregonFloraProject/">Facebook</a></li>
+            <ul class="square-bullets purple-bullets">
+                <li>2 March 2019, 8a – 5p.  Stop by our display at the BEEvent Pollinator Conference! Linn Co. Fair & Expo Center, Albany OR. Sponsored by Linn Co. Master Gardeners.</li>
+                <li>5 March 2019, 6:30p. Panelist: Marys River Watershed Council Forum—restoration efforts on Oak Creek. Corvallis Benton Co. Library, 645 NW Monroe, Corvallis OR.</li>
+                <li>11 March 2019, 7:30p. Presentation: The OregonFlora website: a digital flora. Oregon State University, 2087 Cordley Hall, Corvallis OR. Sponsored by Corvallis Chapter of Native Plant Society of Oregon.</li>
+                <li>27-28 April 2019, 9a – 5p. Presentations daily.  Glide Wildflower Show, Community Center, Glide, OR.</li>
             </ul>
-            <p>news and events go here.</p>
+            <p><a href="https://www.facebook.com/OregonFloraProject/"><img src="pages/images/facebook.png" alt="Like us on Facebook"></a></p>
         </div>
     </div>
 </div>
