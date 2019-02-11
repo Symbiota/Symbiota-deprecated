@@ -4,9 +4,6 @@
 Language: English
 ------------------
 */
-
-include_once('checklist.en.php');
-
 $LANG['NAV_HOME'] = 'Home';
 $LANG['CHECKADMIN'] = ' Checklist Administration';
 $LANG['RETURNCHECK'] = 'Return to Checklist';
@@ -72,12 +69,10 @@ $LANG['DELETECHECK'] = 'Delete Checklist';
 $LANG['EDITCHECKLIST'] = 'Save Edits';
 $LANG['ADDCHECKLIST'] = 'Create Checklist';
 $LANG['DELETETHISU'] = 'Delete this user';
-$LANG['CHECK_ACOUNT'] = 'Checklists assigned to your account';
-$LANG['NO_CHECK'] = 'You have no personal checklists';
-$LANG['CREATE_CHECK'] = 'Click here to create a new checklist';
-$LANG['ADMIN_PROJ'] = 'Inventory Project Administration';
-$LANG['NO_PROJ'] = 'There are no Projects for which you have administrative permissions';
-$LANG['REF_CHECK'] = 'More Inclusive Reference Checklist:';
+$LANG['CHECK_ACOUNT'] = 'Checklists assigned to your account.';
+$LANG['NO_CHECK'] = 'No personal control lists.';
+$LANG['ADMIN_PROJ'] = 'Inventory project management';
+$LANG['NO_PROJ'] = 'There are no projects for which you have administrative permissions.';
+$LANG['REF_CHECK'] = 'Most inclusive reference checklist:';
 $LANG['ACCESS'] = 'Access';
-
 ?>

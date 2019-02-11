@@ -1,12 +1,9 @@
-﻿<?php
+<?php
 /*
 ------------------
 Language: Español (Spanish)
 ------------------
 */
-
-include_once('checklist.en.php');
-
 $LANG['NAV_HOME'] = 'Inicio';
 $LANG['CHECKADMIN'] = ' Administraci&oacute;n de Listado de Comprobaci&oacute;n';
 $LANG['RETURNCHECK'] = 'Volver al Listado de Comprobaci&oacute;n';
@@ -72,12 +69,11 @@ $LANG['DELETECHECK'] = 'Borrar Listado de Comprobaci&oacute;n';
 $LANG['EDITCHECKLIST'] = 'Someter Cambios';
 $LANG['ADDCHECKLIST'] = 'Crear Lista Nueva';
 $LANG['DELETETHISU'] = 'Borrar este usuario';
+
 $LANG['CHECK_ACOUNT'] = 'Listas de verificación asignadas a su cuenta.';
 $LANG['NO_CHECK'] = 'No tiene listas de control personales.';
-$LANG['CREATE_CHECK'] = 'Haga clic aquí para crear una nueva lista de verificación';
 $LANG['ADMIN_PROJ'] = 'Administración de proyectos de inventario';
 $LANG['NO_PROJ'] = 'No hay proyectos para los que tenga permisos administrativos.';
 $LANG['REF_CHECK'] = 'Lista de verificación de referencia más inclusiva:';
 $LANG['ACCESS'] = 'Acceso';
-
 ?>
