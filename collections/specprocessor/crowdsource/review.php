@@ -22,8 +22,16 @@ if(array_key_exists('CollAdmin',$USER_RIGHTS) && in_array($collid,$USER_RIGHTS['
 }
 
 $statusStr = '';
-if(array_key_exists('occid',$_POST)){
-	$statusStr = $csManager->submitReviews($_POST);
+if($isEditor && $action){
+	if($action == 'submitReviews'){
+		$statusStr = $csManager->submitReviews($_POST);
+	}
+	elseif($action == 'resetToNotReviewed'){
+		$statusStr = $csManager->resetReviewStatus($_POST,5);
+	}
+	elseif($action == 'resetToOpen'){
+		$statusStr = $csManager->resetReviewStatus($_POST,0);
+	}
 }
 
 $projArr = $csManager->getProjectDetails();
@@ -34,6 +42,9 @@ $projArr = $csManager->getProjectDetails();
 	<title><?php echo $DEFAULT_TITLE; ?> Crowdsourcing Reviewer</title>
     <link href="../../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" rel="stylesheet" type="text/css" />
     <link href="../../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" rel="stylesheet" type="text/css" />
+	<link href="../../../css/jquery-ui.css" rel="stylesheet" type="text/css" />
+	<script src="../../../js/jquery.js" type="text/javascript"></script>
+	<script" src="../../../js/jquery-ui.js" type="text/javascript"></script>
 	<script type="text/javascript">
 		function selectAll(cbObj){
 			var cbStatus = cbObj.checked;
@@ -61,6 +72,11 @@ $projArr = $csManager->getProjectDetails();
 			}
 			alert("No records have been selected");
 			return false;
+		}
+
+		function showAdditionalActions(){
+			$('#addActionsDiv').show();
+			$('#showAddDiv').hide();
 		}
 	</script>
 </head>
@@ -117,11 +133,11 @@ $projArr = $csManager->getProjectDetails();
 							<legend><b>Filter</b></legend>
 							<div style="margin:3px;">
 								<b>Review Status:</b>
-								<select name="rstatus">
+								<select name="rstatus" onchange="this.form.submit()">
 									<option value="5,10">All Records</option>
 									<option value="5,10">----------------------</option>
-									<option value="5" <?php echo ($rStatus=='5'?'SELECTED':''); ?>>Pending Review</option>
-									<option value="10" <?php echo ($rStatus=='10'?'SELECTED':''); ?>>Closed (Approved)</option>
+									<option value="5" <?php echo ($rStatus=='5'?'SELECTED':''); ?>>Not Reviewed</option>
+									<option value="10" <?php echo ($rStatus=='10'?'SELECTED':''); ?>>Reviewed and Approved)</option>
 								</select>
 							</div>
 							<?php
@@ -129,7 +145,7 @@ $projArr = $csManager->getProjectDetails();
 								?>
 								<div style="margin:3px;">
 									<b>Editor:</b>
-									<select name="uid">
+									<select name="uid" onchange="this.form.submit()">
 										<option value="">All Editors</option>
 										<option value="">----------------------</option>
 										<?php
@@ -148,7 +164,7 @@ $projArr = $csManager->getProjectDetails();
 							?>
 							<div style="margin:3px;">
 								<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
-								<input name="action" type="submit" value="Filter Records" />
+								<!-- <input name="action" type="submit" value="Filter Records" /> -->
 							</div>
 						</fieldset>
 					</form>
@@ -202,13 +218,19 @@ $projArr = $csManager->getProjectDetails();
 										if(isset($rArr['points'])) $points = $rArr['points'];
 										if($collid){
 											echo '<td><input id="o-'.$occid.'" name="occid[]" type="checkbox" value="'.$occid.'" /></td>';
-											echo '<td><select name="p-'.$occid.'" style="width:45px;" onchange="selectCheckbox('.$occid.')">';
-											echo '<option value="0" '.($points=='0'?'SELECTED':'').'>0</option>';
-											echo '<option value="1" '.($points=='1'?'SELECTED':'').'>1</option>';
-											echo '<option value="2" '.($points=='2'?'SELECTED':'').'>2</option>';
-											echo '<option value="3" '.($points=='3'?'SELECTED':'').'>3</option>';
-											echo '</select></td>';
-											echo '<td><input name="c-'.$occid.'" type="text" value="'.$notes.'" style="width:60px;" onfocus="expandNotes(this)" onblur="collapseNotes(this)" onchange="selectCheckbox('.$occid.')" /></td>';
+											if(isset($rArr['points'])){
+												echo '<td><input name="p-'.$occid.'" type="text" value="'.$points.'" style="width:40px;" DISABLED /></td>';
+												echo '<td><b>Reviewed and Approved</b></td>';
+											}
+											else{
+												echo '<td><select name="p-'.$occid.'" style="width:45px;" onchange="selectCheckbox('.$occid.')">';
+												echo '<option value="0" '.($points=='0'?'SELECTED':'').'>0</option>';
+												echo '<option value="1" '.($points=='1'?'SELECTED':'').'>1</option>';
+												echo '<option value="2" '.($points=='2'?'SELECTED':'').'>2</option>';
+												echo '<option value="3" '.($points=='3'?'SELECTED':'').'>3</option>';
+												echo '</select></td>';
+												echo '<td><input name="c-'.$occid.'" type="text" value="'.$notes.'" style="width:60px;" onfocus="expandNotes(this)" onblur="collapseNotes(this)" onchange="selectCheckbox('.$occid.')" /></td>';
+											}
 										}
 										else{
 											echo '<td><input name="p-'.$occid.'" type="text" value="'.$points.'" style="width:15px;" DISABLED /></td>';
@@ -249,8 +271,18 @@ $projArr = $csManager->getProjectDetails();
 								<div style="clear:both;">
 									<?php
 									if($collid){
-										echo '<div style="float:left"><input name="action" type="submit" value="Submit Reviews" /></div>';
-										echo '<div style="float:left; margin-left:15px"><input name="updateProcessingStatus" type="checkbox" value="1" checked /> Set Processing Status to reviewed (unchecking will leave Processing Status as set by user for each record)</div>';
+										?>
+										<div style="margin:10px;clear:both;">
+											<button name="action" type="submit" value="submitReviews" >Submit Reviews</button>
+											<input name="updateProcessingStatus" type="checkbox" value="1" checked />
+											Set Processing Status to reviewed (unchecking will leave Processing Status as set by user for each record)
+										</div>
+										<div id="showAddDiv" style="margin:10px"><a href="#" onclick="showAdditionalActions();return false;">Show Addtional Actions</a></div>
+										<div id="addActionsDiv" style="display:none;margin:20px 10px;">
+											<div><button name="action" type="submit" value="resetToNotReviewed" onclick="return confirm('Are you sure you want to change review status? All points and review comments will be deleted.')">Remove points and change to Not Reviewed</button></div>
+											<div style="margin-top:5px"><button name="action" type="submit" value="resetToOpen" onclick="return confirm('Are you sure you want to reset status? Editor, points, and review comments will be deleted.')">Move back into crowdsourcing queue as Open Records</button></div>
+										</div>
+										<?php
 									}
 									?>
 								</div>
