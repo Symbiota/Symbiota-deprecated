@@ -1,7 +1,7 @@
 ﻿<?php
 /*
 ------------------
-Language: Español (Spanish)
+Language:  Español (Spanish)
 ------------------
 */
 
@@ -24,6 +24,7 @@ $LANG['LONGE'] = 'Long Este';
 $LANG['LONGW'] = 'Long Oeste';
 $LANG['INCLUDELATLONG'] = 'Incluir Lat/Long y localidad como una condici&oacute;n "OR"';
 $LANG['ONLYCOORD'] = 'Solamente incluir ocurrencias con coordenadas';
+$LANG['POLYGON_SEARCH'] = 'Search based on polygon defining checklist research boundaries';
 $LANG['EXCLUDE'] = 'Excluir especies cultivadas';
 $LANG['TAXON'] = 'Tax&oacute;n';
 $LANG['SAVESEARCH'] = 'Guardar T&eacute;rminos de B&uacute;squeda';
@@ -46,9 +47,9 @@ $LANG['ALLTAXACONTAINVOUCH'] = 'Todos los taxones contienen enlaces a vouchers';
 $LANG['FULLSPECLIST'] = 'Listado de especies completo (CSV)';
 $LANG['FULLPRINT'] = 'Listado de especies completo (Print Friendly)';
 $LANG['FULLSPECLISTVOUCHER'] = 'Listado de especies completo con vouchers (CSV)';
-$LANG['PENSOFT_XLSX_EXPORT'] = 'Listado de especies en el formato del Pensoft';
-$LANG['VOUCHERONLY'] = 'Vouchers solomente (DwC-A, CSV, Tab-delimited)';
 $LANG['FULLPRINTVOUCHER'] = 'Listado de especies completo con vouchers (Print Friendly)';
+$LANG['PENSOFT_DOWNLOAD'] = 'Listado de especies en el formato del Pensoft';
+$LANG['VOUCHERONLY'] = 'Vouchers solomente (DwC-A, CSV, Tab-delimited)';
 $LANG['SPECMISSINGTITLE'] = 'Posibles adiciones de especies basadas en vales de muestra';
 $LANG['SPECMISSTAXA'] = 'Espec&iacute;menes de taxa faltantes del listado de Comprobaci&oacute;n (CSV)';
 $LANG['SPECMISSPELLED'] = 'Espec&iacute;menes con nombres cient&iacute;ficos mal escritos, ilegales, y problem&aacute;ticos (CSV)';
