@@ -4,9 +4,7 @@
 Language: Espa�ol (Spanish)
 ------------------
 */
-
 include_once('sharedterms.es.php');
-
 $LANG['PAGE_TITLE'] = 'Par&aacute;metros de B&uacute;squeda de Colecciones';
 $LANG['PAGE_HEADER'] = 'Formulario de B&uacute;squeda';
 $LANG['GENERAL_TEXT_1'] = 'Ingrese uno o m&aacute;s de los criterios de consulta siguientes y haga click en el bot&oacute;n &quot;Search&quot; para ver los resultados.';
@@ -59,7 +57,6 @@ $LANG['OTHER_CATNUM'] = 'Otro N&uacute;mero de Cat&aacute;logo:';
 $LANG['TYPE'] = 'Limitar Solamente a Ejemplares Tipo';
 $LANG['HAS_IMAGE'] = 'Limitar Solamente a Ejemplares con Im&aacute;genes';
 $LANG['HAS_GENETIC'] = 'Limitar Solamente a Ejemplares con datos gen&eacute;ticos';
-
 //Following used in mapboundingbox.php
 $LANG['MBB_TITLE'] = 'Mapeador de Coordenadas';
 $LANG['MBB_INSTRUCTIONS'] = 'Click para comenzar a dibujar y otra vez para terminar el rect&aacute;ngulo. Click sobre el bot&oacute;n Enviar para transferir Coordenadas.';
@@ -67,7 +64,6 @@ $LANG['MBB_NORTHERN'] = 'Latitud Norte';
 $LANG['MBB_EASTERN'] = 'Longitud Este';
 $LANG['MBB_SOUTHERN'] = 'Latitud Sur';
 $LANG['MBB_WESTERN'] = 'Longitud Oeste';
-
 //Following used in mappointradius.php
 $LANG['MPR_TITLE'] = 'Mapeador de Coordenadas';
 $LANG['MPR_INSTRUCTIONS'] = 'Click para capturar coordenadas. Click en el bot&oacute;n Enviar Coordenadas para transferir Coordenadas.';
