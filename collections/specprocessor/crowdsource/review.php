@@ -277,7 +277,7 @@ $projArr = $csManager->getProjectDetails();
 											<input name="updateProcessingStatus" type="checkbox" value="1" checked />
 											Set Processing Status to reviewed (unchecking will leave Processing Status as set by user for each record)
 										</div>
-										<div id="showAddDiv" style="margin:10px"><a href="#" onclick="showAdditionalActions();return false;">Show Addtional Actions</a></div>
+										<div id="showAddDiv" style="margin:10px"><a href="#" onclick="showAdditionalActions();return false;">Show Additional Actions</a></div>
 										<div id="addActionsDiv" style="display:none;margin:20px 10px;">
 											<div><button name="action" type="submit" value="resetToNotReviewed" onclick="return confirm('Are you sure you want to change review status? All points and review comments will be deleted.')">Remove points and change to Not Reviewed</button></div>
 											<div style="margin-top:5px"><button name="action" type="submit" value="resetToOpen" onclick="return confirm('Are you sure you want to reset status? Editor, points, and review comments will be deleted.')">Move back into crowdsourcing queue as Open Records</button></div>
