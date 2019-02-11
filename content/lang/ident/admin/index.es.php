@@ -28,5 +28,6 @@ $LANG['NO_HEADING'] = 'Sin rumbo';
 $LANG['Create'] = 'Crear';
 $LANG['NO_ASSIGNED_HEADER'] = 'No hay encabezado asignado';
 $LANG['YOU_ARE_NOT_AUTHORIZED_TO_ADD_CHARACTERS'] = 'No estás autorizado para añadir personajes.';
+$LANG['CHARACTERS_BY_HEADING'] = 'Personajes por encabezado';
 
 ?>

@@ -28,5 +28,6 @@ $LANG['NO_HEADING'] = 'No Heading';
 $LANG['Create'] = 'Create';
 $LANG['NO_ASSIGNED_HEADER'] = 'No Assigned Header';
 $LANG['YOU_ARE_NOT_AUTHORIZED_TO_ADD_CHARACTERS'] = 'You are not authorized to add characters';
+$LANG['CHARACTERS_BY_HEADING'] = 'Characters by Heading';
 
 ?>
