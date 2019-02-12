@@ -18,6 +18,8 @@ header("Content-Type: text/html; charset=".$charset);
 <?php
 include($serverRoot."/header.php");
 ?>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.6/dist/jquery.fancybox.min.css" />
+<script src="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.6/dist/jquery.fancybox.min.js"></script>
 <link rel="stylesheet" href="css/jquery.bxslider.css">
 <script src="js/jquery.bxslider.js"></script>
 <script>
@@ -100,7 +102,8 @@ $(document).ready(function () {
             <h2>Welcome to our new site! Here’s what you’ll find</h2>
             <p>OregonFlora has joined forces with <a href="http://symbiota.org/docs/wp-content/uploads/Symbiota_Dec_27_2017.pdf" target="_blank">Symbiota</a> o present our website as a Symbiota portal! It’s easy to collaborate, share data, and tailor the information we present to meet your needs with these features:</p>
             <h2>Taxon profile pages</h2>
-            <p>Comprehensive information, gathered in one location—for each of the ~4,700 vascular plants in the state! Select a page using the Plant Taxon Search box in the header or in links throughout the website. Learn how here [a hyperlink to the forthcoming video].</p>
+            <p>Comprehensive information, gathered in one location—for each of the ~4,700 vascular plants in the state! Select a page using the Plant Taxon Search box in the header or in links throughout the website.
+                <a data-fancybox href="https://www.youtube.com/embed/JhvrQeY3doI">Learn how here</a>.</p>
             <h2>Mapping</h2>
             <p>Draw a shape on the interactive map to learn what plant diversity is found there, or enter plant names to view their distribution across Oregon and beyond. Learn how here.</p>
             <h2>Interactive key</h2>
@@ -112,7 +115,7 @@ $(document).ready(function () {
         </div>
         <div class="col2">
             <div class="video-wrapper">
-                <iframe width="560" height="315" src="https://www.youtube.com/embed/JhvrQeY3doI" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                <iframe id="kaltura_player" src="https://cdnapisec.kaltura.com/p/391241/sp/39124100/embedIframeJs/uiconf_id/28342472/partner_id/391241?iframeembed=true&playerId=kaltura_player&entry_id=0_0lr3qeva&flashvars[localizationCode]=en&amp;flashvars[leadWithHTML5]=true&amp;flashvars[sideBarContainer.plugin]=true&amp;flashvars[sideBarContainer.position]=left&amp;flashvars[sideBarContainer.clickToClose]=true&amp;flashvars[chapters.plugin]=true&amp;flashvars[chapters.layout]=vertical&amp;flashvars[chapters.thumbnailRotator]=false&amp;flashvars[streamSelector.plugin]=true&amp;flashvars[EmbedPlayer.SpinnerTarget]=videoHolder&amp;flashvars[dualScreen.plugin]=true&amp;&wid=0_46rd6whd" width="554" height="366" allowfullscreen webkitallowfullscreen mozAllowFullScreen allow="autoplay *; fullscreen *; encrypted-media *" frameborder="0" title="Kaltura Player"></iframe>
             </div>
             <a href="/tips.php" class="btn purple-btn full-width-btn">Tips for using this site</a>
         </div>

@@ -573,8 +573,8 @@ ul.square-bullets {
 	color: #ffffff;
 	font-size: 30px;
 }
-.garden-wrapper a:link, .garden-wrapper a:active, .garden-wrapper a:hover {
-	color: #ffffff;
+.garden-wrapper a:link, .garden-wrapper a:active, .garden-wrapper a:visited, .garden-wrapper a:hover {
+	color: #ffffff !important;
 }
 /* end garden section */
 
