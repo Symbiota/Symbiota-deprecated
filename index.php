@@ -100,7 +100,7 @@ $(document).ready(function () {
     <div class="inner-content">
         <div class="col1">
             <h2>Welcome to our new site! Here’s what you’ll find</h2>
-            <p>OregonFlora has joined forces with <a href="http://symbiota.org/docs/wp-content/uploads/Symbiota_Dec_27_2017.pdf" target="_blank">Symbiota</a> o present our website as a Symbiota portal! It’s easy to collaborate, share data, and tailor the information we present to meet your needs with these features:</p>
+            <p>OregonFlora has joined forces with <a href="http://symbiota.org/docs/wp-content/uploads/Symbiota_Dec_27_2017.pdf" target="_blank">Symbiota</a> to present our website as a Symbiota portal! It’s easy to collaborate, share data, and tailor the information we present to meet your needs with these features:</p>
             <h2>Taxon profile pages</h2>
             <p>Comprehensive information, gathered in one location—for each of the ~4,700 vascular plants in the state! Select a page using the Plant Taxon Search box in the header or in links throughout the website.
                 <a data-fancybox href="https://www.youtube.com/embed/JhvrQeY3doI">Learn how here</a>.</p>

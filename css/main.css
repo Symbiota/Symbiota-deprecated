@@ -541,6 +541,7 @@ ul.square-bullets {
 .welcome-wrapper .col2 {
 	width: 40%;
 	padding-left: 30px;
+	align-self: center;
 }
 .welcome-wrapper h2 {
 	color: #4e1e97;
