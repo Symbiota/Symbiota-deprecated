@@ -547,6 +547,12 @@ ul.square-bullets {
 	color: #4e1e97;
 	font-size: 30px;
 }
+
+span.h3 {
+	font-size: 24px;
+	font-weight: 500;
+	color: #4e1e97;;
+}
 /* end welcome section */
 
 

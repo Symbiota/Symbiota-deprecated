@@ -101,17 +101,13 @@ $(document).ready(function () {
         <div class="col1">
             <h2>Welcome to our new site! Here’s what you’ll find</h2>
             <p>OregonFlora has joined forces with <a href="http://symbiota.org/docs/wp-content/uploads/Symbiota_Dec_27_2017.pdf" target="_blank">Symbiota</a> to present our website as a Symbiota portal! It’s easy to collaborate, share data, and tailor the information we present to meet your needs with these features:</p>
-            <h2>Taxon profile pages</h2>
-            <p>Comprehensive information, gathered in one location—for each of the ~4,700 vascular plants in the state! Select a page using the Plant Taxon Search box in the header or in links throughout the website.
+            <p><span class="h3">Taxon profile pages </span>Comprehensive information, gathered in one location—for each of the ~4,700 vascular plants in the state! Select a page using the Plant Taxon Search box in the header or in links throughout the website.
                 <a data-fancybox href="https://www.youtube.com/embed/JhvrQeY3doI">Learn how here</a>.</p>
-            <h2>Mapping</h2>
-            <p>Draw a shape on the interactive map to learn what plant diversity is found there, or enter plant names to view their distribution across Oregon and beyond. Learn how here.</p>
-            <h2>Interactive key</h2>
-            <p>An identification tool based on the plant features you recognize! Start with a list of species from the surrounding area, then select characters that match your unknown plant to narrow the possibilities. Learn how here.</p>
-            <h2>Plant Inventories</h2>
-            <p>Species lists for defined places, presented as a checklist and an interactive key. Learn more here.</p>
-            <h2>OSU Herbarium</h2>
-            <p>All databased specimen records of OSU Herbarium’s vascular plants, mosses, lichens, fungi, and algae in a searchable, downloadable format. Learn more here.</p>
+            <p><span class="h3">Mapping </span>Draw a shape on the interactive map to learn what plant diversity is found there, or enter plant names to view their distribution across Oregon and beyond. Learn how here.</p>
+            <p><span class="h3">Interactive key </span>An identification tool based on the plant features you recognize! Start with a list of species from the surrounding area, then select characters that match your unknown plant to narrow the possibilities. Learn how here.</p>
+            <p><span class="h3">Plant Inventories </span>Species lists for defined places, presented as a checklist and an interactive key. Learn more here.</p>
+            <h2></h2>
+            <p><span class="h3">OSU Herbarium </span>All databased specimen records of OSU Herbarium’s vascular plants, mosses, lichens, fungi, and algae in a searchable, downloadable format. Learn more here.</p>
         </div>
         <div class="col2">
             <div class="video-wrapper">
