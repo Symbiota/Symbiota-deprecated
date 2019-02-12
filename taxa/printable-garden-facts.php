@@ -183,8 +183,12 @@ $displayLeftMenu = false;
                         <?php if($attribs['sunlight_string'] != '') { ?>
                             <strong>Light: </strong><?php echo $attribs['sunlight_string'] ?><br>
                         <?php } ?>
-                        <?php if($attribs['moisture_string'] != '') { ?>
-                            <strong>Moisture: </strong><?php echo $attribs['moisture_string'] ?><br>
+                        <?php if( $attribs['moisture_string'] != '' || $attribs['watering_string'] != '' ){ ?>
+                            <strong>Moisture: </strong><?php echo $attribs['moisture_string'] ?>
+                            <?php if( $attribs['watering_string'] != '' ){ ?>
+                                <?php echo $attribs['moisture_string'] != '' ? ';' : '' ?> <?php echo $attribs['watering_string'] ?> summer water
+                            <?php } ?>
+                            <br>
                         <?php } ?>
                         <?php if(isset($attribs['wildlife_string']) && $attribs['wildlife_string'] != ''){ ?>
                             <strong>Wildlife support: </strong><?php echo $attribs['wildlife_string'] ?><br>
