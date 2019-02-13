@@ -4,6 +4,8 @@
  * PHP must be setup to run via command line. Automate by adding call to handler as a cron job, or scheduled task.
  * Variables in order: collid (required), uspid (required), importImages (optional, 0 or 1, 1 = default), importIdentificationHistory (optional, 0 or 1, 0 = default), matchCatalogNumber (optional, 0 or 1, 0 = default), matchOtherCatalogNumbers (optional, 0 or 1, 0 = default)
  * ex: php uploadhandler.php 382 331 1
+ * If data imports fail, check your php configuration variables. In particular, look at:
+ * post_max_size, upload_max_filesize, default_socket_timeout, max_execution_time, max_input_time, and allow_url_fopen
  */
 
 include_once('../../config/symbini.php');

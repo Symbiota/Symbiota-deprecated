@@ -47,7 +47,7 @@ class OccurrenceTaxaManager {
 		}
 	}
 
-	protected function setTaxonRequestVariable($inputArr = null){
+	public function setTaxonRequestVariable($inputArr = null){
 		//Set taxa search terms
 		if(isset($inputArr['taxa']) && $inputArr['taxa']){
 			$taxaStr = $this->cleanInputStr($inputArr["taxa"]);
@@ -201,7 +201,7 @@ class OccurrenceTaxaManager {
 		}
 	}
 
-	protected function getTaxonWhereFrag(){
+	public function getTaxonWhereFrag(){
 		$sqlWhereTaxa = '';
 		if(isset($this->taxaArr['taxa'])){
 			$tidInArr = array();

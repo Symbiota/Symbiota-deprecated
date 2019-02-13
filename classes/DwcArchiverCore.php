@@ -6,6 +6,7 @@ include_once($SERVER_ROOT.'/classes/DwcArchiverDetermination.php');
 include_once($SERVER_ROOT.'/classes/DwcArchiverImage.php');
 include_once($SERVER_ROOT.'/classes/DwcArchiverAttribute.php');
 include_once($SERVER_ROOT.'/classes/UuidFactory.php');
+include_once($SERVER_ROOT.'/classes/OccurrenceTaxaManager.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceAccessStats.php');
 
 class DwcArchiverCore extends Manager{
@@ -251,7 +252,7 @@ class DwcArchiverCore extends Manager{
 		if(!preg_match('/^[A-Za-z]+$/',$field)) return false;
 		if(!preg_match('/^[A-Z]+$/',$cond)) return false;
 		//Set condition
-		if($field){
+		if($field && in_array(strtolower($field),$this->condAllowArr)){
 			if(!$cond) $cond = 'EQUALS';
 			if($value || ($cond == 'NULL' || $cond == 'NOTNULL')){
 				if(is_array($value)){
@@ -291,6 +292,15 @@ class DwcArchiverCore extends Manager{
 				}
 				elseif($field == 'clid'){
 					$sqlFrag .= 'AND (v.clid IN('.implode(',',$condArr['EQUALS']).')) ';
+				}
+				elseif(($field == 'sciname' || $field == 'family') && isset($condArr['EQUALS'])){
+					$taxaManager = new OccurrenceTaxaManager();
+					$taxaArr = array();
+					$taxaArr['taxa'] = implode(';',$condArr['EQUALS']);
+					//$taxaArr['usethes'] = 1;
+					//$taxaArr['taxontype'] = 2;
+					$taxaManager->setTaxonRequestVariable($taxaArr);
+					$sqlFrag .= $taxaManager->getTaxonWhereFrag();
 				}
 				else{
 					$sqlFrag2 = '';
