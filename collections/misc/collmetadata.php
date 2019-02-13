@@ -506,7 +506,7 @@ $collManager->cleanOutArr($collData);
 								</td>
 							</tr>
 							<?php
-							if(isset($GBIF_USERNAME) && isset($GBIF_PASSWORD) && isset($GBIF_ORG_KEY)) {
+							if(isset($GBIF_USERNAME) && isset($GBIF_PASSWORD) && isset($GBIF_ORG_KEY) && $GBIF_ORG_KEY) {
 								?>
 								<tr>
 									<td>
