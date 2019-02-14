@@ -117,6 +117,9 @@ include($SERVER_ROOT.'/header.php');
 
 
 ?>
+<script type="text/javascript" src="../js/tooltipster.bundle.min.js"></script>
+<link rel="stylesheet" type="text/css" href="../css/tooltipster.bundle.min.css" />
+<link href="../css/tooltipster-sideTip-light.min.css" type="text/css" rel="stylesheet" />
 <div class="garden-content-wrapper">
     <div class="garden-page-header">
         <a href="printable-garden-facts.php?taxon=<?php echo $taxonManager->getTid(); ?>" class="btn light-purple-btn pull-right" target="_blank">Printable Fact Sheet</a>
@@ -260,5 +263,10 @@ include($SERVER_ROOT.'/header.php');
 <?php
 include($SERVER_ROOT.'/footer.php');
 ?>
+<script>
+    $('.tooltip').tooltipster({
+        theme: 'tooltipster-light'
+    });
+</script>
 </body>
 </html>

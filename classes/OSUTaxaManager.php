@@ -976,15 +976,15 @@ class OSUTaxaManager {
         foreach ($tmp[680] as $value) { //sunlight
             switch ($value['charstatename']) {
                 case "sun":
-                    $attribs["sunlight"] .= "<img src=\"../images/sunlight_icon1.png\" alt=\"Sun\" >";
+                    $attribs["sunlight"] .= "<img src=\"../images/sunlight_icon1.png\" alt=\"Sun\" class=\"tooltip\" title=\"tolerates light conditions that are predominately full sun\" >";
                     $attribs["sunlight_array"][]= $value['charstatename'];
                     break;
                 case "part shade":
-                    $attribs["sunlight"] .= "<img src=\"../images/sunlight_icon3.png\" alt=\"Part Shade\" >";
+                    $attribs["sunlight"] .= "<img src=\"../images/sunlight_icon3.png\" alt=\"Part Shade\" class=\"tooltip\" title=\"tolerates light conditions that are predominately partial shade\" >";
                     $attribs["sunlight_array"][]= $value['charstatename'];
                     break;
                 case "shade":
-                    $attribs["sunlight"] .= "<img src=\"../images/sunlight_icon4.png\" alt=\"Shade\" >";
+                    $attribs["sunlight"] .= "<img src=\"../images/sunlight_icon4.png\" alt=\"Shade\" class=\"tooltip\" title=\"tolerates light conditions that are predominately full shade\" >";
                     $attribs["sunlight_array"][]= $value['charstatename'];
                     break;
             }
@@ -1011,15 +1011,15 @@ class OSUTaxaManager {
         foreach ($tmp[683] as $value) { //moisture
             switch ($value['charstatename']) {
                 case "dry":
-                    $attribs["moisture"].= "<img src=\"../images/moisture_icon1.png\" alt=\"Dry\" >";
+                    $attribs["moisture"].= "<img src=\"../images/moisture_icon1.png\" alt=\"Dry\" class=\"tooltip\" title=\"tolerating year-round soil moisture conditions that are predominately dry\" >";
                     $attribs["moisture_array"][]= $value['charstatename'];
                     break;
                 case "moist":
-                    $attribs["moisture"].= "<img src=\"../images/moisture_icon3.png\" alt=\"Moist\" >";
+                    $attribs["moisture"].= "<img src=\"../images/moisture_icon3.png\" alt=\"Moist\" class=\"tooltip\" title=\"tolerating year-round soil moisture conditions that are predominately moist\" >";
                     $attribs["moisture_array"][]= $value['charstatename'];
                     break;
                 case "wet":
-                    $attribs["moisture"].= "<img src=\"../images/moisture_icon4.png\" alt=\"Wet\" >";
+                    $attribs["moisture"].= "<img src=\"../images/moisture_icon4.png\" alt=\"Wet\" class=\"tooltip\" title=\"tolerating year-round soil moisture conditions that are predominately wet\" >";
                     $attribs["moisture_array"][]= $value['charstatename'];
                     break;
             }
@@ -1041,23 +1041,23 @@ class OSUTaxaManager {
         foreach ($tmp[685] as $value) { //wildlife/insect support
             switch ($value['cs']) {
                 case "1":
-                    $attribs["wildlife"] .= "<img src=\"../images/wildlife_icon4.png\" alt=\"Butterfly\" >";
+                    $attribs["wildlife"] .= "<img src=\"../images/wildlife_icon4.png\" alt=\"Butterfly\" class=\"tooltip\" title=\"provides nectar for adult butterflies\" >";
                     $attribs["wildlife_array"][]= $value['charstatename'];
                     break;
                 case "2":
-                    $attribs["wildlife"] .= "<img src=\"../images/wildlife_icon2.png\" alt=\"Bee\" >";
+                    $attribs["wildlife"] .= "<img src=\"../images/wildlife_icon2.png\" alt=\"Bee\" class=\"tooltip\" title=\"provides a significant source of nectar or pollen for native bees, honeybees, and other pollinators\" >";
                     $attribs["wildlife_array"][]= $value['charstatename'];
                     break;
                 case "3":
-                    $attribs["wildlife"] .= "<img src=\"../images/wildlife_icon5.png\" alt=\"Insect\" >";
+                    $attribs["wildlife"] .= "<img src=\"../images/wildlife_icon5.png\" alt=\"Insect\" class=\"tooltip\" title=\"provides a food source or habitat for predatory insects (those which eat large numbers of other insects) or parasitoids (those that live in or on a host insect, thereby killing it)\" >";
                     $attribs["wildlife_array"][]= $value['charstatename'];
                     break;
                 case "5":
-                    $attribs["wildlife"] .= "<img src=\"../images/wildlife_icon3.png\" alt=\"Caterpillar\" >";
+                    $attribs["wildlife"] .= "<img src=\"../images/wildlife_icon3.png\" alt=\"Caterpillar\" class=\"tooltip\" title=\"a food source for the caterpillar stage of butterflies\" >";
                     $attribs["wildlife_array"][]= $value['charstatename'];
                     break;
                 case "6":
-                    $attribs["wildlife"] .= "<img src=\"../images/wildlife_icon1.png\" alt=\"Hummingbirds\" >";
+                    $attribs["wildlife"] .= "<img src=\"../images/wildlife_icon1.png\" alt=\"Hummingbirds\" class=\"tooltip\" title=\"provides a significant food source for hummingbirds\" >";
                     $attribs["wildlife_array"][]= $value['charstatename'];
                     break;
             }
@@ -1091,7 +1091,7 @@ class OSUTaxaManager {
                 break;
         }
         for($i=1;$i<=ceil($num_baskets);$i++) {
-            $attribs["commercial_availability"].= "<img src=\"../images/commercial_icon.png\" alt=\"Commercial Availability\" >";
+            $attribs["commercial_availability"].= "<img src=\"../images/commercial_icon.png\" alt=\"Commercial Availability\" class=\"tooltip\" title=\"relative availability (on a scale of 1 to 3) from listed native plant vendors\" >";
         }
         $attribs["other_cultivation_factors"] = implode(", ",array_map(function($a){
             return $a["charstatename"];
