@@ -1024,7 +1024,7 @@ class OSUTaxaManager {
                     break;
             }
         }
-        if(is_array($tme['683'])) {
+        if(is_array($tmp['683'])) {
             $min_moisture = min(array_column($tmp["683"], 'cs'));
             $max_moisture = max(array_column($tmp["683"], 'cs'));
             $min_moisture_key = array_search($min_moisture, array_column($tmp["683"], 'cs'));
