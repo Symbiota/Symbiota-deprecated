@@ -45,7 +45,7 @@ class GardenSearchManager {
 
     public function getCharacterStateArr($char,$sortseq){
         $returnArr = Array();
-        $sql = 'SELECT CharStateName, cid, cs '.
+        $sql = 'SELECT CharStateName, cid, cs, Description '.
             'FROM kmcs '.
             'WHERE cid = '.$char.' '.
             'ORDER BY '.($sortseq?'SortSequence':'CharStateName').' ';
@@ -54,6 +54,7 @@ class GardenSearchManager {
         while($row = $result->fetch_object()){
             $returnArr[$row->CharStateName]["cid"] = $row->cid;
             $returnArr[$row->CharStateName]["cs"] = $row->cs;
+            $returnArr[$row->CharStateName]["description"] = $row->Description;
         }
         $result->free();
 
@@ -231,48 +232,48 @@ UNION SELECT t.tid FROM taxa as t WHERE (((t.SciName)="'.$cs.'"))))';
         foreach ($tmp[137] as $value) { //habit
             switch ($value['charstatename']) {
                 case "tree":
-                    $attribs["type"] .= "<img src='../images/plant_type_icon1.png' alt='Tree' >";
+                    $attribs["type"] .= "<img src='../images/plant_type_icon1.png' alt='Tree' class='large woody plants with typically one main stem (trunk)' title='asdf' >";
                     break;
                 case "shrub":
-                    $attribs["type"] .= "<img src='../images/plant_type_icon2.png' alt='Shrub' >";
+                    $attribs["type"] .= "<img src='../images/plant_type_icon2.png' alt='Shrub' class='tooltip' title='woody plants, multi-stemmed, typically less than 10’ tall' >";
                     break;
                 case "vine":
-                    $attribs["type"] .= "<img src='../images/plant_type_icon2.png' alt='Vine' >";
+                    $attribs["type"] .= "<img src='../images/plant_type_icon2.png' alt='Vine' class='tooltip' title='climbing or trailing plants with long flexible stems, often supported by tendrils' >";
                     break;
                 case "herb":
-                    $attribs["type"] .= "<img src='../images/plant_type_icon4.png' alt='Herb' >";
+                    $attribs["type"] .= "<img src='../images/plant_type_icon4.png' alt='Herb' class='tooltip' title='flowering plants (annual, biennial, or perennial) with non-woody stems' >";
                     break;
                 case "grass or grass-like":
-                    $attribs["type"] .= "<img src='../images/plant_type_icon5.png' alt='Grass or grass-like' >";
+                    $attribs["type"] .= "<img src='../images/plant_type_icon5.png' alt='Grass or grass-like' class='tooltip' title='plants typically with non-showy, wind-pollinated flowers; includes sedges, rushes, and some other monocots' >";
                     break;
                 case "fern or fern ally":
-                    $attribs["type"] .= "<img src='../images/plant_type_icon6.png' alt='Fern or fern ally' >";
+                    $attribs["type"] .= "<img src='../images/plant_type_icon6.png' alt='Fern or fern ally' class='tooltip' title='plant that typically have feathery fronds (leaves) and no flowers' >";
                     break;
             }
         }
         foreach ($tmp[680] as $value) { //sunlight
             switch ($value['charstatename']) {
                 case "sun":
-                    $attribs["sunlight"] .= "<img src='../images/sunlight_icon1.png' alt='Sun' >";
+                    $attribs["sunlight"] .= "<img src='../images/sunlight_icon1.png' alt='Sun' class='tooltip' title='tolerates light conditions that are predominately full sun' >";
                     break;
                 case "part shade":
-                    $attribs["sunlight"] .= "<img src='../images/sunlight_icon3.png' alt='Part Shade' >";
+                    $attribs["sunlight"] .= "<img src='../images/sunlight_icon3.png' alt='Part Shade' class='tooltip' title='tolerates light conditions that are predominately partial shade' >";
                     break;
                 case "shade":
-                    $attribs["sunlight"] .= "<img src='../images/sunlight_icon4.png' alt='Shade' >";
+                    $attribs["sunlight"] .= "<img src='../images/sunlight_icon4.png' alt='Shade' class='tooltip' title='tolerates light conditions that are predominately full shade' >";
                     break;
             }
         }
         foreach ($tmp[683] as $value) { //moisture
             switch ($value['charstatename']) {
                 case "dry":
-                    $attribs["moisture"].= "<img src='../images/moisture_icon1.png' alt='Dry' >";
+                    $attribs["moisture"].= "<img src='../images/moisture_icon1.png' alt='Dry' class='tooltip' title='tolerating year-round soil moisture conditions that are predominately dry' >";
                     break;
                 case "moist":
-                    $attribs["moisture"].= "<img src='../images/moisture_icon3.png' alt='Moist' >";
+                    $attribs["moisture"].= "<img src='../images/moisture_icon3.png' alt='Moist' class='tooltip' title='tolerating year-round soil moisture conditions that are predominately moist' >";
                     break;
                 case "wet":
-                    $attribs["moisture"].= "<img src='../images/moisture_icon4.png' alt='Wet' >";
+                    $attribs["moisture"].= "<img src='../images/moisture_icon4.png' alt='Wet' class='tooltip' title='tolerating year-round soil moisture conditions that are predominately wet' >";
                     break;
             }
         }

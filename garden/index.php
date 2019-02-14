@@ -340,6 +340,7 @@ include($serverRoot."/header.php");
         //console.log('loaded');
         document.getElementById("resultCount").innerHTML = reccnt;
         $('body').removeClass('with-overlay');
+        $('.tooltip').tooltipster({theme: 'tooltipster-light'});
     }
 
     function getResultCnt(res){
@@ -709,10 +710,11 @@ include($serverRoot."/header.php");
                         foreach($lifeCycleArr as $opt => $optArr){
                             $cId = $optArr['cid'];
                             $csId = $optArr['cs'];
+                            $tooltip = $optArr['description'];
                             $optId = $cId.'--'.$csId;
                             $onchange = "processOption('".$optId."');";
                             echo '<input class="advSearchOptCheckBox" type="checkbox" onchange="'.$onchange.'" id="'.$optId.'">';
-                            echo '<div id="'.$optId.'Div" class="advSearchOptCheckBoxDiv unselectable">';
+                            echo '<div id="'.$optId.'Div" class="advSearchOptCheckBoxDiv unselectable tooltip" title="'.$tooltip.'">';
                             echo '<label id="'.$optId.'Label" class="advSearchOptCheckBoxLabel" for="'.$optId.'">'.$opt.'</label>';
                             echo '</div>';
                         }
@@ -728,9 +730,10 @@ include($serverRoot."/header.php");
                             $cId = $optArr['cid'];
                             $csId = $optArr['cs'];
                             $optId = $cId.'--'.$csId;
+                            $tooltip = $optArr['description'];
                             $onchange = "processOption('".$optId."');";
                             echo '<input class="advSearchOptCheckBox" type="checkbox" onchange="'.$onchange.'" id="'.$optId.'">';
-                            echo '<div id="'.$optId.'Div" class="advSearchOptCheckBoxDiv unselectable">';
+                            echo '<div id="'.$optId.'Div" class="advSearchOptCheckBoxDiv unselectable tooltip" title="'.$tooltip.'">';
                             echo '<label id="'.$optId.'Label" class="advSearchOptCheckBoxLabel" for="'.$optId.'">'.$opt.'</label>';
                             echo '</div>';
                         }
@@ -839,9 +842,10 @@ include($serverRoot."/header.php");
 					            $cId = $optArr['cid'];
 					            $csId = $optArr['cs'];
 					            $optId = $cId.'--'.$csId;
+                                $tooltip = $optArr['description'];
 					            $onchange = "processOption('".$optId."');";
 					            echo '<input class="advSearchOptCheckBox" type="checkbox" onchange="'.$onchange.'" id="'.$optId.'">';
-					            echo '<div id="'.$optId.'Div" class="advSearchOptCheckBoxDiv unselectable">';
+					            echo '<div id="'.$optId.'Div" class="advSearchOptCheckBoxDiv unselectable tooltip" title="'.$tooltip.'">';
 					            echo '<label id="'.$optId.'Label" class="advSearchOptCheckBoxLabel" for="'.$optId.'">'.$opt.'</label>';
 					            echo '</div>';
 				            }
@@ -861,9 +865,10 @@ include($serverRoot."/header.php");
 					            $cId = $optArr['cid'];
 					            $csId = $optArr['cs'];
 					            $optId = $cId.'--'.$csId;
+                                $tooltip = $optArr['description'];
 					            $onchange = "processOption('".$optId."');";
 					            echo '<input class="advSearchOptCheckBox" type="checkbox" onchange="'.$onchange.'" id="'.$optId.'">';
-					            echo '<div id="'.$optId.'Div" class="advSearchOptCheckBoxDiv unselectable">';
+					            echo '<div id="'.$optId.'Div" class="advSearchOptCheckBoxDiv unselectable tooltip" title="'.$tooltip.'">';
 					            echo '<label id="'.$optId.'Label" class="advSearchOptCheckBoxLabel" for="'.$optId.'">'.$opt.'</label>';
 					            echo '</div>';
 				            }
@@ -885,9 +890,10 @@ include($serverRoot."/header.php");
 				            $cId = $optArr['cid'];
 				            $csId = $optArr['cs'];
 				            $optId = $cId.'--'.$csId;
+                            $tooltip = $optArr['description'];
 				            $onchange = "processOption('".$optId."');";
 				            echo '<input class="advSearchOptCheckBox" type="checkbox" onchange="'.$onchange.'" id="'.$optId.'">';
-				            echo '<div id="'.$optId.'Div" class="advSearchOptCheckBoxDiv unselectable">';
+				            echo '<div id="'.$optId.'Div" class="advSearchOptCheckBoxDiv unselectable tooltip" title="'.$tooltip.'">';
 				            echo '<label id="'.$optId.'Label" class="advSearchOptCheckBoxLabel" for="'.$optId.'">'.$opt.'</label>';
 				            echo '</div>';
 			            }
@@ -909,9 +915,10 @@ include($serverRoot."/header.php");
                             $cId = $optArr['cid'];
                             $csId = $optArr['cs'];
                             $optId = $cId.'--'.$csId;
+                            $tooltip = $optArr['description'];
                             $onchange = "processOption('".$optId."');";
                             echo '<input class="advSearchOptCheckBox" type="checkbox" onchange="'.$onchange.'" id="'.$optId.'">';
-                            echo '<div id="'.$optId.'Div" class="advSearchOptCheckBoxDiv unselectable">';
+                            echo '<div id="'.$optId.'Div" class="advSearchOptCheckBoxDiv unselectable tooltip" title="'.$tooltip.'">';
                             echo '<label id="'.$optId.'Label" class="advSearchOptCheckBoxLabel" for="'.$optId.'">'.$opt.'</label>';
                             echo '</div>';
                         }
