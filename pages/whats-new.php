@@ -51,7 +51,7 @@ include( $serverRoot . "/header.php" );
     <ul>
         <li>Display: <strong><a target="_blank" href="https://www.linnmastergardeners.com/store/p1/Pollinator_Conference.html">BEEvent Pollinator Conference</a></strong>. 2 March 2019. 8a - 5p. Linn Co. Fair &amp; Expo Center, Albany, OR. Sponsored by Linn Co. Master Gardeners.</li>
         <li>Panel Discussion, Winter Forum 2019: <strong><a target="_blank" href="https://www.facebook.com/events/1015219372008927/">The Oak Creek Story</a></strong>. 5 March 2019. 7:00p. Corvallis Benton Co. Library, 645 NW Monroe, Corvallis, OR. Sponsored by Marys River Watershed Council.</li>
-        <li>Presentation: <strong>The OregonFlora website: a digital flora</strong> with Thea Jaster &amp; Linda Hardison. 11 March 2019. 7:30pm.&nbsp; Oregon State University, 2087 Cordley Hall, Corvallis OR. Sponsored by Corvallis Chapter of Native Plant Society of Oregon.</li>
+        <li>Presentation: <strong>The OregonFlora website: a digital flora</strong>. 11 March 2019. 7:30pm. Oregon State University, 2087 Cordley Hall, Corvallis OR. Sponsored by Corvallis Chapter of <a href="http://www.npsoregon.org/calendar.html" target="_blank" >Native Plant Society of Oregon</a>.</li>
         <li>Presentation: <strong>The New OregonFlora website</strong> 27 April 2019, 10:30a &amp; 28 April 2019, 12:00n. <a target="_blank" href="http://www.glidewildflowershow.org/">Glide Wildflower Show</a>, Community Center, Glide, OR.</li>
     </ul>
 </div> <!-- .inner-content -->

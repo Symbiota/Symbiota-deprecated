@@ -460,9 +460,8 @@ include($serverRoot."/header.php");
 </div>
 <div class="garden-content">
     <div class="garden-name-search-wrapper">
-        <h2 class="poptip"  title="tooltip here">Garden Native Plant Search <i class="fa fa-question-circle green"></i></h2>
+        <h2>Garden Native Plant Search <i class="fa fa-question-circle green"></i></h2>
         <span class="garden-feature-search-text">Select any combination of features within one or more categories. Results are immediately displayed below.</span>
-        <h2>Search by plant name</h2>
         <div class="garden-name-search-box">
             <div class="input-label">Scientific name</div>
             <div class="input-wrapper">
@@ -478,6 +477,7 @@ include($serverRoot."/header.php");
             </div>
         </div>
     </div>
+    <h2>Search by Plant Features</h2>
 </div>
 <div class="garden-content">
     <div class="basic-feature-search-wrapper">
