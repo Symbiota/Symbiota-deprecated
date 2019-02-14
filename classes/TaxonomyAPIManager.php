@@ -68,7 +68,7 @@ class TaxonomyAPIManager{
 
         $sql = 'SELECT DISTINCT v.VernacularName '.
             'FROM taxavernaculars AS v ';
-        $sql .= 'WHERE v.VernacularName LIKE "'.$this->cleanInStr($queryString).'%" ';
+        $sql .= 'WHERE v.VernacularName LIKE "%'.$this->cleanInStr($queryString).'%" ';
         if($this->limit){
             $sql .= 'LIMIT '.$this->limit.' ';
         }
