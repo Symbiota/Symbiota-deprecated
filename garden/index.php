@@ -41,6 +41,9 @@ $availabilityArr = $gsManager->getCharacterStateArr(209,true);
 <?php
 include($serverRoot."/header.php");
 ?>
+<script type="text/javascript" src="../js/tooltipster.bundle.min.js"></script>
+<link rel="stylesheet" type="text/css" href="../css/tooltipster.bundle.min.css" />
+<link href="../css/tooltipster-sideTip-light.min.css" type="text/css" rel="stylesheet" />
 <link rel="stylesheet" href="../css/jquery.bxslider.css">
 <script src="../js/jquery.bxslider.js"></script>
 <script src="../js/jquery.manifest.js" type="text/javascript"></script>
@@ -457,7 +460,7 @@ include($serverRoot."/header.php");
 </div>
 <div class="garden-content">
     <div class="garden-name-search-wrapper">
-        <h2>Garden Native Plant Search <i class="fa fa-question-circle green"></i></h2>
+        <h2 class="poptip"  title="tooltip here">Garden Native Plant Search <i class="fa fa-question-circle green"></i></h2>
         <span class="garden-feature-search-text">Select any combination of features within one or more categories. Results are immediately displayed below.</span>
         <h2>Search by plant name</h2>
         <div class="garden-name-search-box">
@@ -484,8 +487,8 @@ include($serverRoot."/header.php");
                     <div class="divTableHead">Plant Type</div>
                     <div class="divTableHead">Sunlight</div>
                     <div class="divTableHead">Moisture</div>
-                    <div class="divTableHead">Mature Size</div>
-                    <div class="divTableHead">Ease of Growth</div>
+                    <div class="divTableHead tooltip tooltip" title="the average size of the plant at maturity">Mature Size</div>
+                    <div class="divTableHead tooltip" title="the level of maintenance effort required under average horticultural conditions">Ease of Growth</div>
                 </div>
             </div>
             <div class="divTableBody">
@@ -497,7 +500,7 @@ include($serverRoot."/header.php");
                                     <div class="divTableCell">
                                         <input class="featureCheckBox" type="checkbox" onchange="processOption('137--3');" id="137--3">
                                         <div id="137--3Div" class="featureCheckBoxDiv">
-                                            <label id="137--3Label" class="featureCheckBoxLabel planttype1" for="137--3">Tree</label>
+                                            <label id="137--3Label" class="featureCheckBoxLabel planttype1 tooltip" for="137--3" title="large woody plants with typically one main stem (trunk)">Tree</label>
                                         </div>
                                     </div>
                                 </div>
@@ -505,7 +508,7 @@ include($serverRoot."/header.php");
                                     <div class="divTableCell">
                                         <input class="featureCheckBox" type="checkbox" onchange="processOption('137--2');" id="137--2">
                                         <div id="137--2Div" class="featureCheckBoxDiv">
-                                            <label id="137--2Label" class="featureCheckBoxLabel planttype2" for="137--2">Shrub</label>
+                                            <label id="137--2Label" class="featureCheckBoxLabel planttype2 tooltip" for="137--2" title="woody plants, multi-stemmed, typically less than 10’ tall">Shrub</label>
                                         </div>
                                     </div>
                                 </div>
@@ -513,7 +516,7 @@ include($serverRoot."/header.php");
                                     <div class="divTableCell">
                                         <input class="featureCheckBox" type="checkbox" onchange="processOption('137--6');" id="137--6">
                                         <div id="137--6Div" class="featureCheckBoxDiv">
-                                            <label id="137--6Label" class="featureCheckBoxLabel planttype3" for="137--6">Vine</label>
+                                            <label id="137--6Label" class="featureCheckBoxLabel planttype3 tooltip" for="137--6" title="climbing or trailing plants with long flexible stems, often supported by tendrils">Vine</label>
                                         </div>
                                     </div>
                                 </div>
@@ -521,7 +524,7 @@ include($serverRoot."/header.php");
                                     <div class="divTableCell">
                                         <input class="featureCheckBox" type="checkbox" onchange="processOption('137--1');" id="137--1">
                                         <div id="137--1Div" class="featureCheckBoxDiv">
-                                            <label id="137--1Label" class="featureCheckBoxLabel planttype4" for="137--1">Herb</label>
+                                            <label id="137--1Label" class="featureCheckBoxLabel planttype4 tooltip" for="137--1" title="flowering plants (annual, biennial, or perennial) with non-woody stems">Herb</label>
                                         </div>
                                     </div>
                                 </div>
@@ -529,7 +532,7 @@ include($serverRoot."/header.php");
                                     <div class="divTableCell">
                                         <input class="featureCheckBox" type="checkbox" onchange="processOption('137--4');" id="137--4">
                                         <div id="137--4Div" class="featureCheckBoxDiv">
-                                            <label id="137--4Label" class="featureCheckBoxLabel planttype5" for="137--4">Grass or grass-like</label>
+                                            <label id="137--4Label" class="featureCheckBoxLabel planttype5 tooltip" for="137--4" title="plants typically with non-showy, wind-pollinated flowers; includes sedges, rushes, and some other monocots">Grass or grass-like</label>
                                         </div>
                                     </div>
                                 </div>
@@ -537,7 +540,7 @@ include($serverRoot."/header.php");
                                     <div class="divTableCell">
                                         <input class="featureCheckBox" type="checkbox" onchange="processOption('137--5');" id="137--5">
                                         <div id="137--5Div" class="featureCheckBoxDiv">
-                                            <label id="137--5Label" class="featureCheckBoxLabel planttype6" for="137--5">Fern or fern ally</label>
+                                            <label id="137--5Label" class="featureCheckBoxLabel planttype6 tooltip" for="137--5" title="plant that typically have feathery fronds (leaves) and no flowers">Fern or fern ally</label>
                                         </div>
                                     </div>
                                 </div>
@@ -551,7 +554,7 @@ include($serverRoot."/header.php");
                                     <div class="divTableCell">
                                         <input class="featureCheckBox" type="checkbox" onchange="processOption('680--1');" id="680--1">
                                         <div id="680--1Div" class="featureCheckBoxDiv">
-                                            <label id="680--1Label" class="featureCheckBoxLabel sunlight1" for="680--1">Sun</label>
+                                            <label id="680--1Label" class="featureCheckBoxLabel sunlight1 tooltip" for="680--1" title="tolerates light conditions that are predominately full sun">Sun</label>
                                         </div>
                                     </div>
                                 </div>
@@ -559,7 +562,7 @@ include($serverRoot."/header.php");
                                     <div class="divTableCell">
                                         <input class="featureCheckBox" type="checkbox" onchange="processOption('680--2');" id="680--2">
                                         <div id="680--2Div" class="featureCheckBoxDiv">
-                                            <label id="680--2Label" class="featureCheckBoxLabel sunlight3" for="680--2">Part shade</label>
+                                            <label id="680--2Label" class="featureCheckBoxLabel sunlight3 tooltip" for="680--2" title="tolerates light conditions that are predominately partial shade">Part shade</label>
                                         </div>
                                     </div>
                                 </div>
@@ -567,7 +570,7 @@ include($serverRoot."/header.php");
                                     <div class="divTableCell">
                                         <input class="featureCheckBox" type="checkbox" onchange="processOption('680--3');" id="680--3">
                                         <div id="680--3Div" class="featureCheckBoxDiv">
-                                            <label id="680--3Label" class="featureCheckBoxLabel sunlight4" for="680--3">Shade</label>
+                                            <label id="680--3Label" class="featureCheckBoxLabel sunlight4 tooltip" for="680--3" title="tolerates light conditions that are predominately full shade">Shade</label>
                                         </div>
                                     </div>
                                 </div>
@@ -581,7 +584,7 @@ include($serverRoot."/header.php");
                                     <div class="divTableCell">
                                         <input class="featureCheckBox" type="checkbox" onchange="processOption('683--1');" id="683--1">
                                         <div id="683--1Div" class="featureCheckBoxDiv">
-                                            <label id="683--1Label" class="featureCheckBoxLabel moisture1" for="683--1">Dry</label>
+                                            <label id="683--1Label" class="featureCheckBoxLabel moisture1 tooltip" for="683--1" title="tolerating year-round soil moisture conditions that are predominately dry">Dry</label>
                                         </div>
                                     </div>
                                 </div>
@@ -589,7 +592,7 @@ include($serverRoot."/header.php");
                                     <div class="divTableCell">
                                         <input class="featureCheckBox" type="checkbox" onchange="processOption('683--2');" id="683--2">
                                         <div id="683--2Div" class="featureCheckBoxDiv">
-                                            <label id="683--2Label" class="featureCheckBoxLabel moisture3" for="683--2">Moist</label>
+                                            <label id="683--2Label" class="featureCheckBoxLabel moisture3 tooltip" for="683--2" title="tolerating year-round soil moisture conditions that are predominately moist">Moist</label>
                                         </div>
                                     </div>
                                 </div>
@@ -597,7 +600,7 @@ include($serverRoot."/header.php");
                                     <div class="divTableCell">
                                         <input class="featureCheckBox" type="checkbox" onchange="processOption('683--3');" id="683--3">
                                         <div id="683--3Div" class="featureCheckBoxDiv">
-                                            <label id="683--3Label" class="featureCheckBoxLabel moisture4" for="683--3">Wet</label>
+                                            <label id="683--3Label" class="featureCheckBoxLabel moisture4 tooltip" for="683--3" title="tolerating year-round soil moisture conditions that are predominately wet">Wet</label>
                                         </div>
                                     </div>
                                 </div>
@@ -608,7 +611,7 @@ include($serverRoot."/header.php");
                         <div class="divTable sizeCol">
                             <div class="divTableBody">
                                 <div class="divTableRow">
-                                    <div class="divTableCell unselectable">
+                                    <div class="divTableCell unselectable tooltip" title="the average size of the plant at maturity">
                                         <div class="feature-slider-range">
                                             <div class="feature-slider-low-value">Any</div>
                                             <div class="feature-slider-high-value">50+</div>
@@ -630,7 +633,7 @@ include($serverRoot."/header.php");
                                     </div>
                                 </div>
                                 <div class="divTableRow">
-                                    <div class="divTableCell unselectable">
+                                    <div class="divTableCell unselectable tooltip" title="the average size of the plant at maturity">
                                         <div class="feature-slider-range">
                                             <div class="feature-slider-low-value">Any</div>
                                             <div class="feature-slider-high-value">15</div>
@@ -654,7 +657,7 @@ include($serverRoot."/header.php");
                             </div>
                         </div>
                     </div>
-                    <div class="divTableCell">
+                    <div class="divTableCell tooltip" title="the level of maintenance effort required under average horticultural conditions">
                         <div class="divTable growthCol">
                             <div class="divTableBody">
                                 <div class="divTableRow">
@@ -737,7 +740,7 @@ include($serverRoot."/header.php");
                 }
                 if($flowerColorArr){
                     ?>
-                    <div class="advSearchOptionWrapper">
+                    <div class="advSearchOptionWrapper tooltip" title="refers to petals or petal-like bracts ">
                         <div class="advSearchOptionHeader">
                             Flower color
                             <hr />
@@ -788,27 +791,27 @@ include($serverRoot."/header.php");
                     <input class="advSearchOptCheckBox" type="checkbox" onchange="processOption('685--2');" id="685--2">
                     <div id="685--2Div" class="advSearchOptCheckBoxDiv unselectable with-icons">
                         <div class="wildlifeOptIconDiv wildlife2"></div>
-                        <label id="685--2Label" class="advSearchOptCheckBoxLabel" for="685--2">Pollinators</label>
+                        <label id="685--2Label" class="advSearchOptCheckBoxLabel tooltip" for="685--2" title="provides a significant source of nectar or pollen for native bees, honeybees, and other pollinators">Pollinators</label>
                     </div>
                     <input class="advSearchOptCheckBox" type="checkbox" onchange="processOption('685--1');" id="685--1">
                     <div id="685--1Div" class="advSearchOptCheckBoxDiv unselectable with-icons">
                         <div class="wildlifeOptIconDiv wildlife4"></div>
-                        <label id="685--1Label" class="advSearchOptCheckBoxLabel" for="685--1">Butterfly nectar source</label>
+                        <label id="685--1Label" class="advSearchOptCheckBoxLabel tooltip" for="685--1" title="provides nectar for adult butterflies">Butterfly nectar source</label>
                     </div>
                     <input class="advSearchOptCheckBox" type="checkbox" onchange="processOption('685--6');" id="685--6">
                     <div id="685--6Div" class="advSearchOptCheckBoxDiv unselectable with-icons">
                         <div class="wildlifeOptIconDiv wildlife1"></div>
-                        <label id="685--6Label" class="advSearchOptCheckBoxLabel" for="685--6">Hummingbirds</label>
+                        <label id="685--6Label" class="advSearchOptCheckBoxLabel tooltip" for="685--6" title="provides a significant food source for hummingbirds">Hummingbirds</label>
                     </div>
                     <input class="advSearchOptCheckBox" type="checkbox" onchange="processOption('685--3');" id="685--3">
                     <div id="685--3Div" class="advSearchOptCheckBoxDiv unselectable with-icons">
                         <div class="wildlifeOptIconDiv wildlife5"></div>
-                        <label id="685--3Label" class="advSearchOptCheckBoxLabel" for="685--3">Pest-eating insects</label>
+                        <label id="685--3Label" class="advSearchOptCheckBoxLabel tooltip" for="685--3" title="provides a food source or habitat for predatory insects (those which eat large numbers of other insects) or parasitoids (those that live in or on a host insect, thereby killing it)">Pest-eating insects</label>
                     </div>
                     <input class="advSearchOptCheckBox" type="checkbox" onchange="processOption('685--5');" id="685--5">
                     <div id="685--5Div" class="advSearchOptCheckBoxDiv unselectable with-icons">
                         <div class="wildlifeOptIconDiv wildlife3"></div>
-                        <label id="685--5Label" class="advSearchOptCheckBoxLabel" for="685--5">Butterfly larval host</label>
+                        <label id="685--5Label" class="advSearchOptCheckBoxLabel tooltip" for="685--5" title="a food source for the caterpillar stage of butterflies">Butterfly larval host</label>
                     </div>
                 </div>
             </div>
@@ -1099,6 +1102,10 @@ include($serverRoot."/header.php");
 <?php
 include($serverRoot."/footer.php");
 ?>
-
+<script>
+    $('.tooltip').tooltipster({
+        theme: 'tooltipster-light'
+    });
+</script>
 </body>
 </html>
