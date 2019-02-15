@@ -1,12 +1,12 @@
 <?php
-include_once($SERVER_ROOT.'/classes/ChecklistVoucherAdmin.php');
+include_once($SERVER_ROOT.'/classes/ChecklistVoucherReport.php');
 include_once($SERVER_ROOT.'/classes/DwcArchiverCore.php');
 require_once($SERVER_ROOT.'/vendor/autoload.php');
 
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
-class ChecklistVoucherPensoft extends ChecklistVoucherAdmin {
+class ChecklistVoucherPensoft extends ChecklistVoucherReport {
 
 	function __construct() {
 		parent::__construct();

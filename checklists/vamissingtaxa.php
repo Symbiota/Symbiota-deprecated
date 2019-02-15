@@ -1,6 +1,6 @@
 <?php
 include_once('../config/symbini.php');
-include_once($SERVER_ROOT.'/classes/ChecklistVoucherAdmin.php');
+include_once($SERVER_ROOT.'/classes/ChecklistVoucherReport.php');
 
 $action = array_key_exists("submitaction",$_REQUEST)?$_REQUEST["submitaction"]:"";
 $clid = array_key_exists("clid",$_REQUEST)?$_REQUEST["clid"]:0;
@@ -8,7 +8,7 @@ $pid = array_key_exists("pid",$_REQUEST)?$_REQUEST["pid"]:"";
 $displayMode = (array_key_exists('displaymode',$_REQUEST)?$_REQUEST['displaymode']:0);
 $startIndex = array_key_exists("start",$_REQUEST)?$_REQUEST["start"]:0;
 
-$vManager = new ChecklistVoucherAdmin();
+$vManager = new ChecklistVoucherReport();
 $vManager->setClid($clid);
 $vManager->setCollectionVariables();
 

@@ -18,7 +18,7 @@ if($rType == 'pensoftxlsx'){
 	$vManager->downloadPensoftXlsx();
 }
 else{
-	$vManager = new ChecklistVoucherAdmin();
+	$vManager = new ChecklistVoucherReport();
 	$vManager->setClid($clid);
 	$vManager->setCollectionVariables();
 	if($rType == 'fullcsv'){

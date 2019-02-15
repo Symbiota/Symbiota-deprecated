@@ -200,7 +200,7 @@ $occurArr = $collManager->getSpecimenMap($pageNumber,$cntPerPage);
 						$targetClid = $collManager->getSearchTerm("targetclid");
 						if($collManager->getClName() && $targetTid && array_key_exists('mode', $_REQUEST)){
 							echo '<div style="float:right;" >';
-							echo '<a href="#" onclick="addVoucherToCl('.$occid.','.$targetClid.','.$targetTid.')" title="'.$LANG['VOUCHER_LINK_TITLE'].' '.$collManager->getClName().';return false;">';
+							echo '<a href="#" onclick="addVoucherToCl('.$occid.','.$targetClid.','.$targetTid.');return false" title="'.$LANG['VOUCHER_LINK_TITLE'].' '.$collManager->getClName().';">';
 							echo '<img src="../images/voucheradd.png" style="border:solid 1px gray;height:13px;margin-right:5px;" /></a></div>';
 						}
 						if(isset($fieldArr['img'])){

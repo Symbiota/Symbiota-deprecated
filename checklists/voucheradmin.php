@@ -1,6 +1,6 @@
 <?php
 include_once('../config/symbini.php');
-include_once($SERVER_ROOT.'/classes/ChecklistVoucherAdmin.php');
+include_once($SERVER_ROOT.'/classes/ChecklistVoucherReport.php');
 include_once($SERVER_ROOT.'/content/lang/checklists/voucheradmin.'.$LANG_TAG.'.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 if(!$SYMB_UID) header('Location: ../profile/index.php?refurl=../checklists/voucheradmin.php?'.$_SERVER['QUERY_STRING']);
@@ -13,7 +13,7 @@ $action = array_key_exists("submitaction",$_REQUEST)?$_REQUEST["submitaction"]:"
 
 $displayMode = (array_key_exists('displaymode',$_REQUEST)?$_REQUEST['displaymode']:0);
 
-$clManager = new ChecklistVoucherAdmin();
+$clManager = new ChecklistVoucherReport();
 $clManager->setClid($clid);
 
 $statusStr = "";
@@ -59,6 +59,8 @@ $clManager->setCollectionVariables();
 </head>
 <body>
 <?php
+//$HEADER_URL = '';
+//if(isset($clArray['headerurl']) && $clArray['headerurl']) $HEADER_URL = $CLIENT_ROOT.$clArray['headerurl'];
 $displayLeftMenu = false;
 include($SERVER_ROOT.'/header.php');
 ?>
@@ -305,7 +307,7 @@ if($clid && $isEditor){
 										<input name="tabindex" value="0" type="hidden" />
 										<input name="clid" value="<?php echo $clid; ?>" type="hidden" />
 										<input name="pid" value="<?php echo $pid; ?>" type="hidden" />
-										<input name="displaymode" value="1" type="hidden" />
+										<input name="displaymode" value="<?php echo $displayMode; ?>" type="hidden" />
 										<input name="usecurrent" value="1" type="checkbox" checked /><?php echo $LANG['ADDNAMECURRTAX'];?><br/>
 										<input name="submitaction" value="Add Vouchers" type="submit" />
 									</form>
