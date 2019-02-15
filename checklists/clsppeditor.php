@@ -127,7 +127,7 @@ $clArray = $vManager->getChecklistData();
 	</head>
 	<body onload="<?php  if(!$status) echo $followUpAction; ?>" >
 		<!-- This is inner text! -->
-		<div id='innertext'>
+		<div id='popup-innertext'>
 			<h1>
 				<?php echo "<i>".$vManager->getTaxonName()."</i> of ".$vManager->getClName();?>
 			</h1>
@@ -143,7 +143,7 @@ $clArray = $vManager->getChecklistData();
 			}
 			if($isEditor){
 				?>
-				<div id="tabs" style="margin:10px;width:90%;">
+				<div id="tabs" style="margin:10px;">
 				    <ul>
 						<li><a href="#gendiv">General Editing</a></li>
 						<li><a href="#voucherdiv">Voucher Admin</a></li>
@@ -253,7 +253,7 @@ $clArray = $vManager->getChecklistData();
 						if($occurrenceModIsActive){
 							?>
 							<div style="float:right;margin-top:10px;">
-								<a href="../collections/list.php?db=all&thes=1&reset=1&taxa=<?php echo $vManager->getTaxonName()."&targetclid=".$vManager->getClid()."&targettid=".$tid;?>">
+								<a href="../collections/list.php?mode=voucher&db=all&thes=1&reset=1&taxa=<?php echo $vManager->getTaxonName()."&targetclid=".$vManager->getClid()."&targettid=".$tid;?>">
 									<img src="../images/link.png"  style="border:0px;" />
 								</a>
 							</div>
