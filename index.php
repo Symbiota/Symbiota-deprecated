@@ -15,6 +15,8 @@ header("Content-Type: text/html; charset=".$charset);
 	</script>
 </head>
 <body>
+<div id="fb-root"></div>
+<script async defer src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&autoLogAppEvents=1&version=v3.2&appId=101991959877943"></script>
 <?php
 include($serverRoot."/header.php");
 ?>
@@ -113,7 +115,7 @@ $(document).ready(function () {
             <div class="video-wrapper">
                 <iframe id="kaltura_player" src="https://cdnapisec.kaltura.com/p/391241/sp/39124100/embedIframeJs/uiconf_id/28342472/partner_id/391241?iframeembed=true&playerId=kaltura_player&entry_id=0_0lr3qeva&flashvars[localizationCode]=en&amp;flashvars[leadWithHTML5]=true&amp;flashvars[sideBarContainer.plugin]=true&amp;flashvars[sideBarContainer.position]=left&amp;flashvars[sideBarContainer.clickToClose]=true&amp;flashvars[chapters.plugin]=true&amp;flashvars[chapters.layout]=vertical&amp;flashvars[chapters.thumbnailRotator]=false&amp;flashvars[streamSelector.plugin]=true&amp;flashvars[EmbedPlayer.SpinnerTarget]=videoHolder&amp;flashvars[dualScreen.plugin]=true&amp;&wid=0_46rd6whd" width="554" height="366" allowfullscreen webkitallowfullscreen mozAllowFullScreen allow="autoplay *; fullscreen *; encrypted-media *" frameborder="0" title="Kaltura Player"></iframe>
             </div>
-            <a href="/tips.php" class="btn purple-btn full-width-btn">Tips for using this site</a>
+            <a href="pages/tips.php" class="btn purple-btn full-width-btn">Tips for using this site</a>
         </div>
     </div>
 </div>
@@ -146,7 +148,7 @@ $(document).ready(function () {
                 <li>11 March 2019, 7:30p. Presentation: The OregonFlora website: a digital flora. Oregon State University, 2087 Cordley Hall, Corvallis OR. Sponsored by Corvallis Chapter of Native Plant Society of Oregon.</li>
                 <li>27-28 April 2019, 9a – 5p. Presentations daily.  Glide Wildflower Show, Community Center, Glide, OR.</li>
             </ul>
-            <iframe src="https://www.facebook.com/plugins/like.php?href=https%3A%2F%2Ffacebook.com%2Fdocs%2FOregonFlora&width=0&layout=button_count&action=like&size=large&show_faces=false&share=true&height=46&appId=101991959877943" width="0" height="46" style="border:none;overflow:hidden" scrolling="no" frameborder="0" allowTransparency="true" allow="encrypted-media"></iframe>
+            <div class="fb-like" data-href="https://www.facebook.com/OregonFlora" data-layout="standard" data-action="like" data-size="large" data-show-faces="false" data-share="true"></div>
         </div>
     </div>
 </div>

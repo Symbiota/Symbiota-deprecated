@@ -319,6 +319,23 @@ img.image-right {
 	margin: 0 auto;
 	padding: 0 20px;
 }
+/* donate page */
+.donate-wrapper {
+	overflow: hidden;
+}
+.donate-wrapper .col1 {
+	width: 60%;
+	float: left;
+	padding-right: 30px;
+}
+.donate-wrapper .col2 {
+	width: 40%;
+	float: left;
+}
+
+
+/* end donate page */
+
 /* responsive videos */
 .video-wrapper {
 	position:relative;
@@ -2099,6 +2116,15 @@ a:hover {
 	.footer-right {
 		width: 100%;
 	}
+
+    .donate-wrapper .col1 {
+        width: 100%;
+        float: none;
+        padding-right: 0;
+    }
+    .donate-wrapper .col2 {
+        display: none;
+    }
 }
 
 
