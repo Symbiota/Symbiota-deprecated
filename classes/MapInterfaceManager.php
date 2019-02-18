@@ -660,12 +660,20 @@ class MapInterfaceManager{
 			$country = $this->conn->real_escape_string($_REQUEST["country"]);
 			if($country){
 				$str = str_replace(",",";",$country);
-				if(stripos($str, "USA") !== false && stripos($str, "United States") === false){
-					$str .= ";United States";
-				}
-				elseif(stripos($str, "United States") !== false && stripos($str, "USA") === false){
-					$str .= ";USA";
-				}
+				if(stripos($str, "USA") !== false || stripos($str, "United States") !== false || stripos($str, "U.S.A.") !== false || stripos($str, "United States of America") !== false){
+                    if(stripos($str, "USA") === false){
+                        $str .= ";USA";
+                    }
+                    if(stripos($str, "United States") === false){
+                        $str .= ";United States";
+                    }
+                    if(stripos($str, "U.S.A.") === false){
+                        $str .= ";U.S.A.";
+                    }
+                    if(stripos($str, "United States of America") === false){
+                        $str .= ";United States of America";
+                    }
+                }
 				$this->searchTermsArr["country"] = $str;
 			}
         }
