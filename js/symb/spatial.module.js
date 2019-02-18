@@ -1874,6 +1874,20 @@ function getTextParams(){
     var hasgenetic = document.getElementById("hasgenetic").checked;
 
     if(countryval){
+        if(countryval.indexOf('USA') !== -1 || countryval.indexOf('United States') !== -1 || countryval.indexOf('U.S.A.') !== -1 || countryval.indexOf('United States of America') !== -1){
+            if(countryval.indexOf('USA') === -1){
+                countryval += ',USA';
+            }
+            if(countryval.indexOf('United States') === -1){
+                countryval += ',United States';
+            }
+            if(countryval.indexOf('U.S.A.') === -1){
+                countryval += ',U.S.A.';
+            }
+            if(countryval.indexOf('United States of America') === -1){
+                countryval += ',United States of America';
+            }
+        }
         var countryvals = countryval.split(',');
         var countryCqlString = '';
         var countrySolrqString = '';
