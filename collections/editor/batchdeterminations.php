@@ -2,6 +2,7 @@
 include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/OccurrenceEditorManager.php');
 include_once($SERVER_ROOT.'/classes/SOLRManager.php');
+include_once($SERVER_ROOT.'/content/lang/collections/editor/batchdeterminations.'.$LANG_TAG.'.php');
 header("Content-Type: text/html; charset=".$charset);
 
 if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../collections/editor/batchdeterminations.php?'.$_SERVER['QUERY_STRING']);
@@ -58,6 +59,7 @@ if($isEditor){
 	<head>
 	    <meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset;?>">
 		<title><?php echo $defaultTitle; ?> Batch Determinations/Nomenclatural Adjustments</title>
+		<link href="../../css/bootstrap.min.css" type="text/css" rel="stylesheet"/>
 		<link href="../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	    <link href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 		<link href="../../css/jquery-ui.css" type="text/css" rel="Stylesheet" />
@@ -72,9 +74,9 @@ if($isEditor){
 					active: <?php echo (is_numeric($tabTarget)?$tabTarget:'0'); ?>
 				});
 			});
-			
+
 			var catalogNumbers = <?php echo ($jsonCatArr?$jsonCatArr:'[]'); ?>;
-			
+
 			function adjustAccTab(){
 				if(catalogNumbers.length > 0){
 					document.getElementById("accrecordlistdviv").style.display = "block";
@@ -83,7 +85,7 @@ if($isEditor){
 					document.getElementById("accrecordlistdviv").style.display = "none";
 				}
 			}
-			
+
 			function clearAccForm(){
 				if(confirm("Clearing the form will clear the form and restart the process. Are you sure you want to do this?") == true){
 					catalogNumbers.length = 0;
@@ -93,7 +95,7 @@ if($isEditor){
 					document.getElementById("accselectall").checked = false;
 				}
 			}
-			
+
 			function clearNomForm(){
 				if(confirm("Clearing the form will clear the form and restart the process. Are you sure you want to do this?") == true){
 					document.getElementById("nomrecordlistdviv").style.display = "none";
@@ -102,18 +104,18 @@ if($isEditor){
 					document.getElementById("nomselectall").checked = false;
 				}
 			}
-			
+
 			function submitAccForm(f){
 				var continueSubmit = true;
 				var catNum = document.getElementById("fcatalognumber").value;
 				if(catalogNumbers.length < 401){
 					if(continueSubmit && $( "#fcatalognumber" ).val() != ""){
 						if(catalogNumbers.indexOf(catNum) < 0){
-							//Add new occurrence 
+							//Add new occurrence
 							$.ajax({
 								type: "POST",
 								url: "rpc/getnewdetspeclist.php",
-								data: { 
+								data: {
 									catalognumber: $( "#fcatalognumber" ).val(),
 									collid: $( "#fcollid" ).val()
 								}
@@ -140,22 +142,22 @@ if($isEditor){
 				else{
 					alert("You cannot add more than 400 occurrences to the list.");
 				}
-				
+
 				$( "#fcatalognumber" ).focus();
 				return false;
 			}
-			
+
 			function submitNomForm(f){
 				document.getElementById("nomrecordsubmit").disabled = true;
 				document.getElementById("workingcircle").style.display = "inline";
 				var continueSubmit = true;
 				var sciName = document.getElementById("nomsciname").value;
 				if(continueSubmit && $( "#nomsciname" ).val() != ""){
-					//Add new occurrence 
+					//Add new occurrence
 					$.ajax({
 						type: "POST",
 						url: "rpc/getnewdetspeclist.php",
-						data: { 
+						data: {
 							sciname: $( "#nomsciname" ).val(),
 							collid: $( "#nomcollid" ).val()
 						}
@@ -173,13 +175,13 @@ if($isEditor){
 						}
 					});
 				}
-				
+
 				$( "#nomsciname" ).focus();
 				document.getElementById("workingcircle").style.display = "none";
 				document.getElementById("nomrecordsubmit").disabled = false;
 				return false;
 			}
-			
+
 			function selectAll(cb){
 				boxesChecked = true;
 				if(!cb.checked){
@@ -222,19 +224,19 @@ if($isEditor){
 				if (newWindow.opener == null) newWindow.opener = self;
 				return false;
 			}
-			
+
 			function initNomAdjAutocomplete(f){
-				$( f.sciname ).autocomplete({ 
-					source: "rpc/getspeciessuggest.php", 
+				$( f.sciname ).autocomplete({
+					source: "rpc/getspeciessuggest.php",
 					minLength: 3,
 					change: function(event, ui) {
 					}
 				});
 			}
-			
+
 			function initDetAutocomplete(f){
-				$( f.sciname ).autocomplete({ 
-					source: "rpc/getspeciessuggest.php", 
+				$( f.sciname ).autocomplete({
+					source: "rpc/getspeciessuggest.php",
 					minLength: 3,
 					change: function(event, ui) {
 						if(f.sciname.value){
@@ -245,11 +247,11 @@ if($isEditor){
 							f.scientificnameauthorship.value = "";
 							f.family.value = "";
 							f.tidtoadd.value = "";
-						}				
+						}
 					}
 				});
 			}
-			
+
 			function verifyDetSciName(f){
 				$.ajax({
 					type: "POST",
@@ -270,7 +272,7 @@ if($isEditor){
 					}
 				});
 			}
-			
+
 			function verifyCatDet(f){
 				if(f.sciname.value == ""){
 					alert("Scientific Name field must have a value");
@@ -284,17 +286,17 @@ if($isEditor){
 					alert("Determination Date field must have a value (enter 'unknown' if not defined)");
 					return false;
 				}
-				//If sciname was changed and submit was clicked immediately afterward, wait 5 seconds so that name can be verified 
+				//If sciname was changed and submit was clicked immediately afterward, wait 5 seconds so that name can be verified
 				if(pauseSubmit){
 					var date = new Date();
 					var curDate = null;
-					do{ 
-						curDate = new Date(); 
+					do{
+						curDate = new Date();
 					}while(curDate - date < 5000 && pauseSubmit);
 				}
 				return true;
 			}
-			
+
 			function verifyNomDet(f){
 				var firstTaxon = document.getElementById("nomsciname").value;
 				if(f.sciname.value == ""){
@@ -309,8 +311,8 @@ if($isEditor){
 				if(pauseSubmit){
 					var date = new Date();
 					var curDate = null;
-					do{ 
-						curDate = new Date(); 
+					do{
+						curDate = new Date();
 					}while(curDate - date < 5000 && pauseSubmit);
 				}
 				return true;
@@ -323,7 +325,7 @@ if($isEditor){
 	include($serverRoot."/header.php");
 	?>
 	<div class='navpath'>
-		<a href='../../index.php'>Home</a> &gt;&gt; 
+		<a href='../../index.php'>Home</a> &gt;&gt;
 		<?php
 		if(isset($collections_batchdeterminationsMenuCrumbs)){
 			echo $collections_batchdeterminationsMenuCrumbs;
@@ -336,29 +338,29 @@ if($isEditor){
 	</div>
 	<!-- This is inner text! -->
 	<div id="innertext">
-		<?php 
+		<?php
 		if($isEditor){
 			echo '<h2>'.$occManager->getCollName().'</h2>';
 			?>
 			<div id="tabs" style="margin:0px;">
 				<ul>
-					<li><a href="#batchdet">Batch Determinations</a></li>
-					<li><a href="#nomadjust">Nomenclatural Adjustments</a></li>
+					<li><a href="#batchdet"><?php echo $LANG['BATCH_DETER'];?></a></li>
+					<li><a href="#nomadjust"><?php echo $LANG['NOMEN_ADJ'];?></a></li>
 				</ul>
-				
+
 				<div id="batchdet">
 					<form name="accqueryform" action="batchdeterminations.php" method="post" onsubmit="return submitAccForm(this);">
 						<fieldset>
-							<legend><b>Define Specimen Recordset</b></legend>
+							<legend><b><?php echo $LANG['DEFINE_SPEC'];?></b></legend>
 							<div style="margin:3px;">
 								<div style="clear:both;padding:8px 0px 0px 0px;">
-									* Specimen list is limited to 400 records
+									<?php echo $LANG['SPEC_LIST'];?>
 								</div>
 								<div style="clear:both;padding:15px 0px 0px 20px;">
 									<div style="float:right;">
-										<button name="clearaccform"  type="button" style="margin-right:40px" onclick='clearAccForm();' >Clear Form</button>
+										<button name="clearaccform"  type="button" style="margin-right:40px" onclick='clearAccForm();' ><?php echo $LANG['CLEAR_FORM'];?></button>
 									</div>
-									<b>Catalog Number:</b>
+									<b><?php echo $LANG['CAT_NUMBER'];?></b>
 									<input id="fcatalognumber" name="catalognumber" type="text" style="border-color:green;" />
 									<input id="fcollid" name="collid" type="hidden" value="<?php echo $collid; ?>" />
 									<input name="recordsubmit" type="submit" value="Add Record" />
@@ -391,17 +393,17 @@ if($isEditor){
 										<input type="text" name="identificationqualifier" title="e.g. cf, aff, etc" />
 									</div>
 									<div style='margin:3px;'>
-										<b>Scientific Name:</b> 
+										<b>Scientific Name:</b>
 										<input type="text" id="dafsciname" name="sciname" style="background-color:lightyellow;width:350px;" onfocus="initDetAutocomplete(this.form)" />
 										<input type="hidden" id="daftidtoadd" name="tidtoadd" value="" />
 										<input type="hidden" name="family" value="" />
 									</div>
 									<div style='margin:3px;'>
-										<b>Author:</b> 
+										<b>Author:</b>
 										<input type="text" name="scientificnameauthorship" style="width:200px;" />
 									</div>
 									<div style='margin:3px;'>
-										<b>Confidence of Determination:</b> 
+										<b>Confidence of Determination:</b>
 										<select name="confidenceranking">
 											<option value="8">High</option>
 											<option value="5" selected>Medium</option>
@@ -409,19 +411,19 @@ if($isEditor){
 										</select>
 									</div>
 									<div style='margin:3px;'>
-										<b>Determiner:</b> 
+										<b>Determiner:</b>
 										<input type="text" name="identifiedby" id="identifiedby" style="background-color:lightyellow;width:200px;" />
 									</div>
 									<div style='margin:3px;'>
-										<b>Date:</b> 
+										<b>Date:</b>
 										<input type="text" name="dateidentified" id="dateidentified" style="background-color:lightyellow;" onchange="detDateChanged(this.form);" />
 									</div>
 									<div style='margin:3px;'>
-										<b>Reference:</b> 
+										<b>Reference:</b>
 										<input type="text" name="identificationreferences" style="width:350px;" />
 									</div>
 									<div style='margin:3px;'>
-										<b>Notes:</b> 
+										<b>Notes:</b>
 										<input type="text" name="identificationremarks" style="width:350px;" />
 									</div>
 									<div style='margin:3px;'>
@@ -430,7 +432,7 @@ if($isEditor){
 									<div style='margin:3px;'>
 										<input type="checkbox" name="printqueue" value="1" /> Add to Annotation Queue
 									</div>
-									<?php 
+									<?php
 									global $fpEnabled;
 									if($fpEnabled){
 										echo '<div style="float:left;margin-left:30px;">';
@@ -450,21 +452,21 @@ if($isEditor){
 						</form>
 					</div>
 				</div>
-				
+
 				<div id="nomadjust">
 					<form name="nomqueryform" action="batchdeterminations.php" method="post" onsubmit="return submitNomForm(this);">
 						<fieldset>
-							<legend><b>Taxon To Be Adjusted</b></legend>
+							<legend><b><?php echo $LANG['TAX_ADJ'];?></b></legend>
 							<div style="margin:3px;">
 								<div style="clear:both;padding:8px 0px 0px 0px;">
-									* Specimen list is limited to 400 records
+									<?php echo $LANG['SPEC_LIST'];?>
 								</div>
 								<div style="clear:both;padding:15px 0px 0px 20px;">
 									<div style="float:right;">
 										<button name="clearnomform"  type="button" style="margin-right:15px" onclick='clearNomForm();' >Clear Form</button>
 									</div>
 									<div style="float:left;width:675px;">
-										<b>Taxon:</b>
+										<b><?php echo $LANG['TAXON'];?></b>
 										<input type="text" id="nomsciname" name="sciname" style="background-color:lightyellow;width:450px;" onfocus="initNomAdjAutocomplete(this.form)" />
 										<input id="nomcollid" name="collid" type="hidden" value="<?php echo $collid; ?>" />
 										<input name="recordsubmit" id="nomrecordsubmit" type="submit" value="Find Records" />
@@ -495,27 +497,27 @@ if($isEditor){
 								<fieldset style="margin: 15px 15px 0px 15px;padding:15px;">
 									<legend><b>Adjust To Taxon</b></legend>
 									<div style='margin:3px;'>
-										<b>Scientific Name:</b> 
+										<b>Scientific Name:</b>
 										<input type="text" id="dafsciname" name="sciname" style="background-color:lightyellow;width:350px;" onfocus="initDetAutocomplete(this.form);" />
 										<input type="hidden" id="daftidtoadd" name="tidtoadd" value="" />
 										<input type="hidden" name="family" value="" />
 									</div>
 									<div style='margin:3px;'>
-										<b>Author:</b> 
+										<b>Author:</b>
 										<input type="text" name="scientificnameauthorship" style="width:200px;" />
 									</div>
 									<div style='margin:3px;'>
-										<b>Reference:</b> 
+										<b>Reference:</b>
 										<input type="text" name="identificationreferences" style="width:350px;" />
 									</div>
 									<div style='margin:3px;'>
-										<b>Notes:</b> 
+										<b>Notes:</b>
 										<input type="text" name="identificationremarks" style="width:350px;" value="" />
 									</div>
 									<div style='margin:3px;'>
 										<input type="checkbox" name="printqueue" value="1" /> Add to Annotation Queue
 									</div>
-									<?php 
+									<?php
 									global $fpEnabled;
 									if($fpEnabled){
 										echo '<div style="float:left;margin-left:30px;">';
@@ -542,10 +544,10 @@ if($isEditor){
 		else{
 			?>
 			<div style="font-weight:bold;margin:20px;font-weight:150%;">
-				You do not have permissions to set batch determinations for this collection. 
+				You do not have permissions to set batch determinations for this collection.
 				Please contact the site administrator to obtain the necessary permissions.
 			</div>
-			<?php 
+			<?php
 		}
 		?>
 	</div>

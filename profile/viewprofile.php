@@ -2,17 +2,15 @@
 include_once('../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/ProfileManager.php');
 include_once($SERVER_ROOT.'/classes/Person.php');
+include_once($SERVER_ROOT.'/content/lang/profile/viewprofile.'.$LANG_TAG.'.php');
 header("Content-Type: text/html; charset=".$CHARSET);
-
 $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:"";
 $userId = array_key_exists("userid",$_REQUEST)?$_REQUEST["userid"]:0;
 $tabIndex = array_key_exists("tabindex",$_REQUEST)?$_REQUEST["tabindex"]:0;
-
 //Sanitation
 if($action && !preg_match('/^[a-zA-Z0-9\s_]+$/',$action)) $action = '';
 if(!is_numeric($userId)) $userId = 0;
 if(!is_numeric($tabIndex)) $tabIndex = 0;
-
 $isSelf = 0;
 $isEditor = 0;
 if(isset($SYMB_UID) && $SYMB_UID){
@@ -27,10 +25,8 @@ if(isset($SYMB_UID) && $SYMB_UID){
 	}
 }
 if(!$userId) header('Location: index.php?refurl=viewprofile.php');
-
 $pHandler = new ProfileManager();
 $pHandler->setUid($userId);
-
 $statusStr = "";
 $person = null;
 if($isEditor){
@@ -40,7 +36,6 @@ if($isEditor){
         $middleinitial = (array_key_exists("middleinitial",$_REQUEST)?$_REQUEST["middleinitial"]:'');
 		$lastname = $_REQUEST["lastname"];
 		$email = $_REQUEST["email"];
-
 		$title = array_key_exists("title",$_REQUEST)?$_REQUEST["title"]:"";
 		$institution = array_key_exists("institution",$_REQUEST)?$_REQUEST["institution"]:"";
         $department = array_key_exists("department",$_REQUEST)?$_REQUEST["department"]:"";
@@ -52,7 +47,6 @@ if($isEditor){
 		$url = array_key_exists("url",$_REQUEST)?$_REQUEST["url"]:"";
 		$biography = array_key_exists("biography",$_REQUEST)?$_REQUEST["biography"]:"";
 		$isPublic = array_key_exists("ispublic",$_REQUEST)?$_REQUEST["ispublic"]:"";
-
 		$newPerson = new Person();
 		$newPerson->setUid($userId);
 		$newPerson->setFirstName($firstname);
@@ -70,7 +64,6 @@ if($isEditor){
 		$newPerson->setUrl($url);
 		$newPerson->setBiography($biography);
 		$newPerson->setIsPublic($isPublic);
-
 		if(!$pHandler->updateProfile($newPerson)){
 			$statusStr = "Profile update failed!";
 		}
@@ -128,7 +121,6 @@ if($isEditor){
 		$person = $pHandler->getPerson();
 		$tabIndex = 2;
 	}
-
 	if(!$person) $person = $pHandler->getPerson();
 }
 ?>
@@ -138,6 +130,7 @@ if($isEditor){
 	<meta http-equiv="X-Frame-Options" content="deny">
 	<link href="../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
+<link type="text/css" href="../css/bootstrap.min.css" rel="Stylesheet" />
 	<link type="text/css" href="../css/jquery-ui.css" rel="Stylesheet" />
 	<script type="text/javascript" src="../js/jquery.js"></script>
 	<script type="text/javascript" src="../js/jquery-ui.js"></script>
@@ -178,12 +171,12 @@ if(isset($profile_viewprofileCrumbs)){
 				<?php
 				if($floraModIsActive){
 					?>
-					<li><a href="../checklists/checklistadminmeta.php?userid=<?php echo $userId; ?>">Species Checklists</a></li>
+					<li><a href="../checklists/checklistadminmeta.php?userid=<?php echo $userId; ?>"><?php echo $LANG['SPEC_CHECK'];?></a></li>
 					<?php
 				}
 				?>
-				<li><a href="personalspecmenu.php">Specimen Management</a></li>
-				<li><a href="userprofile.php?userid=<?php echo $userId; ?>">User Profile</a></li>
+				<li><a href="personalspecmenu.php"><?php echo $LANG['SPEC_MANAGEMENT'];?></a></li>
+				<li><a href="userprofile.php?userid=<?php echo $userId; ?>"><?php echo $LANG['USER_PROFILE'];?></a></li>
 				<?php
 				if ($person->getIsTaxonomyEditor()) {
 					echo '<li><a href="specimenstoid.php?userid='.$userId.'&action='.$action.'">IDs Needed</a></li>';
@@ -191,13 +184,11 @@ if(isset($profile_viewprofileCrumbs)){
 				}
 				if( $fpEnabled) {
 					$userTaxonomy = $person->getUserTaxonomy();
-
 					foreach ($userTaxonomy as $cat => $taxonArr) {
 						foreach ($taxonArr as $tid => $taxon) {
 							$sciName = $taxon['sciname'];
 						}
 					}
-
 					if ($person->getIsHasTaxonInterest()) {
 						echo '<li><a href="taxoninterests.php?scientificName='.$sciName.'">Taxon Interests</a></li>';
 					}

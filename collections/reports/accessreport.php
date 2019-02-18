@@ -1,6 +1,7 @@
 <?php
 include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceAccessStats.php');
+include_once($SERVER_ROOT.'/content/lang/collections/reports/accessreport.'.$LANG_TAG.'.php');
 
 if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../collections/reports/accessstatsreview.php?'.$_SERVER['QUERY_STRING']);
 header("Content-Type: text/html; charset=".$CHARSET);
@@ -46,18 +47,19 @@ $headerStr = '';
 if($display == 'full'){
 	$statArr = $statManager->getFullReport();
 	$recCnt = $statManager->getFullReportCount();
-	$headerStr = '<th>Date</th><th>Access Type</th><th>Record #</th><th>Record Count</th>';
+	$headerStr = '<th>'.$LANG['DATE'].'</th><th>'.$LANG['ACCESS'].'</th><th>'.$LANG['RECORD'].' #</th><th>'.$LANG['RECORD_COUNT'].'</th>';
 }
 else{
 	$statArr = $statManager->getSummaryReport();
 	$recCnt = $statManager->getSummaryReportCount();
 	$periodArr = array('day'=>'Date','week'=>'Year-Week','month'=>'Year-Month','year'=>'Year');
-	$headerStr = '<th>'.$periodArr[$duration].'</th><th>Access Type</th><th>Record Count</th>';
+	$headerStr = '<th>'.$periodArr[$duration].'</th><th>'.$LANG['ACCESS'].'</th><th>'.$LANG['RECORD_COUNT'].'</th>';
 }
 ?>
 <html>
 	<head>
-		<title>Occurrence Access Reporting</title>
+		<title><?php echo $LANG['OCCURRENCE_ACCESS_REPORTING']; ?></title>
+		<link href="<?php echo $CLIENT_ROOT; ?>/css/bootstrap.min.css" type="text/css" rel="stylesheet"/>
 		<link href="<?php echo $CLIENT_ROOT; ?>/css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 		<link href="<?php echo $CLIENT_ROOT; ?>/css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 		<link href="<?php echo $CLIENT_ROOT; ?>/css/jquery-ui.css" type="text/css" rel="stylesheet" />
@@ -66,7 +68,7 @@ else{
 		<script>
 			function validateFilterForm(f){
 				if(f.startdate.value != "" && f.enddate.value != "" && f.startdate.value > f.enddate.value){
-					alert("Start date cannot be after end date");
+					alert("<?php echo $LANG['START_DATE_CANNOT_BE_AFTER_END_DATE']; ?>");
 					return false;
 				}
 				return true
@@ -103,20 +105,16 @@ else{
 		$displayLeftMenu = false;
 		include($SERVER_ROOT.'/header.php');
 		echo '<div class="navpath">';
-		echo '<a href="../../index.php">Home</a> &gt;&gt; ';
-		echo '<a href="../misc/collprofiles.php?collid='.$collid.'&emode=1">Collection Management Panel</a> &gt;&gt; ';
-		echo '<b>Occurrence Access Reports</b>';
+		echo '<a href="../../index.php">'.$LANG['HOME'].'</a> &gt;&gt; ';
+		echo '<a href="../misc/collprofiles.php?collid='.$collid.'&emode=1">'.$LANG['COLLECTION_MANAGEMENT_PANEL'].'</a> &gt;&gt; ';
+		echo '<b>'.$LANG['OCCURRENCE_ACCESS_REPORTS'].'</b>';
 		echo '</div>';
 		?>
 		<!-- This is inner text! -->
 		<div id="innertext" style="min-width:1100px">
 			<div>
-				<div style="float:left;font-size:120%"><b><u>User Access Statistics</u></b></div>
-				<div id="desc_details" style="clear:both;display:none;width:500px;">Displays general user access statistics for all occurrences within collection.
-					Download = any occurrence download excluding data backups and custom downloads made by collection administrators (e.g. via Data Management Menu),
-					Full View = viewing full record via occurrence details page,
-					List View = viewing basic field data through a list view (e.g. default occurrence listing tab within the general search interface),
-					Map View = occurrence represented as a dot within any of the map-based search interfaces
+				<div style="float:left;font-size:120%"><b><u><?php echo $LANG['USER'];?></u></b></div>
+				<div id="desc_details" style="clear:both;display:none;width:500px;"><?php echo $LANG['DISPLAYS'];?>
 				</div>
 				<div id="desc_info" style="float:left;margin-left:5px;"><a href="#" onclick="toggle('desc_details');toggle('desc_info');"><img src="../../images/info.png" style="width:12px" /></a></div>
 			</div>
@@ -128,49 +126,49 @@ else{
 				$navPageBase = 'accessreport.php?collid='.$collid.'&display='.$display.'&duration='.$duration.'&startdate='.$startDate.'&enddate='.$endDate.'&ip='.$ip.'&accesstype='.$accessType;
 				$navStr = '<div class="navbarDiv" style="float:right;">';
 				if($pageNum){
-					$navStr .= '<a href="'.$navPageBase.'&pagenum='.($pageNum-1).'&limitcnt='.$limitCnt.'" title="Previous '.$limitCnt.' records">&lt;&lt;</a>';
+					$navStr .= '<a href="'.$navPageBase.'&pagenum='.($pageNum-1).'&limitcnt='.$limitCnt.'" title="'.$LANG['PREVIOUS'].' '.$limitCnt.' '.$LANG['RECORDS'].'">&lt;&lt;</a>';
 				}
 				else{
 					$navStr .= '&lt;&lt;';
 				}
 				$navStr .= ' | ';
-				$navStr .= ($pageNum*$limitCnt).'-'.$subsetCnt.' of '.$recCnt.' records';
+				$navStr .= ($pageNum*$limitCnt).'-'.$subsetCnt.' '.$LANG['OF'].' '.$recCnt.' '.$LANG['RECORDS'];
 				$navStr .= ' | ';
 				if($subsetCnt < $recCnt){
-					$navStr .= '<a href="'.$navPageBase.'&pagenum='.($pageNum+1).'&limitcnt='.$limitCnt.'" title="Next '.$limitCnt.' records">&gt;&gt;</a>';
+					$navStr .= '<a href="'.$navPageBase.'&pagenum='.($pageNum+1).'&limitcnt='.$limitCnt.'" title="'.$LANG['NEXT'].' '.$limitCnt.' '.$LANG['RECORDS'].'">&gt;&gt;</a>';
 				}
 				else{
 					$navStr .= '&gt;&gt;';
 				}
 				$navStr .= '</div>';
-				$retToMenuStr = '<div class="returnDiv" style="clear:both;display:none"><b><a href="#" onclick="printFriendlyMode(false)">Exit Print Mode</a></b></div>';
+				$retToMenuStr = '<div class="returnDiv" style="clear:both;display:none"><b><a href="#" onclick="printFriendlyMode(false)">'.$LANG['EXIT_PRINT_MODE'].'</a></b></div>';
 				echo $retToMenuStr;
-				$accessTypeArr = array('download'=>'Download','view'=>'Full View','list'=>'List View','map'=>'Map View','downloadJSON'=>'API JSON Download');
+				$accessTypeArr = array('download'=>$LANG['DOWNLOAD'],'view'=>$LANG['FULL_VIEW'],'list'=>$LANG['LIST_VIEW'],'map'=>$LANG['MAP_VIEW'],'downloadJSON'=>$LANG['API_JSON_DOWNLOAD']);
 				?>
 				<div id="filterDiv" style="clear:both;padding-top:5px;">
 					<form name="filter" action="accessreport.php" method="post" onsubmit="return validateFilterForm(this)">
 						<fieldset style="width:375px;text-align:left;">
-							<legend><b>Filter</b></legend>
+							<legend><b><?php echo $LANG['FILTER'];?></b></legend>
 							<div style="margin:3px;">
-								Display:
+								<?php echo $LANG['DIS'];?>
 								<select name="display">
-									<option value="summary">Summary Count</option>
-									<option value="full" <?php echo ($display=='full'?'SELECTED':''); ?>>Full Records</option>
+									<option value="summary"><?php echo $LANG['SUMMARY'];?></option>
+									<option value="full" <?php echo ($display=='full'?'SELECTED':''); ?>><?php echo $LANG['FULL'];?></option>
 								</select>
 							</div>
 							<div style="margin:3px;">
-								Duration:
+								<?php echo $LANG['DURATION'];?>
 								<select name="duration">
-									<option value="day">Daily</option>
-									<option value="week" <?php echo ($duration=='week'?'SELECTED':''); ?>>Weekly</option>
-									<option value="month" <?php echo ($duration=='month'?'SELECTED':''); ?>>Monthly</option>
-									<option value="year" <?php echo ($duration=='year'?'SELECTED':''); ?>>Yearly</option>
+									<option value="day"><?php echo $LANG['DAILY'];?></option>
+									<option value="week" <?php echo ($duration=='week'?'SELECTED':''); ?>><?php echo $LANG['WEEK'];?></option>
+									<option value="month" <?php echo ($duration=='month'?'SELECTED':''); ?>><?php echo $LANG['MONTHLY'];?></option>
+									<option value="year" <?php echo ($duration=='year'?'SELECTED':''); ?>><?php echo $LANG['YEARLY'];?></option>
 								</select>
 							</div>
 							<div style="margin:3px;">
-								Access Type:
+								<?php echo $LANG['ACCESS'];?>
 								<select name="accesstype">
-									<option value="">All Access Types</option>
+									<option value=""><?php echo $LANG['ALL_ACCESS'];?></option>
 									<option value="">---------------------</option>
 									<?php
 									foreach($accessTypeArr as $k => $v){
@@ -180,12 +178,12 @@ else{
 								</select>
 							</div>
 							<div style="margin:3px;">
-								Date:
-								<input name="startdate" type="date" value="<?php echo $startDate; ?>" /> to
+								<?php echo $LANG['DATE'];?>
+								<input name="startdate" type="date" value="<?php echo $startDate; ?>" /> <?php echo $LANG['TO'];?>
 								<input name="enddate" type="date" value="<?php echo $endDate; ?>" />
 							</div>
 							<div style="margin:10px;">
-								<button name="submitbutton" type="submit" value="submitfilter">Submit Filter</button>
+								<button name="submitbutton" type="submit" value="submitfilter"><?php echo $LANG['SUBMIT'];?></button>
 								<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
 							</div>
 						</fieldset>
@@ -193,7 +191,7 @@ else{
 				</div>
 				<div style="font-weight:bold;font-size:130%;">
 					<?php echo $collName; ?>
-					<a href="<?php echo $navPageBase.'&action=export'; ?>" title="Download Results"><img src="../../images/dl.png" style="margin-left:10px;width:14px;" /></a>
+					<a href="<?php echo $navPageBase.'&action=export'; ?>" title="<?php $LANG['DOWNLOAD_RESULTS']; ?>"><img src="../../images/dl.png" style="margin-left:10px;width:14px;" /></a>
 				</div>
 				<div style="width:400px">
 					<div style="clear:both"><?php echo $navStr; ?></div>
@@ -226,7 +224,7 @@ else{
 							?>
 							<tr>
 								<td colspan="10">
-									<div style="font-weight:bold;font-size:150%;margin:20px;">There are no access statistic matching search criteria.</div>
+									<div style="font-weight:bold;font-size:90%;margin:20px;"><?php echo $LANG['THERE'];?></div>
 								</td>
 							</tr>
 							<?php

@@ -24,6 +24,8 @@ $imageExplorer = new ImageExplorer();
     <script type="text/javascript" src="../js/underscore-1.4.3.js"></script>
     <script type="text/javascript" src="../js/backbone-0.9.10.js"></script>
     <script type="text/javascript" src="../js/symb/imagelib.imgexplorer.js"></script>
+    <!--inicio favicon -->
+	<link rel="shortcut icon" href="../images/favicon.png" type="image/x-icon">
 
     <script src="../js/visualsearch.js" type="text/javascript"></script>
     <!--[if (!IE)|(gte IE 8)]><!-->

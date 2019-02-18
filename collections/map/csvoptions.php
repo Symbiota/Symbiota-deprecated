@@ -2,7 +2,7 @@
 include_once('../../config/symbini.php');
 header("Content-Type: text/html; charset=".$charset);
 
-$downloadType = array_key_exists("dltype",$_REQUEST)?$_REQUEST["dltype"]:"specimen"; 
+$downloadType = array_key_exists("dltype",$_REQUEST)?$_REQUEST["dltype"]:"specimen";
 $taxonFilterCode = array_key_exists("taxonFilterCode",$_REQUEST)?$_REQUEST["taxonFilterCode"]:0;
 ?>
 <html>
@@ -12,6 +12,9 @@ $taxonFilterCode = array_key_exists("taxonFilterCode",$_REQUEST)?$_REQUEST["taxo
 	<link href="../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 	<link href="../../css/jquery-ui.css" type="text/css" rel="stylesheet" />
+	<!--inicio favicon -->
+	<link rel="shortcut icon" href="../../images/favicon.png" type="image/x-icon">
+
 	<script src="../../js/jquery.js" type="text/javascript"></script>
 	<script src="../../js/jquery-ui.js" type="text/javascript"></script>
 	<script type="text/javascript" src="../../js/symb/collections.mapinterface.js"></script>
@@ -26,12 +29,12 @@ $taxonFilterCode = array_key_exists("taxonFilterCode",$_REQUEST)?$_REQUEST["taxo
 					modal: true,
 					position: { my: "left top", at: "center", of: "#"+dialogStr }
 				});
-	
+
 				$( "#"+dialogStr ).click(function() {
 					$( "#"+this.id+"dialog" ).dialog( "open" );
 				});
 			}
-	
+
 		});
 
 		function extensionSelected(obj){
@@ -52,11 +55,11 @@ $taxonFilterCode = array_key_exists("taxonFilterCode",$_REQUEST)?$_REQUEST["taxo
 	<div id="innertext">
 		<h2>Data Usage Guidelines</h2>
 		<div style="margin:15px;width:575px;">
-			By downloading data, the user confirms that he/she has read and agrees with the general 
-			<a href="../../misc/usagepolicy.php#images" target="_blank">data usage terms</a>. 
-			Note that additional terms of use specific to the individual collections 
-			may be distributed with the data download. When present, the terms 
-			supplied by the owning institution should take precedence over the 
+			By downloading data, the user confirms that he/she has read and agrees with the general
+			<a href="../../misc/usagepolicy.php#images" target="_blank">data usage terms</a>.
+			Note that additional terms of use specific to the individual collections
+			may be distributed with the data download. When present, the terms
+			supplied by the owning institution should take precedence over the
 			general terms posted on the website.
 		</div>
 		<div style='margin:15px;width:575px;'>
@@ -68,11 +71,11 @@ $taxonFilterCode = array_key_exists("taxonFilterCode",$_REQUEST)?$_REQUEST["taxo
 							<td valign="top">
 								<div style="margin:10px;">
 									<b>Structure:</b>
-								</div> 
+								</div>
 							</td>
 							<td>
 								<div style="margin:10px 0px;">
-									<input type="radio" name="schema" value="symbiota" onclick="georefRadioClicked(this)" CHECKED /> 
+									<input type="radio" name="schema" value="symbiota" onclick="georefRadioClicked(this)" CHECKED />
 									Symbiota Native
 									<a id="schemanativeinfo" href="#" onclick="return false" title="More Information">
 										<img src="../../images/info.png" style="width:13px;" />
@@ -81,14 +84,14 @@ $taxonFilterCode = array_key_exists("taxonFilterCode",$_REQUEST)?$_REQUEST["taxo
 										Symbiota native is very similar to Darwin Core except with the addtion of a few fields
 										such as substrate, associated collectors, verbatim description.
 									</div>
-									<input type="radio" name="schema" value="dwc" onclick="georefRadioClicked(this);" /> 
+									<input type="radio" name="schema" value="dwc" onclick="georefRadioClicked(this);" />
 									Darwin Core
 									<a id="schemadwcinfo" href="#" target="" title="More Information">
 										<img src="../../images/info.png" style="width:13px;" />
 									</a><br/>
 									<div id="schemadwcinfodialog">
-										Darwin Core (DwC) is a TDWG endorsed exchange standard specifically for biodiversity datasets. 
-										For more information on what data fields are included in DwC, visit the 
+										Darwin Core (DwC) is a TDWG endorsed exchange standard specifically for biodiversity datasets.
+										For more information on what data fields are included in DwC, visit the
 										<a href="http://rs.tdwg.org/dwc/index.htm"target='_blank'>DwC Quick Reference Guide</a>.
 									</div>
 									*<a href='http://rs.tdwg.org/dwc/index.htm' class='bodylink' target='_blank'>What is Darwin Core?</a>
@@ -99,13 +102,13 @@ $taxonFilterCode = array_key_exists("taxonFilterCode",$_REQUEST)?$_REQUEST["taxo
 							<td valign="top">
 								<div style="margin:10px;">
 									<b>Data Extensions:</b>
-								</div> 
+								</div>
 							</td>
 							<td>
 								<div style="margin:10px 0px;">
 									<input type="checkbox" name="identifications" value="1" onchange="extensionSelected(this);" checked /> include Determination History<br/>
 									<input type="checkbox" name="images" value="1" onchange="extensionSelected(this);" checked /> include Image Records<br/>
-									*Output must be a compressed archive 
+									*Output must be a compressed archive
 								</div>
 							</td>
 						</tr>
@@ -113,7 +116,7 @@ $taxonFilterCode = array_key_exists("taxonFilterCode",$_REQUEST)?$_REQUEST["taxo
 							<td valign="top">
 								<div style="margin:10px;">
 									<b>File Format:</b>
-								</div> 
+								</div>
 							</td>
 							<td>
 								<div style="margin:10px 0px;">
@@ -126,11 +129,11 @@ $taxonFilterCode = array_key_exists("taxonFilterCode",$_REQUEST)?$_REQUEST["taxo
 							<td valign="top">
 								<div style="margin:10px;">
 									<b>Character Set:</b>
-								</div> 
+								</div>
 							</td>
 							<td>
 								<div style="margin:10px 0px;">
-									<?php 
+									<?php
 									$cSet = strtolower($charset);
 									?>
 									<input type="radio" name="cset" value="iso-8859-1" <?php echo ($cSet=='iso-8859-1'?'checked':''); ?> /> ISO-8859-1 (western)<br/>
@@ -142,7 +145,7 @@ $taxonFilterCode = array_key_exists("taxonFilterCode",$_REQUEST)?$_REQUEST["taxo
 							<td valign="top">
 								<div style="margin:10px;">
 									<b>Compression:</b>
-								</div> 
+								</div>
 							</td>
 							<td>
 								<div style="margin:10px 0px;">
@@ -160,7 +163,7 @@ $taxonFilterCode = array_key_exists("taxonFilterCode",$_REQUEST)?$_REQUEST["taxo
 							</td>
 						</tr>
 					</table>
-				</form>					
+				</form>
 			</fieldset>
 		</div>
 	</div>

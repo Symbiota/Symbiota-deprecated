@@ -87,6 +87,7 @@ if($traitID){
 	<head>
 		<title>Occurrence Attribute batch Editor</title>
 		<link href="../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+		<link href="../../css/bootstrap.min.css" type="text/css" rel="stylesheet"/>
 		<link href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 		<link href="../../css/jquery-ui.css" type="text/css" rel="stylesheet" />
 		<script src="../../js/jquery.js" type="text/javascript"></script>
@@ -233,7 +234,7 @@ if($traitID){
 		<script src="../../js/symb/collections.traitattr.js" type="text/javascript"></script>
 		<script src="../../js/symb/shared.js?ver=151229" type="text/javascript"></script>
 	</head>
-	<body>
+	<body style="padding: 100px;margin-left:50px;">
 		<?php
 		$displayLeftMenu = false;
 		include($SERVER_ROOT.'/header.php');
@@ -268,7 +269,7 @@ if($traitID){
 		}
 		?>
 		<!-- This is inner text! -->
-		<div id="innertext" style="position:relative;">
+		<div id="innertext" style="position:center;">
 		<?php
 		if($collid){
 			?>

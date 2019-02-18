@@ -1,14 +1,12 @@
 <?php
 include_once('../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/DynamicChecklistManager.php');
+include_once($SERVER_ROOT.'/content/lang/checklists/dynamicmap.'.$LANG_TAG.'.php');
 header('Content-Type: text/html; charset='.$CHARSET);
-
 $tid = array_key_exists('tid',$_REQUEST)?$_REQUEST['tid']:0;
 $taxa = array_key_exists('taxa',$_REQUEST)?$_REQUEST['taxa']:'';
 $interface = array_key_exists('interface',$_REQUEST)&&$_REQUEST['interface']?htmlspecialchars($_REQUEST['interface']):'checklist';
-
 $dynClManager = new DynamicChecklistManager();
-
 $latCen = 41.0;
 $longCen = -95.0;
 $coorArr = explode(";",$MAPPING_BOUNDARIES);
@@ -34,7 +32,12 @@ elseif($coordRange > 40){
 	<title><?php echo $DEFAULT_TITLE; ?> - Dynamic Checklist Generator</title>
 	<link href="../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
+	<link href="../css/bootstrap.min.css" type="text/css" rel="stylesheet" />
 	<link href="../css/jquery-ui.css" type="text/css" rel="stylesheet" />
+
+	<!--inicio favicon -->
+	<link rel="shortcut icon" href="../images/favicon.png" type="image/x-icon">
+
 	<script src="../js/jquery.js" type="text/javascript"></script>
 	<script src="../js/jquery-ui.js" type="text/javascript"></script>
 	<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
@@ -45,7 +48,6 @@ elseif($coordRange > 40){
 	    var currentMarker;
 	  	var zoomLevel = 5;
 	  	var submitCoord = false;
-
         $(document).ready(function() {
         	$( "#taxa" ).autocomplete({
         		source: function( request, response ) {
@@ -59,9 +61,8 @@ elseif($coordRange > 40){
         			}
 				}
         	});
-			
-        });
 
+        });
 	    function initialize(){
 	    	var dmLatLng = new google.maps.LatLng(<?php echo $latCen.",".$longCen; ?>);
 	    	var dmOptions = {
@@ -69,16 +70,15 @@ elseif($coordRange > 40){
 				center: dmLatLng,
 				mapTypeId: google.maps.MapTypeId.TERRAIN
 			};
-
 	    	map = new google.maps.Map(document.getElementById("map_canvas"), dmOptions);
-	    	
+
 			google.maps.event.addListener(map, 'click', function(event) {
 	            mapZoom = map.getZoom();
 	            startLocation = event.latLng;
 	            setTimeout("placeMarker()", 500);
 	        });
 	    }
-	
+
 	    function placeMarker() {
 			if(currentMarker) currentMarker.setMap();
 	        if(mapZoom == map.getZoom()){
@@ -87,7 +87,6 @@ elseif($coordRange > 40){
 	                map: map
 	            });
 				currentMarker = marker;
-
 		        var latValue = startLocation.lat();
 		        var lonValue = startLocation.lng();
 		        latValue = latValue.toFixed(5);;
@@ -99,16 +98,15 @@ elseif($coordRange > 40){
                 submitCoord = true;
 			}
 	    }
-
 		function checkForm(){
 			if(submitCoord) return true;
 			alert("You must first click on map to capture coordinate points");
 			return false;
 		}
 	</script>
-</head> 
+</head>
 <body style="background-color:#ffffff;" onload="initialize()">
-	<?php 
+	<?php
 		$displayLeftMenu = false;
 		include($SERVER_ROOT.'/header.php');
 		if(isset($checklists_dynamicmapCrumbs)){
@@ -123,59 +121,59 @@ elseif($coordRange > 40){
 		else{
 			?>
 			<div class='navpath'>
-				<a href='../index.php'>Home</a> &gt; 
+				<a href='../index.php'>Home</a> &gt;
 				<b>Dynamic Map</b>
 			</div>
-			<?php 
+			<?php
 		}
 		?>
 		<div id='innertext'>
 			<div>
-				Pan, zoom and click on map to capture coordinates, then submit coordinates to build a species list. 
+				<?php echo $LANG['LEGEND'];?>
+
 				<span id="moredetails" style="cursor:pointer;color:blue;font-size:80%;" onclick="this.style.display='none';document.getElementById('moreinfo').style.display='inline';document.getElementById('lessdetails').style.display='inline';">
-					More Details
+					<?php echo $LANG['MORE_DETAILS'];?>
 				</span>
 				<span id="moreinfo" style="display:none;">
-					If a radius is defined, species lists are generated using occurrence data collected within the defined area.
-					If a radius is not supplied, the area is sampled in concentric rings until the sample size is determined to 
-					best represent the local species diversity. In other words, poorly collected areas will have a larger radius sampled. 
-					Setting the taxon filter will limit the return to species found within that taxonomic group.
+
+					<?php echo $LANG['LEGEND2'];?>
+
 				</span>
 				<span id="lessdetails" style="cursor:pointer;color:blue;font-size:80%;display:none;" onclick="this.style.display='none';document.getElementById('moreinfo').style.display='none';document.getElementById('moredetails').style.display='inline';">
-					Less Details
+					<?php echo $LANG['LESS_DETAILS'];?>
 				</span>
 			</div>
 			<div style="margin-top:5px;">
 				<form name="mapForm" action="dynamicchecklist.php" method="post" onsubmit="return checkForm();">
-					<div style="float:left;width:300px;">
+					<div style="float:left;width:500px;">
 						<div>
-							<input type="submit" name="buildchecklistbutton" value="Build Checklist" disabled />
+							<input type="submit" name="buildchecklistbutton" value="Construir lista de verificación" disabled />
 							<input type="hidden" name="interface" value="<?php echo $interface; ?>" />
 							<input type="hidden" id="latbox" name="lat" value="" />
 							<input type="hidden" id="lngbox" name="lng" value="" />
 						</div>
 						<div>
-							<b>Point (Lat, Long):</b> 
+							<b><?php echo $LANG['POINT'];?></b>
 							<span id="latlngspan"> &lt; Click on map &gt; </span>
 						</div>
 					</div>
 					<div style="float:left;">
 						<div style="margin-right:35px;">
-							<b>Taxon Filter:</b> <input id="taxa" name="taxa" type="text" value="<?php echo $taxa; ?>" />
+							<b><?php echo $LANG['TAX_FILTER'];?></b> <input id="taxa" name="taxa" type="text" value="<?php echo $taxa; ?>" />
 							<input id="tid" name="tid" type="hidden" value="<?php echo $tid; ?>" />
 						</div>
-						<div> 
-							<b>Radius:</b> 
-							<input name="radius" value="(optional)" type="text" style="width:140px;" onfocus="this.value = ''" /> 
+						<div>
+							<b><?php echo $LANG['RADIUS'];?></b>
+							<input name="radius" value="(opcional)" type="text" style="width:140px;" onfocus="this.value = ''" />
 							<select name="radiusunits">
-								<option value="km">Kilometers</option>
-								<option value="mi">Miles</option>
+								<option value="km">Kilómetros</option>
+								<option value="mi">Millas</option>
 							</select>
 						</div>
 					</div>
 				</form>
 			</div>
-			<div id='map_canvas' style='width:95%; height:650px; clear:both;'></div>
+			<div id='map_canvas' style='width:100%; height:650px; clear:both;'></div>
 		</div>
 	<?php
  	include_once($SERVER_ROOT.'/footer.php');

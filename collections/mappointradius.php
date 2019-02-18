@@ -18,13 +18,15 @@ else{
 <html>
 	<head>
 		<title><?php echo $DEFAULT_TITLE.' - '.$LANG['MPR_TITLE']; ?></title>
+		<!--inicio favicon -->
+	<link rel="shortcut icon" href="../images/favicon.png" type="image/x-icon">
 	</head>
 	<body style="background-color:#ffffff;">
 	<script src="//maps.googleapis.com/maps/api/js?<?php echo (isset($GOOGLE_MAP_KEY) && $GOOGLE_MAP_KEY?'key='.$GOOGLE_MAP_KEY:''); ?>"></script>
 	<script type="text/javascript">
 		var map;
 		var marker;
-      	
+
         function initialize(){
 
 			var dmOptions = {
@@ -53,7 +55,7 @@ else{
             if(opener.document.getElementById("radiustemp").value == ""){
             	opener.document.getElementById("radiustemp").value = 30;
             	opener.document.getElementById("radius").value = 30;
-            } 
+            }
             self.close();
             return false;
         }
@@ -65,9 +67,9 @@ else{
     <div id='map' style='width: 100%; height: 520px'></div>
 	<form id="mapForm" onsubmit="return updateParentForm();">
 		<div>
-			<?php echo $LANG['MPR_LAT']?>: <input type="text" id="latbox" size="13" name="lat" value="" />&nbsp;&nbsp;&nbsp; 
+			<?php echo $LANG['MPR_LAT']?>: <input type="text" id="latbox" size="13" name="lat" value="" />&nbsp;&nbsp;&nbsp;
 			<?php echo $LANG['MPR_LNG']?>: <input type="text" id="lonbox" size="13" name="lon" value="" /> &nbsp;&nbsp;&nbsp;
-			<input type="submit" name="addcoords" value="<?php echo $LANG['SUBMIT']; ?>" />	
+			<input type="submit" name="addcoords" value="<?php echo $LANG['SUBMIT']; ?>" />
 		</div>
 	</form>
   </body>

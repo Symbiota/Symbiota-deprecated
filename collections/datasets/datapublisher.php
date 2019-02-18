@@ -2,6 +2,8 @@
 include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/DwcArchiverPublisher.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceCollectionProfile.php');
+include_once($SERVER_ROOT.'/content/lang/collections/datasets/datapublisher.'.$LANG_TAG.'.php');
+
 header('Content-Type: text/html; charset=' .$CHARSET);
 
 $collId = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
@@ -85,7 +87,8 @@ if($isEditor){
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET; ?>">
-	<title>Darwin Core Archiver Publisher</title>
+	<title><?php echo $LANG['DCA']; ?></title>
+	<link href="../../css/bootstrap.min.css" type="text/css" rel="stylesheet"/>
 	<link href="../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
     <link href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet">
 	<link href="../../css/jquery-ui.css" type="text/css" rel="Stylesheet" />
@@ -134,7 +137,7 @@ if($isEditor){
 				var dbElement = dbElements[i];
 				if(dbElement.checked) return true;
 			}
-		   	alert("Please choose at least one collection!");
+		   	alert("<?php echo $LANG['PLEASE_CHOOSE_AT_LEAST_ONE_COLLECTION']; ?>");
 			return false;
     	}
 
@@ -163,20 +166,20 @@ $displayLeftMenu = (isset($collections_datasets_datapublisherMenu)?$collections_
 include($SERVER_ROOT. '/header.php');
 ?>
 <div class='navpath'>
-	<a href="../../index.php">Home</a> &gt;&gt;
+	<a href="../../index.php"><?php echo $LANG['HOME']; ?></a> &gt;&gt;
 	<?php
 	if($collId){
 		?>
-		<a href="../misc/collprofiles.php?collid=<?php echo $collId; ?>&emode=1">Collection Management</a> &gt;&gt;
+		<a href="../misc/collprofiles.php?collid=<?php echo $collId; ?>&emode=1"><?php echo $LANG['COLLECTION_MANAGEMENT']; ?></a> &gt;&gt;
 		<?php
 	}
 	else{
 		?>
-		<a href="../../sitemap.php">Sitemap</a> &gt;&gt;
+		<a href="../../sitemap.php"><?php echo $LANG['SITEMAP']; ?></a> &gt;&gt;
 		<?php
 	}
 	?>
-	<b>Darwin Core Archive Publisher</b>
+	<b><?php echo $LANG['DARWIN_CORE_ARCHIVE_PUBLISHER']; ?></b>
 </div>
 <!-- This is inner text! -->
 <div id="innertext">
@@ -184,53 +187,48 @@ include($SERVER_ROOT. '/header.php');
 	if(!$collId && $IS_ADMIN){
 		?>
 		<div style="float:right;">
-			<a href="#" title="Display Publishing Control Panel" onclick="toggle('dwcaadmindiv')">
+			<a href="#" title="<?php echo $LANG['DISPLAY_PUBLISHING_CONTROL_PANEL']; ?>" onclick="toggle('dwcaadmindiv')">
 				<img style="border:0;width:12px;" src="../../images/edit.png" />
 			</a>
 		</div>
 		<?php
 	}
 	?>
-	<h1>Darwin Core Archive Publishing</h1>
+	<h1><?php echo $LANG['DCA_PUB'];?></h1>
 	<?php
 	if($collId){
 		echo '<div style="font-weight:bold;font-size:120%;">'.$collArr['collname'].'</div>';
 		?>
 		<div style="margin:10px;">
-			Use the controls below to publish occurrence data within this collection as a
-			<a href="http://rs.tdwg.org/dwc/terms/guides/text/index.htm">Darwin Core Archive (DwC-A)</a> file.
-			A DwC-A file is a single compressed ZIP file that contains one to several data files along with a meta.xml
-			document that describes the content.
-			The occurrence data file is required, but identifications (determinations) and image metadata are optional.
-			Fields within the occurrences.csv file are defined by the <a href="http://rs.tdwg.org/dwc/terms/index.htm">Darwin Core</a>
-			exchange standard.
+			<?php echo $LANG['USE_CONTROL'];?>
+			<a href="http://rs.tdwg.org/dwc/terms/guides/text/index.htm"><?php echo $LANG['DCA'].'</a>'.$LANG['FILE']; ?>
+			<?php echo $LANG['A_DWC_A_FILE_IS_A_SINGLE_COMPRESSED_ZIP']; ?>
 		</div>
 		<?php
 	}
 	else{
 		?>
-		<div style="margin:10px;">
-			The following downloads are occurrence data packages from collections
-			that have chosen to publish their complete dataset as a
-			<a href="http://rs.tdwg.org/dwc/terms/guides/text/index.htm">Darwin Core Archive (DwC-A)</a> file.
-			A DwC-A file is a single compressed ZIP file that contains one to several data files along with a meta.xml
-			document that describes the content.
-			The archives below contain three comma separated (CSV) files containing occurrences, identifications (determinations), and image metadata.
-			Fields within the occurrences.csv file are defined by the <a href="http://rs.tdwg.org/dwc/terms/index.htm">Darwin Core</a>
-			exchange standard. The identification and image files follow the DwC extensions for those data types.
+    <div style="margin:10px;">
+      <?php echo $LANG['FOLL_DOWNLOAD'];?>
+
+			<a href="http://rs.tdwg.org/dwc/terms/guides/text/index.htm"><?php echo $LANG['DCA'];?></a> <?php echo $LANG['FILE'];?>
+      <?php echo $LANG['A_DWC_ZIP'];?>
+     <a href="http://rs.tdwg.org/dwc/terms/index.htm"><?php echo $LANG['DC'];?></a>
+			<?php echo $LANG['IDENT_IMAGE'];?>
+
 		</div>
 		<div style="margin:10px;">
-			<h3>Data Usage Policy:</h3>
-			Use of these datasets requires agreement with the terms and conditions in our
-			<a href="../../misc/usagepolicy.php">Data Usage Policy</a>.
-			Locality details for rare, threatened, or sensitive records have been redacted from these data files.
-			One must contact the collections directly to obtain access to sensitive locality data.
+			<h3><?php echo $LANG['DATA_USAGE_POL'];?></h3>
+			<?php echo $LANG['USE_DATABASE'];?>
+			<a href="../../misc/usagepolicy.php"> <?php echo $LANG['DATA_USAGE_POL'];?></a>.
+			<?php echo $LANG['LOC_DETAILS'];?>
 		</div>
 		<?php
 	}
 	?>
 	<div style="margin:20px;">
-		<b>RSS Feed:</b>
+		<b></b>
+		<b><?php echo $LANG['RSS_FEED']; ?>:</b>
 		<?php
 		$urlPrefix = $dwcaManager->getServerDomain().$CLIENT_ROOT.(substr($CLIENT_ROOT,-1)=='/'?'':'/');
 		if(file_exists('../../webservices/dwc/rss.xml')){
@@ -238,7 +236,7 @@ include($SERVER_ROOT. '/header.php');
 			echo '<a href="'.$feedLink.'" target="_blank">'.$feedLink.'</a>';
 		}
 		else{
-			echo '--feed not published for any of the collections within the portal--';
+			echo '--'.$LANG['FEED_NOT_PUBLISHED_FOR_ANY'].'--';
 		}
 		?>
 	</div>
@@ -262,48 +260,87 @@ include($SERVER_ROOT. '/header.php');
 			?>
 			<div style="margin:10px;">
 				<div>
-					<b>Title:</b> <?php echo $dArr['title']; ?>
-					<form action="datapublisher.php" method="post" style="display:inline;" onsubmit="return window.confirm('Are you sure you want to delete this archive?');">
+					<b><?php echo $LANG['TITLE']; ?>:</b> <?php echo $dArr['title']; ?>
+					<form action="datapublisher.php" method="post" style="display:inline;" onsubmit="return window.confirm('<?php echo $LANG['ARE_YOU_SURE_YOU_WANT_TO_DELETE']; ?>');">
 						<input type="hidden" name="colliddel" value="<?php echo $dArr['collid']; ?>">
 						<input type="hidden" name="collid" value="<?php echo $dArr['collid']; ?>">
-						<input type="image" src="../../images/del.png" name="action" value="DeleteCollid" title="Delete Archive" style="width:15px;" />
+						<input type="image" src="../../images/del.png" name="action" value="DeleteCollid" title="<?php echo $LANG['DELETE_ARCHIVE']; ?>" style="width:15px;" />
 					</form>
 				</div>
-				<div><b>Description:</b> <?php echo $dArr['description']; ?></div>
+				<div><b><?php echo $LANG['DESCRIPTION']; ?>:</b> <?php echo $dArr['description']; ?></div>
 				<?php
 				$emlLink = $urlPrefix.'collections/datasets/emlhandler.php?collid='.$collId;
 				?>
 				<div><b>EML:</b> <a href="<?php echo $emlLink; ?>"><?php echo $emlLink; ?></a></div>
-				<div><b>DwC-Archive File:</b> <a href="<?php echo $dArr['link']; ?>"><?php echo $dArr['link']; ?></a></div>
-				<div><b>Publication Date:</b> <?php echo $dArr['pubDate']; ?></div>
+				<div><b>DwC-<?php echo $LANG['ARCHIVE_FILE']; ?>:</b> <a href="<?php echo $dArr['link']; ?>"><?php echo $dArr['link']; ?></a></div>
+				<div><b><?php echo $LANG['PUBLICATION_DATE']; ?>:</b> <?php echo $dArr['pubDate']; ?></div>
 			</div>
 			<?php
 		}
 		else{
-			echo '<div style="margin:20px;font-weight:bold;color:orange;">No data archives have been published for this collection</div>';
+			echo '<div style="margin:20px;font-weight:bold;color:orange;">'.$LANG['NO_DATA_ARCHIVES_HAVE_BEEN_PUBLISHED'].'</div>';
 		}
 		?>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 		<fieldset style="margin:15px;padding:15px;">
-			<legend><b>Publishing Information</b></legend>
+			<legend><b><?php echo $LANG['PUBLISHING_INFORMATION']; ?></b></legend>
 			<?php
 			//Data integrity checks
 			$blockSubmitMsg = '';
 			$recFlagArr = $dwcaManager->verifyCollRecords($collId);
 			if($collArr['guidtarget']){
-				echo '<div style="margin:10px;"><b>GUID source:</b> '.$collArr['guidtarget'].'</div>';
+				echo '<div style="margin:10px;"><b>'.$LANG['GUID_SOURCE'].':</b> '.$collArr['guidtarget'].'</div>';
 				if($recFlagArr['nullGUIDs']){
 					echo '<div style="margin:10px;">';
 					if($collArr['guidtarget'] == 'occurrenceId'){
-						echo '<b>Records missing <a href="" target="_blank">OccurrenceID GUIDs</a>:</b> '.$recFlagArr['nullGUIDs'];
-						echo ' <span style="color:red;margin-left:15px;">These records will not be published!</span> ';
+						echo '<b>'.$LANG['RECORD_MISSING'].' <a href="" target="_blank">'.$LANG['OCCURRENCE_ID_GUID'].'</a>:</b> '.$recFlagArr['nullGUIDs'];
+						echo ' <span style="color:red;margin-left:15px;">'.$LANG['THESE_RECORDS_WILL_NOT_BE'].'</span> ';
 					}
 					elseif($collArr['guidtarget'] == 'catalogNumber'){
-						echo '<b>Records missing Catalog Numbers:</b> '.$recFlagArr['nullGUIDs'];
-						echo ' <span style="color:red;margin-left:15px;">These records will not be published!</span> ';
+						echo '<b>'.$LANG['RECORDS_MISSING_SYMBIOTA_GUIDs'].':</b> '.$recFlagArr['nullGUIDs'];
+						echo ' <span style="color:red;margin-left:15px;">'.$LANG['THESE_RECORDS_WILL_NOT_BE'].'</span> ';
 					}
 					else{
-						echo 'Records missing Symbiota GUIDs: '.$recFlagArr['nullGUIDs'].'<br/>';
-						echo 'Please go to the <a href="../admin/guidmapper.php?collid='.$collId.'">Collection GUID Mapper</a> to assign Symbiota GUIDs.';
+						echo $LANG['RECORDS_MISSING_SYMBIOTA_GUIDs'].': '.$recFlagArr['nullGUIDs'].'<br/>';
+						echo $LANG['PLEASE_GO_TO_THE'].' <a href="../admin/guidmapper.php?collid='.$collId.'">'.$LANG['COLLECTION_GUID_MAPPER'].'</a> '.$LANG['TO_ASSIGN_SYMBIOTA'].'.';
 					}
 					echo '</div>';
 				}
@@ -312,31 +349,52 @@ include($SERVER_ROOT. '/header.php');
 					if(substr($serverName, 0, 4) == 'www.') $serverName = substr($serverName, 4);
 					if(!strpos($collArr['dwcaurl'],$serverName)){
 						$baseUrl = substr($collArr['dwcaurl'],0,strpos($collArr['dwcaurl'],'/content')).'/collections/datasets/datapublisher.php';
-						$blockSubmitMsg = 'Already published on sister portal (<a href="'.$baseUrl.'" target="_blank">'.substr($baseUrl,0,strpos($baseUrl,'/',10)).'</a>) ';
+						$blockSubmitMsg = $LANG['ALREADY_PUBLISHED_ON_SISTER_PORTAL'].' (<a href="'.$baseUrl.'" target="_blank">'.substr($baseUrl,0,strpos($baseUrl,'/',10)).'</a>) ';
 					}
 				}
 			}
 			else{
-				echo '<div style="margin:10px;font-weight:bold;color:red;">The GUID source has not been set for this collection. Please go to the <a href="../misc/collmetadata.php?collid='.$collId.'">Edit Metadata page</a> to set GUID source.</div>';
+				echo '<div style="margin:10px;font-weight:bold;color:red;">'.$LANG['THE_GUID_SOURCE_HAS_NOT_BEEN_SET'].' <a href="../misc/collmetadata.php?collid='.$collId.'">'.$LANG['EDIT_M'].'.</div>';
 				$blockSubmitMsg = 'Archive cannot be published until occurrenceID GUID source is set<br/>';
 			}
 			if($recFlagArr['nullBasisRec']){
-				echo '<div style="margin:10px;font-weight:bold;color:red;">There are '.$recFlagArr['nullBasisRec'].' records missing basisOfRecord and will not be published. Please go to <a href="../editor/occurrencetabledisplay.php?q_recordedby=&q_recordnumber=&q_eventdate=&q_catalognumber=&q_othercatalognumbers=&q_observeruid=&q_recordenteredby=&q_dateentered=&q_datelastmodified=&q_processingstatus=&q_customfield1=basisOfRecord&q_customtype1=NULL&q_customvalue1=Something&q_customfield2=&q_customtype2=EQUALS&q_customvalue2=&q_customfield3=&q_customtype3=EQUALS&q_customvalue3=&collid='.$collId.'&csmode=0&occid=&occindex=0&orderby=&orderbydir=ASC">Edit Existing Occurrence Records</a> to correct this.</div>';
+				echo '<div style="margin:10px;font-weight:bold;color:red;">'.$LANG['THERE_ARE'].' '.$recFlagArr['nullBasisRec'].' '.$LANG['RECORDS_MISSING_BASIS_OF_RECORD'].' <a href="../editor/occurrencetabledisplay.php?q_recordedby=&q_recordnumber=&q_eventdate=&q_catalognumber=&q_othercatalognumbers=&q_observeruid=&q_recordenteredby=&q_dateentered=&q_datelastmodified=&q_processingstatus=&q_customfield1=basisOfRecord&q_customtype1=NULL&q_customvalue1=Something&q_customfield2=&q_customtype2=EQUALS&q_customvalue2=&q_customfield3=&q_customtype3=EQUALS&q_customvalue3=&collid='.$collId.'&csmode=0&occid=&occindex=0&orderby=&orderbydir=ASC">'.$LANG['EDIT_EXISTING_OCCURRENCE_RECORDS'].'.</div>';
 			}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 			if(($publishGBIF || $publishIDIGBIO) && $dwcUri && isset($GBIF_USERNAME) && isset($GBIF_PASSWORD) && isset($GBIF_ORG_KEY)){
 				if($publishGBIF && !$datasetKey) {
 					?>
 					<div style="margin:10px;">
-						You have selected to have this collection's DwC archives published to GBIF. Please go to the
-						<a href="https://www.gbif.org/become-a-publisher" target="_blank">GBIF Endorsement Request page</a> to
-						register your collection with GBIF and enter the key provided by GBIF below. If your collection is found in the
-                        GBIF Organization lookup, there is already a GBIF Key assigned. The key is the remaining part of
-						the url after the last backslash of your collection's GBIF Data Provider page. If your collection is found,
-                        please ensure that your data is not already published in GBIF. DO NOT PUBLISH your data if there is any chance it is
-                        already published. Before activating your GBIF Key in this portal, you will also need to contact GBIF (<a href="mailto:helpdesk@gbif.org">helpdesk@gbif.org</a>) and
-                        request that the user: <b><?php echo $GBIF_USERNAME; ?></b> has permissions to create and edit datatsets for your collection.
+						<?php echo $LANG['YOU_HAVE_SELECTED_TO_HAVE_THIS_COLLECTIONS']; ?>
+						<a href="https://www.gbif.org/become-a-publisher" target="_blank"><?php echo $LANG['GBIF_ENDORSEMENT_REQUEST_PAGE']; ?></a>
+						<?php echo $LANG['TO_REGISTER_YOUR_COLLECTION']; ?><a href="mailto:helpdesk@gbif.org">helpdesk@gbif.org</a><?php echo $LANG['AND_REQUEST_THAT_THE_USER']; ?> <b><?php echo $GBIF_USERNAME; ?></b> <?php echo $LANG['HAS_PERMISSIONS_TO_CREATE_AND_EDIT']; ?>
 						<form style="margin-top:10px;" name="gbifpubform" action="datapublisher.php" method="post" onsubmit="return processGbifOrgKey(this.form);">
-							GBIF Key <input type="text" name="gbifOrgKey" id="gbifOrgKey" value="" style="width:250px;"/>
+							<?php echo $LANG['GBIF_KEY']; ?> <input type="text" name="gbifOrgKey" id="gbifOrgKey" value="" style="width:250px;"/>
 							<input type="hidden" name="collid" value="<?php echo $collId; ?>"/>
 							<input type="hidden" name="portalname" id="portalname" value='<?php echo $DEFAULT_TITLE; ?>'/>
 							<input type="hidden" name="collname" id="collname" value='<?php echo $collArr['collname']; ?>'/>
@@ -346,7 +404,8 @@ include($SERVER_ROOT. '/header.php');
 							<input type="hidden" id="gbifDataKey" value=''/>
 							<input type="hidden" id="gbifEndKey" value=''/>
 							<input type="hidden" name="dwcUri" id="dwcUri" value="<?php echo $dwcUri; ?>"/>
-							<input type="submit" name="formsubmit" value="Save Key"/>
+							<input type="hidden" name="formsubmit" value="Save Key" />
+							<input type="submit" value="<?php echo $LANG['SAVE_KEY']; ?>" />
 						</form>
 					</div>
 					<?php
@@ -355,8 +414,7 @@ include($SERVER_ROOT. '/header.php');
                     $dataUrl = 'http://www.gbif.org/dataset/'.$datasetKey;
                     ?>
                     <div style="margin:10px;">
-                        <div><b>GBIF Dataset page:</b> <a href="<?php echo $dataUrl; ?>"
-                                                          target="_blank"><?php echo $dataUrl; ?></a></div>
+                        <div><b><?php echo $LANG['GBIF_DATASET_PAGE']; ?>:</b> <a href="<?php echo $dataUrl; ?>" target="_blank"><?php echo $dataUrl; ?></a></div>
                     </div>
                     <?php
                 }
@@ -364,7 +422,7 @@ include($SERVER_ROOT. '/header.php');
                     $dataUrl = 'https://www.idigbio.org/portal/recordsets/'.$idigbioKey;
                     ?>
                     <div style="margin:10px;">
-                        <div><b>iDigBio Dataset page:</b> <a href="<?php echo $dataUrl; ?>" target="_blank"><?php echo $dataUrl; ?></a></div>
+                        <div><b><?php echo $LANG['IDIGBIO_DATASET_PAGE']; ?>:</b> <a href="<?php echo $dataUrl; ?>" target="_blank"><?php echo $dataUrl; ?></a></div>
                     </div>
                     <?php
                 }
@@ -372,16 +430,17 @@ include($SERVER_ROOT. '/header.php');
 			?>
 		</fieldset>
 		<fieldset style="padding:15px;margin:15px;">
-			<legend><b>Publish/Refresh DwC-A File</b></legend>
+			<legend><b><?php echo $LANG['PUBLISH_REFRESH_DWC_A_FILE']; ?></b></legend>
 			<form name="dwcaform" action="datapublisher.php" method="post" onsubmit="return verifyDwcaForm(this)">
 				<div>
-					<input type="checkbox" name="dets" value="1" <?php echo ($includeDets?'CHECKED':''); ?> /> Include Determination History<br/>
-					<input type="checkbox" name="imgs" value="1" <?php echo ($includeImgs?'CHECKED':''); ?> /> Include Image URLs<br/>
-					<input type="checkbox" name="redact" value="1" <?php echo ($redactLocalities?'CHECKED':''); ?> /> Redact Sensitive Localities<br/>
+					<input type="checkbox" name="dets" value="1" <?php echo ($includeDets?'CHECKED':''); ?> /> <?php echo $LANG['INCLUDE_DETERMINATION_HISTORY']; ?><br/>
+					<input type="checkbox" name="imgs" value="1" <?php echo ($includeImgs?'CHECKED':''); ?> /> <?php echo $LANG['INCLUDE_IMAGE_URLS']; ?><br/>
+					<input type="checkbox" name="redact" value="1" <?php echo ($redactLocalities?'CHECKED':''); ?> /> <?php echo $LANG['REACT_SENSITIVE_LOCALITIES']; ?><br/>
 				</div>
 				<div style="clear:both;margin:10px;">
 					<input type="hidden" name="collid" value="<?php echo $collId; ?>" />
-					<input type="submit" name="formsubmit" value="Create/Refresh Darwin Core Archive" <?php if($blockSubmitMsg) echo 'disabled'; ?> />
+					<input type="hidden" name="formsubmit" value="Create/Refresh Darwin Core Archive" />
+					<input type="submit" value="<?php echo $LANG['CREATE_REFRESH_DARWIN_CORE_ARCHIVED']; ?>" <?php if($blockSubmitMsg) echo 'disabled'; ?> />
 					<?php
 					if($blockSubmitMsg){
 						echo '<span style="color:red;margin-left:10px;">'.$blockSubmitMsg.'</span>';
@@ -392,7 +451,7 @@ include($SERVER_ROOT. '/header.php');
 				if($collArr['managementtype'] != 'Live Data' || $collArr['guidtarget'] != 'symbiotaUUID'){
 					?>
 					<div style="margin:10px;font-weight:bold">
-						NOTE: all records lacking occurrenceID GUIDs will be excluded
+						<?php echo $LANG['NOTE_ALL_RECORDS_LACKING_OCCURENCE_ID']; ?>
 					</div>
 					<?php
 				}
@@ -419,19 +478,19 @@ include($SERVER_ROOT. '/header.php');
 			<div id="dwcaadmindiv" style="margin:10px;display:<?php echo ($emode?'block':'none'); ?>;" >
 				<form name="dwcaadminform" action="datapublisher.php" method="post" onsubmit="return verifyDwcaAdminForm(this)">
 					<fieldset style="padding:15px;">
-						<legend><b>Publish / Refresh <?php echo $catTitle; ?> DwC-A Files</b></legend>
+						<legend><b> <?php echo $LANG['PUBLISH_REFRESH']." ".$catTitle ." ". $LANG['DWC_A_FILES']; ?> </b></legend>
 						<div style="margin:10px;">
-							<input name="collcheckall" type="checkbox" value="" onclick="checkAllColl(this)" /> Select/Deselect All<br/><br/>
+							<input name="collcheckall" type="checkbox" value="" onclick="checkAllColl(this)" /> <?php echo $LANG['SELECT_DESELECT_ALL']; ?><br/><br/>
 							<?php
 							$collList = $dwcaManager->getCollectionList($catID);
 							foreach($collList as $k => $v){
 								$errMsg = '';
 								if(!$v['guid']){
-									$errMsg = 'Missing GUID source';
+									$errMsg = $LANG['MISSING_GUID_SOURCE'];
 								}
 								elseif($v['url'] && !strpos($v['url'],str_replace('www.', '', $_SERVER["SERVER_NAME"]))){
 									$baseUrl = substr($v['url'],0,strpos($v['url'],'/content')).'/collections/datasets/datapublisher.php';
-									$errMsg = 'Already published on different domain (<a href="'.$baseUrl.'" target="_blank">'.substr($baseUrl,0,strpos($baseUrl,'/',10)).'</a>)';
+									$errMsg = $LANG['ALREADY_PUBLISHED_ON_DIFFERENT_DOMAIN'].' (<a href="'.$baseUrl.'" target="_blank">'.substr($baseUrl,0,strpos($baseUrl,'/',10)).'</a>)';
 								}
 								echo '<input name="coll[]" type="checkbox" value="'.$k.'" '.($errMsg?'DISABLED':'').' />';
 								echo '<a href="../misc/collprofiles.php?collid='.$k.'" target="_blank">'.$v['name'].'</a>';
@@ -441,14 +500,15 @@ include($SERVER_ROOT. '/header.php');
 							?>
 						</div>
 						<fieldset style="margin:10px;padding:15px;">
-							<legend><b>Options</b></legend>
-							<input type="checkbox" name="dets" value="1" <?php echo ($includeDets?'CHECKED':''); ?> /> Include Determination History<br/>
-							<input type="checkbox" name="imgs" value="1" <?php echo ($includeImgs?'CHECKED':''); ?> /> Include Image URLs<br/>
-							<input type="checkbox" name="redact" value="1" <?php echo ($redactLocalities?'CHECKED':''); ?> /> Redact Sensitive Localities<br/>
+							<legend><b><?php echo $LANG['OPTIONS']; ?></b></legend>
+							<input type="checkbox" name="dets" value="1" <?php echo ($includeDets?'CHECKED':''); ?> /> <?php echo $LANG['INCLUDE_DETERMINATION_HISTORY']; ?><br/>
+							<input type="checkbox" name="imgs" value="1" <?php echo ($includeImgs?'CHECKED':''); ?> /> <?php echo $LANG['INCLUDE_IMAGE_URLS']; ?><br/>
+							<input type="checkbox" name="redact" value="1" <?php echo ($redactLocalities?'CHECKED':''); ?> /> <?php echo $LANG['REACT_SENSITIVE_LOCALITIES']; ?><br/>
 						</fieldset>
 						<div style="clear:both;margin:20px;">
 							<input type="hidden" name="collid" value="<?php echo $collId; ?>" />
 							<input type="submit" name="formsubmit" value="Create/Refresh Darwin Core Archive(s)" />
+							<input type="submit" value="<?php echo $LANG['CREATE_REFRESH_DARWIN_CORE_ARCHIVED']; ?>(s)" />
 						</div>
 					</fieldset>
 				</form>
@@ -459,7 +519,7 @@ include($SERVER_ROOT. '/header.php');
 			if($catTitle) echo '<div style="font-weight:bold;font-size:140%;margin:50px 0px 15px 0px;">'.$catTitle.' DwC-Archive Files</div>';
 			?>
 			<table class="styledtable" style="font-family:Arial;font-size:12px;margin:10px;">
-				<tr><th>Code</th><th>Collection Name</th><th>DwC-Archive</th><th>Metadata</th><th>Pub Date</th></tr>
+				<tr><th><?php echo $LANG['CODE']; ?></th><th><?php echo $LANG['COLLECTION_NAME']; ?></th><th><?php echo $LANG['DWC_ARCHIVE']; ?></th><th><?php echo $LANG['METADATA']; ?></th><th><?php echo $LANG['PUB_DATE']; ?></th></tr>
 				<?php
 				foreach($dwcaArr as $k => $v){
 					?>
@@ -471,9 +531,9 @@ include($SERVER_ROOT. '/header.php');
 							echo '<a href="'.$v['link'].'">DwC-A ('.$dwcaManager->humanFileSize($v['link']).')</a>';
 							if($IS_ADMIN){
 								?>
-								<form action="datapublisher.php" method="post" style="display:inline;" onsubmit="return window.confirm('Are you sure you want to delete this archive?');">
+								<form action="datapublisher.php" method="post" style="display:inline;" onsubmit="return window.confirm('<?php echo $LANG['ARE_YOU_SURE_YOU_WANT_TO_DELETE']; ?>');">
 									<input type="hidden" name="colliddel" value="<?php echo $v['collid']; ?>">
-									<input type="image" src="../../images/del.png" name="action" value="DeleteCollid" title="Delete Archive" style="width:15px;" />
+									<input type="image" src="../../images/del.png" name="action" value="DeleteCollid" title="<?php echo $LANG['DELETE_ARCHIVE']; ?>" style="width:15px;" />
 								</form>
 								<?php
 							}
@@ -493,14 +553,14 @@ include($SERVER_ROOT. '/header.php');
 			<?php
 		}
 		else{
-			echo '<div style="margin:10px;font-weight:bold;">There are no publishable collections</div>';
+			echo '<div style="margin:10px;font-weight:bold;">'.$LANG['THERE_ARE_NO_PUBLISHABLE_COLLECTION'].'</div>';
 		}
 		if($catID){
 			if($addDwca = $dwcaManager->getAdditionalDWCA($catID)){
-				echo '<div style="font-weight:bold;font-size:140%;margin:50px 0px 15px 0px;">Additional Data Sources within the Portal Network</div>';
+				echo '<div style="font-weight:bold;font-size:140%;margin:50px 0px 15px 0px;">'.$LANG['ADDITIONAL_DATA_SOURCES_WITHIN_THE_PORTAL_NETWORK'].'</div>';
 				echo '<ul>';
 				foreach($addDwca as $domanName => $domainArr){
-					echo '<li><a href="'.$domainArr['url'].'/collections/datasets/datapublisher.php'.'" target="_blank">http://'.$domanName.'</a> - '.$domainArr['cnt'].' Archives</li>';
+					echo '<li><a href="'.$domainArr['url'].'/collections/datasets/datapublisher.php'.'" target="_blank">http://'.$domanName.'</a> - '.$domainArr['cnt'].' '.$LANG['ARCHIVES'].'</li>';
 				}
 				echo '</ul>';
 			}

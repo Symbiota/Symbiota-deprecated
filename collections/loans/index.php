@@ -1,6 +1,7 @@
 <?php
 include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/SpecLoans.php');
+include_once($SERVER_ROOT.'/content/lang/collections/loans/index.'.$LANG_TAG.'.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 ini_set('max_execution_time', 180); //180 seconds = 3 minutes
 
@@ -85,7 +86,8 @@ $loanInList = $loanManager->getLoanInList($searchTerm,$displayAll);
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET;?>">
-	<title><?php echo $DEFAULT_TITLE; ?> Loan Management</title>
+	<title><?php echo $DEFAULT_TITLE.' '.$LANG['LOAN_MANAGEMENT']; ?></title>
+	<link href="../../css/bootstrap.min.css" type="text/css" rel="stylesheet"/>
     <link href="../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" rel="stylesheet" type="text/css" />
     <link href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" rel="stylesheet" type="text/css" />
 	<link href="../../css/jquery-ui.css" rel="Stylesheet" type="text/css" />
@@ -103,18 +105,18 @@ $loanInList = $loanManager->getLoanInList($searchTerm,$displayAll);
 	if(isset($collections_loans_indexCrumbs) && $collections_loans_indexCrumbs){
 		?>
 		<div class='navpath'>
-			<a href='../../index.php'>Home</a> &gt;&gt; 
+			<a href='../../index.php'><?php echo $LANG['HOME'];?></a> &gt;&gt; 
 			<?php echo $collections_loans_indexCrumbs; ?>
-			<a href='index.php?collid=<?php echo $collId; ?>'> <b>Loan Management Main Menu</b></a>
+			<a href='index.php?collid=<?php echo $collId; ?>'> <b><?php echo $LANG['LOAN'];?></b></a>
 		</div>
 		<?php 
 	}
 	else{
 		?>
 		<div class='navpath'>
-			<a href='../../index.php'>Home</a> &gt;&gt; 
-			<a href="../misc/collprofiles.php?collid=<?php echo $collId; ?>&emode=1">Collection Management Menu</a> &gt;&gt;
-			<a href='index.php?collid=<?php echo $collId; ?>'> <b>Loan Management Main Menu</b></a>
+			<a href='../../index.php'><?php echo $LANG['HOME'];?></a> &gt;&gt; 
+			<a href="../misc/collprofiles.php?collid=<?php echo $collId; ?>&emode=1"><?php echo $LANG['COLL'];?></a> &gt;&gt;
+			<a href='index.php?collid=<?php echo $collId; ?>'> <b><?php echo $LANG['LOAN'];?></b></a>
 		</div>
 		<?php 
 	}
@@ -138,28 +140,29 @@ $loanInList = $loanManager->getLoanInList($searchTerm,$displayAll);
 				?>
 				<div id="tabs" style="margin:0px;">
 				    <ul>
-						<li><a href="#loanoutdiv"><span>Outgoing Loans</span></a></li>
-						<li><a href="#loanindiv"><span>Incoming Loans</span></a></li>
-						<li><a href="exchange.php?collid=<?php echo $collId; ?>"><span>Gifts/Exchanges</span></a></li>
+						<li><a href="#loanoutdiv"><span><?php echo $LANG['OUT'];?></span></a></li>
+						<li><a href="#loanindiv"><span><?php echo $LANG['INCO'];?></span></a></li>
+						<li><a href="exchange.php?collid=<?php echo $collId; ?>"><span><?php echo $LANG['GIFT'];?></span></a></li>
 					</ul>
 					<div id="loanoutdiv" style="">
 						<div style="float:right;">
 							<form name='optionform' action='index.php' method='post'>
 								<fieldset>
-									<legend><b>Options</b></legend>
+									<legend><b><?php echo $LANG['OPTION'];?></b></legend>
 									<div>
-										<b>Search: </b>
+										<b><?php echo $LANG['SEARCH'];?> </b>
 										<input type="text" autocomplete="off" name="searchterm" value="<?php echo $searchTerm;?>" size="20" />
 									</div>
 									<div>
-										<input type="radio" name="displayall" value="0"<?php echo ($displayAll==0?'checked':'');?> /> Display outstanding loans only
+										<input type="radio" name="displayall" value="0"<?php echo ($displayAll==0?'checked':'');?> /> <?php echo $LANG['DISPLAY'];?>
 									</div>
 									<div>
-										<input type="radio" name="displayall" value="1"<?php echo ($displayAll?'checked':'');?> /> Display all loans
+										<input type="radio" name="displayall" value="1"<?php echo ($displayAll?'checked':'');?> /> <?php echo $LANG['DIS'];?>
 									</div>
 									<div style="float:right;">
 										<input type="hidden" name="collid" value="<?php echo $collId; ?>" />
-										<input type="submit" name="formsubmit" value="Refresh List" />
+										<input type="hidden" name="formsubmit" value="Refresh List" />
+										<input type="submit" value="<?php echo $LANG['REFRESH_LIST']; ?>" />
 									</div>
 								</fieldset>
 							</form>	
@@ -169,7 +172,7 @@ $loanInList = $loanManager->getLoanInList($searchTerm,$displayAll);
 							?>
 							<div id="loanoutToggle" style="float:right;margin:10px;">
 								<a href="#" onclick="displayNewLoanOut();">
-									<img src="../../images/add.png" alt="Create New Loan" />
+									<img src="../../images/add.png" alt="<?php echo $LANG['CREATE_NEW_LOAN']; ?>" />
 								</a>
 							</div>
 							<?php
@@ -178,10 +181,10 @@ $loanInList = $loanManager->getLoanInList($searchTerm,$displayAll);
 						<div id="newloanoutdiv" style="display:<?php echo ($loanOutList?'none':'block'); ?>;">
 							<form name="newloanoutform" action="index.php" method="post" onsubmit="return verfifyLoanOutAddForm(this);">
 								<fieldset>
-									<legend><b>New Outgoing Loan</b></legend>
+									<legend><b><?php echo $LANG['NEW'];?></b></legend>
 									<div style="padding-top:4px;float:left;">
 										<span>
-											Entered By:
+											<?php echo $LANG['ENTER'];?>
 										</span><br />
 										<span>
 											<input type="text" autocomplete="off" name="createdbyown" tabindex="96" maxlength="32" style="width:100px;" value="<?php echo $paramsArr['un']; ?>" onchange=" " />
@@ -189,16 +192,16 @@ $loanInList = $loanManager->getLoanInList($searchTerm,$displayAll);
 									</div>
 									<div style="padding-top:15px;float:right;">
 										<span>
-											<b>Loan Identifier: </b><input type="text" autocomplete="off" name="loanidentifierown" maxlength="255" style="width:120px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="" />
+											<b><?php echo $LANG['LOAN_IDEN'];?> </b><input type="text" autocomplete="off" name="loanidentifierown" maxlength="255" style="width:120px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="" />
 										</span>
 									</div>
 									<div style="clear:both;padding-top:6px;float:left;">
 										<span>
-											Send to Institution:
+											<?php echo $LANG['SEND'];?>
 										</span><br />
 										<span>
 											<select name="reqinstitution" style="width:400px;">
-												<option value="">Select Institution</option>
+												<option value=""><?php echo $LANG['SELEC'];?></option>
 												<option value="">------------------------------------------</option>
 												<?php 
 												$instArr = $loanManager->getInstitutionArr();
@@ -209,14 +212,14 @@ $loanInList = $loanManager->getLoanInList($searchTerm,$displayAll);
 											</select>
 										</span>
 										<span>
-											<a href="../admin/institutioneditor.php?emode=1" target="_blank" title="Add a New Institution">
+											<a href="../admin/institutioneditor.php?emode=1" target="_blank" title="<?php echo $LANG['CREATE_NEW_LOAN']; ?>">
 												<img src="../../images/add.png" style="width:15px;" />
 											</a>
 										</span>
 									</div>
 									<div style="clear:both;padding-top:8px;float:right;">
 										<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
-										<button name="formsubmit" type="submit" value="Create Loan Out">Create Loan</button>
+										<button name="formsubmit" type="submit" value="Create Loan Out"><?php echo $LANG['CREA'];?></button>
 									</div>
 								</fieldset>
 							</form>
@@ -229,7 +232,7 @@ $loanInList = $loanManager->getLoanInList($searchTerm,$displayAll);
 						<div>
 							<?php 
 							if($loanOutList){
-								echo '<h3>Outgoing Loan Records</h3>';
+								echo '<h3>'.$LANG['OUTGOING_LOAN_RECORDS'].'</h3>';
 								echo '<ul>';
 								foreach($loanOutList as $k => $loanArr){
 									echo '<li>';
@@ -242,7 +245,7 @@ $loanInList = $loanManager->getLoanInList($searchTerm,$displayAll);
 								echo '</ul>';
 							}
 							else{
-								echo '<div style="font-weight:bold;font-size:120%;margin-top:10px;">There are no loans out registered for this collection</div>';
+								echo '<div style="font-weight:bold;font-size:120%;margin-top:10px;">'.$LANG['THERE_ARE_NO_LOANS_OUT_REGISTERED_FOR_THIS_COLLECTION'].'</div>';
 							}
 							?>
 						</div>
@@ -252,19 +255,20 @@ $loanInList = $loanManager->getLoanInList($searchTerm,$displayAll);
 						<div style="float:right;">
 							<form name='optionform' action='index.php' method='post'>
 								<fieldset>
-									<legend><b>Options</b></legend>
+									<legend><b><?php echo $LANG['OP'];?></b></legend>
 									<div>
-										<b>Search: </b><input type="text" autocomplete="off" name="searchterm" value="<?php echo $searchTerm;?>" size="20" />
+										<b><?php echo $LANG['SEAR'];?> </b><input type="text" autocomplete="off" name="searchterm" value="<?php echo $searchTerm;?>" size="20" />
 									</div>
 									<div>
-										<input type="radio" name="displayall" value="0"<?php echo ($displayAll==0?'checked':'');?> /> Display outstanding loans only
+										<input type="radio" name="displayall" value="0"<?php echo ($displayAll==0?'checked':'');?> /> <?php echo $LANG['DI'];?>
 									</div>
 									<div>
-										<input type="radio" name="displayall" value="1"<?php echo ($displayAll?'checked':'');?> /> Display all loans
+										<input type="radio" name="displayall" value="1"<?php echo ($displayAll?'checked':'');?> /> <?php echo $LANG['DIS_ALL'];?>
 									</div>
 									<div style="float:right;">
 										<input type="hidden" name="collid" value="<?php echo $collId; ?>" />
-										<input type="submit" name="formsubmit" value="Refresh List" />
+										<input type="hidden" name="formsubmit" value="Refresh List" />
+										<input type="submit" name="formsubmit" value="<?php echo $LANG['REFRESH_LIST']; ?>" />
 									</div>
 								</fieldset>
 							</form>	
@@ -274,7 +278,7 @@ $loanInList = $loanManager->getLoanInList($searchTerm,$displayAll);
 							?>
 							<div id="loaninToggle" style="float:right;margin:10px;">
 								<a href="#" onclick="displayNewLoanIn();">
-									<img src="../../images/add.png" alt="Create New Loan" />
+									<img src="../../images/add.png" alt="<?php echo $LANG['CREATE_NEW_LOAN']; ?>" />
 								</a>
 							</div>
 							<?php
@@ -283,10 +287,10 @@ $loanInList = $loanManager->getLoanInList($searchTerm,$displayAll);
 						<div id="newloanindiv" style="display:<?php echo (($loansOnWay || $loanInList)?'none':'block'); ?>;">
 							<form name="newloaninform" action="index.php" method="post" onsubmit="return verifyLoanInAddForm(this);">
 								<fieldset>
-									<legend><b>New Incoming Loan</b></legend>
+									<legend><b><?php echo $LANG['NEW_INCOM'];?></b></legend>
 									<div style="padding-top:4px;float:left;">
 										<span>
-											Entered By:
+											<?php echo $LANG['ENTER_BY'];?>
 										</span><br />
 										<span>
 											<input type="text" autocomplete="off" name="createdbyborr" tabindex="96" maxlength="32" style="width:100px;" value="<?php echo $paramsArr['un']; ?>" onchange=" " />
@@ -294,17 +298,17 @@ $loanInList = $loanManager->getLoanInList($searchTerm,$displayAll);
 									</div>
 									<div style="padding-top:15px;float:right;">
 										<span>
-											<b>Loan Identifier: </b>
+											<b><?php echo $LANG['LOAN_INDENTIFIER'];?> </b>
 											<input type="text" autocomplete="off" id="loanidentifierborr" name="loanidentifierborr" maxlength="255" style="width:120px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="" onchange="inIdentCheck(loanidentifierborr,<?php echo $collId; ?>);" />
 										</span>
 									</div>
 									<div style="clear:both;padding-top:6px;float:left;">
 										<span>
-											Sent From:
+											<?php echo $LANG['SENT'];?> 
 										</span><br />
 										<span>
 											<select name="iidowner" style="width:400px;">
-												<option value="0">Select Institution</option>
+												<option value="0"><?php echo $LANG['SELECT_INST'];?></option>
 												<option value="0">------------------------------------------</option>
 												<?php 
 												$instArr = $loanManager->getInstitutionArr();
@@ -315,14 +319,14 @@ $loanInList = $loanManager->getLoanInList($searchTerm,$displayAll);
 											</select>
 										</span>
 										<span>
-											<a href="../admin/institutioneditor.php?emode=1" target="_blank" title="Add a New Institution">
+											<a href="../admin/institutioneditor.php?emode=1" target="_blank" title="<?php echo $LANG['ADD_A_NEW_INSTITUTION']; ?>">
 												<img src="../../images/add.png" style="width:15px;" />
 											</a>
 										</span>
 									</div>
 									<div style="clear:both;padding-top:8px;float:right;">
 										<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
-										<button name="formsubmit" type="submit" value="Create Loan In">Create Loan</button>
+										<button name="formsubmit" type="submit" value="Create Loan In"><?php echo $LANG['CREA']; ?></button>
 									</div>
 								</fieldset>
 							</form>
@@ -335,7 +339,7 @@ $loanInList = $loanManager->getLoanInList($searchTerm,$displayAll);
 						<div>
 							<?php 
 							if($loansOnWay){
-								echo '<h3>Loans on Their Way</h3>';
+								echo '<h3>'.$LANG['LOANDS_ON_THEIR_WAY'].'</h3>';
 								echo '<ul>';
 								foreach($loansOnWay as $k => $loanArr){
 									echo '<li>';
@@ -350,7 +354,7 @@ $loanInList = $loanManager->getLoanInList($searchTerm,$displayAll);
 						</div>
 						<div>
 							<?php 
-							echo '<h3>Incoming Loans</h3>';
+							echo '<h3>'.$LANG['INCO'].'</h3>';
 							echo '<ul>';
 							if($loanInList){
 								foreach($loanInList as $k => $loanArr){
@@ -358,12 +362,12 @@ $loanInList = $loanManager->getLoanInList($searchTerm,$displayAll);
 									echo '<a href="index.php?collid='.$collId.'&loanid='.$k.'&loantype=in">';
 									echo $loanArr['loanidentifierborr'];
 									echo '</a>: '.$loanArr['institutioncode'].' ('.$loanArr['forwhom'].')';
-									echo ' - '.($loanArr['dateclosed']?'Closed: '.$loanArr['dateclosed']:'<b>OPEN</b>');
+									echo ' - '.($loanArr['dateclosed']?'Closed: '.$loanArr['dateclosed']:'<b>'.$LANG['OPEN'].'</b>');
 									echo '</li>';
 								}
 							}
 							else{
-								echo '<li>There are no loans received</li>';
+								echo '<li>'.$LANG['THERE_ARE_NO_LOANS_RECEIVED'].'</li>';
 							}
 							echo '</ul>';
 							?>
@@ -384,13 +388,13 @@ $loanInList = $loanManager->getLoanInList($searchTerm,$displayAll);
 			}
 			else{
 				if(!$SYMB_UID){
-					echo '<h2>Please <a href="'.$CLIENT_ROOT.'/profile/index.php?collid='.$collId.'&refurl='.$CLIENT_ROOT.'/collections/loans/index.php?collid='.$collId.'">login</a></h2>';
+					echo '<h2>'.$LANG['PLEASE'].' <a href="'.$CLIENT_ROOT.'/profile/index.php?collid='.$collId.'&refurl='.$CLIENT_ROOT.'/collections/loans/index.php?collid='.$collId.'">'.$LANG['LOGIN'].'</a></h2>';
 				}
 				elseif(!$collId){
-					echo '<h2>Collection not defined</h2>';
+					echo '<h2>'.$LANG['COLLECTION_NOT_DEFINED'].'</h2>';
 				}
 				elseif(!$isEditor){
-					echo '<h2>You are not authorized to manage loans</h2>';
+					echo '<h2>'.$LANG['YOU_ARE_NOT_AUTHORIZED_TO_MANAGE_LOANS'].'</h2>';
 				}
 			}
 		}
@@ -399,10 +403,10 @@ $loanInList = $loanManager->getLoanInList($searchTerm,$displayAll);
 				echo 'Please <a href="../../profile/index.php?refurl=../collections/loans/index.php?collid='.$collId.'">login</a>';
 			}
 			elseif(!$isEditor){
-				echo '<h2>You are not authorized to add occurrence records</h2>';
+				echo '<h2>'.$LANG['YOU_ARE_NOT_AUTHORIZED_TO_ADD_OCCURRENCE_RECORDS'].'</h2>';
 			}
 			else{
-				echo '<h2>ERROR: unknown error, please contact system administrator</h2>';
+				echo '<h2>'.$LANG['ERROR_UNKNOWN_ERROR_PLEASE_CONTACT_SYSTEM_ADMINISTRATOR'].'</h2>';
 			}
 		}
 		?>

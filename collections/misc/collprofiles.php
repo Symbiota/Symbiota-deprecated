@@ -62,8 +62,12 @@ if($SYMB_UID){
 <head>
 	<title><?php echo $DEFAULT_TITLE." ".($collid?$collData[$collid]["collectionname"]:"") ; ?> Collection Profiles</title>
 	<meta name="keywords" content="Natural history collections,<?php echo ($collid?$collData[$collid]["collectionname"]:""); ?>" />
+	<!-- CSS bootstrap -->
+	<link href="../../css/bootstrap.min.css" type="text/css" rel="stylesheet"/>
 	<link href="../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
+
+
 	<link href="../../css/jquery-ui.css" rel="Stylesheet" type="text/css" />
 	<script src="../../js/jquery.js?ver=20130917" type="text/javascript"></script>
 	<script src="../../js/jquery-ui.js?ver=20130917" type="text/javascript"></script>
@@ -136,8 +140,8 @@ if($SYMB_UID){
 					<fieldset style="padding:10px;padding-left:25px;">
 						<legend><b>Data Editor Control Panel</b></legend>
 						<fieldset style="float:right;margin:5px" title="Quick Search">
-							<legend><b>Quick Search</b></legend>
-							<b>Catalog Number</b><br/>
+							<legend><b><?php echo $LANG['QUIK_SEARCH']; ?></b></legend>
+							<b><?php echo $LANG['CAT_NUM']; ?></b><br/>
 							<form name="quicksearch" action="../editor/occurrenceeditor.php" method="post">
 								<input name="q_catalognumber" type="text" />
 								<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
@@ -390,7 +394,7 @@ if($SYMB_UID){
                 if($addrArr = $collManager->getAddress()){
 					?>
 					<div style="margin-top:5px;">
-						<div style="float:left;font-weight:bold;">Address:</div>
+						<div style="float:left;font-weight:bold;"><?php echo $LANG['ADDRESS']; ?></div>
 						<div style="float:left;margin-left:10px;">
 							<?php
 							echo "<div>".$addrArr["institutionname"];
@@ -468,7 +472,7 @@ if($SYMB_UID){
 		}
 		else{
 			?>
-			<h2><?php echo $DEFAULT_TITLE; ?> Natural History Collections and Observation Projects</h2>
+			<h2><?php echo $DEFAULT_TITLE; ?> <?php echo $LANG['NATURAL_HISTORY']; ?></h2>
 			<div style='margin:10px;clear:both;'>
 				<?php
 				$serverDomain = "http://";

@@ -2,6 +2,8 @@
 include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceCleaner.php');
 include_once($SERVER_ROOT.'/classes/SOLRManager.php');
+include_once($SERVER_ROOT.'/content/lang/collections/cleaning/duplicatesearch.'.$LANG_TAG.'.php');
+
 header("Content-Type: text/html; charset=".$CHARSET);
 
 $collid = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
@@ -51,6 +53,7 @@ elseif($action == 'listdupsrecordedby'){
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET; ?>">
 	<title><?php echo $DEFAULT_TITLE; ?> Occurrence Cleaner</title>
+	<link href="../../css/bootstrap.min.css" type="text/css" rel="stylesheet"/>
 	<link href="../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
     <link href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
     <style type="text/css">
@@ -95,12 +98,12 @@ elseif($action == 'listdupsrecordedby'){
 		}
 	</script>
 </head>
-<body style="background-color:white;margin-left:0px;margin-right:0px">
+<body style="background-color:white;margin-left:0px;margin-right:0px;padding:50px">
 	<div class='navpath'>
-		<a href="../../index.php">Home</a> &gt;&gt;
-		<a href="../misc/collprofiles.php?collid=<?php echo $collid; ?>&emode=1">Collection Management</a> &gt;&gt;
-		<a href="index.php?collid=<?php echo $collid; ?>">Cleaning Module Index</a> &gt;&gt;
-		<b>Duplicate Occurrences</b>
+		<a href="../../index.php"><?php echo $LANG['HOME'];?></a> &gt;&gt;
+		<a href="../misc/collprofiles.php?collid=<?php echo $collid; ?>&emode=1"><?php echo $LANG['COL_MAN'];?></a> &gt;&gt;
+		<a href="index.php?collid=<?php echo $collid; ?>"><?php echo $LANG['CLEANING'];?></a> &gt;&gt;
+		<b><?php echo $LANG['DUPLICATE'];?></b>
 	</div>
 
 	<!-- inner text -->
@@ -115,7 +118,7 @@ elseif($action == 'listdupsrecordedby'){
 					//Build table
 					?>
 					<div style="margin-bottom:10px;">
-						<b>Use the checkboxes to select the records you would like to merge, and the radio buttons to select which target record to merge into.</b>
+						<b><?php echo $LANG['USE_BOXE'];?></b>
 					</div>
 					<form name="mergeform" action="duplicatesearch.php" method="post" onsubmit="return validateMergeForm(this);">
 						<?php
@@ -130,19 +133,20 @@ elseif($action == 'listdupsrecordedby'){
 								<th style="width:40px;">ID</th>
 								<th style="width:20px;"><input name="selectalldupes" type="checkbox" title="Select/Deselect All" onclick="selectAllDuplicates(this.form)" /></th>
 								<th><input type="checkbox" name="batchswitch" onclick="batchSwitchTargetSpecimens(this)" title="Batch switch target occurrences" /></th>
-								<th style="width:40px;">Catalog Number</th>
-								<th style="width:40px;">Other Catalog Numbers</th>
-								<th>Scientific Name</th>
-								<th>Collector</th>
-								<th>Collection Number</th>
-								<th>Associated Collectors</th>
-								<th>Collection Date</th>
-								<th>Verbatim Date</th>
-								<th>Country</th>
-								<th>State</th>
-								<th>County</th>
-								<th>Locality</th>
-								<th>Date Last Modified</th>
+								<th style="width:40px;"><?php echo $LANG['CAT_NUM'];?></th>
+								<th style="width:40px;"><?php echo $LANG['OTHER_CAT'];?></th>
+								<th><?php echo $LANG['SCIENT'];?></th>
+								<th><?php echo $LANG['COLLECTOR'];?></th>
+								<th><?php echo $LANG['COL_NUMBER'];?></th>
+								<th><?php echo $LANG['ASSOCIATED'];?></th>
+								<th><?php echo $LANG['COLL_DATE'];?></th>
+								<th><?php echo $LANG['VERB_DATE'];?></th>
+								<th></th>
+								<th><?php echo $LANG['COUNTRY'];?></th>
+								<th><?php echo $LANG['STATE'];?></th>
+								<th><?php echo $LANG['COUNTY'];?></th>
+								<th><?php echo $LANG['LOCALITY'];?></th>
+								<th><?php echo $LANG['DATE_LAST'];?></th>
 							</tr>
 							<?php
 							$setCnt = 0;
@@ -183,7 +187,7 @@ elseif($action == 'listdupsrecordedby'){
 				else{
 					?>
 					<div style="margin:25px;font-weight:bold;font-size:120%;">
-						There are no duplicate catalog numbers!
+						<?php echo $LANG['THERE'];?>
 					</div>
 					<?php
 				}
@@ -191,7 +195,7 @@ elseif($action == 'listdupsrecordedby'){
 			elseif($action == 'Merge Duplicate Records'){
 				?>
 				<ul>
-					<li>Duplicate merging process started</li>
+					<li><?php echo $LANG['DUPLICATE_MERGIN'];?></li>
 					<?php
 					$dupArr = array();
 					foreach($_POST['dupid'] as $v){
@@ -204,13 +208,13 @@ elseif($action == 'listdupsrecordedby'){
 					$cleanManager->mergeDupeArr($dupArr);
                     if($SOLR_MODE) $solrManager->updateSOLR();
 					?>
-					<li>Done!</li>
+					<li><?php echo $LANG['DONE'];?></li>
 				</ul>
 				<?php
 			}
 			?>
 			<div>
-				<a href="index.php?collid=<?php echo $collid; ?>">Return to main menu</a>
+				<a href="index.php?collid=<?php echo $collid; ?>"><?php echo $LANG['RETURN'];?></a>
 			</div>
 			<?php
 		}

@@ -1,6 +1,7 @@
 <?php
 include_once('../../config/symbini.php'); 
 include_once($serverRoot.'/classes/OccurrenceDuplicate.php');
+include_once($SERVER_ROOT.'/content/lang/collections/datasets/duplicatemanager.'.$LANG_TAG.'.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $collId = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
@@ -44,7 +45,8 @@ if($isEditor && $formSubmit){
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>">
-	<title><?php echo $defaultTitle; ?> Occurrence Cleaner</title>
+	<title><?php echo $defaultTitle;?> Occurrence Cleaner</title>
+	<link href="../../css/bootstrap.min.css" type="text/css" rel="stylesheet"/>
 	<link href="../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
     <link href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
     <style type="text/css">
@@ -128,27 +130,23 @@ if($isEditor && $formSubmit){
 			if(!$action){
 				?>
 				<fieldset style="padding:20px;">
-					<legend><b>Duplicate Linkages</b></legend>
+					<legend><b><?php echo $LANG['DUPLICATE'];?></b></legend>
 						<div>
-						It is common within some collection domains to collect specimens in duplicate. 
-						Links below list duplicate cluster and aid collection managers in batch linking 
-						their specimen records to duplicate specimens housed at other institutions. 
-						The main method of batch clustering duplicates is by matching 
-						the collector, collector number, and collection date.
+						<?php echo $LANG['IT'];?>
 					</div>
 					<div style="margin:25px;font-weight:bold;font-size:120%;">
 						<a href="duplicatemanager.php?collid=<?php echo $collId; ?>&action=listdupes">
-							List linked duplicate clusters 
+							<?php echo $LANG['LIST_LINKED'];?> 
 						</a>
 					</div>
 					<div style="margin:25px;font-weight:bold;font-size:120%;">
 						<a href="duplicatemanager.php?collid=<?php echo $collId; ?>&dupedepth=2&action=listdupeconflicts">
-							List linked duplicate clusters with conflicted identifications 
+								<?php echo $LANG['LIST_CLUSTER'];?> 
 						</a>
 					</div>
 					<div style="margin:25px;font-weight:bold;font-size:120%;">
 						<a href="duplicatemanager.php?collid=<?php echo $collId; ?>&action=batchlinkdupes">
-							Start batch linking duplicates
+							<?php echo $LANG['BATCH'];?>
 						</a>
 					</div>
 				</fieldset>
@@ -205,11 +203,11 @@ if($isEditor && $formSubmit){
 									?>
 									<div class="editdiv-<?php echo $dupId; ?>" style="display:none;">
 										<fieldset style="margin:20px;padding:15px;">
-											<legend><b>Edit Cluster</b></legend>
+											<legend><b><?php echo $LANG['EDIT'];?></b></legend>
 											<form name="dupeditform-<?php echo $dupId; ?>" method="post" action="duplicatemanager.php" onsubmit="return verifyEditForm(this);">
-												<b>Title:</b> <input name="title" type="text" value="<?php echo $dupArr['title']; ?>" style="width:300px;" /><br/>
-												<b>Description:</b> <input name="description" type="text" value="<?php echo $dupArr['desc']; ?>" style="width:400px;" /><br/>
-												<b>Notes:</b> <input name="notes" type="text" value="<?php echo $dupArr['notes']; ?>" style="width:400px;" /><br/>
+												<b><?php echo $LANG['TITLE'];?></b> <input name="title" type="text" value="<?php echo $dupArr['title']; ?>" style="width:300px;" /><br/>
+												<b><?php echo $LANG['DESCRIPTION'];?></b> <input name="description" type="text" value="<?php echo $dupArr['desc']; ?>" style="width:400px;" /><br/>
+												<b><?php echo $LANG['NOTES'];?></b> <input name="notes" type="text" value="<?php echo $dupArr['notes']; ?>" style="width:400px;" /><br/>
 												<input name="dupid" type="hidden" value="<?php echo $dupId; ?>" />
 												<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
 												<input name="start" type="hidden" value="<?php echo $start; ?>" />
@@ -278,13 +276,13 @@ if($isEditor && $formSubmit){
 				}
 				?>
 				<div>
-					<a href="duplicatemanager.php?collid=<?php echo $collId; ?>">Return to main menu</a>
+					<a href="duplicatemanager.php?collid=<?php echo $collId; ?>"><?php echo $LANG['RETURN'];?></a>
 				</div> 
 				<?php 
 			}
 		}
 		else{
-			echo '<h2>You are not authorized to access this page</h2>';
+			echo '<h5>You are not authorized to access this page</h5>';
 		}
 		?>
 	</div>

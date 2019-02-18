@@ -1,6 +1,8 @@
 <?php
 include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/UuidFactory.php');
+include_once($SERVER_ROOT.'/content/lang/collections/admin/guidmapper.'.$LANG_TAG.'.php');
+
 header("Content-Type: text/html; charset=".$charset);
 ini_set('max_execution_time', 3600);
 
@@ -19,7 +21,8 @@ $uuidManager = new UuidFactory();
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET; ?>">
-	<title>UUID GUID Mapper</title>
+	<title><?php echo $LANG['UUID_GUID_MAPPER']; ?></title>
+	<link href="../../css/bootstrap.min.css" type="text/css" rel="stylesheet"/>
 	<link rel="stylesheet" href="../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" />
     <link rel="stylesheet" href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" />
 	<script type="text/javascript">
@@ -62,20 +65,20 @@ $uuidManager = new UuidFactory();
     </script>
 </head>
 <body>
-<?php 
+<?php
 $displayLeftMenu = (isset($admin_guidmapperMenu)?$admin_guidmapperMenu:"true");
 include($SERVER_ROOT."/header.php");
 ?>
 <!-- This is inner text! -->
 <div id="innertext">
-	<?php 
+	<?php
 	if($isEditor){
 		?>
-		<h3>GUID Maintenance Control Panel</h3>
+		<h3><?php echo $LANG['GUID_MANT'];?></h3>
 		<div style="margin:10px;">
-			 
+
 		</div>
-		<?php 
+		<?php
 		if($action == 'Populate Collection GUIDs'){
 			echo '<ul>';
 			$uuidManager->populateGuids($collId);
@@ -86,28 +89,29 @@ include($SERVER_ROOT."/header.php");
 			$uuidManager->populateGuids();
 			echo '</ul>';
 		}
-		
+
 		//$collCnt = $uuidManager->getCollectionCount();
 		$occCnt = $uuidManager->getOccurrenceCount($collId);
 		$detCnt = $uuidManager->getDeterminationCount($collId);
 		$imgCnt = $uuidManager->getImageCount($collId);
 		?>
 		<?php if($collId) echo '<h3>'.$uuidManager->getCollectionName($collId).'</h3>'; ?>
-		<div style="font-weight:bold;">Records without GUIDs (UUIDs)</div>
+		<div style="font-weight:bold;"><?php echo $LANG['REC_GUID'];?></div>
 		<div style="margin:10px;">
-			<div><b>Occurrences: </b><?php echo $occCnt; ?></div>
-			<div><b>Determinations: </b><?php echo $detCnt; ?></div>
-			<div><b>Images: </b><?php echo $imgCnt; ?></div>
+			<div><b><?php echo $LANG['OCC'];?> </b><?php echo $occCnt; ?></div>
+			<div><b><?php echo $LANG['DETER'];?> </b><?php echo $detCnt; ?></div>
+			<div><b><?php echo $LANG['IMAGES'];?> </b><?php echo $imgCnt; ?></div>
 		</div>
-		<?php 
+		<?php
 		if($collId){
 			?>
 			<form name="guidform" action="guidmapper.php" method="post" onsubmit="return verifyGuidForm(this)">
 				<fieldset style="padding:15px;">
-					<legend><b>GUID (UUID) Mapper</b></legend>
+					<legend><b><?php echo $LANG['REC_GUID'];?></b></legend>
 					<div style="clear:both;">
 						<input type="hidden" name="collid" value="<?php echo $collId; ?>" />
-						<input type="submit" name="formsubmit" value="Populate Collection GUIDs" />
+						<input type="hidden" name="formsubmit" value="Populate Collection GUIDs" />
+						<input type="submit" value="<?php echo $LANG['POPULATE_COLLECTION_GUIDS']; ?>" />
 					</div>
 				</fieldset>
 			</form>
@@ -118,10 +122,11 @@ include($SERVER_ROOT."/header.php");
 			<div id="guidadmindiv">
 				<form name="dwcaguidform" action="guidmapper.php" method="post" onsubmit="return verifyGuidAdminForm(this)">
 					<fieldset style="padding:15px;">
-						<legend><b>GUID (UUID) Mapper</b></legend>
+						<legend><b><?php echo $LANG['REC_GUID'];?></b></legend>
 						<div style="clear:both;margin:10px;">
 							<input type="hidden" name="collid" value="<?php echo $collId; ?>" />
-							<input type="submit" name="formsubmit" value="Populate GUIDs" />
+							<input type="hidden" name="formsubmit" value="Populate GUIDs" />
+							<input type="submit" value="<?php echo $LANG['POPULATE_GUIDS']; ?>" />
 						</div>
 					</fieldset>
 				</form>
@@ -130,11 +135,11 @@ include($SERVER_ROOT."/header.php");
 		}
 	}
 	else{
-		echo '<h2>You are not authorized to access this page</h2>';
+		echo '<h2>'.$LANG['YOU_ARE_NOT_AUTHORIZED_TO_ACCESS_THIS_PAGE'].'</h2>';
 	}
 	?>
 </div>
-<?php 
+<?php
 include($SERVER_ROOT."/footer.php");
 ?>
 </body>

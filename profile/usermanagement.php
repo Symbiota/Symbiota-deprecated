@@ -2,6 +2,8 @@
 include_once('../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/PermissionsManager.php');
 include_once($SERVER_ROOT.'/classes/ProfileManager.php');
+include_once($SERVER_ROOT.'/content/lang/profile/usermanagement.'.$LANG_TAG.'.php');
+
 header("Content-Type: text/html; charset=".$CHARSET);
 
 $loginAs = array_key_exists("loginas",$_REQUEST)?trim($_REQUEST["loginas"]):"";
@@ -39,6 +41,7 @@ if($IS_ADMIN){
 <head>
 	<title><?php echo $DEFAULT_TITLE; ?> User Management</title>
 	<meta http-equiv="X-Frame-Options" content="deny">
+	<link href="../css/bootstrap.min.css" type="text/css" rel="stylesheet"/>
 	<link href="../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 </head>
@@ -52,22 +55,22 @@ if($IS_ADMIN){
 		echo "<div class='navpath'>";
 		echo "<a href='../index.php'>Home</a> &gt; ";
 		echo $profile_usermanagementCrumbs;
-		echo " <b>User Management</b>"; 
+		echo " <b>User Management</b>";
 		echo "</div>";
 	}
-	?> 
-	<!-- This is inner text! --> 
+	?>
+	<!-- This is inner text! -->
 	<div id="innertext">
 		<div style="float:right;">
 			<div style="margin:10px 0px 15px 0px;">
 				<fieldset style="background-color:#FFFFCC;padding:0px 10px 10px 10px;">
-					<legend style="font-weight:bold;">Search</legend>
-					Last Name or Login Name:
+					<legend style="font-weight:bold;"><?php echo $LANG['SEARCH'];?></legend>
+					<?php echo $LANG['LAST_NAME'];?>
 					<form name='searchform1' action='usermanagement.php' method='post'>
 						<input type='text' name='searchterm' title='Enter Last Name'><br/>
 						<input name='submit' type='submit' value='Search'>
 					</form>
-					Quick Search:
+					<?php echo $LANG['QUIK_SEARCH'];?>
 					<div style='margin:2px 0px 0px 10px;'>
 						<div><a href='usermanagement.php?searchterm=A'>A</a>|<a href='usermanagement.php?searchterm=B'>B</a>|<a href='usermanagement.php?searchterm=C'>C</a>|<a href='usermanagement.php?searchterm=D'>D</a>|<a href='usermanagement.php?searchterm=E'>E</a>|<a href='usermanagement.php?searchterm=F'>F</a>|<a href='usermanagement.php?searchterm=G'>G</a>|<a href='usermanagement.php?searchterm=H'>H</a></div>
 						<div><a href='usermanagement.php?searchterm=I'>I</a>|<a href='usermanagement.php?searchterm=J'>J</a>|<a href='usermanagement.php?searchterm=K'>K</a>|<a href='usermanagement.php?searchterm=L'>L</a>|<a href='usermanagement.php?searchterm=M'>M</a>|<a href='usermanagement.php?searchterm=N'>N</a>|<a href='usermanagement.php?searchterm=O'>O</a>|<a href='usermanagement.php?searchterm=P'>P</a>|<a href='usermanagement.php?searchterm=Q'>Q</a></div>
@@ -76,48 +79,48 @@ if($IS_ADMIN){
 				</fieldset>
 			</div>
 		</div>
-		<?php 
+		<?php
 		if($IS_ADMIN){
 			if($userId){
 				$user = $userManager->getUser($userId);
 				?>
 				<h1>
-					<?php 
-						echo $user["firstname"]." ".$user["lastname"]." (#".$user["uid"].") "; 
+					<?php
+						echo $user["firstname"]." ".$user["lastname"]." (#".$user["uid"].") ";
 						echo "<a href='viewprofile.php?emode=1&tabindex=2&&userid=".$user["uid"]."'><img src='../images/edit.png' style='border:0px;width:15px;' /></a>";
 					?>
 				</h1>
 				<div style="margin-left:10px;">
 					<div style="clear:left;">
-						<div style="float:left;font-weight:bold;margin-right:8px;">Title: </div>
+						<div style="float:left;font-weight:bold;margin-right:8px;"><?php echo $LANG['TITLE'];?> </div>
 						<div style="float:left;"><?php echo $user["title"];?></div>
 					</div>
 					<div style="clear:left;">
-						<div style="float:left;font-weight:bold;margin-right:8px;">Institution: </div>
+						<div style="float:left;font-weight:bold;margin-right:8px;"><?php echo $LANG['INSTITUTION'];?> </div>
 						<div style="float:left;"><?php echo $user["institution"];?></div>
 					</div>
 					<div style="clear:left;">
-						<div style="float:left;font-weight:bold;margin-right:8px;">City: </div>
+						<div style="float:left;font-weight:bold;margin-right:8px;"><?php echo $LANG['CITY'];?> </div>
 						<div style="float:left;"><?php echo $user["city"];?></div>
 					</div>
 					<div style="clear:left;">
-						<div style="float:left;font-weight:bold;margin-right:8px;">State: </div>
+						<div style="float:left;font-weight:bold;margin-right:8px;"><?php echo $LANG['STATE'];?> </div>
 						<div style="float:left;"><?php echo $user["state"];?></div>
 					</div>
 					<div style="clear:left;">
-						<div style="float:left;font-weight:bold;margin-right:8px;">Zip: </div>
+						<div style="float:left;font-weight:bold;margin-right:8px;"><?php echo $LANG['ZIP'];?> </div>
 						<div style="float:left;"><?php echo $user["zip"];?></div>
 					</div>
 					<div style="clear:left;">
-						<div style="float:left;font-weight:bold;margin-right:8px;">Country: </div>
+						<div style="float:left;font-weight:bold;margin-right:8px;"><?php echo $LANG['COUNTRY'];?> </div>
 						<div style="float:left;"><?php echo $user["country"];?></div>
 					</div>
 					<div style="clear:left;">
-						<div style="float:left;font-weight:bold;margin-right:8px;">Email: </div>
+						<div style="float:left;font-weight:bold;margin-right:8px;"><?php echo $LANG['EMAIL'];?> </div>
 						<div style="float:left;"><?php echo $user["email"];?></div>
 					</div>
 					<div style="clear:left;">
-						<div style="float:left;font-weight:bold;margin-right:8px;">URL: </div>
+						<div style="float:left;font-weight:bold;margin-right:8px;"><?php echo $LANG['URL'];?> </div>
 						<div style="float:left;">
 							<a href='<?php echo $user["url"];?>'>
 								<?php echo $user["url"];?>
@@ -140,110 +143,110 @@ if($IS_ADMIN){
 				?>
 				<fieldset style="clear:both;margin:10px;padding:15px;padding-left:25px;">
 					<legend><b>Current Permissions</b></legend>
-					<?php 
+					<?php
 					$userPermissions = $userManager->getUserPermissions($userId);
 					if($userPermissions){
 						?>
 						<div>
 							<ul>
-							<?php 
-							if(array_key_exists("SuperAdmin",$userPermissions)){ 
+							<?php
+							if(array_key_exists("SuperAdmin",$userPermissions)){
 								?>
 								<li>
-									<b><?php 
+									<b><?php
 									echo '<span title="'.$userPermissions['SuperAdmin']['aby'].'">';
 									echo str_replace('SuperAdmin','Super Administrator',$userPermissions['SuperAdmin']['role']);
-									echo '</span>'; 
-									?></b> 
+									echo '</span>';
+									?></b>
 									<a href="usermanagement.php?delrole=SuperAdmin&userid=<?php echo $userId; ?>">
 										<img src="../images/del.png" style="border:0px;width:15px;" title="Delete permission" />
 									</a>
 								</li>
-								<?php 
+								<?php
 							}
-							if(array_key_exists("Taxonomy",$userPermissions)){ 
+							if(array_key_exists("Taxonomy",$userPermissions)){
 								?>
 								<li>
-									<b><?php 
+									<b><?php
 									echo '<span title="'.$userPermissions['Taxonomy']['aby'].'">';
 									echo str_replace('Taxonomy','Taxonomy Editor',$userPermissions['Taxonomy']['role']);
-									echo '</span>'; 
-									?></b> 
+									echo '</span>';
+									?></b>
 									<a href="usermanagement.php?delrole=Taxonomy&userid=<?php echo $userId; ?>">
 										<img src="../images/del.png" style="border:0px;width:15px;" title="Delete permission" />
 									</a>
 								</li>
-								<?php 
+								<?php
 							}
-							if(array_key_exists("TaxonProfile",$userPermissions)){ 
+							if(array_key_exists("TaxonProfile",$userPermissions)){
 								?>
 								<li>
-									<b><?php 
+									<b><?php
 									echo '<span title="'.$userPermissions['TaxonProfile']['aby'].'">';
 									echo str_replace('TaxonProfile','Taxon Profile Editor',$userPermissions['TaxonProfile']['role']);
-									echo '</span>'; 
-									?></b> 
+									echo '</span>';
+									?></b>
 									<a href="usermanagement.php?delrole=TaxonProfile&userid=<?php echo $userId; ?>">
 										<img src="../images/del.png" style="border:0px;width:15px;" title="Delete permission" />
 									</a>
 								</li>
-								<?php 
+								<?php
 							}
-							if(array_key_exists("KeyAdmin",$userPermissions)){ 
+							if(array_key_exists("KeyAdmin",$userPermissions)){
 								?>
 								<li>
-									<b><?php 
+									<b><?php
 									echo '<span title="'.$userPermissions['KeyAdmin']['aby'].'">';
 									echo str_replace('KeyAdmin','Identification Keys Administrator',$userPermissions['KeyAdmin']['role']);
-									echo '</span>'; 
+									echo '</span>';
 									?></b>
 									<a href="usermanagement.php?delrole=KeyAdmin&userid=<?php echo $userId; ?>">
 										<img src="../images/del.png" style="border:0px;width:15px;" title="Delete permission" />
 									</a>
 								</li>
-								<?php 
+								<?php
 							}
-							if(array_key_exists("KeyEditor",$userPermissions)){ 
+							if(array_key_exists("KeyEditor",$userPermissions)){
 								?>
 								<li>
-									<b><?php 
+									<b><?php
 									echo '<span title="'.$userPermissions['KeyEditor']['aby'].'">';
 									echo str_replace('KeyEditor','Identification Keys Editor',$userPermissions['KeyEditor']['role']);
-									echo '</span>'; 
+									echo '</span>';
 									?></b>
 									<a href="usermanagement.php?delrole=KeyEditor&userid=<?php echo $userId; ?>">
 										<img src="../images/del.png" style="border:0px;width:15px;" title="Delete permission" />
 									</a>
 								</li>
-								<?php 
+								<?php
 							}
-							if(array_key_exists("RareSppAdmin",$userPermissions)){ 
+							if(array_key_exists("RareSppAdmin",$userPermissions)){
 								?>
 								<li>
-									<b><?php 
+									<b><?php
 									echo '<span title="'.$userPermissions['RareSppAdmin']['aby'].'">';
 									echo str_replace('RareSppAdmin','Rare Species List Administrator',$userPermissions['RareSppAdmin']['role']);
-									echo '</span>'; 
+									echo '</span>';
 									?></b>
 									<a href="usermanagement.php?delrole=RareSppAdmin&userid=<?php echo $userId; ?>">
 										<img src="../images/del.png" style="border:0px;width:15px;" title="Delete permission" />
 									</a>
 								</li>
-								<?php 
+								<?php
 							}
-							if(array_key_exists("RareSppReadAll",$userPermissions)){ 
+							if(array_key_exists("RareSppReadAll",$userPermissions)){
 								?>
 								<li>
-									<b><?php 
+									<b><?php
 									echo '<span title="'.$userPermissions['RareSppReadAll']['aby'].'">';
 									echo str_replace('RareSppReadAll','View and Map Specimens of Rare Species from all Collections',$userPermissions['RareSppReadAll']['role']);
-									echo '</span>'; 
+									echo '</span>';
 									?></b>
 									<a href="usermanagement.php?delrole=RareSppReadAll&userid=<?php echo $userId; ?>">
 										<img src="../images/del.png" style="border:0px;width:15px;" title="Delete permission" />
 									</a>
 								</li>
-								<?php 
+								<?php
 							}
 							//Collections Admin
 							if(array_key_exists("CollAdmin",$userPermissions)){
@@ -272,12 +275,12 @@ if($IS_ADMIN){
 								}
 								echo "</ul>";
 							}
-							if(array_key_exists("RareSppReader",$userPermissions)){ 
+							if(array_key_exists("RareSppReader",$userPermissions)){
 								?>
 								<li>
 									<b>View and Map Specimens of Rare Species from following Collections</b>
 									<ul>
-									<?php 
+									<?php
 									$rsrArr = $userPermissions["RareSppReader"];
 									foreach($rsrArr as $collId => $v){
 										?>
@@ -287,12 +290,12 @@ if($IS_ADMIN){
 												<img src="../images/del.png" style="border:0px;width:15px;" title="Delete permission" />
 											</a>
 										</li>
-										<?php 
+										<?php
 									}
 									?>
 									</ul>
 								</li>
-								<?php 
+								<?php
 							}
 							//Inventory Projects
 							if(array_key_exists("ProjAdmin",$userPermissions)){
@@ -300,7 +303,7 @@ if($IS_ADMIN){
 								<li>
 									<b>Administrator for following inventory projects</b>
 									<ul>
-										<?php 
+										<?php
 										$projList = $userPermissions["ProjAdmin"];
 										asort($projList);
 										foreach($projList as $k => $v){
@@ -312,7 +315,7 @@ if($IS_ADMIN){
 										?>
 									</ul>
 								</li>
-								<?php 
+								<?php
 							}
 							//Checklists
 							if(array_key_exists("ClAdmin",$userPermissions)){
@@ -320,7 +323,7 @@ if($IS_ADMIN){
 								<li>
 									<b>Administrator for following checklists</b>
 									<ul>
-										<?php 
+										<?php
 										$clList = $userPermissions["ClAdmin"];
 										asort($clList);
 										foreach($clList as $k => $v){
@@ -337,12 +340,12 @@ if($IS_ADMIN){
 										?>
 									</ul>
 								</li>
-								<?php 
+								<?php
 							}
 							?>
 							</ul>
 						</div>
-						<?php 									
+						<?php
 					}
 					else{
 						echo "<h3 style='margin:20px;'>No permissions have to been assigned to this user</h3>";
@@ -384,7 +387,7 @@ if($IS_ADMIN){
 									<input type='checkbox' name='p[]' value='RareSppAdmin' />
 									Rare Species Administrator (add/remove species from list)
 								</div>
-								<?php 
+								<?php
  							}
  							else{
 								$showRareSppOption = false;
@@ -395,7 +398,7 @@ if($IS_ADMIN){
 								<input type='checkbox' name='p[]' value='RareSppReadAll' />
 								Can read Rare Species data for all collections
 							</div>
-							<?php 
+							<?php
  							}
  							else{
 								$showRareSppOption = false;
@@ -430,27 +433,27 @@ if($IS_ADMIN){
 											<td align="center">
 												<input type='checkbox' name='p[]' value='CollEditor-<?php echo $collid;?>' title='Able to add and edit occurrence data' <?php if(isset($userPermissions["CollEditor"][$collid])) echo "DISABLED";?> />
 											</td>
-											<?php 
-											if($showRareSppOption){ 
+											<?php
+											if($showRareSppOption){
 												?>
 												<td align="center">
 													<input type='checkbox' name='p[]' value='RareSppReader-<?php echo $collid;?>' title='Able to read occurrence details for rare species' <?php if(isset($userPermissions["RareSppReader"][$collid])) echo "DISABLED";?> />
 												</td>
-												<?php 
-											} 
+												<?php
+											}
 											?>
 											<td>
-												<?php 
+												<?php
 												echo $cArr['collectionname'];
-												echo ' ('.$cArr['institutioncode'].($cArr['collectioncode']?'-'.$cArr['collectioncode']:'').')'; 
+												echo ' ('.$cArr['institutioncode'].($cArr['collectioncode']?'-'.$cArr['collectioncode']:'').')';
 												?>
 											</td>
 										</tr>
-										<?php 
+										<?php
 									}
 									?>
 								</table>
-								<?php 
+								<?php
 							}
 							//Observation projects
 							if($obserArr){
@@ -476,27 +479,27 @@ if($IS_ADMIN){
 											<td align="center">
 												<input type='checkbox' name='p[]' value='CollEditor-<?php echo $obsid;?>' title='Able to add and edit occurrence data' <?php if(isset($userPermissions["CollEditor"][$obsid])) echo "DISABLED";?> />
 											</td>
-											<?php 
-											if($showRareSppOption){ 
+											<?php
+											if($showRareSppOption){
 												?>
 												<td align="center">
 													<input type='checkbox' name='p[]' value='RareSppReader-<?php echo $obsid;?>' title='Able to read occurrence details for rare species' <?php if(isset($userPermissions["RareSppReader"][$obsid])) echo "DISABLED";?> />
 												</td>
-												<?php 
-											} 
+												<?php
+											}
 											?>
 											<td>
-												<?php 
+												<?php
 												echo $oArr['collectionname'];
-												echo ' ('.$oArr['institutioncode'].($oArr['collectioncode']?'-'.$oArr['collectioncode']:'').')'; 
+												echo ' ('.$oArr['institutioncode'].($oArr['collectioncode']?'-'.$oArr['collectioncode']:'').')';
 												?>
 											</td>
 										</tr>
-										<?php 
+										<?php
 									}
 									?>
 								</table>
-								<?php 
+								<?php
 							}
 							//Get checklists
 							$pidArr = Array();
@@ -511,16 +514,16 @@ if($IS_ADMIN){
 									<input type='submit' name='apsubmit' value='Add Permission' />
 								</div>
 								<h2>Inventory Project Management</h2>
-								<?php 
+								<?php
 								foreach($projectArr as $k=>$v){
 									?>
 									<div style='margin-left:15px;'>
-										<?php 
+										<?php
 										echo '<input type="checkbox" name="p[]" value="ProjAdmin-'.$k.'" />';
-										echo '<a href="../projects/index.php?pid='.$k.'" target="_blank">'.$v.'</a>'; 
+										echo '<a href="../projects/index.php?pid='.$k.'" target="_blank">'.$v.'</a>';
 										?>
 									</div>
-									<?php 
+									<?php
 								}
 							}
 							//Get checklists
@@ -536,16 +539,16 @@ if($IS_ADMIN){
 									<input type='submit' name='apsubmit' value='Add Permission' />
 								</div>
 								<h2>Checklist Management</h2>
-								<?php 
+								<?php
 								foreach($checklistArr as $k=>$v){
 									?>
 									<div style='margin-left:15px;'>
-										<?php 
+										<?php
 										echo '<input type="checkbox" name="p[]" value="ClAdmin-'.$k.'" />';
 										echo '<a href="../checklists/checklist.php?cl='.$k.'" target="_blank">'.$v.'</a>';
 										?>
 									</div>
-									<?php 
+									<?php
 								}
 							}
 							?>
@@ -557,7 +560,7 @@ if($IS_ADMIN){
 			}
 			else{
 				$users = $userManager->getUsers($searchTerm);
-				echo "<h1>Users</h1>";
+				echo "<h1>".$LANG['USERS']."</h1>";
 				foreach($users as $id => $name){
 					echo "<div><a href='usermanagement.php?userid=$id'>$name</a></div>";
 				}
@@ -570,7 +573,7 @@ if($IS_ADMIN){
 	</div>
 	<?php
 	include($SERVER_ROOT.'/footer.php');
-	?> 
+	?>
 
 </body>
 </html>

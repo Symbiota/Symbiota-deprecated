@@ -1,6 +1,7 @@
 <?php
 include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceSupport.php');
+include_once($SERVER_ROOT.'/content/lang/collections/misc/commentlist.'.$LANG_TAG.'.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 
 if(!$SYMB_UID) header('Location: '.$CLIENT_ROOT.'/profile/index.php?refurl=../collections/misc/commentlist.php?'.$_SERVER['QUERY_STRING']);
@@ -59,6 +60,7 @@ if($isEditor){
 <html>
 	<head>
 		<title>Comments Listing</title>
+		<link href="<?php echo $CLIENT_ROOT; ?>/css/bootstrap.min.css" type="text/css" rel="stylesheet"/>
 		<link href="<?php echo $CLIENT_ROOT; ?>/css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 		<link href="<?php echo $CLIENT_ROOT; ?>/css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 		<script>
@@ -66,13 +68,13 @@ if($isEditor){
 				if(dateInput.value != ""){
 					var dateArr = parseDate(dateInput.value);
 					if(dateArr['y'] == 0){
-						alert("Unable to interpret Date. Please use the following formats: 2016-05-21, 05/21/2016, 21 May 2016, May 2016, or simply 2016");
+						alert("<?php echo $LANG['UNABLE_TO_INTERPRET_DATE']; ?>");
 						return false;
 					}
 					else{
 						//Invalid format is month > 12
 						if(dateArr['m'] > 12){
-							alert("Month cannot be greater than 12. Note that the format should be YYYY-MM-DD");
+							alert("<?php echo $LANG['MONTH_CANNOT_BE_GREATER_THAN']; ?>");
 							return false;
 						}
 			
@@ -81,7 +83,7 @@ if($isEditor){
 							if(dateArr['d'] > 31 
 								|| (dateArr['d'] == 30 && dateArr['m'] == 2) 
 								|| (dateArr['d'] == 31 && (dateArr['m'] == 4 || dateArr['m'] == 6 || dateArr['m'] == 9 || dateArr['m'] == 11))){
-								alert("The Day (" + dateArr['d'] + ") is invalid for that month");
+								alert("<?php echo $LANG['THE_DAY']; ?> (" + dateArr['d'] + ") <?php echo $LANG['IS_INVALID_FOR_THAT_MONTH']; ?>");
 								return false;
 							}
 						}
@@ -186,9 +188,9 @@ if($isEditor){
 		include($SERVER_ROOT.'/header.php');
 		?>
 		<div class="navpath">
-			<a href="<?php echo $CLIENT_ROOT; ?>/index.php">Home</a> &gt;&gt; 
-			<a href="../misc/collprofiles.php?collid=<?php echo $collid; ?>&emode=1">Collection Management</a> &gt;&gt;
-			<b>Occurrence Comment Listing</b>
+			<a href="<?php echo $CLIENT_ROOT; ?>/index.php"><?php echo $LANG['HOME'];?></a> &gt;&gt; 
+			<a href="../misc/collprofiles.php?collid=<?php echo $collid; ?>&emode=1"><?php echo $LANG['COLL'];?></a> &gt;&gt;
+			<b><?php echo $LANG['OUT'];?></b>
 		</div>
 		<?php 
 		if($statusStr){
@@ -216,7 +218,7 @@ if($isEditor){
 					$hrefPrefix = 'commentlist.php?'.$urlVars."&start=";
 					$pageBar .= "<span style='margin:5px;'>\n";
 					if($endPage > 1){
-					    $pageBar .= "<span style='margin-right:5px;'><a href='".$hrefPrefix."0'>First Page</a> &lt;&lt;</span>";
+					    $pageBar .= "<span style='margin-right:5px;'><a href='".$hrefPrefix."0'>".$LANG['FIRST_PAGE']."</a> &lt;&lt;</span>";
 						for($x = $startPage; $x <= $endPage; $x++){
 						    if($currentPage != $x){
 						        $pageBar .= "<span style='margin-right:3px;margin-right:3px;'><a href='".$hrefPrefix.(($x-1)*$limit)."'>".$x."</a></span>";
@@ -227,12 +229,12 @@ if($isEditor){
 						}
 					}
 					if($lastPage > $endPage){
-					    $pageBar .= "<span style='margin-left:5px;'>&gt;&gt; <a href='".$hrefPrefix.(($lastPage-1)*$limit)."'>Last Page</a></span>";
+					    $pageBar .= "<span style='margin-left:5px;'>&gt;&gt; <a href='".$hrefPrefix.(($lastPage-1)*$limit)."'>".$LANG['LAST_PAGE']."</a></span>";
 					}
 					$pageBar .= "</span>";
 					$endNum = $start + $limit;
 					if($endNum > $recCnt) $endNum = $recCnt;
-					$cntBar = ($start+1)."-".$endNum." of ".$recCnt.' comments';
+					$cntBar = ($start+1)."-".$endNum." of ".$recCnt.' '.$LANG['COMMENTS'];
 					echo "<div><hr/></div>\n";
 					echo '<div style="float:right;"><b>'.$pageBar.'</b></div>';
 					echo '<div><b>'.$cntBar.'</b></div>';
@@ -241,11 +243,11 @@ if($isEditor){
 				?>
 				<!-- Option box -->
 				<fieldset style="float:right;width:250px;margin:10px;">
-					<legend><b>Options</b></legend>
+					<legend><b><?php echo $LANG['OPTION'];?></b></legend>
 					<form name="optionform" action="commentlist.php" method="post">
 						<div>
 							<select name="uid" onchange="this.form.submit()">
-								<option value="0">All Users</option> 
+								<option value="0"><?php echo $LANG['ALL_USER'];?></option> 
 								<option value="0">------------------------</option> 
 								<?php 
 									$userArr = $commentManager->getCommentUsers($collid);
@@ -256,16 +258,16 @@ if($isEditor){
 							</select>
 						</div>
 						<div>
-							Beginning Date: 
+							<?php echo $LANG['BEGI'];?> 
 							<input name="tsstart" type="text" value="<?php echo $tsStart; ?>" style="width:100px;" onchange="dateChanged(this)" /><br/>
-							End Date:  
+							<?php echo $LANG['END'];?>   
 							<input name="tsend" type="text" value="<?php echo $tsEnd; ?>" style="width:100px;" onchange="dateChanged(this)" />
 						</div>
 						<div>
-							<input name="rs" type="radio" value="1" <?php echo ($rs==1?'checked':''); ?> onchange="this.form.submit()" /> Public <br/>
-							<input name="rs" type="radio" value="2" <?php echo ($rs==2?'checked':''); ?> onchange="this.form.submit()" /> Non-public <br/>
-							<input name="rs" type="radio" value="3" <?php echo ($rs==3?'checked':''); ?> onchange="this.form.submit()" /> Reviewed <br/>
-							<input name="rs" type="radio" value="0" <?php echo (!$rs?'checked':''); ?> onchange="this.form.submit()" /> All
+							<input name="rs" type="radio" value="1" <?php echo ($rs==1?'checked':''); ?> onchange="this.form.submit()" /> <?php echo $LANG['PUBLIC'];?> <br/>
+							<input name="rs" type="radio" value="2" <?php echo ($rs==2?'checked':''); ?> onchange="this.form.submit()" /> <?php echo $LANG['NON_PUBLIC'];?> <br/>
+							<input name="rs" type="radio" value="3" <?php echo ($rs==3?'checked':''); ?> onchange="this.form.submit()" /> <?php echo $LANG['REVIEWED'];?> <br/>
+							<input name="rs" type="radio" value="0" <?php echo (!$rs?'checked':''); ?> onchange="this.form.submit()" /> <?php echo $LANG['ALL'];?>
 						</div>
 						<div>
 							<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
@@ -280,10 +282,10 @@ if($isEditor){
 						echo '<div>';
 						echo '<b>'.$userArr[$cArr['uid']].'</b> <span style="color:gray;">posted on '.$cArr['ts'].'</span>';
 						if($cArr['rs'] == 2 || $cArr['rs'] === '0'){
-							echo '<span style="margin-left:20px;"><b>Status:</b> </span><span style="color:red;" title="viewable by administrators only)">Not Public</span>';
+							echo '<span style="margin-left:20px;"><b>Status:</b> </span><span style="color:red;" title="'.$LANG['VIEWABLE_BY_ADMINISTRATOR'].'">'.$LANG['NOT_PUBLIC'].'</span>';
 						}
 						elseif($cArr['rs'] == 3){
-							echo '<span style="margin-left:20px;"><b>Status:</b> </span><span style="color:orange;">Reviewed</span>';
+							echo '<span style="margin-left:20px;"><b>'.$LANG['STATUS'].':</b> </span><span style="color:orange;">'.$LANG['REVIEWED'].'</span>';
 						}
 						echo '</div>';
 						echo '<div style="margin:10px;">'.$cArr['str'].'</div>';
@@ -299,17 +301,20 @@ if($isEditor){
 								<input name="rs" type="hidden" value="<?php echo $rs; ?>" />
 								<?php 
 								if($cArr['rs'] == 2){
-									echo '<input name="formsubmit" type="submit" value="Make comment public" />';
-								}
-								else{
-									echo '<input name="formsubmit" type="submit" value="Hide Comment from Public" />';
+									echo '<input name="formsubmit" type="hidden" value="Make comment public" />';
+									echo '<input type="submit" value="'.$LANG['MAKE_COMMENT_PUBLIC'].'" />';
+								} else {
+									echo '<input name="formsubmit" type="hidden" value="Hide Comment from Public" />';
+									echo '<input type="submit" value="'.$LANG['HIDE_COMMENT_FROM_PUBLIC'].'" />';
 								}
 								?>
 								<span style="margin-left:20px;">
-									<input name="formsubmit" type="submit" value="Mark as reviewed" />
+									<input name="formsubmit" type="hidden" value="Mark as reviewed" />
+									<input type="submit" value="<?php echo $LANG['MARK_AS_REVIEWED']; ?>" />
 								</span>
 								<span style="margin-left:20px;">
-									<input name="formsubmit" type="submit" value="Delete Comment"  onclick="return confirm('Are you sure you want to delete this comment?')" />
+									<input name="formsubmit" type="hidden" value="Delete Comment" />
+									<input type="submit" value="<?php echo $LANG['DELETE_COMMENT']; ?>"  onclick="return confirm('<?php echo $LANG['ARE_YOU_SURE_YOU_WANT_TO_DELETE']; ?>')" />
 								</span>
 								<input name="comid" type="hidden" value="<?php echo $comid; ?>" />
 							</form>
@@ -320,13 +325,11 @@ if($isEditor){
 					}
 					echo '<div style="float:right;">'.$pageBar.'</div>';
 					echo "<div style='clear:both;'><hr/></div></div>";
+				} else {
+					echo '<div style="font-weight:bold;font-size:120%;margin:20px;">'.$LANG['NO_COMMENTS_HAVE_BEEN_SUBMITTED'].'</div>';
 				}
-				else{
-					echo '<div style="font-weight:bold;font-size:120%;margin:20px;">No comments have been submitted</div>';
-				}
-			}
-			else{
-				echo '<div>ERROR: collid is null</div>';
+			} else {
+				echo '<div>'.$LANG['ERROR_COLLID_IS_NULL'].'</div>';
 			}
 			?>
 		</div>

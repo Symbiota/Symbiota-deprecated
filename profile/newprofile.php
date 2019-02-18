@@ -1,6 +1,7 @@
 <?php
 include_once('../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/ProfileManager.php');
+include_once($SERVER_ROOT.'/content/lang/profile/newprofile.'.$LANG_TAG.'.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 header('Cache-Control: no-cache, no-cache="set-cookie", no-store, must-revalidate');
 header('Pragma: no-cache'); // HTTP 1.0.
@@ -11,7 +12,6 @@ $emailAddr = array_key_exists('emailaddr',$_POST)?$_POST['emailaddr']:'';
 $action = array_key_exists("submit",$_REQUEST)?$_REQUEST["submit"]:'';
 
 $pHandler = new ProfileManager();
-$middle = $pHandler->checkFieldExists('users','middleinitial');
 $displayStr = '';
 
 //Sanitation
@@ -71,9 +71,12 @@ if($action == "Create Login"){
 <html>
 <head>
 	<title><?php echo $DEFAULT_TITLE; ?> - New User Profile</title>
-	<meta http-equiv="X-Frame-Options" content="deny">
 	<link href="../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
+	<link href="../css/bootstrap.min.css" type="text/css" rel="stylesheet"/>
+	<!--inicio favicon -->
+	<link rel="shortcut icon" href="../images/favicon.png" type="image/x-icon">
+
 	<script type="text/javascript">
 		function validateform(f){
 			<?php
@@ -89,7 +92,7 @@ if($action == "Create Login"){
 			var pwd1 = f.pwd.value;
 			var pwd2 = f.pwd2.value;
 			if(pwd1 == "" || pwd2 == ""){
-				alert("Both password fields must contain a value");
+				alert("<?php echo $LANG['FIELD_PASS'];?>");
 				return false;
 			}
 			if(pwd1.charAt(0) == " " || pwd1.slice(-1) == " "){
@@ -146,8 +149,7 @@ if($action == "Create Login"){
 		echo "</div>";
 	}
 	?>
-	<div id="innertext">
-	<h1>Create New Profile</h1>
+	<div id="innertext" style="margin-top:20px;">
 
 	<?php
 	if($displayStr){
@@ -164,7 +166,8 @@ if($action == "Create Login"){
 				<div style="margin:15px">
 					<form name="retrieveLoginForm" method="post" action="index.php">
 						<input name="emailaddr" type="hidden" value="<?php echo $emailAddr; ?>" />
-						<input name="action" type="submit" value="Retrieve Login" />
+						<input type="hidden" name="submit" value="Retrieve Login" />
+						<input type="submit" value="<?php echo $LANG['RETRIEVE_LOGIN']; ?>" />
 					</form>
 				</div>
 			</div>
@@ -179,136 +182,116 @@ if($action == "Create Login"){
 		echo '</div>';
 	}
 	?>
-	<fieldset style='margin:10px;width:95%;'>
-		<legend><b>Login Details</b></legend>
+	<fieldset style='width:100%;background: #FFFFFF; opacity: 50%; padding-right: 35%; padding-left: 5%;'>
+
+		<p><legend><h2><?php echo $LANG['CREATE_ACCOUNT'];?></h2></legend>
+			<br/>
+			<h3><?php echo $LANG['DETAIL_REG'];?></h3>
+		</p>
+
 		<form action="newprofile.php" method="post" onsubmit="return validateform(this);">
-			<div style="margin:15px;">
+			<div style="margin-color:15px; margin:15px;">
 				<table cellspacing='3'>
 					<tr>
 						<td style="width:120px;">
-							<b>Login:</b>
+							<?php echo $LANG['LOGIN'];?>
 						</td>
 						<td>
 							<input name="login" value="<?php echo $login; ?>" size="20" />
-							<span style="color:red;">*</span>
-							<br/>&nbsp;
+							<span style="color:green;">*</span>
 						</td>
 					</tr>
 					<tr>
 						<td>
-							<b>Password:</b>
+							<?php echo $LANG['PASS'];?>
 						</td>
 						<td>
 							<input name="pwd" id="pwd" value="" size="20" type="password" autocomplete="off" />
-							<span style="color:red;">*</span>
+							<span style="color:green;">*</span>
 						</td>
 					</tr>
 					<tr>
 						<td>
-							<b>Password Again:</b>
+							<?php echo $LANG['RETYPE_PASS'];?>
 						</td>
 						<td>
 							<input id="pwd2" name="pwd2" value="" size="20" type="password" autocomplete="off" />
-							<span style="color:red;">*</span>
+							<span style="color:green;">*</span>
 							<br/>&nbsp;
 						</td>
 					</tr>
 					<tr>
-						<td><span style="font-weight:bold;">First Name:</span></td>
+						<td><span style="font-weight:regular;"><?php echo $LANG['NAME'];?></span></td>
 						<td>
 							<input id="firstname" name="firstname" size="40" value="<?php echo (isset($_POST['firstname'])?htmlspecialchars($_POST['firstname']):''); ?>">
-							<span style="color:red;">*</span>
+							<span style="color:green;">*</span>
 						</td>
 					</tr>
-                    <?php
-                    if($middle){
-                        ?>
-                        <tr>
-                            <td><span style="font-weight:bold;">Middle Initial:</span></td>
-                            <td>
-                                <input id="middleinitial" name="middleinitial" size="3" value="<?php echo (isset($_POST['middleinitial'])?htmlspecialchars($_POST['middleinitial']):''); ?>">
-                            </td>
-                        </tr>
-                        <?php
-                    }
-                    ?>
 					<tr>
-						<td><span style="font-weight:bold;">Last Name:</span></td>
+						<td><span style="font-weight:regular;"><?php echo $LANG['LAST_NAME'];?></span></td>
 						<td>
 							<input id="lastname" name="lastname" size="40" value="<?php echo (isset($_POST['lastname'])?htmlspecialchars($_POST['lastname']):''); ?>">
-							<span style="color:red;">*</span>
+							<span style="color:green;">*</span>
 						</td>
 					</tr>
 					<tr>
-						<td><span style="font-weight:bold;">Email Address:</span></td>
+						<td><span style="font-weight:regular;"><?php echo $LANG['E_MAIL'];?></span></td>
 						<td>
 							<span class="profile"><input name="emailaddr"  size="40" value="<?php echo $emailAddr; ?>"></span>
-							<span style="color:red;">*</span>
+							<span style="color:green;">*</span>
 						</td>
 					</tr>
 					<tr>
 						<td>&nbsp;</td>
-						<td><span style="color:red;">* required fields</span></td>
+						<td><span style="color:green;"><?php echo $LANG['REQUIRED_FIELDS'];?></span></td>
 					</tr>
 				</table>
-				<div style="margin:15px 0px 10px 0px;"><b><u>Information below is optional, but encouraged</u></b></div>
+				<div style="margin:15px 0px 10px 0px;"><b><u><?php echo $LANG['OPT_INFO'];?></u></b></div>
 				<table cellspacing='3'>
 					<tr>
-						<td><b>Title:</b></td>
+						<td><?php echo $LANG['TITLE'];?></td>
 						<td>
 							<span class="profile"><input name="title"  size="40" value="<?php echo (isset($_POST['title'])?htmlspecialchars($_POST['title']):''); ?>"></span>
 						</td>
 					</tr>
 					<tr>
-						<td><b>Institution:</b></td>
+						<td><?php echo $LANG['INST'];?></td>
 						<td>
 							<span class="profile"><input name="institution"  size="40" value="<?php echo (isset($_POST['institution'])?htmlspecialchars($_POST['institution']):'') ?>"></span>
 						</td>
 					</tr>
-                    <tr>
-                        <td><b>Department:</b></td>
-                        <td>
-                            <span class="profile"><input name="department"  size="40" value="<?php echo (isset($_POST['department'])?htmlspecialchars($_POST['department']):'') ?>"></span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><b>Street Address:</b></td>
-                        <td>
-                            <span class="profile"><input name="address"  size="40" value="<?php echo (isset($_POST['address'])?htmlspecialchars($_POST['address']):'') ?>"></span>
-                        </td>
-                    </tr>
 					<tr>
-						<td><span style="font-weight:bold;">City:</span></td>
+						<td><span style="font-weight:regular;"><?php echo $LANG['DEPT'];?></span></td>
 						<td>
 							<span class="profile"><input id="city" name="city" size="40" value="<?php echo (isset($_POST['city'])?$_POST['city']:''); ?>"></span>
 						</td>
 					</tr>
 					<tr>
-						<td><span style="font-weight:bold;">State:</span></td>
+						<td><span style="font-weight:regular;"><?php echo $LANG['STATE'];?></span></td>
 						<td>
 							<span class="profile"><input id="state" name="state"  size="40" value="<?php echo (isset($_POST['state'])?htmlspecialchars($_POST['state']):''); ?>"></span>
 						</td>
 					</tr>
 					<tr>
-						<td><b>Zip Code:</b></td>
+						<td><?php echo $LANG['ZCODE'];?></td>
 						<td>
 							<span class="profile"><input name="zip"  size="40" value="<?php echo (isset($_POST['zip'])?htmlspecialchars($_POST['zip']):''); ?>"></span>
 						</td>
 					</tr>
 					<tr>
-						<td><span style="font-weight:bold;">Country:</span></td>
+						<td><span style="font-weight:regular;"><?php echo $LANG['COUNTRY'];?></span></td>
 						<td>
 							<span class="profile"><input id="country" name="country"  size="40" value="<?php echo (isset($_POST['country'])?htmlspecialchars($_POST['country']):''); ?>"></span>
 						</td>
 					</tr>
 					<tr>
-						<td><b>Url:</b></td>
+						<td><?php echo $LANG['URL'];?></td>
 						<td>
 							<span class="profile"><input name="url"  size="40" value="<?php echo (isset($_POST['url'])?htmlspecialchars($_POST['url']):''); ?>"></span>
 						</td>
 					</tr>
 					<tr>
-						<td><b>Biography:</b></td>
+						<td><?php echo $LANG['BIO'];?></td>
 						<td>
 							<span class="profile">
 								<textarea name="biography" rows="4" cols="40"><?php echo (isset($_POST['biography'])?htmlspecialchars($_POST['biography']):''); ?></textarea>
@@ -318,19 +301,20 @@ if($action == "Create Login"){
 					<tr>
 						<td colspan="2">
 							<span class="profile">
-								<input type="checkbox" name="ispublic" value="1" <?php if(isset($_POST['ispublic'])) echo "CHECKED"; ?> /> Public can view email and bio within website (e.g. photographer listing)
+								<input type="checkbox" name="ispublic" value="1" <?php if(isset($_POST['ispublic'])) echo "CHECKED"; ?>/> <?php echo $LANG['PUB_INFO'];?>
 							</span>
 						</td>
 					</tr>
 					<tr>
 						<td colspan="2">
-							<div style="margin:10px;">
+							<div style="margin:30px;">
 								<?php
 								if($useRecaptcha) echo '<div class="g-recaptcha" data-sitekey="'.$RECAPTCHA_PUBLIC_KEY.'"></div>';
 								?>
 							</div>
 							<div style="float:right;margin:20px;">
-								<input type="submit" value="Create Login" name="submit" id="submit" />
+							<input type="hidden" name="submit" value="Create Login" />
+							<input type="submit" value="<?php echo $LANG['CREATE_LOGIN']; ?>" />
 							</div>
 						</td>
 					</tr>
@@ -339,8 +323,6 @@ if($action == "Create Login"){
 		</form>
 	</fieldset>
 	</div>
-	<?php
-	include($SERVER_ROOT.'/footer.php');
-	?>
+
 </body>
 </html>

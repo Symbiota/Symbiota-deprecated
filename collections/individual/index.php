@@ -3,7 +3,6 @@ include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceIndividualManager.php');
 include_once($SERVER_ROOT.'/classes/DwcArchiverCore.php');
 include_once($SERVER_ROOT.'/classes/RdfUtility.php');
-
 $occid = array_key_exists("occid",$_REQUEST)?trim($_REQUEST["occid"]):0;
 $collid = array_key_exists("collid",$_REQUEST)?trim($_REQUEST["collid"]):0;
 $pk = array_key_exists("pk",$_REQUEST)?trim($_REQUEST["pk"]):"";
@@ -12,7 +11,6 @@ $submit = array_key_exists('formsubmit',$_REQUEST)?trim($_REQUEST['formsubmit'])
 $tabIndex = array_key_exists('tabindex',$_REQUEST)?$_REQUEST['tabindex']:0;
 $clid = array_key_exists("clid",$_REQUEST)?trim($_REQUEST["clid"]):0;
 $format = isset($_GET['format'])?$_GET['format']:'';
-
 //Sanitize input variables
 if(!is_numeric($occid)) $occid = 0;
 if($guid && !preg_match('/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/', $guid)) $guid = '';
@@ -21,7 +19,6 @@ if(!is_numeric($tabIndex)) $tabIndex = 0;
 if(!is_numeric($clid)) $clid = 0;
 if($pk && !preg_match('/^[a-zA-Z0-9\s_]+$/',$pk)) $pk = '';
 if($submit && !preg_match('/^[a-zA-Z0-9\s_]+$/',$submit)) $submit = '';
-
 $indManager = new OccurrenceIndividualManager();
 if($occid){
 	$indManager->setOccid($occid);
@@ -33,19 +30,15 @@ elseif($collid && $pk){
 	$indManager->setCollid($collid);
 	$indManager->setDbpk($pk);
 }
-
 $indManager->setDisplayFormat($format);
 $occArr = $indManager->getOccData();
 if(!$occid) $occid = $indManager->getOccid();
 $collMetadata = $indManager->getMetadata();
 if(!$collid) $collid = $occArr['collid'];
-
 $genticArr = $indManager->getGeneticArr();
-
 $statusStr = '';
 $displayLocality = false;
 $isEditor = false;
-
 //  If other than HTML was requested, return just that content.
 $done=FALSE;
 $accept = RdfUtility::parseHTTPAcceptHeader($_SERVER['HTTP_ACCEPT']);
@@ -71,12 +64,10 @@ while (!$done && list($key, $mediarange) = each($accept)) {
        echo $dwcManager->getAsJson();
        $done = TRUE;
     }
-
 }
 if ($done) {
   die;
 }
-
 if($SYMB_UID){
 	//Check editing status
 	if($IS_ADMIN || (array_key_exists('CollAdmin',$USER_RIGHTS) && in_array($collid,$USER_RIGHTS['CollAdmin']))){
@@ -91,7 +82,6 @@ if($SYMB_UID){
 	elseif($indManager->isTaxonomicEditor()){
 		$isEditor = true;
 	}
-
 	//Check locality security
 	if($isEditor || array_key_exists("RareSppAdmin",$USER_RIGHTS) || array_key_exists("RareSppReadAll",$USER_RIGHTS)){
 		$displayLocality = true;
@@ -102,7 +92,6 @@ if($SYMB_UID){
 	elseif(array_key_exists('CollAdmin',$USER_RIGHTS) || array_key_exists('CollEditor',$USER_RIGHTS)){
 		$displayLocality = true;
 	}
-
 	//Form action submitted
 	if(array_key_exists('delvouch',$_GET) && $occid){
 		if(!$indManager->deleteVoucher($occid,$_GET['delvouch'])){
@@ -145,12 +134,10 @@ if($SYMB_UID){
 	}
 }
 if(!$occArr['localitysecurity']) $displayLocality = true;
-
 $displayMap = false;
 if($displayLocality && is_numeric($occArr['decimallatitude']) && is_numeric($occArr['decimallongitude'])) $displayMap = true;
 $dupClusterArr = $indManager->getDuplicateArr();
 $commentArr = $indManager->getCommentArr($isEditor);
-
 header("Content-Type: text/html; charset=".$CHARSET);
 ?>
 <html>
@@ -170,7 +157,6 @@ header("Content-Type: text/html; charset=".$CHARSET);
 		var tabIndex = <?php echo $tabIndex; ?>;
 		var map;
 		var mapInit = false;
-
 		$(document).ready(function() {
 			$('#tabs').tabs({
 				beforeActivate: function(event, ui) {
@@ -182,13 +168,11 @@ header("Content-Type: text/html; charset=".$CHARSET);
 				},
 				active: tabIndex
 			});
-
 			$("#tabs").tabs().css({
 				'min-height': '400px',
 				'overflow': 'auto'
 			});
 		});
-
 		function toggle(target){
 			var objDiv = document.getElementById(target);
 			if(objDiv){
@@ -214,7 +198,6 @@ header("Content-Type: text/html; charset=".$CHARSET);
 				}
 			}
 		}
-
 		function verifyVoucherForm(f){
 			var clTarget = f.elements["clid"].value;
 			if(clTarget == "0"){
@@ -223,7 +206,6 @@ header("Content-Type: text/html; charset=".$CHARSET);
 			}
 			return true;
 		}
-
 		function verifyCommentForm(f){
 			if(f.commentstr.value.replace(/^\s+|\s+$/g,"")){
 				return true;
@@ -231,12 +213,10 @@ header("Content-Type: text/html; charset=".$CHARSET);
 			alert("Please enter a comment");
 			return false;
 		}
-
 		function openIndividual(target) {
 			occWindow=open("index.php?occid="+target,"occdisplay","resizable=1,scrollbars=1,toolbar=1,width=900,height=600,left=20,top=20");
 			if (occWindow.opener == null) occWindow.opener = self;
 		}
-
 		<?php
 		if($displayMap){
 			?>

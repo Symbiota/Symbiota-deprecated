@@ -4,8 +4,8 @@ include_once($SERVER_ROOT.'/content/lang/taxa/index.'.$LANG_TAG.'.php');
 include_once($SERVER_ROOT.'/classes/TaxonProfileManager.php');
 Header("Content-Type: text/html; charset=".$CHARSET);
 
-$taxonValue = array_key_exists("taxon",$_REQUEST)?$_REQUEST["taxon"]:""; 
-$taxAuthId = array_key_exists("taxauthid",$_REQUEST)?$_REQUEST["taxauthid"]:1; 
+$taxonValue = array_key_exists("taxon",$_REQUEST)?$_REQUEST["taxon"]:"";
+$taxAuthId = array_key_exists("taxauthid",$_REQUEST)?$_REQUEST["taxauthid"]:1;
 $clValue = array_key_exists("cl",$_REQUEST)?$_REQUEST["cl"]:0;
 $projValue = array_key_exists("proj",$_REQUEST)?$_REQUEST["proj"]:0;
 $lang = array_key_exists("lang",$_REQUEST)?$_REQUEST["lang"]:$DEFAULT_LANG;
@@ -73,6 +73,7 @@ else{
 <head>
 	<title><?php echo $DEFAULT_TITLE." - ".$spDisplay; ?></title>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET; ?>"/>
+	<link href="../css/bootstrap.min.css" type="text/css" rel="stylesheet"/>
 	<link href="../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/speciesprofilebase.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />

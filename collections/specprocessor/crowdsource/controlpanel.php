@@ -1,6 +1,7 @@
 <?php
 include_once('../../../config/symbini.php');
 include_once($serverRoot.'/classes/OccurrenceCrowdSource.php');
+include_once($SERVER_ROOT.'/content/lang/collections/specprocessor/crowdsource/controlpanel.'.$LANG_TAG.'.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $collid= array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
@@ -40,19 +41,18 @@ $projArr = $csManager->getProjectDetails();
 		<div style="float:right;"><a href="#" onclick="toggle('projFormDiv')"><img src="../../images/edit.png" /></a></div>
 		<div style="font-weight:bold;font-size:130%;"><?php echo (($omcsid && $projArr)?$projArr['name']:''); ?></div>
 		<div>
-			This module can be used to submit and manage records for data entry by the
-			general public. For more information, see the <a href="http://symbiota.org/docs/crowdsourcing-within-symbiota-2/">Symbiota documentation on crowdsourcing</a>.
+			<?php echo $LANG['A'];?> <a href="http://symbiota.org/docs/crowdsourcing-within-symbiota-2/"><?php echo $LANG['B'];?></a>.
 		</div>
 		<div id="projFormDiv" style="display:none">
 			<fieldset style="margin:15px;">
-				<legend><b>Edit Project</b></legend>
+				<legend><b><?php echo $LANG['C_1'];?></b></legend>
 				<form name="csprojform" action="index.php" method="post">
 					<div style="margin:3px;">
-						<b>General Instructions:</b><br/>
+						<b><?php echo $LANG['C'];?></b><br/>
 						<textarea name="instr" style="width:500px;height:100px;"><?php echo (($omcsid && $projArr)?$projArr['instr']:''); ?></textarea>
 					</div>
 					<div style="margin:3px;">
-						<b>Training Url:</b><br/>
+						<b><?php echo $LANG['D'];?></b><br/>
 						<input name="url" type="text" value="<?php echo (($omcsid && $projArr)?$projArr['url']:''); ?>" style="width:500px;" />
 					</div>
 					<div>
@@ -75,7 +75,7 @@ $projArr = $csManager->getProjectDetails();
 				<div style="font-weight:bold;text-decoration:underline">Total Counts:</div>
 				<div style="margin:15px 0px 25px 15px;">
 					<div>
-						<b>Records in Queue:</b>
+						<b><?php echo $LANG['E'];?></b>
 						<?php
 						$unprocessedCnt = 0;
 						if(isset($statsArr[0]) && $statsArr[0]) $unprocessedCnt = $statsArr[0];
@@ -93,7 +93,7 @@ $projArr = $csManager->getProjectDetails();
 						?>
 					</div>
 					<div>
-						<b>Pending Approval:</b>
+						<b><?php echo $LANG['F'];?></b>
 						<?php
 						$pendingCnt = 0;
 						if(isset($statsArr[5])) $pendingCnt = $statsArr[5];
@@ -104,7 +104,7 @@ $projArr = $csManager->getProjectDetails();
 						?>
 					</div>
 					<div>
-						<b>Closed (Approved):</b>
+						<b><?php echo $LANG['G'];?></b>
 						<?php
 						$reviewedCnt = 0;
 						if(isset($statsArr[10])) $reviewedCnt = $statsArr[10];
@@ -115,7 +115,7 @@ $projArr = $csManager->getProjectDetails();
 						?>
 					</div>
 					<div>
-						<b>Available to Add:</b>
+						<b><?php echo $LANG['H'];?></b>
 						<?php
 						echo $statsArr['toadd'];
 						if($statsArr['toadd']){
@@ -125,9 +125,9 @@ $projArr = $csManager->getProjectDetails();
 							<div id="addQueueDiv" style="display:none;margin-left:30px;">
 								<form method="post" action="index.php">
 									<fieldset>
-										<legend><b>Criteria</b></legend>
+										<legend><b><?php echo $LANG['I'];?></b></legend>
 										<div>
-											<b>Family:</b>
+											<b><?php echo $LANG['J'];?></b>
 											<select name="family">
 												<option value="">---------------------</option>
 												<?php
@@ -140,7 +140,7 @@ $projArr = $csManager->getProjectDetails();
 											</select>
 										</div>
 										<div>
-											<b>Genus/Species:</b>
+											<b><?php echo $LANG['K'];?></b>
 											<select name="taxon">
 												<option value="">---------------------</option>
 												<?php
@@ -153,7 +153,7 @@ $projArr = $csManager->getProjectDetails();
 											</select>
 										</div>
 										<div>
-											<b>Country:</b>
+											<b><?php echo $LANG['L'];?></b>
 											<select name="country">
 												<option value="">---------------------</option>
 												<?php
@@ -166,7 +166,7 @@ $projArr = $csManager->getProjectDetails();
 											</select>
 										</div>
 										<div>
-											<b>State/Province:</b>
+											<b><?php echo $LANG['M'];?></b>
 											<select name="stateprovince">
 												<option value="">---------------------</option>
 												<?php
@@ -179,7 +179,7 @@ $projArr = $csManager->getProjectDetails();
 											</select>
 										</div>
 										<div>
-											<b>Record limit:</b> <input name="limit" type="text" value="1000" />
+											<b><?php echo $LANG['N'];?></b> <input name="limit" type="text" value="1000" />
 										</div>
 										<div>
 											<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
@@ -204,10 +204,10 @@ $projArr = $csManager->getProjectDetails();
 					<div style="font-weight:bold;text-decoration:underline;margin-bottom:15px;">Volunteers</div>
 					<table class="styledtable" style="font-family:Arial;font-size:12px;width:500px;">
 						<tr>
-							<th>User</th>
-							<th>Score</th>
-							<th>Pending Review</th>
-							<th>Approved</th>
+							<th><?php echo $LANG['O'];?></th>
+							<th><?php echo $LANG['P'];?></th>
+							<th><?php echo $LANG['Q'];?></th>
+							<th><?php echo $LANG['R'];?></th>
 						</tr>
 						<?php
 						if($volStats){
@@ -236,13 +236,13 @@ $projArr = $csManager->getProjectDetails();
 					</table>
 				</div>
 				<div style="margin:25px 15px">
-					<div style="font-weight:bold;text-decoration:underline;margin-bottom:15px;">Approved Editors</div>
+					<div style="font-weight:bold;text-decoration:underline;margin-bottom:15px;"><?php echo $LANG['S'];?></div>
 					<table class="styledtable" style="font-family:Arial;font-size:12px;width:500px;">
 						<tr>
-							<th>User</th>
-							<th>Score</th>
-							<th>Pending Review</th>
-							<th>Approved</th>
+							<th><?php echo $LANG['T'];?></th>
+							<th><?php echo $LANG['U'];?></th>
+							<th><?php echo $LANG['V'];?></th>
+							<th><?php echo $LANG['W'];?></th>
 						</tr>
 						<?php
 						if($editStats){
@@ -271,7 +271,7 @@ $projArr = $csManager->getProjectDetails();
 					</table>
 				</div>
 				<div style="clear:both;margin-top:50px;font-weight:bold;">
-					Visit <a href="crowdsource/index.php">Source Board</a>
+					Visit <a href="crowdsource/index.php"><?php echo $LANG['Y'];?></a>
 				</div>
 				<?php
 			}

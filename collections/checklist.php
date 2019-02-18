@@ -44,7 +44,7 @@ if($stArrCollJson || $stArrSearchJson){
     }
 }
 ?>
-<div>
+<div >
     <div class='button' style='margin:10px;float:right;width:13px;height:13px;' title='<?php echo $LANG['DOWNLOAD_TITLE']; ?>'>
 		<a href='download/index.php?starr=<?php echo htmlentities($stArrSearchJson, ENT_QUOTES | ENT_HTML5, 'UTF-8'); ?>&jsoncollstarr=<?php echo htmlentities($stArrCollJson, ENT_QUOTES | ENT_HTML5, 'UTF-8'); ?>&dltype=checklist&taxonFilterCode=<?php echo $taxonFilter; ?>'>
 			<img width="15px" src="../images/dl.png" />

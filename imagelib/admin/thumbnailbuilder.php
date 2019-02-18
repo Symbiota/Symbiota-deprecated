@@ -1,6 +1,7 @@
 <?php
 include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/ImageCleaner.php');
+include_once($SERVER_ROOT.'/content/lang//imagelib/admin/thumbnailbuilder.'.$LANG_TAG.'.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 
 if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../imagelib/admin/thumbnailbuilder.php?'.$_SERVER['QUERY_STRING']);
@@ -25,9 +26,10 @@ $imgManager->setTid($tid);
 ?>
 <html>
 <head>
-<title><?php echo $DEFAULT_TITLE; ?> Thumbnail Builder</title>
+<title><?php echo $DEFAULT_TITLE; ?> Constructor de miniaturas</title>
 	<link href="../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
+	<link href="../../css/bootstrap.min.css" type="text/css" rel="stylesheet" />
 	<script type="text/javascript">
 		function resetRebuildForm(f){
 			f.catNumLow.value = "";
@@ -51,13 +53,13 @@ $imgManager->setTid($tid);
 			echo '<a href="../../sitemap.php">Sitemap</a> &gt;&gt;';
 		}
 		?>
-		<b>Thumbnail Builder</b>
+		<b><?php echo $LANG['THUMB_B'];?>Constructor de miniaturas</b>
 	</div>
 	<!-- This is inner text! -->
 	<div id="innertext">
 		<?php
 		if($isEditor){
-			if($action){
+			if($action && $action != 'none'){
 				echo '<fieldset style="margin:10px;padding:15px">';
 				echo '<legend><b>Processing Panel</b></legend>';
 				echo '<div style="font-weight:bold;">Start processing...</div>';
@@ -73,7 +75,7 @@ $imgManager->setTid($tid);
 			}
 			?>
 			<fieldset style="margin:30px 10px;padding:15px;">
-				<legend><b>Thumbnail Builder</b></legend>
+				<legend><b><?php echo $LANG['THUMB_B'];?></b></legend>
 				<div>
 					<?php
 					//if(!$action) $imgManager->resetProcessing();
@@ -93,7 +95,7 @@ $imgManager->setTid($tid);
 						echo '</ul>';
 					}
 					else{
-						echo '<div style="font-weight:bold;">All images have properly mapped thumbnails. Nothing needs to be done.</div>';
+						echo '<div style="font-weight:bold;">'.$LANG['ALL_IMG'].'</div>';
 					}
 					?>
 				</div>

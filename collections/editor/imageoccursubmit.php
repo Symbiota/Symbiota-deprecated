@@ -2,6 +2,7 @@
 include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceEditorImages.php');
 include_once($SERVER_ROOT.'/classes/SOLRManager.php');
+include_once($SERVER_ROOT.'/content/lang/collections/editor/imageoccursubmit.'.$LANG_TAG.'.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../collections/editor/imageoccursubmit.php?'.$_SERVER['QUERY_STRING']);
 
@@ -51,6 +52,7 @@ elseif(file_exists('includes/config/occurVarDefault.php')){
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET; ?>">
 	<title><?php echo $DEFAULT_TITLE; ?> Occurrence Image Submission</title>
+	<link href="../../css/bootstrap.min.css" type="text/css" rel="stylesheet"/>
 	<link href="../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
     <link href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 	<link href="../../css/jquery-ui.css" type="text/css" rel="stylesheet" />	
@@ -106,8 +108,8 @@ elseif(file_exists('includes/config/occurVarDefault.php')){
 	?>
 	<div class='navpath'>
 		<a href="../../index.php">Home</a> &gt;&gt;
-		<a href="../misc/collprofiles.php?collid=<?php echo $collid; ?>&emode=1">Collection Management</a> &gt;&gt;
-		<b>Occurrence Image Submission</b>
+		<a href="../misc/collprofiles.php?collid=<?php echo $collid; ?>&emode=1"><?php echo $LANG['COLLECTION'];?></a> &gt;&gt;
+		<b><?php echo $LANG['OCURRENCE'];?></b>
 	</div>
 	<!-- inner text -->
 	<div id="innertext">
@@ -120,7 +122,7 @@ elseif(file_exists('includes/config/occurVarDefault.php')){
 			?>
 			<form id='imgoccurform' name='imgoccurform' action='imageoccursubmit.php' method='post' enctype='multipart/form-data' onsubmit="return validateImgOccurForm(this)">
 				<fieldset style="padding:15px;">
-					<legend><b>Manual Occurrence Image Upload</b></legend>
+					<legend><b><?php echo $LANG['MANUAL'];?></b></legend>
 					<div class="targetdiv">
 						<input type='hidden' name='MAX_FILE_SIZE' value='10000000' />
 						<div>
@@ -128,61 +130,60 @@ elseif(file_exists('includes/config/occurVarDefault.php')){
 						</div>
 						<div id="newimagediv"></div>
 						<div style="margin:10px 0px;">
-							* Uploading web-ready images recommended. Upload image size can not be greater than 10MB
+							<?php echo $LANG['UP'];?>
 						</div>
 					</div>
 					<div class="targetdiv" style="display:none;">
 						<div style="margin-bottom:10px;">
-							Enter a URL to an image already located on a web server. 
-							If the image is larger than a typical web image, the url will be saved as the large version 
-							and a basic web derivative will be created. 
+							<?php echo $LANG['ENTER'];?>
 						</div>
 						<div>
-							<b>Image URL:</b><br/> 
+							<b><?php echo $LANG['IMAGE'];?></b><br/> 
 							<input type='text' name='imgurl' size='70' />
 						</div>
 						<div>
 							<input type="checkbox" name="copytoserver" value="1" <?php echo (isset($_POST['copytoserver'])&&$_POST['copytoserver']?'checked':''); ?> /> 
-							Copy large image to server (if left unchecked, source URL will serve as large version)
+							<?php echo $LANG['COPY'];?>
+							
 						</div>
 					</div>
 					<div style="float:right;text-decoration:underline;font-weight:bold;">
 						<div class="targetdiv">
-							<a href="#" onclick="toggle('targetdiv');return false;">Enter URL</a>
+							<a href="#" onclick="toggle('targetdiv');return false;"><?php echo $LANG['URL'];?></a>
 						</div>
 						<div class="targetdiv" style="display:none;">
-							<a href="#" onclick="toggle('targetdiv');return false;">Upload Local Image</a>
+							<a href="#" onclick="toggle('targetdiv');return false;"><?php echo $LANG['UPLOAD'];?></a>
 						</div>
 					</div>
 					<div>
 						<input type="checkbox" name="nolgimage" value="1" <?php echo (isset($_POST['nolgimage'])&&$_POST['nolgimage']?'checked':''); ?> /> 
-						Do not map large version of image (when applicable) 
+						<?php echo $LANG['DO'];?> 
 					</div>
 				</fieldset>
 				<fieldset style="padding:15px;">
-					<legend><b>Skeletal Data</b></legend>
+					<legend><b><?php echo $LANG['SKELETAL'];?> </b></legend>
 					<div style="margin:3px;">
-						<b>Catalog Number:</b> 
+						<b><?php echo $LANG['CATALOG'];?></b> 
 						<input name="catalognumber" type="text" onchange="<?php if(!defined('CATNUMDUPECHECK') || CATNUMDUPECHECK) echo 'searchDupesCatalogNumber(this.form,true)'; ?>" />
 					</div>
 					<div style="margin:3px;">
-						<b>Scientific Name:</b> 
+						<b><?php echo $LANG['NAME'];?></b> 
 						<input id="sciname" name="sciname" type="text" value="<?php echo (isset($_POST['sciname'])?$_POST['sciname']:''); ?>" style="width:300px"/> 
 						<input name="scientificnameauthorship" type="text" value="<?php echo (isset($_POST['scientificnameauthorship'])?$_POST['scientificnameauthorship']:''); ?>" /><br/>
 						<input type="hidden" id="tidinterpreted" name="tidinterpreted" value="<?php echo (isset($_POST['tidinterpreted'])?$_POST['tidinterpreted']:''); ?>" />
-						<b>Family:</b> <input name="family" type="text" value="<?php echo (isset($_POST['family'])?$_POST['family']:''); ?>" />
+						<b><?php echo $LANG['FAMILY'];?></b> <input name="family" type="text" value="<?php echo (isset($_POST['family'])?$_POST['family']:''); ?>" />
 					</div>
 					<div> 
 						<div style="float:left;margin:3px;">
-							<b>Country:</b><br/> 
+							<b><?php echo $LANG['COUNTRY'];?></b><br/> 
 							<input id="country" name="country" type="text" value="<?php echo (isset($_POST['country'])?$_POST['country']:''); ?>" />
 						</div> 
 						<div style="float:left;margin:3px;">
-							<b>State/Province:</b><br/>
+							<b><?php echo $LANG['STATE'];?></b><br/>
 							<input id="state" name="stateprovince" type="text" value="<?php echo (isset($_POST['stateprovince'])?$_POST['stateprovince']:''); ?>" />
 						</div> 
 						<div style="float:left;margin:3px;">
-							<b>County:</b><br/>
+							<b><?php echo $LANG['COUNTY'];?></b><br/>
 							<input id="county" name="county" type="text" value="<?php echo (isset($_POST['county'])?$_POST['county']:''); ?>" />
 						</div> 
 					</div>
@@ -192,17 +193,17 @@ elseif(file_exists('includes/config/occurVarDefault.php')){
 							?>
 							<div style="float:left;">
 								<input name="tessocr" type="checkbox" value=1 <?php if(isset($_POST['tessocr'])) echo 'checked'; ?> /> 
-								OCR Text using Tesseract OCR engine
+								<?php echo $LANG['OCR'];?>
 							</div>
 							<?php
 						}
 						?>
-						<div style="float:left;margin:8px 0px 0px 20px;">(<a href="#" onclick="toggle('manualocr')">Manually add OCR</a>)</div>
+						<div style="float:left;margin:8px 0px 0px 20px;">(<a href="#" onclick="toggle('manualocr')"><?php echo $LANG['MANUALLY'];?></a>)</div>
 					</div>
 					<div id="manualocr" style="clear:both;display:none;margin:3px;">
-						<b>OCR Text</b><br/>
+						<b><?php echo $LANG['OCR_TXT'];?></b><br/>
 						<textarea name="ocrblock" style="width:100%;height:100px;"></textarea><br/>
-						<b>Source:</b> <input type="text" name="ocrsource" value="" />
+						<b><?php echo $LANG['XOURCE'];?></b> <input type="text" name="ocrsource" value="" />
 					</div>
 				</fieldset>
 				<div style="margin:10px;clear:both;">

@@ -1,6 +1,8 @@
-<?php 
+<?php
 include_once('../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/ImageLibraryManager.php');
+include_once($SERVER_ROOT.'/content/lang/imagelib/contributors.'.$LANG_TAG.'.php');
+
 header("Content-Type: text/html; charset=".$CHARSET);
 
 $pManager = new ImageLibraryManager();
@@ -8,8 +10,11 @@ $pManager = new ImageLibraryManager();
 <html>
 <head>
 	<title><?php echo $DEFAULT_TITLE; ?> Photographer List</title>
+	<link href="../css/bootstrap.min.css" type="text/css" rel="stylesheet"/>
 	<link href="../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
+	<!--inicio favicon -->
+	<link rel="shortcut icon" href="../images/favicon.png" type="image/x-icon">
 	<meta name='keywords' content='' />
 </head>
 <body>
@@ -18,18 +23,18 @@ $pManager = new ImageLibraryManager();
 	include($SERVER_ROOT.'/header.php');
 	?>
 	<div class="navpath">
-		<a href="../index.php">Home</a> &gt;&gt; 
-		<a href="index.php">Image Library</a> &gt;&gt; 
-		<b>Image contributors</b> 
+		<a href="../index.php">Home</a> &gt;&gt;
+		<a href="index.php">Image Library</a> &gt;&gt;
+		<b>Image contributors</b>
 	</div>
 
 	<!-- This is inner text! -->
 	<div id="innertext" style="height:100%">
-		<?php 
+		<?php
 		$pList = $pManager->getPhotographerList();
 		if($pList){
 			echo '<div style="float:left;;margin-right:40px;">';
-			echo '<h2>Image Contributors</h2>';
+			echo '<h2>'.$LANG['IMG_CONTRIB'].'</h2>';
 			echo '<div style="margin-left:15px">';
 			foreach($pList as $uid => $pArr){
 				echo '<div>';
@@ -48,7 +53,7 @@ $pManager = new ImageLibraryManager();
 			$collList = $pManager->getCollectionImageList();
 			$specList = $collList['coll'];
 			if($specList){
-				echo '<h2>Specimens</h2>';
+				echo '<h2>'.$LANG['SPEC'].'</h2>';
 				echo '<div style="margin-left:15px;margin-bottom:20px">';
 				foreach($specList as $k => $cArr){
 					echo '<div>';
@@ -60,7 +65,7 @@ $pManager = new ImageLibraryManager();
 
 			$obsList = $collList['obs'];
 			if($obsList){
-				echo '<h2>Observations</h2>';
+				echo '<h2>'.$LANG['OBS'].'</h2>';
 				echo '<div style="margin-left:15px">';
 				foreach($obsList as $k => $cArr){
 					echo '<div>';
@@ -72,7 +77,7 @@ $pManager = new ImageLibraryManager();
 			?>
 		</div>
 	</div>
-	<?php 
+	<?php
 	include($SERVER_ROOT.'/footer.php');
 	?>
 </body>

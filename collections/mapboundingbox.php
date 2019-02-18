@@ -19,7 +19,9 @@ else{
 <html>
 	<head>
 		<title><?php echo $DEFAULT_TITLE.' - '.$LANG['MBB_TITLE']; ?></title>
-	</head> 
+		<!--inicio favicon -->
+	<link rel="shortcut icon" href="../images/favicon.png" type="image/x-icon">
+	</head>
 	<body style="background-color:#ffffff;">
 	<script src="//maps.googleapis.com/maps/api/js?<?php echo (isset($GOOGLE_MAP_KEY) && $GOOGLE_MAP_KEY?'key='.$GOOGLE_MAP_KEY:''); ?>"></script>
 	<script type="text/javascript">
@@ -35,7 +37,7 @@ else{
 				mapTypeId: google.maps.MapTypeId.TERRAIN,
 				scaleControl: true
 			};
-	
+
 	    	map = new google.maps.Map(document.getElementById("map"), dmOptions);
 
 			//placeRectangle(latCenter, lngCenter);
@@ -70,7 +72,7 @@ else{
 			google.maps.event.addListener(rectangle, 'bounds_changed', function(event) {
 				recordRectBounds(rectangle.getBounds());
 			});
-			
+
 			rectangle.setMap(map);
 
 			recordRectBounds(newBounds);
@@ -105,7 +107,7 @@ else{
 				<?php echo $LANG['MBB_NORTHERN']; ?>: <input type="text" id="nlat" size="13" name="nlat" value="" />
 			</td><td>
 				<?php echo $LANG['MBB_EASTERN']; ?>: <input type="text" id="elon" size="13" name="elon" value="" />
-				<input type="submit" name="addcoords" value="<?php echo $LANG['SUBMIT']; ?>" />	
+				<input type="submit" name="addcoords" value="<?php echo $LANG['SUBMIT']; ?>" />
 			</td></tr>
 			<tr><td>
 				<?php echo $LANG['MBB_SOUTHERN']; ?>: <input type="text" id="slat" size="13" name="slat" value="" />

@@ -1,6 +1,7 @@
 <?php
 include_once('../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/ProfileManager.php');
+include_once($SERVER_ROOT.'/content/lang/profile/personalspecmenu.'.$LANG_TAG.'.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 
 $collId = array_key_exists("collid",$_REQUEST)?$_REQUEST["collid"]:0;
@@ -18,7 +19,7 @@ if($SYMB_UID){
 $statusStr = '';
 ?>
 <div style="margin:10px;">
-<?php 
+<?php
 if($SYMB_UID){
 	//Collection is defined and User is logged-in and have permissions
 	if($statusStr){
@@ -28,7 +29,7 @@ if($SYMB_UID){
 			<?php echo $statusStr; ?>
 		</div>
 		<hr/>
-		<?php 
+		<?php
 	}
 	$genArr = array();
 	if(array_key_exists('General Observations',$collArr)){
@@ -72,7 +73,7 @@ if($SYMB_UID){
 							Review/Verify Occurrence Edits
 						</a>
 					</li>
-					<!-- 
+					<!--
 					<li>Import csv file</li>
 					 -->
 					<li>
@@ -80,7 +81,7 @@ if($SYMB_UID){
 							Backup file download (CSV extract)
 						</a>
 					</li>
-					<!-- 
+					<!--
 					<li>
 						<a href="../collections/cleaning/index.php?collid=<?php echo $collId; ?>">
 							Data Cleaning Module
@@ -99,14 +100,14 @@ if($SYMB_UID){
 		<fieldset style="margin:15px;padding:15px;">
 			<legend style="font-weight:bold;"><b>Collection Management</b></legend>
 			<ul>
-				<?php 
+				<?php
 				foreach($cArr as $collId => $cName){
 					echo '<li><a href="../collections/misc/collprofiles.php?collid='.$collId.'&emode=1">'.$cName.'</a></li>';
 				}
 				?>
 			</ul>
 		</fieldset>
-		<?php 
+		<?php
 	}
 	if(array_key_exists('Observations',$collArr)){
         $collEditor = true;
@@ -115,14 +116,14 @@ if($SYMB_UID){
 		<fieldset style="margin:15px;padding:15px;">
 			<legend style="font-weight:bold;"><b>Observation Project Management</b></legend>
 			<ul>
-				<?php 
+				<?php
 				foreach($cArr as $collId => $cName){
 					echo '<li><a href="../collections/misc/collprofiles.php?collid='.$collId.'&emode=1">'.$cName.'</a></li>';
 				}
 				?>
 			</ul>
 		</fieldset>
-		<?php 
+		<?php
 	}
 	if($genArr && isset($USER_RIGHTS['CollAdmin'])){
         $collEditor = true;
@@ -132,7 +133,7 @@ if($SYMB_UID){
 			<fieldset style="margin:15px;padding:15px;">
 				<legend style="font-weight:bold;"><b>General Observation Administration</b></legend>
 				<ul>
-					<?php 
+					<?php
 					foreach($genAdminArr as $id => $name){
 						echo '<li><a href="../collections/misc/collprofiles.php?collid='.$id.'&emode=1">'.$name.'</a></li>';
 					}
@@ -140,11 +141,11 @@ if($SYMB_UID){
 				</ul>
 			</fieldset>
 			<?php
-		} 
+		}
 	}
     if(!$collEditor){
-        echo '<div>Personal occurrence management or collection management has not been setup for your login. Please contact the site administrator (<a href="mailto:'.$adminEmail.'">'.$adminEmail.'</a>) to activate this feature.</div>';
+        echo '<div>'.$LANG['LA_GES'].' (<a href="mailto:'.$adminEmail.'">'.$adminEmail.'</a>) '.$LANG['FOR_ACT_CHAR'].'to activate this feature.</div>';
     }
 }
-?>	
+?>
 </div>

@@ -4,6 +4,7 @@ include_once($SERVER_ROOT.'/config/includes/searchVarDefault.php');
 include_once($SERVER_ROOT.'/classes/TaxonProfileMap.php');
 include_once($SERVER_ROOT.'/classes/MapInterfaceManager.php');
 include_once($SERVER_ROOT.'/classes/SOLRManager.php');
+include_once($SERVER_ROOT.'/content/lang/collections/map/mapinterface.'.$LANG_TAG.'.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 header('Cache-Control: no-cache, no-store, must-revalidate'); // HTTP 1.1.
 header('Pragma: no-cache'); // HTTP 1.0.
@@ -154,6 +155,9 @@ elseif($stArr || ($mapType && $mapType == 'occquery') || $clid){
     <link type="text/css" href="../../css/jquery.symbiota.css" rel="stylesheet" />
     <link type="text/css" href="../../css/jquery-ui_accordian.css" rel="stylesheet" />
     <link type="text/css" href="../../css/jquery-ui.css" rel="Stylesheet" />
+    <!--inicio favicon -->
+	<link rel="shortcut icon" href="../../images/favicon.png" type="image/x-icon">
+
     <style type="text/css">
         #tabs1 a,#tabs2 a,#tabs3 a{
             outline-color: transparent;
@@ -1373,7 +1377,7 @@ elseif($stArr || ($mapType && $mapType == 'occquery') || $clid){
 <body style='width:100%;' <?php echo (!$GEOLOCATION?'onload="initialize();"':''); ?>>
 <div data-role="page" id="page1">
     <div role="main" class="ui-content" style="height:400px;">
-        <a href="#defaultpanel" style="position:absolute;top:0;left:0;margin-top:0px;z-index:10;padding-top:3px;padding-bottom:3px;text-decoration:none;" data-role="button" data-inline="true" data-icon="bars">Open</a>
+        <a href="#defaultpanel" style="position:absolute;top:0;left:0;margin-top:0px;z-index:10;padding-top:3px;padding-bottom:3px;text-decoration:none;" data-role="button" data-inline="true" data-icon="bars"><?php echo $LANG['OPEN_PANEL'];?></a>
     </div>
     <!-- defaultpanel -->
     <div data-role="panel" data-dismissible="false" class="overflow: hidden;" style="width:380px;" id="defaultpanel" data-position="left" data-display="overlay" >
@@ -1390,18 +1394,18 @@ elseif($stArr || ($mapType && $mapType == 'occquery') || $clid){
                     <?php //echo "coordArr: ".$coordArr; ?>
                     <?php //echo "tIdArr: ".json_encode($tIdArr); ?>
                     <?php //echo "minLat:".$minLat."maxLat:".$maxLat."minLng:".$minLng."maxLng:".$maxLng; ?>
-                    <h3>Search Criteria and Options</h3>
+                    <h3><?php echo $LANG['SEARCH_CRITERIA'];?></h3>
                     <div id="tabs1" style="width:379px;padding:0px;">
                         <form name="mapsearchform" id="mapsearchform" data-ajax="false" action="mapinterface.php" method="get" onsubmit="return verifyCollForm(this);return checkForm();">
                             <ul>
-                                <li><a href="#searchcriteria"><span>Criteria</span></a></li>
-                                <li id="mapinterfaceCollectionsTab"><a href="#searchcollections"><span>Collections</span></a></li>
-                                <li><a href="#mapoptions"><span>Map Options</span></a></li>
+                                <li><a href="#searchcriteria"><span><?php echo $LANG['CRITERIA'];?></span></a></li>
+                                <li id="mapinterfaceCollectionsTab"><a href="#searchcollections"><span><?php echo $LANG['COLLECTIONS'];?></span></a></li>
+                                <li><a href="#mapoptions"><span><?php echo $LANG['MAP_OPTIONS'];?></span></a></li>
                             </ul>
                             <div id="searchcollections" style="">
                                 <div class="mapinterface">
                                     <div>
-                                        <h1 style="margin:0px 0px 8px 0px;font-size:15px;">Collections to be Searched</h1>
+                                        <h1 style="margin:0px 0px 8px 0px;font-size:15px;"><?php echo $LANG['COLL_TO_SEARCH'];?></h1>
                                     </div>
                                     <?php
                                     if($specArr || $obsArr){
@@ -1409,7 +1413,7 @@ elseif($stArr || ($mapType && $mapType == 'occquery') || $clid){
                                         <div id="specobsdiv">
                                             <div style="margin:0px 0px 10px 20px;">
                                                 <input id="dballcb" data-role="none" name="db[]" class="specobs" value='all' type="checkbox" onclick="selectAll(this);" <?php echo (((array_key_exists("db",$previousCriteria)&&in_array("all",$dbArr))||!$dbArr)?'checked':'') ?> />
-                                                Select/Deselect all <a href="<?php echo $clientRoot; ?>/collections/misc/collprofiles.php">Collections</a>
+                                                <?php echo $LANG['SELEC_DESELECT'];?><a href="<?php echo $clientRoot; ?>/collections/misc/collprofiles.php"><?php echo $LANG['COLLECTIONS'];?></a>
                                             </div>
                                             <?php
                                             if($specArr){
@@ -1502,29 +1506,30 @@ elseif($stArr || ($mapType && $mapType == 'occquery') || $clid){
                                     <div id="noshapecriteria" style="display:<?php echo ((!$previousCriteria || ((!$previousCriteria['poly_array']) && (!$previousCriteria['upperlat'])))?'block':'none'); ?>;">
                                         <div id="geocriteria" style="display:<?php echo ((!$previousCriteria || ((!$previousCriteria['poly_array']) && (!$previousCriteria['distFromMe']) && (!$previousCriteria['pointlat']) && (!$previousCriteria['upperlat'])))?'block':'none'); ?>;">
                                             <div>
-                                                Use the shape tools on the map to select occurrences within a given shape.
+                                                <?php echo $LANG['SHAPE_TOOLS_1'];?>
                                             </div>
                                         </div>
                                         <div id="distancegeocriteria" style="display:<?php echo ((!$previousCriteria || ($previousCriteria && array_key_exists('distFromMe',$previousCriteria) && $previousCriteria['distFromMe']))?'block':'none'); ?>;">
                                             <div>
-                                                Within <input data-role="none" type="text" id="distFromMe" style="width:40px;" name="distFromMe" value="<?php if(array_key_exists('distFromMe',$previousCriteria)) echo $previousCriteria['distFromMe']; ?>" /> miles from me, or
-                                                use the shape tools on the map to select occurrences within a given shape.
+                                                <?php echo $LANG['WITHIN'];?> <input data-role="none" type="text" id="distFromMe" style="width:40px;" name="distFromMe" value="<?php if(array_key_exists('distFromMe',$previousCriteria)) echo $previousCriteria['distFromMe']; ?>" />
+
+                                                <?php echo $LANG['SHAPE_TOOLS_2'];?>
                                             </div>
                                         </div>
                                     </div>
                                     <div id="polygeocriteria" style="display:<?php echo (($previousCriteria && $previousCriteria['poly_array'])?'block':'none'); ?>;">
                                         <div>
-                                            Within the selected polygon.
+                                            <?php echo $LANG['WITHIN_POLYGON'];?>
                                         </div>
                                     </div>
                                     <div id="circlegeocriteria" style="display:<?php echo (($previousCriteria && $previousCriteria['pointlat'] && !$previousCriteria['distFromMe'])?'block':'none'); ?>;">
                                         <div>
-                                            Within the selected circle.
+                                            <?php echo $LANG['WITHIN_CIRCLE'];?>
                                         </div>
                                     </div>
                                     <div id="rectgeocriteria" style="display:<?php echo (($previousCriteria && $previousCriteria['upperlat'])?'block':'none'); ?>;">
                                         <div>
-                                            Within the selected rectangle.
+                                            <?php echo $LANG['WITHIN_RECTANGLE'];?>
                                         </div>
                                     </div>
                                     <div id="deleteshapediv" style="margin-top:5px;display:<?php echo (($previousCriteria && ($previousCriteria['pointlat'] || $previousCriteria['upperlat'] || $previousCriteria['poly_array']))?'block':'none'); ?>;">
@@ -1569,17 +1574,17 @@ elseif($stArr || ($mapType && $mapType == 'occquery') || $clid){
                         </form>
                         <div id="mapoptions" style="">
                             <div style="border:1px black solid;margin-top:10px;padding:5px;" >
-                                <b>Clustering</b>
+                                <b><?php echo $LANG['CLUSTERING'];?></b>
                                 <div style="margin-top:8px;">
                                     <div style="float:left;">
-                                        Grid Size: <input name="gridsize" id="gridsize" data-role="none" type="text" value="<?php echo $gridSize; ?>" style="width:50px;" onchange="setClustering();" />
+                                        <?php echo $LANG['GRID_SIZE'];?> <input name="gridsize" id="gridsize" data-role="none" type="text" value="<?php echo $gridSize; ?>" style="width:50px;" onchange="setClustering();" />
                                     </div>
                                     <div style="padding-left:8px;float:left;">
-                                        Min. Cluster Size: <input name="minclustersize" id="minclustersize" data-role="none" type="text" value="<?php echo $minClusterSize; ?>" style="width:50px;" onchange="setClustering();" />
+                                        <?php echo $LANG['CLUSTER_SIZE'];?> <input name="minclustersize" id="minclustersize" data-role="none" type="text" value="<?php echo $minClusterSize; ?>" style="width:50px;" onchange="setClustering();" />
                                     </div>
                                 </div>
                                 <div style="clear:both;margin-top:8px;">
-                                    Turn Off Clustering: <input data-role="none" type="checkbox" id="clusteroff" name="clusteroff" value='1' <?php echo ($clusterOff=="y"?'checked':'') ?> onchange="setClustering();"/>
+                                    <?php echo $LANG['TURN_OFF_CLUSTERING'];?> <input data-role="none" type="checkbox" id="clusteroff" name="clusteroff" value='1' <?php echo ($clusterOff=="y"?'checked':'') ?> onchange="setClustering();"/>
                                 </div>
                             </div>
                             <?php
@@ -1610,12 +1615,12 @@ elseif($stArr || ($mapType && $mapType == 'occquery') || $clid){
                     <?php
                     if($stArr){
                         ?>
-                        <h3 id="recordstaxaheader" style="display:none;">Records and Taxa</h3>
+                        <h3 id="recordstaxaheader" style="display:none;"><?php echo $LANG['RECORDS_TAXA'];?></h3>
                         <div id="tabs2" style="display:none;width:379px;padding:0px;">
                             <ul>
-                                <li><a href='#symbology'><span>Collections</span></a></li>
-                                <li><a href='#queryrecordsdiv' onclick='changeRecordPage(starr,1);'><span>Records</span></a></li>
-                                <li><a href='#maptaxalist'><span>Taxa List</span></a></li>
+                                <li><a href='#symbology'><span><?php echo $LANG['COLLECTIONS'];?></span></a></li>
+                                <li><a href='#queryrecordsdiv' onclick='changeRecordPage(starr,1);'><span><?php echo $LANG['RECORDS'];?></span></a></li>
+                                <li><a href='#maptaxalist'><span><?php echo $LANG['TAXA_LIST'];?></span></a></li>
                                 <li style="display:none;" id="selectionstab" ><a href='#selectionslist'><span>Selections</span></a></li>
                             </ul>
                             <div id="symbology" style="">
@@ -1629,14 +1634,14 @@ elseif($stArr || ($mapType && $mapType == 'occquery') || $clid){
                                                     <g>
                                                         <circle cx="7.5" cy="7.5" r="7" fill="white" stroke="#000000" stroke-width="1px" ></circle>
                                                     </g>
-                                                </svg> = Collection
+                                                </svg> = <?php echo $LANG['COLLECTIONS'];?>
                                             </div>
                                             <div style="margin-top:5px;" >
                                                 <svg style="height:14px;width:14px;margin-bottom:-2px;">" xmlns="http://www.w3.org/2000/svg">
                                                     <g>
                                                         <path stroke="#000000" d="m6.70496,0.23296l-6.70496,13.48356l13.88754,0.12255l-7.18258,-13.60611z" stroke-width="1px" fill="white"/>
                                                     </g>
-                                                </svg> = General Observation
+                                                </svg> = <?php echo $LANG['OBSERVATION'];?>
                                             </div>
                                         </div>
                                         <?php
@@ -1767,14 +1772,14 @@ elseif($stArr || ($mapType && $mapType == 'occquery') || $clid){
                         <?php
                     }
                     ?>
-                    <h3>Datasets</h3>
+                    <h3><?php echo $LANG['DATASETS'];?></h3>
                     <div id="tabs3" style="width:379px;padding:0px;">
                         <?php
                         if($symbUid){
                             ?>
                             <ul>
-                                <li><a href='#recordsetselect'><span>Dataset</span></a></li>
-                                <li style="display:none;" id="recordsetlisttab" ><a href='#recordslist'><span>Records</span></a></li>
+                                <li><a href='#recordsetselect'><span><?php echo $LANG['DATASETS'];?></span></a></li>
+                                <li style="display:none;" id="recordsetlisttab" ><a href='#recordslist'><span><?php echo $LANG['RECORDS'];?></span></a></li>
                             </ul>
                             <div id="recordsetselect" style=""></div>
                             <div id="recordslist" style="">

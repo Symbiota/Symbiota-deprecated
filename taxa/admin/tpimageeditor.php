@@ -1,6 +1,7 @@
 <?php
 include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/TPImageEditorManager.php');
+include_once($SERVER_ROOT.'/content/lang/taxa/admin/tpimageeditor.'.$LANG_TAG.'.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $tid = $_REQUEST["tid"];
@@ -66,11 +67,11 @@ if($tid){
 										}
 										?>
 										<div style='margin-top:2px;'>
-											Sort sequence: 
+											<?php echo $LANG['SORT']; ?>
 											<b><?php echo $imgArr["sortsequence"];?></b>
 										</div>
 										<div>
-											New Value: 
+											<?php echo $LANG['NEW_VALUE'];?> 
 											<input name="imgid-<?php echo $imgArr["imgid"];?>" type="text" size="5" maxlength="5" />
 										</div>
 									</td>
@@ -107,7 +108,7 @@ if($tid){
 				<?php 
 			}
 			else{
-				echo '<h2>No images available.</h2>';
+				echo '<h5>No images available.</h5>';
 			}
 		}
 		elseif($category == "imageadd"){
@@ -115,11 +116,11 @@ if($tid){
 			<div style='clear:both;'>
 				<form enctype='multipart/form-data' action='tpeditor.php' id='imageaddform' method='post' target='_self' onsubmit='return submitAddImageForm(this);'>
 					<fieldset style='margin:15px;padding:15px;width:90%;'>
-				    	<legend><b>Add a New Image</b></legend>
+				    	<legend><b><?php echo $LANG['ADD_NEW'];?></b></legend>
 						<div style='padding:10px;width:550px;border:1px solid yellow;background-color:FFFF99;'>
 							<div class="targetdiv" style="display:block;">
 								<div style="font-weight:bold;font-size:110%;margin-bottom:5px;">
-									Select an image file located on your computer that you want to upload:
+									<?php echo $LANG['SEL_IMAGE'];?>
 								</div>
 						    	<!-- following line sets MAX_FILE_SIZE (must precede the file input field)  -->
 								<input type='hidden' name='MAX_FILE_SIZE' value='3000000' />
@@ -127,39 +128,39 @@ if($tid){
 									<input name='imgfile' id='imgfile' type='file' size='70'/>
 								</div>
 								<div style="margin-left:10px;">
-									<input type="checkbox" name="createlargeimg" value="1" /> Keep a large version of image, when applicable
+									<input type="checkbox" name="createlargeimg" value="1" /> <?php echo $LANG['KEEP'];?>
 								</div>
-								<div style="margin-left:10px;">Note: upload image size can not be greater than 2MB</div>
+								<div style="margin-left:10px;"><?php echo $LANG['NOTE_UPLOAD'];?></div>
 								<div style="margin:10px 0px 0px 350px;cursor:pointer;text-decoration:underline;font-weight:bold;" onclick="toggle('targetdiv')">
-									Link to External Image
+									<?php echo $LANG['LINK_EXTERNAL'];?>
 								</div>
 							</div>
 							<div class="targetdiv" style="display:none;">
 								<div style="font-weight:bold;font-size:110%;margin-bottom:5px;">
-									Enter a URL to an image already located on a web server:
+									<?php echo $LANG['ENTER_URL'];?>
 								</div>
 								<div>
 									<b>URL:</b> 
 									<input type='text' name='filepath' size='70'/>
 								</div>
 								<div style="margin-left:10px;">
-									<input type="checkbox" name="importurl" value="1" /> Import image to local server
+									<input type="checkbox" name="importurl" value="1" /> <?php echo $LANG['IMPORT'];?>
 								</div>
 								<div style="margin:10px 0px 0px 350px;cursor:pointer;text-decoration:underline;font-weight:bold;" onclick="toggle('targetdiv')">
-									Upload Local Image
+									<?php echo $LANG['UPLOAD'];?>
 								</div>
 							</div>
 						</div>
 						
 						<!-- Image metadata -->
 				    	<div style='margin-top:2px;'>
-				    		<b>Caption:</b> 
+				    		<b><?php echo $LANG['CAPTION'];?></b> 
 							<input name='caption' type='text' value='' size='25' maxlength='100'>
 						</div>
 						<div style='margin-top:2px;'>
-							<b>Photographer:</b> 
+							<b><?php echo $LANG['PHOTOGRA'];?></b> 
 							<select name='photographeruid' name='photographeruid'>
-								<option value="">Select Photographer</option>
+								<option value=""><?php echo $LANG['SEL_PHOTO'];?>/option>
 								<option value="">---------------------------------------</option>
 								<?php $imageEditor->echoPhotographerSelect($paramsArr["uid"]); ?>
 							</select>
@@ -168,37 +169,37 @@ if($tid){
 							</a>
 						</div>
 						<div id="photooveridediv" style='margin:2px 0px 5px 10px;display:none;'>
-							<b>Photographer Override:</b> 
+							<b><?php echo $LANG['PHOTO_OVERRI'];?></b> 
 							<input name='photographer' type='text' value='' size='37' maxlength='100'><br/> 
-							* Use only when photographer is not found in above pulldown
+							<?php echo $LANG['USE_ONLY'];?>
 						</div>
 						<div style="margin-top:2px;" title="Use if manager is different than photographer">
-							<b>Manager:</b> 
+							<b><?php echo $LANG['MANAGER'];?></b> 
 							<input name='owner' type='text' value='' size='35' maxlength='100'>
 						</div>
 						<div style='margin-top:2px;' title="URL to source project. Use when linking to an external image.">
-							<b>Source URL:</b> 
+							<b><?php echo $LANG['SOURCE_URL'];?></b> 
 							<input name='sourceurl' type='text' value='' size='70' maxlength='250'>
 						</div>
 						<div style='margin-top:2px;'>
-							<b>Copyright:</b> 
+							<b><?php echo $LANG['COPY'];?></b> 
 							<input name='copyright' type='text' value='' size='70' maxlength='250'>
 						</div>
 						<div style='margin-top:2px;'>
-							<b>Occurrence Record #:</b> 
+							<b><?php echo $LANG['OCURRENCE'];?></b> 
 							<input id="occidadd" name="occid" type="text" value=""/>
-							<span style="cursor:pointer;color:blue;"  onclick="openOccurrenceSearch('occidadd')">Link to Occurrence Record</span>
+							<span style="cursor:pointer;color:blue;"  onclick="openOccurrenceSearch('occidadd')"><?php echo $LANG['LINK_OCURRENCE'];?></span>
 						</div>
 						<div style='margin-top:2px;'>
-							<b>Locality:</b> 
+							<b><?php echo $LANG['LOCAL'];?></b> 
 							<input name='locality' type='text' value='' size='70' maxlength='250'>
 						</div>
 						<div style='margin-top:2px;'>
-							<b>Notes:</b> 
+							<b><?php echo $LANG['NOT'];?></b> 
 							<input name='notes' type='text' value='' size='70' maxlength='250'>
 						</div>
 						<div style='margin-top:2px;'>
-							<b>Sort sequence:</b> 
+							<b><?php echo $LANG['SORT_SEQUENCE'];?></b> 
 							<input name='sortsequence' type='text' value='' size='5' maxlength='5'>
 						</div>
 						<input name="tid" type="hidden" value="<?php echo $imageEditor->getTid();?>">
@@ -237,7 +238,7 @@ if($tid){
 									if($imgArr["originalurl"]){
 										$origUrl = (array_key_exists("imageDomain",$GLOBALS)&&substr($imgArr["originalurl"],0,1)=="/"?$GLOBALS["imageDomain"]:"").$imgArr["originalurl"];
 										?>
-										<br /><a href="<?php echo $origUrl;?>">Open Large Image</a>
+										<br /><a href="<?php echo $origUrl;?>"><?php echo $LANG['OPEN_LARGE'];?></a>
 										<?php 
 									}
 									?>
@@ -267,28 +268,28 @@ if($tid){
 								<div style='margin:60px 0px 10px 10px;clear:both;'>
 									<?php if($imgArr["tid"] != $tid){ ?>
 									<div>
-										<b>Image linked from:</b> 
+										<b><?php echo $LANG['IMAGE_LINKED'];?></b> 
 										<a href="tpeditor.php?tid=<?php echo $imgArr["tid"];?>" target=""><?php echo $imgArr["sciname"];?></a>
 									</div>
 									<?php 
 									}
 									if($imgArr["caption"]){ ?>
 									<div>
-										<b>Caption:</b> 
+										<b><?php echo $LANG['CAPTION'];?></b> 
 										<?php echo $imgArr["caption"];?>
 									</div>
 									<?php 
 									}
 									?>
 									<div>
-										<b>Photographer:</b> 
+										<b><?php echo $LANG['PHO'];?></b> 
 										<?php echo $imgArr["photographerdisplay"];?>
 									</div>
 									<?php 
 									if($imgArr["owner"]){
 									?>
 									<div>
-										<b>Manager:</b> 
+										<b><?php echo $LANG['MANAGER_1'];?></b> 
 										<?php echo $imgArr["owner"];?>
 									</div>
 									<?php
@@ -296,7 +297,7 @@ if($tid){
 									if($imgArr["sourceurl"]){
 									?>
 									<div>
-										<b>Source URL:</b> 
+										<b><?php echo $LANG['SOUERCE_URL_1'];?></b> 
 										<?php echo $imgArr["sourceurl"];?>
 									</div>
 									<?php
@@ -304,7 +305,7 @@ if($tid){
 									if($imgArr["copyright"]){
 									?>
 									<div>
-										<b>Copyright:</b> 
+										<b><?php echo $LANG['COPY'];?></b> 
 										<?php echo $imgArr["copyright"];?>
 									</div>
 									<?php
@@ -312,7 +313,7 @@ if($tid){
 									if($imgArr["locality"]){
 									?>
 									<div>
-										<b>Locality:</b> 
+										<b><?php echo $LANG['LOCALITY_2'];?></b> 
 										<?php echo $imgArr["locality"];?>
 									</div>
 									<?php
@@ -320,7 +321,7 @@ if($tid){
 									if($imgArr["occid"]){
 									?>
 									<div>
-										<b>Occurrence Record #:</b> 
+										<b><?php echo $LANG['OCU_RECORD'];?></b> 
 										<a href="<?php echo $clientRoot;?>/collections/individual/index.php?occid=<?php echo $imgArr["occid"]; ?>">
 											<?php echo $imgArr["occid"];?>
 										</a>
@@ -330,14 +331,14 @@ if($tid){
 									if($imgArr["notes"]){
 									?>
 									<div>
-										<b>Notes:</b> 
+										<b><?php echo $LANG['NOTE_3'];?></b> 
 										<?php echo $imgArr["notes"];?>
 									</div>
 									<?php
 									} 
 									?>
 									<div>
-										<b>Sort sequence:</b> 
+										<b><?php echo $LANG['SORTE_3'];?></b> 
 										<?php echo $imgArr["sortsequence"];?>
 									</div>
 								</div>
@@ -356,7 +357,7 @@ if($tid){
 				<?php
 			} 
 			else{
-				echo '<h2>No images available.</h2>';
+				echo '<h5>No images available.</h5>';
 			}
 		}
 	}

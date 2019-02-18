@@ -39,7 +39,8 @@ $LANG['THE_OCR'] = 'The OCR module gives collection managers the ability to batc
 								engine or process and upload text files containing OCR obtained from other OCR software.';
 $LANG['COLLECTION_PRO'] = 'Collection project has not been identified';
 
- 
+$LANG['RECORDS_ADDED_TO_QUEUE'] = 'records added to queue';
+$LANG['SPECIMEN_PROCESSOR_CONTROL_PANEL'] = 'Specimen Processor Control Panel';
+$LANG['HOME'] = 'Home';
 										
-
 ?>

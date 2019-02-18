@@ -1,6 +1,8 @@
 <?php
 include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/RareSpeciesManager.php');
+include_once($SERVER_ROOT.'/content/lang/collections/misc/rarespecies.'.$LANG_TAG.'.php');
+
 header("Content-Type: text/html; charset=".$CHARSET);
 
 $submitAction = array_key_exists("submitaction",$_REQUEST)?$_REQUEST["submitaction"]:'';
@@ -26,21 +28,26 @@ if($searchTaxon) $rsManager->setSearchTaxon($searchTaxon);
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET; ?>">
-	<title>Rare, Threatened, Sensitive Species</title>
+	<title><?php echo $LANG['ESPECIES']; ?></title>
+	<link href="../../css/bootstrap.min.css" type="text/css" rel="stylesheet"/>
 	<link href="../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
-	<link href="../../css/jquery-ui.css" type="text/css" rel="Stylesheet" />	
+	<link href="../../css/jquery-ui.css" type="text/css" rel="Stylesheet" />
+
+	<!--inicio favicon -->
+	<link rel="shortcut icon" href="../../images/favicon.png" type="image/x-icon">
+
 	<script src="../../js/jquery.js" type="text/javascript"></script>
 	<script src="../../js/jquery-ui.js" type="text/javascript"></script>
 	<script>
 		$(document).ready(function() {
-			$("#speciestoadd").autocomplete({ 
-				source: "rpc/speciessuggest.php" },{ minLength: 3, autoFocus: true 
+			$("#speciestoadd").autocomplete({
+				source: "rpc/speciessuggest.php" },{ minLength: 3, autoFocus: true
 			});
 
-			$("#searchtaxon").autocomplete({ 
-				source: "rpc/speciessuggest.php" },{ minLength: 3, autoFocus: true 
-			});			
+			$("#searchtaxon").autocomplete({
+				source: "rpc/speciessuggest.php" },{ minLength: 3, autoFocus: true
+			});
 		});
 
 		function toggle(target){
@@ -74,7 +81,7 @@ if($searchTaxon) $rsManager->setSearchTaxon($searchTaxon);
 		function submitAddSpecies(f){
 			var sciName = f.speciestoadd.value;
 			if(sciName == ""){
-				alert("Enter the scientific name of species you wish to add");
+				alert("<?php echo $LANG['ENTER']; ?>");
 				return false;
 			}
 
@@ -87,7 +94,7 @@ if($searchTaxon) $rsManager->setSearchTaxon($searchTaxon);
 				f.tidtoadd.value = data;
 				f.submit();
 			}).fail(function(jqXHR){
-				alert("ERROR: Scientific name does not exist in database. Did you spell it correctly? If so, it may have to be added to taxa table.");
+				alert("<?php echo $LANG['ERROR_SCIENTIFIC_NAME']; ?>");
 			});
 		}
 	</script>
@@ -98,62 +105,60 @@ $displayLeftMenu = (isset($collections_misc_rarespeciesMenu)?$collections_misc_r
 include($SERVER_ROOT.'/header.php');
 if(isset($collections_misc_rarespeciesCrumbs)){
 	echo "<div class='navpath'>";
-	echo "<a href='../index.php'>Home</a> &gt;&gt; ";
+	echo "<a href='../index.php'>".$LANG['HOME']."</a> &gt;&gt; ";
 	echo $collections_misc_rarespeciesCrumbs." &gt;&gt;";
-	echo " <b>Sensitive Species for Masking Locality Details</b>";
+	echo " <b>".$LANG['SENSITIVE_SPECIES_FOR_MASKING']."</b>";
 	echo "</div>";
 }
 ?>
 <!-- This is inner text! -->
 <div id="innertext">
-	<?php 
+	<?php
 	if($isEditor){
 		?>
-		<div style="float:right;cursor:pointer;" onclick="javascript:toggle('editobj');" title="Toggle Editing Functions">
+		<div style="float:right;cursor:pointer;" onclick="javascript:toggle('editobj');" title="<?php  echo $LANG['TOGGLE_EDITING_FUNCTIONS']; ?>">
 			<img style="border:0px;" src="../../images/edit.png" />
 		</div>
-		<?php 
+		<?php
 	}
 	?>
-	<h1>Rare, Threatened, Sensitive Species</h1>
+	<h1><?php echo $LANG['ESPECIES'];?></h1>
 	<div style="float:right;">
 		<fieldset style="margin:0px 15px;padding:10px">
-			<legend><b>Taxon Search</b></legend>
+			<legend><b><?php echo $LANG['TAX_SEARCH'];?></b></legend>
 			<form name="searchform" action="rarespecies.php" method="post">
 				<input id="searchtaxon" name="searchtaxon" type="text" value="<?php echo $searchTaxon; ?>" />
-				<input name="submitaction" type="submit" value="Search" />
+				<input type="hidden" name="submitaction" value="Search" />
+				<input type="submit" value="<?php echo $LANG['SEARCH']; ?>" />
 			</form>
 		</fieldset>
 	</div>
 	<div style='margin:15px;'>
-		Species in the list below have protective status with specific locality 
-		details below county withheld (e.g. decimal lat/long). 
-		Rare, threatened, or sensitive status are the typical causes for protection though 
-		species that are cherished by collectors or wild harvesters may also appear on the list.
+		<?php echo $LANG['PAR_2'];?>
 	</div>
 	<div style="clear:both">
 		<fieldset style="padding:15px;margin:15px">
-			<legend><b>Global Protections</b></legend>
+			<legend><b><?php echo $LANG['GLOBAL'];?></b></legend>
 			<?php
 			if($isEditor){
 				?>
 				<div class="editobj" style="display:none;width:400px;">
 					<form name="addspeciesform" action='rarespecies.php' method='post'>
 						<fieldset style='margin:5px;background-color:#FFFFCC;'>
-							<legend><b>Add Species to List</b></legend>
+							<legend><b><?php echo $LANG['ADD_SPECIES'];?></b></legend>
 							<div style="margin:3px;">
-								Scientific Name:
+								<?php echo $LANG['SCIENTIFIC_NAME'];?>
 								<input type="text" id="speciestoadd" name="speciestoadd" style="width:300px" />
 								<input type="hidden" id="tidtoadd" name="tidtoadd" value="" />
 							</div>
 							<div style="margin:3px;">
 								<input type="hidden" name="submitaction" value="addspecies" />
-								<input type="button" value="Add Species" onclick="submitAddSpecies(this.form)" />
+								<input type="button" value="<?php echo $LANG['ADD_SPECIES_NEW']; ?>" onclick="submitAddSpecies(this.form)" />
 							</div>
 						</fieldset>
 					</form>
 				</div>
-				<?php 
+				<?php
 			}
 			$rsArr = $rsManager->getRareSpeciesList();
 			if($rsArr){
@@ -161,14 +166,14 @@ if(isset($collections_misc_rarespeciesCrumbs)){
 					?>
 					<h3><?php echo $family; ?></h3>
 					<div style='margin-left:20px;'>
-					<?php 
+					<?php
 					foreach($speciesArr as $tid => $sciName){
 						echo '<div id="tid-'.$tid.'"><a href="../../taxa/index.php?taxon='.$tid.'" target="_blank">'.$sciName.'</a>';
 						if($isEditor){
 							?>
 							<span class="editobj" style="display:none;">
 								<a href="rarespecies.php?submitaction=deletespecies&tidtodel=<?php echo $tid;?>">
-									<img src="../../images/del.png" style="width:13px;border:0px;" title="remove species from list" />
+									<img src="../../images/del.png" style="width:13px;border:0px;" title="<?php echo $LANG['REMOVE_SPECIES_FROM_LIST']; ?>" />
 								</a>
 							</span>
 							<?php
@@ -177,21 +182,21 @@ if(isset($collections_misc_rarespeciesCrumbs)){
 					}
 					?>
 					</div>
-					<?php 
+					<?php
 				}
 			}
 			else{
 				?>
 				<div style="margin:30px;font-weight:bold;font-size:120%;">
-					No species were returned marked for global protection. 
+					<?php echo $LANG['NO_SPECIES'];?>
 				</div>
-				<?php 
+				<?php
 			}
 			?>
 		</fieldset>
 		<fieldset style="padding:25px;margin:15px">
-			<legend><b>State/Province Level Protections</b></legend>
-			<?php 
+			<legend><b><?php echo $LANG['STATE'];?> </b></legend>
+			<?php
 			$stateList = $rsManager->getStateList();
 			$emptyList = true;
 			foreach($stateList as $clid => $stateArr){
@@ -208,15 +213,15 @@ if(isset($collections_misc_rarespeciesCrumbs)){
 			if($emptyList){
 				?>
 				<div style="margin:30px;font-weight:bold;font-size:120%;">
-					 No checklists returned 
+					 <?php echo $LANG['NO_CHECKLIST'];?>
 				</div>
-				<?php 
+				<?php
 			}
 			?>
 		</fieldset>
 	</div>
 </div>
-<?php 		
+<?php
 include($SERVER_ROOT.'/footer.php')
 ?>
 </body>

@@ -244,7 +244,8 @@ if($url){
     elseif($aUrl){
         echo '<a href="'.$aUrl.'">';
     }
-    echo '<img src="'.$url.'" title="'.$spDisplay.'" alt="'.$spDisplay.'" />';
+    // Cambiar imagen de geovisor
+    echo '<img src="http://biodiversidad.ikiam.edu.ec/Symbiota/images/mappoint.png" title="'.$spDisplay.'" alt="'.$spDisplay.'" />';
     if($aUrl || $gAnchor) echo '</a>';
     if($gAnchor) echo '<br /><a href="#" onclick="'.$gAnchor.';return false">'.$LANG['OPEN_MAP'].'</a>';
     echo "</div>";

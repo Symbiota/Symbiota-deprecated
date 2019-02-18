@@ -1,6 +1,7 @@
 <?php
 include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceCleaner.php');
+include_once($SERVER_ROOT.'/content/lang/collections/cleaning/index.'.$LANG_TAG.'.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 
 $collid = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
@@ -28,6 +29,7 @@ if($collMap['colltype'] == 'General Observations'){
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET; ?>">
 	<title><?php echo $DEFAULT_TITLE; ?> Occurrence Cleaner</title>
+	<link href="../../css/bootstrap.min.css" type="text/css" rel="stylesheet"/>
 	<link href="../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 	<style type="text/css">
@@ -53,28 +55,26 @@ if($collMap['colltype'] == 'General Observations'){
 		if($isEditor){
 			echo '<h2>'.$collMap['collectionname'].' ('.$collMap['code'].')</h2>';
 			?>
-			<div style="color:orange;margin:20px 0px">Downloading a backup of your collection data before running any batch updates is strongly recommended</div>
+			<div style="color:orange;margin:20px 0px"><?php echo $LANG['DOWN'];?></div>
 			<?php
 			if($collMap['colltype'] != 'General Observations'){
 				?>
-				<h3>Duplicate Records</h3>
+				<h3><?php echo $LANG['DUPLICATE_RECORD'];?></h3>
 				<div style="margin:0px 0px 40px 15px;">
 					<div>
-						These tools will assist in searching this collection of records for duplicate records of the same occurrence.
-						If duplicate records exist, this feature offers the ability to merge record values, images,
-						and data relationships into a single record.
+						<?php echo $LANG['THESE'];?>
 					</div>
 					<fieldset style="margin:10px 0px;padding:5px;width:450px">
-						<legend style="font-weight:bold"><b>List Duplicates based on...</b></legend>
+						<legend style="font-weight:bold"><b><?php echo $LANG['LIST_DUPLICATES'];?></b></legend>
 						<ul>
 							<li>
 								<a href="duplicatesearch.php?collid=<?php echo $collid; ?>&action=listdupscatalog">
-									Catalog Numbers
+									<?php echo $LANG['CATAOG_NUMBER'];?>
 								</a>
 							</li>
 							<li>
 								<a href="duplicatesearch.php?collid=<?php echo $collid; ?>&action=listdupsothercatalog">
-									Other Catalog Numbers
+									<?php echo $LANG['OTHER_CATALOG'];?>
 								</a>
 							</li>
 							<!--
@@ -91,36 +91,34 @@ if($collMap['colltype'] == 'General Observations'){
 			}
 			?>
 
-			<h3>Political Geography</h3>
+			<h3><?php echo $LANG['POLITICAL'];?></h3>
 			<div style="margin:0px 0px 40px 15px;">
 				<div>
-					These tools help standardize country, state/province, and county designations.
-					They are also useful for locating and correcting misspelled geographical political units,
-					and even mismatched units, such as a state designation that does not match the wrong country.
+					<?php echo $LANG['THESE_TOOLS'];?>
 				</div>
 				<fieldset style="margin:10px 0px;padding:5px;width:450px">
-					<legend style="font-weight:bold">Statistics and Action Panel</legend>
+					<legend style="font-weight:bold"><?php echo $LANG['STATICS'];?></legend>
 					<ul>
 						<li>
-							<a href="../misc/collprofiles.php?collid=<?php echo $collid; ?>&stat=geography#geographystats" target="_blank">Geographic Distributions</a>
+							<a href="../misc/collprofiles.php?collid=<?php echo $collid; ?>&stat=geography#geographystats" target="_blank"><?php echo $LANG['GEO'];?></a>
 						</li>
 						<li>
-							<a href="politicalunits.php?collid=<?php echo $collid; ?>">Geography Cleaning Tools</a>
+							<a href="politicalunits.php?collid=<?php echo $collid; ?>"><?php echo $LANG['GEO_CLEAN'];?></a>
 						</li>
 					</ul>
 				</fieldset>
 			</div>
 
-			<h3>Specimen Coordinates</h3>
+			<h3><?php echo $LANG['SPECIMEN'];?></h3>
 			<div style="margin:0px 0px 40px 15px;">
 				<div>
-					These tools are to aid collection managers in verifying, ranking, and managing coordinate information associated with occurrence records.
+					<?php echo $LANG['THESE_TOOLS_AID'];?>
 				</div>
 				<div style="margin:15px 0px;color:orange">
-					-- IN DEVELOPMENT - more to come soon --
+					<?php echo $LANG['IN'];?>
 				</div>
 				<fieldset style="margin:10px 0px;padding:5px;width:450px">
-					<legend style="font-weight:bold">Statistics and Action Panel</legend>
+					<legend style="font-weight:bold"><?php echo $LANG['STATICT_PANEL'];?></legend>
 					<ul>
 						<?php
 						$statsArr = $cleanManager->getCoordStats();
@@ -136,7 +134,7 @@ if($collMap['colltype'] == 'General Observations'){
 							}
 							?>
 						</li>
-						<li>Lacking coordinates: <?php echo $statsArr['noCoord']; ?>
+						<li><?php echo $LANG['LACKING_COORDINATES'];?> <?php echo $statsArr['noCoord']; ?>
 							<?php
 							if($statsArr['noCoord']){
 								?>
@@ -150,7 +148,7 @@ if($collMap['colltype'] == 'General Observations'){
 							}
 							?>
 						</li>
-						<li style="margin-left:15px">Lacking coordinates with verbatim coordinates: <?php echo $statsArr['noCoord_verbatim']; ?>
+						<li style="margin-left:15px"><?php echo $LANG['LACKINK_VERBATIN'];?> <?php echo $statsArr['noCoord_verbatim']; ?>
 							<?php
 							if($statsArr['noCoord_verbatim']){
 								?>
@@ -161,7 +159,7 @@ if($collMap['colltype'] == 'General Observations'){
 							}
 							?>
 						</li>
-						<li style="margin-left:15px">Lacking coordinates without verbatim coordinates: <?php echo $statsArr['noCoord_noVerbatim']; ?>
+						<li style="margin-left:15px"><?php echo $LANG['LACK'];?> <?php echo $statsArr['noCoord_noVerbatim']; ?>
 							<?php
 							if($statsArr['noCoord_noVerbatim']){
 								?>
@@ -173,12 +171,12 @@ if($collMap['colltype'] == 'General Observations'){
 							?>
 						</li>
 						<li>
-							<a href="coordinatevalidator.php?collid=<?php echo $collid; ?>">Check coordinates against political boundaries</a>
+							<a href="coordinatevalidator.php?collid=<?php echo $collid; ?>"><?php echo $LANG['CHECK'];?></a>
 						</li>
 					</ul>
 				</fieldset>
 				<div style="margin:10px 0px">
-					<div style="font-weight:bold">Ranking Statistics</div>
+					<div style="font-weight:bold"><?php echo $LANG['RANKINK'];?></div>
 					<?php
 					$coordRankingArr = $cleanManager->getRankingStats('coordinate');
 					$rankArr = current($coordRankingArr);
@@ -202,16 +200,16 @@ if($collMap['colltype'] == 'General Observations'){
 				</div>
 			</div>
 
-			<h3>Taxonomy</h3>
+			<h3><?php echo $LANG['TAXO'];?></h3>
 			<div style="margin:0px 0px 40px 15px;">
 				<div>
-					These tools are meant to aid in locating and fixing taxonomic errors and inconsistencies.
+					<?php echo $LANG['MEANT'];?>
 				</div>
 				<fieldset style="margin:10px 0px;padding:5px;width:450px">
-					<legend style="font-weight:bold">Statistics and Action panel</legend>
+					<legend style="font-weight:bold"><?php echo $LANG['ACTION'];?></legend>
 					<ul>
-						<li><a href="taxonomycleaner.php?collid=<?php echo $collid; ?>">Analyze taxonomic names...</a></li>
-						<li><a href="../misc/collprofiles.php?collid=<?php echo $collid; ?>&stat=taxonomy#taxonomystats">Taxonomic Distributions...</a></li>
+						<li><a href="taxonomycleaner.php?collid=<?php echo $collid; ?>"><?php echo $LANG['ANALIZYE'];?></a></li>
+						<li><a href="../misc/collprofiles.php?collid=<?php echo $collid; ?>&stat=taxonomy#taxonomystats"><?php echo $LANG['TAXO_DISTRIBUTION'];?></a></li>
 						<?php
 						if($cleanManager->hasDuplicateClusters()){
 							echo '<li><a href="../datasets/duplicatemanager.php?collid='.$collid.'&dupedepth=3&action=listdupeconflicts">';
@@ -258,7 +256,7 @@ if($collMap['colltype'] == 'General Observations'){
 			<?php
 		}
 		else{
-			echo '<h2>You are not authorized to access this page</h2>';
+			echo '<h5>You are not authorized to access this page</h5>';
 		}
 		?>
 	</div>

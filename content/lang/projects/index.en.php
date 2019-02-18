@@ -40,6 +40,9 @@ $LANG['CHARLONG'] = 'characters long';
 $LANG['SELECTCHECKPULL'] = 'Choose a checklist from the pull-down';
 $LANG['CHOOSEUSER'] = 'Choose a user from the pull-down';
 $LANG['ADDNEWPR'] = 'Add New Project';
+$LANG['ADD'] = 'Add New';
+$LANG['NEW'] = 'New';
+$LANG['PROJECT'] = 'Project';
 $LANG['TOGGLEEDIT'] = 'Toggle Editing Functions';
 $LANG['MAPREP'] = 'Map representation of checklists';
 ?>

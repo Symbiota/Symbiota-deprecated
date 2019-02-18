@@ -1,6 +1,7 @@
 <?php
 include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/SpecLoans.php');
+include_once($SERVER_ROOT.'/content/lang/collections/loans/exchange.'.$LANG_TAG.'.php');
 
 $collId = $_REQUEST['collid'];
 $exchangeId = array_key_exists('exchangeid',$_REQUEST)?$_REQUEST['exchangeid']:0;
@@ -25,27 +26,27 @@ else{
 <div id="newexchangediv" style="display:<?php echo ($transInstList?'none':'block'); ?>;width:550px;">
 	<form name="newexchangegiftform" action="index.php" method="post" onsubmit="return verfifyExchangeAddForm(this)">
 		<fieldset>
-			<legend>New Gift/Exchange</legend>
+			<legend><?php echo $LANG['NEW_GIFT'];?></legend>
 			<div style="padding-top:10px;float:left;">
 				<span>
-					<b>Transaction Number:</b> 
+					<b><?php echo $LANG['TRANSACTION'];?></b> 
 					<input type="text" autocomplete="off" id="identifier" name="identifier" maxlength="255" style="width:120px;border:2px solid black;text-align:center;font-weight:bold;color:black;" value="" onchange="exIdentCheck(identifier,<?php echo $collId; ?>);" />
 				</span>
 			</div>
 			<div style="clear:left;padding-top:6px;float:left;">
 				<span>
-					Transaction Type:
+					<?php echo $LANG['TRAN_TYPE'];?>
 				</span><br />
 				<span>
 					<select name="transactiontype" style="width:100px;" >
-						<option value="Shipment" SELECTED >Shipment</option>
-						<option value="Adjustment">Adjustment</option>
+						<option value="Shipment" SELECTED ><?php echo $LANG['SHIPMENT'];?></option>
+						<option value="Adjustment"><?php echo $LANG['ADJUSTMENT'];?></option>
 					</select>
 				</span>
 			</div>
 			<div style="padding-top:6px;margin-left:20px;float:left;">
 				<span>
-					Entered By:
+					<?php echo $LANG['ENTERED'];?>
 				</span><br />
 				<span>
 					<input type="text" autocomplete="off" name="createdby" tabindex="96" maxlength="32" style="width:100px;" value="<?php echo $paramsArr['un']; ?>" onchange=" " />
@@ -53,11 +54,11 @@ else{
 			</div><br />
 			<div style="padding-top:6px;float:left;">
 				<span>
-					Institution:
+					<?php echo $LANG['INSTITUTION'];?>
 				</span><br />
 				<span>
 					<select name="iid" style="width:400px;" >
-						<option value="">Select Institution</option>
+						<option value=""><?php echo $LANG['SEL_INSTITU'];?></option>
 						<option value="">------------------------------------------</option>
 						<?php 
 						$instArr = $loanManager->getInstitutionArr();

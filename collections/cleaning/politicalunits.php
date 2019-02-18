@@ -1,6 +1,7 @@
 <?php
 include_once('../../config/symbini.php'); 
 include_once($SERVER_ROOT.'/classes/OccurrenceCleaner.php');
+include_once($SERVER_ROOT.'/content/lang/collections/cleaning/politicalunits.'.$LANG_TAG.'.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 
 $collid = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
@@ -74,13 +75,15 @@ if($action && $isEditor){
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET; ?>">
-	<title><?php echo $DEFAULT_TITLE; ?> Political Units Standardization</title>
+	<title><?php echo $DEFAULT_TITLE." ".$LANG['POLITICAL_UNITS_STANDARDIZATION']; ?></title>
+
+    <link href="../../css/bootstrap.min.css" type="text/css" rel="stylesheet"/>
 	<link href="../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
     <link href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 	<script type="text/javascript">
 		function verifyCountryCleanForm(f){
 			if(f.newcountry.value == ""){
-				alert("Select a country value");
+				alert("<?php echo $LANG['SELECT_A_COUNTRY_VALUE']; ?>");
 				return false
 			}
 			return true;
@@ -88,7 +91,7 @@ if($action && $isEditor){
 
 		function verifyNullCountryForm(f){
 			if(f.country.value == ""){
-				alert("Select a country value");
+				alert("<?php echo $LANG['SELECT_A_COUNTRY_VALUE']; ?>");
 				return false
 			}
 			return true;
@@ -96,7 +99,7 @@ if($action && $isEditor){
 	
 		function verifyStateCleanForm(f){
 			if(f.newstate.value == ""){
-				alert("Select a state value");
+				alert("<?php echo $LANG['SELECT_A_STATE_VALUE']; ?>");
 				return false
 			}
 			return true;
@@ -104,7 +107,7 @@ if($action && $isEditor){
 
 		function verifyNullStateForm(f){
 			if(f.state.value == ""){
-				alert("Select a state value");
+				alert("<?php echo $LANG['SELECT_A_STATE_VALUE']; ?>");
 				return false
 			}
 			return true;
@@ -112,7 +115,7 @@ if($action && $isEditor){
 
 		function verifyCountyCleanForm(f){
 			if(f.newcounty.value == ""){
-				alert("Select a county value");
+				alert("<?php echo $LANG['SELECT_A_COUNTY_VALUE']; ?>");
 				return false
 			}
 			return true;
@@ -120,7 +123,7 @@ if($action && $isEditor){
 
 		function verifyNullCountyForm(f){
 			if(f.county.value == ""){
-				alert("Select a county value");
+				alert("<?php echo $LANG['SELECT_A_COUNTY_VALUE']; ?>");
 				return false
 			}
 			return true;
@@ -133,11 +136,11 @@ if($action && $isEditor){
 	include($SERVER_ROOT.'/header.php');
 	?>
 	<div class='navpath'>
-		<a href="../../index.php">Home</a> &gt;&gt;
-		<a href="../misc/collprofiles.php?collid=<?php echo $collid; ?>&emode=off">Collection Management</a> &gt;&gt;
-		<a href="index.php?collid=<?php echo $collid; ?>">Cleaning Tools Index</a> 
+		<a href="../../index.php"><?php echo $LANG['HOME']; ?></a> &gt;&gt;
+		<a href="../misc/collprofiles.php?collid=<?php echo $collid; ?>&emode=off"><?php echo $LANG['ADMIN'];?></a> &gt;&gt;
+		<a href="index.php?collid=<?php echo $collid; ?>"><?php echo $LANG['IN'];?></a> 
 		<?php 
-		if($mode) echo '&gt;&gt; <a href="politicalunits.php?collid='.$collid.'"><b>Political Geography Cleaning Menu</b></a>';
+		if($mode) echo '&gt;&gt; <a href="politicalunits.php?collid='.$collid.'"><b>'.$LANG['POLITICAL_GEOGRAPHY_CLEANING_MENU'].'</b></a>';
 		?>
 	</div>
 
@@ -157,15 +160,11 @@ if($action && $isEditor){
 		if($isEditor){
 			?>
 			<fieldset style="padding:20px;position:relative">
-				<legend><b>Geographic Report</b></legend>
+				<legend><b><?php echo $LANG['REPOR'];?></b></legend>
 				<?php
 				if($target == 'geolocal'){ 
-					if($mode) echo '<div style="position:absolute;top:5px;right:0px;padding:10px;border:1px solid grey"><a href="politicalunits.php?collid='.$collid.'&mode=0">Main Menu</a></div>';
-					echo '<div style="width:85%;margin-bottom:15px;">Click on links provided below to list non-standardized geographical terms used within the collection. '.
-						'The numbers to the right of each geographic designation represent the number of occurrences using that term. '.
-						'Click on editing symbol (pencil) to open the occurrence editor. Use tools provided to batch update fields with corrected term. '.
-						'If the parent/child terms are not in the thesaurus, a replacement/suggestion term list will not be offered as a pulldown. '.
-						'Contact portal manager to add new terms to geographical term dictionary.</div>';
+					if($mode) echo '<div style="position:absolute;top:5px;right:0px;padding:10px;border:1px solid grey"><a href="politicalunits.php?collid='.$collid.'&mode=0">'.$LANG['MAIN_MENU'].'</a></div>';
+					echo '<div style="width:85%;margin-bottom:15px;">'.$LANG['CLICK_ON_LINKS_PROVIDED_BELOW_TO_LIST'].'</div>';
 					if($mode == 'badcountry'){
 						$badCountryArr = $cleanManager->getBadCountryArr();
 						$goodCountryArr = $cleanManager->getGoodCountryArr();
@@ -173,7 +172,7 @@ if($action && $isEditor){
 						<div style="margin:20px">
 							<div style="margin:5px">
 								<div style="margin-bottom:10px;">
-									<b>Questionable countries:</b> <?php echo $cleanManager->getFeatureCount(); ?> possible issues
+									<b><?php echo $LANG['QUES'];?></b> <?php echo $cleanManager->getFeatureCount(); ?> <?php echo $LANG['POSSI'];?>
 								</div> 
 								<?php
 								foreach($badCountryArr as $countryName => $countryCnt){
@@ -181,10 +180,10 @@ if($action && $isEditor){
 									<div style="margin-left:15px;">
 										<form name="countrycleanform" method="post" action="politicalunits.php" onsubmit="return verifyCountryCleanForm(this)">
 											<b><?php echo $countryName; ?></b>
-											<?php echo ' <span title="Number of Specimens">('.$countryCnt.')</span>'; ?>
+											<?php echo ' <span title="'.$LANG['NUMBER_OF_SPECIMENS'].'">('.$countryCnt.')</span>'; ?>
 											<a href="../editor/occurrenceeditor.php?q_catalognumber=&occindex=0&q_customfield1=country&q_customtype1=EQUALS&q_customvalue1=<?php echo urlencode($countryName).'&collid='.$collid; ?>" target="_blank"><img src="../../images/edit.png" style="width:13px" /></a>
 											<select name="newcountry" style="width:200px;">
-												<option value="">Replace with...</option>
+												<option value=""><?php echo $LANG['REM'];?></option>
 													<option value="">-------------------------</option>
 												<?php 
 												foreach($goodCountryArr as $cgv){
@@ -196,7 +195,8 @@ if($action && $isEditor){
 											<input name="target" type="hidden" value="geolocal" />
 											<input name="mode" type="hidden" value="badcountry" />
 											<input name="badcountry" type="hidden" value="<?php echo $countryName; ?>" />
-											<input name="action" type="submit" value="Replace Country" />
+											<input type="hidden" name="action" value="Replace Country" />
+											<input type="submit" value="<?php echo $LANG['REPLACE_COUNTRY']; ?>" />
 										</form>
 									</div>
 									<?php 
@@ -213,7 +213,7 @@ if($action && $isEditor){
 						<div style="margin:20px">
 							<div style="margin:5px">
 								<div style="margin-bottom:10px;font-size:120%;">
-									<span style="text-decoration: underline; font-weight:bold">NULL countries and non-Null state:</span> <?php echo $cleanManager->getFeatureCount(); ?> possible issues
+									<span style="text-decoration: underline; font-weight:bold"><?php echo $LANG['NULL_COUNTRIES_AND_NON_NULL_STATE']; ?>:</span> <?php echo $cleanManager->getFeatureCount(); ?> <?php echo $LANG['POSSI'];?>
 								</div> 
 								<?php
 								foreach($badCountryArr as $stateName => $stateCnt){
@@ -221,10 +221,10 @@ if($action && $isEditor){
 									<div style="margin-left:15px;">
 										<form name="nullcountryform" method="post" action="politicalunits.php" onsubmit="return verifyNullCountryForm(this)">
 											<b><?php echo $stateName; ?></b>
-											<?php echo ' <span title="Number of Specimens">('.$stateCnt.')</span>'; ?>
+											<?php echo ' <span title="'.$LANG['NUMBER_OF_SPECIMENS'].'">('.$stateCnt.')</span>'; ?>
 											<a href="../editor/occurrenceeditor.php?q_catalognumber=&occindex=0&q_customfield1=country&q_customtype1=NULL&q_customfield2=stateProvince&q_customtype2=EQUALS&q_customvalue2=<?php echo urlencode($stateName).'&collid='.$collid; ?>" target="_blank"><img src="../../images/edit.png" style="width:13px" /></a>
 											<select name="country" style="width:200px;">
-												<option value="">Assign Country...</option>
+												<option value=""><?php echo $LANG['ASSING'];?></option>
 												<option value="">-------------------------</option>
 												<?php 
 												foreach($goodCountryArr as $gcv => $stateArr){
@@ -236,7 +236,8 @@ if($action && $isEditor){
 											<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
 											<input name="target" type="hidden" value="geolocal" />
 											<input name="mode" type="hidden" value="nullcountry" />
-											<input name="action" type="submit" value="Assign Country" />
+											<input type="hidden" name="action" value="Assign Country" />
+											<input type="submit" value="<?php echo $LANG['ASSIGN_COUNTRY']; ?>" />
 										</form>
 									</div>
 									<?php 
@@ -253,7 +254,7 @@ if($action && $isEditor){
 						<div style="margin:20px">
 							<div style="margin:5px">
 								<div style="margin-bottom:10px;">
-									<b>Questionable states:</b> <?php echo $cleanManager->getFeatureCount(); ?> possible issues
+									<b><?php echo $LANG['QUESTION'];?></b> <?php echo $cleanManager->getFeatureCount(); ?> <?php echo $LANG['POSSI'];?>
 								</div> 
 								<?php
 								foreach($badStateArr as $countryValue => $stateArr){
@@ -263,13 +264,13 @@ if($action && $isEditor){
 										<div style="margin-left:15px;">
 											<form name="statecleanform" method="post" action="politicalunits.php" onsubmit="return verifyStateCleanForm(this)">
 												<b><?php echo $stateName; ?></b>
-												<?php echo ' <span title="Number of Specimens">('.$stateCnt.')</span>'; ?>
+												<?php echo ' <span title="'.$LANG['NUMBER_OF_SPECIMENS'].'">('.$stateCnt.')</span>'; ?>
 												<a href="../editor/occurrenceeditor.php?q_catalognumber=&occindex=0&q_customfield1=stateProvince&q_customtype1=EQUALS&q_customvalue1=<?php echo urlencode($stateName).'&collid='.$collid; ?>" target="_blank"><img src="../../images/edit.png" style="width:13px" /></a>
 												<?php 
 												if(array_key_exists($countryValue,$goodStateArr)){
 													?>
 													<select name="newstate" style="width:200px;">
-														<option value="">Replace with...</option>
+														<option value=""><?php echo $LANG['REM'];?></option>
 														<option value="">-------------------------</option>
 														<?php 
 														$arr = $goodStateArr[$countryValue];
@@ -283,7 +284,8 @@ if($action && $isEditor){
 													<input name="mode" type="hidden" value="badstate" />
 													<input name="badstate" type="hidden" value="<?php echo $stateName; ?>" />
 													<input name="country" type="hidden" value="<?php echo $countryValue; ?>" />
-													<input name="action" type="submit" value="Replace State" />
+													<input type="hidden" name="action" value="Replace State" />
+													<input type="submit" value="<?php echo $LANG['REPLACE_STATE']; ?>" />
 													<?php
 												} 
 												?>
@@ -304,7 +306,7 @@ if($action && $isEditor){
 						<div style="margin:20px">
 							<div style="margin:5px">
 								<div style="margin-bottom:10px;font-size:120%;">
-									<span style="text-decoration: underline; font-weight:bold">NULL state/province and non-Null county:</span> <?php echo $cleanManager->getFeatureCount(); ?> possible issues
+									<span style="text-decoration: underline; font-weight:bold"><?php echo $LANG['NULL'];?></span> <?php echo $cleanManager->getFeatureCount(); ?> <?php echo $LANG['POSSI'];?>
 								</div> 
 								<?php
 								foreach($badStateArr as $countryName => $countyArr){
@@ -314,13 +316,13 @@ if($action && $isEditor){
 										<div style="margin-left:15px;">
 											<form name="nullstateform" method="post" action="politicalunits.php" onsubmit="return verifyNullStateForm(this)">
 												<b><?php echo $countyName; ?></b>
-												<?php echo ' <span title="Number of Specimens">('.$countyCnt.')</span>'; ?>
+												<?php echo ' <span title="'.$LANG['NUMBER_OF_SPECIMENS'].'">('.$countyCnt.')</span>'; ?>
 												<a href="../editor/occurrenceeditor.php?q_catalognumber=&occindex=0&q_customfield1=stateProvince&q_customtype1=NULL&q_customfield2=county&q_customtype2=EQUALS&q_customvalue2=<?php echo urlencode($countyName).'&collid='.$collid; ?>" target="_blank"><img src="../../images/edit.png" style="width:13px" /></a>
 												<?php 
 												if(array_key_exists($countryName,$goodStateArr)){
 													?>
 													<select name="state" style="width:200px;">
-														<option value="">Assign State...</option>
+														<option value=""><?php echo $LANG['ASSING'];?></option>
 														<option value="">-------------------------</option>
 														<?php 
 														$countyTestStr = str_replace(array(' county',' co.',' co'),'',strtolower($countyName));
@@ -335,7 +337,8 @@ if($action && $isEditor){
 													<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
 													<input name="target" type="hidden" value="geolocal" />
 													<input name="mode" type="hidden" value="nullstate" />
-													<input name="action" type="submit" value="Assign State" />
+													<input type="hidden" name="action" value="Assign State" />
+													<input type="submit" value="<?php echo $LANG['ASSIGN_STATE']; ?>" />
 													<?php
 												} 
 												?>
@@ -356,7 +359,7 @@ if($action && $isEditor){
 						<div style="margin:20px">
 							<div style="margin:5px">
 								<div style="margin-bottom:10px;">
-									<b>Questionable counties:</b> <?php echo $cleanManager->getFeatureCount(); ?> possible issues
+									<b><?php echo $LANG['QUESTION'];?></b> <?php echo $cleanManager->getFeatureCount(); ?> <?php echo $LANG['POSSI'];?>
 								</div> 
 								<?php
 								foreach($badCountyArr as $countryName => $stateArr){
@@ -370,13 +373,13 @@ if($action && $isEditor){
 											<div style="margin-left:30px;">
 												<form name="countycleanform" method="post" action="politicalunits.php" onsubmit="return verifyCountyCleanForm(this)">
 													<b><?php echo $countyName; ?></b>
-													<?php echo ' <span title="Number of Specimens">('.$countyCnt.')</span>'; ?>
+													<?php echo ' <span title="'.$LANG['NUMBER_OF_SPECIMENS'].'">('.$countyCnt.')</span>'; ?>
 													<a href="../editor/occurrenceeditor.php?q_catalognumber=&occindex=0&q_customfield1=county&q_customtype1=EQUALS&q_customvalue1=<?php echo urlencode($countyName).'&collid='.$collid; ?>" target="_blank"><img src="../../images/edit.png" style="width:13px" /></a>
 													<?php 
 													if(array_key_exists($stateTestStr,$goodCountyArr)){
 														?>
 														<select name="newcounty" style="width:200px;">
-															<option value="">Replace with...</option>
+															<option value=""><?php echo $LANG['REM'];?></option>
 																<option value="">-------------------------</option>
 															<?php 
 															$arr = $goodCountyArr[$stateTestStr];
@@ -391,7 +394,8 @@ if($action && $isEditor){
 														<input name="badcounty" type="hidden" value="<?php echo $countyName; ?>" />
 														<input name="country" type="hidden" value="<?php echo $countryName; ?>" />
 														<input name="state" type="hidden" value="<?php echo $stateName; ?>" />
-														<input name="action" type="submit" value="Replace County" />
+														<input type="submit" name="action" value="Replace County" />
+														<input type="submit" value="<?php echo $LANG['REPLACE_COUNTY']; ?>" />
 														<?php
 													} 
 													?>
@@ -413,7 +417,7 @@ if($action && $isEditor){
 						<div style="margin:20px">
 							<div style="margin:5px">
 								<div style="margin-bottom:10px;font-size:120%;">
-									<span style="text-decoration: underline; font-weight:bold">NULL county and non-Null locality:</span> <?php echo $cleanManager->getFeatureCount(); ?> possible issues
+									<span style="text-decoration: underline; font-weight:bold"><?php echo $LANG['NULL:STATE'];?></span> <?php echo $cleanManager->getFeatureCount(); ?> <?php echo $LANG['POSSI'];?>
 								</div> 
 								<?php
 								foreach($badCountyArr as $countryName => $stateArr){
@@ -426,13 +430,13 @@ if($action && $isEditor){
 											<div style="margin-left:30px;">
 												<form name="nullstateform" method="post" action="politicalunits.php" onsubmit="return verifyNullCountyForm(this)">
 													<b><?php echo $localityName; ?></b>
-													<?php echo ' <span title="Number of Specimens">('.$localityCnt.')</span>'; ?>
+													<?php echo ' <span title="'.$LANG['NUMBER_OF_SPECIMENS'].'">('.$localityCnt.')</span>'; ?>
 													<a href="../editor/occurrenceeditor.php?q_catalognumber=&occindex=0&q_customfield1=county&q_customtype1=NULL&q_customfield2=locality&q_customtype2=EQUALS&q_customvalue2=<?php echo urlencode($localityName).'&collid='.$collid; ?>" target="_blank"><img src="../../images/edit.png" style="width:13px" /></a>
 													<?php 
 													if(array_key_exists($stateTestStr,$goodCountyArr)){
 														?>
 														<select name="county" style="width:200px;">
-															<option value="">Assign County...</option>
+															<option value=""><?php echo $LANG['ASSI:STAT'];?></option>
 															<option value="">-------------------------</option>
 															<?php 
 															$arr = $goodCountyArr[$stateTestStr];
@@ -447,7 +451,8 @@ if($action && $isEditor){
 														<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
 														<input name="target" type="hidden" value="geolocal" />
 														<input name="mode" type="hidden" value="nullcounty" />
-														<input name="action" type="submit" value="Assign County" />
+														<input type="hidden" name="action" value="Assign County" />
+														<input type="submit" value="<?php echo $LANG['ASSIGN_COUNTY']; ?>" />
 														<?php
 													} 
 													?>
@@ -465,50 +470,50 @@ if($action && $isEditor){
 					else{
 						if($mode === ''){
 							echo '<div style="margin-bottom:15px;">';
-							echo '<div style="font-weight:bold;">General cleaning... </div>';
+							echo '<div style="font-weight:bold;">'.$LANG['GENERAL_CLEANING'].'... </div>';
 							flush();
 							ob_flush();
 							$cleanManager->countryCleanFirstStep();
 							echo '</div>';
 						}
 						
-						echo '<div style="margin-bottom:2px"><b>Questionable countries:</b> ';
+						echo '<div style="margin-bottom:2px"><b>'.$LANG['QUESTIONABLE_COUNTRIES'].':</b> ';
 						$badCountryCnt = $cleanManager->getBadCountryCount();
 						echo $badCountryCnt;
-						if($badCountryCnt) echo ' => <a href="politicalunits.php?collid='.$collid.'&target=geolocal&mode=badcountry">List countries...</a>';
+						if($badCountryCnt) echo ' => <a href="politicalunits.php?collid='.$collid.'&target=geolocal&mode=badcountry">'.$LANG['LIST_COUNTRIES'].'...</a>';
 						echo '</div>';
 						
 						//Get Null country and not null state
-						echo '<div style="margin-bottom:20px"><b>Null country with non-Null state/province:</b> ';
+						echo '<div style="margin-bottom:20px"><b>'.$LANG['NULL_COUNTRY_WITH_NON_NULL_STATE_PROVINCE'].':</b> ';
 						$nullCountryCnt = $cleanManager->getNullCountryNotStateCount();
 						echo $nullCountryCnt;
-						if($nullCountryCnt) echo ' => <a href="politicalunits.php?collid='.$collid.'&target=geolocal&mode=nullcountry">List records...</a>';
+						if($nullCountryCnt) echo ' => <a href="politicalunits.php?collid='.$collid.'&target=geolocal&mode=nullcountry">'.$LANG['LIST_RECORDS'].'...</a>';
 						echo '</div>';
 						
-						echo '<div style="margin-bottom:2px"><b>Questionable states/provinces:</b> ';
+						echo '<div style="margin-bottom:2px"><b>'.$LANG['QUESTIONABLE_STATES_PROVINCES'].':</b> ';
 						$badStateCnt = $cleanManager->getBadStateCount();
 						echo $badStateCnt;
-						if($badStateCnt) echo ' => <a href="politicalunits.php?collid='.$collid.'&target=geolocal&mode=badstate">List states...</a>';
+						if($badStateCnt) echo ' => <a href="politicalunits.php?collid='.$collid.'&target=geolocal&mode=badstate">'.$LANG['LIST_STATES'].'...</a>';
 						echo '</div>';
 						
 						//Get Null state and not null county or municipality
-						echo '<div style="margin-bottom:20px"><b>Null state/province with non-Null county:</b> ';
+						echo '<div style="margin-bottom:20px"><b>'.$LANG['NULL_STATE_PROVINCE_WITH_NON_NULL_COUNTY'].':</b> ';
 						$nullStateCnt = $cleanManager->getNullStateNotCountyCount();
 						echo $nullStateCnt;
-						if($nullStateCnt) echo ' => <a href="politicalunits.php?collid='.$collid.'&target=geolocal&mode=nullstate">List records...</a>';
+						if($nullStateCnt) echo ' => <a href="politicalunits.php?collid='.$collid.'&target=geolocal&mode=nullstate">'.$LANG['LIST_RECORDS'].'...</a>';
 						echo '</div>';
 						
-						echo '<div style="margin-bottom:2px"><b>Questionable counties:</b> ';
+						echo '<div style="margin-bottom:2px"><b>'.$LANG['QUESTIONABLE_COUNTIES'].':</b> ';
 						$badCountiesCnt = $cleanManager->getBadCountyCount();
 						echo $badCountiesCnt;
-						if($badCountiesCnt) echo ' => <a href="politicalunits.php?collid='.$collid.'&target=geolocal&mode=badcounty">List counties...</a>';
+						if($badCountiesCnt) echo ' => <a href="politicalunits.php?collid='.$collid.'&target=geolocal&mode=badcounty">'.$LANG['LIST_COUNTIES'].'...</a>';
 						echo '</div>';
 						
 						//Get Null county and not null locality
-						echo '<div style="margin-bottom:60px"><b>Null county with non-Null locality details:</b> ';
+						echo '<div style="margin-bottom:60px"><b>'.$LANG['NULL_COUNTY_WITH_NON_NULL_LOCALITY_DETAILS'].':</b> ';
 						$nullCountyCnt = $cleanManager->getNullCountyNotLocalityCount();
 						echo $nullCountyCnt;
-						if($nullCountyCnt) echo ' => <a href="politicalunits.php?collid='.$collid.'&target=geolocal&mode=nullcounty">List records...</a>';
+						if($nullCountyCnt) echo ' => <a href="politicalunits.php?collid='.$collid.'&target=geolocal&mode=nullcounty">'.$LANG['LIST_RECORDS'].'...</a>';
 						echo '</div>';
 					}
 				}
@@ -552,7 +557,7 @@ if($action && $isEditor){
  			<?php 
 		}
 		else{
-			echo '<h2>You are not authorized to access this page</h2>';
+			echo '<h2>'.$LANG['YOU_ARE_NOT_AUTHORIZED_TO_ACCESS_THIS_PAGE'].'</h2>';
 		}
 		?>
 	</div>

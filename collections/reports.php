@@ -13,6 +13,9 @@ $rm = new ReportsManager();
         tr:nth-child(even) {background: #CCC}
         tr:nth-child(odd) {background: #FFF}
     </style>
+    <!--inicio favicon -->
+	<link rel="shortcut icon" href="../images/favicon.png" type="image/x-icon">
+
 </head>
 <body>
 <h3>New identifications to the species level (by determiner)</h3>

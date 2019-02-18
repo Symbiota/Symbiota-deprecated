@@ -1,6 +1,8 @@
 <?php
 include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/TPDescEditorManager.php');
+include_once($SERVER_ROOT.'/content/lang/taxa/admin/tpdesceditor.'.$LANG_TAG.'.php');
+
 header("Content-Type: text/html; charset=".$charset);
 
 $tid = array_key_exists("tid",$_REQUEST)?$_REQUEST["tid"]:0;
@@ -33,21 +35,21 @@ if($editable){
 	<div id='adddescrblock' style='display:none;'>
 		<form name='adddescrblockform' action="tpeditor.php" method="get">
 			<fieldset style='width:90%;margin:10px;padding:10px;'>
-    			<legend><b>New Description Block</b></legend>
+    			<legend><b><?php echo $LANG['NEW_DESCRIPTION'];?></b></legend>
 				<div style=''>
-					Language: <input id="language" name="language" type="text" value="<?php echo $defaultLang; ?>" />
+					<?php echo $LANG['LANGUAJE'];?> <input id="language" name="language" type="text" value="<?php echo $defaultLang; ?>" />
 				</div>
 				<div style=''>
-					Caption: <input id='caption' name='caption' style='width:300px;' type='text' />
+					<?php echo $LANG['CAPTION'];?> <input id='caption' name='caption' style='width:300px;' type='text' />
 				</div>
 				<div style=''>
-					Source: <input id='source' name='source' style='width:450px;' type='text' />
+					<?php echo $LANG['SOURCE'];?> <input id='source' name='source' style='width:450px;' type='text' />
 				</div>
 				<div style=''>
-					Source Url: <input id='sourceurl' name='sourceurl' style='width:450px;' type='text' />
+					<?php echo $LANG['SOURCE_URL'];?> <input id='sourceurl' name='sourceurl' style='width:450px;' type='text' />
 				</div>
 				<div style=''>
-					Notes: <input id='notes' name='notes' style='width:450px;' type='text' />
+					<?php echo $LANG['NOTES'];?> <input id='notes' name='notes' style='width:450px;' type='text' />
 				</div>
 				<div style="float:right;">
 					<input name='action' style='margin-top:5px;' type='submit' value='Add Description Block' />
@@ -55,7 +57,7 @@ if($editable){
 					<input type="hidden" name="tabindex" value="4" />
 				</div>
 				<div style=''>
-					Sort Order: <input name='displaylevel' style='width:40px;' type='text' />
+					<?php echo $LANG['SORT_ORDER'];?> <input name='displaylevel' style='width:40px;' type='text' />
 				</div>
 			</fieldset>
 		</form>
@@ -73,42 +75,42 @@ if($editable){
 				if($descEditor->getTid() != $dArr['tid']){
 					?>
 					<div style="margin:4px 0px;">
-						<b>Linked to synonym:</b> <?php echo $dArr['sciname']; ?> 
-						(<a href="tpeditor.php?action=remap&tdbid=<?php echo $tdbid.'&tid='.$descEditor->getTid(); ?>">relink to accepted taxon</a>)
+						<b><?php echo $LANG['LINKED_TO'];?></b> <?php echo $dArr['sciname']; ?> 
+						(<a href="tpeditor.php?action=remap&tdbid=<?php echo $tdbid.'&tid='.$descEditor->getTid(); ?>"><?php echo $LANG['RELINK'];?></a>)
 					</div>
 					<?php 
 				}
 				?>
-				<div><b>Caption:</b> <?php echo $dArr["caption"]; ?></div>
-				<div><b>Source:</b> <?php echo $dArr["source"]; ?></div>
-				<div><b>Source URL:</b> <a href='<?php echo $dArr["sourceurl"]; ?>'><?php echo $dArr["sourceurl"]; ?></a></div>
-				<div><b>Notes:</b> <?php echo $dArr["notes"]; ?></div>
+				<div><b><?php echo $LANG['CAPTION_1'];?></b> <?php echo $dArr["caption"]; ?></div>
+				<div><b><?php echo $LANG['SOURCE_1'];?></b> <?php echo $dArr["source"]; ?></div>
+				<div><b><?php echo $LANG['SOURCE_URL_3'];?></b> <a href='<?php echo $dArr["sourceurl"]; ?>'><?php echo $dArr["sourceurl"]; ?></a></div>
+				<div><b><?php echo $LANG['NOTES'];?></b> <?php echo $dArr["notes"]; ?></div>
 				<div id="dblock-<?php echo $tdbid;?>" style="display:none;margin-top:10px;">
 					<fieldset style="padding:10px;">
-						<legend><b>Description Block Edits</b></legend>
+						<legend><b><?php echo $LANG['DESCR_BLOCK'];?></b></legend>
 						<form id='updatedescrblock' name='updatedescrblock' action="tpeditor.php" method="post">
 							<div>
-								Language: 
+								<?php echo $LANG['LANGUAJE_1'];?>
 								<input name='language' type='text' value='<?php echo $dArr['language']; ?>' />
 							</div>
 							<div>
-								Caption: 
+								<?php echo $LANG['CAPTION_3'];?> 
 								<input id='caption' name='caption' style='width:450px;' type='text' value='<?php echo $dArr["caption"];?>' />
 							</div>
 							<div>
-								Source: 
+								<?php echo $LANG['SOURCE_3'];?> 
 								<input id='source' name='source' style='width:450px;' type='text' value='<?php echo $dArr["source"];?>' />
 							</div>
 							<div>
-								Source URL: 
+								<?php echo $LANG['SOURCE_URL_3'];?> 
 								<input id='sourceurl' name='sourceurl' style='width:500px;' type='text' value='<?php echo $dArr["sourceurl"];?>' />
 							</div>
 							<div>
-								Notes: 
+								<?php echo $LANG['NOTES_4'];?> 
 								<input name='notes' style='width:450px;' type='text' value='<?php echo $dArr["notes"];?>' />
 							</div>
 							<div>
-								Display Level: 
+								<?php echo $LANG['DIPLAY_LEVEL'];?> 
 								<input name='displaylevel' style='width:40px;' type='text' value='<?php echo $dArr['displaylevel'];?>' />
 							</div>
 							<div style="margin:10px;">
@@ -126,30 +128,30 @@ if($editable){
 								<input type="hidden" name="tabindex" value="4" />
 								<input type='hidden' name='action' value='Delete Description Block'>
 								<input name='submitaction' value='Delete Description Block' style='margin:10px 0px 0px 20px;height:12px;' type='image' src='../../images/del.png'/> 
-								Delete Description Block (Including all statements below) 
+								<?php echo $LANG['DELETE_DESCRIP'];?> 
 							</form>
 						</div>
 					</fieldset>
 				</div>
     			<div style="margin-top:10px;">
 					<fieldset style="padding:10px;">
-						<legend><b>Statements</b></legend>
+						<legend><b><?php echo $LANG['STATEMENTS'];?></b></legend>
 						<div onclick="toggle('addstmt-<?php echo $tdbid;?>');" style="float:right;" title="Add a New Statement">
 							<img style='border:0px;width:15px;' src='../../images/add.png'/>
 						</div>
 						<div id='addstmt-<?php echo $tdbid;?>' style='display:<?php echo ($action == 'Add Description Block'?'block':'none'); ?>'>
 							<form name='adddescrstmtform' action="tpeditor.php" method="post">
 								<fieldset style='margin:5px 0px 0px 15px;'>
-					    			<legend><b>New Description Statement</b></legend>
+					    			<legend><b><?php echo $LANG['NEW_DESCRIP'];?></b></legend>
 									<div style='margin:3px;'>
-										Heading: <input name='heading' style='margin-top:5px;' type='text' />&nbsp;&nbsp;&nbsp;&nbsp;
-										<input name='displayheader' type='checkbox' value='1' CHECKED /> Display Heading
+										<?php echo $LANG['HEADING'];?> <input name='heading' style='margin-top:5px;' type='text' />&nbsp;&nbsp;&nbsp;&nbsp;
+										<input name='displayheader' type='checkbox' value='1' CHECKED /> <?php echo $LANG['DISPLAY_HEADING'];?>
 									</div>
 									<div style='margin:3px;'>
 										<textarea name='statement' style="width:99%;height:200px;"></textarea>
 									</div>
 									<div style='margin:3px;'>
-										Sort Sequence: 
+										<?php echo $LANG['SORT_SEQUENCE'];?> 
 										<input name='sortsequence' style='margin-top:5px;width:40px;' type='text' value='' />
 									</div>
 									<div style="margin:10px;">
@@ -175,14 +177,14 @@ if($editable){
 									<div style='margin:5px 0px 5px 20px;border:2px solid cyan;padding:5px;'>
 										<form id='updatedescr' name='updatedescr' action="tpeditor.php" method="post">
 											<div>
-												<b>Heading:</b> <input name='heading' style='margin:3px;' type='text' value='<?php echo $stmtArr["heading"];?>' /> 
-												<input name='displayheader' type='checkbox' value='1' <?php echo ($stmtArr["displayheader"]?"CHECKED":"");?> /> Display Header
+												<b><?php echo $LANG['HEADING_2'];?> </b> <input name='heading' style='margin:3px;' type='text' value='<?php echo $stmtArr["heading"];?>' /> 
+												<input name='displayheader' type='checkbox' value='1' <?php echo ($stmtArr["displayheader"]?"CHECKED":"");?> /> <?php echo $LANG['DIS_HEAD'];?>
 											</div>
 											<div>
 												<textarea name='statement'  style="width:99%;height:200px;margin:3px;"><?php echo $stmtArr["statement"];?></textarea>
 											</div>
 											<div>
-												<b>Sort Sequence:</b> 
+												<b><?php echo $LANG['SORT_SEQUENCE_4'];?></b> 
 												<input name='sortsequence' style='width:40px;' type='text' value='<?php echo $stmtArr["sortsequence"];?>' />
 											</div>
 											<div style="margin:10px;">
@@ -200,7 +202,7 @@ if($editable){
 											<input type="hidden" name="tabindex" value="4" />
 											<input type='hidden' name='action' value='Delete Statement'>
 											<input name='submitaction' value='Delete Statement' style='margin:10px 0px 0px 20px;height:12px;' type='image' src='../../images/del.png'/> 
-											Delete Statement 
+											<?php echo $LANG['DELETE_STATEMENT'];?> 
 										</form>
 									</div>
 								</div>
@@ -215,7 +217,7 @@ if($editable){
 		}
 	}
 	else{
-		echo '<h2>No descriptions available.</h2>';
+		echo '<h5>No descriptions available.</h5>';
 	}
 }
 ?>

@@ -67,7 +67,7 @@ $procManager->setProjVariables('OCR Harvest');
 		return true;
 	}
 </script>
-<div style="margin:15px;">
+<div style="margin:45px;font-family: Hind;">
 	<?php 
 	$cntTotal = $procManager->getSpecWithImage();
 	$cntUnproc = $procManager->getSpecWithImage($procStatus);

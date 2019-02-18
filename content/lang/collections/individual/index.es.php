@@ -5,7 +5,7 @@ Language: English (Ingles)
 ------------------
 */
 
-include_once('sharedterms.es.php');
+//include_once('sharedterms.es.php');
 
 $LANG['DETAILS'] = 'Detalles';
 $LANG['CA'] = 'Catálogo #:';
@@ -102,4 +102,39 @@ $LANG['FIELD_NOTES'] = 'Notas de campo';
 $LANG['CULTIVATION_STATUS'] = 'Estado de cultivo';
 $LANG['CULTI'] = 'Cultivado';
 $LANG['ESTA_MEANS'] = 'Medios del establecimiento';
+
+$LANG['COMMENT_REPORTED_AS_INAPPROPRIATE'] = 'Comentario reportado como inapropiado. El comentario no estará disponible para el público hasta que sea revisado por un administrador.';
+$LANG['DETAILED_COLLECTION_RECORD_INFORMATIO'] = 'Recopilación detallada de información de registro';
+$LANG['PLEASE_SELECT_A_CHECKLIST'] = 'Por favor seleccione una lista de verificación';
+$LANG['PLEASE_ENTER_A_COMMENT'] = 'Por favor ingrese un comentario';
+$LANG['ANNOTATIONS'] = 'Anotaciones';
+$LANG['LINK_TO_SOURCE'] = 'Enlace a la fuente';
+$LANG['OCCURRENCE'] = 'ocurrencia';
+$LANG['SPECIMEN_BEING_REFERENCED'] = 'Espécimen referenciado';
+$LANG['CATALOG_NUMBER'] = 'Numero de catalogo';
+$LANG['LATEST_IDENTIFICATION'] = 'Última identificación';
+$LANG['IDENTIFIED_BY'] = 'Identificado por';
+$LANG['SHOW_FULL_DETAILS'] = 'Mostrar detalles completos';
+$LANG['COMMENT_NOT_PUBLIC_DUE_TO_PENDIENG_ABUSE_REPORT']a = 'Comentario no público debido a informe de abuso pendiente (visible solo para administradores)';
+$LANG['POSTED'] = 'al corriente';
+$LANG['SUBMIT_COMMENT'] = 'enviar comentario';
+$LANG['MANAGE_EDIT'] = 'Administrar Editar';
+$LANG['ENTERED_BY'] = 'Introducido por';
+$LANG['DATE_ENTERED'] = 'Fecha ingresada';
+$LANG['DATE_MODIFIED'] = 'Fecha modificada';
+$LANG['FIELD'] = 'Campo';
+$LANG['OLD_VALUE'] = 'Valor antiguo';
+$LANG['NEW_VALUE'] = 'Valor nuevo';
+$LANG['RECORD_HAS_NOT_BEEN_EDITED'] = 'El registro no se ha editado desde que se ingresó';
+$LANG['NOTE_EDITS_ARE_ONLY_VIEWABLE'] = 'Nota: las ediciones solo son visibles para los administradores y editores de colecciones.';
+$LANG['ACCESS_STATS'] = 'Estadísticas de acceso';
+$LANG['YEAR'] = 'Año';
+$LANG['ACCESS_TYPE'] = 'Tipo de acceso';
+$LANG['COUNT'] = 'Contar';
+$LANG['RECORD_DELETED'] = 'Registro borrado';
+$LANG['NOTES'] = 'Notas';
+$LANG['VALUE'] = 'Valor';
+$LANG['IMAGE'] = 'Imagen';
+$LANG['UNABLE_TO_LOCATE_RECORD_WITHIN_ARCHIVE'] = 'No se puede localizar el registro dentro del archivo';
+
 ?>

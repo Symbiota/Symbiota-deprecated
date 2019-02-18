@@ -1,23 +1,14 @@
 /* Do not modify styles within this file
- * Instead, modify styles within the main.css file to override the default styles within this file 
- * 
+ * Instead, modify styles within the main.css file to override the default styles within this file
+ *
  **/
 body{
-	margin:	8px;
-	margin-left: auto;
-	margin-right: auto;
-	width:		900px; 
-	background-color: #FFFFFF;
-	color: #000000;
-	font-family: Arial, Helvetica, sans-serif;
-	font-size: 12px;
+
 }
 
 /*Main table framework*/
 #maintable{
 	border-spacing: 0px;
-	width:		900px; 
-	height:		500px;
 }
 
 #maintable td{
@@ -33,11 +24,11 @@ td.middleleft{
 }
 
 td.middleleftnomenu{
-	width:	20px;	
+	width:	20px;
 }
 
 td.middlecenter{
- 	height:	350px;		
+ 	height:	350px;
 }
 
 td.middleright{
@@ -45,28 +36,26 @@ td.middleright{
 }
 
 /*Central div and general components */
-#innertext{
-	margin:	10px;	
-	background-color: #FFFFFF;
-	min-height:400px;
-	padding-top: 15px;
-}
+
 
 #innertext a{
+	color: #FFFFFF !important;
 
 }
 
 #innertext a:hover{
+	color: #ADA386 !important;
 
 }
 
 form div {
 	margin-top:	2px;
+	color: #000000;
 }
 
 a{
 	color: 		#2C405E;
-    text-decoration: none;	
+    text-decoration: none;
 }
 
 a:hover{
@@ -75,14 +64,14 @@ a:hover{
 }
 
 /* Spans that use javascript to add clickable link behaviors */
-span[class=link] { 
+span[class=link] {
 	color: 		#2C405E;
-    text-decoration: none;	
+    text-decoration: none;
 }
 
-span[class=link]:hover { 
+span[class=link]:hover {
 	color: black;
-    text-decoration: underline;	
+    text-decoration: underline;
 }
 
 /* General Image thumbnails   */
@@ -118,29 +107,28 @@ div.tnimg img{
 	left: -9999px;
 	right: -9999px;
 	margin: auto;
-}	
+}
 
 /* styled table */
 
 table.styledtable{
-	width:				100%; 
-	border-collapse:	collapse; 
+	width:				100%;
+	border-collapse:	collapse;
 }
 table.styledtable th {
-	text-align:			left; 
+	text-align:			left;
 	padding:			4px;
-	border:				1px solid gray; 
-	background-color:	#dbe5f1; 
-	color:				black; 
+	border:				1px solid gray;
+	background-color:	#dbe5f1;
+	color:				black;
 }
 table.styledtable td {
-	font-size:		1em; 
 	padding:		3px;
-	border:			1px solid gray; 
+	border:			1px solid gray;
 	background-color: #efefef;
 }
 table.styledtable tr.alt td {
-	color:				#000000; 
+	color:				#000000;
 	/*background-color:	#FCFCFC; */
 	background-color: #dfdfdf;
 }
@@ -149,6 +137,8 @@ table.styledtable tr.alt td {
 div.navpath {
 	color: #000000;
 	font-size: 11px;
+	padding-left: 60px;
+
 }
 
 div.navpath a {
@@ -169,7 +159,7 @@ div.button {
 }
 
 div.button img {
-	border:	0px;	
+	border:	0px;
 }
 
 div.button:hover {
@@ -223,6 +213,7 @@ div.button:hover {
 	width:		250px;
 	text-align:	left;
 	float:		right;
+	min-height:	325px;
 }
 
 #taxonfilterdiv{
@@ -237,19 +228,33 @@ div.button:hover {
 
 
 /* /collections/ folder pages */
-.categorytitle a{ 
-	font-weight: bold; 
-	color:		black; 
-	font-size:	110%; 
+.collectiontable{
+	float: left;
+}
+
+.collectiontable td{
+	vertical-align: middle;
+}
+
+.categorytitle{
+}
+
+.categorytitle a{
+	font-weight: bold;
+	font-size:	110%;
+}
+
+.collectiontitle{
+	font-color:gray;
 }
 
 .collectiontitle a{
-	font-weight: bold;
-	color: 		 #000000;
+	font-size: 75%;
 }
 
 .collectiontitle a:hover{
-	color: 	#000000;
+	font-weight: bold;
+	color: grey;
 }
 
 #omlisttable{
@@ -260,41 +265,13 @@ div.button:hover {
     border: medium double #990000;
 }
 
-/* Quick Search Plugin */
-#quicksearchdiv{
-	float: right;
-	width: 335px;
-	margin: 8px;
-	padding: 5px 5px 0px 5px;
-	-moz-border-radius: 5px;
-	-webkit-border-radius: 5px;
-	border: 1px solid black;	
-}
-
-#quicksearchtext{
-	margin-top:0px;
-	padding-bottom:0px;
-}
-
-#quicksearchtaxon{
-	width: 250px;
-	margin-bottom:0px;
-	padding-bottom:0px;
-	font-family: Arial, Helvetica, sans-serif;
-}
-
-#quicksearchbutton{
-	margin-left:10px;
-	margin-top:0px;
-	margin-bottom:0px;
-	padding-bottom:0px;
-}
-
 /* Slideshow Plugin */
 #slideshowcontainer{
 	border: 2px solid black;
 	border-radius:10px;
 	padding:10px;
+	margin-left: auto;
+	margin-right: auto;
 }
 
 /* misc */
@@ -310,12 +287,12 @@ div.genericpopup{
 }
 
 .nextbtn {
-	font-weight: bold;
-	background-color: #c0c0c0;
+	font-weight: bold,
+	background-color: #dddddd;
 	border-color: #999;
     color: black;
-	width: 90px;
-	padding: 6px 10px;
+	width: 110px;
+	padding: 5px 8px;
 	border-radius: 5px;
 }
 
@@ -325,13 +302,13 @@ div.genericpopup{
 }
 
 .resetbtn {
-	font-weight: bold;
+	font-weight: bold,
 	background-color: #c0c0c0;
 	border-color: #999;
     color: black;
 	width: 90px;
 	padding: 4px 6px;
-	border-radius: 5px;
+	border-radius: 2px;
 }
 
 .resetbtn:hover {

@@ -1,6 +1,7 @@
 <?php 
 include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/SpecUpload.php');
+include_once($SERVER_ROOT.'/content/lang/collections/admin/specuploadmanagement.'.$LANG_TAG.'.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 
 if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../collections/admin/specuploadmanagement.php?'.$_SERVER['QUERY_STRING']);
@@ -29,7 +30,7 @@ if($IS_ADMIN || (array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collid,
 if($isEditor){
 	if($action == "Save Edits"){
 		if($duManager->editUploadProfile($_POST)){
-			$statusStr = 'SUCCESS: Edits to import profile have been applied';
+			$statusStr = $LANG['SUCCESS_EDITS_TO_IMPORT_PROFILE'];
 		}
 		else{
 			$statusStr = $duManager->getErrorStr();
@@ -38,7 +39,7 @@ if($isEditor){
 	}
 	elseif($action == "Create Profile"){
 		if($duManager->createUploadProfile($_POST)){
-			$statusStr = 'SUCCESS: New upload profile added';
+			$statusStr = $LANG['SUCCESS_NEW_UPLOAD_PROFILE_ADDED'];
 		}
 		else{
 			$statusStr = $duManager->getErrorStr();
@@ -47,7 +48,7 @@ if($isEditor){
 	}
 	elseif($action == "Delete Profile"){
 		if($duManager->deleteUploadProfile($uspid)){
-			$statusStr = 'SUCCESS: Upload Profile Deleted';
+			$statusStr = $LANG['SUCCESS_UPLOAD_PROFILE_DELETED'];
 		}
 		else{
 			$statusStr = $duManager->getErrorStr();
@@ -61,7 +62,9 @@ $duManager->readUploadParameters();
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET; ?>">
-	<title><?php echo $DEFAULT_TITLE; ?> Specimen Upload Profile Manager</title>
+	<title><?php echo $DEFAULT_TITLE." ".$LANG['SPECIMEN_UPLOAD_PROFILE_MANAGER']; ?></title>
+	<link href="../../css/bootstrap.min.css" type="text/css" rel="stylesheet"/>
+	<link href="../../css/bootstrap.min.css" type="text/css" rel="stylesheet"/>
 	<link href="../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 	<script>
@@ -75,17 +78,17 @@ $duManager->readUploadParameters();
 					if (f.uspid[counter].checked) return true; 
 				}
 			}
-			alert("Please select an Upload Option");
+			alert("<?php echo $LANG['PLEASE_SELECT_AN_UPLOAD_OPTION']; ?>");
 			return false;
 		}
 
 		function checkParameterForm(f){
 			if(f.title.value == ""){
-				alert("Profile title is required");
+				alert("<?php echo $LANG['PROFILE_TITLE_IS_REQUIRED']; ?>");
 				return false;
 			}
 			else if(f.uploadtype.value == ""){
-				alert("Select Upload Type");
+				alert("<?php echo $LANG['SELECT_UPLOAD_TYPE']; ?>");
 				return false;
 			}
 			return true;
@@ -159,9 +162,9 @@ $duManager->readUploadParameters();
 		if($collections_admin_specuploadCrumbs){
 			?>
 			<div class="navpath">
-				<a href="../../index.php">Home</a> &gt;&gt;
+				<a href="../../index.php"><?php echo $LANG['HOME']; ?></a> &gt;&gt;
 				<?php echo $collections_admin_specuploadCrumbs; ?>
-				<b>Specimen Loader</b> 
+				<b><?php echo $LANG['SPECIMEN']; ?></b> 
 			</div>
 			<?php 
 		}
@@ -169,16 +172,16 @@ $duManager->readUploadParameters();
 	else{
 		?>
 		<div class="navpath">
-			<a href="../../index.php">Home</a> &gt;&gt; 
-			<a href="../misc/collprofiles.php?collid=<?php echo $collid; ?>&emode=1">Collection Management Panel</a> &gt;&gt; 
-			<b>Specimen Loader</b> 
+			<a href="../../index.php"><?php echo $LANG['HOME'];?></a> &gt;&gt; 
+			<a href="../misc/collprofiles.php?collid=<?php echo $collid; ?>&emode=1"><?php echo $LANG['COLLECTION_MANAGEMENT_PANEL']; ?></a> &gt;&gt; 
+			<b><?php echo $LANG['SPECIMEN'];?></b> 
 		</div>
 		<?php 
 	}
 ?> 
 <!-- This is inner text! -->
 <div id="innertext">
-	<h1>Data Upload Management</h1>
+	<h5><?php echo $LANG['DATA'];?></h5>
 	<?php
 	
 	if($statusStr){
@@ -191,7 +194,7 @@ $duManager->readUploadParameters();
 		if($collid){
 			echo '<div style="font-weight:bold;font-size:130%;">'.$duManager->getCollInfo('name').'</div>';
 			if($duManager->getCollInfo("uploaddate")) {
-				echo "<div style='margin:0px 0px 15px 15px;'><b>Last Upload Date:</b> ".$duManager->getCollInfo("uploaddate")."</div>";
+				echo "<div style='margin:0px 0px 15px 15px;'><b>".$LANG['LAST_UPLOAD_DATE'].":</b> ".$duManager->getCollInfo("uploaddate")."</div>";
 			}
 			if(!$action){
 		 		//Collection has been selected, now display different upload options
@@ -199,10 +202,10 @@ $duManager->readUploadParameters();
 				?>
 				<form name="uploadlistform" action="specupload.php" method="post" onsubmit="return checkUploadListForm(this);">
 					<fieldset>
-						<legend style="font-weight:bold;font-size:120%;">Upload Options</legend>
+						<legend style="font-weight:bold;font-size:120%;"><?php echo $LANG['UP'];?></legend>
 						<div style="float:right;">
 							<?php 
-							echo '<a href="specuploadmanagement.php?collid='.$collid.'&action=addprofile"><img src="'.$clientRoot.'/images/add.png" style="width:15px;border:0px;" title="Add a New Upload Profile" /></a>';
+							echo '<a href="specuploadmanagement.php?collid='.$collid.'&action=addprofile"><img src="'.$clientRoot.'/images/add.png" style="width:15px;border:0px;" title="'.$LANG['ADD_A_NEW_UPLOAD'].'" /></a>';
 							?>
 						</div>
 						<?php 
@@ -212,7 +215,7 @@ $duManager->readUploadParameters();
 						 		<div style="margin:10px;">
 									<input type="radio" name="uspid" value="<?php echo $id.'-'.$v["uploadtype"];?>" />
 									<?php echo $v["title"]; ?> 
-									<a href="specuploadmanagement.php?action=editprofile&collid=<?php echo $collid.'&uspid='.$id; ?>" title="View/Edit Parameters"><img src="../../images/edit.png" /></a>
+									<a href="specuploadmanagement.php?action=editprofile&collid=<?php echo $collid.'&uspid='.$id; ?>" title="<?php echo $LANG['VIEW_EDIT_PARAMETERS']; ?>"><img src="../../images/edit.png" /></a>
 									<input type="hidden" name="uploadtype" value="<?php echo $v["uploadtype"];?>" />
 								</div>
 								<?php 
@@ -220,15 +223,16 @@ $duManager->readUploadParameters();
 							?>
 							<input type="hidden" name="collid" value="<?php echo $collid;?>" />
 							<div style="margin:10px;">
-								<input type="submit" name="action" value="Initialize Upload..." />
+								<input type="hidden" name="action" value="Initialize Upload..." />
+								<input type="submit" value="<?php echo $LANG['INITIALIZE_UPLOAD']; ?>" />
 							</div>
 							<?php
 						} 
 					 	else{
 					 		?>
 							<div style="padding:30px;">
-								There are no Upload Profiles associated with this collection. <br />
-								Click <a href="specuploadmanagement.php?collid=<?php echo ($collid);?>&action=addprofile">here</a> to add a new profile.
+								<?php echo $LANG['THERE'];?> <br />
+								<?php echo $LANG['CLICK'];?> <a href="specuploadmanagement.php?collid=<?php echo ($collid);?>&action=addprofile"><?php echo $LANG['HERE'];?></a> <?php echo $LANG['TO_ADD'];?>
 							</div>
 							<?php 
 					 	}
@@ -242,83 +246,83 @@ $duManager->readUploadParameters();
 		 		?>
 				<div style="clear:both;">
 					<fieldset>
-						<legend><b>Upload Parameters</b></legend>
+						<legend><b><?php echo $LANG['UPLOAD'];?></b></legend>
 						<div style="float:right;">
 							<?php 
-							echo '<a href="specuploadmanagement.php?collid='.$collid.'">View All</a> ';
+							echo '<a href="specuploadmanagement.php?collid='.$collid.'">'.$LANG['VIEW_ALL'].'</a> ';
 							?>
 						</div>
 						<form name="parameterform" action="specuploadmanagement.php" method="post" onsubmit="return checkParameterForm(this)">
 							<div id="updatetypeDiv" style="">
-								<b>Upload Type:</b> 
+								<b><?php echo $LANG['UP_TYPE'];?></b> 
 								<select name="uploadtype" onchange="adjustParameterForm()" <?php if($uspid) echo 'DISABLED'; ?>>
-									<option value="">Select an Upload Type</option>
+									<option value=""><?php echo $LANG['SEL'];?></option>
 									<option value="">----------------------------------</option>
 									<?php 
 									$uploadType = $duManager->getUploadType();
-									echo '<option value="'.$DWCAUPLOAD.'" '.($uploadType==$DWCAUPLOAD?'SELECTED':'').'>Darwin Core Archive Manual Upload</option>';
-									echo '<option value="'.$IPTUPLOAD.'" '.($uploadType==$IPTUPLOAD?'SELECTED':'').'>IPT Resource / Darwin Core Archive Provider</option>';
-									echo '<option value="'.$FILEUPLOAD.'" '.($uploadType==$FILEUPLOAD?'SELECTED':'').'>File Upload</option>';
-									echo '<option value="'.$SKELETAL.'" '.($uploadType==$SKELETAL?'SELECTED':'').'>Skeletal File Upload</option>';
-									echo '<option value="'.$NFNUPLOAD.'" '.($uploadType==$NFNUPLOAD?'SELECTED':'').'>NfN File Upload</option>';
+									echo '<option value="'.$DWCAUPLOAD.'" '.($uploadType==$DWCAUPLOAD?'SELECTED':'').'>'.$LANG['DARWIN_CORE_ARCHIV_MANUAL_UPLOAD'].'</option>';
+									echo '<option value="'.$IPTUPLOAD.'" '.($uploadType==$IPTUPLOAD?'SELECTED':'').'>'.$LANG['IPT_RESOURCE_DARWIN_CORE_ARCHIVE'].'</option>';
+									echo '<option value="'.$FILEUPLOAD.'" '.($uploadType==$FILEUPLOAD?'SELECTED':'').'>'.$LANG['FILE_UPLOAD'].'</option>';
+									echo '<option value="'.$SKELETAL.'" '.($uploadType==$SKELETAL?'SELECTED':'').'>'.$LANG['SKELETAL_FILE_UPLOAD'].'</option>';
+									echo '<option value="'.$NFNUPLOAD.'" '.($uploadType==$NFNUPLOAD?'SELECTED':'').'>'.$LANG['NFN_FILE_UPLOAD'].'</option>';
 									echo '<option value="">......................................</option>';
-									echo '<option value="'.$DIGIRUPLOAD.'" '.($uploadType==$DIGIRUPLOAD?'SELECTED':'').'>DiGIR Provider</option>';
-									echo '<option value="'.$DIRECTUPLOAD.'" '.($uploadType==$DIRECTUPLOAD?'SELECTED':'').'>Direct Database Mapping</option>';
-									echo '<option value="'.$STOREDPROCEDURE.'" '.($uploadType==$STOREDPROCEDURE?'SELECTED':'').'>Stored Procedure</option>';
-									echo '<option value="'.$SCRIPTUPLOAD.'" '.($uploadType==$SCRIPTUPLOAD?'SELECTED':'').'>Script Upload</option>';
+									echo '<option value="'.$DIGIRUPLOAD.'" '.($uploadType==$DIGIRUPLOAD?'SELECTED':'').'>'.$LANG['DIGIR_PROVIDER'].'</option>';
+									echo '<option value="'.$DIRECTUPLOAD.'" '.($uploadType==$DIRECTUPLOAD?'SELECTED':'').'>'.$LANG['DIRECT_DATABASE_MAPPING'].'</option>';
+									echo '<option value="'.$STOREDPROCEDURE.'" '.($uploadType==$STOREDPROCEDURE?'SELECTED':'').'>'.$LANG['STORED_PROCEDURE'].'</option>';
+									echo '<option value="'.$SCRIPTUPLOAD.'" '.($uploadType==$SCRIPTUPLOAD?'SELECTED':'').'>'.$LANG['SCRIPT_UPLOAD'].'</option>';
 									?>
 								</select>
 							</div>
 							<div id="titleDiv" style="">
-								<b>Title:</b> 
+								<b><?php echo $LANG['TITLE'];?></b> 
 								<input name="title" type="text" value="<?php echo $duManager->getTitle(); ?>" style="width:400px;" maxlength="45" />
 							</div>
 							<div id="platformDiv" style="display:none">
-								<b>Database Platform:</b>
+								<b><?php echo $LANG['DATABASE'];?></b>
 								<select name="platform">
-									<option value="">None Selected</option>
+									<option value=""><?php echo $LANG['NONE'];?></option>
 									<option value="">--------------------------------------------</option>
-									<option value="mysql" <?php echo ($duManager->getPlatform()=='mysql'?'SELECTED':''); ?>>MySQL Database</option>
+									<option value="mysql" <?php echo ($duManager->getPlatform()=='mysql'?'SELECTED':''); ?>><?php echo $LANG['SQL'];?></option>
 								</select> 
 							</div>
 							<div id="serverDiv" style="display:none">
-								<b>Server:</b> 
+								<b><?php echo $LANG['SERVER'];?></b> 
 								<input name="server" type="text" size="50" value="<?php echo $duManager->getServer(); ?>" style="width:400px;" />
 							</div>
 							<div id="portDiv" style="display:none">
-								<b>Port:</b> 
+								<b><?php echo $LANG['PORT'];?></b> 
 								<input name="port" type="text" value="<?php echo $duManager->getPort(); ?>" />
 							</div>
 							<div id="pathDiv" style="display:none">
-								<b>Path:</b> 
+								<b><?php echo $LANG['PATH'];?></b> 
 								<input name="path" type="text" size="50" value="<?php echo $duManager->getPath(); ?>" style="width:400px;" />
 							</div>
 							<div id="codeDiv" style="display:none">
-								<b>Code:</b> 
+								<b><?php echo $LANG['CODE'];?></b> 
 								<input name="code" type="text" value="<?php echo $duManager->getCode(); ?>" />
 							</div>
 							<div id="pkfieldDiv" style="display:none">
-								<b>Primary Key Field:</b> 
+								<b><?php echo $LANG['PRIMARY'];?></b> 
 								<input name="pkfield" type="text" value="<?php echo $duManager->getPKField(); ?>" />
 							</div>
 							<div id="usernameDiv" style="display:none">
-								<b>Username:</b> 
+								<b><?php echo $LANG['USER'];?></b> 
 								<input name="username" type="text" value="<?php echo $duManager->getUsername(); ?>" />
 							</div>
 							<div id="passwordDiv" style="display:none">
-								<b>Password:</b> 
+								<b><?php echo $LANG['PASS'];?></b> 
 								<input name="password" type="text" value="<?php echo $duManager->getPassword(); ?>" />
 							</div>
 							<div id="schemanameDiv" style="display:none">
-								<b>Schema Name:</b> 
+								<b><?php echo $LANG['SCHEMA'];?></b> 
 								<input name="schemaname" type="text" size="65" value="<?php echo $duManager->getSchemaName(); ?>" />
 							</div>
 							<div id="cleanupspDiv" style="display:none">
-								<b>Stored Procedure:</b> 
+								<b><?php echo $LANG['STORED'];?></b> 
 								<input name="cleanupsp" type="text" size="40" value="<?php echo $duManager->getStoredProcedure(); ?>" style="width:400px;" />
 							</div>
 							<div id="querystrDiv" style="display:none">
-								<b>Query/Command String: </b><br/>
+								<b><?php echo $LANG['QUERY'];?> </b><br/>
 								<textarea name="querystr" cols="75" rows="6" ><?php echo $duManager->getQueryStr(); ?></textarea>
 							</div>
 							<div style="margin:15px">
@@ -327,12 +331,14 @@ $duManager->readUploadParameters();
 								<?php
 								if($uspid){ 
 									?>
-									<input type="submit" name="action" value="Save Edits" />
+									<input type="hidden" name="action" value="Save Edits" />
+									<input type="submit" value="<?php echo $LANG['SAVE_EDITS']; ?>" />
 									<?php
 								}
 								else{ 
 									?>
-									<input type="submit" name="action" value="Create Profile" />
+									<input type="hidden" name="action" value="Create Profile" />
+									<input type="submit" value="<?php echo $LANG['CREATE_PROFILE']; ?>" />
 									<?php 
 								}
 								?>
@@ -343,13 +349,14 @@ $duManager->readUploadParameters();
 				<?php 
 				if($uspid){
 					?>
-					<form action="specuploadmanagement.php" method="post" onsubmit="return confirm('Are you sure you want to permanently delete this profile?')">
+					<form action="specuploadmanagement.php" method="post" onsubmit="return confirm('<?php echo $LANG['ARE_YOU_SURE_YOU_WANT']; ?>')">
 						<fieldset>
-							<legend><b>Delete this Profile</b></legend>
+							<legend><b><?php echo $LANG['DELET'];?></b></legend>
 							<div>
 								<input type="hidden" name="uspid" value="<?php echo $uspid; ?>" />
 								<input type="hidden" name="collid" value="<?php echo $collid; ?>" />
-								<input type="submit" name="action" value="Delete Profile" />
+								<input type="hidden" name="action" value="Delete Profile" />
+								<input type="submit" value="<?php echo $LANG['DELETE_PROFILE']; ?>" />
 							</div>
 						</fieldset>
 					</form>
@@ -358,13 +365,13 @@ $duManager->readUploadParameters();
 		 	}
 		}
 		else{
-			echo '<div style="font-weight:bold;font-size:120%;">ERROR: collection identifier not set</div>';
+			echo '<div style="font-weight:bold;font-size:120%;">'.$LANG['ERROR_COLLECTION_IDENTIFIER_NOT_SET'].'</div>';
 		}
 	}
 	else{
 		?>
 		<div style="font-weight:bold;font-size:120%;">
-			ERROR: you are not authorized to upload to this collection
+			<?php echo $LANG['ERROR'];?>
 		</div>
 		<?php 
 	}

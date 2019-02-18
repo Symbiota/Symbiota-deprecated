@@ -1,6 +1,7 @@
 <?php
 include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/PermissionsManager.php');
+include_once($SERVER_ROOT.'/content/lang/collections/misc/collpermissions.'.$LANG_TAG.'.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:""; 
@@ -70,6 +71,7 @@ if($collMetadata['colltype'] == 'General Observations') $isGenObs = 1;
 <html>
 <head>
 	<title><?php echo $collMetadata['collectionname']; ?> Collection Permissions</title>
+	<link href="../../css/bootstrap.min.css" type="text/css" rel="stylesheet"/>
 	<link href="../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 	<script language=javascript>
@@ -103,8 +105,8 @@ if($collMetadata['colltype'] == 'General Observations') $isGenObs = 1;
 	else{
 		?>
 		<div class='navpath'>
-			<a href='../../index.php'>Home</a> &gt;&gt; 
-			<a href='collprofiles.php?emode=1&collid=<?php echo $collId; ?>'>Collection Management</a> &gt;&gt; 
+			<a href='../../index.php'><?php echo $LANG['HOME'];?></a> &gt;&gt; 
+			<a href='collprofiles.php?emode=1&collid=<?php echo $collId; ?>'><?php echo $LANG['COLL'];?></a> &gt;&gt; 
 			<b><?php echo $collMetadata['collectionname'].' Permissions'; ?></b>
 		</div>
 		<?php 
@@ -119,7 +121,7 @@ if($collMetadata['colltype'] == 'General Observations') $isGenObs = 1;
 			if(!$isGenObs){
 				?>
 				<fieldset style="margin:15px;padding:15px;">
-					<legend><b>Administrators</b></legend>
+					<legend><b><?php echo $LANG['ADMINS'];?></b></legend>
 					<?php 
 					if(array_key_exists('admin',$collPerms)){
 						?>
@@ -151,7 +153,7 @@ if($collMetadata['colltype'] == 'General Observations') $isGenObs = 1;
 			}
 			?>
 			<fieldset style="margin:15px;padding:15px;">
-				<legend><b>Editors</b></legend>
+				<legend><b><?php echo $LANG['EDITORS'];?></b></legend>
 				<?php 
 				if(array_key_exists('editor',$collPerms)){
 					?>
@@ -179,14 +181,14 @@ if($collMetadata['colltype'] == 'General Observations') $isGenObs = 1;
 				}
 				?>
 				<div style="margin:10px">
-					*Administrators automatically inherit editing rights
+					<?php echo $LANG['ADMIN'];?>
 				</div>
 			</fieldset>
 			<?php 
 			if(!$isGenObs){
 				?>
 				<fieldset style="margin:15px;padding:15px;">
-					<legend><b>Rare Species Readers</b></legend>
+					<legend><b><?php echo $LANG['RARE'];?></b></legend>
 					<?php 
 					if(array_key_exists('rarespp',$collPerms)){
 						?>
@@ -214,18 +216,18 @@ if($collMetadata['colltype'] == 'General Observations') $isGenObs = 1;
 					}
 					?>
 					<div style="margin:10px">
-						*Administrators and editors automatically inherit protected species viewing rights
+						<?php echo $LANG['AD'];?>
 					</div>
 				</fieldset>
 				<?php
 			} 
 			?>
 			<fieldset style="margin:15px;padding:15px;">
-				<legend><b>Add a User</b></legend>
+				<legend><b><?php echo $LANG['ADD'];?></b></legend>
 				<form name="addrights" action="collpermissions.php" method="post" onsubmit="return verifyAddRights(this)">
 					<div>
 						<select name="uid">
-							<option value="">Select User</option>
+							<option value=""><?php echo $LANG['SEL'];?></option>
 							<option value="">-----------------------------------</option>
 							<?php 
 							$userArr = $permManager->getUsers();
@@ -244,9 +246,9 @@ if($collMetadata['colltype'] == 'General Observations') $isGenObs = 1;
 					}
 					else{
 						?>
-						<input name="righttype" type="radio" value="admin" /> Administrator <br/> 
+						<input name="righttype" type="radio" value="admin" /> <?php echo $LANG['ADMINIS'];?> <br/> 
 						<input name="righttype" type="radio" value="editor" /> Editor <br/>
-						<input name="righttype" type="radio" value="rare" /> Rare Species Reader<br/>
+						<input name="righttype" type="radio" value="rare" /> <?php echo $LANG['RAR_SPE'];?><br/>
 						<?php 
 					}
 					?>
@@ -263,7 +265,7 @@ if($collMetadata['colltype'] == 'General Observations') $isGenObs = 1;
 			if($taxonEditorArr || $taxonSelectArr){
 				?>
 				<fieldset style="margin:15px;padding:15px;">
-					<legend><b>Identification Editors</b></legend>
+					<legend><b><?php echo $LANG['IDENTI'];?></b></legend>
 					<div style="float:right;" title="Add a new user">
 						<a href="#" onclick="toggle('addUserDiv');return false;">
 							<img style='border:0px;width:15px;' src='../../images/add.png'/>
@@ -271,17 +273,16 @@ if($collMetadata['colltype'] == 'General Observations') $isGenObs = 1;
 					</div>
 					<div id="addUserDiv" style="display:none;">
 						<fieldset style="margin:15px;padding:15px;">
-							<legend><b>Add Identification Editor</b></legend>
+							<legend><b><?php echo $LANG['AD_IDENTI'];?></b></legend>
 							<div style="margin:0px 20px 10px 10px;">
-								The user list below contains only Identification Editors that been approved by a portal manager. 
-								Contact your portal manager to request the addition of a new user.
+								<?php echo $LANG['THE_USER'];?>
 							</div>
 							<div style="margin:10px;">
 								<form name="addidenteditor" action="collpermissions.php" method="post" onsubmit="return verifyAddIdentEditor(this)">
 									<div>
-										<b>User</b><br/> 
+										<b><?php echo $LANG['USER'];?></b><br/> 
 										<select name="identeditor">
-											<option value="">Select User</option>
+											<option value=""><?php echo $LANG['SEL_USER'];?></option>
 											<option value="">--------------------------</option>
 											<?php 
 											foreach($taxonSelectArr as $uid => $uArr){
@@ -305,11 +306,7 @@ if($collMetadata['colltype'] == 'General Observations') $isGenObs = 1;
 						</fieldset>
 					</div>
 					<div style="margin:10px;">
-						Following users have permission to edit occurrence records that are  
-						insignificantly identified to a taxon that is within the scope of their taxonomic interest 
-						and has an identification confidence ranking value of less than 6. 
-						Identification Editors can also edit occurrence records that are only identified to 
-						order or above or lack an identification altogether.
+						<?php echo $LANG['FOLLOW'];?>
 					</div>
 					<?php 
 					if($taxonEditorArr){

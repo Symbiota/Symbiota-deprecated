@@ -1,6 +1,8 @@
 <?php
 include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceCollectionProfile.php');
+include_once($SERVER_ROOT.'/content/lang/collections/misc/collstats.'.$LANG_TAG.'.php');
+
 header("Content-Type: text/html; charset=".$CHARSET);
 ini_set('max_execution_time', 1200); //1200 seconds = 20 minutes
 
@@ -218,11 +220,16 @@ if($action != "Update Statistics"){
 	<html>
 		<head>
 			<meta name="keywords" content="Natural history collections statistics" />
-			<title><?php echo $DEFAULT_TITLE; ?> Collection Statistics</title>
+			<title><?php echo $DEFAULT_TITLE." ".$LANG['COLLECTION_STATISTICS']; ?></title>
+			<link href="../../css/bootstrap.min.css" type="text/css" rel="stylesheet"/>
 			<link rel="stylesheet" href="../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" />
 			<link rel="stylesheet" href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" />
 			<link rel="stylesheet" href="../../css/jquery-ui.css" type="text/css" />
-            <script type="text/javascript" src="../../js/jquery.js"></script>
+
+			<!--inicio favicon -->
+			<link rel="shortcut icon" href="../../images/favicon.png" type="image/x-icon">
+
+			<script type="text/javascript" src="../../js/jquery.js"></script>
 			<script type="text/javascript" src="../../js/jquery-ui.js"></script>
 			<script type="text/javascript" src="../../js/symb/collections.index.js"></script>
 			<script type="text/javascript">
@@ -346,7 +353,7 @@ if($action != "Update Statistics"){
 						document.getElementById("collform").submit();
 					}
 					else{
-						alert("Please choose at least one collection!");
+						alert("<?php echo $LANG['PLEASE_CHOOSE_AT_LEAST_ONE_COLLECTION']; ?>");
 						return false;
 					}
 				}
@@ -359,31 +366,31 @@ if($action != "Update Statistics"){
 			if(isset($collections_misc_collstatsCrumbs)){
 				if($collections_misc_collstatsCrumbs){
 					echo "<div class='navpath'>";
-					echo "<a href='../../index.php'>Home</a> &gt;&gt; ";
+					echo "<a href='../../index.php'>".$LANG['HOME']."</a> &gt;&gt; ";
 					echo $collections_misc_collstatsCrumbs.' &gt;&gt; ';
-					echo "<b>Collection Statistics</b>";
+					echo "<b>".$LANG['COLLECTION_STATISTICS']."</b>";
 					echo "</div>";
 				}
 			}
 			else{
 				?>
 				<div class='navpath'>
-					<a href='../../index.php'>Home</a> &gt;&gt;
-					<a href='collprofiles.php'>Collections</a> &gt;&gt;
-					<b>Collection Statistics</b>
+					<a href='../../index.php'><?php echo $LANG['HOME']; ?></a> &gt;&gt;
+					<a href='collprofiles.php'><?php echo $LANG['COLL']; ?></a> &gt;&gt;
+					<b><?php echo $LANG['COLLECTION_STATISTICS']; ?></b>
 				</div>
 				<?php
 			}
 			?>
 			<!-- This is inner text! -->
 			<div id="innertext">
-				<h1>Select Collections to be Analyzed</h1>
+				<h1><?php echo $LANG['SELEC_COLL'];?></h1>
 				<div id="tabs" style="margin:0px;">
 					<ul>
-						<li><a href="#specobsdiv">Collections</a></li>
+						<li><a href="#specobsdiv"><?php echo $LANG['COLL'];?></a></li>
 						<?php
                         if($action == "Run Statistics"){
-							echo '<li><a href="#statsdiv">Statistics</a></li>';
+							echo '<li><a href="#statsdiv">'.$LANG['STATS'].'</a></li>';
 						}
 						?>
 					</ul>
@@ -397,12 +404,12 @@ if($action != "Update Statistics"){
                                 if($SYMB_UID && ($IS_ADMIN || array_key_exists("CollAdmin",$USER_RIGHTS))){
                                     ?>
                                     <fieldset style="padding:10px;padding-left:25px;">
-                                        <legend><b>Record Criteria</b></legend>
+                                        <legend><b><?php echo $LANG['REG_CRIT'];?></b></legend>
                                         <div style="margin:10px;float:left;">
-                                            Parent Taxon: <input type="text" id="taxon" size="43" name="taxon" value="<?php echo $cPartentTaxon; ?>" />
+                                            <?php echo $LANG['PRENT_TAX'];?> <input type="text" id="taxon" size="43" name="taxon" value="<?php echo $cPartentTaxon; ?>" />
                                         </div>
                                         <div style="margin:10px;float:left;">
-                                            Country: <input type="text" id="country" size="43" name="country" value="<?php echo $cCountry; ?>" />
+                                            <?php echo $LANG['COUNTRY'];?> <input type="text" id="country" size="43" name="country" value="<?php echo $cCountry; ?>" />
                                         </div>
                                     </fieldset>
                                     <?php
@@ -410,7 +417,7 @@ if($action != "Update Statistics"){
                                 ?>
                                 <div style="margin:20px 0px 10px 20px;">
 									<input id="dballcb" name="db[]" class="specobs" value='all' type="checkbox" onclick="selectAll(this);" />
-									Select/Deselect all <a href="collprofiles.php">Collections</a>
+									<?php echo $LANG['SELECT_UNSELECT'];?> <a href="collprofiles.php"><?php echo $LANG['COLL'];?></a>
 								</div>
 								<?php
 								$collArrIndex = 0;
@@ -421,13 +428,15 @@ if($action != "Update Statistics"){
 										?>
 										<div style="float:right;margin-top:20px;margin-bottom:10px;">
 											<div>
-												<input type="submit" name="submitaction" value="Run Statistics" />
+												<input type="hidden" name="submitaction" value="Run Statistics" />
+												<input type="submit" value="<?php echo $LANG['RUN_STATISTICS']; ?>" />
 											</div>
 											<?php
 											if($SYMB_UID && $IS_ADMIN){
 												?>
 												<div style="clear:both;margin-top:8px;">
-													<input type="submit" name="submitaction" value="Update Statistics" />
+													<input type="hidden" name="submitaction" value="Update Statistics" />
+													<input type="submit" value="<?php echo $LANG['UPDATE_STATISTICS']; ?>" />
 												</div>
 												<?php
 											}
@@ -484,7 +493,7 @@ if($action != "Update Statistics"){
 																					?>
 																				</a>
 																				<a href='collprofiles.php?collid=<?php echo $collid; ?>' style='font-size:75%;'>
-																					more info
+																					<?php echo $LANG['MORE_INFO']; ?>
 																				</a>
 																			</div>
 																		</td>
@@ -526,7 +535,7 @@ if($action != "Update Statistics"){
 																?>
 															</a>
 															<a href='collprofiles.php?collid=<?php echo $collid; ?>' style='font-size:75%;'>
-																more info
+																<?php echo $LANG['MORE_INFO']; ?>
 															</a>
 														</div>
 													</td>
@@ -538,13 +547,15 @@ if($action != "Update Statistics"){
 										</table>
 										<div style="float:right;margin-top:20px;margin-bottom:10px;">
 											<div>
-												<input type="submit" name="submitaction" value="Run Statistics" />
+												<input type="hidden" name="submitaction" value="Run Statistics" />
+												<input type="submit" value="<?php echo $LANG['RUN_STATISTICS']; ?>" />
 											</div>
 											<?php
 											if($SYMB_UID && $IS_ADMIN){
 												?>
 												<div style="clear:both;margin-top:8px;">
-													<input type="submit" name="submitaction" value="Update Statistics" />
+													<input type="hidden" name="submitaction" value="Update Statistics" />
+													<input type="submit" value="<?php echo $LANG['UPDATE_STATISTICS']; ?>" />
 												</div>
 												<?php
 											}
@@ -562,13 +573,15 @@ if($action != "Update Statistics"){
 										?>
 										<div style="float:right;margin-top:20px;margin-bottom:10px;">
 											<div>
-												<input type="submit" name="submitaction" value="Run Statistics" />
+												<input type="hidden" name="submitaction" value="Run Statistics" />
+												<input type="submit" value="<?php echo $LANG['RUN_STATISTICS']; ?>" />
 											</div>
 											<?php
 											if($SYMB_UID && $IS_ADMIN){
 												?>
 												<div style="clear:both;margin-top:8px;">
-													<input type="submit" name="submitaction" value="Update Statistics" />
+													<input type="hidden" name="submitaction" value="Update Statistics" />
+													<input type="submit" value="<?php echo $LANG['UPDATE_STATISTICS']; ?>" />
 												</div>
 												<?php
 											}
@@ -625,7 +638,7 @@ if($action != "Update Statistics"){
 																					?>
 																				</a>
 																				<a href = 'collprofiles.php?collid=<?php echo $collid; ?>' style='font-size:75%;'>
-																					more info
+																					<?php echo $LANG['MORE_INFO']; ?>
 																				</a>
 																			</div>
 																		</td>
@@ -667,7 +680,7 @@ if($action != "Update Statistics"){
 																?>
 															</a>
 															<a href = 'collprofiles.php?collid=<?php echo $collid; ?>' style='font-size:75%;'>
-																more info
+																<?php echo $LANG['MORE_INFO']; ?>
 															</a>
 														</div>
 													</td>
@@ -679,13 +692,15 @@ if($action != "Update Statistics"){
 										</table>
 										<div style="float:right;margin-top:20px;margin-bottom:10px;">
 											<div>
-												<input type="submit" name="submitaction" value="Run Statistics" />
+												<input type="hidden" name="submitaction" value="Run Statistics" />
+												<input type="submit" value="<?php echo $LANG['RUN_STATISTICS']; ?>" />
 											</div>
 											<?php
 											if($SYMB_UID && $IS_ADMIN){
 												?>
 												<div style="clear:both;margin-top:8px;">
-													<input type="submit" name="submitaction" value="Update Statistics" />
+													<input type="hidden" name="submitaction" value="Update Statistics" />
+													<input type="submit" value="<?php echo $LANG['UPDATE_STATISTICS']; ?>" />
 												</div>
 												<?php
 											}
@@ -704,7 +719,7 @@ if($action != "Update Statistics"){
                             <?php
                         }
 						else{
-							echo '<div style="margin-top:10px;"><div style="font-weight:bold;font-size:120%;">There are currently no collections to analyze.</div></div>';
+							echo '<div style="margin-top:10px;"><div style="font-weight:bold;font-size:120%;">'.$LANG['THERE_ARE_CURRENTLY_NO_COLLECTIONS'].'.</div></div>';
 						}
 						?>
 					</div>
@@ -714,10 +729,10 @@ if($action != "Update Statistics"){
 						?>
 						<div id="statsdiv">
 							<div style="min-height:300px;">
-								<div style="height:100%;">
-									<h1>Selected Collection Statistics</h1>
+								<div style="height:auto;">
+									<h1><?php echo $LANG['SELEC_COLL_STAT'];?></h1>
 									<div style="font-weight:bold;font-size:105%;margin:10px;">
-										<div id="colllistlabel"><a href="#" onclick="toggle('colllist');toggle('colllistlabel');">Display List of Collections Analyzed</a></div>
+										<div id="colllistlabel"><a href="#" onclick="toggle('colllist');toggle('colllistlabel');"><?php echo $LANG['DISPLAY_LIST'];?></a></div>
 										<div id="colllist" style="display:none">
 											<?php echo $collStr; ?>
 										</div>
@@ -726,40 +741,40 @@ if($action != "Update Statistics"){
 										<ul style="margin:0px;padding-left:10px;">
 											<?php
 											echo "<li>";
-											echo ($results['SpecimenCount']?number_format($results['SpecimenCount']):0)." occurrence records";
+											echo ($results['SpecimenCount']?number_format($results['SpecimenCount']):0)." ".$LANG['OCCURRENCE_RECORDS'];
 											echo "</li>";
 											echo "<li>";
 											$percGeo = '';
 											if($results['SpecimenCount'] && $results['GeorefCount']){
 												$percGeo = (100* ($results['GeorefCount'] / $results['SpecimenCount']));
 											}
-											echo ($results['GeorefCount']?number_format($results['GeorefCount']):0).($percGeo?" (".($percGeo>1?round($percGeo):round($percGeo,2))."%)":'')." georeferenced";
+											echo ($results['GeorefCount']?number_format($results['GeorefCount']):0).($percGeo?" (".($percGeo>1?round($percGeo):round($percGeo,2))."%)":'')." ".$LANG['GEOREFERENCED'];
 											echo "</li>";
 											echo "<li>";
 											$percImg = '';
 											if($results['SpecimenCount'] && $results['TotalImageCount']){
 												$percImg = (100* ($results['TotalImageCount'] / $results['SpecimenCount']));
 											}
-											echo ($results['TotalImageCount']?number_format($results['TotalImageCount']):0).($percImg?" (".($percImg>1?round($percImg):round($percImg,2))."%)":'')." imaged";
+											echo ($results['TotalImageCount']?number_format($results['TotalImageCount']):0).($percImg?" (".($percImg>1?round($percImg):round($percImg,2))."%)":'')." ".$LANG['IMAGED'];
 											echo "</li>";
 											echo "<li>";
 											$percId = '';
 											if($results['SpecimenCount'] && $results['SpecimensCountID']){
 												$percId = (100* ($results['SpecimensCountID'] / $results['SpecimenCount']));
 											}
-											echo ($results['SpecimensCountID']?number_format($results['SpecimensCountID']):0).($percId?" (".($percId>1?round($percId):round($percId,2))."%)":'')." identified to species";
+											echo ($results['SpecimensCountID']?number_format($results['SpecimensCountID']):0).($percId?" (".($percId>1?round($percId):round($percId,2))."%)":'')." ".$LANG['IDENTIFIED_TO_SPECIES'];
 											echo "</li>";
 											echo "<li>";
-											echo ($results['FamilyCount']?number_format($results['FamilyCount']):0)." families";
+											echo ($results['FamilyCount']?number_format($results['FamilyCount']):0)." ".$LANG['FAMILIES'];
 											echo "</li>";
 											echo "<li>";
-											echo ($results['GeneraCount']?number_format($results['GeneraCount']):0)." genera";
+											echo ($results['GeneraCount']?number_format($results['GeneraCount']):0)." ".$LANG['GENERA'];
 											echo "</li>";
 											echo "<li>";
-											echo ($results['SpeciesCount']?number_format($results['SpeciesCount']):0)." species";
+											echo ($results['SpeciesCount']?number_format($results['SpeciesCount']):0)." ".$LANG['SPECIES'];
 											echo "</li>";
 											echo "<li>";
-											echo ($results['TotalTaxaCount']?number_format($results['TotalTaxaCount']):0)." total taxa (including subsp. and var.)";
+											echo ($results['TotalTaxaCount']?number_format($results['TotalTaxaCount']):0)." ".$LANG['TOTAL_TAXA_INCLUIDING_SUBSP_AND_VAR'];
 											echo "</li>";
 											/*echo "<li>";
 											echo ($results['TypeCount']?number_format($results['TypeCount']):0)." type specimens";
@@ -769,16 +784,16 @@ if($action != "Update Statistics"){
 										<form name="statscsv" id="statscsv" action="collstatscsv.php" method="post" onsubmit="">
 											<div style="margin-top:8px;">
 												<div id="showstatspercoll" style="float:left;display:block;" >
-													<a href="#" onclick="return toggleStatsPerColl()">Show Statistics per Collection</a>
+													<a href="#" onclick="return toggleStatsPerColl()"><?php echo $LANG['SHOW_STATS'];?></a>
 												</div>
 												<div id="hidestatspercoll" style="float:left;display:none;" >
-													<a href="#" onclick="return toggleStatsPerColl()">Hide Statistics per Collection</a>
+													<a href="#" onclick="return toggleStatsPerColl()"><?php echo $LANG['HIDE_STATS'];?></a>
 												</div>
-												<div style='float:left;margin-left:6px;width:16px;height:16px;padding:2px;' title="Save CSV">
+												<div style='float:left;margin-left:6px;width:16px;height:16px;padding:2px;' title="<?php echo $LANG['SAVE_CSV']; ?>">
 													<input type="hidden" name="collids" id="collids" value='<?php echo $collId; ?>' />
                                                     <input type="hidden" name="taxon" value='<?php echo $cPartentTaxon; ?>' />
                                                     <input type="hidden" name="country" value='<?php echo $cCountry; ?>' />
-													<input type="hidden" name="action" id="action" value='Download Stats per Coll' />
+													<input type="hidden" name="action" id="action" value='<?php echo $LANG['DOWNLOAD_STATS_PER_COLL']; ?>' />
 													<input type="image" name="action" src="../../images/dl.png" onclick="" />
 													<!--input type="submit" name="action" value="Download Stats per Coll" src="../../images/dl.png" / -->
 												</div>
@@ -788,31 +803,31 @@ if($action != "Update Statistics"){
 									<div style="">
 										<fieldset style="width:275px;margin:20px 0px 10px 20px;background-color:#FFFFCC;">
 											<form name="famstatscsv" id="famstatscsv" action="collstatscsv.php" method="post" onsubmit="">
-												<div class='legend'><b>Extra Statistics</b></div>
+												<div class='legend'><b><?php echo $LANG['EXTRA_STATISTICS']; ?></b></div>
 												<div style="margin-top:8px;">
 													<div id="showfamdist" style="float:left;display:block;" >
-														<a href="#" onclick="return toggleFamilyDist()">Show Family Distribution</a>
+														<a href="#" onclick="return toggleFamilyDist()"><?php echo $LANG['SHOW_FAMILY_DISTRIBUTION']; ?></a>
 													</div>
 													<div id="hidefamdist" style="float:left;display:none;" >
-														<a href="#" onclick="return toggleFamilyDist()">Hide Family Distribution</a>
+														<a href="#" onclick="return toggleFamilyDist()"><?php echo $LANG['HIDE_FAMILY_DISTRIBUTION']; ?></a>
 													</div>
-													<div style='float:left;margin-left:6px;width:16px;height:16px;padding:2px;' title="Save CSV">
+													<div style='float:left;margin-left:6px;width:16px;height:16px;padding:2px;' title="<?php echo $LANG['SAVE_CSV']; ?>">
 														<input type="hidden" name="action" value='Download Family Dist' />
-														<input type="image" name="action" src="../../images/dl.png" onclick="" />
+														<input type="image" src="../../images/dl.png" onclick="" />
 													</div>
 												</div>
 											</form>
 											<form name="geostatscsv" id="geostatscsv" action="collstatscsv.php" method="post" onsubmit="">
 												<div style="clear:both;">
 													<div id="showgeodist" style="float:left;display:block;" >
-														<a href="#" onclick="return toggleGeoDist()">Show Geographic Distribution</a>
+														<a href="#" onclick="return toggleGeoDist()"><?php echo $LANG['SHOW_GEOGRAPHIC_DISTRIBUTION']; ?></a>
 													</div>
 													<div id="hidegeodist" style="float:left;display:none;" >
-														<a href="#" onclick="return toggleGeoDist();">Hide Geographic Distribution</a>
+														<a href="#" onclick="return toggleGeoDist();"><?php echo $LANG['HIDE_GEOGRAPHIC_DISTRIBUTION']; ?></a>
 													</div>
-													<div style='float:left;margin-left:6px;width:16px;height:16px;padding:2px;' title="Save CSV">
+													<div style='float:left;margin-left:6px;width:16px;height:16px;padding:2px;' title="<?php echo $LANG['SAVE_CSV']; ?>">
 														<input type="hidden" name="action" value='Download Geo Dist' />
-														<input type="image" name="action" src="../../images/dl.png" onclick="" />
+														<input type="image" src="../../images/dl.png" onclick="" />
 													</div>
 												</div>
 											</form>
@@ -827,7 +842,8 @@ if($action != "Update Statistics"){
                                                                value='<?php echo $collId; ?>'/>
                                                         <input type="hidden" name="totalcnt" id="totalcnt"
                                                                value='<?php echo $results['SpecimenCount']; ?>'/>
-                                                        <input type="submit" name="action" value="Load Order Distribution"/>
+														<input type="hidden" name="action" value="Load Order Distribution"/>
+                                                        <input type="submit" value="<?php echo $LANG['LOAD_ORDER_DISTRIBUTION']; ?>"/>
                                                     </form>
                                                 </div>
                                                 <?php
@@ -839,7 +855,7 @@ if($action != "Update Statistics"){
                                             if ($SYMB_UID && ($IS_ADMIN || array_key_exists("CollAdmin", $USER_RIGHTS))) {
                                                 ?>
                                                 <fieldset id="yearstatsbox" style="width:275px;">
-                                                    <legend><b>Year Stats</b></legend>
+                                                    <legend><b><?php echo $LANG['YEAR_STATS']; ?></b></legend>
                                                     <form name="yearstats" style="margin-bottom:0px"
                                                           action="collyearstats.php" method="post" target="_blank"
                                                           onsubmit="">
@@ -849,10 +865,11 @@ if($action != "Update Statistics"){
                                                         <input type="hidden" name="months"
                                                                value="<?php echo $months; ?>"/>
                                                         <div style="float:left;">
-                                                            Years: <input type="text" id="years" size="5" name="years" value="1" />
+															<?php echo $LANG['YEARS']; ?>: <input type="text" id="years" size="5" name="years" value="1" />
                                                         </div>
                                                         <div style="margin-left:10px;float:left;">
-                                                            <input type="submit" name="action" value="Load Stats"/>
+															<input type="hidden" name="action" value="Load Stats"/>
+                                                            <input type="submit" value="<?php echo $LANG['LOAD_STATS']; ?>"/>
                                                         </div>
                                                     </form>
                                                 </fieldset>
@@ -865,18 +882,18 @@ if($action != "Update Statistics"){
 								</div>
 
 								<fieldset id="statspercollbox" style="clear:both;margin-top:15px;width:90%;display:none;">
-									<legend><b>Statistics per Collection</b></legend>
+									<legend><b><?php echo $LANG['STATICS_COLL'];?></b></legend>
 									<table class="styledtable" style="font-family:Arial;font-size:12px;">
 										<tr>
-											<th style="text-align:center;">Collection</th>
-											<th style="text-align:center;">Specimens</th>
-											<th style="text-align:center;">Georeferenced</th>
-											<th style="text-align:center;">Imaged</th>
-											<th style="text-align:center;">Species ID</th>
-											<th style="text-align:center;">Families</th>
-											<th style="text-align:center;">Genera</th>
-											<th style="text-align:center;">Species</th>
-											<th style="text-align:center;">Total Taxa</th>
+											<th style="text-align:center;"><?php echo $LANG['COLLECTION']; ?></th>
+											<th style="text-align:center;"><?php echo $LANG['SPECIMENS']; ?></th>
+											<th style="text-align:center;"><?php echo $LANG['GEOREFERENCED']; ?></th>
+											<th style="text-align:center;"><?php echo $LANG['IMAGED']; ?></th>
+											<th style="text-align:center;"><?php echo $LANG['SPECIES_ID']; ?></th>
+											<th style="text-align:center;"><?php echo $LANG['FAMILIES']; ?></th>
+											<th style="text-align:center;"><?php echo $LANG['GENERA']; ?></th>
+											<th style="text-align:center;"><?php echo $LANG['SPECIES']; ?></th>
+											<th style="text-align:center;"><?php echo $LANG['TOTAL_TAXA']; ?></th>
 											<!-- <th style="text-align:center;">Types</th> -->
 										</tr>
 										<?php
@@ -901,11 +918,11 @@ if($action != "Update Statistics"){
 									<legend><b>Family Distribution</b></legend>
 									<table class="styledtable" style="font-family:Arial;font-size:12px;width:780px;">
 										<tr>
-											<th style="text-align:center;">Family</th>
-											<th style="text-align:center;">Specimens</th>
-											<th style="text-align:center;">Georeferenced</th>
-											<th style="text-align:center;">Species ID</th>
-											<th style="text-align:center;">Georeferenced<br />and<br />Species ID</th>
+											<th style="text-align:center;"><?php echo $LANG['FAMILY']; ?></th>
+											<th style="text-align:center;"><?php echo $LANG['SPECIMENS']; ?></th>
+											<th style="text-align:center;"><?php echo $LANG['GEOREFERENCED']; ?></th>
+											<th style="text-align:center;"><?php echo $LANG['SPECIES_ID']; ?></th>
+											<th style="text-align:center;"><?php echo $LANG['GEOREFERENCED_AND_SPECIES']; ?></th>
 										</tr>
 										<?php
 										$total = 0;
@@ -930,19 +947,19 @@ if($action != "Update Statistics"){
 										?>
 									</table>
 									<div style="margin-top:10px;">
-										<b>Total Specimens with Family:</b> <?php echo number_format($total); ?><br />
-										Specimens without Family: <?php echo number_format($results['SpecimenCount']-$total); ?><br />
+										<b><?php echo $LANG['TOTAL_SPECIMENS_WITH_FAMILY']; ?>:</b> <?php echo number_format($total); ?><br />
+										<?php echo $LANG['SPECIMENS_WITHOUT_FAMILY']; ?>: <?php echo number_format($results['SpecimenCount']-$total); ?><br />
 									</div>
 								</fieldset>
 								<fieldset id="geodistbox" style="margin-top:15px;width:800px;display:none;">
 									<legend><b>Geographic Distribution</b></legend>
 									<table class="styledtable" style="font-family:Arial;font-size:12px;width:780px;">
 										<tr>
-											<th style="text-align:center;">Country</th>
-											<th style="text-align:center;">Specimens</th>
-											<th style="text-align:center;">Georeferenced</th>
-											<th style="text-align:center;">Species ID</th>
-											<th style="text-align:center;">Georeferenced<br />and<br />Species ID</th>
+											<th style="text-align:center;"><?php echo $LANG['COUNTRY']; ?></th>
+											<th style="text-align:center;"><?php echo $LANG['SPECIMENS']; ?></th>
+											<th style="text-align:center;"><?php echo $LANG['GEOREFERENCED']; ?></th>
+											<th style="text-align:center;"><?php echo $LANG['SPECIES_ID']; ?></th>
+											<th style="text-align:center;"><?php echo $LANG['GEOREFERENCED_AND_SPECIES']; ?></th>
 										</tr>
 										<?php
 										$total = 0;
@@ -967,8 +984,8 @@ if($action != "Update Statistics"){
 										?>
 									</table>
 									<div style="margin-top:10px;">
-										<b>Total Specimens with Country:</b> <?php echo number_format($total); ?><br />
-										Specimens without Country or Georeferencing: <?php echo number_format(($results['SpecimenCount']-$total)+$results['SpecimensNullLatitude']); ?><br />
+										<b><?php echo $LANG['TOTAL_SPECIMENS_WITH_COUNTRY']; ?>:</b> <?php echo number_format($total); ?><br />
+										<?php echo $LANG['SPECIMENS_WITHOUT_COUNTRY_OR_GEOREFERENCING']; ?>: <?php echo number_format(($results['SpecimenCount']-$total)+$results['SpecimensNullLatitude']); ?><br />
 									</div>
 								</fieldset>
 							</div>

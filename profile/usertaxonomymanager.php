@@ -1,13 +1,15 @@
 <?php
 include_once('../config/symbini.php');
 include_once($serverRoot.'/classes/UserTaxonomy.php');
+include_once($SERVER_ROOT.'/content/lang/profile/usertaxonomymanager.'.$LANG_TAG.'.php');
+
 header("Content-Type: text/html; charset=".$charset);
 
-$action = array_key_exists("action",$_POST)?$_POST["action"]:""; 
+$action = array_key_exists("action",$_POST)?$_POST["action"]:"";
 
 $utManager = new UserTaxonomy();
 
-$isEditor = 0;		 
+$isEditor = 0;
 if($SYMB_UID){
 	if( $IS_ADMIN ){
 		$isEditor = 1;
@@ -39,6 +41,7 @@ $editorArr = $utManager->getTaxonomyEditors();
 <head>
 	<title>Taxonomic Interest User permissions</title>
 	<meta http-equiv="X-Frame-Options" content="deny">
+	<link href="../css/bootstrap.min.css" type="text/css" rel="stylesheet"/>
 	<link href="../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 	<link type="text/css" href="../css/jquery-ui.css" rel="stylesheet" />
@@ -87,10 +90,10 @@ $editorArr = $utManager->getTaxonomyEditors();
 	else{
 		?>
 		<div class='navpath'>
-			<a href='../index.php'>Home</a> &gt;&gt; 
+			<a href='../index.php'>Home</a> &gt;&gt;
 			<b>Taxonomic Interest User permissions</b>
 		</div>
-		<?php 
+		<?php
 	}
 
 	if($statusStr){
@@ -100,13 +103,13 @@ $editorArr = $utManager->getTaxonomyEditors();
 			<?php echo $statusStr; ?>
 		</div>
 		<hr/>
-		<?php 
+		<?php
 	}
 	if($isEditor){
 		?>
 		<!-- This is inner text! -->
 		<div id="innertext">
-			<h2>Taxonomic Interest User Permissions</h2>
+			<h5><?php echo $LANG['TAX_USER'];?></h5>
 			<div style="float:right;" title="Add a new taxonomic relationship">
 				<a href="#" onclick="toggle('addUserDiv')">
 					<img style='border:0px;width:15px;' src='../images/add.png'/>
@@ -114,13 +117,13 @@ $editorArr = $utManager->getTaxonomyEditors();
 			</div>
 			<div id="addUserDiv" style="display:none;">
 				<fieldset style="padding:20px;">
-					<legend><b>New Taxonomic Relationship</b></legend>
+					<legend><b><?php echo $LANG['NEW_TAX'];?></b></legend>
 					<form name="adduserform" action="usertaxonomymanager.php" method="post" onsubmit="return verifyUserAddForm(this)">
 						<div style="margin:3px;">
-							<b>User</b><br/>
+							<b><?php echo $LANG['USER'];?></b><br/>
 							<select name="uid">
 								<option value="">-------------------------------</option>
-								<?php 
+								<?php
 								$userArr = $utManager->getUserArr();
 								foreach($userArr as $uid => $displayName){
 									echo '<option value="'.$uid.'">'.$displayName.'</option>';
@@ -133,24 +136,24 @@ $editorArr = $utManager->getTaxonomyEditors();
 							<input id="taxoninput" name="taxon" type="text" value="" style="width:90%;" />
 						</div>
 						<div style="margin:3px;">
-							<b>Scope of Relationship</b><br/>
+							<b><?php echo $LANG['SCOPE'];?></b><br/>
 							<select name="editorstatus">
 								<option value="">----------------------------</option>
 								<option value="OccurrenceEditor">Occurrence Identification Editor</option>
 								<option value="RegionOfInterest">Region Of Interest</option>
 								<option value="TaxonomicThesaurusEditor">Taxonomic Thesaurus Editor</option>
 							</select>
-						
+
 						</div>
 						<div style="margin:3px;">
-							<b>Geographic Scope Limits</b><br/>
+							<b><?php echo $LANG['GEO'];?></b><br/>
 							<input name="geographicscope" type="text" value="" style="width:90%;"/>
-						
+
 						</div>
 						<div style="margin:3px;">
-							<b>Notes</b><br/>
+							<b><?php echo $LANG['NOTE'];?></b><br/>
 							<input name="notes" type="text" value="" style="width:90%;" />
-						
+
 						</div>
 						<div style="margin:3px;">
 							<input name="action" type="submit" value="Add Taxonomic Relationship" />
@@ -159,7 +162,7 @@ $editorArr = $utManager->getTaxonomyEditors();
 				</fieldset>
 			</div>
 			<div>
-				<?php 
+				<?php
 				foreach($editorArr as $editorStatus => $userArr){
 					$cat = 'Undefined';
 					if($editorStatus == 'RegionOfInterest') $cat = 'Region Of Interest';
@@ -168,7 +171,7 @@ $editorArr = $utManager->getTaxonomyEditors();
 					?>
 					<div><b><u><?php echo $cat; ?></u></b></div>
 					<ul style="margin:10px;">
-					<?php 
+					<?php
 					foreach($userArr as $uid => $uArr){
 						$username = $uArr['username'];
 						unset($uArr['username']);
@@ -194,11 +197,11 @@ $editorArr = $utManager->getTaxonomyEditors();
 							}
 							?>
 						</li>
-						<?php  
+						<?php
 					}
 					?>
 					</ul>
-					<?php 
+					<?php
 				}
 				?>
 			</div>

@@ -1,5 +1,5 @@
 <?php
-include_once('../config/symbini.php'); 
+include_once('../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceListManager.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 
@@ -20,7 +20,7 @@ $collArr = Array();
 $resetOccIndex = false;
 $navStr = '';
 
-$sortFields = array('Catalog Number','Collection','Collector','Country','County','Elevation','Event Date',
+$sortFields = array('Collection','Country','County','Elevation','Event Date',
     'Family','Individual Count','Life Stage','Number','Scientific Name','Sex','State/Province');
 
 if($stArrCollJson || $stArrSearchJson){
@@ -54,10 +54,15 @@ else{
 		}
     </style>
 	<link href="../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+  <link href="../css/bootstrap.min.css" type="text/css" rel="stylesheet" />
+
     <link href="../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 	<script src="../js/jquery.js" type="text/javascript"></script>
 	<script src="../js/jquery-ui.js" type="text/javascript"></script>
     <script src="../js/symb/collections.search.js?ver=1" type="text/javascript"></script>
+    <!--inicio favicon -->
+	<link rel="shortcut icon" href="../images/favicon.png" type="image/x-icon">
+
 	<script type="text/javascript">
 		<?php include_once($SERVER_ROOT.'/config/googleanalytics.php'); ?>
 	</script>
@@ -130,7 +135,7 @@ else{
             sortorder = document.sortform.sortorder.value;
             sessionStorage.collSearchTableIndex = index;
 
-            document.getElementById("tablediv").innerHTML = "<p>Loading... <img src='../images/workingcircle.gif' width='15px' /></p>";
+            document.getElementById("tablediv").innerHTML = "<p></p>";
 
             //console.log('rpc/changetablepage.php?starr='+starrJson+'&jsoncollstarr='+collJson+'&occindex='+index+'&sortfield1='+sortfield1+'&sortfield2='+sortfield2+'&sortorder='+sortorder+'&targettid=<?php echo $targetTid; ?>');
 
@@ -170,7 +175,7 @@ else{
         }
     </script>
 </head>
-<body style="margin-left: 0px; margin-right: 0px;background-color:white;">
+<body style="margin: 0 auto;background-color:white;">
 	<!-- inner text -->
 	<div id="">
 		<div style="width:725px;clear:both;margin-bottom:5px;">
@@ -185,9 +190,9 @@ else{
 				<legend><b>Sort Results</b></legend>
 				<form name="sortform" action="listtabledisplay.php" method="post">
 					<div style="float:left;">
-						<b>Sort By:</b> 
+						<b>Sort By:</b>
 						<select name="sortfield1">
-							<?php 
+							<?php
 							foreach($sortFields as $k){
                                 echo '<option value="'.$k.'" '.($k==$sortField1?'SELECTED':'').'>'.$k.'</option>';
 							}
@@ -195,10 +200,10 @@ else{
 						</select>
 					</div>
 					<div style="float:left;margin-left:10px;">
-						<b>Then By:</b> 
+						<b>Then By:</b>
 						<select name="sortfield2">
 							<option value="">Select Field Name</option>
-							<?php 
+							<?php
 							foreach($sortFields as $k){
                                 echo '<option value="'.$k.'" '.($k==$sortField2?'SELECTED':'').'>'.$k.'</option>';
 							}
@@ -206,7 +211,7 @@ else{
 						</select>
 					</div>
 					<div style="float:left;margin-left:10px;">
-						<b>Order:</b> 
+						<b>Order:</b>
 						<select name="sortorder">
                             <option value="asc" <?php echo ($sortOrder=="asc"?'SELECTED':''); ?>>Ascending</option>
                             <option value="desc" <?php echo ($sortOrder=="desc"?'SELECTED':''); ?>>Descending</option>
@@ -232,7 +237,8 @@ else{
 				echo '<span class="navpath">';
 				echo '<a href="../index.php">Home</a> &gt;&gt; ';
 				echo '<a href="index.php">Collections</a> &gt;&gt; ';
-				echo '<a href="harvestparams.php">Search Criteria</a> &gt;&gt; ';
+				echo '<a href="list.php">Occurence Reg</a> &gt;&gt; ';
+        echo '<a href="harvestparams.php">Search Criteria</a> &gt;&gt; ';
 				echo '<b>Specimen Records Table</b>';
 				echo '</span>';
 			}

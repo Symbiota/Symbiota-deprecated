@@ -1,8 +1,8 @@
-<?php 
+<?php
 include_once('../config/symbini.php');
 include_once($serverRoot.'/config/dbconnection.php');
 header("Content-Type: text/html; charset=".$charset);
-$showClosedIds = array_key_exists("showclosed",$_REQUEST)?$_REQUEST["showclosed"]:""; 
+$showClosedIds = array_key_exists("showclosed",$_REQUEST)?$_REQUEST["showclosed"]:"";
 
 ?>
 <html>
@@ -11,6 +11,8 @@ $showClosedIds = array_key_exists("showclosed",$_REQUEST)?$_REQUEST["showclosed"
 	<link href="../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 	<link rel="stylesheet" href="../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" />
+	<!--inicio favicon -->
+	<link rel="shortcut icon" href="../images/favicon.png" type="image/x-icon">
 	<meta name='keywords' content='' />
 </head>
 
@@ -22,43 +24,43 @@ $showClosedIds = array_key_exists("showclosed",$_REQUEST)?$_REQUEST["showclosed"
 		echo "<div class='navpath'>";
 		echo "<a href='../index.php'>Home</a> &gt; ";
 		echo $imagelib_unknownbrowseCrumbs;
-		echo " <b>Unknown</b>"; 
+		echo " <b>Unknown</b>";
 		echo "</div>";
 	}
-	?> 
+	?>
 	<!-- This is inner text! -->
 	<div style="margin:15px;">
 		<h1>Community Identification</h1>
 		<div style="margin:0px 0px 5px 20px;">
-			<a href="unknownsubmit.php">Submit</a> an image of an unknown for identification by the botanical community or browse 
-			submitted images and offer your options on their identification. Note that you must 
-			<a href="../profile/index.php?refurl=<?php echo $_SERVER['PHP_SELF']; ?>">login</a> to either submit an image 
-			or comment on a submitted image.   
+			<a href="unknownsubmit.php">Submit</a> an image of an unknown for identification by the botanical community or browse
+			submitted images and offer your options on their identification. Note that you must
+			<a href="../profile/index.php?refurl=<?php echo $_SERVER['PHP_SELF']; ?>">login</a> to either submit an image
+			or comment on a submitted image.
 		</div>
 		<div style="margin:0px 0px 5px 20px;">
 			<h1>Pending Identications</h1>
-			<?php 
+			<?php
 				$uknManager = new UnknownManager();
 				$uknManager->showPending();
-			?>   
+			?>
 		</div>
 		<div style="margin:0px 0px 5px 20px;">
 			<h1>Closed Identifications</h1>
-   			<?php 
+   			<?php
    				if($showClosedIds){
 					$uknManager->showClosed();
    				}
    				else{
    					echo "<a href='unknownbrowse.php?showclosed=1'>Show Closed Identifications</a>";
    				}
-   			
+
    			?>
 		</div>
 	</div>
 	<?php
 	include($serverRoot.'/footer.php');
 	?>
-	
+
 </body>
 </html>
 

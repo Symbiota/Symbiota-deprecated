@@ -20,19 +20,28 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 <html>
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET;?>">
-		<title><?php echo $DEFAULT_TITLE.' '.$LANG['PAGE_TITLE']; ?></title>
+		<title><?php echo $DEFAULT_TITLE.' '.$LANG['PAGE_TITLE']; ?>
+
+		</title>
+
+		<!-- CSS bootstrap -->
+
+	<link href="../css/bootstrap.min.css" type="text/css" rel="stylesheet"/>
 		<link href="../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 		<link href="../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 		<link href="../css/jquery-ui.css" type="text/css" rel="Stylesheet" />
+		<!--inicio favicon -->
+	<link rel="shortcut icon" href="../images/favicon.png" type="image/x-icon">
+
 		<script src="../js/jquery.js" type="text/javascript"></script>
 		<script src="../js/jquery-ui.js" type="text/javascript"></script>
-		<script src="../js/symb/collections.index.js?ver=1" type="text/javascript"></script> 
+		<script src="../js/symb/collections.index.js?ver=1" type="text/javascript"></script>
 		<script type="text/javascript">
 			<?php include_once($SERVER_ROOT.'/config/googleanalytics.php'); ?>
 		</script>
 	</head>
 	<body>
-	
+
 	<?php
 	$displayLeftMenu = (isset($collections_indexMenu)?$collections_indexMenu:false);
 	include($SERVER_ROOT."/header.php");
@@ -40,7 +49,7 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 		if($collections_indexCrumbs){
 			echo "<div class='navpath'>";
 			echo $collections_indexCrumbs;
-			echo ' <b>'.$LANG['NAV_COLLECTIONS'].'</b>'; 
+			echo ' <b>'.$LANG['NAV_COLLECTIONS'].'</b>';
 			echo "</div>";
 		}
 	}
@@ -55,14 +64,14 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 	<div id="innertext">
         <div id="tabs" style="margin:0px;">
 			<ul>
-				<?php 
+				<?php
 				if($specArr && $obsArr) echo '<li><a href="#specobsdiv">'.$LANG['TAB_1'].'</a></li>';
 				if($specArr) echo '<li><a href="#specimendiv">'.$LANG['TAB_2'].'</a></li>';
 				if($obsArr) echo '<li><a href="#observationdiv">'.$LANG['TAB_3'].'</a></li>';
 				if($otherCatArr) echo '<li><a href="#otherdiv">'.$LANG['TAB_4'].'</a></li>';
 				?>
 			</ul>
-			<?php 
+			<?php
 			if($specArr && $obsArr){
 				?>
 				<div id="specobsdiv">
@@ -71,15 +80,15 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 							<input id="dballcb" name="db[]" class="specobs" value='all' type="checkbox" onclick="selectAll(this);" checked />
 					 		<?php echo $LANG['SELECT_ALL']; ?>
 						</div>
-						<?php 
-						$collManager->outputFullCollArr($specArr, $catId); 
-						if($specArr && $obsArr) echo '<hr style="clear:both;margin:20px 0px;"/>'; 
+						<?php
+						$collManager->outputFullCollArr($specArr, $catId);
+						if($specArr && $obsArr) echo '<hr style="clear:both;margin:20px 0px;"/>';
 						$collManager->outputFullCollArr($obsArr, $catId);
 						?>
 						<div style="clear:both;">&nbsp;</div>
 					</form>
 				</div>
-			<?php 
+			<?php
 			}
 			if($specArr){
 				?>
@@ -95,7 +104,7 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 						<div style="clear:both;">&nbsp;</div>
 					</form>
 				</div>
-				<?php 
+				<?php
 			}
 			if($obsArr){
 				?>
@@ -111,8 +120,8 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 						<div style="clear:both;">&nbsp;</div>
 					</form>
 				</div>
-				<?php 
-			} 
+				<?php
+			}
 			if($otherCatArr && isset($otherCatArr['titles'])){
 				$catTitleArr = $otherCatArr['titles']['cat'];
 				asort($catTitleArr);
@@ -138,7 +147,7 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 										<b><?php echo $projTitle; ?></b>
 									</div>
 									<div id="pid-<?php echo $pid; ?>" style="margin:10px 15px;display:none;">
-										<?php 
+										<?php
 										$clArr = $otherCatArr[$pid];
 										asort($clArr);
 										foreach($clArr as $clid => $clidName){
@@ -148,19 +157,19 @@ $otherCatArr = $collManager->getOccurVoucherProjects();
 												<?php echo $clidName; ?>
 											</div>
 											<?php
-										} 
+										}
 										?>
 									</div>
 									<?php
-								} 
+								}
 								?>
 							</fieldset>
-							<?php 
+							<?php
 						}
 						?>
 					</form>
 				</div>
-				<?php 
+				<?php
 			}
 			?>
 		</div>

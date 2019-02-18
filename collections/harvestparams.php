@@ -32,9 +32,13 @@ if(isset($_REQUEST['db'])){
 <html>
 <head>
     <title><?php echo $defaultTitle.' '.$SEARCHTEXT['PAGE_TITLE']; ?></title>
+    <link href="../css/bootstrap.min.css" type="text/css" rel="stylesheet"/>
 	<link href="../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/jquery-ui.css" type="text/css" rel="Stylesheet" />
+  <!--inicio favicon -->
+	<link rel="shortcut icon" href="../images/favicon.png" type="image/x-icon">
+
 	<script type="text/javascript" src="../js/jquery.js"></script>
 	<script type="text/javascript" src="../js/jquery-ui.js"></script>
     <script type="text/javascript" src="../js/symb/collections.harvestparams.js?ver=9"></script>

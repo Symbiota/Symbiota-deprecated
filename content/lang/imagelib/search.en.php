@@ -37,4 +37,14 @@ $LANG['TAXA_LIST'] = 'Taxa List';
 $LANG['SINGLE_DATE_OR_START_DATE_OF_RANGE'] = 'Single date or start date of range';
 $LANG['END_DATE_OF_RANGE'] = 'End date of range; leave blank if searching for single date';
 
+$LANG['LOADING'] = 'Loading';
+$LANG['THERE_WERE_NO_IMAGES'] = 'There were no images matching your search critera';
+$LANG['HOME'] = 'Home';
+$LANG['IMAGE_CONTRIBUTORS'] = 'Image Contributors';
+$LANG['IMAGE_SEARCH'] = 'Image Search';
+$LANG['IMAGES'] = 'Images';
+$LANG['SEPARATE_MULTIPLE_NAMES_COMMAS'] = 'Separate multiple names w/ commas';
+$LANG['SEPARATE_MULTIPLE_PHOTOGRAPHERS_COMMAS'] = 'Separate multiple photographers w/ commas';
+$LANG['SEPARATE_MULTIPLE_KEYWORDS_COMMAS'] = 'Separate multiple keywords w/ commas';
+
 ?>

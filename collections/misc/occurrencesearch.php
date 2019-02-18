@@ -1,6 +1,7 @@
 <?php
 include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceSupport.php');
+include_once($SERVER_ROOT.'/content/lang/collections/misc/occurrencesearch.'.$LANG_TAG.'.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 
 $targetId = $_REQUEST["targetid"];
@@ -96,12 +97,12 @@ $collArr = $occManager->getCollectionArr($IS_ADMIN?'all':$collEditorArr);
 			?>
 			<form name="occform" action="occurrencesearch.php" method="post" onsubmit="return verifyOccurSearchForm(this)" >
 				<fieldset style="width:650px;">
-					<legend><b>Voucher Search Pane</b></legend>
+					<legend><b><?php echo $LANG['VOUCHER'];?></b></legend>
 					<div style="clear:both;padding:2px;">
-						<div style="float:left;width:130px;">Target Collection:</div>
+						<div style="float:left;width:130px;"><?php echo $LANG['TARGET'];?></div>
 						<div style="float:left;">
 							<select name="collid">
-								<option value="">Select Collection</option>
+								<option value=""><?php echo $LANG['SELEC'];?></option>
 								<option value="">--------------------------------</option>
 								<?php
 								foreach($collArr as $id => $collName){
@@ -112,19 +113,19 @@ $collArr = $occManager->getCollectionArr($IS_ADMIN?'all':$collEditorArr);
 						</div>
 					</div>
 					<div style="clear:both;padding:2px;">
-						<div style="float:left;width:130px;">Catalog #:</div>
+						<div style="float:left;width:130px;"><?php echo $LANG['CATALOG'];?></div>
 						<div style="float:left;"><input name="catalognumber" type="text" /></div>
 					</div>
 					<div style="clear:both;padding:2px;">
-						<div style="float:left;width:130px;">Other Catalog #:</div>
+						<div style="float:left;width:130px;"><?php echo $LANG['OTHER_CATALOG'];?></div>
 						<div style="float:left;"><input name="othercatalognumbers" type="text" /></div>
 					</div>
 					<div style="clear:both;padding:2px;">
-						<div style="float:left;width:130px;">Collector Last Name:</div>
+						<div style="float:left;width:130px;"><?php echo $LANG['COLLECTOR'];?></div>
 						<div style="float:left;"><input name="recordedby" type="text" /></div>
 					</div>
 					<div style="clear:both;padding:2px;">
-						<div style="float:left;width:130px;">Collector Number:</div>
+						<div style="float:left;width:130px;"><?php echo $LANG['COLLECTOR_NUMBRE'];?></div>
 						<div style="float:left;"><input name="recordnumber" type="text" /></div>
 					</div>
 					<div style="clear:both;padding:2px;">
@@ -142,7 +143,7 @@ $collArr = $occManager->getCollectionArr($IS_ADMIN?'all':$collEditorArr);
 						<div style="margin:10px;">
 							<?php echo "<b>OccId ".$occid.":</b> ".$vArr["recordedby"]." [".($vArr["recordnumber"]?$vArr["recordnumber"]:$vArr["eventdate"])."]; ".$vArr["locality"];?>
 							<div style="margin-left:10px;cursor:pointer;color:blue;" onclick="updateParentForm('<?php echo $occid;?>')">
-								Select Occurrence Record
+								<?php echo $LANG['SEL_OCURRENCE'];?>
 							</div>
 						</div>
 						<hr />
@@ -153,7 +154,7 @@ $collArr = $occManager->getCollectionArr($IS_ADMIN?'all':$collEditorArr);
 				else{
 					?>
 					<div style="margin:30 10px;">
-						<b>No records were returned. Please modify your search and try again.</b> 
+						<b>	<?php echo $LANG['NO_RECORDS'];?></b> 
 					</div>
 					<?php 
 				}
@@ -161,9 +162,9 @@ $collArr = $occManager->getCollectionArr($IS_ADMIN?'all':$collEditorArr);
 			?>
 			<form name="occform" action="occurrencesearch.php" method="post" onsubmit="return false" >
 				<fieldset style="width:650px;padding:20px">
-					<legend><b>Link to New Occurrence Record</b></legend>
+					<legend><b><?php echo $LANG['LINK_TO_NEW'];?></b></legend>
 					<select name="collid">
-						<option value="">Select Collection</option>
+						<option value=""><?php echo $LANG['SEL_COLL'];?></option>
 						<option value="">--------------------------------</option>
 						<?php
 						foreach($collArr as $id => $collName){
@@ -171,7 +172,7 @@ $collArr = $occManager->getCollectionArr($IS_ADMIN?'all':$collEditorArr);
 						}  
 						?>
 					</select>
-					<button type="button" onclick="linkToNewOccurrence(this.form)">Create New Occurrence</button>
+					<button type="button" onclick="linkToNewOccurrence(this.form)"><?php echo $LANG['CREATE_NEW_OCU'];?></button>
 				</fieldset>
 			</form>
 			<?php
@@ -179,7 +180,7 @@ $collArr = $occManager->getCollectionArr($IS_ADMIN?'all':$collEditorArr);
 		else{
 			?>
 			<div style="margin:30 10px;">
-				<b>You are not authorized to link to any collections</b> 
+				<b><?php echo $LANG['YOU_ARE'];?></b> 
 			</div>
 			<?php 
 		} 

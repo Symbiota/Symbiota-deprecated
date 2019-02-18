@@ -1,4 +1,4 @@
-<?php 
+<?php
 include_once('../config/symbini.php');
 include_once($serverRoot.'/config/dbconnection.php');
 header("Content-Type: text/html; charset=".$charset);
@@ -12,6 +12,8 @@ $unkDisplayManager = new UnknownDisplayManager();
 	<link href="../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 	<link rel="stylesheet" href="../css/speciesprofile.css" type="text/css"/>
+	<!--inicio favicon -->
+	<link rel="shortcut icon" href="../images/favicon.png" type="image/x-icon">
 	<meta name='keywords' content='' />
 </head>
 
@@ -23,18 +25,18 @@ $unkDisplayManager = new UnknownDisplayManager();
 		echo "<div class='navpath'>";
 		echo "<a href='../index.php'>Home</a> &gt; ";
 		echo $imagelib_unknowndisplayCrumbs;
-		echo " <b>Unknown</b>"; 
+		echo " <b>Unknown</b>";
 		echo "</div>";
 	}
-	?> 
+	?>
 	<!-- This is inner text! -->
 	<div style="margin:15px;">
 		<h1>Unknown #<?php echo $unkid; ?></h1>
 		<div style="margin:0px 0px 5px 20px;">
 			Use form below to submit one to several images of an unknown. Enter the family or genus if you know it, or just leave as unknown.
-			Make sure to include a locality and elevation of the unknown.  
+			Make sure to include a locality and elevation of the unknown.
 		</div>
-		<?php 
+		<?php
 			$unkArray = $unkDisplayManager->getUnknown($unkid);
 			echo "<div><b>Taxonomy:</b> ".$unkArray["sciname"].($unkArray["sciname"] != $unkArray["family"]?" (".$unkArray["family"].")":"")."</div>";
 			echo "<div><b>Photographer:</b> ".$unkArray["photographer"]."</div>";
@@ -48,7 +50,7 @@ $unkDisplayManager = new UnknownDisplayManager();
 			foreach($urlArr as $url){
 				echo "<div class='imgthumb'>";
 				echo "<a href='".$url."'><img src='".$url."' style='width:150px;' /></a>";
-				echo "</div>"; 
+				echo "</div>";
 			}
 			echo "<hr/></div>";
 		?>
@@ -58,10 +60,10 @@ $unkDisplayManager = new UnknownDisplayManager();
 				<fieldset>
 					<legend>Image Information</legend>
 					<div>
-						Family or Genus (if known): 
+						Family or Genus (if known):
 						<select name="tid" id="tid">
 							<option value="unknown">unknown</option>
-							<?php 
+							<?php
 								$submitManager->showTaxaList($unkArray["sciname"]);
 							?>
 						</select>
@@ -73,7 +75,7 @@ $unkDisplayManager = new UnknownDisplayManager();
 						Owner: <input name="owner" id="owner" type="text" value="<?php echo $unkArray["owner"]; ?>">
 					</div>
 					<div>
-						Decimal Latitude: 
+						Decimal Latitude:
 						<input name="latdecimal" id="latdecimal" type="text" value="<?php echo $unkArray["latdecimal"]; ?>" onchange="javascript:checkLat();">
 						<select id="lat_ns" name="lat_ns" onchange="javascript:checkLat();">
 							<option id="N" value="N">N</option>
@@ -96,7 +98,7 @@ $unkDisplayManager = new UnknownDisplayManager();
 		</div>
 		<div style="margin:20px;">
 			<h1>Public Comments</h1>
-			<?php 
+			<?php
 				$unkDisplayManager->getComments($unkid);
 			?>
 		</div>
@@ -104,7 +106,7 @@ $unkDisplayManager = new UnknownDisplayManager();
 	<?php
 	include($serverRoot.'/footer.php');
 	?>
-	
+
 </body>
 </html>
 
@@ -112,12 +114,12 @@ $unkDisplayManager = new UnknownDisplayManager();
 
 class UnknownDisplayManager{
 
-	private $conn; 
-	
+	private $conn;
+
  	public function __construct(){
  		$this->conn = MySQLiConnectionFactory::getCon("write");
  	}
-	
+
  	public function __destruct() {
  		$this->conn->close();
 	}
@@ -146,7 +148,7 @@ class UnknownDisplayManager{
 		$result->close();
 		return $unkArr;
 	}
-	
+
 	public function getComments($unkid){
 		$sql = "SELECT c.comid, c.comment, c.username, c.initialtimestamp ".
 			"FROM unknowncomments c ".
@@ -158,7 +160,7 @@ class UnknownDisplayManager{
 		}
 		$result->close();
 	}
-	
+
 	public function showTaxaList($sciname){
 		$sql = "SELECT t.tid, t.sciname ".
 			"FROM taxa t WHERE t.rankid = 140 OR t.rankid = 180 ".
@@ -169,7 +171,7 @@ class UnknownDisplayManager{
 		}
 		$result->close();
 	}
-	
+
 	public function loadUnknown($unkData){
 		$sql = "INSERT INTO unknowns (tid, photographer, owner, latdecimal, longdecimal, notes, username) ".
 			"VALUES (".$unkData["tid"].",".$unkData["photographer"].",".$unkData["owner"].",".$unkData["latdecimal"].",".

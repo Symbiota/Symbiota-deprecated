@@ -31,4 +31,20 @@ $LANG['SENT'] = 'Sent From:';
 $LANG['SELECT_INST'] = 'Select Institution';
 $LANG['CREATE_LOAN'] = 'Create Loan';
 
+$LANG['LOAN_MANAGEMENT'] = 'Loan Management';
+$LANG['REFRESH_LIST'] = 'Refresh List';
+$LANG['CREATE_NEW_LOAN'] = 'Create New Loan';
+$LANG['ADD_A_NEW_INSTITUTION'] = 'Add a New Institution';
+$LANG['OUTGOING_LOAN_RECORDS'] = 'Outgoing Loan Records';
+$LANG['THERE_ARE_NO_LOANS_OUT_REGISTERED_FOR_THIS_COLLECTION'] = 'There are no loans out registered for this collection';
+$LANG['LOANDS_ON_THEIR_WAY'] = 'Loans on Their Way';
+$LANG['THERE_ARE_NO_LOANS_RECEIVED'] = 'There are no loans received';
+$LANG['PLEASE'] = 'Please';
+$LANG['OPEN'] = 'OPEN';
+$LANG['COLLECTION_NOT_DEFINED'] = 'Collection not defined';
+$LANG['YOU_ARE_NOT_AUTHORIZED_TO_MANAGE_LOANS'] = 'You are not authorized to manage loans';
+$LANG['LOGIN'] = 'login';
+$LANG['YOU_ARE_NOT_AUTHORIZED_TO_ADD_OCCURRENCE_RECORDS'] = 'You are not authorized to add occurrence records';
+$LANG['ERROR_UNKNOWN_ERROR_PLEASE_CONTACT_SYSTEM_ADMINISTRATOR'] = 'ERROR: unknown error, please contact system administrator';
+
 ?>

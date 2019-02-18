@@ -1,0 +1,35 @@
+
+.card-img-top-colecciones {
+        height: 164px;
+        display: inline-block;
+    }
+    .card-img-top-colecciones:hover {
+        background-color: black no-repeat;
+    }
+
+    .card-img-top-mapa {
+        height: 164px;
+        background: url("images/icono_wp.png") no-repeat;
+        display: inline-block;
+    }
+    .card-img-top-mapa:hover {
+        background: url("images/icono_wp.png") no-repeat;
+    }
+
+    .card-img-top-listados {
+        height: 164px;
+        background: url("images/icono_wp.png") no-repeat;
+        display: inline-block;
+    }
+    .card-img-top-listados:hover {
+        background: url("images/icono_wp.png") no-repeat;
+    }
+
+    .card-img-top-taxa {
+        height: 164px;
+        background: url("images/icono_wp.png") no-repeat;
+        display: inline-block;
+    }
+   .card-img-top-taxa:hover {
+        background: url("images/icono_wp.png") no-repeat;
+    }

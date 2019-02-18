@@ -24,6 +24,8 @@ $fileName = time();
 		<link type="text/css" href="../../css/jquery-ui_accordian.css" rel="stylesheet" />
 		<link type="text/css" href="../../css/jquery-ui.css" rel="Stylesheet" />
 		<link type="text/css" href="../../css/communicator.css" rel="Stylesheet" />
+		<!--inicio favicon -->
+	<link rel="shortcut icon" href="../../images/favicon.png" type="image/x-icon">
 		<script type="text/javascript" src="../../js/jquery.js"></script>
 		<script type="text/javascript" src="../../js/jquery-ui.js"></script>
 		<script type="text/javascript" src="../../js/garmin/prototype/prototype.js"></script>
@@ -35,8 +37,8 @@ $fileName = time();
 
 				////////////////////////////////////////////////////////////////////////
 				//prototype constructor method:
-				
-				initialize: function(statusDiv, mapId) {        
+
+				initialize: function(statusDiv, mapId) {
 					this.status = $(statusDiv);
 					this.findDevicesButton = $("findDevicesButton");
 					this.cancelFindDevicesButton = $("cancelFindDevicesButton");
@@ -59,7 +61,7 @@ $fileName = time();
 						this.garminController.findDevices();
 					}.bind(this)
 				},
-				
+
 				////////////////////////////////////////////////////////////////////////
 				//Garmin.DeviceControl call-back methods:
 
@@ -71,15 +73,15 @@ $fileName = time();
 						var devices = json.controller.getDevices();
 						this._setStatus("Found " + devices.length + " devices.");
 						this._listDevices(devices);
-						
+
 						this.cancelWriteDataButton.onclick = function() {
 							this.writeDataButton.disabled = false;
 							this.cancelWriteDataButton.disabled = true;
 							this._hideProgressBar();
 							this.garminController.cancelWriteToDevice();
 						}.bind(this)
-			
-						this.writeDataButton.disabled = false;            
+
+						this.writeDataButton.disabled = false;
 						this.writeDataButton.onclick = function() {
 							this.writeDataButton.disabled = true;
 							this.cancelWriteDataButton.disabled = false;
@@ -99,8 +101,8 @@ $fileName = time();
 					this._setStatus("Find cancelled");
 				},
 
-				//The device already has a file with this name on it.  Do we want to override?  1 is yes, 2 is no 
-				onWaitingWriteToDevice: function(json) {    
+				//The device already has a file with this name on it.  Do we want to override?  1 is yes, 2 is no
+				onWaitingWriteToDevice: function(json) {
 					if(confirm(json.message.getText())) {
 						this._setStatus('Overwriting file');
 						json.controller.respondToMessageBox(true);
@@ -109,12 +111,12 @@ $fileName = time();
 						json.controller.respondToMessageBox(false);
 					}
 				},
-			
+
 				onProgressWriteToDevice: function(json) {
 					this._updateProgressBar(json.progress.getPercentage());
 					this._setStatus(json.progress);
 				},
-			
+
 				onFinishWriteToDevice: function(json) {
 					this._hideProgressBar();
 					this._setStatus("Data written to the device.");
@@ -123,7 +125,7 @@ $fileName = time();
 					this.cancelWriteDataButton.disabled = true;
 				},
 
-			
+
 				////////////////////////////////////////////////////////////////////////
 				//internal utility methods:
 
@@ -136,9 +138,9 @@ $fileName = time();
 						setRealStatus(e);
 						if(e == "OutOfDatePluginException") {
 							//alert("Plug-in out of date");
-						} else if(e == "PluginNotInstalledException: Garmin Communicator Plugin NOT detected.") { 
+						} else if(e == "PluginNotInstalledException: Garmin Communicator Plugin NOT detected.") {
 							//alert("Plug-in not installed");
-						} else if(e == "BrowserNotSupportedException") { 
+						} else if(e == "BrowserNotSupportedException") {
 							//alert("Browser not supported");
 						} else {
 							//alert("Error initializing - " + e);
@@ -181,7 +183,7 @@ $fileName = time();
 					this.deviceInfo.innerHTML += "Description:\t\t" + device.getDescription() + "\n";
 					this.deviceInfo.innerHTML += "Id:\t\t\t" + device.getId();
 				},
-			
+
 				_setStatus: function(statusText) {
 					this.status.innerHTML = statusText;
 				}
@@ -189,11 +191,11 @@ $fileName = time();
 
 			//control is created when HTML page is loaded
 			var control;
-			
+
 			function setRealStatus(e){
 				var statusDiv = document.getElementById("statusText");
 				if(e){
-					if(e == "PluginNotInstalledException: Garmin Communicator Plugin NOT detected.") { 
+					if(e == "PluginNotInstalledException: Garmin Communicator Plugin NOT detected.") {
 						statusDiv.innerHTML = '<span style="color:red;">Plug-in not installed.</span> Please download and install the free <a href="http://software.garmin.com/en-US/gcp.html" target="_blank" >Garmin Communicator Plugin</a> to get started';
 					}
 					else{
@@ -201,12 +203,12 @@ $fileName = time();
 					}
 				}
 			}
-				
+
 			function load() {
 				control = new GarminDeviceControlDemo("statusText", "readMap");
 			}
 		</script>
-	</head> 
+	</head>
 	<body style="width:400px;height:330px;margin-left:0px;margin-right:0px;background-color:white;overflow-y:hidden;overflow-x:hidden;" onload="load()">
 		<div id="innertext">
 			<fieldset style="padding:10px;height:280px;width:350px;">

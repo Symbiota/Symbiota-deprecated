@@ -60,7 +60,7 @@ $htmlStr .= '<div style="clear:both;">';
 $htmlStr .= '<div style="margin:5px;float:right;"><button type="button" id="copyurl" onclick="copySearchUrl();">Copy URL to These Results</button></div>';
 $htmlStr .= '<div style="margin:5px;float:left;">';
 $tableLink = 'listtabledisplay.php?starr='.$stArrSearchJson.'&jsoncollstarr='.$stArrCollJson.($targetTid?'&targettid='.$targetTid:'');
-$htmlStr .= "<a href='".$tableLink."'>See Results in Table View</a>";
+$htmlStr .= "<a href='".$tableLink."'>Observar resultados en tabla</a>";
 $htmlStr .= '</div></div>';
 $htmlStr .= '<div style="clear:both;"></div>';
 

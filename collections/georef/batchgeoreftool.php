@@ -2,6 +2,7 @@
 include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceGeorefTools.php');
 include_once($SERVER_ROOT.'/classes/SOLRManager.php');
+include_once($SERVER_ROOT.'/content/lang/collections/georef/batchgeoreftool.'.$LANG_TAG.'.php');
 
 if(!$SYMB_UID) header('Location: ../profile/index.php?refurl=../collections/georef/batchgeoreftool.php?'.$_SERVER['QUERY_STRING']);
 
@@ -79,6 +80,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 <html>
 	<head>
 		<title>Georeferencing Tools</title>
+		<link href="/css/bootstrap.min.css" type="text/css" rel="stylesheet"/>
 		<link href="<?php echo $CLIENT_ROOT; ?>/css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 		<link href="<?php echo $CLIENT_ROOT; ?>/css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 		<link type="text/css" href="<?php echo $clientRoot; ?>/css/jquery-ui.css" rel="Stylesheet" />
@@ -87,13 +89,12 @@ header("Content-Type: text/html; charset=".$CHARSET);
 		<script type="text/javascript" src="<?php echo $CLIENT_ROOT; ?>/js/symb/collections.georef.batchgeoreftool.js?ver=161212"></script>
 	</head>
 	<body>
-		<!-- This is inner text! -->
 		<div  id='innertext'>
 			<div style="float:left;">
 				<div style="font-weight:bold;font-size:150%;margin-top:6px;">
 					<?php echo $geoManager->getCollName(); ?>
 				</div>
-				<div class='navpath' style="margin:10px;">
+				<div class='navpath' style="margin:0px;padding: 25px;">
 					<a href='../../index.php'>Home</a> &gt;&gt;
 					<?php
 					if(isset($collections_editor_georeftoolsCrumbs)){
@@ -101,11 +102,11 @@ header("Content-Type: text/html; charset=".$CHARSET);
 					}
 					else{
 						?>
-						<a href='../misc/collprofiles.php?emode=1&collid=<?php echo $collId; ?>'>Control Menu</a> &gt;&gt;
+						<a href='../misc/collprofiles.php?emode=1&collid=<?php echo $collId; ?>'><?php echo $LANG['CONTROL'];?></a> &gt;&gt;
 						<?php
 					}
 					?>
-					<b>Batch Georeferencing Tools</b>
+					<b><?php echo $LANG['BATCH'];?></b>
 				</div>
 				<?php
 				if($statusStr){
@@ -116,7 +117,8 @@ header("Content-Type: text/html; charset=".$CHARSET);
 					<?php
 				}
 				?>
-			</div>
+			</div><!-- This is inner text! -->
+		
 			<?php
 			if($collId){
 				if($editor){
@@ -124,12 +126,12 @@ header("Content-Type: text/html; charset=".$CHARSET);
 					<div style="float:right;">
 						<form name="queryform" method="post" action="batchgeoreftool.php" onsubmit="return verifyQueryForm(this)">
 							<fieldset style="padding:5px;width:600px;background-color:lightyellow;">
-								<legend><b>Query Form</b></legend>
+								<legend><b><?php echo $LANG['QUERY'];?></b></legend>
 								<div style="height:20px;">
 									<div style="clear:both;">
 										<div style="float:left;margin-right:10px;">
 											<select name="qcountry" style="width:150px;">
-												<option value=''>All Countries</option>
+												<option value=''><?php echo $LANG['ALL_1'];?></option>
 												<option value=''>--------------------</option>
 												<?php
 												$cArr = $geoManager->getCountryArr();
@@ -141,7 +143,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 										</div>
 										<div style="float:left;margin-right:10px;">
 											<select name="qstate" style="width:150px;">
-												<option value=''>All States</option>
+												<option value=''><?php echo $LANG['ALL_2'];?></option>
 												<option value=''>--------------------</option>
 												<?php
 												$sArr = $geoManager->getStateArr($qCountry);
@@ -153,7 +155,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 										</div>
 										<div style="float:left;margin-right:10px;">
 											<select name="qcounty" style="width:180px;">
-												<option value=''>All Counties</option>
+												<option value=''><?php echo $LANG['ALL_3'];?></option>
 												<option value=''>--------------------</option>
 												<?php
 												$coArr = $geoManager->getCountyArr($qCountry,$qState);
@@ -167,7 +169,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 									<div style="clear:both;margin-top:5px;">
 										<div style="float:left;margin-right:10px;">
 											<select name="qmunicipality" style="width:180px;">
-												<option value=''>All Municipalities</option>
+												<option value=''><?php echo $LANG['ALL_4'];?></option>
 												<option value=''>--------------------</option>
 												<?php
 												$muArr = $geoManager->getMunicipalityArr($qCountry,$qState);
@@ -179,7 +181,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 										</div>
 										<div style="float:left;margin-right:10px;">
 											<select name="qprocessingstatus">
-												<option value="">All Processing Status</option>
+												<option value=""><?php echo $LANG['ALL_5'];?></option>
 												<option value="">-----------------------</option>
 												<?php
 												$processingStatus = $geoManager->getProcessingStatus();
@@ -196,16 +198,16 @@ header("Content-Type: text/html; charset=".$CHARSET);
 								</div>
 								<div id="advfilterdiv" style="clear:both;margin-top:5px;display:<?php echo ($qSciname || $qVStatus || $qDisplayAll?'block':'none'); ?>;">
 									<div style="float:left;margin-right:15px;">
-										<b>Verification status:</b>
+										<b><?php echo $LANG['VERIFICATION'];?></b>
 										<input id="qvstatus" name="qvstatus" type="text" value="<?php echo $qVStatus; ?>" style="width:175px;" />
 									</div>
 									<div style="float:left;">
-										<b>Family/Genus:</b>
+										<b><?php echo $LANG['FAM_GEN'];?></b>
 										<input name="qsciname" type="text" value="<?php echo $qSciname; ?>" style="width:150px;" />
 									</div>
 									<div style="clear:both;margin-top:5px;">
 										<input name="qdisplayall" type="checkbox" value="1" <?php echo ($qDisplayAll?'checked':''); ?> />
-										Including previously georeferenced records
+										<?php echo $LANG['INCLUDING'];?>
 									</div>
 								</div>
 								<div style="margin-top:5px;clear:both;">
@@ -217,7 +219,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 										</span>
 									</div>
 									<div style="float:left">
-										<b>Locality Term:</b>
+										<b><?php echo $LANG['LOCALITY'];?></b>
 										<input name="qlocality" type="text" value="<?php echo $qLocality; ?>" style="width:250px;" />
 									</div>
 								</div>
@@ -283,9 +285,9 @@ header("Content-Type: text/html; charset=".$CHARSET);
 							</div>
 							<div style="float:right;">
 								<fieldset>
-									<legend><b>Statistics</b></legend>
+									<legend><b><?php echo $LANG['STATIC'];?></b></legend>
 									<div style="">
-										Records to be Georeferenced
+										<?php echo $LANG['RECORD'];?>
 									</div>
 									<div style="margin:5px;">
 										<?php
@@ -308,7 +310,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 										<td><b>Decimal</b></td>
 									</tr>
 									<tr>
-										<td style="vertical-align:middle"><b>Latitude:</b> </td>
+										<td style="vertical-align:middle"><b><?php echo $LANG['LATITUDE'];?></b> </td>
 										<td><input name="latdeg" type="text" value="" onchange="updateLatDec(this.form)" style="width:30px;" /></td>
 										<td><input name="latmin" type="text" value="" onchange="updateLatDec(this.form)" style="width:50px;" /></td>
 										<td><input name="latsec" type="text" value="" onchange="updateLatDec(this.form)" style="width:50px;" /></td>
@@ -327,7 +329,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 										</td>
 									</tr>
 									<tr>
-										<td style="vertical-align:middle"><b>Longitude:</b> </td>
+										<td style="vertical-align:middle"><b><?php echo $LANG['LONGITUDE'];?></b> </td>
 										<td><input name="lngdeg" type="text" value="" onchange="updateLngDec(this.form)" style="width:30px;" /></td>
 										<td><input name="lngmin" type="text" value="" onchange="updateLngDec(this.form)" style="width:50px;" /></td>
 										<td><input name="lngsec" type="text" value="" onchange="updateLngDec(this.form)" style="width:50px;" /></td>
@@ -342,13 +344,13 @@ header("Content-Type: text/html; charset=".$CHARSET);
 									</tr>
 									<tr>
 										<td colspan="3" style="vertical-align:middle">
-											<b>Error (in meters):</b>
+											<b><?php echo $LANG['ERROR'];?></b>
 										</td>
 										<td colspan="2" style="vertical-align:middle">
 											<input id="coordinateuncertaintyinmeters" name="coordinateuncertaintyinmeters" type="text" value="" style="width:50px;" onchange="verifyCoordUncertainty(this)" />
 										</td>
 										<td colspan="2" style="vertical-align:middle">
-											<span style="margin-left:20px;font-weight:bold;">Datum:</span>
+											<span style="margin-left:20px;font-weight:bold;"><?php echo $LANG['DATUM'];?></span>
 											<input id="geodeticdatum" name="geodeticdatum" type="text" value="" style="width:75px;" />
 											<span style="cursor:pointer;margin-left:3px;" onclick="toggle('utmdiv');">
 												<img src="../../images/editplus.png" style="border:0px;width:14px;" />
@@ -357,7 +359,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 									</tr>
 									<tr>
 										<td colspan="3" style="vertical-align:middle">
-											<b>Footprint WKT:</b>
+											<b><?php echo $LANG['FOOT'];?></b>
 										</td>
 										<td colspan="4" style="vertical-align:middle">
 											<input id="footprintwkt" name="footprintwkt" type="text" value="" style="width:500px;" onchange="verifyFootprintWKT(this)" />
@@ -368,21 +370,21 @@ header("Content-Type: text/html; charset=".$CHARSET);
 											<div id="utmdiv" style="display:none;padding:15px 10px;background-color:lightyellow;border:1px solid yellow;width:400px;height:75px;margin-bottom:10px;">
 												<div>
 													<div style="margin:3px;float:left;">
-														East: <input name="utmeast" type="text" style="width:100px;" />
+														<?php echo $LANG['EAST'];?> <input name="utmeast" type="text" style="width:100px;" />
 													</div>
 													<div style="margin:3px;float:left;">
-														North: <input name="utmnorth" type="text" style="width:100px;" />
+														<?php echo $LANG['NORTH'];?> <input name="utmnorth" type="text" style="width:100px;" />
 													</div>
 													<div style="margin:3px;float:left;">
-														Zone: <input name="utmzone" style="width:40px;" />
+														<?php echo $LANG['ZONE'];?> <input name="utmzone" style="width:40px;" />
 													</div>
 												</div>
 												<div style="clear:both;margin:3px;">
 													<div style="float:left;">
-														Hemisphere:
+														<?php echo $LANG['MEMIS'];?>
 														<select name="hemisphere" title="Use hemisphere designator (e.g. 12N) rather than grid zone ">
-															<option value="Northern">North</option>
-															<option value="Southern">South</option>
+															<option value="Northern"><?php echo $LANG['NORTH2'];?></option>
+															<option value="Southern"><?php echo $LANG['SOUTH'];?></option>
 														</select>
 													</div>
 													<div style="margin:5px 0px 0px 15px;float:left;">
@@ -394,7 +396,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 									</tr>
 									<tr>
 										<td colspan="3" style="vertical-align:middle">
-											<b>Sources:</b>
+											<b><?php echo $LANG['SOURCE'];?></b>
 										</td>
 										<td colspan="4">
 											<input id="georeferencesources" name="georeferencesources" type="text" value="<?php echo $georeferenceSources; ?>" style="width:500px;" />
@@ -402,7 +404,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 									</tr>
 									<tr>
 										<td colspan="3" style="vertical-align:middle">
-											<b>Remarks:</b>
+											<b><?php echo $LANG['REMARK'];?></b>
 										</td>
 										<td colspan="4">
 											<input name="georeferenceremarks" type="text" value="" style="width:500px;" />
@@ -410,7 +412,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 									</tr>
 									<tr>
 										<td colspan="3" style="vertical-align:middle">
-											<b>Verification Status:</b>
+											<b><?php echo $LANG['STATUS'];?></b>
 										</td>
 										<td colspan="4">
 											<input id="georeferenceverificationstatus" name="georeferenceverificationstatus" type="text" value="<?php echo $georeferenceVerificationStatus; ?>" style="width:400px;" />
@@ -418,37 +420,37 @@ header("Content-Type: text/html; charset=".$CHARSET);
 									</tr>
 									<tr>
 										<td colspan="3" style="vertical-align:middle">
-											<b>Elevation:</b>
+											<b><?php echo $LANG['ELEVA'];?></b>
 										</td>
 										<td colspan="4">
-											<input name="minimumelevationinmeters" type="text" value="" style="width:50px;" /> to
-											<input name="maximumelevationinmeters" type="text" value="" style="width:50px;" /> meters
+											<input name="minimumelevationinmeters" type="text" value="" style="width:50px;" /> <?php echo $LANG['TO'];?>
+											<input name="maximumelevationinmeters" type="text" value="" style="width:50px;" /> <?php echo $LANG['METERS'];?>
 											<span style="margin-left:80px;">
-												<input type="text" value="" style="width:50px;" onchange="updateMinElev(this.value)" /> to
-												<input type="text" value="" style="width:50px;" onchange="updateMaxElev(this.value)" /> feet
+												<input type="text" value="" style="width:50px;" onchange="updateMinElev(this.value)" /> <?php echo $LANG['TO_1'];?>
+												<input type="text" value="" style="width:50px;" onchange="updateMaxElev(this.value)" /> <?php echo $LANG['FE'];?>
 											</span>
 										</td>
 									</tr>
 									<tr>
 										<td colspan="3">
-											<b>Processing status: </b>
+											<b><?php echo $LANG['PRO'];?> </b>
 										</td>
 										<td colspan="4">
 											<select name="processingstatus">
-												<option value="">Leave as is</option>
-												<option value="unprocessed">Unprocessed</option>
-												<option value="unprocessed/NLP">unprocessed/NLP</option>
-												<option value="stage 1">Stage 1</option>
-												<option value="stage 2">Stage 2</option>
-												<option value="stage 3">Stage 3</option>
-												<option value="pending review-nfn">Pending Review-NfN</option>
-												<option value="pending review">Pending Review</option>
-												<option value="expert required">Expert Required</option>
-												<option value="reviewed">Reviewed</option>
-												<option value="closed">Closed</option>
+												<option value=""><?php echo $LANG['LEAVE'];?> </option>
+												<option value="unprocessed"><?php echo $LANG['UMPROCE'];?></option>
+												<option value="unprocessed/NLP"><?php echo $LANG['UNPRO'];?></option>
+												<option value="stage 1"><?php echo $LANG['STAGE_1'];?></option>
+												<option value="stage 2"><?php echo $LANG['STAGE_2'];?></option>
+												<option value="stage 3"><?php echo $LANG['STAGE_3'];?></option>
+												<option value="pending review-nfn"><?php echo $LANG['PENDING_REVIEW'];?></option>
+												<option value="pending review"><?php echo $LANG['REQ'];?></option>
+												<option value="expert required"><?php echo $LANG['EXPERT'];?></option>
+												<option value="reviewed"><?php echo $LANG['REVI'];?></option>
+												<option value="closed"><?php echo $LANG['CLOSED'];?></option>
 											</select>
 											<span style="margin-left:20px;font-size:80%">
-												Georefer by:
+												<?php echo $LANG['GEO'];?>
 												<input name="georeferencedby" type="text" value="<?php echo $paramsArr['un']; ?>" style="width:75px" readonly />
 											</span>
 										</td>
@@ -475,11 +477,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 										</td>
 									</tr>
 								</table>
-								<div style="margin-top:15px">Note: Existing data within following georeference fields will be replaced with incoming data.
-								However, elevation data will only be added when the target fields are null.
-								No incoming data will replace existing elevational data.
-								Georeference fields that will be replaced: decimalLatitude, decimalLongitude, coordinateUncertaintyInMeters, geodeticdatum,
-								footprintwkt, georeferencedby, georeferenceRemarks, georeferenceSources, georeferenceVerificationStatus </div>
+								<div style="margin-top:15px"><?php echo $LANG['NOTE'];?> </div>
 							</div>
 						</form>
 					</div>
@@ -488,7 +486,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 				else{
 					?>
 					<div style='font-weight:bold;font-size:120%;'>
-						ERROR: You do not have permission to edit this collection
+						<?php echo $LANG['ER'];?>
 					</div>
 					<?php
 				}
@@ -496,7 +494,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 			else{
 				?>
 				<div style='font-weight:bold;font-size:120%;'>
-					ERROR: Collection identifier is null
+					<?php echo $LANG['ER_1'];?>
 				</div>
 				<?php
 			}

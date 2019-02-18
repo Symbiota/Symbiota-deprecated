@@ -1,6 +1,7 @@
 <?php
 include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceCleaner.php');
+include_once($SERVER_ROOT.'/content/lang/collections/cleaning/coordinatevalidator.'.$LANG_TAG.'.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 
 $collid = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
@@ -38,6 +39,7 @@ if($collMap['colltype'] == 'General Observations' && $obsUid !== 0){
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET; ?>">
 	<title><?php echo $DEFAULT_TITLE; ?> Coordinate Validator</title>
+	<link href="../../css/bootstrap.min.css" type="text/css" rel="stylesheet"/>
 	<link href="../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
     <link href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 	<script type="text/javascript">
@@ -54,9 +56,9 @@ if($collMap['colltype'] == 'General Observations' && $obsUid !== 0){
 	?>
 	<div class='navpath'>
 		<a href="../../index.php">Home</a> &gt;&gt;
-		<a href="../misc/collprofiles.php?collid=<?php echo $collid; ?>&emode=1">Collection Management</a> &gt;&gt;
-		<a href="index.php?collid=<?php echo $collid; ?>">Cleaning Tools Index</a> &gt;&gt;
-		<b>Coordinate Political Units Validator</b>
+		<a href="../misc/collprofiles.php?collid=<?php echo $collid; ?>&emode=1"><?php echo $LANG['COL'];?></a> &gt;&gt;
+		<a href="index.php?collid=<?php echo $collid; ?>"><?php echo $LANG['CLEAN'];?></a> &gt;&gt;
+		<b><?php echo $LANG['COORD'];?></b>
 		<?php
 		//echo '&gt;&gt; <a href="coordinatevalidator.php?collid='.$collid.'"><b>Coordinate Validator Main Menu</b></a>';
 		?>
@@ -78,7 +80,7 @@ if($collMap['colltype'] == 'General Observations' && $obsUid !== 0){
 		if($isEditor){
 			?>
 			<div style="margin:15px">
-				This tool will loop through all unvalidated georeferenced occurrences and verify that the coordinates actually fall within the defined political units.
+				<?php echo $LANG['TOOLS'];?>
 			</div>
 			<div style="margin:15px">
 				<?php
@@ -96,7 +98,7 @@ if($collMap['colltype'] == 'General Observations' && $obsUid !== 0){
 				?>
 			</div>
 			<div style="margin:10px">
-				<div style="font-weight:bold">Ranking Statistics</div>
+				<div style="font-weight:bold"><?php echo $LANG['RANK'];?></div>
 				<?php
 				$coordRankingArr = $cleanManager->getRankingStats('coordinate');
 				$rankArr = current($coordRankingArr);
@@ -115,7 +117,7 @@ if($collMap['colltype'] == 'General Observations' && $obsUid !== 0){
 				?>
 			</div>
 			<div style="margin:10px">
-				<div style="font-weight:bold">Non-verified by State/Province</div>
+				<div style="font-weight:bold"><?php echo $LANG['NO_VER'];?></div>
 				<?php
 				$countryArr = $cleanManager->getUnverifiedByCountry();
 				echo '<table class="styledtable">';
@@ -141,12 +143,12 @@ if($collMap['colltype'] == 'General Observations' && $obsUid !== 0){
 			</div>
 			<div style="margin:10px">
 				<fieldset style="width:400px;padding:20px">
-					<legend><b>Rank Listing</b></legend>
+					<legend><b><?php echo $LANG['LISTING'];?></b></legend>
 					<div>
 						<form action="coordinatevalidator.php" method="post">
-							Select Rank:
+							<?php echo $LANG['SEL_RANK'];?>
 							<select name="ranking" onchange="this.form.submit()">
-								<option value="">Select Rank</option>
+								<option value=""><?php echo $LANG['SEL_RANK'];?></option>
 								<option value="">----------------</option>
 								<?php
 								$rankList = $cleanManager->getRankList();
@@ -183,7 +185,7 @@ if($collMap['colltype'] == 'General Observations' && $obsUid !== 0){
  			<?php
 		}
 		else{
-			echo '<h2>You are not authorized to access this page</h2>';
+			echo '<h5>You are not authorized to access this page</h5>';
 		}
 		?>
 	</div>

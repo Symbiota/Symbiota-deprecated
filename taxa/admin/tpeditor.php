@@ -3,6 +3,7 @@ include_once('../../config/symbini.php');
 include_once($serverRoot.'/classes/TPEditorManager.php');
 include_once($serverRoot.'/classes/TPDescEditorManager.php');
 include_once($serverRoot.'/classes/TPImageEditorManager.php');
+include_once($SERVER_ROOT.'/content/lang/taxa/admin/tpeditor.'.$LANG_TAG.'.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $tid = array_key_exists("tid",$_REQUEST)?$_REQUEST["tid"]:0;
@@ -110,6 +111,7 @@ if($editable && $action){
 <head>
 	<title><?php echo $defaultTitle." Taxon Editor: ".$tEditor->getSciName(); ?></title>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset;?>" />
+	<link href="../../css/bootstrap.min.css" type="text/css" rel="stylesheet"/>
 	<link href="../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 	<link type="text/css" href="../../css/jquery-ui.css" rel="Stylesheet" />	
@@ -198,11 +200,11 @@ if($editable && $action){
 				?>
 				<div id="tabs" style="margin:10px;">
 					<ul>
-						<li><a href="#commontab"><span>Synonyms / Vernaculars</span></a></li>
-				        <li><a href="tpimageeditor.php?tid=<?php echo $tEditor->getTid().'&lang='.$lang; ?>"><span>Images</span></a></li>
-				        <li><a href="tpimageeditor.php?tid=<?php echo $tEditor->getTid().'&lang='.$lang.'&cat=imagequicksort'; ?>"><span>Image Sort</span></a></li>
-				        <li><a href="tpimageeditor.php?tid=<?php echo $tEditor->getTid().'&lang='.$lang.'&cat=imageadd'; ?>"><span>Add Image</span></a></li>
-				        <li><a href="tpdesceditor.php?tid=<?php echo $tEditor->getTid().'&lang='.$lang.'&action='.$action; ?>"><span>Descriptions</span></a></li>
+						<li><a href="#commontab"><span><?php echo $LANG['SYNONYMS']; ?></span></a></li>
+				        <li><a href="tpimageeditor.php?tid=<?php echo $tEditor->getTid().'&lang='.$lang; ?>"><span><?php echo $LANG['IMAGES']; ?></span></a></li>
+				        <li><a href="tpimageeditor.php?tid=<?php echo $tEditor->getTid().'&lang='.$lang.'&cat=imagequicksort'; ?>"><span><?php echo $LANG['IMAGE_SORT']; ?></span></a></li>
+				        <li><a href="tpimageeditor.php?tid=<?php echo $tEditor->getTid().'&lang='.$lang.'&cat=imageadd'; ?>"><span><?php echo $LANG['ADD_IMAGE']; ?></span></a></li>
+				        <li><a href="tpdesceditor.php?tid=<?php echo $tEditor->getTid().'&lang='.$lang.'&action='.$action; ?>"><span><?php echo $LANG['DESCRIPTION']; ?></span></a></li>
 				    </ul>
 					<div id="commontab">
 						<?php
@@ -219,25 +221,25 @@ if($editable && $action){
 							<div id="addvern" class="addvern" style="display:<?php echo ($vernList?'none':'block'); ?>;">
 								<form name="addvernform" action="tpeditor.php" method="post" >
 									<fieldset style="width:250px;margin:5px 0px 0px 20px;">
-										<legend><b>New Common Name</b></legend>
+										<legend><b><?php echo $LANG['NEW_COOMON']; ?></b></legend>
 										<div>
-											Common Name: 
+											<?php echo $LANG['COMMON_NAME']; ?> 
 											<input name="vern" style="margin-top:5px;border:inset;" type="text" />
 										</div>
 					    				<div>
-					    					Language: 
+					    					<?php echo $LANG['LANGUAGE']; ?>
 					    					<input name="language" style="margin-top:5px;border:inset;" type="text" />
 					    				</div>
 										<div>
-											Notes: 
+											<?php echo $LANG['NOTES']; ?> 
 											<input name="notes" style="margin-top:5px;border:inset;" type="text" />
 										</div>
 										<div>
-											Source: 
+											<?php echo $LANG['SOURCE']; ?> 
 											<input name="source" style="margin-top:5px;border:inset;" type="text" />
 										</div>
 										<div>
-											Sort Sequence: 
+											<?php echo $LANG['SORT_SQUENCE']; ?>  
 											<input name="sortsequence" style="margin-top:5px;border:inset;width:40px" type="text" />
 										</div>
 										<div>
@@ -267,22 +269,22 @@ if($editable && $action){
 													<input id='vernacularname' name='vernacularname' style='margin:2px 0px 5px 15px;border:inset;' type='text' value='<?php echo $vernArr["vernacularname"]; ?>' />
 												</div>
 												<div>
-													Language: <?php echo $vernArr["language"]; ?>
+													<?php echo $LANG['LANGUAGE']; ?> <?php echo $vernArr["language"]; ?>
 												</div>
 												<div class='vid-<?php echo $vernArr["vid"]; ?>' style='display:none;'>
 													<input id='language' name='language' style='margin:2px 0px 5px 15px;border:inset;' type='text' value='<?php echo $vernArr["language"]; ?>' />
 												</div>
 												<div>
-													Notes: <?php echo $vernArr["notes"]; ?>
+													<?php echo $LANG['NOT']; ?> <?php echo $vernArr["notes"]; ?>
 												</div>
 												<div class='vid-<?php echo $vernArr["vid"]; ?>' style='display:none;'>
 													<input id='notes' name='notes' style='margin:2px 0px 5px 15px;border:inset;' type='text' value='<?php echo $vernArr["notes"];?>' />
 												</div>
-												<div style=''>Source: <?php echo $vernArr["source"]; ?></div>
+												<div style=''><?php echo $LANG['SOURCE_2']; ?> <?php echo $vernArr["source"]; ?></div>
 												<div class='vid-<?php echo $vernArr["vid"]; ?>' style='display:none;'>
 													<input id='source' name='source' style='margin:2px 0px 5px 15px;border:inset;' type='text' value='<?php echo $vernArr["source"]; ?>' />
 												</div>
-												<div style=''>Sort Sequence: <?php echo $vernArr["sortsequence"];?></div>
+												<div style=''><?php echo $LANG['SORT_2']; ?> <?php echo $vernArr["sortsequence"];?></div>
 												<div class='vid-<?php echo $vernArr["vid"]; ?>' style='display:none;'>
 													<input id='sortsequence' name='sortsequence' style='margin:2px 0px 5px 15px;border:inset;width:40px;' type='text' value='<?php echo $vernArr["sortsequence"]; ?>' />
 												</div>
@@ -298,7 +300,7 @@ if($editable && $action){
 													<input type='hidden' name='tid' value='<?php echo $tEditor->getTid(); ?>' />
 													<input name='action' type='hidden' value='Delete Common Name' /> 
 													<input name='submitaction' type='image' value='Delete Common Name' style='height:12px;' src='../../images/del.png' /> 
-													Delete Common Name
+													<?php echo $LANG['DELETE_COMMON_NAME']; ?>
 												</form>
 											</div>
 											<?php 
@@ -312,7 +314,7 @@ if($editable && $action){
 						</div>
 						<div style="margin:30px 0px"><hr/></div>
 						<fieldset style='padding:10px;margin:30px 0px;width:400px;'>
-					    	<legend><b>Synonyms</b></legend>
+					    	<legend><b><?php echo $LANG['SYN']; ?></b></legend>
 							<?php 	
 							//Display Synonyms
 							if($synonymArr = $tEditor->getSynonym()){
@@ -333,7 +335,7 @@ if($editable && $action){
 									<form name="synsortform" action="tpeditor.php" method="post">
 										<input type="hidden" name="tid" value="<?php echo $tEditor->getTid(); ?>" />
 										<fieldset style='margin:5px 0px 5px 5px;margin-left:20px;width:350px;'>
-									    	<legend><b>Synonym Sort Order</b></legend>
+									    	<legend><b><?php echo $LANG['SORT_ORDER']; ?></b></legend>
 									    	<?php 
 									    	foreach($synonymArr as $tidKey => $valueArr){
 									    		?>
@@ -342,7 +344,7 @@ if($editable && $action){
 													<?php echo $valueArr["sciname"]; ?>
 												</div>
 												<div style="margin:0px 0px 5px 10px;">
-													new sort value: 
+													<?php echo $LANG['NEW_VALUE']; ?> 
 													<input type="text" name="syn-<?php echo $tidKey; ?>" style="width:35px;border:inset;" />
 												</div>
 												<?php 
@@ -361,7 +363,7 @@ if($editable && $action){
 							}
 							?>
 							<div style="margin:10px;">
-								*Most of the synonym management must be done in the Taxonomic Thesaurus editing module (see <a href="../../sitemap.php">sitemap</a>). 
+								<?php echo $LANG['MOST']; ?>  <a href="../../sitemap.php"><?php echo $LANG['SITEMAP']; ?></a>). 
 							</div>
 						</fieldset>
 					</div>
@@ -371,7 +373,7 @@ if($editable && $action){
 			else{
 				?>
 				<div style="margin:30px;">
-					<h2>You must be logged in and authorized to taxon data.</h2>
+					<h5><?php echo $LANG['YOU_MUST']; ?></h5>
 					<h3>
 						<?php 
 							echo "Click <a href='".$clientRoot."/profile/index.php?tid=".$tEditor->getTid()."&refurl=".$clientRoot."/taxa/admin/tpeditor.php'>here</a> to login";

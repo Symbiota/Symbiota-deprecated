@@ -2,6 +2,8 @@
 include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceEditReview.php');
 include_once($SERVER_ROOT.'/classes/SOLRManager.php');
+include_once($SERVER_ROOT.'/content/lang/collections/editor/editreviewer.'.$LANG_TAG.'.php');
+
 
 if(!$SYMB_UID) header('Location: ../../profile/index.php?refurl=../collections/editor/editreviewer.php?'.$_SERVER['QUERY_STRING']);
 header("Content-Type: text/html; charset=".$CHARSET);
@@ -108,6 +110,7 @@ $navStr .= '</div>';
 <html>
 	<head>
 		<title>Specimen Edit Reviewer</title>
+		<link href="<?php echo $CLIENT_ROOT; ?>/css/bootstrap.min.css" type="text/css" rel="stylesheet"/>
 		<link href="<?php echo $CLIENT_ROOT; ?>/css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 		<link href="<?php echo $CLIENT_ROOT; ?>/css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 		<link href="<?php echo $CLIENT_ROOT; ?>/css/jquery-ui.css" type="text/css" rel="stylesheet" />
@@ -215,29 +218,29 @@ $navStr .= '</div>';
 				<div id="filterDiv" style="float:right;">
 					<form name="filter" action="editreviewer.php" method="post" onsubmit="return validateFilterForm(this)">
 						<fieldset style="width:375px;text-align:left;">
-							<legend><b>Filter</b></legend>
+							<legend><b><?php echo $LANG['FILTER'];?></b></legend>
 							<div style="margin:3px;">
-								Applied Status: 
+								<?php echo $LANG['APPLIED'];?> 
 								<select name="fastatus">
-									<option value="">All Records</option>
-									<option value="0" <?php echo ($faStatus=='0'?'SELECTED':''); ?>>Not Applied</option>
-									<option value="1" <?php echo ($faStatus=='1'?'SELECTED':''); ?>>Applied</option>
+									<option value=""><?php echo $LANG['ALL_RECORD'];?></option>
+									<option value="0" <?php echo ($faStatus=='0'?'SELECTED':''); ?>><?php echo $LANG['NOT_APLI'];?></option>
+									<option value="1" <?php echo ($faStatus=='1'?'SELECTED':''); ?>><?php echo $LANG['APLIED'];?></option>
 								</select>
 							</div>
 							<div style="margin:3px;">
-								Review Status: 
+								<?php echo $LANG['REVIEW_STATUS'];?> 
 								<select name="frstatus">
-									<option value="0">All Records</option>
-									<option value="1,2" <?php echo ($frStatus=='1,2'?'SELECTED':''); ?>>Open/Pending</option>
-									<option value="1" <?php echo ($frStatus=='1'?'SELECTED':''); ?>>Open Only</option>
-									<option value="2" <?php echo ($frStatus=='2'?'SELECTED':''); ?>>Pending Only</option>
-									<option value="3" <?php echo ($frStatus=='3'?'SELECTED':''); ?>>Closed</option>
+									<option value="0"><?php echo $LANG['ALL'];?></option>
+									<option value="1,2" <?php echo ($frStatus=='1,2'?'SELECTED':''); ?>><?php echo $LANG['OPEN_PENDING'];?></option>
+									<option value="1" <?php echo ($frStatus=='1'?'SELECTED':''); ?>><?php echo $LANG['OPEN_ONLY'];?></option>
+									<option value="2" <?php echo ($frStatus=='2'?'SELECTED':''); ?>><?php echo $LANG['PENDING_ONLY'];?></option>
+									<option value="3" <?php echo ($frStatus=='3'?'SELECTED':''); ?>><?php echo $LANG['CLOSED'];?></option>
 								</select>
 							</div>
 							<div style="margin:3px;">
-								Editor: 
+								<?php echo $LANG['EDITOR'];?> 
 								<select name="editor">
-									<option value="">All Editors</option>
+									<option value=""><?php echo $LANG['ALL_EDITOR'];?> </option>
 									<option value="">----------------------</option>
 									<?php 
 									$editorArr = $reviewManager->getEditorList();
@@ -248,22 +251,22 @@ $navStr .= '</div>';
 								</select>
 							</div>
 							<div style="margin:3px;">
-								Date:
-								<input name="startdate" type="date" value="<?php echo $startDate; ?>" /> to 
+								<?php echo $LANG['DATE'];?>
+								<input name="startdate" type="date" value="<?php echo $startDate; ?>" /> <?php echo $LANG['TO'];?> 
 								<input name="enddate" type="date" value="<?php echo $endDate; ?>" /> 
 							</div>
 							<div style="margin:10px;float:right;">
-								<button name="submitbutton" type="submit" value="submitfilter">Submit Filter</button>
+								<button name="submitbutton" type="submit" value="submitfilter"><?php echo $LANG['SUBMIT'];?> </button>
 								<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
 							</div>
 							<?php 
 							if($reviewManager->hasRevisionRecords() && !$reviewManager->getObsUid()){
 								?>
 								<div style="margin:3px;">
-									Editing Source: 
+									<?php echo $LANG['EDITING'];?>
 									<select name="display">
-										<option value="1">Internal</option>
-										<option value="2" <?php if($displayMode == 2) echo 'SELECTED'; ?>>External</option>
+										<option value="1"><?php echo $LANG['INTERNAL'];?></option>
+										<option value="2" <?php if($displayMode == 2) echo 'SELECTED'; ?>><?php echo $LANG['EXTERNAL'];?></option>
 									</select>
 								</div>
 								<?php 
@@ -275,19 +278,19 @@ $navStr .= '</div>';
 				<form name="editform" action="editreviewer.php" method="post" >
 					<div id="actionDiv" style="margin:10px;float:left;">
 						<fieldset>
-							<legend><b>Action Panel</b></legend>
+							<legend><b><?php echo $LANG['ACTION_PANEL'];?></b></legend>
 							<div style="margin:10px 10px;">
 								<div style="float:left;margin-bottom:10px;">
-									<input name="applytask" type="radio" value="apply" CHECKED title="Apply Edits, if not already done" />Apply Edits<br/>
-									<input name="applytask" type="radio" value="revert" title="Revert Edits" />Revert Edits
+									<input name="applytask" type="radio" value="apply" CHECKED title="Apply Edits, if not already done" /><?php echo $LANG['APPLY_EDIT'];?><br/>
+									<input name="applytask" type="radio" value="revert" title="Revert Edits" /><?php echo $LANG['REVERT_EDIT'];?>
 								</div>
 								<div style="float:left;margin-left:30px;">
-									<b>Review Status:</b>
+									<b><?php echo $LANG['REVIEW'];?></b>
 									<select name="rstatus">
-										<option value="0">LEAVE AS IS</option>
-										<option value="1">OPEN</option>
-										<option value="2">PENDING</option>
-										<option value="3">CLOSED</option>
+										<option value="0"><?php echo $LANG['LEAVE'];?></option>
+										<option value="1"><?php echo $LANG['OPEN'];?></option>
+										<option value="2"><?php echo $LANG['PEN'];?></option>
+										<option value="3"><?php echo $LANG['CLO'];?></option>
 									</select>
 								</div>
 								<div style="clear:both;margin:15px 5px;">
@@ -304,19 +307,19 @@ $navStr .= '</div>';
 							</div>
 							<div style="clear:both;margin:15px 0px;">
 								<hr/>
-								<a href="#" onclick="toggle('additional')"><b>Additional Actions</b></a>
+								<a href="#" onclick="toggle('additional')"><b><?php echo $LANG['ADD_ACTION'];?></b></a>
 							</div>
 							<div id="additional" style="display:none">
 								<div style="margin:10px 15px;">
 									<input name="delsubmit" type="submit" value="Delete Selected Edits" onclick="return validateDelete(this.form)" />
-									<div style="margin:5px 0px 10px 10px;">* Permanently clear selected edit from versioning history. Warning: this action can not be undone!</div>
+									<div style="margin:5px 0px 10px 10px;"><?php echo $LANG['PERMANENTLY'];?></div>
 								</div>
 								<div style="margin:5px 0px 10px 15px;">
 									<input name="dlsubmit" type="submit" value="Download Selected Records" onclick="return validateEditForm(this.form);" />
 								</div>
 								<div style="margin:5px 0px 10px 15px;">
 									<input name="dlallsubmit" type="submit" value="Download All Records" />
-									<div style="margin:5px 0px 10px 10px;">* Based on search parameters in Filter Pane to the right</div>
+									<div style="margin:5px 0px 10px 10px;"><?php echo $LANG['BASED'];?></div>
 								</div>
 								<div style="margin:10px 15px;">
 									<input name="printsubmit" type="button" value="Print Friendly Page" onclick="printFriendlyMode(true)" />
@@ -458,7 +461,7 @@ $navStr .= '</div>';
 							?>
 							<tr>
 								<td colspan="10">
-									<div style="font-weight:bold;font-size:150%;margin:20px;">There are no Edits matching search criteria.</div>
+									<div style="font-weight:bold;font-size:150%;margin:20px;"><?php echo $LANG['THERE'];?></div>
 								</td>
 							</tr>
 							<?php 

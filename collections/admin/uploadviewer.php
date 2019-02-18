@@ -12,24 +12,62 @@ $uploadManager = new SpecUpload();
 $uploadManager->setCollId($collid);
 $collMap = $uploadManager->getCollInfo();
 
-$headerMapBase = array('catalognumber' => 'Catalog Number','occurrenceid' => 'Occurrence ID',
-	'othercatalognumbers' => 'Other Catalog #','family' => 'Family','identificationqualifier' => 'ID Qualifier',
-	'sciname' => 'Scientific name','scientificnameauthorship'=>'Author','recordedby' => 'Collector','recordnumber' => 'Number',
-	'associatedcollectors' => 'Associated Collectors','eventdate' => 'Event Date','verbatimeventdate' => 'Verbatim Date',
-	'identificationremarks' => 'Identification Remarks','taxonremarks' => 'Taxon Remarks','identifiedby' => 'Identified By',
-	'dateidentified' => 'Date Identified', 'identificationreferences' => 'Identification References',
-	'country' => 'Country','stateprovince' => 'State/Province','county' => 'county','municipality' => 'municipality',
-	'locality' => 'locality','decimallatitude' => 'Latitude', 'decimallongitude' => 'Longitude','geodeticdatum' => 'Datum',
-	'coordinateuncertaintyinmeters' => 'Uncertainty In Meters','verbatimcoordinates' => 'Verbatim Coordinates',
-	'georeferencedby' => 'Georeferenced By','georeferenceprotocol' => 'Georeference Protocol','georeferencesources' => 'Georeference Sources',
-	'georeferenceverificationstatus' => 'Georef Verification Status','georeferenceremarks' => 'Georef Remarks',
-	'minimumelevationinmeters' => 'Min. Elev. (m)','maximumelevationinmeters' => 'Max. Elev. (m)','verbatimelevation' => 'Verbatim Elev.',
-	'habitat' => 'Habitat','substrate' => 'Substrate','occurrenceremarks' => 'Notes','associatedtaxa' => 'Associated Taxa',
-	'verbatimattributes' => 'Description','lifestage' => 'Life Stage', 'sex' => 'Sex', 'individualcount' => 'Individual Count', 
-	'samplingprotocol' => 'Sampling Protocol', 'preparations' => 'Preparations', 'reproductivecondition' => 'Reproductive Condition',
-	'typestatus' => 'Type Status','cultivationstatus' => 'Cultivation Status','establishmentmeans' => 'Establishment Means',
-	'disposition' => 'disposition','duplicatequantity' => 'Duplicate Qty','datelastmodified' => 'Date Last Modified',
-	'processingstatus' => 'Processing Status','recordenteredby' => 'Entered By','basisofrecord' => 'Basis Of Record','occid' => 'targetRecord (occid)');
+$headerMapBase = array('catalognumber' => $LANG['CATALOG_NUMBER'],
+						'occurrenceid' => $LANG['OCCURRENCE_ID'],
+						'othercatalognumbers' => $LANG['OTHER_CATALOG'],
+						'family' => $LANG['FAMILY'],
+						'identificationqualifier' => $LANG['ID_QUALIFIER'],
+						'sciname' => $LANG['SCIENTIFIC_NAME'],
+						'scientificnameauthorship'=>$LANG['AUTHOR'],
+						'recordedby' => $LANG['COLLECTOR'],
+						'recordnumber' => $LANG['NUMBER'],
+						'associatedcollectors' => $LANG['ASSICIATED_COLLECTORS'],
+						'eventdate' => $LANG['EVENT_DATE'],
+						'verbatimeventdate' => $LANG['VERBATIM_DATE'],
+						'identificationremarks' => $LANG['IDENTIFICATION_REMARKS'],
+						'taxonremarks' => $LANG['TAXON_REMARKS'],
+						'identifiedby' => $LANG['IDENTIFIED_BY'],
+						'dateidentified' => $LANG['DATE_IDENTIFIED'], 
+						'identificationreferences' => $LANG['IDENTIFICATION_REFERENCES'],
+						'country' => $LANG['COUNTRY'],
+						'stateprovince' => $LANG['STATE_PROVINCE'],
+						'county' => $LANG['COUNTY'],
+						'municipality' => $LANG['MUNICIPALITY'],
+						'locality' => $LANG['LOCALITY'],
+						'decimallatitude' => $LANG['LATITUDE'], 
+						'decimallongitude' => $LANG['LONGITUDE'],
+						'geodeticdatum' => $LANG['DATUM'],
+						'coordinateuncertaintyinmeters' => $LANG['UNCERTAINTY_IN_METERS'],
+						'verbatimcoordinates' => $LANG['VERBATIM_COORDINATES'],
+						'georeferencedby' => $LANG['GEOREFERENCED_BY'],
+						'georeferenceprotocol' => $LANG['GEOREFERENCE_PROTOCOL'],
+						'georeferencesources' => $LANG['GEOREFERENCE_SOURCES'],
+						'georeferenceverificationstatus' => $LANG['GEOREF_VERIFICATION_STATUS'],
+						'georeferenceremarks' => $LANG['GEOREF_REMARKS'],
+						'minimumelevationinmeters' => $LANG['MIN_ELEV_M'],
+						'maximumelevationinmeters' => $LANG['MAX_ELEV_M'],
+						'verbatimelevation' => $LANG['VERBATIM_ELEV'],
+						'habitat' => $LANG['HABITAT'],
+						'substrate' => $LANG['SUBSTRATE'],
+						'occurrenceremarks' => $LANG['NOTES'],
+						'associatedtaxa' => $LANG['ASSOCIATED_TAXA'],
+						'verbatimattributes' => $LANG['DESCRIPTION'],
+						'lifestage' => $LANG['LIFE_STAGE'], 
+						'sex' => $LANG['SEX'], 
+						'individualcount' => $LANG['INDIVIDUAL_COUNT'], 
+						'samplingprotocol' => $LANG['SAMPLING_PROTOCOL'], 
+						'preparations' => $LANG['PREPARATIONS'], 
+						'reproductivecondition' => $LANG['REPRODUCTIVE_CONDITION'],
+						'typestatus' => $LANG['TYPE_STATUS'],
+						'cultivationstatus' => $LANG['CULTIVATION_STATUS'],
+						'establishmentmeans' => $LANG['ESTABLISHMENT_MEANS'],
+						'disposition' => $LANG['DISPOSITION'],
+						'duplicatequantity' => $LANG['DUPLICATE_QTY'],
+						'datelastmodified' => $LANG['DATELAST_MODIFIED'],
+						'processingstatus' => $LANG['PROCESSING_STATUS'],
+						'recordenteredby' => $LANG['ENTERED_BY'],
+						'basisofrecord' => $LANG['BASIS_OF_RECORD'],
+						'occid' => $LANG['TARGETRECORD_OCCID']);
 if($collMap['managementtype'] == 'Snapshot'){
 	$headerMapBase['dbpk'] = 'Source Identifier';
 }
@@ -68,7 +106,7 @@ if($SYMB_UID){
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>">
-	<title>Record Upload Preview</title>
+	<title><?php echo $LANG['RECORD_UPLOAD_PREVIEW']; ?></title>
     <style type="text/css">
 		table.styledtable td {
 		    white-space: nowrap;
@@ -138,13 +176,13 @@ if($SYMB_UID){
 			else{
 				?>
 				<div style="font-weight:bold;font-size:120%;margin:25px;">
-					No records have been uploaded
+					<?php echo $LANG['NO_RECORDS_HAVE_BEEN_UPLOADED']; ?>
 				</div>
 				<?php 
 			}
 		}
 		else{
-			echo '<h2>You are not authorized to access this page</h2>';
+			echo '<h2>'.$LANG['YOU_ARE_NOT_AUTHORIZED'].'</h2>';
 		}
 		?>
 	</div>

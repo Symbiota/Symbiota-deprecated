@@ -38,5 +38,8 @@ $LANG['THE_OCR'] = 'El módulo OCR ofrece a los administradores de colecciones l
 motor o procesar y cargar archivos de texto que contengan OCR obtenidos de otro software de OCR.';
 $LANG['COLLECTION_PRO'] = 'Proyecto de recolección no ha sido identificado.';
 
+$LANG['RECORDS_ADDED_TO_QUEUE'] = 'registros agregados a la cola';
+$LANG['SPECIMEN_PROCESSOR_CONTROL_PANEL'] = 'Panel de control del procesador de muestras';
+$LANG['HOME'] = 'Inicio';
 
 ?>

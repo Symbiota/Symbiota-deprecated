@@ -4,6 +4,7 @@ include_once($SERVER_ROOT.'/classes/SpecProcessorManager.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceCrowdSource.php');
 include_once($SERVER_ROOT.'/classes/SpecProcessorOcr.php');
 include_once($SERVER_ROOT.'/classes/ImageProcessor.php');
+include_once($SERVER_ROOT.'/content/lang/collections/specprocessor/index.'.$LANG_TAG.'.php');
 
 header("Content-Type: text/html; charset=".$CHARSET);
 
@@ -61,7 +62,7 @@ if($isEditor){
 		$csManager->setCollid($collid);
 		$statusStr = $csManager->addToQueue($_POST['omcsid'],$_POST['family'],$_POST['taxon'],$_POST['country'],$_POST['stateprovince'],$_POST['limit']);
 		if(is_numeric($statusStr)){
-			$statusStr .= ' records added to queue';
+			$statusStr .= ' '.$LANG['RECORDS_ADDED_TO_QUEUE'];
 		}
 		$action = '';
 	}
@@ -80,7 +81,8 @@ if($isEditor){
 ?>
 <html>
 	<head>
-		<title>Specimen Processor Control Panel</title>
+		<title><?php echo $LANG['SPECIMEN_PROCESSOR_CONTROL_PANEL']; ?></title>
+		<link href="<?php echo $CLIENT_ROOT; ?>/css/bootstrap.min.css" type="text/css" rel="stylesheet"/>
 		<link href="<?php echo $CLIENT_ROOT; ?>/css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 		<link href="<?php echo $CLIENT_ROOT; ?>/css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 		<link href="../../js/jquery-ui-1.12.1/jquery-ui.css" type="text/css" rel="Stylesheet" />	
@@ -109,17 +111,17 @@ if($isEditor){
 		if(isset($collections_specprocessor_indexCrumbs)){
 			if($collections_specprocessor_indexCrumbs){
 				echo "<div class='navpath'>";
-				echo "<a href='../../index.php'>Home</a> &gt;&gt; ";
+				echo "<a href='../../index.php'>".$LANG['HOME']."</a> &gt;&gt; ";
 				echo $collections_specprocessor_indexCrumbs;
-				echo " <b>Specimen Processor Control Panel</b>";
+				echo " <b>".$LANG['SPECIMEN_PROCESSOR_CONTROL_PANEL']."</b>";
 				echo "</div>";
 			}
 		}
 		else{
 			echo '<div class="navpath">';
-			echo '<a href="../../index.php">Home</a> &gt;&gt; ';
+			echo '<a href="../../index.php">'.$LANG['HOME'].'</a> &gt;&gt; ';
 			echo '<a href="../misc/collprofiles.php?collid='.$collid.'&emode=1">Collection Control Panel</a> &gt;&gt; ';
-			echo '<b>Specimen Processor Control Panel</b>';
+			echo '<b>'.$LANG['SPECIMEN_PROCESSOR_CONTROL_PANEL'].'</b>';
 			echo '</div>';
 		}
 		?>
@@ -142,15 +144,15 @@ if($isEditor){
 				?>
 				<div id="tabs" class="taxondisplaydiv">
 				    <ul>
-				        <li><a href="#introdiv">Introduction</a></li>
-				        <li><a href="imageprocessor.php?collid=<?php echo $collid.'&spprid='.$spprId.'&submitaction='.$action.'&filename='.$fileName; ?>">Image Loading</a></li>
-				        <li><a href="crowdsource/controlpanel.php?collid=<?php echo $collid; ?>">Crowdsourcing</a></li>
+				        <li><a href="#introdiv"><?php echo $LANG['INTRO'];?></a></li>
+				        <li><a href="imageprocessor.php?collid=<?php echo $collid.'&spprid='.$spprId.'&submitaction='.$action.'&filename='.$fileName; ?>"><?php echo $LANG['IMAGE'];?></a></li>
+				        <li><a href="crowdsource/controlpanel.php?collid=<?php echo $collid; ?>"><?php echo $LANG['CROW'];?></a></li>
 				        <li><a href="ocrprocessor.php?collid=<?php echo $collid.'&procstatus='.$procStatus.'&spprid='.$spprId; ?>">OCR</a></li>
 				        <!-- 
 				        <li><a href="nlpprocessor.php?collid=<?php echo $collid.'&spnlpid='.$spNlpId; ?>">NLP</a></li>
 				         -->
-				        <li><a href="reports.php?<?php echo $_SERVER['QUERY_STRING']; ?>">Reports</a></li>
-				        <li><a href="exporter.php?collid=<?php echo $collid.'&displaymode='.$displayMode; ?>">Exporter</a></li>
+				        <li><a href="reports.php?<?php echo $_SERVER['QUERY_STRING']; ?>"><?php echo $LANG['REPORTS'];?></a></li>
+				        <li><a href="exporter.php?collid=<?php echo $collid.'&displaymode='.$displayMode; ?>"><?php echo $LANG['EXPORTER'];?></a></li>
 				        <?php 
 				        if($ACTIVATE_GEOLOCATE_TOOLKIT){
 					        ?>
@@ -160,42 +162,26 @@ if($isEditor){
 				        ?>
 				    </ul>
 					<div id="introdiv">
-						<h1>Specimen Processor Control Panel</h1>
+						<h5><?php echo $LANG['SPECIMEN'];?></h5>
 						<div style="margin:10px">
-							This management module is designed to aid in establishing advanced processing workflows 
-							for unprocessed specimens using images of the specimen label. The central functions addressed in this page are:
-							Batch loading images, Optical Character Resolution (OCR), Natural Language Processing (NLP), 
-							and crowdsourcing data entry. 
-							Use tabs above for access tools.     
+							<?php echo $LANG['THIS'];?>     
 						</div>
 						<div style="margin:10px;height:400px;">
-							<h2>Image Loading</h2>
+							<h5><?php echo $LANG['IMAGE_1'];?></h5>
 							<div style="margin:15px">
-								The batch image loading module is designed to batch process specimen images that are deposited in a 
-								drop folder. This module will produce web-ready images for a group of specimen images and 
-								map the new image derivative to specimen records. Images can be linked to already existing 
-								specimen records, or linked to a newly created skeletal specimen record for further digitization within the portal.
-								Field data from skeletal data files (.csv, .tab, .dat) placed in the image folders will  
-								augment new records by adding content to empty fields only. 
-								The column names of skeletal files must match Symbiota field names (e.g. Darwin Core) with catalogNumber as a 
-								required field. For more information, see the
-								<b><a href="http://symbiota.org/docs/batch-loading-specimen-images-2/">Batch Image Loading</a></b> section 
-								on the <b><a href="http://symbiota.org">Symbiota</a> website</b>.   
+								<?php echo $LANG['THE_BATCH'];?>
+								<b><a href="http://symbiota.org/docs/batch-loading-specimen-images-2/"><?php echo $LANG['BTACH_IMAGE'];?></a></b> <?php echo $LANG['SECTION'];?> <b><a href="http://symbiota.org">Symbiota</a> <?php echo $LANG['WEB'];?></b>.   
 							</div>
 
-							<h2>Crowdsourcing Module</h2>
+							<h5><?php echo $LANG['CRO_MOD'];?></h5>
 							<div style="margin:15px">
-								The crowdsourcing module can be used to make unprocessed records accessible for data entry by 
-								general users who typically do not have explicit editing writes for a particular collection. 
-								For more information, see the
-								<b><a href="http://symbiota.org/docs/crowdsourcing-within-symbiota-2/">Crowdsource</a></b> section 
-								on the <b><a href="http://symbiota.org">Symbiota</a> website</b>.   
+								<?php echo $LANG['THE_CROW'];?>
+								<b><a href="http://symbiota.org/docs/crowdsourcing-within-symbiota-2/"><?php echo $LANG['CROWSOURCE'];?></a></b> <?php echo $LANG['SEC'];?> <b><a href="http://symbiota.org">Symbiota</a> <?php echo $LANG['WEBSITE'];?></b>.   
 							</div>
 
-							<h2>Optical Character Resolution (OCR)</h2>
+							<h5><?php echo $LANG['OPTICAL'];?></h5>
 							<div style="margin:15px">
-								The OCR module gives collection managers the ability to batch OCR specimen images using the Tesseract OCR 
-								engine or process and upload text files containing OCR obtained from other OCR software.   
+								<?php echo $LANG['THE_OCR'];?>   
 							</div>
 
 							<!--  
@@ -211,7 +197,7 @@ if($isEditor){
 			else{
 				?>
 				<div style='font-weight:bold;'>
-					Collection project has not been identified
+					<?php echo $LANG['COLLECTION_PRO'];?> 
 				</div>
 				<?php
 			}

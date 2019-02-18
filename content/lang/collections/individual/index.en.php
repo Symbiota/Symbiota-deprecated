@@ -5,7 +5,7 @@ Language: Español (Spanish)
 ------------------
 */
 
-include_once('sharedterms.es.php');
+//include_once('sharedterms.es.php');
 
 $LANG['DETAILS'] = 'Details';
 $LANG['CA'] = 'Catalog #:';
@@ -102,4 +102,39 @@ $LANG['FIELD_NOTES'] = 'Field Notes';
 $LANG['CULTIVATION_STATUS'] = 'Cultivation Status';
 $LANG['CULTI'] = 'Cultivated';
 $LANG['ESTA_MEANS'] = 'Establishment Means';
+
+$LANG['COMMENT_REPORTED_AS_INAPPROPRIATE'] = 'Comment reported as inappropriate. Comment will remain unavailable to public until reviewed by an administrator.';
+$LANG['DETAILED_COLLECTION_RECORD_INFORMATIO'] = 'Detailed Collection Record Informatio';
+$LANG['PLEASE_SELECT_A_CHECKLIST'] = 'Please select a checklist';
+$LANG['PLEASE_ENTER_A_COMMENT'] = 'Please enter a comment';
+$LANG['ANNOTATIONS'] = 'Annotations';
+$LANG['LINK_TO_SOURCE'] = 'Link to Source';
+$LANG['OCCURRENCE'] = 'occurrence';
+$LANG['SPECIMEN_BEING_REFERENCED'] = 'Specimen being referenced';
+$LANG['CATALOG_NUMBER'] = 'Catalog Number';
+$LANG['LATEST_IDENTIFICATION'] = 'Latest Identification';
+$LANG['IDENTIFIED_BY'] = 'Identified by';
+$LANG['SHOW_FULL_DETAILS'] = 'Show Full Details';
+$LANG['COMMENT_NOT_PUBLIC_DUE_TO_PENDIENG_ABUSE_REPORT'] = 'Comment not public due to pending abuse report (viewable to administrators only)';
+$LANG['POSTED'] = 'posted';
+$LANG['SUBMIT_COMMENT'] = 'Submit Comment';
+$LANG['MANAGE_EDIT'] = 'Manage Edit';
+$LANG['ENTERED_BY'] = 'Entered By';
+$LANG['DATE_ENTERED'] = 'Date entered';
+$LANG['DATE_MODIFIED'] = 'Date modified';
+$LANG['FIELD'] = 'Field';
+$LANG['OLD_VALUE'] = 'Old Value';
+$LANG['NEW_VALUE'] = 'New Value';
+$LANG['RECORD_HAS_NOT_BEEN_EDITED'] = 'Record has not been edited since being entered';
+$LANG['NOTE_EDITS_ARE_ONLY_VIEWABLE'] = 'Note: Edits are only viewable by collection administrators and editors';
+$LANG['ACCESS_STATS'] = 'Access Stats';
+$LANG['YEAR'] = 'Year';
+$LANG['ACCESS_TYPE'] = 'Access Type';
+$LANG['COUNT'] = 'Count';
+$LANG['RECORD_DELETED'] = 'Record deleted';
+$LANG['NOTES'] = 'Notes';
+$LANG['VALUE'] = 'Value';
+$LANG['IMAGE'] = 'Image';
+$LANG['UNABLE_TO_LOCATE_RECORD_WITHIN_ARCHIVE'] = 'Unable to locate record within archive';
+
 ?>

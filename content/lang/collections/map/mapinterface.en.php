@@ -43,6 +43,4 @@ $LANG['MORE_INFO'] = 'more info...';
 $LANG['COLL_TO_SEARCH'] = 'Collections to be Searched';
 $LANG['SELEC_DESELECT'] = 'Select/Deselect all';
 $LANG['DATASETS'] = 'Datasets';
-
-
 ?>

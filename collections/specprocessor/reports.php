@@ -16,7 +16,7 @@ if($IS_ADMIN || (array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collid,
  	$isEditor = true;
 }
 ?>
-<div id="innertext" style="background-color:white;">
+<div id="innertext" style="background-color:white;font-family: Hind;margin: 40px;">
 	<?php
 	if($isEditor){
 		$reportTypes = array(0 => 'General Stats', 1 => 'User Stats');

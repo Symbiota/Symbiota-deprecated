@@ -1,6 +1,8 @@
 <?php
 include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/ExsiccatiManager.php');
+include_once($SERVER_ROOT.'/content/lang/collections/exsiccati/index.'.$LANG_TAG.'.php');
+
 header("Content-Type: text/html; charset=".$CHARSET);
 
 $ometId = array_key_exists('ometid',$_REQUEST)?$_REQUEST['ometid']:0;
@@ -70,8 +72,12 @@ if($formSubmit == 'dlexsiccati'){
 <html>
 <head>
 	<title><?php echo $DEFAULT_TITLE; ?> Exsiccati</title>
+	<link href="../../css/bootstrap.min.css" type="text/css" rel="stylesheet"/>
     <link href="../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
     <link href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
+		<!--inicio favicon -->
+	<link rel="shortcut icon" href="../../images/favicon.png" type="image/x-icon">
+
 	<script type="text/javascript" src="../../js/symb/shared.js?ver=130926"></script>
 	<script type="text/javascript">
 		function toggleExsEditDiv(){
@@ -269,19 +275,19 @@ if($formSubmit == 'dlexsiccati'){
 			?>
 			<div id="cloptiondiv" style="width:249px;float:right;">
 				<form name="optionform" action="index.php" method="post">
-					<fieldset style="background-color:#FFD700;">
-					    <legend><b>Options</b></legend>
+					<fieldset style="background-color:#FFFFFF;">
+					    <legend><b><?php echo $LANG['OPTIONS'];?></b></legend>
 				    	<div>
-				    		<b>Search:</b>
+				    		<b><?php echo $LANG['SEARCH'];?></b>
 							<input type="text" name="searchterm" value="<?php echo $searchTerm;?>" size="20" onchange="this.form.submit()" />
 						</div>
 						<div title="including without linked specimen records">
 							<input type="checkbox" name="specimenonly" value="1" <?php echo ($specimenOnly?"CHECKED":"");?> onchange="specimenOnlyChanged(this)" />
-							Display only those w/ specimens
+							<?php echo $LANG['VIEW_SPEC'];?>
 						</div>
 						<div id="qryextradiv" style="margin-left:15px;display:<?php echo ($specimenOnly?'block':'none'); ?>;" title="including without linked specimen records">
 							<div>
-								Limit to:
+								<?php echo $LANG['LIMIT_TO'];?>
 								<select name="collid" style="width:230px;" onchange="this.form.submit()">
 									<option value="">All Collections</option>
 									<option value="">-----------------------</option>
@@ -295,13 +301,13 @@ if($formSubmit == 'dlexsiccati'){
 							</div>
 							<div>
 							    <input name='imagesonly' type='checkbox' value='1' <?php echo ($imagesOnly?"CHECKED":""); ?> onchange="this.form.submit()" />
-							    Display only those w/ images
+							    <?php echo $LANG['VIEW_IMG'];?>
 							</div>
 						</div>
 						<div style="margin:5px 0px 0px 5px;">
-							Display and sort by:<br />
-							<input type="radio" name="sortby" value="0" <?php echo ($sortBy == 0?"CHECKED":""); ?> onchange="this.form.submit()">Title
-							<input type="radio" name="sortby" value="1" <?php echo ($sortBy == 1?"CHECKED":""); ?> onchange="this.form.submit()">Abbreviation
+							<?php echo $LANG['DISPLAY'];?><br />
+							<input type="radio" name="sortby" value="0" <?php echo ($sortBy == 0?"CHECKED":""); ?> onchange="this.form.submit()"> <?php echo $LANG['TITLE'];?>
+							<input type="radio" name="sortby" value="1" <?php echo ($sortBy == 1?"CHECKED":""); ?> onchange="this.form.submit()"> <?php echo $LANG['ABBR'];?>
 						</div>
 						<div style="float:right;" title="Download Exsiccati Records">
 							<?php
@@ -315,7 +321,7 @@ if($formSubmit == 'dlexsiccati'){
 					</fieldset>
 				</form>
 			</div>
-			<div style="font-weight:bold;font-size:120%;">Exsiccati</div>
+			<div style="font-weight:bold;font-size:120%;"><?php echo $LANG['EXSICCATI'];?></div>
 			<?php
 			if($isEditor){
 				?>
@@ -325,29 +331,29 @@ if($formSubmit == 'dlexsiccati'){
 				<div id="exsadddiv" style="display:none;">
 					<form name="exsaddform" action="index.php" method="post" onsubmit="return verfifyExsAddForm(this)">
 						<fieldset style="margin:10px;padding:15px;background-color:#B0C4DE;">
-							<legend><b>Add New Exsiccati</b></legend>
+							<legend><b><?php echo $LANG['ADD_EXSICCATI'];?></b></legend>
 							<div style="margin:2px;">
-								Title:<br/><input name="title" type="text" value="" style="width:480px;" />
+								<?php echo $LANG['TITLE'];?><br/><input name="title" type="text" value="" style="width:480px;" />
 							</div>
 							<div style="margin:2px;">
-								Abbr:<br/><input name="abbreviation" type="text" value="" style="width:480px;" />
+								<?php echo $LANG['ABBR'];?><br/><input name="abbreviation" type="text" value="" style="width:480px;" />
 							</div>
 							<div style="margin:2px;">
-								Editor:<br/><input name="editor" type="text" value="" style="width:300px;" />
+								<?php echo $LANG['EDITOR'];?><br/><input name="editor" type="text" value="" style="width:300px;" />
 							</div>
 							<div style="margin:2px;">
-								Number Range:<br/><input name="exsrange" type="text" value="" />
+								<?php echo $LANG['NUM_RANGE'];?><br/><input name="exsrange" type="text" value="" />
 							</div>
 							<div style="margin:2px;">
-								Date range:<br/>
+								<?php echo $LANG['DATE_RANGE'];?><br/>
 								<input name="startdate" type="text" value="" /> -
 								<input name="enddate" type="text" value="" />
 							</div>
 							<div style="margin:2px;">
-								Source:<br/><input name="source" type="text" value="" style="width:480px;" />
+								<?php echo $LANG['SOURCE'];?><br/><input name="source" type="text" value="" style="width:480px;" />
 							</div>
 							<div style="margin:2px;">
-								Notes:<br/><input name="notes" type="text" value="" style="width:480px;" />
+								<?php echo $LANG['NOTES'];?><br/><input name="notes" type="text" value="" style="width:480px;" />
 							</div>
 							<div style="margin:10px;">
 								<input name="formsubmit" type="submit" value="Add Exsiccati Title" />
@@ -373,7 +379,7 @@ if($formSubmit == 'dlexsiccati'){
 					}
 				}
 				else{
-					echo '<div style="margin:20px;font-size:120%;">There are no exsiccati matching your request</div>';
+					echo '<div style="margin:20px;font-size:120%;">'.$LANG['LEGEND_EX'].'</div>';
 				}
 				?>
 			</ul>
@@ -405,27 +411,27 @@ if($formSubmit == 'dlexsiccati'){
 					<fieldset style="margin:10px;padding:15px;background-color:#B0C4DE;">
 						<legend><b>Edit Title</b></legend>
 						<div style="margin:2px;">
-							Title:<br/><input name="title" type="text" value="<?php echo $exsArr['title']; ?>" style="width:500px;" />
+							<?php echo $LANG['TITLE'];?><br/><input name="title" type="text" value="<?php echo $exsArr['title']; ?>" style="width:500px;" />
 						</div>
 						<div style="margin:2px;">
-							Abbr:<br/><input name="abbreviation" type="text" value="<?php echo $exsArr['abbreviation']; ?>" style="width:500px;" />
+							<?php echo $LANG['ABBR'];?><br/><input name="abbreviation" type="text" value="<?php echo $exsArr['abbreviation']; ?>" style="width:500px;" />
 						</div>
 						<div style="margin:2px;">
-							Editor:<br/><input name="editor" type="text" value="<?php echo $exsArr['editor']; ?>" style="width:300px;" />
+							<?php echo $LANG['EDITOR'];?><br/><input name="editor" type="text" value="<?php echo $exsArr['editor']; ?>" style="width:300px;" />
 						</div>
 						<div style="margin:2px;">
-							Number range:<br/><input name="exsrange" type="text" value="<?php echo $exsArr['exsrange']; ?>" />
+							<?php echo $LANG['NUM_RANGE'];?><br/><input name="exsrange" type="text" value="<?php echo $exsArr['exsrange']; ?>" />
 						</div>
 						<div style="margin:2px;">
-							Date range:<br/>
+							<?php echo $LANG['DATE_RANGE'];?><br/>
 							<input name="startdate" type="text" value="<?php echo $exsArr['startdate']; ?>" /> -
 							<input name="enddate" type="text" value="<?php echo $exsArr['enddate']; ?>" />
 						</div>
 						<div style="margin:2px;">
-							Source:<br/><input name="source" type="text" value="<?php echo $exsArr['source']; ?>" style="width:480px;" />
+							<?php echo $LANG['SOURCE'];?><br/><input name="source" type="text" value="<?php echo $exsArr['source']; ?>" style="width:480px;" />
 						</div>
 						<div style="margin:2px;">
-							Notes:<br/><input name="notes" type="text" value="<?php echo $exsArr['notes']; ?>" style="width:500px;" />
+							<?php echo $LANG['NOTES'];?><br/><input name="notes" type="text" value="<?php echo $exsArr['notes']; ?>" style="width:500px;" />
 						</div>
 						<div style="margin:10px;">
 							<input name="ometid" type="hidden" value="<?php echo $ometId; ?>" />
@@ -435,7 +441,7 @@ if($formSubmit == 'dlexsiccati'){
 				</form>
 				<form name="exdeleteform" action="index.php" method="post" onsubmit="return confirm('Are you sure you want to delete this exsiccati?');">
 					<fieldset style="margin:10px;padding:15px;background-color:#B0C4DE;">
-						<legend><b>Delete Exsiccati</b></legend>
+						<legend><b><?php echo $LANG['DEL_EXSICCATI'];?></b></legend>
 						<div style="margin:10px;">
 							<input name="ometid" type="hidden" value="<?php echo $ometId; ?>" />
 							<input name="formsubmit" type="submit" value="Delete Exsiccati" />
@@ -444,9 +450,9 @@ if($formSubmit == 'dlexsiccati'){
 				</form>
 				<form name="exmergeform" action="index.php" method="post" onsubmit="return verifyExsMergeForm(this);">
 					<fieldset style="margin:10px;padding:15px;background-color:#B0C4DE;">
-						<legend><b>Merge Exsiccati</b></legend>
+						<legend><b><?php echo $LANG['MERGE_EXSICCATI'];?></b></legend>
 						<div style="margin:10px;">
-							Target Exsiccati<br/>
+							<?php echo $LANG['TARGET_EXSICCATI'];?><br/>
 							<select name="targetometid" style="width:650px;">
 								<option value="">Select the Target Exsiccati</option>
 								<option value="">-------------------------------</option>
@@ -472,10 +478,10 @@ if($formSubmit == 'dlexsiccati'){
 					<fieldset style="margin:10px;padding:15px;background-color:#B0C4DE;">
 						<legend><b>Add Exsiccati Number</b></legend>
 						<div style="margin:2px;">
-							Exsiccati Number: <input name="exsnumber" type="text" />
+							<?php echo $LANG['EXSICCATI_NUM'];?> <input name="exsnumber" type="text" />
 						</div>
 						<div style="margin:2px;">
-							Notes: <input name="notes" type="text" style="width:90%" />
+							<?php echo $LANG['NOTES'];?> <input name="notes" type="text" style="width:90%" />
 						</div>
 						<div style="margin:10px;">
 							<input name="ometid" type="hidden" value="<?php echo $ometId; ?>" />
@@ -544,12 +550,12 @@ if($formSubmit == 'dlexsiccati'){
 			<div id="numeditdiv" style="display:none;">
 				<form name="numeditform" action="index.php" method="post" onsubmit="return verifyNumEditForm(this)">
 					<fieldset style="margin:10px;padding:15px;background-color:#B0C4DE;">
-						<legend><b>Edit Exsiccati Number</b></legend>
+						<legend><b><?php echo $LANG['EDIT_EXSICCATI_NUM'];?></b></legend>
 						<div style="margin:2px;">
-							Number: <input name="exsnumber" type="text" value="<?php echo $mdArr['exsnumber']; ?>" style="width:500px;" />
+							<?php echo $LANG['NUM'];?> <input name="exsnumber" type="text" value="<?php echo $mdArr['exsnumber']; ?>" style="width:500px;" />
 						</div>
 						<div style="margin:2px;">
-							Notes: <input name="notes" type="text" value="<?php echo $mdArr['notes']; ?>" style="width:500px;" />
+							<?php echo $LANG['NOTES'];?> <input name="notes" type="text" value="<?php echo $mdArr['notes']; ?>" style="width:500px;" />
 						</div>
 						<div style="margin:10px;">
 							<input name="omenid" type="hidden" value="<?php echo $omenId; ?>" />
@@ -559,7 +565,7 @@ if($formSubmit == 'dlexsiccati'){
 				</form>
 				<form name="numdelform" action="index.php" method="post" onsubmit="return confirm('Are you sure you want to delete this exsiccati number?')">
 					<fieldset style="margin:10px;padding:15px;background-color:#B0C4DE;">
-						<legend><b>Delete Exsiccati Number</b></legend>
+						<legend><b><?php echo $LANG['DEL_EXSICCATI_NUM'];?></b></legend>
 						<div style="margin:10px;">
 							<input name="omenid" type="hidden" value="<?php echo $omenId; ?>" />
 							<input name="ometid" type="hidden" value="<?php echo $mdArr['ometid']; ?>" />

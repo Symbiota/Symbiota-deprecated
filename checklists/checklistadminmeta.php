@@ -253,7 +253,7 @@ if(!$clid){
 	<?php
 	if(array_key_exists("userid",$_REQUEST)){
 		$userId = $_REQUEST["userid"];
-		echo '<div style="font-weight:bold;font:bold 14pt;">Checklists assigned to your account</div>';
+		echo '<div style="font-weight:bold;font:bold 14pt;">'.$LANG['CHECK_ACOUNT'].'</div>';
 		$listArr = $clManager->getManagementLists($userId);
 		if(array_key_exists('cl',$listArr)){
 			$clArr = $listArr['cl'];
@@ -279,7 +279,7 @@ if(!$clid){
 		else{
 			?>
 			<div style="margin:10px;">
-				<div>You have no personal checklists</div>
+				<div><?php echo $LANG['NO_CHECK'];?></div>
 				<div style="margin-top:5px">
 					<a href="#" onclick="toggle('checklistDiv')">Click here to create a new checklist</a>
 				</div>
@@ -287,7 +287,7 @@ if(!$clid){
 			<?php
 		}
 
-		echo '<div style="font-weight:bold;font:bold 14pt;margin-top:25px;">Inventory Project Administration</div>'."\n";
+		echo '<div style="font-weight:bold;font:bold 14pt;margin-top:25px;">'.$LANG['ADMIN_PROJ'].'</div>'."\n";
 		if(array_key_exists('proj',$listArr)){
 			$projArr = $listArr['proj'];
 			?>
@@ -310,7 +310,7 @@ if(!$clid){
 			<?php
 		}
 		else{
-			echo '<div style="margin:10px;">There are no Projects for which you have administrative permissions</div>';
+			echo '<div style="margin:10px;">'.$LANG['NO_PROJ'].'</div>';
 		}
 	}
 	?>

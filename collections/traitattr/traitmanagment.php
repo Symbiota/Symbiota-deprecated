@@ -42,6 +42,7 @@ if($isEditor){
 <html>
 	<head>
 		<title>Occurrence Attribute Mining Tool</title>
+		<link href="../../css/bootstrap.min.css" type="text/css" rel="stylesheet"/>
 		<link href="../../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 		<link href="../../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 		<link href="../../css/jquery-ui.css" type="text/css" rel="stylesheet" />
@@ -52,7 +53,7 @@ if($isEditor){
 		</script>
 		<script src="../../js/symb/shared.js?ver=151229" type="text/javascript"></script>
 	</head>
-	<body style="width:900px">
+	<body style="width:1250px">
 		<?php
 		$displayLeftMenu = false;
 		include($SERVER_ROOT.'/header.php');

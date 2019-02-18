@@ -35,7 +35,10 @@ $LANG['DESCMAXCHAR'] = 'La descripci&oacute;n s&oacute;lo puede tener un m&aacut
 $LANG['CHARLONG'] = 'caracteres';
 $LANG['SELECTCHECKPULL'] = 'Elija un listado de comprobaci&oacute;n desde la lista desplegable';
 $LANG['CHOOSEUSER'] = 'Elija un usuario desde la lista desplegable';
-$LANG['ADDNEWPR'] = 'Ingresar un Proyecto Nuevo';
+$LANG['ADDNEWPR'] = 'Añadir Proyecto Nuevo';
+$LANG['ADD'] = 'Añadir Nuevo';
+$LANG['NEW'] = 'Nuevo';
+$LANG['PROJECT'] = 'Proyectos';
 $LANG['TOGGLEEDIT'] = 'Intercambia Funciones de Edici&oacute;n';
-$LANG['MAPREP'] = 'Mapea representaci&oacute;n de listados de comprobaci&oacute;n';
+$LANG['MAPREP'] = 'Mapear representaci&oacute;n de listados de comprobaci&oacute;n';
 ?>
