@@ -17,6 +17,7 @@ class ImageProcessor {
 	private $destructConn = true;
 
 	function __construct($con = null){
+		ini_set('auto_detect_line_endings', true);
 		if($con){
 			//Inherits connection from another class
 			$this->conn = $con;
