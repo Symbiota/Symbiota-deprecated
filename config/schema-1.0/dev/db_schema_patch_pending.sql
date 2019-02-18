@@ -94,6 +94,9 @@ ALTER TABLE `omoccurrences`
   CHANGE COLUMN `labelProject` `labelProject` varchar(250) DEFAULT NULL,
   CHANGE COLUMN `georeferenceRemarks` `georeferenceRemarks` VARCHAR(500) NULL DEFAULT NULL,
   DROP INDEX `idx_occrecordedby`;
+  
+ALTER TABLE `omoccurrences` 
+  ADD UNIQUE INDEX `UNIQUE_occurrenceID` (`occurrenceID` ASC);
 
 DELETE FROM omoccurrencesfulltext 
 WHERE locality IS NULL AND recordedby IS NULL;
