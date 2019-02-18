@@ -84,15 +84,15 @@ class PluginsManager {
 				'CONCAT_WS("; ",o.sciname, o.catalognumber, CONCAT_WS(" ",o.recordedby,IFNULL(o.recordnumber,o.eventdate))) AS identifier '.
 				'FROM images i LEFT JOIN users u ON i.photographeruid = u.uid '.
 				'LEFT JOIN omoccurrences o ON i.occid = o.occid '.
-				'LEFT JOIN taxa t ON i.tid = t.tid '.
-				'WHERE i.sortsequence < 500 ';
+				'LEFT JOIN taxa t ON i.tid = t.tid ';
 			if($clid){
 				$sql .= 'INNER JOIN fmchklsttaxalink v ON i.tid = v.TID ';
-				$sql .= 'AND v.CLID IN('.$clid.') ';
+				$sql .= 'WHERE v.CLID IN('.$clid.') ';
 			}
 			else{
-				$sql .= 'AND i.InitialTimeStamp < "'.$sinceDate.'" AND i.tid IS NOT NULL ';
+				$sql .= 'WHERE i.InitialTimeStamp < "'.$sinceDate.'" AND i.tid IS NOT NULL ';
 			}
+			$sql .= 'AND i.sortsequence < 500 ';
 			if($imageType == 'specimen'){
 				$sql .= 'AND i.occid IS NOT NULL ';
 			}
