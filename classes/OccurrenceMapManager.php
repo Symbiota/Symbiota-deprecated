@@ -284,7 +284,7 @@ class OccurrenceMapManager extends OccurrenceManager {
 			$queryShape .= 'map.fitBounds(queryShapeBounds);';
 			$queryShape .= 'map.panToBounds(queryShapeBounds);';
 		}
-		if(isset($previousCriteria["poly_array"]) && $previousCriteria["poly_array"]){
+		if(isset($previousCriteria["poly_array"]) && $previousCriteria["poly_array"] && substr($previousCriteria["poly_array"],0,7) == 'POLYGON'){
 			$wkt = substr($previousCriteria["poly_array"],9,-2);
 			if(substr($wkt,0,1) == '(') $wkt = substr($wkt,1);
 			$coordArr = explode(',',$wkt);
