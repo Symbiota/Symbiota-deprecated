@@ -427,13 +427,15 @@ class ChecklistManager {
 				$rs1 = $this->conn->query($sql1);
 				if($rs1){
 					while($r1 = $rs1->fetch_object()){
-						if($abbreviated){
-							$retArr[] = $r1->decimallatitude.','.$r1->decimallongitude;
+						if(abs($r1->decimallatitude) < 90 && abs($r1->decimallongitude) < 180){
+							if($abbreviated){
+								$retArr[] = $r1->decimallatitude.','.$r1->decimallongitude;
+							}
+							else{
+								$retArr[$r1->tid][] = array('ll'=>$r1->decimallatitude.','.$r1->decimallongitude,'sciname'=>$this->cleanOutStr($r1->sciname),'notes'=>$this->cleanOutStr($r1->notes));
+							}
+							$retCnt++;
 						}
-						else{
-							$retArr[$r1->tid][] = array('ll'=>$r1->decimallatitude.','.$r1->decimallongitude,'sciname'=>$this->cleanOutStr($r1->sciname),'notes'=>$this->cleanOutStr($r1->notes));
-						}
-						$retCnt++;
 					}
 					$rs1->free();
 				}
@@ -464,13 +466,14 @@ class ChecklistManager {
 					$rs2 = $this->conn->query($sql2);
 					if($rs2){
 						while($r2 = $rs2->fetch_object()){
-							if($abbreviated){
-								$retArr[] = $r2->decimallatitude.','.$r2->decimallongitude;
+							if(abs($r2->decimallatitude) < 90 && abs($r2->decimallongitude) < 180){
+								if($abbreviated){
+									$retArr[] = $r2->decimallatitude.','.$r2->decimallongitude;
+								}
+								else{
+									$retArr[$r2->tid][] = array('ll'=>$r2->decimallatitude.','.$r2->decimallongitude,'notes'=>$this->cleanOutStr($r2->notes),'occid'=>$r2->occid);
+								}
 							}
-							else{
-								$retArr[$r2->tid][] = array('ll'=>$r2->decimallatitude.','.$r2->decimallongitude,'notes'=>$this->cleanOutStr($r2->notes),'occid'=>$r2->occid);
-							}
-							$retCnt++;
 						}
 						$rs2->free();
 					}
