@@ -66,6 +66,7 @@ $IS_ADMIN = (array_key_exists("SuperAdmin",$USER_RIGHTS)?1:0);
 $SOLR_MODE = ((isset($SOLR_URL) && $SOLR_URL)?true:false);
 $CHECKLIST_FG_EXPORT = ((isset($ACTIVATE_CHECKLIST_FG_EXPORT) && $ACTIVATE_CHECKLIST_FG_EXPORT)?true:false);
 $FIELDGUIDE_ACTIVE = ((isset($ACTIVATE_FIELDGUIDE) && $ACTIVATE_FIELDGUIDE)?true:false);
+$ETHNO_ACTIVE = ((isset($ETHNOBIOLOGY_MOD_IS_ACTIVE) && $ETHNOBIOLOGY_MOD_IS_ACTIVE)?true:false);
 $GEOLOCATION = ((isset($ACTIVATE_GEOLOCATION) && $ACTIVATE_GEOLOCATION)?true:false);
 $BROADGEOREFERENCE = ((isset($GEOREFERENCE_POLITICAL_DIVISIONS) && $GEOREFERENCE_POLITICAL_DIVISIONS)?true:false);
 //Can get rid of following once all parameters are remapped to constants

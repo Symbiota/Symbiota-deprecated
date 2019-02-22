@@ -35,6 +35,7 @@ $NLP_SALIX_ACTIVATED = 0;
 $OCCURRENCE_MOD_IS_ACTIVE = 1;
 $FLORA_MOD_IS_ACTIVE = 1;
 $KEY_MOD_IS_ACTIVE = 1;
+$ETHNOBIOLOGY_MOD_IS_ACTIVE = 0;
 
 $REQUESTED_TRACKING_IS_ACTIVE = 0;   // Allow users to request actions such as requests for images to be made for specimens
 
