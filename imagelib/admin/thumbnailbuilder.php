@@ -76,7 +76,7 @@ $imgManager->setTid($tid);
 				<legend><b>Thumbnail Builder</b></legend>
 				<div>
 					<?php
-					if(!$action && date('j')%8 == 0) $imgManager->resetProcessing();
+					//if(!$action && date('j')%8 == 0) $imgManager->resetProcessing();
 					$reportArr = $imgManager->getReportArr();
 					if($reportArr){
 						echo '<b>Images counts without thumbnails and/or basic web image display</b> - This function will build thumbnail images for all occurrence images mapped from an external server.';

@@ -105,7 +105,10 @@ class ImageCleaner extends Manager{
 			$this->conn->autocommit(true);
 
 			$setFormat = ($row->format?false:true);
-			$this->buildImageDerivatives($imgId, $row->catalognumber, $row->url, $row->thumbnailurl, $row->originalurl, $setFormat);
+			if(!$this->buildImageDerivatives($imgId, $row->catalognumber, $row->url, $row->thumbnailurl, $row->originalurl, $setFormat)){
+				//$tagSql = 'UPDATE images SET thumbnailurl = "empty" WHERE (imgid = '.$imgId.') AND thumbnailurl LIKE "processing %"';
+				//$this->conn->query($tagSql);
+			}
 			if(!$status) $this->logOrEcho($this->errorMessage,1);
 			$cnt++;
 		}
@@ -125,7 +128,7 @@ class ImageCleaner extends Manager{
 	}
 
 	private function getSqlWhere(){
-		$sql = 'WHERE ((i.thumbnailurl IS NULL) OR (i.url = "empty")) ';
+		$sql = 'WHERE ((i.thumbnailurl IS NULL) OR (i.thumbnailurl LIKE "processing%") OR (i.url = "empty") OR (i.url LIKE "processing%")) ';
 		if($this->collid) $sql .= 'AND (o.collid = '.$this->collid.') ';
 		elseif($this->collid === '0') $sql .= 'AND (i.occid IS NULL) ';
 		if($this->tidArr) $sql .= 'AND (e.taxauthid = 1) AND (i.tid IN('.implode(',',$this->tidArr).') OR e.parenttid IN('.implode(',',$this->tidArr).')) ';
