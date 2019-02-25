@@ -151,7 +151,7 @@ $(document).ready(function () {
             </div>
             <div>
                 <div class="fb-like" data-href="https://www.facebook.com/OregonFlora" data-layout="standard" data-action="like" data-size="large" data-show-faces="false" data-share="true"></div>
-                <img src="images/layout/facebook.png" alt="Facebook">
+                <a href="https://www.facebook.com/OregonFlora/" target="_blank"><img src="images/layout/facebook.png" alt="Facebook"></a>
             </div>
         </div>
     </div>
