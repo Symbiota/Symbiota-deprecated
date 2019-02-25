@@ -620,6 +620,11 @@ span.h3 {
 .news-wrapper h2 {
 	font-size: 30px;
 }
+.expanded {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
 /* end news section */
 
 /* books section */

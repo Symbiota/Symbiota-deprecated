@@ -113,7 +113,7 @@ $(document).ready(function () {
         </div>
         <div class="col2">
             <div class="video-wrapper">
-                <iframe id="kaltura_player" src="https://cdnapisec.kaltura.com/p/391241/sp/39124100/embedIframeJs/uiconf_id/28342472/partner_id/391241?iframeembed=true&playerId=kaltura_player&entry_id=0_0lr3qeva&flashvars[localizationCode]=en&amp;flashvars[leadWithHTML5]=true&amp;flashvars[sideBarContainer.plugin]=true&amp;flashvars[sideBarContainer.position]=left&amp;flashvars[sideBarContainer.clickToClose]=true&amp;flashvars[chapters.plugin]=true&amp;flashvars[chapters.layout]=vertical&amp;flashvars[chapters.thumbnailRotator]=false&amp;flashvars[streamSelector.plugin]=true&amp;flashvars[EmbedPlayer.SpinnerTarget]=videoHolder&amp;flashvars[dualScreen.plugin]=true&amp;&wid=0_46rd6whd" width="554" height="366" allowfullscreen webkitallowfullscreen mozAllowFullScreen allow="autoplay *; fullscreen *; encrypted-media *" frameborder="0" title="Kaltura Player"></iframe>
+                <iframe width="560" height="315" src="https://www.youtube.com/embed/9ystxXKEOp4" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
             </div>
             <a href="pages/tips.php" class="btn purple-btn full-width-btn">Tips for using this site</a>
         </div>
@@ -130,8 +130,7 @@ $(document).ready(function () {
                     <li>Browse collections of plants suitable for unique garden and landscape objectives, including pollinator gardens, meadowscapes, and more.</li>
                     <li>Link to printable garden-focused profile pages with photos and cultivation details.</li>
                 </ul>
-                <a href="garden/index.php" class="btn light-purple-btn full-width-btn">Learn More about
-                    Gardening with Natives</a>
+                <a data-fancybox href="https://youtu.be/1on5abHiruM" class="btn light-purple-btn full-width-btn">Tips for using the Gardening with Natives portal</a>
             </div>
         </div>
 </div>
@@ -140,15 +139,20 @@ $(document).ready(function () {
         <div class="col1">
             <img src="images/layout/news-events.jpg" alt="News and Events">
         </div>
-        <div class="col2">
-            <h2>News and Events</h2>
-            <ul class="square-bullets purple-bullets">
-                <li>2 March 2019, 8a – 5p.  Stop by our display at the BEEvent Pollinator Conference! Linn Co. Fair & Expo Center, Albany OR. Sponsored by Linn Co. Master Gardeners.</li>
-                <li>5 March 2019, 6:30p. Panelist: Marys River Watershed Council Forum—restoration efforts on Oak Creek. Corvallis Benton Co. Library, 645 NW Monroe, Corvallis OR.</li>
-                <li>11 March 2019, 7:30p. Presentation: The OregonFlora website: a digital flora. Oregon State University, 2087 Cordley Hall, Corvallis OR. Sponsored by Corvallis Chapter of Native Plant Society of Oregon.</li>
-                <li>27-28 April 2019, 9a – 5p. Presentations daily.  Glide Wildflower Show, Community Center, Glide, OR.</li>
-            </ul>
-            <div class="fb-like" data-href="https://www.facebook.com/OregonFlora" data-layout="standard" data-action="like" data-size="large" data-show-faces="false" data-share="true"></div>
+        <div class="col2 expanded">
+            <div>
+                <h2>News and Events</h2>
+                <ul class="square-bullets purple-bullets">
+                    <li>Display: <strong><a target="_blank" href="https://www.linnmastergardeners.com/store/p1/Pollinator_Conference.html">BEEvent Pollinator Conference</a></strong>. 2 March 2019. 8a - 5p. Linn Co. Fair &amp; Expo Center, Albany, OR. Sponsored by Linn Co. Master Gardeners.</li>
+                    <li>Panel Discussion, Winter Forum 2019: <strong><a target="_blank" href="https://www.facebook.com/events/1015219372008927/">The Oak Creek Story</a></strong>. 5 March 2019. 7:00p. Corvallis Benton Co. Library, 645 NW Monroe, Corvallis, OR. Sponsored by Marys River Watershed Council.</li>
+                    <li>Presentation: <strong>The OregonFlora website: a digital flora</strong>. 11 March 2019. 7:30pm. Oregon State University, 2087 Cordley Hall, Corvallis OR. Sponsored by Corvallis Chapter of <a href="http://www.npsoregon.org/calendar.html" target="_blank" >Native Plant Society of Oregon</a>.</li>
+                    <li>Presentation: <strong>The New OregonFlora website</strong> 27 April 2019, 10:30a &amp; 28 April 2019, 12:00n. <a target="_blank" href="http://www.glidewildflowershow.org/">Glide Wildflower Show</a>, Community Center, Glide, OR.</li>
+                </ul>
+            </div>
+            <div>
+                <div class="fb-like" data-href="https://www.facebook.com/OregonFlora" data-layout="standard" data-action="like" data-size="large" data-show-faces="false" data-share="true"></div>
+                <img src="images/layout/facebook.png" alt="Facebook">
+            </div>
         </div>
     </div>
 </div>
@@ -170,7 +174,7 @@ $(document).ready(function () {
                     <strong>Flora of Oregon
                         Volume 2:</strong>
                     Dicots Adoxaceae - Fagaceae <br><br>
-                    <span class="btn">Available late 2018</span>
+                    <a class="btn" target="_blank" href="pages/pdfs/SponsorshipBrochure.pdf">Available 2019</a>
                 </div>
                 <p>A comprehensive reference containing plant descriptions, pen and ink illustrations, and front chapters covering diverse topics. Do you have your copy of Flora of Oregon?</p>
             </div>
