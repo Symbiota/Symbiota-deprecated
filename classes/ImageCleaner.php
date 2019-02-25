@@ -477,17 +477,22 @@ class ImageCleaner extends Manager{
 		//Fetch only the header
 		curl_setopt($curl, CURLOPT_NOBODY, true);
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($curl, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36');
+		curl_setopt($curl, CURLOPT_HEADER, true);
+		curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true );
+
 		// attempt to retrieve the modification date
 		curl_setopt($curl, CURLOPT_FILETIME, true);
 
 		$curlResult = curl_exec($curl);
-
 		if($curlResult === false){
 			$this->logOrEcho('ERROR retrieving modified date of original image file: '.curl_error($curl),1);
 			return false;
 		}
 
-		//return -1;
+		$infoArr = curl_getinfo($curl);
+		if(isset($infoArr['filetime']) && $infoArr['filetime'] == -1) return -1;
+
 		$ts = curl_getinfo($curl, CURLINFO_FILETIME);
 		return $ts;
 	}
