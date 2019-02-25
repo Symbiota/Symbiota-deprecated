@@ -359,7 +359,7 @@ include($serverRoot."/header.php");
             html += '<div class="searchResultTable">';
         }
         for(i in res){
-            console.log(res[i]);
+            //console.log(res[i]);
             var sciname = res[i].sciname;
             if(display == "grid"){
                 html += '<div class="searchresultgridcell">';
@@ -440,6 +440,7 @@ include($serverRoot."/header.php");
                         searchCriteriaArr.splice(index, 1);
                     }
                 }
+                getSearchResults();
             }
         });
         $("#widthSlider").slider("values", 0, 0);
