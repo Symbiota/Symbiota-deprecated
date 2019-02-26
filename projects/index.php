@@ -381,9 +381,10 @@ if(!$researchList && !$editMode){
 							</div>
 							<?php
 						}
-						//$gMapUrl = $projManager->getGoogleStaticMap();
-						$gMapUrl = $CLIENT_ROOT.'/images/mappoint.png';
-						if($gMapUrl){
+						$gMapUrl = $projManager->getGoogleStaticMap();
+						//$gMapUrl = $CLIENT_ROOT.'/images/mappoint.png';
+						$coordArr = $projManager->getChecklistCoordArr();
+						if($gMapUrl && $coordArr){
 							?>
 							<div style="float:right;text-align:center;">
 								<a href="../checklists/clgmap.php?pid=<?php echo $pid;?>" title="Map Checklists">

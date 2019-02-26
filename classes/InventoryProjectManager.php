@@ -6,7 +6,7 @@ class InventoryProjectManager {
 	private $conn;
 	private $pid;
 	private $googleUrl;
-	private $researchCoord = Array();
+	private $checklistCoordArr = Array();
 	private $isPublic = 1;
 	private $errorStr;
 
@@ -207,7 +207,7 @@ class InventoryProjectManager {
 			while($row = $rs->fetch_object()){
 				$retArr[$row->clid] = $row->name.($row->access == 'private'?' <span title="Viewable only to editors">(private)</span>':'');
 				if($cnt < 50 && $row->latcentroid){
-					$this->researchCoord[] = $row->latcentroid.','.$row->longcentroid;
+					$this->checklistCoordArr[] = $row->latcentroid.','.$row->longcentroid;
 				}
 				$cnt++;
 			}
@@ -219,7 +219,7 @@ class InventoryProjectManager {
 	public function getGoogleStaticMap(){
 		$googleUrlLocal = $this->googleUrl;
 		//$googleUrlLocal .= "&zoom=6";
-		$coordStr = implode('%7C',$this->researchCoord);
+		$coordStr = implode('%7C',$this->checklistCoordArr);
 		if(!$coordStr) return "";
 		$googleUrlLocal .= "&markers=size:tiny%7C".$coordStr;
 		return $googleUrlLocal;
@@ -272,6 +272,10 @@ class InventoryProjectManager {
 
 	public function getErrorStr(){
 		return $this->errorStr;
+	}
+
+	public function getChecklistCoordArr(){
+		return $this->checklistCoordArr;
 	}
 
 	//Misc functions
