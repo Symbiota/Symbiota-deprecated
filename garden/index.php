@@ -462,7 +462,7 @@ include($serverRoot."/header.php");
 </div>
 <div class="garden-content">
     <div class="garden-name-search-wrapper">
-        <h2>Garden Native Plant Search <a href="../pages/gardening-with-natives.php"><i class="fa fa-question-circle green"></i></a></h2>
+        <h2>Garden Native Plant Search <a href="../pages/gardening-with-natives.php" target="_blank"><i class="fa fa-question-circle green"></i></a></h2>
         <span class="garden-feature-search-text">Select any combination of features within one or more categories. Results are immediately displayed below.</span>
         <div class="garden-name-search-box">
             <div class="input-label">Scientific name</div>

@@ -115,7 +115,7 @@ $(document).ready(function () {
             <div class="video-wrapper">
                 <iframe width="560" height="315" src="https://www.youtube.com/embed/9ystxXKEOp4" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
             </div>
-            <a href="pages/tips.php" class="btn purple-btn full-width-btn">Tips for using this site</a>
+            <a href="pages/tips.php" class="btn purple-btn full-width-btn" target="_blank">Tips for using this site</a>
         </div>
     </div>
 </div>
@@ -130,7 +130,7 @@ $(document).ready(function () {
                     <li>Browse collections of plants suitable for unique garden and landscape objectives, including pollinator gardens, meadowscapes, and more.</li>
                     <li>Link to printable garden-focused profile pages with photos and cultivation details.</li>
                 </ul>
-                <a data-fancybox href="https://youtu.be/1on5abHiruM" class="btn light-purple-btn full-width-btn">Tips for using the Gardening with Natives portal</a>
+                <a data-fancybox href="https://youtu.be/1on5abHiruM" class="btn light-purple-btn full-width-btn">Video tutorial for the Gardening with Natives portal</a>
             </div>
         </div>
 </div>

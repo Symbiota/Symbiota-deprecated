@@ -28,7 +28,7 @@ include( $serverRoot . "/header.php" );
     <!-- place static page content here. -->
     <h1>Tips for Using This Site</h1>
     <p>The website tools described here can be accessed from the dropdowns in the navigation bar, or by clicking on the labeled images at the top of the home page.</p>
-    <p><i>Click the video icon associated with each section to view the associated video.</i></p>
+    <p><i>Click the video icon associated with each section to view a tutorial.</i></p>
     <h3>Plant Taxon Search &nbsp; <a data-fancybox href="https://youtu.be/HwtEXcTO9jA" class="btn light-purple-btn"><i class="fa fa-film"></i></a></h3>
     <p>This tool is found in the upper right corner of each page. Start typing to access a dropdown list of all vascular plant scientific names. Select from the list, click on the magnifying glass icon, and the profile page for that taxon will open. There is a taxon profile page for every one of the ~4,700 taxa&mdash;i.e., species, subspecies, or variety&mdash;of Oregon vascular plants.</p>
     <p><em>Things to note:</em></p>
@@ -71,7 +71,7 @@ include( $serverRoot . "/header.php" );
                 <li>The Records tab lists all the plant occurrences from your search.</li>
                 <ol type="a">
                     <li>Click on a name in the Collector column to view the details of that record.</li>
-                    <li>Select particular records using the checkbox at far left to be copied to the Selections tab.</li>
+                    <li>Select particular records to be copied to the Selections tabby using the checkboxes to the left of each record.</li>
                 </ol>
                 <li>The Taxa tab lists all taxa returned in your search.</li>
                 <ol type="a">
@@ -79,15 +79,15 @@ include( $serverRoot . "/header.php" );
                     <li>Taxa that are not vascular plants are included in the list; these do not have a profile page.</li>
                 </ol>
                 <li>Pressing the &lt;Alt&gt; button while clicking on any dot on the map opens a popup with details about that record.</li>
-                <li>Click the green &ldquo;Download&rdquo; button to download the results.</li>
+                <li>Click the green &ldquo;Download&rdquo;  button to download results presented on any tab.</li>
             </ol>
         </li>
     </ul>
     <ul>
-        <li><em>Rare taxa </em>Currently, access to rare plant (those state and federally listed, and on ORBIC List 1) locality data is restricted to authorized users; the message &ldquo;There were no records matching your query&rdquo; appears.&nbsp; OregonFlora is working with these agencies to establish policy on the accessibility of data.<br><br>To request an account granting access to restricted information, click the &ldquo;Log In&rdquo; link on the top banner, complete and submit the <a href="../profile/newprofile.php?refurl=/portal/index.php?">profile form</a>. Please explain in the Biography section why you need access.<br><br>
+        <li><em>Rare taxa</em> Currently, access to rare plant (those state and federally listed, and on ORBIC List 1) locality data is restricted to authorized users; the message &ldquo;There were no records matching your query&rdquo; appears to users not logged in.  OregonFlora is working with these agencies to establish data access policies.&rdquo;<br><br>To request an account granting access to restricted information, click the &ldquo;Log In&rdquo; link on the top banner, complete and submit the <a href="../profile/newprofile.php?refurl=/portal/index.php?">profile form</a>. Please explain in the Biography section why you need access.<br><br>
             OregonFlora is working with federal and state agencies and ORBIC to establish data access policies.
         </li>
-        <li><em>Additional help</em> Access the OregonFlora <a data-fancybox href="https://youtu.be/Y2sdnibf1O8"><i class="fa fa-film"></i> video tutorial describing the mapping module here</a>.&nbsp; Symbiota webinars covering <a href="http://idigbio.adobeconnect.com/pbkdmqf66sgk" target="_blank">basic</a> and <a href="http://idigbio.adobeconnect.com/pgpptu7v6y4d" target="_blank">advanced</a> (including vector tools)&nbsp; features are also available.</li>
+        <li><em>Additional help</em> In addition to the <a data-fancybox href="https://youtu.be/Y2sdnibf1O8">OregonFlora video tutorial</a>,  Symbiota webinars covering <a href="http://idigbio.adobeconnect.com/pbkdmqf66sgk" target="_blank">basic</a> and <a href="http://idigbio.adobeconnect.com/pgpptu7v6y4d" target="_blank">advanced</a> (including vector tools)  features are also available.</li>
     </ul>
     <p>&nbsp;</p>
     <h3>Interactive Key &nbsp;<a data-fancybox href="https://youtu.be/DKxoEEwL3V4" class="btn light-purple-btn"><i class="fa fa-film"></i></a></h3>
@@ -133,10 +133,11 @@ include( $serverRoot . "/header.php" );
         <li>Map-based searches can be performed in the &ldquo;Latitude and Longitude&rdquo; section by clicking on the earth icon in the lower right corner of each subsection.</li>
         <li>View results in table format using the checkbox at the top of the search page, or from the top of the results page.</li>
         <li>Searches can be limited to selected collections by opening the &ldquo;Collections&rdquo; tab (accessed from the navigation path at top of page) and using the checkboxes next to each collection name. Clear these selections using the &ldquo;Reset Form&rdquo; button on the search page.</li>
-        <li>Results can be downloaded by clicking on the icon at the top of the page.</li>
+        <li>Results can be downloaded by clicking on the <img style="vertical-align: middle;" src="../images/layout/download-icon.png" alt="Download"> icon at the top of the page.</li>
     </ul>
     <p>&nbsp;</p>
-    <p><strong>Taxonomic Tree </strong>&nbsp;Accessed from the &ldquo;Resources&rdquo; tab in the navigation bar, this feature displays names of all taxa within a given taxonomic ranking. Synonyms are indicated in [brackets]. Each scientific name is a link to its taxon profile page.</p>
+    <h3>Taxonomic Tree </h3>
+    <p>Accessed from the &ldquo;Resources&rdquo; tab in the navigation bar, this feature displays names of all taxa within a given taxonomic ranking. Synonyms are indicated in [brackets]. Each scientific name is a link to its taxon profile page.</p>
 
 </div> <!-- .inner-content -->
 
