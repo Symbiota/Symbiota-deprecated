@@ -116,10 +116,10 @@ if($editable){
 								<input name='displaylevel' style='width:40px;' type='text' value='<?php echo $dArr['displaylevel'];?>' />
 							</div>
 							<div style="margin:10px;">
-								<input type='hidden' name='tdbid' value='<?php echo $tdbid;?>' />
-								<input type='hidden' name='tid' value='<?php echo $descEditor->getTid();?>' />
-								<input type="hidden" name="tabindex" value="4" />
-								<input type='submit' name='action' value='Edit Description Block' />
+								<input name="tdbid" type="hidden" value="<?php echo $tdbid;?>" />
+								<input name="tid" type="hidden" value="<?php echo $descEditor->getTid();?>" />
+								<input name="tabindex" type="hidden" value="4" />
+								<button name="action" type="submit" value="saveDescriptionBlock">Save Edits</button>
 							</div>
 						</form>
 						<hr/>
@@ -171,9 +171,11 @@ if($editable){
 							foreach($sArr as $tdsid => $stmtArr){
 								?>
 								<div style="margin-top:3px;clear:both;">
-									<b><?php echo $stmtArr["heading"];?></b>:
-									<?php echo $stmtArr["statement"];?>
 									<span onclick="toggle('edstmt-<?php echo $tdsid;?>');" title="Edit Statement"><img style='border:0px;width:12px;' src='../../images/edit.png'/></span>
+									<?php
+									echo ($stmtArr["heading"]?'<b>'.$stmtArr["heading"].'</b>:':'');
+									echo $stmtArr["statement"];
+									?>
 								</div>
 								<div class="edstmt-<?php echo $tdsid;?>" style="clear:both;display:none;">
 									<div style='margin:5px 0px 5px 20px;border:2px solid cyan;padding:5px;'>
@@ -190,10 +192,10 @@ if($editable){
 												<input name='sortsequence' style='width:40px;' type='text' value='<?php echo $stmtArr["sortsequence"];?>' />
 											</div>
 											<div style="margin:10px;">
-												<input name='action' type='submit' value='Edit Statement' />
-												<input type='hidden' name='tdsid' value='<?php echo $tdsid;?>'>
-												<input type='hidden' name='tid' value='<?php echo $descEditor->getTid();?>' />
-												<input type="hidden" name="tabindex" value="4" />
+												<input name="tdsid" type="hidden" value="<?php echo $tdsid;?>" />
+												<input name="tid" type="hidden" value="<?php echo $descEditor->getTid();?>" />
+												<input name="tabindex" type="hidden" value="4" />
+												<button name="action" type="submit" value="saveStatementEdit">Save Edits</button>
 											</div>
 										</form>
 									</div>

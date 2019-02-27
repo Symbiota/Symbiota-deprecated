@@ -69,7 +69,7 @@ if($editable && $action){
 	elseif($action == "Add Description Block"){
 		$statusStr = $tEditor->addDescriptionBlock($_POST);
 	}
-	elseif($action == "Edit Description Block"){
+	elseif($action == "saveDescriptionBlock"){
 		$statusStr = $tEditor->editDescriptionBlock($_POST);
 	}
 	elseif($action == "Delete Description Block"){
@@ -81,7 +81,7 @@ if($editable && $action){
 	elseif($action == "Add Statement"){
 		$statusStr = $tEditor->addStatement($_POST);
 	}
-	elseif($action == "Edit Statement"){
+	elseif($action == "saveStatementEdit"){
 		$statusStr = $tEditor->editStatement($_POST);
 	}
 	elseif($action == "Delete Statement"){
