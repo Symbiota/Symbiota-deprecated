@@ -75,7 +75,7 @@ $collManager->cleanOutArr($collData);
 				$( "#"+dialogStr+"dialog" ).dialog({
 					autoOpen: false,
 					modal: true,
-					position: { my: "left top", at: "right bottom", of: "#"+dialogStr }
+					position: { my: "right", at: "center", of: "#"+dialogStr }
 				});
 
 				$( "#"+dialogStr ).click(function() {
@@ -525,11 +525,10 @@ $collManager->cleanOutArr($collData);
 										<div>
 											iDigBio <input type="checkbox" name="publishToIdigbio" value="1" onchange="checkGUIDSource(this.form);" <?php echo($collData['publishtoidigbio']?'CHECKED':''); ?> />
 										</div>
-										<div id="pubagginfodialog">
-											Check boxes to make Darwin Core Archives published from this collection
-											available to iDigBio and/or GBIF (if activated in this portal).
-										</div>
 										 -->
+										<div id="pubagginfodialog">
+											Activates GBIF publishing tools available within Darwin Core Archive Publishing menu option.
+										</div>
 									</td>
 								</tr>
 								<?php
@@ -545,11 +544,12 @@ $collManager->cleanOutArr($collData);
 										<img src="../../images/info.png" style="width:15px;" />
 									</a>
 									<div id="sourceurlinfodialog">
-										Adding a URL template here will dynamically generate and add the specimen details page a link to the
-										source record. For example, &quot;http://sweetgum.nybg.org/vh/specimen.php?irn=--DBPK--&quot;
-										will generate a url to the NYBG collection with &quot;--DBPK--&quot; being replaced with the
-										NYBG's Primary Key (dbpk data field within the ommoccurrence table).
-										Template pattern --CATALOGNUMBER-- can also be used in place of --DBPK--
+										Advance setting: Adding a URL template here will add a link to the source record to the specimen details page.
+										For example, &quot;http://swbiodiversity.org/seinet/collections/individual/index.php?occid=--DBPK--&quot;
+										will generate a url to the original record managed in SEINet is an ASU snapshot collection was created using a DWC-A import from SEINet.
+										Or &quot;http://www.inaturalist.org/observations/--DBPK--&quot; can be used for an iNaturalist import if you mapped their ID field
+										as the source Identifier (e.g. dbpk) during import.
+										Template patterns --CATALOGNUMBER-- and --OCCURRENCEID-- are additional options.
 									</div>
 								</td>
 							</tr>
