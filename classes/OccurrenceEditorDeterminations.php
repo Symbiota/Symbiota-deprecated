@@ -12,10 +12,10 @@ class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 	public function getDetMap($identBy, $dateIdent, $sciName){
 		$retArr = array();
 		$hasCurrent = 0;
-		$sql = "SELECT detid, identifiedBy, dateIdentified, sciname, scientificNameAuthorship, ".
-			"identificationQualifier, iscurrent, appliedstatus, identificationReferences, identificationRemarks, sortsequence ".
-			"FROM omoccurdeterminations ".
-			"WHERE (occid = ".$this->occid.") ORDER BY iscurrent DESC, sortsequence";
+		$sql = 'SELECT detid, identifiedBy, dateIdentified, sciname, scientificNameAuthorship, identificationQualifier, '.
+			'iscurrent, printqueue, appliedstatus, identificationReferences, identificationRemarks, sortsequence '.
+			'FROM omoccurdeterminations '.
+			'WHERE (occid = '.$this->occid.') ORDER BY iscurrent DESC, sortsequence';
 		//echo "<div>".$sql."</div>";
 		$result = $this->conn->query($sql);
 		while($row = $result->fetch_object()){
@@ -27,6 +27,7 @@ class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 			$retArr[$detId]["identificationqualifier"] = $this->cleanOutStr($row->identificationQualifier);
 			if($row->iscurrent == 1) $hasCurrent = 1;
 			$retArr[$detId]["iscurrent"] = $row->iscurrent;
+			$retArr[$detId]['printqueue'] = $row->printqueue;
 			$retArr[$detId]["appliedstatus"] = $row->appliedstatus;
 			$retArr[$detId]["identificationreferences"] = $this->cleanOutStr($row->identificationReferences);
 			$retArr[$detId]["identificationremarks"] = $this->cleanOutStr($row->identificationRemarks);

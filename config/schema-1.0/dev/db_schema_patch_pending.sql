@@ -33,7 +33,8 @@ ALTER TABLE `uploadtaxa`
 
 
 ALTER TABLE `taxa` 
-  ADD COLUMN `locked` INT NULL AFTER `Hybrid`;
+  ADD COLUMN `locked` INT NULL AFTER `Hybrid`,
+  CHANGE COLUMN `UnitInd3` `UnitInd3` VARCHAR(15) NULL DEFAULT NULL ;
 
 ALTER TABLE `taxstatus` 
   ADD COLUMN `modifiedBy` VARCHAR(45) NULL AFTER `SortSequence`;

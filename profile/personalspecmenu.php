@@ -61,6 +61,11 @@ if($SYMB_UID){
 					</a>
 				</li>
 				<li>
+					<a href="../collections/reports/annotationmanager.php?collid=<?php echo $collId; ?>">
+						Print Annotation Labels
+					</a>
+				</li>
+				<li>
 					<a href="../collections/editor/observationsubmit.php?collid=<?php echo $collId; ?>">
 						Submit image vouchered observation
 					</a>

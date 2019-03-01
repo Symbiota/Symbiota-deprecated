@@ -162,6 +162,11 @@ if($SYMB_UID){
 								</a>
 							</li>
 							<li>
+								<a href="../reports/annotationmanager.php?collid=<?php echo $collid; ?>">
+									<?php echo $LANG['PRINT_ANNOTATIONS']; ?>
+								</a>
+							</li>
+							<li>
 								<a href="../georef/batchgeoreftool.php?collid=<?php echo $collid; ?>">
 									<?php echo $LANG['BATCH_GEOREF']; ?>
 								</a>
