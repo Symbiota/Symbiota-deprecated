@@ -12,8 +12,6 @@ $collid = $_POST["collid"];
 $lHeader = $_POST['lheading'];
 $lFooter = $_POST['lfooter'];
 $detIdArr = $_POST['detid'];
-$speciesAuthors = ((array_key_exists('speciesauthors',$_POST) && $_POST['speciesauthors'])?1:0);
-$clearQueue = ((array_key_exists('clearqueue',$_POST) && $_POST['clearqueue'])?1:0);
 $action = array_key_exists('submitaction',$_POST)?$_POST['submitaction']:'';
 $rowsPerPage = 3;
 
@@ -40,9 +38,11 @@ if($SYMB_UID){
 	}
 }
 
+$labelArr = array();
 if($isEditor && $action){
+	$speciesAuthors = ((array_key_exists('speciesauthors',$_POST) && $_POST['speciesauthors'])?1:0);
 	$labelArr = $labelManager->getAnnoArray($_POST['detid'], $speciesAuthors);
-	if($clearQueue){
+	if(array_key_exists('clearqueue',$_POST) && $_POST['clearqueue']){
 		$labelManager->clearAnnoQueue($_POST['detid']);
 	}
 }
@@ -158,6 +158,20 @@ foreach($labelArr as $occid => $occArr){
 			$textrun->addText(htmlspecialchars($scinameStr).' ','scientificnameFont');
 		}
 		$textrun->addText(htmlspecialchars($occArr['scientificnameauthorship']),'scientificnameauthFont');
+		if($occArr['identifiedby'] || $occArr['dateidentified']){
+			$textrun = $cell->addTextRun('other');
+			if($occArr['identifiedby']){
+				$identByStr = $occArr['identifiedby'];
+				if($occArr['dateidentified']){
+					$identByStr .= '      '.$occArr['dateidentified'];
+				}
+				$textrun->addText('Det: '.htmlspecialchars($identByStr),'identifiedFont');
+			}
+		}
+		if(array_key_exists('printcatnum',$_POST) && $_POST['printcatnum'] && $occArr['catalognumber']){
+			$textrun = $cell->addTextRun('other');
+			$textrun->addText('Catalog #: '.htmlspecialchars($occArr['catalognumber']).' ','identifiedFont');
+		}
 		if($occArr['identificationremarks']){
 			$textrun = $cell->addTextRun('other');
 			$textrun->addText(htmlspecialchars($occArr['identificationremarks']).' ','identifiedFont');
@@ -165,18 +179,6 @@ foreach($labelArr as $occid => $occArr){
 		if($occArr['identificationreferences']){
 			$textrun = $cell->addTextRun('other');
 			$textrun->addText(htmlspecialchars($occArr['identificationreferences']).' ','identifiedFont');
-		}
-		if($occArr['identifiedby'] || $occArr['dateidentified']){
-			$textrun = $cell->addTextRun('other');
-			if($occArr['identifiedby']){
-				$textrun->addText('Determiner: '.htmlspecialchars($occArr['identifiedby']),'identifiedFont');
-				if($occArr['dateidentified']){
-					$textrun->addTextBreak(1);
-				}
-			}
-			if($occArr['dateidentified']){
-				$textrun->addText('Date: '.htmlspecialchars($occArr['dateidentified']).' ','identifiedFont');
-			}
 		}
 		if($footerStr){
 			$textrun = $cell->addTextRun('footer');
@@ -186,7 +188,7 @@ foreach($labelArr as $occid => $occArr){
 	}
 }
 
-$targetFile = $SERVER_ROOT.'/temp/report/'.$paramsArr['un'].'_'.date('Ymd').'_annotations_'.session_id().'.docx';
+$targetFile = $SERVER_ROOT.'/temp/report/'.$paramsArr['un'].'_annoLabel_'.date('Y-m-d').'_'.time().'.docx';
 $phpWord->save($targetFile, 'Word2007');
 
 header('Content-Description: File Transfer');

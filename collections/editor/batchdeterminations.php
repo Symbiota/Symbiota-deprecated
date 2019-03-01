@@ -411,7 +411,7 @@ if($isEditor){
 								</div>
 								<div style='margin:3px;'>
 									<input type="checkbox" name="printqueue" value="1" checked /> Add to Annotation Print Queue
-									<a href="../reports/labelmanager.php?collid=<?php echo $collid; ?>&tabtarget=1" target="_blank"><img src="../../images/list.png" style="width:13px" title="Display Annotation Print Queue" /></a>
+									<a href="../reports/annotationmanager.php?collid=<?php echo $collid; ?>" target="_blank"><img src="../../images/list.png" style="width:13px" title="Display Annotation Print Queue" /></a>
 								</div>
 								<div style='margin:15px;'>
 									<div style="float:left;">

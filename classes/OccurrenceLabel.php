@@ -221,6 +221,56 @@ class OccurrenceLabel{
 		return $retArr;
 	}
 
+	public function exportLabelCsvFile($postArr){
+		global $CHARSET;
+		$occidArr = $postArr['occid'];
+		if($occidArr){
+			$speciesAuthors = 0;
+			if(array_key_exists('speciesauthors',$postArr) && $postArr['speciesauthors']) $speciesAuthors = 1;
+			$labelArr = $this->getLabelArray($occidArr, $speciesAuthors);
+			if($labelArr){
+				$fileName = 'labeloutput_'.time().".csv";
+				header('Content-Description: Symbiota Label Output File');
+				header ('Content-Type: text/csv');
+				header ('Content-Disposition: attachment; filename="'.$fileName.'"');
+				header('Content-Transfer-Encoding: '.strtoupper($CHARSET));
+				header('Expires: 0');
+				header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+				header('Pragma: public');
+
+				$fh = fopen('php://output','w');
+				$headerArr = array("occid","catalogNumber","otherCatalogNumbers","family","scientificName","genus","specificEpithet",
+						"taxonRank","infraSpecificEpithet","scientificNameAuthorship","parentAuthor","identifiedBy",
+						"dateIdentified","identificationReferences","identificationRemarks","taxonRemarks","identificationQualifier",
+						"typeStatus","recordedBy","recordNumber","associatedCollectors","eventDate","year","month","day","monthName",
+						"verbatimEventDate","habitat","substrate","occurrenceRemarks","associatedTaxa","verbatimAttributes",
+						"reproductiveCondition","establishmentMeans","country",
+						"stateProvince","county","municipality","locality","decimalLatitude","decimalLongitude",
+						"geodeticDatum","coordinateUncertaintyInMeters","verbatimCoordinates",
+						"minimumElevationInMeters","maximumElevationInMeters","verbatimElevation","disposition");
+
+				fputcsv($fh,$headerArr);
+				//change header value to lower case
+				$headerLcArr = array();
+				foreach($headerArr as $k => $v){
+					$headerLcArr[strtolower($v)] = $k;
+				}
+				//Output records
+				foreach($labelArr as $occid => $occArr){
+					$dupCnt = $postArr['q-'.$occid];
+					for($i = 0;$i < $dupCnt;$i++){
+						fputcsv($fh,array_intersect_key($occArr,$headerLcArr));
+					}
+				}
+				fclose($fh);
+			}
+			else{
+				echo "Recordset is empty.\n";
+			}
+		}
+	}
+
+	//Annotation functions
 	public function getAnnoArray($detidArr, $speciesAuthors){
 		$retArr = array();
 		if($detidArr){
@@ -245,9 +295,9 @@ class OccurrenceLabel{
 			}
 
 			//Get determination records
-			$sql2 = 'SELECT d.detid, d.identifiedBy, d.dateIdentified, d.sciname, d.scientificNameAuthorship, '.
-				'd.identificationQualifier, d.identificationReferences, d.identificationRemarks '.
-				'FROM omoccurdeterminations d '.$sqlWhere;
+			$sql2 = 'SELECT d.detid, d.identifiedBy, d.dateIdentified, d.sciname, d.scientificNameAuthorship, d.identificationQualifier, '.
+				'd.identificationReferences, d.identificationRemarks, IFNULL(o.catalogNumber,o.otherCatalogNumbers) AS catalogNumber '.
+				'FROM omoccurdeterminations d INNER JOIN omoccurrences o ON d.occid = o.occid '.$sqlWhere;
 			//echo 'SQL: '.$sql2;
 			if($rs2 = $this->conn->query($sql2)){
 				while($row2 = $rs2->fetch_assoc()){
@@ -277,47 +327,14 @@ class OccurrenceLabel{
 		return $statusStr;
 	}
 
-	public function getLabelProjects(){
-		$retArr = array();
-		if($this->collid){
-			$sql = 'SELECT DISTINCT labelproject FROM omoccurrences WHERE labelproject IS NOT NULL AND collid = '.$this->collid.' ';
-			if($this->collArr['colltype'] == 'General Observations') $sql .= 'AND (observeruid = '.$GLOBALS['SYMB_UID'].') ';
-			$rs = $this->conn->query($sql);
-			while($r = $rs->fetch_object()){
-				$retArr[] = $r->labelproject;
-			}
-			sort($retArr);
-			$rs->free();
-		}
-		return $retArr;
-	}
-
-	public function getDatasetProjects(){
-		$retArr = array();
-		if($this->collid){
-			$sql = 'SELECT DISTINCT ds.datasetid, ds.name '.
-				'FROM omoccurdatasets ds INNER JOIN userroles r ON ds.datasetid = r.tablepk '.
-				'INNER JOIN omoccurdatasetlink dl ON ds.datasetid = dl.datasetid '.
-				'INNER JOIN omoccurrences o ON dl.occid = o.occid '.
-				'WHERE (r.tablename = "omoccurdatasets") AND (o.collid = '.$this->collid.') ';
-			if($this->collArr['colltype'] == 'General Observations') $sql .= 'AND (o.observeruid = '.$GLOBALS['SYMB_UID'].') ';
-			$rs = $this->conn->query($sql);
-			while($r = $rs->fetch_object()){
-				$retArr[$r->datasetid] = $r->name;
-			}
-			$rs->free();
-		}
-		return $retArr;
-	}
-
 	public function getAnnoQueue(){
 		$retArr = array();
 		if($this->collid){
 			$sql = 'SELECT o.occid, d.detid, CONCAT_WS(" ",o.recordedby,IFNULL(o.recordnumber,o.eventdate)) AS collector, '.
-				'CONCAT_WS(" ",d.identificationQualifier,d.sciname) AS sciname, '.
-				'CONCAT_WS(", ",d.identifiedBy,d.dateIdentified,d.identificationRemarks,d.identificationReferences) AS determination '.
-				'FROM omoccurrences o INNER JOIN omoccurdeterminations d ON o.occid = d.occid '.
-				'WHERE (o.collid = '.$this->collid.') AND (d.printqueue = 1) ';
+					'CONCAT_WS(" ",d.identificationQualifier,d.sciname) AS sciname, '.
+					'CONCAT_WS(", ",d.identifiedBy,d.dateIdentified,d.identificationRemarks,d.identificationReferences) AS determination '.
+					'FROM omoccurrences o INNER JOIN omoccurdeterminations d ON o.occid = d.occid '.
+					'WHERE (o.collid = '.$this->collid.') AND (d.printqueue = 1) ';
 			if($this->collArr['colltype'] == 'General Observations'){
 				$sql .= ' AND (o.observeruid = '.$GLOBALS['SYMB_UID'].') ';
 			}
@@ -337,51 +354,37 @@ class OccurrenceLabel{
 	}
 
 	//General functions
-	public function exportCsvFile($postArr, $speciesAuthors){
-		global $CHARSET;
-		$occidArr = $postArr['occid'];
-		if($occidArr){
-			$labelArr = $this->getLabelArray($occidArr, $speciesAuthors);
-			if($labelArr){
-				$fileName = 'labeloutput_'.time().".csv";
-				header('Content-Description: Symbiota Label Output File');
-				header ('Content-Type: text/csv');
-				header ('Content-Disposition: attachment; filename="'.$fileName.'"');
-				header('Content-Transfer-Encoding: '.strtoupper($CHARSET));
-				header('Expires: 0');
-				header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
-				header('Pragma: public');
-
-				$fh = fopen('php://output','w');
-				$headerArr = array("occid","catalogNumber","otherCatalogNumbers","family","scientificName","genus","specificEpithet",
-					"taxonRank","infraSpecificEpithet","scientificNameAuthorship","parentAuthor","identifiedBy",
-					"dateIdentified","identificationReferences","identificationRemarks","taxonRemarks","identificationQualifier",
-		 			"typeStatus","recordedBy","recordNumber","associatedCollectors","eventDate","year","month","day","monthName",
-			 		"verbatimEventDate","habitat","substrate","occurrenceRemarks","associatedTaxa","verbatimAttributes",
-		 			"reproductiveCondition","establishmentMeans","country",
-		 			"stateProvince","county","municipality","locality","decimalLatitude","decimalLongitude",
-			 		"geodeticDatum","coordinateUncertaintyInMeters","verbatimCoordinates",
-		 			"minimumElevationInMeters","maximumElevationInMeters","verbatimElevation","disposition");
-
-				fputcsv($fh,$headerArr);
-				//change header value to lower case
-				$headerLcArr = array();
-				foreach($headerArr as $k => $v){
-					$headerLcArr[strtolower($v)] = $k;
-				}
-				//Output records
-				foreach($labelArr as $occid => $occArr){
-					$dupCnt = $postArr['q-'.$occid];
-					for($i = 0;$i < $dupCnt;$i++){
-						fputcsv($fh,array_intersect_key($occArr,$headerLcArr));
-					}
-				}
-				fclose($fh);
+	public function getLabelProjects(){
+		$retArr = array();
+		if($this->collid){
+			$sql = 'SELECT DISTINCT labelproject FROM omoccurrences WHERE labelproject IS NOT NULL AND collid = '.$this->collid.' ';
+			if($this->collArr['colltype'] == 'General Observations') $sql .= 'AND (observeruid = '.$GLOBALS['SYMB_UID'].') ';
+			$rs = $this->conn->query($sql);
+			while($r = $rs->fetch_object()){
+				$retArr[] = $r->labelproject;
 			}
-			else{
-				echo "Recordset is empty.\n";
-			}
+			sort($retArr);
+			$rs->free();
 		}
+		return $retArr;
+	}
+
+	public function getDatasetProjects(){
+		$retArr = array();
+		if($this->collid){
+			$sql = 'SELECT DISTINCT ds.datasetid, ds.name '.
+					'FROM omoccurdatasets ds INNER JOIN userroles r ON ds.datasetid = r.tablepk '.
+					'INNER JOIN omoccurdatasetlink dl ON ds.datasetid = dl.datasetid '.
+					'INNER JOIN omoccurrences o ON dl.occid = o.occid '.
+					'WHERE (r.tablename = "omoccurdatasets") AND (o.collid = '.$this->collid.') ';
+			if($this->collArr['colltype'] == 'General Observations') $sql .= 'AND (o.observeruid = '.$GLOBALS['SYMB_UID'].') ';
+			$rs = $this->conn->query($sql);
+			while($r = $rs->fetch_object()){
+				$retArr[$r->datasetid] = $r->name;
+			}
+			$rs->free();
+		}
+		return $retArr;
 	}
 
 	//General setters and getters

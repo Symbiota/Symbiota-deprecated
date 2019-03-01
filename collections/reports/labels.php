@@ -10,7 +10,6 @@ $hSuffix = $_POST['lhsuffix'];
 $lFooter = $_POST['lfooter'];
 $occIdArr = $_POST['occid'];
 $labelFormat = $_POST['labelformat'];
-$speciesAuthors = ((array_key_exists('speciesauthors',$_POST) && $_POST['speciesauthors'])?1:0);
 $showcatalognumbers = ((array_key_exists('catalognumbers',$_POST) && $_POST['catalognumbers'])?1:0);
 $useBarcode = array_key_exists('bc',$_POST)?$_POST['bc']:0;
 $useSymbBarcode = array_key_exists('symbbc',$_POST)?$_POST['symbbc']:0;
@@ -32,7 +31,7 @@ if($SYMB_UID){
 	}
 }
 if($action == 'Export to CSV'){
-	$labelManager->exportCsvFile($_POST, $speciesAuthors);
+	$labelManager->exportLabelCsvFile($_POST);
 }
 else{
 	?>
@@ -82,6 +81,7 @@ else{
 			<div>
 				<?php
 				if($action && $isEditor){
+					$speciesAuthors = ((array_key_exists('speciesauthors',$_POST) && $_POST['speciesauthors'])?1:0);
 					$labelArr = $labelManager->getLabelArray($_POST['occid'], $speciesAuthors);
 					$labelCnt = 0;
 					foreach($labelArr as $occid => $occArr){
