@@ -568,7 +568,7 @@ class OccurrenceEditorManager {
 		}
         if($this->collId) $sqlWhere .= 'AND (o2.collid = '.$this->collId.') ';
 		if($sqlWhere){
-            if(strpos($str, "OR") === 0){
+            if(strpos($sqlWhere, "OR") === 0){
                 $sqlWhere = 'WHERE ('.substr($sqlWhere,3).') ';
             }
             else{
