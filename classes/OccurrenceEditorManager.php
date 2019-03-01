@@ -566,8 +566,7 @@ class OccurrenceEditorManager {
 		if($this->crowdSourceMode){
 			$sqlWhere .= 'AND (q.reviewstatus = 0) ';
 		}
-        if($this->collId) $sqlWhere .= 'AND (o2.collid = '.$this->collId.') ';
-		if($sqlWhere){
+        if($sqlWhere){
             if(strpos($sqlWhere, "OR") === 0){
                 $sqlWhere = 'WHERE ('.substr($sqlWhere,3).') ';
             }
@@ -575,7 +574,7 @@ class OccurrenceEditorManager {
             	$sqlWhere = 'WHERE ('.substr($sqlWhere,4).') ';
             }
         }
-
+		if($this->collId) $sqlWhere .= 'AND (o2.collid = '.$this->collId.') ';
 		if(isset($this->qryArr['orderby'])){
 			$sqlOrderBy = '';
 			$orderBy = $this->cleanInStr($this->qryArr['orderby']);
