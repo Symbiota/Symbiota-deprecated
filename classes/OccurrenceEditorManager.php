@@ -574,7 +574,7 @@ class OccurrenceEditorManager {
             	$sqlWhere = 'WHERE ('.substr($sqlWhere,4).') ';
             }
         }
-		if($this->collId) $sqlWhere .= 'AND (o2.collid = '.$this->collId.') ';
+		if($this->collId) $sqlWhere .= ($sqlWhere?'AND (o2.collid = '.$this->collId.') ':'WHERE (o2.collid = '.$this->collId.') ');
 		if(isset($this->qryArr['orderby'])){
 			$sqlOrderBy = '';
 			$orderBy = $this->cleanInStr($this->qryArr['orderby']);
