@@ -230,12 +230,14 @@ class ProfileManager{
 
 			//Send email
 			$subject = 'RE: Password reset';
-			$bodyStr = "Your ".$GLOBALS["DEFAULT_TITLE"]." (<a href='http://".$_SERVER['SERVER_NAME'].$GLOBALS["CLIENT_ROOT"]."'>http://".$_SERVER['SERVER_NAME'].$GLOBALS["CLIENT_ROOT"]."</a>) password has been reset to: ".$newPassword." ".
-				"<br/><br/>After logging in, you can reset your password by clicking on <a href='http://".$_SERVER['SERVER_NAME'].$GLOBALS["CLIENT_ROOT"]."/profile/viewprofile.php'>View Profile</a> link and then click the Edit Profile tab.".
+			$bodyStr = "Your ".$GLOBALS["DEFAULT_TITLE"]." (see link below) password has been reset to: ".$newPassword."<br/><br/> ".
+				"After logging in, you can reset your password by clicking on View Profile link and then click the Edit Profile tab.".
 				"<br/>If you have problems with the new password, contact the System Administrator";
 			if(array_key_exists('ADMIN_EMAIL',$GLOBALS)) $bodyStr .= ': <'.$GLOBALS['ADMIN_EMAIL'].'>';
+			$bodyStr .= '<br/><br/>Data portal: <a href="http://'.$_SERVER['SERVER_NAME'].$GLOBALS['CLIENT_ROOT'].'">http://'.$_SERVER['SERVER_NAME'].$GLOBALS['CLIENT_ROOT'].'</a>'.
+				'Direct link to your user profile: <a href="http://'.$_SERVER['SERVER_NAME'].$GLOBALS['CLIENT_ROOT'].'/profile/viewprofile.php?tabindex=2">http://'.$_SERVER['SERVER_NAME'].$GLOBALS['CLIENT_ROOT'].'/profile/viewprofile.php</a>';
 
-			$headerStr = "Organization: ".$GLOBALS["DEFAULT_TITLE"]." \r\n";
+			$headerStr = "Organization: ".$GLOBALS["DEFAULT_TITLE"]." \r\n".
 				"MIME-Version: 1.0 \r\n".
 				"Content-type: text/html; charset=iso-8859-1 \r\n".
 				"To: ".$emailStr." \r\n".
