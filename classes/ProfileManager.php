@@ -240,11 +240,10 @@ class ProfileManager{
 			$headerStr = "Organization: ".$GLOBALS["DEFAULT_TITLE"]." \r\n".
 				"MIME-Version: 1.0 \r\n".
 				"Content-type: text/html; charset=iso-8859-1 \r\n".
-				"To: ".$emailStr." \r\n".
-				"From: ".$emailStr." \r\n";
+				"To: ".$emailStr." \r\n";
 
 			if(array_key_exists("ADMIN_EMAIL",$GLOBALS) && $GLOBALS["ADMIN_EMAIL"]){
-				$headerStr .= "From: ".$GLOBALS["ADMIN_EMAIL"]." \r\n".
+				$headerStr .= "From: portal admin <".$GLOBALS["ADMIN_EMAIL"]."> \r\n".
 					"Reply-To: ".$GLOBALS["ADMIN_EMAIL"]." \r\n".
 					"Return-Path: ".$GLOBALS["ADMIN_EMAIL"]." \r\n";
 			}
