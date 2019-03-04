@@ -229,16 +229,25 @@ class ProfileManager{
 			$result->free();
 
 			//Send email
-			$subject = 'Your password';
+			$subject = 'RE: Password reset';
 			$bodyStr = "Your ".$GLOBALS["DEFAULT_TITLE"]." (<a href='http://".$_SERVER['SERVER_NAME'].$GLOBALS["CLIENT_ROOT"]."'>http://".$_SERVER['SERVER_NAME'].$GLOBALS["CLIENT_ROOT"]."</a>) password has been reset to: ".$newPassword." ".
 				"<br/><br/>After logging in, you can reset your password by clicking on <a href='http://".$_SERVER['SERVER_NAME'].$GLOBALS["CLIENT_ROOT"]."/profile/viewprofile.php'>View Profile</a> link and then click the Edit Profile tab.".
 				"<br/>If you have problems with the new password, contact the System Administrator";
 			if(array_key_exists('ADMIN_EMAIL',$GLOBALS)) $bodyStr .= ': <'.$GLOBALS['ADMIN_EMAIL'].'>';
 
-			$headerStr = "MIME-Version: 1.0 \r\n".
-				"Content-type: text/html; charset=".$CHARSET." \r\n".
-				"To: ".$emailStr." \r\n";
-			if(array_key_exists("ADMIN_EMAIL",$GLOBALS)) $headerStr .= "From: Admin <".$GLOBALS["ADMIN_EMAIL"]."> \r\n";
+			$headerStr = "Organization: ".$GLOBALS["DEFAULT_TITLE"]." \r\n";
+				"MIME-Version: 1.0 \r\n".
+				"Content-type: text/html; charset=iso-8859-1 \r\n".
+				"To: ".$emailStr." \r\n".
+				"From: ".$emailStr." \r\n";
+
+			if(array_key_exists("ADMIN_EMAIL",$GLOBALS) && $GLOBALS["ADMIN_EMAIL"]){
+				$headerStr .= "From: ".$GLOBALS["ADMIN_EMAIL"]." \r\n".
+					"Reply-To: ".$GLOBALS["ADMIN_EMAIL"]." \r\n".
+					"Return-Path: ".$GLOBALS["ADMIN_EMAIL"]." \r\n";
+			}
+			$headerStr .= "X-Priority: 3\r\n".
+				"X-Mailer: PHP". phpversion() ."\r\n";
 			mail($emailStr,$subject,$bodyStr,$headerStr);
 
 			$returnStr = "Your new password was just emailed to: ".$emailStr;
