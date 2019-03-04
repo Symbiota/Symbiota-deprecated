@@ -96,7 +96,7 @@ class ImageLibraryManager extends OccurrenceTaxaManager{
 		else{
 			$sql .= 'WHERE ';
 		}
-		$sql .= '(i.sortsequence < 500) AND (ts.taxauthid = 1) AND (t.RankId > 219) ';
+		$sql .= '(ts.taxauthid = 1) AND (t.RankId > 219) ';
 		if($this->tidFocus) $sql .= 'AND (e.parenttid IN('.$this->tidFocus.')) AND (e.taxauthid = 1) ';
 		return $sql;
 	}
