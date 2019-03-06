@@ -150,15 +150,15 @@ $urlPrefix = (isset($_SERVER['HTTPS'])?'https://':'http://').$_SERVER['HTTP_HOST
 						<th>Catalog Number</th>
 						<th>Family</th>
 						<th>Scientific Name</th>
+						<th>Collector</th>
+						<th>Number</th>
+						<th>Event Date</th>
 						<th>Country</th>
 						<th>State/Province</th>
 						<th>County</th>
 						<th>Locality</th>
 						<th>Habitat</th>
 						<th>Elevation</th>
-						<th>Event Date</th>
-						<th>Collector</th>
-						<th>Number</th>
 					</tr>
 					<?php
 					$recCnt = 0;
@@ -191,15 +191,15 @@ $urlPrefix = (isset($_SERVER['HTTPS'])?'https://':'http://').$_SERVER['HTTP_HOST
 							<td><?php echo $occArr['catnum']; ?></td>
 							<td><?php echo $occArr['family']; ?></td>
 							<td><?php echo $occArr['sciname'].($occArr['author']?" ".$occArr['author']:""); ?></td>
+							<td><?php echo $occArr['collector']; ?></td>
+							<td><?php echo (array_key_exists("collnum",$occArr)?$occArr['collnum']:""); ?></td>
+							<td><?php echo (array_key_exists("date",$occArr)?$occArr['date']:""); ?></td>
 							<td><?php echo $occArr['country']; ?></td>
 							<td><?php echo $occArr['state']; ?></td>
 							<td><?php echo $occArr['county']; ?></td>
 							<td><?php echo ((strlen($occArr['locality'])>80)?substr($occArr['locality'],0,80).'...':$occArr['locality']); ?></td>
 							<td><?php if(isset($occArr['habitat'])) echo ((strlen($occArr['habitat'])>80)?substr($occArr['habitat'],0,80).'...':$occArr['habitat']); ?></td>
 							<td><?php echo (array_key_exists("elev",$occArr)?$occArr['elev']:""); ?></td>
-							<td><?php echo (array_key_exists("date",$occArr)?$occArr['date']:""); ?></td>
-							<td><?php echo $occArr['collector']; ?></td>
-							<td><?php echo (array_key_exists("collnum",$occArr)?$occArr['collnum']:""); ?></td>
 						</tr>
 						<?php
 						$recCnt++;
