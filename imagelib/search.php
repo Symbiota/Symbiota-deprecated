@@ -106,8 +106,8 @@ if($action == 'search'){
 					<div style="clear:both;"></div>
 				</div>
 				<div id="criteriadiv">
-					<div style="clear:both;padding:5px 0px;">
-						<div style="float:left;">
+					<div style="clear:both;height:50px">
+						<div style="float:left;margin-top:3px">
 							<select id="taxontype" name="taxontype">
 								<?php
 								$taxonType = 1;
@@ -119,8 +119,13 @@ if($action == 'search'){
 								?>
 							</select>
 						</div>
-						<div style="float:left;margin-bottom:5px;">
-							<input id="taxa" name="taxa" type="text" style="width:450px;" value="<?php echo (isset($_REQUEST["taxa"])?$_REQUEST["taxa"]:''); ?>" title="Separate multiple names w/ commas" autocomplete="off" />
+						<div style="float:left;">
+							<?php
+							$taxonStr = '';
+							if(isset($_REQUEST["taxa"])) $taxonStr = $_REQUEST["taxa"];
+							if(is_numeric($taxonStr)) $taxonStr = $imgLibManager->getTaxaStr($taxonStr);
+							?>
+							<input id="taxa" name="taxa" type="text" style="width:450px;" value="<?php echo $taxonStr; ?>" title="Separate multiple names w/ commas" autocomplete="off" />
 						</div>
 						<div style="float:left;margin-left:10px;" >
 							<input name="usethes" type="checkbox" value="1" <?php if(!$action || (array_key_exists("usethes",$_REQUEST) && $_REQUEST["usethes"])) echo "CHECKED"; ?> >Include Synonyms

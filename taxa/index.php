@@ -78,7 +78,7 @@ $descr = Array();
 $displayLeftMenu = false;
 include($SERVER_ROOT.'/header.php');
 ?>
-<div id="innertext">
+<div id="popup-innertext">
 	<table id="innertable">
 	<?php
 	if($taxonManager->getSciName()){

@@ -535,6 +535,19 @@ class ImageLibraryManager extends OccurrenceTaxaManager{
 		return $retArr;
 	}
 
+	public function getTaxaStr($tid){
+		$retStr = '';
+		if(is_numeric($tid)){
+			$sql = 'SELECT sciname FROM taxa WHERE (tid = '.$tid.')';
+			$rs = $this->conn->query($sql);
+			while($r = $rs->fetch_object()) {
+				$retStr = $r->sciname;
+			}
+			$rs->free();
+		}
+		return $retStr;
+	}
+
 	//Setters and getters
 	public function getRecordCnt(){
 		return $this->recordCount;
