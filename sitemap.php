@@ -44,7 +44,11 @@ $smManager = new SiteMapManager();
 				<li><a href="collections/index.php"><?php echo $LANG['SEARCHENGINE'];?></a> - <?php echo $LANG['SEARCH_COLL'];?></li>
 				<li><a href="collections/misc/collprofiles.php"><?php echo $LANG['COLLECTIONS'];?></a> - <?php echo $LANG['LISTOFCOLL'];?></li>
 				<li><a href="collections/misc/collstats.php"><?php echo $LANG['COLLSTATS'];?></a></li>
-				<li><a href="collections/exsiccati/index.php"><?php echo $LANG['EXSICC'];?></a></li>
+				<?php
+				if(isset($ACTIVATE_EXSICCATI) && $ACTIVATE_EXSICCATI){
+					echo '<li><a href="collections/exsiccati/index.php">'.$LANG['EXSICC'].'</a></li>';
+				}
+				?>
 				<li><?php echo (isset($LANG['DATA_PUBLISHING'])?$LANG['DATA_PUBLISHING']:'Data Publishing');?></li>
 				<li style="margin-left:15px"><a href="collections/datasets/rsshandler.php" target="_blank"><?php echo $LANG['COLLECTIONS_RSS'];?></a></li>
 				<li style="margin-left:15px"><a href="collections/datasets/datapublisher.php"><?php echo $LANG['DARWINCORE'];?></a> - <?php echo $LANG['PUBDATA'];?></li>
@@ -171,20 +175,16 @@ $smManager = new SiteMapManager();
 								<li>
 									<?php echo $LANG['AUTHIDKEY'];?>
 								</li>
-								<li>
-									<?php
-									//Show Checklists that user has explicit editing rights
-									if($clAdmin){
-										echo $LANG['CODINGCHARA'].'<br/>';
-										echo '<ul>';
-										foreach($clAdmin as $vClid => $name){
-											echo "<li><a href='".$CLIENT_ROOT."/ident/tools/massupdate.php?clid=".$vClid."'>".$name."</a></li>";
-										}
-										echo '</ul>';
-									}
-									?>
-								</li>
 								<?php
+								//Show Checklists that user has explicit editing rights
+								if($clAdmin){
+									echo '<li>'.$LANG['CODINGCHARA'].'</li>';
+									echo '<ul>';
+									foreach($clAdmin as $vClid => $name){
+										echo "<li><a href='".$CLIENT_ROOT."/ident/tools/massupdate.php?clid=".$vClid."'>".$name."</a></li>";
+									}
+									echo '</ul>';
+								}
 							}
 							else{
 								?>
