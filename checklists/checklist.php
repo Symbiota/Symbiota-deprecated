@@ -690,9 +690,9 @@ $taxaArray = $clManager->getTaxaList($pageNumber,($printMode?0:500));
 						foreach($taxaArray as $tid => $sppArr){
 							$group = $sppArr['taxongroup'];
 							if($group != $prevGroup){
-								$famUrl = "../taxa/index.php?taxauthid=1&taxon=$group&clid=".$clid;
+								$famUrl = '../taxa/index.php?taxauthid=1&taxon='.strip_tags($group).'&clid='.$clid;
 								?>
-								<div class="familydiv" id="<?php echo $group;?>" style="margin:12px 0px 3px 0px;font-weight:bold;">
+								<div class="familydiv" id="<?php echo strip_tags($group);?>" style="margin:12px 0px 3px 0px;font-weight:bold;">
 									<a href="<?php echo $famUrl; ?>" target="_blank" style="color:black;"><?php echo $group;?></a>
 								</div>
 								<?php
