@@ -752,18 +752,10 @@ class TaxonomyEditorManager{
 	public function transferResources($targetTid){
 		$statusStr = '';
 		if(is_numeric($targetTid)){
-			//Remap occurrence records
-			$sql ='UPDATE omoccurrences SET tidinterpreted = '.$targetTid.' WHERE tidinterpreted = '.$this->tid;
-			if(!$this->conn->query($sql)){
-				$statusStr .= 'ERROR transferring occurrence records ('.$this->conn->error.')<br/>';
-			}
-			$sql ='UPDATE omoccurdeterminations SET tidinterpreted = '.$targetTid.' WHERE tidinterpreted = '.$this->tid;
-			if(!$this->conn->query($sql)){
-				$statusStr .= 'ERROR transferring occurrence determination records ('.$this->conn->error.')<br/>';
-			}
+			//Set occurrence and determination tids to NULL within delete function function below
 
-			//Field images
-			$sql ='UPDATE IGNORE images SET tid = '.$targetTid.' WHERE tid = '.$this->tid;
+			//Field images; specimen images set to null within delete function
+			$sql ='UPDATE IGNORE images SET tid = '.$targetTid.' WHERE occid IS NULL AND tid = '.$this->tid;
 			if(!$this->conn->query($sql)){
 				$statusStr .= 'ERROR transferring image links ('.$this->conn->error.')<br/>';
 			}
@@ -823,10 +815,12 @@ class TaxonomyEditorManager{
 		if(!$this->conn->query($sql)){
 			$statusStr .= 'ERROR setting tid to NULL for occurrence images in deleteTaxon method ('.$this->conn->error.')<br/>';
 		}
+		/*
 		$sql ='DELETE FROM images WHERE tid = '.$this->tid;
 		if(!$this->conn->query($sql)){
 			$statusStr .= 'ERROR deleting remaining links in deleteTaxon method ('.$this->conn->error.')<br/>';
 		}
+		*/
 
 		//Vernaculars
 		$sql ='DELETE FROM taxavernaculars WHERE tid = '.$this->tid;
@@ -840,10 +834,14 @@ class TaxonomyEditorManager{
 			$statusStr .= 'ERROR deleting taxa description blocks in deleteTaxon method ('.$this->conn->error.')<br/>';
 		}
 
-		//Occurrences
+		//Set occurrence and determination tids to NULL; collection can clean later using the taxonomic cleaning tools
 		$sql = 'UPDATE omoccurrences SET tidinterpreted = NULL WHERE tidinterpreted = '.$this->tid;
 		if(!$this->conn->query($sql)){
 			$statusStr .= 'ERROR setting tidinterpreted to NULL in deleteTaxon method ('.$this->conn->error.')<br/>';
+		}
+		$sql ='UPDATE omoccurdeterminations SET tidinterpreted = NULL WHERE tidinterpreted = '.$this->tid;
+		if(!$this->conn->query($sql)){
+			$statusStr .= 'ERROR transferring occurrence determination records ('.$this->conn->error.')<br/>';
 		}
 
 		//Vouchers
@@ -852,7 +850,7 @@ class TaxonomyEditorManager{
 			$statusStr .= 'ERROR deleting voucher links in deleteTaxon method ('.$this->conn->error.')<br/>';
 		}
 
-		//Checklists
+		//Links to checklists
 		$sql ='DELETE FROM fmchklsttaxalink WHERE tid = '.$this->tid;
 		if(!$this->conn->query($sql)){
 			$statusStr .= 'ERROR deleting checklist links in deleteTaxon method ('.$this->conn->error.')<br/>';
