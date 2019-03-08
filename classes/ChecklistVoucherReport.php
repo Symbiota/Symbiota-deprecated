@@ -161,7 +161,7 @@ class ChecklistVoucherReport extends ChecklistVoucherAdmin {
 				'o.tidinterpreted, o.sciname, o.recordedby, o.recordnumber, o.eventdate, '.
 				'CONCAT_WS("; ",o.country, o.stateprovince, o.county, o.locality) as locality '.
 				$sqlBase.' LIMIT '.($limitIndex?($limitIndex*400).',':'').'400';
-			//echo '<div>'.$sql.'</div>';
+			//echo '<div>'.$sql.'</div>'; exit;
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
 				$retArr[$r->sciname][$r->occid]['tid'] = $r->tidinterpreted;
@@ -179,9 +179,8 @@ class ChecklistVoucherReport extends ChecklistVoucherAdmin {
 			$rs->free();
 
 			//Set missing taxa count
-			$sqlB = 'SELECT COUNT(DISTINCT ts.tidaccepted) as cnt '.
-				$sqlBase;
-			//echo '<div>'.$sql.'</div>';
+			$sqlB = 'SELECT COUNT(DISTINCT ts.tidaccepted) as cnt '.$sqlBase;
+			//echo '<div>'.$sqlB.'</div>'; exit;
 			$rsB = $this->conn->query($sqlB);
 			if($r = $rsB->fetch_object()){
 				$this->missingTaxaCount = $r->cnt;
