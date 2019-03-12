@@ -262,15 +262,25 @@ class OccurrenceTaxaManager {
 							//$sqlWhereTaxa .= "OR (o.tidinterpreted IN(".implode(',',$tidArr).")) ";
 							$tidInArr = array_merge($tidInArr,$tidArr);
 							//Return matches that are not linked to thesaurus
-							if($rankid > 219 && in_array($term, $this->taxaSearchTerms)) $sqlWhereTaxa .= "OR (o.sciname LIKE '".$this->cleanInStr($term)."%') ";
-							elseif($rankid == 180) $sqlWhereTaxa .= "OR (o.sciname LIKE '".$this->cleanInStr($term)."%') ";
+							if($rankid > 219 && in_array($term, $this->taxaSearchTerms)){
+								$sqlWhereTaxa .= "OR (o.sciname LIKE '".$this->cleanInStr($term)."%') ";
+							}
+							elseif($rankid == 180){
+								$sqlWhereTaxa .= "OR (o.sciname LIKE '".$this->cleanInStr($term)." %') ";
+							}
 						}
 						else{
 							$term = $this->cleanInStr(trim($term,'%'));
 							//Protect against someone trying to download big pieces of the occurrence table through the user interface
 							if(strlen($term) < 4) $term .= ' ';
 							//Return matches for "Pinus a"
-							$sqlWhereTaxa .= "OR (o.sciname LIKE '".$term."%') ";
+							if(strpos($term, ' ') || strpos($term, '%')){
+								$sqlWhereTaxa .= "OR (o.sciname LIKE '".$term."%') ";
+							}
+							else{
+								$sqlWhereTaxa .= "OR (o.sciname LIKE '".$term." %') ";
+							}
+							//$sqlWhereTaxa .= "OR (o.sciname LIKE '".$term."%') ";
 						}
 					}
 					if(array_key_exists("synonyms",$searchArr)){
