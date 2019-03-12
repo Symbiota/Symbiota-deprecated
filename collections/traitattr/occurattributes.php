@@ -28,13 +28,13 @@ if(!is_numeric($paneX)) $paneX = '';
 if(!is_numeric($paneY)) $paneY = '';
 if(!is_numeric($start)) $start = 0;
 
-$isEditor = 0; 
+$isEditor = 0;
 if($SYMB_UID){
 	if($IS_ADMIN){
 		$isEditor = 2;
 	}
 	elseif($collid){
-		//If a page related to collections, one maight want to... 
+		//If a page related to collections, one maight want to...
 		if(array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collid,$USER_RIGHTS["CollAdmin"])){
 			$isEditor = 2;
 		}
@@ -51,14 +51,14 @@ $attrManager->setCollid($collid);
 $statusStr = '';
 if($isEditor){
 	if($submitForm == 'Save and Next'){
-		$attrManager->setTargetOccid($_POST['targetoccid']);
-		if(!$attrManager->saveAttributes($_POST,$_POST['notes'],$SYMB_UID)){
+		$attrManager->setOccid($_POST['targetoccid']);
+		if(!$attrManager->addAttributes($_POST,$SYMB_UID)){
 			$statusStr = $attrManager->getErrorMessage();
 		}
 	}
 	elseif($submitForm == 'Set Status and Save'){
-		$attrManager->setTargetOccid($_POST['targetoccid']);
-		$attrManager->saveReviewStatus($traitID,$_POST);
+		$attrManager->setOccid($_POST['targetoccid']);
+		$attrManager->editAttributes($_POST);
 	}
 }
 $imgArr = array();
@@ -73,13 +73,13 @@ if($traitID){
 	elseif($mode == 2){
 		$imgRetArr = $attrManager->getReviewUrls($traitID, $reviewUid, $reviewDate, $reviewStatus, $start);
 		if($imgRetArr) $imgArr = current($imgRetArr);
-		
+
 	}
 	if($imgRetArr){
 		$catNum = $imgArr['catnum'];
 		unset($imgArr['catnum']);
 		$occid = key($imgRetArr);
-		if($occid) $attrManager->setTargetOccid($occid);
+		if($occid) $attrManager->setOccid($occid);
 	}
 }
 ?>
@@ -249,9 +249,9 @@ if($traitID){
 		}
 		?>
 		<div class="navpath">
-			<a href="../../index.php">Home</a> &gt;&gt; 
+			<a href="../../index.php">Home</a> &gt;&gt;
 			<a href="../misc/collprofiles.php?collid=<?php echo $collid; ?>&emode=1">Collection Management</a> &gt;&gt;
-			<?php 
+			<?php
 			if($mode == 2){
 				echo '<b>Attribute Reviewer</b>';
 			}
@@ -260,7 +260,7 @@ if($traitID){
 			}
 			?>
 		</div>
-		<?php 
+		<?php
 		if($statusStr){
 			echo '<div style="color:red">';
 			echo $statusStr;
@@ -275,7 +275,7 @@ if($traitID){
 			<div style="float:right;width:290px;">
 				<?php
 				$attrNameArr = $attrManager->getTraitNames();
-				if($mode == 1){ 
+				if($mode == 1){
 					?>
 					<fieldset style="margin-top:25px">
 						<legend><b>Filter</b></legend>
@@ -289,7 +289,7 @@ if($traitID){
 								<select name="traitid">
 									<option value="">Select Trait</option>
 									<option value="">------------------------------------</option>
-									<?php 
+									<?php
 									if($attrNameArr){
 										foreach($attrNameArr as $ID => $aName){
 											echo '<option value="'.$ID.'" '.($traitID==$ID?'SELECTED':'').'>'.$aName.'</option>';
@@ -316,7 +316,7 @@ if($traitID){
 						</form>
 					</fieldset>
 				<?php
-				} 
+				}
 				elseif($mode == 2){
 					?>
 					<fieldset style="margin-top:25px">
@@ -326,7 +326,7 @@ if($traitID){
 								<select name="traitid">
 									<option value="">Select Trait</option>
 									<option value="">------------------------------------</option>
-									<?php 
+									<?php
 									if($attrNameArr){
 										foreach($attrNameArr as $ID => $aName){
 											echo '<option value="'.$ID.'" '.($traitID==$ID?'SELECTED':'').'>'.$aName.'</option>';
@@ -342,7 +342,7 @@ if($traitID){
 								<select name="reviewuid">
 									<option value="">All Editors</option>
 									<option value="">-----------------------</option>
-									<?php 
+									<?php
 									$editorArr = $attrManager->getEditorArr();
 									foreach($editorArr as $uid => $name){
 										echo '<option value="'.$uid.'" '.($uid==$reviewUid?'SELECTED':'').'>'.$name.'</option>';
@@ -354,7 +354,7 @@ if($traitID){
 								<select name="reviewdate">
 									<option value="">All Dates</option>
 									<option value="">-----------------------</option>
-									<?php 
+									<?php
 									$dateArr = $attrManager->getEditDates();
 									foreach($dateArr as $date){
 										echo '<option '.($date==$reviewDate?'SELECTED':'').'>'.$date.'</option>';
@@ -379,35 +379,45 @@ if($traitID){
 								<input name="submitform" type="submit" value="Get Images" />
 							</div>
 							<div>
-								<?php 
+								<?php
 								if($traitID){
 									$rCnt = $attrManager->getReviewCount($traitID, $reviewUid, $reviewDate, $reviewStatus);
 									echo '<b>'.($rCnt?$start+1:0).' of '.$rCnt.' records</b>';
 									if($rCnt > 1){
 										$next = ($start+1);
-										if($next >= $rCnt) $next = 0; 
+										if($next >= $rCnt) $next = 0;
 										echo ' (<a href="#" onclick="nextReviewRecord('.($next).')">Next record &gt;&gt;</a>)';
-									} 
-								} 
+									}
+								}
 								?>
 							</div>
 						</form>
 					</fieldset>
 					<?php
-				} 
+				}
 				if($imgArr){
 					$traitArr = $attrManager->getTraitArr($traitID,($mode==2?true:false));
+					$statusCode = 0;
+					$notes = '';
+					foreach($traitArr['states'] as $stArr){
+						if(isset($stArr['statuscode']) && $stArr['statuscode']) $statusCode = $stArr['statuscode'];
+						if(isset($stArr['notes']) && $stArr['notes']) $notes = $stArr['notes'];
+					}
 					?>
 					<fieldset style="margin-top:20px">
 						<legend><b>Action Panel - <?php echo $traitArr[$traitID]['name']; ?></b></legend>
 						<form name="submitform" method="post" action="occurattributes.php" onsubmit="return verifySubmitForm(this)" >
 							<div>
-								<?php 
+								<?php
 								$attrManager->echoFormTraits($traitID);
 								?>
 							</div>
+							<div style="margin:10px 5px;">
+								Notes:
+								<input name="notes" type="text" style="width:200px" value="<?php echo $notes; ?>" />
+							</div>
 							<div style="margin-left:5;">
-								Status: 
+								Status:
 								<select name="setstatus">
 									<?php
 									if($mode == 2){
@@ -422,7 +432,7 @@ if($traitID){
 										<option value="0">---------------</option>
 										<option value="5">Expert Needed</option>
 										<?php
-									} 
+									}
 									?>
 								</select>
 							</div>
@@ -436,10 +446,10 @@ if($traitID){
 								<input id="imgres2" name="imgres" type="hidden" value="<?php echo $imgRes; ?>" />
 								<input name="targetoccid" type="hidden" value="<?php echo $occid; ?>" />
 								<input name="mode" type="hidden" value="<?php echo $mode; ?>" />
-								<input name="reviewuid" type="hidden" value="<?php echo $reviewUid; ?>" /> 
-								<input name="reviewdate" type="hidden" value="<?php echo $reviewDate; ?>" /> 
-								<input name="reviewstatus" type="hidden" value="<?php echo $reviewStatus; ?>" /> 
-								<?php 
+								<input name="reviewuid" type="hidden" value="<?php echo $reviewUid; ?>" />
+								<input name="reviewdate" type="hidden" value="<?php echo $reviewDate; ?>" />
+								<input name="reviewstatus" type="hidden" value="<?php echo $reviewStatus; ?>" />
+								<?php
 								if($mode == 2){
 									echo '<input name="submitform" type="submit" value="Set Status and Save" />';
 								}
@@ -451,17 +461,17 @@ if($traitID){
 						</form>
 					</fieldset>
 					<?php
-				} 
+				}
 				?>
 			</div>
 			<div style="height:600px">
-				<?php 
+				<?php
 				if($imgArr){
 					?>
 					<div>
 						<span><input id="imgresmed" name="resradio"  type="radio" checked onchange="changeImgRes('med')" />Med Res.</span>
 						<span style="margin-left:6px;"><input id="imgreslg" name="resradio" type="radio" onchange="changeImgRes('lg')" />High Res.</span>
-						<?php 
+						<?php
 						if($occid){
 							if(!$catNum) $catNum = 'Specimen Details';
 							echo '<span style="margin-left:50px;">';
@@ -485,7 +495,7 @@ if($traitID){
 				else{
 					if($submitForm)
 						echo '<div style="margin:50px;color:red;font-weight:bold;font-size:140%">No images available matching taxon search criteria</div>';
-					else 
+					else
 						echo '<div style="margin:50px;font-weight:bold;font-size:140%">Select a trait and submit filter in the form to the right to display images that have not yet been scored</div>';
 				}
 				?>
@@ -494,10 +504,10 @@ if($traitID){
 		}
 		else{
 			echo '<div><b>ERROR: collection identifier is not set</b></div>';
-		} 
+		}
 		?>
 		</div>
-		<?php 
+		<?php
 		include($SERVER_ROOT.'/footer.php');
 		?>
 	</body>
