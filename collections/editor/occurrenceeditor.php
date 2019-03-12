@@ -33,7 +33,6 @@ if($crowdSourceMode){
 	$occManager->setCrowdSourceMode(1);
 }
 
-$isEditor = 0;		//If not editor, edits will be submitted to omoccuredits table but not applied to omoccurrences
 $displayQuery = 0;
 $isGenObs = 0;
 $collMap = Array();
@@ -84,7 +83,9 @@ if($SYMB_UID){
 		}
 	}
 
-	//0 = not editor, 1 = admin, 2 = editor
+	$isEditor = 0;
+	//0 = not editor, 1 = admin, 2 = editor, 3 = taxon editor, 4 = crowdsource editor or collection allows public edits
+	//If not editor, edits will be submitted to omoccuredits table but not applied to omoccurrences
 	if($IS_ADMIN || ($collId && array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collId,$USER_RIGHTS["CollAdmin"]))){
 		$isEditor = 1;
 	}
@@ -117,7 +118,6 @@ if($SYMB_UID){
 		}
 		elseif(array_key_exists("CollTaxon",$USER_RIGHTS) && $occId){
 			//Check to see if this user is authorized to edit this occurrence given their taxonomic editing authority
-			//0 = not editor, 2 = full editor, 3 = taxon editor, but not for this specific occurrence
 			$isEditor = $occManager->isTaxonomicEditor();
 		}
 	}
@@ -624,6 +624,17 @@ else{
 												<a href="includes/imagetab.php?<?php echo $anchorVars; ?>"
 													style="">Images</a>
 											</li>
+											<?php
+											if($occManager->traitCodingActivated()){
+												$traitAnchor = $anchorVars.'&delstates='.(isset($_POST['delstates'])?$_POST['delstates']:'');
+												?>
+												<li id="traitTab">
+													<a href="includes/traittab.php?<?php echo $traitAnchor; ?>"
+														style="">Traits</a>
+												</li>
+												<?php
+											}
+											?>
 											<li id="resourceTab">
 												<a href="includes/resourcetab.php?<?php echo $anchorVars; ?>"
 													style="">Linked Resources</a>

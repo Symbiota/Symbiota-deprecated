@@ -6,8 +6,8 @@ class OccurrenceAttributes extends Manager {
 	private $collidStr = 0;
 	private $tidFilter;
 	private $traitArr = array();
-	private $targetOccid = 0;
-	private $attrNotes = '';
+	private $stateCodedArr = array();
+	private $occid = 0;
 	private $sqlBody = '';
 
 	public function __construct($type = 'write'){
@@ -19,7 +19,7 @@ class OccurrenceAttributes extends Manager {
 	}
 
 	//Edit functions
-	public function saveAttributes($postArr,$notes,$uid){
+	public function addAttributes($postArr,$uid){
 		if(!is_numeric($uid)){
 			$this->errorMessage = 'ERROR saving occurrence attribute: bad input values; ';
 			return false;
@@ -38,7 +38,8 @@ class OccurrenceAttributes extends Manager {
 		}
 		foreach($stateArr as $stateId){
 			if(is_numeric($stateId)){
-				$sql = 'INSERT INTO tmattributes(stateid,occid,notes,createduid) VALUES('.$stateId.','.$this->targetOccid.',"'.$this->cleanInStr($notes).'",'.$uid.') ';
+				$sql = 'INSERT INTO tmattributes(stateid,occid,notes,createduid) VALUES('.$stateId.','.$this->occid.',"'.$this->cleanInStr($postArr['notes']).'",'.$uid.') ';
+				//echo $sql.'<br/>';
 				if(!$this->conn->query($sql)){
 					$this->errorMessage .= 'ERROR saving occurrence attribute: '.$this->conn->error.'; ';
 					$status = false;
@@ -47,6 +48,88 @@ class OccurrenceAttributes extends Manager {
 			else{
 				$this->errorMessage .= 'ERROR saving occurrence attribute: bad input values ('.$stateId.'); ';
 				$status = false;
+			}
+		}
+		return $status;
+	}
+
+	public function editAttributes($postArr){
+		$status = false;
+		$stateArr = array();
+
+		foreach($postArr as $postKey => $postValue){
+			if(substr($postKey,0,8) == 'stateid-'){
+				if(is_array($postValue)){
+					$stateArr = array_merge($stateArr,$postValue);
+				}
+				else{
+					$stateArr[] = $postValue;
+				}
+			}
+		}
+
+		$setStatus = $postArr['setstatus'];
+		$traitID = $postArr['traitid'];
+		if(is_numeric($traitID) && is_numeric($setStatus)){
+			$this->setTraitArr($traitID);
+			//$this->setTraitStates();
+			$attrArr = $this->setCodedAttribute();
+			$addArr = array_diff($stateArr,$attrArr);
+			$delArr = array_diff($attrArr,$stateArr);
+			if($addArr){
+				foreach($addArr as $id){
+					if(is_numeric($id)){
+						$sql = 'INSERT INTO tmattributes(stateid,occid,createduid) VALUES('.$id.','.$this->occid.','.$GLOBALS['SYMB_UID'].') ';
+						//echo $sql.'<br/>';
+						if($this->conn->query($sql)){
+							$status = true;
+						}
+						else{
+							$this->errorMessage = 'ERROR addin occurrence attribute: '.$this->conn->error;
+							$status = false;
+						}
+					}
+				}
+			}
+			if($delArr){
+				foreach($delArr as $id){
+					if(is_numeric($id)){
+						$sql = 'DELETE FROM tmattributes WHERE stateid = '.$id.' AND occid = '.$this->occid;
+						//echo $sql.'<br/>';
+						if($this->conn->query($sql)){
+							$status = true;
+						}
+						else{
+							$this->errorMessage = 'ERROR removing occurrence attribute: '.$this->conn->error;
+							$status = false;
+						}
+					}
+				}
+			}
+
+			$sql = 'UPDATE tmattributes a INNER JOIN tmstates s ON a.stateid = s.stateid '.
+				'SET a.statuscode = '.$setStatus.', a.notes = "'.$this->cleanInStr($postArr['notes']).'" '.
+				'WHERE a.occid = '.$this->occid.' AND s.traitid IN('.implode(',',array_keys($this->traitArr)).')';
+			if($this->conn->query($sql)){
+				$status = true;
+			}
+			else{
+				$this->errorMessage = 'ERROR updating occurrence attribute review status: '.$this->conn->error;
+				$status = false;
+			}
+		}
+		return $status;
+	}
+
+	public function deleteAttributes($stateIdStr){
+		$status = false;
+		if(preg_match('/^[1-9,]+$/',$stateIdStr) && $this->occid){
+			$sql = 'DELETE FROM tmattributes WHERE (occid = '.$this->occid.') AND (stateid IN('.$stateIdStr.'))';
+			if($this->conn->query($sql)){
+				$status = true;
+			}
+			else{
+				$this->errorMessage = 'ERROR deleting trait attributes: '.$this->conn->error;
 			}
 		}
 		return $status;
@@ -214,14 +297,16 @@ class OccurrenceAttributes extends Manager {
 
 	private function setCodedAttribute(){
 		$retArr = array();
-		$sql = 'SELECT s.traitid, a.stateid, a.notes '.
+		$sql = 'SELECT s.traitid, a.stateid, a.notes, a.statuscode '.
 			'FROM tmattributes a INNER JOIN tmstates s ON a.stateid = s.stateid '.
-			'WHERE (a.occid = '.$this->targetOccid.') ';
+			'WHERE (a.occid = '.$this->occid.') ';
 		if($this->traitArr) $sql .= 'AND (s.traitid IN('.implode(',',array_keys($this->traitArr)).'))';
 		//echo $sql; exit;
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
-			$this->traitArr[$r->traitid]['states'][$r->stateid]['coded'] = $r->notes;
+			$this->traitArr[$r->traitid]['states'][$r->stateid]['coded'] = '';
+			$this->traitArr[$r->traitid]['states'][$r->stateid]['notes'] = $r->notes;
+			$this->traitArr[$r->traitid]['states'][$r->stateid]['statuscode'] = $r->statuscode;
 			$retArr[] = $r->stateid;
 		}
 		$rs->free();
@@ -230,12 +315,9 @@ class OccurrenceAttributes extends Manager {
 
 	public function echoFormTraits($traitID){
 		echo $this->getTraitUnitString($traitID,true);
-		echo '<div style="margin:10px 5px;">';
-		echo 'Notes: <input name="notes" type="text" style="width:200px" value="'.$this->attrNotes.'" />';
-		echo '</div>';
 	}
 
-	private function getTraitUnitString($traitID,$dispaly,$classStr=''){
+	private function getTraitUnitString($traitID,$display,$classStr=''){
 		$controlType = 'checkbox';
 		if($this->traitArr[$traitID]['props']){
 			$propArr = json_decode($this->traitArr[$traitID]['props'],true);
@@ -249,7 +331,7 @@ class OccurrenceAttributes extends Manager {
 			if(array_key_exists('coded',$sArr)){
 				$isCoded = true;
 				$hasBeenCoded = true;
-				$this->attrNotes = $sArr['coded'];
+				$this->stateCodedArr[$sid] = $sid;
 			}
 			$depTraitId = false;
 			if(isset($sArr['dependTraitID']) && $sArr['dependTraitID']) $depTraitId = $sArr['dependTraitID'];
@@ -269,7 +351,7 @@ class OccurrenceAttributes extends Manager {
 			$classArr = explode(' ',$classStr);
 			$divClass = array_pop($classArr);
 		}
-		$outStr = '<div class="'.$divClass.'" style="margin-left:'.($classStr?'10':'').'px; display:'.($dispaly?'block':'none').';">';
+		$outStr = '<div class="'.$divClass.'" style="margin-left:'.($classStr?'10':'').'px; display:'.($display?'block':'none').';">';
 		if($controlType == 'select'){
 			$outStr .= '<select name="stateid">';
 			$outStr .= '<option value="">Select State</option>';
@@ -375,62 +457,6 @@ class OccurrenceAttributes extends Manager {
 			$sqlFrag .= 'AND (a.statuscode IS NULL OR a.statuscode = 0) ';
 		}
 		return $sqlFrag;
-	}
-
-	public function saveReviewStatus($traitID, $postArr){
-		$status = false;
-		$stateArr = array();
-		foreach($postArr as $postKey => $postValue){
-			if(substr($postKey,0,8) == 'stateid-'){
-				if(is_array($postValue)){
-					$stateArr = array_merge($stateArr,$postValue);
-				}
-				else{
-					$stateArr[] = $postValue;
-				}
-			}
-		}
-		$setStatus = $postArr['setstatus'];
-		if(is_numeric($traitID) && is_numeric($setStatus)){
-			$this->setTraitArr($traitID);
-			//$this->setTraitStates();
-			$attrArr = $this->setCodedAttribute();
-			$addArr = array_diff($stateArr,$attrArr);
-			$delArr = array_diff($attrArr,$stateArr);
-			if($addArr){
-				foreach($addArr as $id){
-					if(is_numeric($id)){
-						$sql = 'INSERT INTO tmattributes(stateid,occid,createduid) VALUES('.$id.','.$this->targetOccid.','.$GLOBALS['SYMB_UID'].') ';
-						//echo $sql.'<br/>';
-						if(!$this->conn->query($sql)){
-							$this->errorMessage = 'ERROR addin occurrence attribute: '.$this->conn->error;
-							$status = false;
-						}
-					}
-				}
-			}
-			if($delArr){
-				foreach($delArr as $id){
-					if(is_numeric($id)){
-						$sql = 'DELETE FROM tmattributes WHERE stateid = '.$id.' AND occid = '.$this->targetOccid;
-						//echo $sql.'<br/>';
-						if(!$this->conn->query($sql)){
-							$this->errorMessage = 'ERROR removing occurrence attribute: '.$this->conn->error;
-							$status = false;
-						}
-					}
-				}
-			}
-
-			$sql = 'UPDATE tmattributes a INNER JOIN tmstates s ON a.stateid = s.stateid '.
-				'SET a.statuscode = '.$setStatus.', a.notes = "'.$this->cleanInStr($postArr['notes']).'" '.
-				'WHERE a.occid = '.$this->targetOccid.' AND s.traitid IN('.implode(',',array_keys($this->traitArr)).')';
-			if(!$this->conn->query($sql)){
-				$this->errorMessage = 'ERROR updating occurrence attribute review status: '.$this->conn->error;
-				$status = false;
-			}
-		}
-		return $status;
 	}
 
 	public function getEditorArr(){
@@ -556,6 +582,17 @@ class OccurrenceAttributes extends Manager {
 	}
 
 	//Setters, getters, and misc get functions
+	public function getObserverUid(){
+		$retUid = 0;
+		$sql = 'SELECT observeruid FROM omoccurrences WHERE occid = '.$this->occid;
+		$rs = $this->conn->query($sql);
+		if($r = $rs->fetch_object()){
+			$retUid = $r->observeruid;
+		}
+		$rs->free();
+		return $retUid;
+	}
+
 	public function getCollectionList($collArr){
 		$retArr = array();
 		$sql = 'SELECT collid, collectionname, CONCAT_WS("-",institutioncode,collectioncode) as instcode FROM omcollections ';
@@ -580,10 +617,14 @@ class OccurrenceAttributes extends Manager {
 		}
 	}
 
-	public function setTargetOccid($occid){
+	public function setOccid($occid){
 		if(is_numeric($occid)){
-			$this->targetOccid = $occid;
+			$this->occid = $occid;
 		}
+	}
+
+	public function getStateCodedStr(){
+		return implode(',', $this->stateCodedArr);
 	}
 }
 ?>
