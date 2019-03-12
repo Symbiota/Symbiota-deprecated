@@ -4,27 +4,32 @@ $(function() {
 		autoOpen: false,
 		position: { my: "left top", at: "right bottom", of: "#zoomInfoDiv" }
 	});
-	
+
 	$( "#zoomInfoDiv" ).click(function() {
 		$( "#zoomInfoDialog" ).dialog( "open" );
+	});
+
+	$( function() {
+		//$( "#labelProcDiv" ).draggable();
+		//$( ".selector" ).draggable( "destroy" );
 	});
 });
 </script>
 <div style="width:100%;height:1050px;">
-	<fieldset style="height:95%;background-color:white;">
+	<fieldset id="labelProcDiv" style="height:95%;background-color:white;">
 		<legend><b>Label Processing</b></legend>
 		<div style="margin-top:-10px;height:15px;position:relative">
 			<div style="float:left;padding-top:3px"><a id="zoomInfoDiv" href="#">Zoom?</a></div>
 			<div id="zoomInfoDialog">
 				Hold down control button and click on the image to quick zoom into specific location
 				or hold down the shift button and hold a left-click while moving the mouse up or down for a more controlled zoom action.
-				Click and drag bottom right corner of image to resize display panel.  
+				Click and drag bottom right corner of image to resize display panel.
 			</div>
 			<div style="float:right;padding:0px 3px;margin:0px 3px;"><input id="imgreslg" name="resradio" type="radio" onchange="changeImgRes('lg')" />High Res.</div>
 			<div style="float:right;padding:0px 3px;margin:0px 3px;"><input id="imgresmed" name="resradio"  type="radio" checked onchange="changeImgRes('med')" />Med Res.</div>
 			<?php
 			reset($imgArr);
-			$imgUrl = current($imgArr); 
+			$imgUrl = current($imgArr);
 			if(strpos($imgUrl['web'],'bisque.cyverse')){
 				echo '<div style="float:right;padding:0px 3px;margin:2px 20px 0px 0px;">Rotate: <a href="#" onclick="rotateiPlantImage(-90)">&nbsp;L&nbsp;</a> &lt;&gt; <a href="#" onclick="rotateiPlantImage(90)">&nbsp;R&nbsp;</a></div>';
 			}
@@ -41,7 +46,7 @@ $(function() {
 					<div>
 						<img id="activeimg-<?php echo $imgCnt; ?>" src="<?php echo $iUrl; ?>" style="width:400px;height:400px" />
 					</div>
-					<?php 
+					<?php
 					if(array_key_exists('error', $iArr)){
 						echo '<div style="font-weight:bold;color:red">'.$iArr['error'].'</div>';
 					}
