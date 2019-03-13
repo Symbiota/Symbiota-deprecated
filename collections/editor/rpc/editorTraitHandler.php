@@ -6,7 +6,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 $occid = $_REQUEST['occid'];
 $action = array_key_exists('submitAction',$_REQUEST)?$_REQUEST['submitAction']:'';
 
-$postArr = array('occid' => $occid, 'traitid' => $_REQUEST['traitID'], 'setstatus' => $_REQUEST['setStatus'], 'notes' => $_REQUEST['notes']);
+$postArr = array('occid' => $occid, 'traitid' => $_REQUEST['traitID'], 'setstatus' => $_REQUEST['setStatus'], 'source' => $_REQUEST['source'], 'notes' => $_REQUEST['notes']);
 
 $stateArr = json_decode($_REQUEST['stateData'],true);
 $postArr = array_merge($postArr,$stateArr);
