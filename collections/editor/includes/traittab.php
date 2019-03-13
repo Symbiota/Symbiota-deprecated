@@ -52,6 +52,7 @@ if($isEditor){
 	function submitEditForm(butElem){
 		var f = butElem.form;
 		var action = butElem.value;
+		var hasStates = false;
 		var stateJson = {};
 		$('input[name^="stateid"]').each(function(index,data) {
 			if($(this).prop('checked')){
@@ -61,26 +62,31 @@ if($isEditor){
 				else{
 					stateJson[$(this).attr('name')] = [$(this).val()];
 				}
+				hasStates = true;
 			}
 		});
-
-		var traitIdStr = f.traitid.value;
-		$("#msgDiv-"+traitIdStr).text('saving data...');
-		$("#msgDiv-"+traitIdStr).css('color', 'orange');
-		$.ajax({
-			type: "POST",
-			url: "rpc/editorTraitHandler.php",
-			data: { occid: f.occid.value, traitID: traitIdStr, submitAction: action, notes: f.notes.value, setStatus: f.setstatus.value, stateData: JSON.stringify(stateJson) }
-		}).done(function( retStatus ) {
-			if(retStatus == 1){
-				$("#msgDiv-"+traitIdStr).css('color', 'green');
-				$("#msgDiv-"+traitIdStr).text('data saved!');
-			}
-			else{
-				$("#msgDiv-"+traitIdStr).css('color', 'red');
-				$("#msgDiv-"+traitIdStr).text('ERROR saving data: '+retStatus);
-			}
-		});
+		if(hasStates){
+			var traitIdStr = f.traitid.value;
+			$("#msgDiv-"+traitIdStr).text('saving data...');
+			$("#msgDiv-"+traitIdStr).css('color', 'orange');
+			$.ajax({
+				type: "POST",
+				url: "rpc/editorTraitHandler.php",
+				data: { occid: f.occid.value, traitID: traitIdStr, submitAction: action, source: f.source.value, notes: f.notes.value, setStatus: f.setstatus.value, stateData: JSON.stringify(stateJson) }
+			}).done(function( retStatus ) {
+				if(retStatus == 1){
+					$("#msgDiv-"+traitIdStr).css('color', 'green');
+					$("#msgDiv-"+traitIdStr).text('data saved!');
+				}
+				else{
+					$("#msgDiv-"+traitIdStr).css('color', 'red');
+					$("#msgDiv-"+traitIdStr).text('ERROR saving data: '+retStatus);
+				}
+			});
+		}
+		else{
+			alert("No traits have been selected");
+		}
 	}
 
 </script>
@@ -103,9 +109,11 @@ if($isEditor){
 			if(!isset($codeTraitArr['dependentTrait'])){
 				$statusCode = 0;
 				$notes = '';
+				$source = '';
 				foreach($codeTraitArr['states'] as $id => $stArr){
 					if(isset($stArr['statuscode']) && $stArr['statuscode']) $statusCode = $stArr['statuscode'];
 					if(isset($stArr['notes']) && $stArr['notes']) $notes = $stArr['notes'];
+					if(isset($stArr['source']) && $stArr['source']) $source = $stArr['source'];
 				}
 				?>
 				<fieldset style="margin-top:20px">
@@ -131,6 +139,10 @@ if($isEditor){
 						<div style="margin:10px 5px;">
 							Notes:
 							<input name="notes" type="text" style="width:300px" value="<?php echo $notes; ?>" />
+						</div>
+						<div style="margin:10px 5px;">
+							Source:
+							<input name="source" type="text" style="width:300px" value="<?php echo $source; ?>" />
 						</div>
 						<div style="margin-left:5;">
 							Status:
@@ -186,6 +198,10 @@ if($isEditor){
 						<div style="margin:10px 5px;">
 							Notes:
 							<input name="notes" type="text" style="width:300px" value="" />
+						</div>
+						<div style="margin:10px 5px;">
+							Source:
+							<input name="source" type="text" style="width:300px" value="viewingSpecimenImage" />
 						</div>
 						<div style="margin-left:5;">
 							Status:

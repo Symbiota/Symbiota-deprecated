@@ -36,9 +36,13 @@ class OccurrenceAttributes extends Manager {
 				}
 			}
 		}
+		$sourceStr = 'viewingSpecimenImage';
+		if(isset($postArr['source']) && $postArr['source']) $sourceStr = $postArr['source'];
 		foreach($stateArr as $stateId){
 			if(is_numeric($stateId)){
-				$sql = 'INSERT INTO tmattributes(stateid,occid,notes,createduid) VALUES('.$stateId.','.$this->occid.',"'.$this->cleanInStr($postArr['notes']).'",'.$uid.') ';
+				$sql = 'INSERT INTO tmattributes(stateid,occid,source,notes,createduid) '.
+					'VALUES('.$stateId.','.$this->occid.','.($sourceStr?'"'.$this->cleanInStr($sourceStr).'"':'NULL').','.
+					($postArr['notes']?'"'.$this->cleanInStr($postArr['notes']).'"':'NULL').','.$uid.') ';
 				//echo $sql.'<br/>';
 				if(!$this->conn->query($sql)){
 					$this->errorMessage .= 'ERROR saving occurrence attribute: '.$this->conn->error.'; ';
@@ -107,8 +111,12 @@ class OccurrenceAttributes extends Manager {
 				}
 			}
 
+			$sourceStr = 'viewingSpecimenImage';
+			if(isset($postArr['source']) && $postArr['source']) $sourceStr = $postArr['source'];
 			$sql = 'UPDATE tmattributes a INNER JOIN tmstates s ON a.stateid = s.stateid '.
-				'SET a.statuscode = '.$setStatus.', a.notes = "'.$this->cleanInStr($postArr['notes']).'" '.
+				'SET a.statuscode = '.$setStatus.', a.notes = '.($postArr['notes']?'"'.$this->cleanInStr($postArr['notes']).'"':'NULL').','.
+				'a.source = '.($sourceStr?'"'.$this->cleanInStr($sourceStr).'"':'NULL').','.
+				'a.modifieduid = '.$GLOBALS['SYMB_UID'].', a.datelastmodified = NOW() '.
 				'WHERE a.occid = '.$this->occid.' AND s.traitid IN('.implode(',',array_keys($this->traitArr)).')';
 			if($this->conn->query($sql)){
 				$status = true;
@@ -123,7 +131,7 @@ class OccurrenceAttributes extends Manager {
 
 	public function deleteAttributes($stateIdStr){
 		$status = false;
-		if(preg_match('/^[1-9,]+$/',$stateIdStr) && $this->occid){
+		if(preg_match('/^[0-9,]+$/',$stateIdStr) && $this->occid){
 			$sql = 'DELETE FROM tmattributes WHERE (occid = '.$this->occid.') AND (stateid IN('.$stateIdStr.'))';
 			if($this->conn->query($sql)){
 				$status = true;
@@ -297,7 +305,7 @@ class OccurrenceAttributes extends Manager {
 
 	private function setCodedAttribute(){
 		$retArr = array();
-		$sql = 'SELECT s.traitid, a.stateid, a.notes, a.statuscode '.
+		$sql = 'SELECT s.traitid, a.stateid, a.source, a.notes, a.statuscode, a.modifieduid, a.datelastmodified, a.createduid, a.initialtimestamp '.
 			'FROM tmattributes a INNER JOIN tmstates s ON a.stateid = s.stateid '.
 			'WHERE (a.occid = '.$this->occid.') ';
 		if($this->traitArr) $sql .= 'AND (s.traitid IN('.implode(',',array_keys($this->traitArr)).'))';
@@ -305,8 +313,13 @@ class OccurrenceAttributes extends Manager {
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
 			$this->traitArr[$r->traitid]['states'][$r->stateid]['coded'] = '';
+			$this->traitArr[$r->traitid]['states'][$r->stateid]['source'] = $r->source;
 			$this->traitArr[$r->traitid]['states'][$r->stateid]['notes'] = $r->notes;
 			$this->traitArr[$r->traitid]['states'][$r->stateid]['statuscode'] = $r->statuscode;
+			$this->traitArr[$r->traitid]['states'][$r->stateid]['modifieduid'] = $r->modifieduid;
+			$this->traitArr[$r->traitid]['states'][$r->stateid]['datelastmodified'] = $r->datelastmodified;
+			$this->traitArr[$r->traitid]['states'][$r->stateid]['createduid'] = $r->createduid;
+			$this->traitArr[$r->traitid]['states'][$r->stateid]['createduid'] = $r->initialtimestamp;
 			$retArr[] = $r->stateid;
 		}
 		$rs->free();
