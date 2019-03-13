@@ -676,9 +676,9 @@ class OccurrenceEditorManager {
 			$rs->free();
 			if($retArr && count($retArr) == 1){
 				if(!$this->occid) $this->occid = $occid;
-				if(!$retArr[$occid]['institutioncode']) $retArr[$occid]['institutioncode'] = $this->collMap['institutioncode'];
-				if(!$retArr[$occid]['collectioncode']) $retArr[$occid]['collectioncode'] = $this->collMap['collectioncode'];
-				if(!$retArr[$occid]['ownerinstitutioncode']) $retArr[$occid]['ownerinstitutioncode'] = $this->collMap['institutioncode'];
+				if(!array_key_exists("institutioncode",$retArr[$occid])) $retArr[$occid]['institutioncode'] = $this->collMap['institutioncode'];
+				if(!array_key_exists("collectioncode",$retArr[$occid])) $retArr[$occid]['collectioncode'] = $this->collMap['collectioncode'];
+				if(!array_key_exists("ownerinstitutioncode",$retArr[$occid])) $retArr[$occid]['ownerinstitutioncode'] = $this->collMap['institutioncode'];
 			}
 			$this->occurrenceMap = $this->cleanOutArr($retArr);
 			if($this->occid){
@@ -1995,10 +1995,11 @@ class OccurrenceEditorManager {
 	public function getCollectionList(){
 		$retArr = array();
 		$collArr = array('0');
+		$collEditorArr = array();
 		if(isset($GLOBALS['USER_RIGHTS']['CollAdmin'])) $collArr = $GLOBALS['USER_RIGHTS']['CollAdmin'];
 		$sql = 'SELECT collid, collectionname FROM omcollections '.
 			'WHERE (collid IN('.implode(',',$collArr).')) ';
-		$collEditorArr = $GLOBALS['USER_RIGHTS']['CollEditor'];
+		if(array_key_exists("CollEditor",$GLOBALS['USER_RIGHTS'])) $collEditorArr = $GLOBALS['USER_RIGHTS']['CollEditor'];
 		if($collEditorArr){
 			$sql .= 'OR (collid IN('.implode(',',$collEditorArr).') AND colltype = "General Observations")';
 		}
