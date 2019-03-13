@@ -136,7 +136,7 @@ class SpecProcNlpHandler {
 		return $retArr;
 	}
 
-	public function batchProcess($collTarget, $source = 'abbyy'){
+    public function batchProcess($collTarget, $source = 'abbyy'){
 		$this->setCollectionMetadata($collTarget);
 		$collArr = explode(',',$collTarget);
 		$totalCnt = 0;
@@ -197,25 +197,6 @@ class SpecProcNlpHandler {
 			$totalCnt += $cnt;
 		}
 		$this->totalStats['collmeta']['totalcnt'] = $totalCnt;
-	}
-	
-	private function getRawOcr($prlid){
-		$retArr = array();
-		//Get raw OCR string
-		$sql = 'SELECT r.rawstr, o.collid, o.catalogNumber '.
-			'FROM omoccurrences o '.
-			'INNER JOIN images i ON o.occid = i.occid '.
-			'INNER JOIN specprocessorrawlabels r ON i.imgid = r.imgid '.
-			'WHERE (r.prlid = '.$prlid.')';
-		//echo $sql;
-		$rs = $this->conn->query($sql);
-		if($r = $rs->fetch_object()){
-			$retArr['rawocr'] = $r->rawstr;
-			$retArr['collid'] = $r->collid;
-			$retArr['catnum'] = $r->catalogNumber;
-		}
-		$rs->free();
-		return $retArr;
 	}
 	
 	public function convertDwcArrToJson($dwcArr){
