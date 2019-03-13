@@ -1,29 +1,66 @@
 <script>
-$(function() {
-	$( "#zoomInfoDialog" ).dialog({
-		autoOpen: false,
-		position: { my: "left top", at: "right bottom", of: "#zoomInfoDiv" }
+	$(function() {
+		$( "#zoomInfoDialog" ).dialog({
+			autoOpen: false,
+			position: { my: "left top", at: "right bottom", of: "#zoomInfoDiv" }
+		});
+
+		$( "#zoomInfoDiv" ).click(function() {
+			$( "#zoomInfoDialog" ).dialog( "open" );
+		});
 	});
 
-	$( "#zoomInfoDiv" ).click(function() {
-		$( "#zoomInfoDialog" ).dialog( "open" );
-	});
+	function floatImgPanel(){
+		$( "#labelProcFieldset" ).css('position', 'fixed');
+		$( "#labelProcFieldset" ).css('top', '20px');
+		var pos = $( "#labelProcDiv" ).position();
+		var posLeft = pos.left - $(window).scrollLeft();
+		$( "#labelProcFieldset" ).css('left', posLeft);
+		$( "#floatImgDiv" ).hide();
+		$( "#draggableImgDiv" ).hide();
+		$( "#anchorImgDiv" ).show();
+	}
 
-	$( function() {
-		//$( "#labelProcDiv" ).draggable();
-		//$( ".selector" ).draggable( "destroy" );
-	});
-});
+	function draggableImgPanel(){
+		$( "#labelProcFieldset" ).draggable();
+		$( "#labelProcFieldset" ).draggable({ cancel: "#labelprocessingdiv" });
+		$( "#labelHeaderDiv" ).css('cursor', 'move');
+		$( "#labelProcFieldset" ).css('top', '10px');
+		$( "#labelProcFieldset" ).css('left', '5px');
+		$( "#floatImgDiv" ).hide();
+		$( "#draggableImgDiv" ).hide();
+		$( "#anchorImgDiv" ).show();
+	}
+
+	function anchorImgPanel(){
+		$( "#draggableImgDiv" ).show();
+		$( "#floatImgDiv" ).show();
+		$( "#anchorImgDiv" ).hide();
+		$( "#labelProcFieldset" ).css('position', 'static');
+		$( "#labelProcFieldset" ).css('top', '');
+		$( "#labelProcFieldset" ).css('left', '');
+		try {
+			$( "#labelProcFieldset" ).draggable( "destroy" );
+			$( "#labelHeaderDiv" ).css('cursor', 'default');
+		}
+		catch(err) {
+		}
+	}
 </script>
-<div style="width:100%;height:1050px;">
-	<fieldset id="labelProcDiv" style="height:95%;background-color:white;">
+<div id="labelProcDiv" style="width:100%;height:1050px;position:relative">
+	<fieldset id="labelProcFieldset" style="height:95%;background-color:white;">
 		<legend><b>Label Processing</b></legend>
-		<div style="margin-top:-10px;height:15px;position:relative">
+		<div id="labelHeaderDiv" style="margin-top:-10px;height:15px;position:relative">
 			<div style="float:left;padding-top:3px"><a id="zoomInfoDiv" href="#">Zoom?</a></div>
 			<div id="zoomInfoDialog">
 				Hold down control button and click on the image to quick zoom into specific location
 				or hold down the shift button and hold a left-click while moving the mouse up or down for a more controlled zoom action.
 				Click and drag bottom right corner of image to resize display panel.
+			</div>
+			<div style="float:left;margin-left:85px">
+				<div id="draggableImgDiv" style="float:left" title="Make image panel draggable"><a href="#" onclick="draggableImgPanel()"><img src="../../images/draggable.png" style="width:15px" /></a></div>
+				<div id="floatImgDiv" style="float:left;margin-left:10px" title="Allow image panel to remain within active screen"><a href="#" onclick="floatImgPanel()"><img src="../../images/floatdown.png" style="width:15px" /></a></div>
+				<div id="anchorImgDiv" style="float:left;margin-left:10px;display:none" title="Anchor image panel in original locality"><a href="#" onclick="anchorImgPanel()"><img src="../../images/anchor.png" style="width:15px" /></a></div>
 			</div>
 			<div style="float:right;padding:0px 3px;margin:0px 3px;"><input id="imgreslg" name="resradio" type="radio" onchange="changeImgRes('lg')" />High Res.</div>
 			<div style="float:right;padding:0px 3px;margin:0px 3px;"><input id="imgresmed" name="resradio"  type="radio" checked onchange="changeImgRes('med')" />Med Res.</div>
