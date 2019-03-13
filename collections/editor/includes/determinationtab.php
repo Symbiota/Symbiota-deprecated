@@ -98,9 +98,9 @@ $specImgArr = $occManager->getImageMap();  // find out if there are images in or
 				echo '<div><b>Set by:</b> '.($idRanking['username']?$idRanking['username']:'undefined').'</div>';
 				if($idRanking['notes']) echo '<div><b>Notes:</b> '.$idRanking['notes'].'</div>';
 			}
-			else{
+			/*else{
 				echo 'not ranked';
-			}
+			}*/
 			?>
 		</div>
 	</div>
