@@ -151,6 +151,11 @@ $fieldArr = array('habitat' => 'Habitat', 'substrate' => 'Substrate', 'occurrenc
 				toggle("collDiv");
 				toggle("displayDiv");
 			}
+
+			function displayDetailDiv(spanObj){
+				toggle("moreSpan");
+				toggle("detailDiv");
+			}
 		</script>
 		<script src="../../js/symb/collections.traitattr.js" type="text/javascript"></script>
 		<script src="../../js/symb/shared.js" type="text/javascript"></script>
@@ -164,7 +169,7 @@ $fieldArr = array('habitat' => 'Habitat', 'substrate' => 'Substrate', 'occurrenc
 			<a href="../../index.php">Home</a> &gt;&gt;
 			<?php
 			if(is_numeric($collid)) echo '<a href="../misc/collprofiles.php?collid='.$collid.'&emode=1">Collection Management</a> &gt;&gt;';
-			if($IS_ADMIN || count($collRights) > 1) echo '<a href="attributemining.php">Adjust Collection Selection</a> &gt;&gt;';
+			else if($IS_ADMIN || count($collRights) > 1) echo '<a href="attributemining.php">Adjust Collection Selection</a> &gt;&gt;';
 			?>
 			<b>Attribute Mining Tool</b>
 		</div>
@@ -199,6 +204,13 @@ $fieldArr = array('habitat' => 'Habitat', 'substrate' => 'Substrate', 'occurrenc
 				}
 				?>
 				<div style="width:650px;">
+					<div>
+						This module allows one to code Occurrence Traits based on content entered into verbatium text fields.<span id="moreSpan">.. <a href="#" onclick="displayDetailDiv(this)">more</a></span>
+						<div id="detailDiv" style="display:none">For instance, phenology traits can be coded in bulk by mapping various
+						text strings displayed within Reproductive Condition text field to a controled phenology defined within the occurrence trait fields.
+						Coded trait attributes can be downloaded and shared via the Darwin Core (DwC) Archive export and publishing tools.
+						Traits are included within a <a href="https://tools.gbif.org/dwca-validator/extension.do?id=http://rs.iobis.org/obis/terms/ExtendedMeasurementOrFact" target="_blank">Measurement Or Fact</a> DwC Extension file.</div>
+					</div>
 					<fieldset style="margin:15px;padding:15px;">
 						<legend><b>Harvesting Filter</b></legend>
 						<form name="filterform" method="post" action="attributemining.php" onsubmit="return verifyFilterForm(this)" >

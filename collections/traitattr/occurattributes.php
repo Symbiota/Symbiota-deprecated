@@ -281,13 +281,9 @@ if($traitID){
 						<legend><b>Filter</b></legend>
 						<form id="filterform" name="filterform" method="post" action="occurattributes.php" onsubmit="return verifyFilterForm(this)" >
 							<div>
-								<b>Taxon: </b>
-								<input id="taxonfilter" name="taxonfilter" type="text" value="<?php echo $taxonFilter; ?>" />
-								<input id="tidfilter" name="tidfilter" type="hidden" value="<?php echo $tidFilter; ?>" />
-							</div>
-							<div>
+								<b>Trait: </b>
 								<select name="traitid">
-									<option value="">Select Trait</option>
+									<option value="">Select Trait (required)</option>
 									<option value="">------------------------------------</option>
 									<?php
 									if($attrNameArr){
@@ -300,6 +296,11 @@ if($traitID){
 									}
 									?>
 								</select>
+							</div>
+							<div>
+								<b>Taxon: </b>
+								<input id="taxonfilter" name="taxonfilter" type="text" value="<?php echo $taxonFilter; ?>" />
+								<input id="tidfilter" name="tidfilter" type="hidden" value="<?php echo $tidFilter; ?>" />
 							</div>
 							<div>
 								<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
@@ -324,7 +325,7 @@ if($traitID){
 						<form id="reviewform" name="reviewform" method="post" action="occurattributes.php" onsubmit="return verifyReviewForm(this)" >
 							<div style="margin:3px">
 								<select name="traitid">
-									<option value="">Select Trait</option>
+									<option value="">Select Trait (required)</option>
 									<option value="">------------------------------------</option>
 									<?php
 									if($attrNameArr){
@@ -399,7 +400,7 @@ if($traitID){
 					$traitArr = $attrManager->getTraitArr($traitID,($mode==2?true:false));
 					$statusCode = 0;
 					$notes = '';
-					foreach($traitArr['states'] as $stArr){
+					foreach($traitArr[$traitID]['states'] as $stArr){
 						if(isset($stArr['statuscode']) && $stArr['statuscode']) $statusCode = $stArr['statuscode'];
 						if(isset($stArr['notes']) && $stArr['notes']) $notes = $stArr['notes'];
 					}
@@ -493,10 +494,24 @@ if($traitID){
 					<?php
 				}
 				else{
-					if($submitForm)
-						echo '<div style="margin:50px;color:red;font-weight:bold;font-size:140%">No images available matching taxon search criteria</div>';
-					else
-						echo '<div style="margin:50px;font-weight:bold;font-size:140%">Select a trait and submit filter in the form to the right to display images that have not yet been scored</div>';
+					if($submitForm){
+						?>
+						<div style="margin:50px;font-size:120%;font-weight: bold">There are no images available matching search criteria</div>
+						<?php
+					}
+					else{
+						?>
+						<div style="margin-top:50px;font-size:120%;font-weight: bold">
+							Select a trait to display images that have not yet been scored
+						</div>
+						<div style="margin-top:15px;">
+							This module allows one to code Occurrence Traits from viewing images of the specimen or observation.
+							Upon submitting the filter to the right, images will be displayed randomly for occurrences that have not yet been coded for the selected trait.
+							Coded trait attributes can be downloaded and shared via the Darwin Core (DwC) Archive export and publishing tools.
+							Traits are included within a <a href="https://tools.gbif.org/dwca-validator/extension.do?id=http://rs.iobis.org/obis/terms/ExtendedMeasurementOrFact" target="_blank">Measurement Or Fact</a> DwC Extension file.
+						</div>
+						<?php
+					}
 				}
 				?>
 			</div>

@@ -86,7 +86,7 @@ if($SYMB_UID){
 				echo '<hr/>';
 			}
 		}
-		if($editCode > 0 && $collid){
+		if($editCode && $collid){
 			?>
 			<div style="float:right;margin:3px;cursor:pointer;" onclick="toggleById('controlpanel');" title="Toggle Manager's Control Panel">
 				<img style='border:0px;' src='../../images/edit.png' />
@@ -99,7 +99,7 @@ if($SYMB_UID){
 			if($collData['collectioncode']) $codeStr .= '-'.$collData['collectioncode'];
 			$codeStr .= ')';
 			echo '<h1>'.$collData['collectionname'].$codeStr.'</h1>';
-			if($editCode > 0){
+			if($editCode){
 				?>
 				<div id="controlpanel" style="clear:both;display:<?php echo ($eMode?'block':'none'); ?>;">
 					<fieldset style="padding:10px;padding-left:25px;">
@@ -166,6 +166,22 @@ if($SYMB_UID){
 									<?php echo $LANG['PRINT_ANNOTATIONS']; ?>
 								</a>
 							</li>
+							<?php
+							if($collManager->traitCodingActivated()){
+								?>
+								<li>
+									<a href="../traitattr/occurattributes.php?collid=<?php echo $collid; ?>">
+										<?php echo (isset($LANG['TRAIT_CODING'])?$LANG['TRAIT_CODING']:'Trait Coding from Images'); ?>
+									</a>
+								</li>
+								<li>
+									<a href="../traitattr/attributemining.php?collid=<?php echo $collid; ?>">
+										<?php echo (isset($LANG['TRAIT_MINING'])?$LANG['TRAIT_MINING']:'Trait Mining from Verbatim Text'); ?>
+									</a>
+								</li>
+								<?php
+							}
+							?>
 							<li>
 								<a href="../georef/batchgeoreftool.php?collid=<?php echo $collid; ?>">
 									<?php echo $LANG['BATCH_GEOREF']; ?>
