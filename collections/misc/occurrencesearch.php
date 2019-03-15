@@ -92,7 +92,7 @@ $collArr = $occManager->getCollectionArr($IS_ADMIN?'all':$collEditorArr);
 	<!-- This is inner text! -->
 	<div id="innertext">
 		<?php 
-		if($collEditorArr){
+		if($isAdmin || $collEditorArr){
 			?>
 			<form name="occform" action="occurrencesearch.php" method="post" onsubmit="return verifyOccurSearchForm(this)" >
 				<fieldset style="width:650px;">
