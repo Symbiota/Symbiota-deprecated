@@ -88,7 +88,7 @@ $collArr = $occManager->getCollectionArr($IS_ADMIN?'all':$collEditorArr);
 	    }
 	</script>
 </head>
-<body>
+<body style="background-color: white;">
 	<!-- This is inner text! -->
 	<div id="innertext">
 		<?php 
