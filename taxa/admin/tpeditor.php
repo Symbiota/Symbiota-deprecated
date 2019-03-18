@@ -12,15 +12,9 @@ $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:"";
 $tabIndex = array_key_exists("tabindex",$_REQUEST)?$_REQUEST["tabindex"]:0;
 
 $tEditor;
-if($tabIndex == 1 || $tabIndex == 2){
-	$tEditor = new TPImageEditorManager();
-}
-elseif($tabIndex == 4){
-	$tEditor = new TPDescEditorManager();
-}
-else{
-	$tEditor = new TPEditorManager();
-}
+$tImageEditor = new TPImageEditorManager();
+$tDescEditor = new TPDescEditorManager();
+$tEditor = new TPEditorManager();
 
 $tid = $tEditor->setTid($tid?$tid:$taxon);
 if($lang) $tEditor->setLanguage($lang);
@@ -32,16 +26,16 @@ if($isAdmin || array_key_exists("TaxonProfile",$userRights)){
 }
 
 if($editable && $action){
-	if($action == "Edit Synonym Sort Order"){
+	if($action === "Edit Synonym Sort Order"){
 		$synSortArr = Array();
 		foreach($_REQUEST as $sortKey => $sortValue){
-			if($sortValue && (substr($sortKey,0,4) == "syn-")){
+			if($sortValue && (substr($sortKey,0,4) === "syn-")){
 				$synSortArr[substr($sortKey,4)] = $sortValue;
 			}
 		}
 		$statusStr = $tEditor->editSynonymSort($synSortArr);
 	}
- 	elseif($action == "Submit Common Name Edits"){
+ 	elseif($action === "Submit Common Name Edits"){
  		$editVernArr = Array();
 		$editVernArr["vid"] = $_REQUEST["vid"];
  		if($_REQUEST["vernacularname"]) $editVernArr["vernacularname"] = str_replace("\"","-",$_REQUEST["vernacularname"]);
@@ -52,7 +46,7 @@ if($editable && $action){
 		$editVernArr["username"] = $paramsArr["un"];
 		$statusStr = $tEditor->editVernacular($editVernArr);
 	}
-	elseif($action == "Add Common Name"){
+	elseif($action === "Add Common Name"){
 		$addVernArr = Array();
 		$addVernArr["vernacularname"] = str_replace("\"","-",$_REQUEST["vern"]);
 		if($_REQUEST["language"]) $addVernArr["language"] = $_REQUEST["language"];
@@ -62,42 +56,42 @@ if($editable && $action){
 		$addVernArr["username"] = $paramsArr["un"];
 		$statusStr = $tEditor->addVernacular($addVernArr);
 	}
-	elseif($action == "Delete Common Name"){
+	elseif($action === "Delete Common Name"){
 		$delVern = $_REQUEST["delvern"];
 		$statusStr = $tEditor->deleteVernacular($delVern);
 	}
-	elseif($action == "Add Description Block"){
-		$statusStr = $tEditor->addDescriptionBlock($_POST);
+	elseif($action === "Add Description Block"){
+		$statusStr = $tDescEditor->addDescriptionBlock();
 	}
-	elseif($action == "Edit Description Block"){
-		$statusStr = $tEditor->editDescriptionBlock($_POST);
+	elseif($action === "Edit Description Block"){
+		$statusStr = $tDescEditor->editDescriptionBlock();
 	}
-	elseif($action == "Delete Description Block"){
-		$statusStr = $tEditor->deleteDescriptionBlock($_POST['tdbid']);
+	elseif($action === "Delete Description Block"){
+		$statusStr = $tDescEditor->deleteDescriptionBlock();
 	}
-	elseif($action == "remap"){
-		$statusStr = $tEditor->remapDescriptionBlock($_GET['tdbid']);
+	elseif($action === "remap"){
+		$statusStr = $tDescEditor->remapDescriptionBlock($_GET['tdbid']);
 	}
-	elseif($action == "Add Statement"){
-		$statusStr = $tEditor->addStatement($_POST);
+	elseif($action === "Add Statement"){
+		$statusStr = $tDescEditor->addStatement($_POST);
 	}
-	elseif($action == "Edit Statement"){
-		$statusStr = $tEditor->editStatement($_POST);
+	elseif($action === "Edit Statement"){
+		$statusStr = $tDescEditor->editStatement($_POST);
 	}
-	elseif($action == "Delete Statement"){
-		$statusStr = $tEditor->deleteStatement($_POST['tdsid']);
+	elseif($action === "Delete Statement"){
+		$statusStr = $tDescEditor->deleteStatement($_POST['tdsid']);
 	}
-	elseif($action == "Submit Image Sort Edits"){
+	elseif($action === "Submit Image Sort Edits"){
 		$imgSortArr = Array();
 		foreach($_REQUEST as $sortKey => $sortValue){
-			if($sortValue && substr($sortKey,0,6) == "imgid-"){
+			if($sortValue && substr($sortKey,0,6) === "imgid-"){
 				$imgSortArr[substr($sortKey,6)]  = $sortValue;
 			}
 		}
-		$statusStr = $tEditor->editImageSort($imgSortArr);
+		$statusStr = $tEditor->$tImageEditor($imgSortArr);
 	} 
-	elseif($action == "Upload Image"){
-		if($tEditor->loadImage($_POST)){
+	elseif($action === "Upload Image"){
+		if($tEditor->$tImageEditor($_POST)){
 			$statusStr = 'Image uploaded successful';
 		}
 		if($tEditor->getErrorStr()){
