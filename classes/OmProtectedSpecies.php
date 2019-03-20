@@ -2,28 +2,34 @@
 include_once($SERVER_ROOT.'/config/dbconnection.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceMaintenance.php');
 
-class RareSpeciesManager {
+class OmProtectedSpecies extends OccurrenceMaintenance {
 
- 	private $conn;
  	private $taxaArr = array();
 
-    function __construct($collType = 'readonly'){
-		$this->conn = MySQLiConnectionFactory::getCon($collType);
+ 	function __construct($conType = 'readonly'){
+		parent::__construct(null,$conType);
     }
 
  	function __destruct(){
-		if(!($this->conn === null)) $this->conn->close();
+ 		parent::__destruct();
 	}
 
-	public function getRareSpeciesList(){
+	public function getProtectedSpeciesList($securityCode){
  		$returnArr = Array();
-		$sql = 'SELECT t.tid, ts.Family, t.SciName, t.Author '.
-			'FROM taxa t INNER JOIN taxstatus ts ON t.TID = ts.tid '.
-			'WHERE ((t.SecurityStatus = 1) AND (ts.taxauthid = 1)) ';
-		if($this->taxaArr){
-			$sql .= 'AND t.tid IN('.implode(',', $this->taxaArr).') ';
+ 		//1 = protect locality details; 2 = protect by fussing taxonomy; 3 = protect locality details and taxonomy; 4 = hide occurrence completely
+		$sql = 'SELECT t.tid, ts.Family, t.SciName, t.Author, t.SecurityStatus FROM taxa t INNER JOIN taxstatus ts ON t.TID = ts.tid ';
+		$sqlWhere = 'WHERE (ts.taxauthid = 1) ';
+		if($securityCode){
+			$sqlWhere .= 'AND (t.SecurityStatus = '.$securityCode.') ';
 		}
-		$sql .= 'ORDER BY ts.Family, t.SciName';
+		else{
+			$sqlWhere .= 'AND (t.SecurityStatus > 0) ';
+		}
+		if($this->taxaArr){
+			$sql .= 'INNER JOIN taxaenumtree e ON t.tid = e.tid';
+			$sqlWhere .= 'AND e.parenttid IN('.implode(',', $this->taxaArr).') ';
+		}
+		$sql .= $sqlWhere.'ORDER BY ts.Family, t.SciName';
 		//echo $sql;
  		$result = $this->conn->query($sql);
 		if($result) {
@@ -35,15 +41,14 @@ class RareSpeciesManager {
 		return $returnArr;
 	}
 
-	public function addSpecies($tid){
+	public function addSpecies($tid, $securityCode){
 		$protectCnt = 0;
-		if(is_numeric($tid)){
-	 		$sql = 'UPDATE taxa t SET t.SecurityStatus = 1 WHERE (t.tid = '.$tid.')';
+		if(is_numeric($tid) && is_numeric($securityCode)){
+	 		$sql = 'UPDATE taxa t SET t.SecurityStatus = '.$securityCode.' WHERE (t.tid = '.$tid.')';
 	 		//echo $sql;
 			$this->conn->query($sql);
 			//Update specimen records
-			$occurMain = new OccurrenceMaintenance($this->conn);
-			$protectCnt = $occurMain->protectGloballyRareSpecies();
+			$protectCnt = $this->protectGlobalSpecies();
 		}
 		return $protectCnt;
 	}
@@ -62,8 +67,7 @@ class RareSpeciesManager {
 				'WHERE (t.tid = '.$tid.') AND (o.localitySecurityReason IS NULL) ';
 			//echo $sql2; exit;
 			$this->conn->query($sql2);
-			$occurMain = new OccurrenceMaintenance($this->conn);
-			$protectCnt = $occurMain->protectGloballyRareSpecies();
+			$protectCnt = $this->protectGlobalSpecies();
 		}
 		return $protectCnt;
 	}
@@ -90,10 +94,8 @@ class RareSpeciesManager {
 		return $retArr;
 	}
 
-	public function setSearchTaxon($searchTaxon){
-		$sql = 'SELECT ts.tidaccepted '.
-			'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
-			'WHERE t.sciname = "'.$searchTaxon.'" AND ts.taxauthid = 1';
+	public function setTaxonFilter($searchTaxon){
+		$sql = 'SELECT ts.tidaccepted FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid WHERE t.sciname = "'.$searchTaxon.'" AND ts.taxauthid = 1';
 		$rs = $this->conn->query($sql);
 		if($rs) {
 			while($r = $rs->fetch_object()){
@@ -111,6 +113,34 @@ class RareSpeciesManager {
 			}
 		}
 		$rs->free();
+	}
+
+	public function getProtectionStats(){
+		$retArr = array();
+		//Make sure protections are up-to-date
+		$this->protectGlobalSpecies();
+		//Get number of specimens protected
+		$sql = 'SELECT COUNT(*) AS cnt FROM taxa WHERE (securitystatus IN(1,3))';
+		$rs = $this->conn->query($sql);
+		if($r = $rs->fetch_object()){
+			$retArr['local'] = $r->cnt;
+		}
+		$rs->free();
+		//Get number of specimens protected
+		$sql = 'SELECT COUNT(*) AS cnt FROM taxa WHERE (securitystatus IN(2,3))';
+		$rs = $this->conn->query($sql);
+		if($r = $rs->fetch_object()){
+			$retArr['tax'] = $r->cnt;
+		}
+		$rs->free();
+		//Get number of specimens protected
+		$sql = 'SELECT COUNT(*) AS cnt FROM omoccurrences WHERE (LocalitySecurity > 0)';
+		$rs = $this->conn->query($sql);
+		if($r = $rs->fetch_object()){
+			$retArr['occur'] = $r->cnt;
+		}
+		$rs->free();
+		return $retArr;
 	}
 }
 ?>

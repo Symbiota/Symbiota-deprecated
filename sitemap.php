@@ -57,7 +57,7 @@ $smManager = new SiteMapManager();
 					echo '<li style="margin-left:15px;"><a href="webservices/dwc/rss.xml" target="_blank">'.$LANG['RSS'].'</a></li>';
 				}
 				?>
-				<li><a href="collections/misc/rarespecies.php"><?php echo $LANG['RARESPEC'];?></a> - <?php echo $LANG['LISTOFTAXA'];?></li>
+				<li><a href="collections/misc/protectedspecies.php"><?php echo $LANG['PROTECTED_SPECIES'];?></a> - <?php echo $LANG['LISTOFTAXA'];?></li>
 
 			</ul>
 
