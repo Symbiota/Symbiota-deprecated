@@ -97,7 +97,9 @@ ALTER TABLE `omoccurrences`
   DROP INDEX `idx_occrecordedby`;
   
 ALTER TABLE `omoccurrences` 
-  ADD UNIQUE INDEX `UNIQUE_occurrenceID` (`occurrenceID` ASC);
+  ADD UNIQUE INDEX `UNIQUE_occurrenceID` (`occurrenceID` ASC),
+  ADD INDEX `Index_occur_localitySecurity` (`localitySecurity` ASC);
+  
 
 DELETE FROM omoccurrencesfulltext 
 WHERE locality IS NULL AND recordedby IS NULL;
