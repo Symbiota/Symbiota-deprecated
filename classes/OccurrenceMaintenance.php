@@ -188,7 +188,7 @@ class OccurrenceMaintenance {
 		return $status;
 	}
 
-	protected function protectGlobalSpecies($collid = 0){
+	public function protectGlobalSpecies($collid = 0){
 		$status = 0;
 		//protect globally rare species
 		if($this->verbose) $this->outputMsg('Protecting globally rare species... ',1);
