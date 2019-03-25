@@ -14,30 +14,31 @@ class OmProtectedSpecies extends OccurrenceMaintenance {
  		parent::__destruct();
 	}
 
-	public function getProtectedSpeciesList($securityCode){
+	public function getProtectedSpeciesList(){
  		$returnArr = Array();
  		//1 = protect locality details; 2 = protect by fussing taxonomy; 3 = protect locality details and taxonomy; 4 = hide occurrence completely
-		$sql = 'SELECT t.tid, ts.Family, t.SciName, t.Author, t.SecurityStatus FROM taxa t INNER JOIN taxstatus ts ON t.TID = ts.tid ';
-		$sqlWhere = 'WHERE (ts.taxauthid = 1) ';
-		if($securityCode){
-			$sqlWhere .= 'AND (t.SecurityStatus = '.$securityCode.') ';
-		}
-		else{
-			$sqlWhere .= 'AND (t.SecurityStatus > 0) ';
-		}
-		if($this->taxaArr){
-			$sql .= 'INNER JOIN taxaenumtree e ON t.tid = e.tid';
-			$sqlWhere .= 'AND e.parenttid IN('.implode(',', $this->taxaArr).') ';
-		}
-		$sql .= $sqlWhere.'ORDER BY ts.Family, t.SciName';
+		$sql = 'SELECT DISTINCT  t.tid, ts.Family, t.SciName, t.Author, t.SecurityStatus FROM taxa t INNER JOIN taxstatus ts ON t.TID = ts.tid ';
+		if($this->taxaArr) $sql .= 'INNER JOIN taxaenumtree e ON t.tid = e.tid ';
+		$sql .= 'WHERE (ts.taxauthid = 1) AND (t.SecurityStatus > 0) ';
+		if($this->taxaArr) $sql .= 'AND e.parenttid IN('.implode(',', $this->taxaArr).') ';
+		$sql .= 'ORDER BY ts.Family, t.SciName';
 		//echo $sql;
- 		$result = $this->conn->query($sql);
-		if($result) {
-			while($row = $result->fetch_object()){
-				$returnArr[$row->Family][$row->tid] = "<i>".$row->SciName."</i>&nbsp;&nbsp;".$row->Author;
-			}
+		$returnArr['stats']['L'] = 0;
+		$returnArr['stats']['T'] = 0;
+		$returnArr['stats']['D'] = 0;
+		$rs = $this->conn->query($sql);
+		while($row = $rs->fetch_object()){
+			$returnArr[$row->Family][$row->tid]['sciname'] = $row->SciName;
+			$returnArr[$row->Family][$row->tid]['author'] = $row->Author;
+			$returnArr[$row->Family][$row->tid]['status'] = $row->SecurityStatus;
+			if($row->SecurityStatus == 1) $returnArr['stats']['L']++;
+			elseif($row->SecurityStatus == 2) $returnArr['stats']['T']++;
+			elseif($row->SecurityStatus == 3) $returnArr['stats']['D']++;
 		}
-		$result->free();
+		$rs->free();
+		foreach($returnArr['stats'] as $k => $v){
+			if(!$v) unset($returnArr['stats'][$k]);
+		}
 		return $returnArr;
 	}
 
@@ -82,13 +83,11 @@ class OmProtectedSpecies extends OccurrenceMaintenance {
 		}
 		$sql .= 'ORDER BY c.locality';
 		$rs = $this->conn->query($sql);
-		if($rs){
-			while($r = $rs->fetch_object()){
-				$retArr[$r->clid]['name'] = $r->name;
-				$retArr[$r->clid]['locality'] = $r->locality;
-				$retArr[$r->clid]['authors'] = $r->authors;
-				$retArr[$r->clid]['access'] = $r->access;
-			}
+		while($r = $rs->fetch_object()){
+			$retArr[$r->clid]['name'] = $r->name;
+			$retArr[$r->clid]['locality'] = $r->locality;
+			$retArr[$r->clid]['authors'] = $r->authors;
+			$retArr[$r->clid]['access'] = $r->access;
 		}
 		$rs->free();
 		return $retArr;
@@ -115,32 +114,16 @@ class OmProtectedSpecies extends OccurrenceMaintenance {
 		$rs->free();
 	}
 
-	public function getProtectionStats(){
-		$retArr = array();
-		//Make sure protections are up-to-date
-		$this->protectGlobalSpecies();
-		//Get number of specimens protected
-		$sql = 'SELECT COUNT(*) AS cnt FROM taxa WHERE (securitystatus IN(1,3))';
-		$rs = $this->conn->query($sql);
-		if($r = $rs->fetch_object()){
-			$retArr['local'] = $r->cnt;
-		}
-		$rs->free();
-		//Get number of specimens protected
-		$sql = 'SELECT COUNT(*) AS cnt FROM taxa WHERE (securitystatus IN(2,3))';
-		$rs = $this->conn->query($sql);
-		if($r = $rs->fetch_object()){
-			$retArr['tax'] = $r->cnt;
-		}
-		$rs->free();
+	public function getSpecimenCnt(){
+		$retCnt;
 		//Get number of specimens protected
 		$sql = 'SELECT COUNT(*) AS cnt FROM omoccurrences WHERE (LocalitySecurity > 0)';
 		$rs = $this->conn->query($sql);
 		if($r = $rs->fetch_object()){
-			$retArr['occur'] = $r->cnt;
+			$retCnt = $r->cnt;
 		}
 		$rs->free();
-		return $retArr;
+		return $retCnt;
 	}
 }
 ?>

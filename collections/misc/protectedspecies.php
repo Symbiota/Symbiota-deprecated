@@ -5,7 +5,6 @@ header("Content-Type: text/html; charset=".$CHARSET);
 
 $action = array_key_exists("submitaction",$_REQUEST)?$_REQUEST["submitaction"]:'';
 $searchTaxon = array_key_exists("searchtaxon",$_POST)?$_POST["searchtaxon"]:'';
-$securityCode = array_key_exists('securitycode',$_POST)?$_POST["securitycode"]:0;
 
 $isEditor = 0;
 if($IS_ADMIN || array_key_exists("RareSppAdmin",$USER_RIGHTS)){
@@ -23,6 +22,9 @@ if($isEditor){
 	}
 }
 if($searchTaxon) $rsManager->setTaxonFilter($searchTaxon);
+$rsArr = $rsManager->getProtectedSpeciesList();
+$statArr = $rsArr['stats'];
+unset($rsArr['stats']);
 ?>
 <html>
 <head>
@@ -126,14 +128,6 @@ if(isset($collections_misc_rarespeciesCrumbs)){
 					<input id="searchtaxon" name="searchtaxon" type="text" value="<?php echo $searchTaxon; ?>" />
 				</div>
 				<div style="margin:3px">
-					Security Code:
-					<select>
-						<option value="1" <?php echo $securityCode==1?'SELECTED':''; ?>>Locality Security</option>
-						<option value="2" <?php echo $securityCode==2?'SELECTED':''; ?>>Taxonomy Security</option>
-						<option value="0" <?php echo $securityCode==3?'SELECTED':''; ?>>All Settings</option>
-					</select>
-				</div>
-				<div style="margin:3px">
 					<input name="submitaction" type="submit" value="Search" />
 				</div>
 			</form>
@@ -149,17 +143,23 @@ if(isset($collections_misc_rarespeciesCrumbs)){
 		<?php
 		if($isEditor){
 			if($action == 'checkstats'){
-				$cntArr = $rsManager->getProtectionStats();
-				$titleArr = array('occur' => 'Occurrences protected','local' => 'Taxa with locality protection','tax' => 'Taxa with taxonomic protection');
-				foreach($cntArr as $titleCode => $cnt){
-					echo '<div style="margin-left:15px">'.$titleArr[$titleCode].': '.$cnt.'</div>';
-				}
+				echo '<div style="margin-left:20px;">Number of specimens affected: '.$rsManager->protectGlobalSpecies().'</div>';
 			}
 			else{
-				echo '<div style="margin-left:10px"><a href="protectedspecies.php?submitaction=checkstats"><button style="font-size:70%">Check and Get Stats</button></a></div>';
+				echo '<div style="margin:15px 25px;float:right;"><a href="protectedspecies.php?submitaction=checkstats"><button style="font-size:70%">Verify protections</button></a></div>';
 			}
 		}
 		?>
+		<fieldset style="margin-left: 15px">
+			<legend><b>Protection Statistics</b></legend>
+			<?php
+			if(isset($statArr['L'])) echo '<div>Locality protection: '.$statArr['L'].' taxa</div>';
+			if(isset($statArr['T'])) echo '<div>Taxonomic protection: '.$statArr['T'].' taxa</div>';
+			if(isset($statArr['D'])) echo '<div>Locality & taxonomic protection: '.$statArr['D'].' taxa</div>';
+			//$occurCnt = $rsManager->getSpecimenCnt();
+			//if($occurCnt) echo '<div>Occurrences protected: '.$occurCnt.'</div>';
+			?>
+		</fieldset>
 	</div>
 	<div style="clear:both">
 		<fieldset style="padding:15px;margin:15px">
@@ -190,27 +190,28 @@ if(isset($collections_misc_rarespeciesCrumbs)){
 				</div>
 				<?php
 			}
-			$rsArr = $rsManager->getProtectedSpeciesList($securityCode);
 			if($rsArr){
 				foreach($rsArr as $family => $speciesArr){
 					?>
 					<h3><?php echo $family; ?></h3>
 					<div style='margin-left:20px;'>
-					<?php
-					foreach($speciesArr as $tid => $sciName){
-						echo '<div id="tid-'.$tid.'"><a href="../../taxa/index.php?taxon='.$tid.'" target="_blank">'.$sciName.'</a>';
-						if($isEditor){
-							?>
-							<span class="editobj" style="display:none;">
-								<a href="protectedspecies.php?submitaction=deletespecies&tidtodel=<?php echo $tid;?>">
-									<img src="../../images/del.png" style="width:13px;border:0px;" title="remove species from list" />
-								</a>
-							</span>
-							<?php
+						<?php
+						$statusCodeArr = array(1 => 'L', 2 => 'T', 3 => 'L & T');
+						foreach($speciesArr as $tid => $nameArr){
+							echo '<div id="tid-'.$tid.'"><a href="../../taxa/index.php?taxon='.$tid.'" target="_blank"><i>'.$nameArr['sciname'].'</i> '.$nameArr['author'].'</a> ';
+							if($isEditor){
+								if(count($statArr) > 1) echo '<span title="">['.$statusCodeArr[$nameArr['status']].']</span>';
+								?>
+								<span class="editobj" style="display:none;">
+									<a href="protectedspecies.php?submitaction=deletespecies&tidtodel=<?php echo $tid;?>">
+										<img src="../../images/del.png" style="width:13px;border:0px;" title="remove species from list" />
+									</a>
+								</span>
+								<?php
+							}
+							echo "</div>";
 						}
-						echo "</div>";
-					}
-					?>
+						?>
 					</div>
 					<?php
 				}
