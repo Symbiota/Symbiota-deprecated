@@ -381,8 +381,8 @@ if(!$researchList && !$editMode){
 							</div>
 							<?php
 						}
-						$gMapUrl = $projManager->getGoogleStaticMap();
-						//$gMapUrl = $CLIENT_ROOT.'/images/mappoint.png';
+						//$gMapUrl = $projManager->getGoogleStaticMap();
+						$gMapUrl = $CLIENT_ROOT.'/images/mappoint.png';
 						$coordArr = $projManager->getChecklistCoordArr();
 						if($gMapUrl && $coordArr){
 							?>
