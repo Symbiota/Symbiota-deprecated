@@ -215,8 +215,8 @@ include($SERVER_ROOT.'/header.php');
 						<?php
 						//Map
 						$aUrl = ''; $gAnchor = '';
-						$url = $taxonManager->getGoogleStaticMap();
-						//$url = $CLIENT_ROOT.'/images/mappoint.png';
+						//$url = $taxonManager->getGoogleStaticMap();
+						$url = $CLIENT_ROOT.'/images/mappoint.png';
 						if($occurrenceModIsActive && $taxonManager->getDisplayLocality()){
 							$gAnchor = "openMapPopup('".$taxonManager->getTid()."',".$clid.")";
 						}
