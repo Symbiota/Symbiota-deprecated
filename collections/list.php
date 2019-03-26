@@ -209,20 +209,27 @@ $occurArr = $collManager->getSpecimenMap($pageNumber,$cntPerPage);
 							echo '<img src="'.$fieldArr['img'].'" style="height:70px" /></a></div>';
 						}
 						echo '<div style="margin:4px;">';
-						echo '<a target="_blank" href="../taxa/index.php?taxon='.$fieldArr["sciname"].'">';
-						echo '<span style="font-style:italic;">'.$fieldArr["sciname"].'</span></a> '.$fieldArr["author"].'</div>';
+						if(isset($fieldArr['sciname'])){
+							$sciStr = '<span style="font-style:italic;">'.$fieldArr['sciname'].'</span>';
+							if(isset($fieldArr['tid']) && $fieldArr['tid']) $sciStr = '<a target="_blank" href="../taxa/index.php?tid='.$fieldArr['tid'].'">'.$sciStr.'</a>';
+							if(isset($fieldArr['author']) && $fieldArr['author']) $sciStr .= ' '.$fieldArr['author'];
+							echo $sciStr;
+						}
+						if($fieldArr['localitysecurity'] > 1){
+							echo '<div style="margin:4px;"> [identification protected]</div>';
+						}
+						echo '</div>';
 						echo '<div style="margin:4px">';
 						echo '<span style="width:150px;">'.$fieldArr["catnum"].'</span>';
 						echo '<span style="width:200px;margin-left:30px;">'.$fieldArr["collector"].'&nbsp;&nbsp;&nbsp;'.(isset($fieldArr["collnum"])?$fieldArr["collnum"]:'').'</span>';
 						if(isset($fieldArr["date"])) echo '<span style="margin-left:30px;">'.$fieldArr["date"].'</span>';
 						echo '</div><div style="margin:4px">';
-						$localStr = "";
+						$localStr = '';
 						if($fieldArr["country"]) $localStr .= $fieldArr["country"].", ";
 						if($fieldArr["state"]) $localStr .= $fieldArr["state"].", ";
 						if($fieldArr["county"]) $localStr .= $fieldArr["county"].", ";
 						if($fieldArr["locality"]) $localStr .= $fieldArr["locality"].", ";
 						if(isset($fieldArr["elev"]) && $fieldArr["elev"]) $localStr .= $fieldArr["elev"].'m';
-						if(isset($fieldArr['raremsg'])) $localStr .= '<div style="color:orange">'.$fieldArr['raremsg'].'</div>';
 						if(strlen($localStr) > 2) $localStr = trim($localStr,' ,');
 						echo $localStr;
 						echo '</div><div style="margin:4px">';

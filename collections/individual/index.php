@@ -43,7 +43,8 @@ if(!$collid) $collid = $occArr['collid'];
 $genticArr = $indManager->getGeneticArr();
 
 $statusStr = '';
-$displayLocality = false;
+$securityCode = ($occArr['localitysecurity']?$occArr['localitysecurity']:0);
+
 $isEditor = false;
 
 //  If other than HTML was requested, return just that content.
@@ -94,13 +95,13 @@ if($SYMB_UID){
 
 	//Check locality security
 	if($isEditor || array_key_exists("RareSppAdmin",$USER_RIGHTS) || array_key_exists("RareSppReadAll",$USER_RIGHTS)){
-		$displayLocality = true;
+		$securityCode = 0;
 	}
 	elseif(array_key_exists("RareSppReader",$USER_RIGHTS) && in_array($collid,$USER_RIGHTS["RareSppReader"])){
-		$displayLocality = true;
+		$securityCode = 0;
 	}
 	elseif(array_key_exists('CollAdmin',$USER_RIGHTS) || array_key_exists('CollEditor',$USER_RIGHTS)){
-		$displayLocality = true;
+		$securityCode = 0;
 	}
 
 	//Form action submitted
@@ -144,10 +145,9 @@ if($SYMB_UID){
 		}
 	}
 }
-if(!$occArr['localitysecurity']) $displayLocality = true;
 
 $displayMap = false;
-if($displayLocality && is_numeric($occArr['decimallatitude']) && is_numeric($occArr['decimallongitude'])) $displayMap = true;
+if(!$securityCode && is_numeric($occArr['decimallatitude']) && is_numeric($occArr['decimallongitude'])) $displayMap = true;
 $dupClusterArr = $indManager->getDuplicateArr();
 $commentArr = $indManager->getCommentArr($isEditor);
 
@@ -403,8 +403,16 @@ header("Content-Type: text/html; charset=".$CHARSET);
 						</div>
 						<div>
 							<b>Taxon:</b>
-							<i><?php echo $occArr['sciname']; ?></i> <?php echo $occArr['scientificnameauthorship']; ?>
 							<?php
+							if($securityCode < 2){
+								echo '<i>'.$occArr['sciname'].'</i> '.$occArr['scientificnameauthorship'];
+								if($occArr['localitysecurity'] == 2 || $occArr['localitysecurity'] == 3){
+									echo '<span style="margin-left:10px;color:orange">[taxonomic protection applied for non-authorized users]</span>';
+								}
+							}
+							else{
+								echo 'identification protected';
+							}
 							if($occArr['tidinterpreted']){
 								//echo ' <a href="../../taxa/index.php?taxon='.$occArr['tidinterpreted'].'" title="Open Species Profile Page"><img src="" /></a>';
 							}
@@ -471,8 +479,8 @@ header("Content-Type: text/html; charset=".$CHARSET);
 											 <div style="margin:10px;">
 											 	<?php
 											 	if($detArr['qualifier']) echo $detArr['qualifier'];
-											 	echo ' <b><i>'.$detArr['sciname'].'</i></b> ';
-											 	echo $detArr['author']."\n";
+											 	if($securityCode < 2) echo ' <b><i>'.$detArr['sciname'].'</i></b> '.$detArr['author'];
+											 	else echo '<b>species identification protected</b>';
 											 	?>
 											 	<div style="">
 											 		<b>Determiner: </b>
@@ -520,11 +528,11 @@ header("Content-Type: text/html; charset=".$CHARSET);
 							<b>Collector:</b>
 							<?php
 							echo $occArr['recordedby'].'&nbsp;&nbsp;&nbsp;';
-							if($displayLocality) echo $occArr['recordnumber'].'&nbsp;&nbsp;&nbsp;';
+							if(!$securityCode || $securityCode == 2) echo $occArr['recordnumber'].'&nbsp;&nbsp;&nbsp;';
 							?>
 						</div>
 						<?php
-						if($displayLocality){
+						if(!$securityCode || $securityCode == 2){
 							if($occArr['eventdate']){
 								echo '<div><b>Date: </b>';
 								echo $occArr['eventdate'];
@@ -560,16 +568,16 @@ header("Content-Type: text/html; charset=".$CHARSET);
 						<div>
 							<b>Locality:</b>
 							<?php
-							if($displayLocality){
+							if($securityCode != 1){
 								$localityStr1 .= $occArr['locality'];
 							}
 							else{
-								$localityStr1 .= '<span style="color:red;">Detailed locality information protected.';
+								$localityStr1 .= '<span style="color:red;">locality details protected: ';
 								if($occArr['localitysecurityreason']){
 									$localityStr1 .= $occArr['localitysecurityreason'];
 								}
 								else{
-									$localityStr1 .= 'This is typically done to protect rare or threatened species localities.';
+									$localityStr1 .= 'typically done to protect locations of rare or threatened species';
 								}
 								$localityStr1 .= '</span>';
 							}
@@ -577,7 +585,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 							?>
 						</div>
 						<?php
-						if($displayLocality){
+						if($securityCode != 1){
 							if($occArr['decimallatitude']){
 								?>
 								<div style="margin-left:10px;">
@@ -640,8 +648,10 @@ header("Content-Type: text/html; charset=".$CHARSET);
 									<?php
 								}
 							}
-							if($occArr['localitysecurity']){
-								echo '<div style="margin-left:10px;color:orange">Note: locality protection applied; only authorized users can view the locality details displayed above</div>';
+							if($occArr['localitysecurity'] == 1 || $occArr['localitysecurity'] == 3){
+								echo '<div style="margin-left:10px;color:orange">Note: Locality ';
+								if($occArr['localitysecurity'] == 3) echo 'and Taxonomic ';
+								echo 'protection applied for non-authorized users</div>';
 							}
 							if($occArr['habitat']){
 								?>
@@ -759,7 +769,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 						?>
 						<div style="clear:both;padding:10px;">
 							<?php
-							if($displayLocality && array_key_exists('imgs',$occArr)){
+							if(!$securityCode && array_key_exists('imgs',$occArr)){
 								$iArr = $occArr['imgs'];
 								?>
 								<fieldset style="padding:10px;">
@@ -845,7 +855,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 							</a>
 						</div>
 						<?php
-						if($isEditor || ($displayLocality && $collMetadata['publicedits'])){
+						if($isEditor || (!$securityCode && $collMetadata['publicedits'])){
 							?>
 							<div style="margin-bottom:10px;">
 								<?php
@@ -910,7 +920,10 @@ header("Content-Type: text/html; charset=".$CHARSET);
 							if($occArr['recordedby']) echo '<div>'.$occArr['recordedby'].' '.$occArr['recordnumber'].'<span style="margin-left:40px;">'.$occArr['eventdate'].'</span></div>';
 							if($occArr['catalognumber']) echo '<div><b>Catalog Number:</b> '.$occArr['catalognumber'].'</div>';
 							if($occArr['occurrenceid']) echo '<div><b>GUID:</b> '.$occArr['occurrenceid'].'</div>';
-							if($occArr['sciname']) echo '<div><b>Latest Identification:</b> '.$occArr['sciname'].'</div>';
+							echo '<div><b>Latest Identification:</b> ';
+							if($securityCode < 2) echo '<i>'.$occArr['sciname'].'</i> '.$occArr['author'];
+							else echo '<b>species identification protected</b>';
+							echo '</div>';
 							if($occArr['identifiedby']) echo '<div><b>Identified by:</b> '.$occArr['identifiedby'].'<span stlye="margin-left:30px;">'.$occArr['dateidentified'].'</span></div>';
 							echo '</div>';
 							echo '<div style="margin:20px 0px;clear:both"><hr/><hr/></div>';
@@ -925,7 +938,10 @@ header("Content-Type: text/html; charset=".$CHARSET);
 										if($dupArr['recordedby']) echo '<div>'.$dupArr['recordedby'].' '.$dupArr['recordnumber'].'<span style="margin-left:40px;">'.$dupArr['eventdate'].'</span></div>';
 										if($dupArr['catnum']) echo '<div><b>Catalog Number:</b> '.$dupArr['catnum'].'</div>';
 										if($dupArr['occurrenceid']) echo '<div><b>GUID:</b> '.$dupArr['occurrenceid'].'</div>';
-										if($dupArr['sciname']) echo '<div><b>Latest Identification:</b> '.$dupArr['sciname'].'</div>';
+										echo '<div><b>Latest Identification:</b> ';
+										if($securityCode < 2) echo '<i>'.$dupArr['sciname'].'</i> '.$dupArr['author'];
+										else echo '<b>species identification protected</b>';
+										echo '</div>';
 										if($dupArr['identifiedby']) echo '<div><b>Identified by:</b> '.$dupArr['identifiedby'].'<span stlye="margin-left:30px;">'.$dupArr['dateidentified'].'</span></div>';
 										if($dupArr['notes']) echo '<div>'.$dupArr['notes'].'</div>';
 										echo '<div><a href="#" onclick="openIndividual('.$dupOccid.')">Show Full Details</a></div>';
