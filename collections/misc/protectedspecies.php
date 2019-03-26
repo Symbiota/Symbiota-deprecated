@@ -149,17 +149,21 @@ if(isset($collections_misc_rarespeciesCrumbs)){
 				echo '<div style="margin:15px 25px;float:right;"><a href="protectedspecies.php?submitaction=checkstats"><button style="font-size:70%">Verify protections</button></a></div>';
 			}
 		}
-		?>
-		<fieldset style="margin-left: 15px">
-			<legend><b>Protection Statistics</b></legend>
-			<?php
-			if(isset($statArr['L'])) echo '<div>Locality protection: '.$statArr['L'].' taxa</div>';
-			if(isset($statArr['T'])) echo '<div>Taxonomic protection: '.$statArr['T'].' taxa</div>';
-			if(isset($statArr['D'])) echo '<div>Locality & taxonomic protection: '.$statArr['D'].' taxa</div>';
-			//$occurCnt = $rsManager->getSpecimenCnt();
-			//if($occurCnt) echo '<div>Occurrences protected: '.$occurCnt.'</div>';
+		if($statArr){
 			?>
-		</fieldset>
+			<fieldset style="margin-left: 15px">
+				<legend><b>Protection Statistics</b></legend>
+				<?php
+				if(isset($statArr['L'])) echo '<div>Locality protection: '.$statArr['L'].' taxa</div>';
+				if(isset($statArr['T'])) echo '<div>Taxonomic protection: '.$statArr['T'].' taxa</div>';
+				if(isset($statArr['D'])) echo '<div>Locality & taxonomic protection: '.$statArr['D'].' taxa</div>';
+				//$occurCnt = $rsManager->getSpecimenCnt();
+				//if($occurCnt) echo '<div>Occurrences protected: '.$occurCnt.'</div>';
+				?>
+			</fieldset>
+			<?php
+		}
+		?>
 	</div>
 	<div style="clear:both">
 		<fieldset style="padding:15px;margin:15px">
@@ -218,14 +222,14 @@ if(isset($collections_misc_rarespeciesCrumbs)){
 			}
 			else{
 				?>
-				<div style="margin:30px;font-weight:bold;font-size:120%;">
+				<div style="margin:20px;font-weight:bold;font-size:120%;">
 					No species were returned marked for global protection.
 				</div>
 				<?php
 			}
 			?>
 		</fieldset>
-		<fieldset style="padding:25px;margin:15px">
+		<fieldset style="padding:15px;margin:15px">
 			<legend><b>State/Province Level Protections</b></legend>
 			<?php
 			$stateList = $rsManager->getStateList();
@@ -243,7 +247,7 @@ if(isset($collections_misc_rarespeciesCrumbs)){
 			}
 			if($emptyList){
 				?>
-				<div style="margin:30px;font-weight:bold;font-size:120%;">
+				<div style="margin:20px;font-weight:bold;font-size:120%;">
 					 No checklists returned
 				</div>
 				<?php
