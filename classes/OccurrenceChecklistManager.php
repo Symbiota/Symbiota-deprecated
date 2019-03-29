@@ -45,7 +45,7 @@ class OccurrenceChecklistManager extends OccurrenceManager{
 				$family = strtoupper($row->family);
 				if(!$family) $family = 'undefined';
 				$sciName = $row->sciname;
-				if($sciName && substr($sciName,-5)!='aceae'){
+				if($sciName && substr($sciName,-5)!='aceae' && substr($sciName,-4)!='idae'){
 					$returnVec[$family][] = $sciName;
 					$this->checklistTaxaCnt++;
 				}
