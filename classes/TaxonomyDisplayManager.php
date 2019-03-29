@@ -268,6 +268,7 @@ class TaxonomyDisplayManager{
 		}
 	}
 
+	//Dynamic tree display fucntions
 	public function getDynamicTreePath(){
 		$retArr = Array();
 		$this->primeTaxaEnumTree();
@@ -343,24 +344,154 @@ class TaxonomyDisplayManager{
 		return $retArr;
 	}
 
-	private function primeTaxaEnumTree(){
-		//Temporary code: check to make sure taxaenumtree is populated
-		//This code can be removed somewhere down the line
-		$sql = 'SELECT tid FROM taxaenumtree LIMIT 1';
-		$rs = $this->conn->query($sql);
-		if(!$rs->num_rows){
-			echo '<div style="color:red;margin:30px;">';
-			echo 'NOTICE: Building new taxonomic hierarchy table (taxaenumtree).<br/>';
-			echo 'This may take a few minutes, but only needs to be done once.<br/>';
-			echo 'Do not terminate this process early.';
-			echo '</div>';
-			ob_flush();
-			flush();
-			TaxonomyUtilities::buildHierarchyEnumTree($this->conn,$this->taxAuthId);
+	function getDynamicChildren($objId,$targetId){
+		$retArr = Array();
+		$childArr = Array();
+
+		//Set rank array
+		$taxonUnitArr = array(1 => 'Organism',10 => 'Kingdom');
+		$sqlR = 'SELECT rankid, rankname FROM taxonunits';
+		$rsR = $this->conn->query($sqlR);
+		while($rR = $rsR->fetch_object()){
+			$taxonUnitArr[$rR->rankid] = $rR->rankname;
 		}
-		$rs->free();
+		$rsR->free();
+
+		$urlPrefix = '../index.php?taxon=';
+		if($this->isEditor) $urlPrefix = 'taxoneditor.php?tid=';
+
+		if($objId == 'root'){
+			$retArr['id'] = 'root';
+			$retArr['label'] = 'root';
+			$retArr['name'] = 'root';
+			if($this->isEditor) $retArr['url'] = 'taxoneditor.php';
+			else $retArr['url'] = '../index.php';
+			$retArr['children'] = Array();
+			$lowestRank = '';
+			$sql = 'SELECT MIN(t.RankId) AS RankId FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid WHERE (ts.taxauthid = '.$this->taxAuthId.') LIMIT 1 ';
+			//echo $sql."<br>";
+			$rs = $this->conn->query($sql);
+			while($row = $rs->fetch_object()){
+				$lowestRank = $row->RankId;
+			}
+			$rs->free();
+			$sql1 = 'SELECT DISTINCT t.tid, t.sciname, t.author, t.rankid '.
+				'FROM taxa t LEFT JOIN taxstatus ts ON t.tid = ts.tid '.
+				'WHERE ts.taxauthid = '.$this->taxAuthId.' AND t.RankId = '.$lowestRank.' ';
+			//echo "<div>".$sql1."</div>";
+			$rs1 = $this->conn->query($sql1);
+			$i = 0;
+			while($row1 = $rs1->fetch_object()){
+				$rankName = (isset($taxonUnitArr[$row1->rankid])?$taxonUnitArr[$row1->rankid]:'Unknown');
+				$label = '2-'.$row1->rankid.'-'.$rankName.'-'.$row1->sciname;
+				$sciName = $row1->sciname;
+				if($row1->tid == $targetId) $sciName = '<b>'.$sciName.'</b>';
+				$sciName = "<span style='font-size:75%;'>".$rankName.":</span> ".$sciName.($this->displayAuthor?" ".$row1->author:"");
+				$childArr[$i]['id'] = $row1->tid;
+				$childArr[$i]['label'] = $label;
+				$childArr[$i]['name'] = $sciName;
+				$childArr[$i]['url'] = $urlPrefix.$row1->tid;
+				$sql3 = 'SELECT tid FROM taxaenumtree WHERE taxauthid = '.$this->taxAuthId.' AND parenttid = '.$row1->tid.' LIMIT 1 ';
+				//echo "<div>".$sql3."</div>";
+				$rs3 = $this->conn->query($sql3);
+				if($row3 = $rs3->fetch_object()){
+					$childArr[$i]['children'] = true;
+				}
+				else{
+					$sql4 = 'SELECT DISTINCT tid, tidaccepted FROM taxstatus WHERE (taxauthid = '.$this->taxAuthId.') AND (tidaccepted = '.$row1->tid.') ';
+					//echo "<div>".$sql4."</div>";
+					$rs4 = $this->conn->query($sql4);
+					while($row4 = $rs4->fetch_object()){
+						if($row4->tid != $row4->tidaccepted){
+							$childArr[$i]['children'] = true;
+						}
+					}
+					$rs4->free();
+				}
+				$rs3->free();
+				$i++;
+			}
+			$rs1->free();
+		}
+		else{
+			//Get children, but only accepted children
+			$sql2 = 'SELECT DISTINCT t.tid, t.sciname, t.author, t.rankid '.
+				'FROM taxa AS t INNER JOIN taxstatus AS ts ON t.tid = ts.tid '.
+				'WHERE (ts.taxauthid = '.$this->taxAuthId.') AND (ts.tid = ts.tidaccepted) '.
+				'AND ((ts.parenttid = '.$objId.') OR (t.tid = '.$objId.')) ';
+			//echo $sql2."<br>";
+			$rs2 = $this->conn->query($sql2);
+			$i = 0;
+			while($row2 = $rs2->fetch_object()){
+				$rankName = (isset($taxonUnitArr[$row2->rankid])?$taxonUnitArr[$row2->rankid]:'Unknown');
+				$label = '2-'.$row2->rankid.'-'.$rankName.'-'.$row2->sciname;
+				$sciName = $row2->sciname;
+				if($row2->rankid >= 180) $sciName = '<i>'.$sciName.'</i>';
+				if($row2->tid == $targetId) $sciName = '<b>'.$sciName.'</b>';
+				$sciName = "<span style='font-size:75%;'>".$rankName.":</span> ".$sciName.($this->displayAuthor?" ".$row2->author:"");
+				if($row2->tid == $objId){
+					$retArr['id'] = $row2->tid;
+					$retArr['label'] = $label;
+					$retArr['name'] = $sciName;
+					$retArr['url'] = $urlPrefix.$row2->tid;
+					$retArr['children'] = Array();
+				}
+				else{
+					$childArr[$i]['id'] = $row2->tid;
+					$childArr[$i]['label'] = $label;
+					$childArr[$i]['name'] = $sciName;
+					$childArr[$i]['url'] = $urlPrefix.$row2->tid;
+					$sql3 = 'SELECT tid FROM taxaenumtree WHERE taxauthid = '.$this->taxAuthId.' AND parenttid = '.$row2->tid.' LIMIT 1 ';
+					//echo "<div>".$sql3."</div>";
+					$rs3 = $this->conn->query($sql3);
+					if($row3 = $rs3->fetch_object()){
+						$childArr[$i]['children'] = true;
+					}
+					else{
+						$sql4 = 'SELECT DISTINCT tid, tidaccepted FROM taxstatus WHERE taxauthid = '.$this->taxAuthId.' AND tidaccepted = '.$row2->tid.' ';
+						//echo "<div>".$sql4."</div>";
+						$rs4 = $this->conn->query($sql4);
+						while($row4 = $rs4->fetch_object()){
+							if($row4->tid != $row4->tidaccepted){
+								$childArr[$i]['children'] = true;
+							}
+						}
+						$rs4->free();
+					}
+					$rs3->free();
+					$i++;
+				}
+			}
+			$rs2->free();
+
+			//Get synonyms for all accepted taxa
+			$sqlSyns = 'SELECT DISTINCT t.tid, t.sciname, t.author, t.rankid '.
+				'FROM taxa AS t INNER JOIN taxstatus AS ts ON t.tid = ts.tid '.
+				'WHERE (ts.tid <> ts.tidaccepted) AND (ts.taxauthid = '.$this->taxAuthId.') AND (ts.tidaccepted = '.$objId.')';
+			//echo $sqlSyns;
+			$rsSyns = $this->conn->query($sqlSyns);
+			while($row = $rsSyns->fetch_object()){
+				$rankName = (isset($taxonUnitArr[$row->rankid])?$taxonUnitArr[$row->rankid]:'Unknown');
+				$label = '1-'.$row->rankid.'-'.$rankName.'-'.$row->sciname;
+				$sciName = $row->sciname;
+				if($row->rankid >= 180) $sciName = '<i>'.$sciName.'</i>';
+				if($row->tid == $targetId) $sciName = '<b>'.$sciName.'</b>';
+				$sciName = '['.$sciName.']'.($this->displayAuthor?' '.$row->author:'');
+				$childArr[$i]['id'] = $row->tid;
+				$childArr[$i]['label'] = $label;
+				$childArr[$i]['name'] = $sciName;
+				$childArr[$i]['url'] = $urlPrefix.$row->tid;
+				$i++;
+			}
+			$rsSyns->free();
+		}
+
+		usort($childArr,array($this,"cmp2"));
+		$retArr['children'] = $childArr;
+		return $retArr;
 	}
 
+	//Setters and getters
 	public function setTargetStr($target){
 		$this->targetStr = $this->conn->real_escape_string(trim(ucfirst($target)));
 	}
@@ -381,14 +512,37 @@ class TaxonomyDisplayManager{
 		if($displaySubg) $this->displaySubGenera = true;
 	}
 
+	public function getTargetStr(){
+		return $this->targetStr;
+	}
+
+	//Misc functions
+	private function primeTaxaEnumTree(){
+		//Temporary code: check to make sure taxaenumtree is populated
+		//This code can be removed somewhere down the line
+		$sql = 'SELECT tid FROM taxaenumtree LIMIT 1';
+		$rs = $this->conn->query($sql);
+		if(!$rs->num_rows){
+			echo '<div style="color:red;margin:30px;">';
+			echo 'NOTICE: Building new taxonomic hierarchy table (taxaenumtree).<br/>';
+			echo 'This may take a few minutes, but only needs to be done once.<br/>';
+			echo 'Do not terminate this process early.';
+			echo '</div>';
+			ob_flush();
+			flush();
+			TaxonomyUtilities::buildHierarchyEnumTree($this->conn,$this->taxAuthId);
+		}
+		$rs->free();
+	}
+
 	private function cmp($a, $b){
 		$sciNameA = (array_key_exists($a,$this->taxaArr)?$this->taxaArr[$a]["sciname"]:"unknown (".$a.")");
 		$sciNameB = (array_key_exists($b,$this->taxaArr)?$this->taxaArr[$b]["sciname"]:"unknown (".$b.")");
 		return strcmp($sciNameA, $sciNameB);
 	}
 
-	public function getTargetStr(){
-		return $this->targetStr;
+	private function cmp2($a,$b){
+		return strnatcmp($a["label"],$b["label"]);
 	}
 }
 ?>
