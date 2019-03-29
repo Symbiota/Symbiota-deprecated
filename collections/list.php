@@ -215,8 +215,8 @@ $occurArr = $collManager->getSpecimenMap($pageNumber,$cntPerPage);
 							if(isset($fieldArr['author']) && $fieldArr['author']) $sciStr .= ' '.$fieldArr['author'];
 							echo $sciStr;
 						}
-						if($fieldArr['localitysecurity'] > 1){
-							echo '<div style="margin:4px;"> [identification protected]</div>';
+						elseif($fieldArr['localitysecurity'] > 1){
+							echo 'Identification Protected';
 						}
 						echo '</div>';
 						echo '<div style="margin:4px">';

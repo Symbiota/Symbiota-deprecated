@@ -77,8 +77,18 @@ class OccurrenceListManager extends OccurrenceManager{
 					$locStr = str_replace('.,',',',$row->locality);
 					if($row->decimallatitude && $row->decimallongitude) $locStr .= ', '.$row->decimallatitude.' '.$row->decimallongitude;
 					$locStr = $this->cleanOutStr(trim($locStr,' ,;'));
-					if($row->localitysecurity == 1 || $row->localitysecurity == 3){
-						$locStr .= '<div style="color:orange">Note: locality details are redacted from non-authorized users</div>';
+					if($row->localitysecurity){
+						$locStr .= '<div style="color:orange">Note: ';
+						if($row->localitysecurity == 1){
+							$locStr .= 'locality ';
+						}
+						elseif($row->localitysecurity == 2){
+							$locStr .= 'taxonomic ';
+						}
+						elseif($row->localitysecurity == 3){
+							$locStr .= 'locality &amp; taxonomic ';
+						}
+						$locStr .= 'details are being redacted from non-authorized users</div>';
 					}
 					$returnArr[$row->occid]["locality"] = $locStr;
 					$returnArr[$row->occid]["collnum"] = $this->cleanOutStr($row->recordnumber);
