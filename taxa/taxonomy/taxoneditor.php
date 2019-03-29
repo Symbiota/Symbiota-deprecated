@@ -139,6 +139,7 @@ if($editable){
 					<li><a href="#editdiv">Editor</a></li>
 					<li><a href="#taxonstatusdiv">Taxonomic Status</a></li>
 					<li><a href="#hierarchydiv">Hierarchy</a></li>
+					<li><a href="taxonomychildren.php?tid=<?php echo $tid.'&taxauthid='.$taxAuthId; ?>">Children Taxa</a></li>
 					<li><a href="taxonomydelete.php?tid=<?php echo $tid; ?>&genusstr=<?php echo $taxonEditorObj->getUnitName1(); ?>">Delete</a></li>
 				</ul>
 				<div id="editdiv" style="height:400px;">
@@ -342,7 +343,7 @@ if($editable){
 								<div>
 									<div style="float:left;width:130px;font-weight:bold;">Parent Taxon: </div>
 									<div class="tsedit">
-										<?php echo $taxonEditorObj->getParentNameFull();?>
+										<?php echo '<a href="taxoneditor.php?tid='.$taxonEditorObj->getParentTid().'">'.$taxonEditorObj->getParentNameFull().'</a>';?>
 									</div>
 									<div class="tsedit" style="display:none;margin:3px;">
 										<input id="parentstr" name="parentstr" type="text" value="<?php echo $taxonEditorObj->getParentName(); ?>" />

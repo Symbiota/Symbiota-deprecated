@@ -408,7 +408,7 @@ class TaxonomyEditorManager{
 			"INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.ParentTID) ".
 			"INNER JOIN taxa t2 ON ts2.tid = t2.tid) ".
 			"LEFT JOIN kmdescr d2 ON (d1.CID = d2.CID) AND (t2.TID = d2.TID) ".
-			"WHERE (ts1.taxauthid = 1) AND (ts2.taxauthid = 1) AND (ts2.tid = ts2.tidaccepted) ".
+			"WHERE (ts1.taxauthid = '.$this->taxAuthId.') AND (ts2.taxauthid = '.$this->taxAuthId.') AND (ts2.tid = ts2.tidaccepted) ".
 			"AND (t2.tid = ".$tid.") And (d2.CID Is Null)";
 		$this->conn->query($sqlAdd1);
 
@@ -422,7 +422,7 @@ class TaxonomyEditorManager{
 				"INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.ParentTID) ".
 				"INNER JOIN taxa t2 ON ts2.tid = t2.tid) ".
 				"LEFT JOIN kmdescr d2 ON (d1.CID = d2.CID) AND (t2.TID = d2.TID) ".
-				"WHERE (ts1.taxauthid = 1) AND (ts2.taxauthid = 1) AND (ts2.tid = ts2.tidaccepted) ".
+				"WHERE (ts1.taxauthid = '.$this->taxAuthId.') AND (ts2.taxauthid = '.$this->taxAuthId.') AND (ts2.tid = ts2.tidaccepted) ".
 				"AND (t2.RankId = 180) AND (t1.tid = ".$tid.") AND (d2.CID Is Null)";
 			//echo $sqlAdd2a;
 			$this->conn->query($sqlAdd2a);
@@ -434,7 +434,7 @@ class TaxonomyEditorManager{
 				"INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.ParentTID) ".
 				"INNER JOIN taxa t2 ON ts2.tid = t2.tid) ".
 				"LEFT JOIN kmdescr d2 ON (d1.CID = d2.CID) AND (t2.TID = d2.TID) ".
-				"WHERE (ts1.taxauthid = 1) AND (ts2.taxauthid = 1) AND (ts2.family = '".
+				"WHERE (ts1.taxauthid = '.$this->taxAuthId.') AND (ts2.taxauthid = '.$this->taxAuthId.') AND (ts2.family = '".
 				$this->sciName."') AND (ts2.tid = ts2.tidaccepted) ".
 				"AND (t2.RankId = 220) AND (d2.CID Is Null)";
 			$this->conn->query($sqlAdd2b);
@@ -449,7 +449,7 @@ class TaxonomyEditorManager{
 				"INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.ParentTID) ".
 				"INNER JOIN taxa t2 ON ts2.tid = t2.tid) ".
 				"LEFT JOIN kmdescr d2 ON (d1.CID = d2.CID) AND (t2.TID = d2.TID) ".
-				"WHERE (ts1.taxauthid = 1) AND (ts2.taxauthid = 1) AND (ts2.tid = ts2.tidaccepted) ".
+				"WHERE (ts1.taxauthid = '.$this->taxAuthId.') AND (ts2.taxauthid = '.$this->taxAuthId.') AND (ts2.tid = ts2.tidaccepted) ".
 				"AND (t2.RankId = 220) AND (t1.tid = ".$tid.") AND (d2.CID Is Null)";
 			//echo $sqlAdd2b;
 			$this->conn->query($sqlAdd3);
@@ -1027,8 +1027,8 @@ class TaxonomyEditorManager{
 		//For now, just return the default taxonomy (taxauthid = 1)
 		$retArr = array();
 		if($this->tid){
-			$sql = "SELECT ta.taxauthid, ta.name FROM taxauthority ta INNER JOIN taxstatus ts ON ta.taxauthid = ts.taxauthid ".
-				"WHERE ta.isactive = 1 AND (ts.tid = ".$this->tid.") ORDER BY ta.taxauthid ";
+			$sql = 'SELECT ta.taxauthid, ta.name FROM taxauthority ta INNER JOIN taxstatus ts ON ta.taxauthid = ts.taxauthid '.
+				'WHERE ta.isactive = 1 AND (ts.tid = ".$this->tid.") ORDER BY ta.taxauthid ';
 			$rs = $this->conn->query($sql);
 			while($row = $rs->fetch_object()){
 				$retArr[$row->taxauthid] = $row->name;
@@ -1040,8 +1040,7 @@ class TaxonomyEditorManager{
 
 	public function getRankArr(){
 		$retArr = array();
-		$sql = 'SELECT rankid, rankname '.
-			'FROM taxonunits ';
+		$sql = 'SELECT rankid, rankname FROM taxonunits ';
 		if($this->kingdomName) $sql .= 'WHERE (kingdomname = "'.($this->kingdomName?$this->kingdomName:'Organism').'") ';
 		$sql .= 'ORDER BY rankid ';
 		//echo $sql;
@@ -1106,12 +1105,27 @@ class TaxonomyEditorManager{
 		return $retArr;
 	}
 
+	public function getChildren(){
+		$retArr = array();
+		$sql = 'SELECT t.tid, t.sciname, t.author '.
+			'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
+			'WHERE (ts.taxauthid = '.$this->taxAuthId.') AND (ts.parenttid = '.$this->tid.')';
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			$retArr[$r->tid]['name'] = $r->sciname;
+			$retArr[$r->tid]['author'] = $r->author;
+		}
+		$rs->free();
+		asort($retArr);
+		return $retArr;
+	}
+
 	public function getChildAccepted($tid){
 		if(!is_numeric($tid)) return false;
 		$retArr = array();
 		$sql = 'SELECT t.tid, t.sciname '.
 			'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
-			'WHERE (ts.taxauthid = 1) AND (ts.parenttid = '.$tid.') AND (ts.tid = ts.tidaccepted) '.
+			'WHERE (ts.taxauthid = '.$this->taxAuthId.') AND (ts.parenttid = '.$tid.') AND (ts.tid = ts.tidaccepted) '.
 			'ORDER BY t.sciname LIMIT 20';
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
