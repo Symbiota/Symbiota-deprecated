@@ -588,6 +588,12 @@ class SpecUploadBase extends SpecUpload{
 			'SET u.scientificNameAuthorship = t.author '.
 			'WHERE u.scientificNameAuthorship IS NULL AND t.author IS NOT NULL';
 		$this->conn->query($sql);
+
+		//Lock security setting if set so that local system can't override
+		$sql = 'UPDATE uploadspectemp '.
+			'SET localitySecurityReason = "locked" '.
+			'WHERE localitySecurity > 0 AND localitySecurityReason IS NULL AND collid IN('.$this->collId.')';
+		$this->conn->query($sql);
 	}
 
 	public function getTransferReport(){
