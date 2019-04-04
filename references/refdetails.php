@@ -10,11 +10,11 @@ $refArr = '';
 
 $statusStr = '';
 if($formSubmit){
-	if($formSubmit == 'Create Reference'){
+	if($formSubmit === 'Create Reference'){
 		$statusStr = $refManager->createReference($_POST);
 		$refId = $refManager->getRefId();
 	}
-	elseif($formSubmit == 'Edit Reference'){
+	elseif($formSubmit === 'Edit Reference'){
 		if($_POST['refGroup'] == 1){
 			$statusStr = $refManager->editBookReference($_POST);
 		}
@@ -41,17 +41,17 @@ if($refId){
 	if($refArr["ReferenceTypeId"] == 3 || $refArr["ReferenceTypeId"] == 4 || $refArr["ReferenceTypeId"] == 6 || $refArr["ReferenceTypeId"] == 27){
 		$refGroup = 1;
 		$parentChild = 1;
-		if($refArr["ReferenceTypeId"] == 4){
+		if($refArr["ReferenceTypeId"] === 4){
 			$refRank = 1;
 		}
-		if($refArr["ReferenceTypeId"] == 3 || $refArr["ReferenceTypeId"] == 6){
+		if($refArr["ReferenceTypeId"] === 3 || $refArr["ReferenceTypeId"] === 6){
 			$refRank = 2;
 		}
-		if($refArr["ReferenceTypeId"] == 27){
+		if($refArr["ReferenceTypeId"] === 27){
 			$refRank = 3;
 		}
 	}
-	if($refArr["ReferenceTypeId"] == 2 || $refArr["ReferenceTypeId"] == 7 || $refArr["ReferenceTypeId"] == 8 || $refArr["ReferenceTypeId"] == 30){
+	if($refArr["ReferenceTypeId"] === 2 || $refArr["ReferenceTypeId"] === 7 || $refArr["ReferenceTypeId"] === 8 || $refArr["ReferenceTypeId"] === 30){
 		$refGroup = 2;
 		$parentChild = 1;
 		if($refArr["ReferenceTypeId"] == 2 || $refArr["ReferenceTypeId"] == 7 || $refArr["ReferenceTypeId"] == 8){
@@ -87,11 +87,10 @@ header("Content-Type: text/html; charset=".$charset);
 	</style>
 	<script type="text/javascript" src="../js/jquery.js"></script>
 	<script type="text/javascript" src="../js/jquery-ui.js"></script>
-	<script type="text/javascript" src="../js/symb/references.index.js"></script>
+	<script type="text/javascript" src="../js/symb/references.index.js?ver=2"></script>
 	<script type="text/javascript">
 		var refid = <?php echo $refId; ?>;
-		var parentChild = false;
-		
+
 		<?php
 		if($parentChild){
 			echo 'parentChild = true;';

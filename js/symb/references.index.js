@@ -1,3 +1,5 @@
+var parentChild = false;
+
 $(document).ready(function() {
 	if(!navigator.cookieEnabled){
 		alert("Your browser cookies are disabled. To be able to login and access your profile, they must be enabled for this domain.");
@@ -422,6 +424,16 @@ function verifyEditRefForm(f){
 function verifyRefTypeChange(){
 	if(document.getElementById("ReferenceTypeId").selectedIndex > 1){
 		if (confirm("Are you sure you would like to change the reference type?")) {
+			var refTypeVal = document.getElementById("ReferenceTypeId").value;
+			if(refTypeVal === 4 || refTypeVal === 3 || refTypeVal === 6 || refTypeVal === 27){
+				document.getElementById("refGroup").value = 1;
+			}
+			else if(refTypeVal === 2 || refTypeVal === 7 || refTypeVal === 8 || refTypeVal === 30){
+				document.getElementById("refGroup").value = 2;
+			}
+			else{
+				document.getElementById("refGroup").value = 3;
+			}
 			document.getElementById("dynamicInput").innerHTML = '<input name="formsubmit" type="hidden" value="Edit Reference" />';
 			document.getElementById("referenceeditform").submit();
 		}

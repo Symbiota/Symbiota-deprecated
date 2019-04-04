@@ -484,7 +484,6 @@ class ReferenceManager{
 					else{
 						$serTitle = $pArr['secondarytitle'];
 					}
-					$sql = "";
 					$sql = "SELECT refid ".
 						"FROM referenceobject ".
 						"WHERE (title LIKE '%".$pArr['secondarytitle']."%' OR title LIKE '%".$pArr['tertiarytitle']."%') ".
@@ -496,7 +495,6 @@ class ReferenceManager{
 						}
 					}
 					if($parentRefId2){
-						$sql = "";
 						$sql = 'UPDATE referenceobject '.
 							'SET placeofpublication = '.$this->cleanTxtStr($pArr['placeofpublication']).',numbervolumnes = '.$this->cleanTxtStr($pArr['numbervolumnes']).','.
 							'edition = '.$this->cleanTxtStr($pArr['edition']).',ispublished = '.$this->cleanTxtStr($pArr['ispublished']).',modifieduid='.$SYMB_UID.',modifiedtimestamp=now() '.
@@ -506,7 +504,6 @@ class ReferenceManager{
 						}
 					}
 					else{
-						$sql = "";
 						$sql = 'INSERT INTO referenceobject(ReferenceTypeId,title,placeofpublication,publisher,numbervolumnes,edition,ispublished,modifieduid,modifiedtimestamp) '.
 							'VALUES(27,'.$this->cleanTxtStr($serTitle).','.$this->cleanTxtStr($pArr['placeofpublication']).','.$this->cleanTxtStr($pArr['publisher']).','.
 							$this->cleanTxtStr($pArr['numbervolumnes']).','.$this->cleanTxtStr($pArr['edition']).','.$this->cleanTxtStr($pArr['ispublished']).','.$SYMB_UID.',now()) ';
@@ -515,14 +512,12 @@ class ReferenceManager{
 						}
 					}
 				}
-				$bookTitle = '';
 				if($pArr['secondarytitle']){
 					$bookTitle = $pArr['secondarytitle'];
 				}
 				else{
 					$bookTitle = $pArr['tertiarytitle'];
 				}
-				$sql = "";
 				$sql = "SELECT refid ".
 					"FROM referenceobject ".
 					"WHERE title LIKE '%".$pArr['secondarytitle']."%' ";
@@ -544,7 +539,6 @@ class ReferenceManager{
 					}
 				}
 				if($parentRefId){
-					$sql = "";
 					if($parentRefId2){
 						$sql = 'UPDATE referenceobject '.
 							'SET parentRefId = '.$parentRefId2.',secondarytitle = '.$this->cleanTxtStr($serTitle).',pubdate = '.$this->cleanTxtStr($pArr['pubdate']).',shorttitle = '.$this->cleanTxtStr($pArr['shorttitle']).','.
@@ -563,7 +557,6 @@ class ReferenceManager{
 					}
 				}
 				else{
-					$sql = "";
 					if($parentRefId2){
 						$sql = 'INSERT INTO referenceobject(parentRefId,ReferenceTypeId,title,secondarytitle,volume,number,pubdate,ispublished,shorttitle,isbn_issn,modifieduid,modifiedtimestamp) '.
 							'VALUES('.$parentRefId2.',3,'.$this->cleanTxtStr($bookTitle).','.$this->cleanTxtStr($serTitle).','.$this->cleanTxtStr($pArr['volume']).','.$this->cleanTxtStr($pArr['number']).','.
@@ -579,7 +572,6 @@ class ReferenceManager{
 						$parentRefId = $this->conn->insert_id;
 					}
 				}
-				$sql = "";
 				$sql = 'UPDATE referenceobject '.
 					'SET parentRefId = '.($parentRefId?$parentRefId:($parentRefId2?$parentRefId2:'NULL')).',ReferenceTypeId = '.$this->cleanTxtStr($pArr['ReferenceTypeId']).','.
 					'title = '.$this->cleanTxtStr($pArr['title']).',secondarytitle = '.$this->cleanTxtStr($bookTitle).',tertiarytitle = '.$this->cleanTxtStr($serTitle).',pages = '.$this->cleanTxtStr($pArr['pages']).',guid = '.$this->cleanTxtStr($pArr['guid']).',url = '.$this->cleanTxtStr($pArr['url']).',notes = '.$this->cleanTxtStr($pArr['notes']).','.
@@ -592,7 +584,6 @@ class ReferenceManager{
 			if($pArr['ReferenceTypeId'] == 3 || $pArr['ReferenceTypeId'] == 6){
 				if($pArr['volume'] || $pArr['number']){
 					$serTitle = $pArr['secondarytitle'];
-					$sql = "";
 					$sql = "SELECT refid ".
 						"FROM referenceobject ".
 						"WHERE (title LIKE '%".$pArr['secondarytitle']."%') ".
@@ -604,7 +595,6 @@ class ReferenceManager{
 						}
 					}
 					if($parentRefId){
-						$sql = "";
 						$sql = 'UPDATE referenceobject '.
 							'SET placeofpublication = '.$this->cleanTxtStr($pArr['placeofpublication']).',numbervolumnes = '.$this->cleanTxtStr($pArr['numbervolumnes']).','.
 							'edition = '.$this->cleanTxtStr($pArr['edition']).',ispublished = '.$this->cleanTxtStr($pArr['ispublished']).',modifieduid='.$SYMB_UID.',modifiedtimestamp=now() '.
@@ -614,7 +604,6 @@ class ReferenceManager{
 						}
 					}
 					else{
-						$sql = "";
 						$sql = 'INSERT INTO referenceobject(ReferenceTypeId,title,placeofpublication,publisher,numbervolumnes,edition,ispublished,modifieduid,modifiedtimestamp) '.
 							'VALUES(27,'.$this->cleanTxtStr($serTitle).','.$this->cleanTxtStr($pArr['placeofpublication']).','.$this->cleanTxtStr($pArr['publisher']).','.
 							$this->cleanTxtStr($pArr['numbervolumnes']).','.$this->cleanTxtStr($pArr['edition']).','.$this->cleanTxtStr($pArr['ispublished']).','.$SYMB_UID.',now()) ';
@@ -622,8 +611,6 @@ class ReferenceManager{
 							$parentRefId = $this->conn->insert_id;
 						}
 					}
-					$sql = "";
-					$sql = "";
 					$sql = 'UPDATE referenceobject '.
 						'SET parentRefId = '.($parentRefId?$parentRefId:'NULL').',ReferenceTypeId = '.$this->cleanTxtStr($pArr['ReferenceTypeId']).',title = '.$this->cleanTxtStr($pArr['title']).','.
 						'secondarytitle = '.$this->cleanTxtStr($serTitle).',volume = '.$this->cleanTxtStr($pArr['volume']).',number = '.$this->cleanTxtStr($pArr['number']).','.

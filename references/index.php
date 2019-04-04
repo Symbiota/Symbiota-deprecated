@@ -11,10 +11,10 @@ $refExist = false;
 
 $statusStr = '';
 if($formSubmit){
-	if($formSubmit == 'Delete Reference'){
+	if($formSubmit === 'Delete Reference'){
 		$statusStr = $refManager->deleteReference($refId);
 	}
-	if($formSubmit == 'Search References'){
+	if($formSubmit === 'Search References'){
 		$refArr = $refManager->getRefList($_POST['searchtitlekeyword'],$_POST['searchauthor']);
 		foreach($refArr as $refName => $valueArr){
 			if($valueArr["title"]){
@@ -23,7 +23,7 @@ if($formSubmit){
 		}
 	}
 }
-if(!$formSubmit || $formSubmit != 'Search References'){
+if(!$formSubmit || $formSubmit !== 'Search References'){
 	$refArr = $refManager->getRefList('','');
 	foreach($refArr as $refName => $valueArr){
 		if($valueArr["title"]){
@@ -46,7 +46,7 @@ header("Content-Type: text/html; charset=".$charset);
 	<link href="../css/jquery-ui.css" rel="stylesheet" type="text/css" />
 	<script type="text/javascript" src="../js/jquery.js"></script>
 	<script type="text/javascript" src="../js/jquery-ui.js"></script>
-	<script type="text/javascript" src="../js/symb/references.index.js"></script>
+	<script type="text/javascript" src="../js/symb/references.index.js?ver=2"></script>
 </head>
 <body>
 	<?php
@@ -169,7 +169,7 @@ header("Content-Type: text/html; charset=".$charset);
 					}
 					echo '</ul></div>';
 				}
-				elseif(($formSubmit && $formSubmit == 'Search References') && !$refExist){
+				elseif(($formSubmit && $formSubmit === 'Search References') && !$refExist){
 					echo '<div style="margin-top:10px;"><div style="font-weight:bold;font-size:120%;">There were no references matching your criteria.</div></div>';
 				}
 				else{

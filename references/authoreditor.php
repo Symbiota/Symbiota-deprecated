@@ -13,14 +13,14 @@ $authExist = false;
 
 $statusStr = '';
 if($formSubmit){
-	if($formSubmit == 'Add Author'){
+	if($formSubmit === 'Add Author'){
 		$refManager->createAuthor($_POST['firstname'],$_POST['middlename'],$_POST['lastname']);
 		$authId = $refManager->getRefAuthId();
 	}
-	if($formSubmit == 'Edit Author'){
+	if($formSubmit === 'Edit Author'){
 		$statusStr = $refManager->editAuthor($_POST);
 	}
-	if($formSubmit == 'Delete Author'){
+	if($formSubmit === 'Delete Author'){
 		$statusStr = $refManager->deleteAuthor($authId);
 		$authId = 0;
 	}
@@ -55,7 +55,7 @@ header("Content-Type: text/html; charset=".$charset);
 	<link href="../css/jquery-ui.css" rel="stylesheet" type="text/css" />
 	<script type="text/javascript" src="../js/jquery.js"></script>
 	<script type="text/javascript" src="../js/jquery-ui.js"></script>
-	<script type="text/javascript" src="../js/symb/references.index.js"></script>
+	<script type="text/javascript" src="../js/symb/references.index.js?ver=2"></script>
 	<script type="text/javascript">
 		var refid = <?php echo $refId; ?>;
 	</script>
