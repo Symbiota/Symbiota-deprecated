@@ -1212,7 +1212,7 @@ function openOccurrenceSearch(target) {
 	if (occWindow.opener == null) occWindow.opener = self;
 }
 
-function localitySecurityChanged(f){
+function securityChanged(f){
 	fieldChanged('localitysecurity');
 	$("#locsecreason").show();
 }
