@@ -1312,7 +1312,7 @@ ul.inline li {
 	background: rgba(116, 177, 7, 0.751);
 	width: 100%;
 	color: #ffffff;
-	font-size: 20px;
+	font-size: 16px;
 	text-align: center;
 	padding: 10px;
 }
@@ -1875,8 +1875,9 @@ div.mf_container {
 	color: black;
 }
 .displaySettingDiv {
-	font-size: 25px;
+	font-size: 20px;
 	color: #ffffff;
+	float: right;
 }
 .displaySettingDiv input[type='radio'] {
 	transform: scale(1.5);

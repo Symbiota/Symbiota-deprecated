@@ -287,6 +287,9 @@ include($serverRoot."/header.php");
 
     function getSearchResults(){
         display = "";
+        orderby = "common";
+        if(document.getElementById('orderbysci').checked) orderby = "sci";
+        if(document.getElementById('orderbycommon').checked) orderby = "common";
         if(document.getElementById('listdisplayselector').checked) display = "list";
         if(document.getElementById('griddisplayselector').checked) display = "grid";
         prepSearchArr();
@@ -304,13 +307,14 @@ include($serverRoot."/header.php");
         var http = new XMLHttpRequest();
         var searchStr = JSON.stringify(searchArr);
         var url = "rpc/gettaxadata.php";
-        var params = 'searchJson='+searchStr+'&display='+display;
+        var params = 'searchJson='+searchStr+'&display='+display+'&orderby='+orderby;
         //console.log(url+'?'+params);
         //console.log('loading');
         $('body').addClass('with-overlay');
         http.open("POST", url, true);
         http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
         http.onreadystatechange = function() {
+            console.log(http.responseText);
             if(http.readyState == 4 && http.status == 200) {
                 processResults(http.responseText);
             }
@@ -340,7 +344,7 @@ include($serverRoot."/header.php");
         //console.log('loaded');
         document.getElementById("resultCount").innerHTML = reccnt;
         $('body').removeClass('with-overlay');
-        $('.tooltip').tooltipster({theme: 'tooltipster-light'});
+        $('.tooltip').tooltipster({theme: 'tooltipster-light', debug: false});
     }
 
     function getResultCnt(res){
@@ -352,6 +356,7 @@ include($serverRoot."/header.php");
     }
 
     function buildResultHtml(res){
+        console.log(res);
         var html = '';
         if(display == "list") {
             html += '<div class="searchResultTable list-results">';
@@ -365,7 +370,7 @@ include($serverRoot."/header.php");
                 html += '<div class="searchresultgridcell">';
                 html += '<a href="../taxa/garden.php?taxon='+i+'" target="_blank">';
                 if(res[i].url) html += '<img class="searchresultgridimage" src="'+res[i].url+'" title="'+sciname+'" alt="'+sciname+' image" />';
-                html += '<div class="searchresultgridsciname">'+sciname+'</div>';
+                html += '<div class="searchresultgridsciname">'+(res[i].common?res[i].common+'<br>':"")+sciname+'</div>';
                 html += '</a>';
                 html += '</div>';
             }
@@ -1023,6 +1028,15 @@ include($serverRoot."/header.php");
             </div>
             <div class="displaySettingDiv">
                 <div class="gridDisplayDiv">
+                    Order by:&nbsp;
+                    <input name="orderby" id="orderbysci" type="radio" value="sci" onchange="getSearchResults();" checked/> Scientific Name
+                </div>
+                <div class="listDisplayDiv">
+                    <input name="orderby" id="orderbycommon" type="radio" value="common" onchange="getSearchResults();" /> Common Name
+                </div>
+            </div>
+            <div class="displaySettingDiv">
+                <div class="gridDisplayDiv">
                     <input name="display" id="griddisplayselector" type="radio" value="grid" onchange="getSearchResults();" checked/> Grid
                 </div>
                 <div class="listDisplayDiv">
@@ -1112,7 +1126,8 @@ include($serverRoot."/footer.php");
 ?>
 <script>
     $('.tooltip').tooltipster({
-        theme: 'tooltipster-light'
+        theme: 'tooltipster-light',
+        debug: false
     });
 </script>
 </body>

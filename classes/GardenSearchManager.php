@@ -34,6 +34,7 @@ class GardenSearchManager {
     private $sqlWhereArr = array();
     private $sql = '';
     private $display = '';
+    private $orderBy = 'common';
 
     function __construct(){
         $this->conn = MySQLiConnectionFactory::getCon("readonly");
@@ -103,13 +104,15 @@ UNION SELECT t.tid FROM taxa as t WHERE (((t.SciName)="'.$cs.'"))))';
         $this->sql = '';
         $sqlWhere = 'WHERE ('.implode(' AND ',$this->sqlWhereArr).') ';
         if($this->display == 'grid'){
-            $sqlSelect = 'SELECT t.TID, t.SciName ';
+            $sqlSelect = 'SELECT t.TID, t.SciName, v.VernacularName ';
             $sqlFrom = 'FROM taxa AS t LEFT JOIN taxaenumtree AS te ON t.TID = te.parenttid ';
+            $sqlFrom .= 'LEFT JOIN taxavernaculars AS v ON t.TID = v.TID ';
             //joining with images is SLOW!  Comment out next line, and run additional query in loop
             //$sqlFrom .= 'LEFT JOIN images AS i ON (te.tid = i.tid OR t.TID = i.tid) ';
-            if(isset($this->searchParamsArr['common'])) $sqlFrom .= 'LEFT JOIN taxavernaculars AS v ON t.TID = v.TID ';
+            //if(isset($this->searchParamsArr['common'])) $sqlFrom .= 'LEFT JOIN taxavernaculars AS v ON t.TID = v.TID ';
             //$sqlWhere .= 'AND te.taxauthid = 1 ';
-            $sqlSuffix = 'GROUP BY t.TID ORDER BY t.SciName ';
+            $sqlSuffix = 'GROUP BY t.TID ';
+            $sqlSuffix .= $this->orderBy == 'common' ? 'ORDER BY v.VernacularName ' : 'ORDER BY t.SciName ';
         }
         elseif($this->display == 'list'){
             $sqlSelect = 'SELECT t.TID, t.SciName, v.VernacularName, kd.CID, ks.CharStateName, ks.cs ';
@@ -119,18 +122,24 @@ UNION SELECT t.tid FROM taxa as t WHERE (((t.SciName)="'.$cs.'"))))';
             $sqlFrom .= 'LEFT JOIN kmcs AS ks ON kd.CID = ks.cid AND kd.CS = ks.cs ';
 	        //$sqlFrom .= 'LEFT JOIN images AS i ON (t.TID = i.tid) ';
             //$sqlWhere .= 'AND (kd.CID IN(137,680,683,140,738,684)) ';
-            $sqlSuffix = 'GROUP BY t.TID ORDER BY t.SciName ';
+            $sqlSuffix = 'GROUP BY t.TID ';
+            $sqlSuffix .= $this->orderBy == 'common' ? 'ORDER BY v.VernacularName ' : 'ORDER BY t.SciName ';
         }
         $this->sql = $sqlSelect.$sqlFrom.$sqlWhere.$sqlSuffix;
+        //if($this->orderBy == 'common')var_dump($this->sql);
     }
 
     public function getDataArr(){
         $returnArr = array();
+        $cnt = 0;
         //echo $this->sql; exit;
         $result = $this->conn->query($this->sql);
         while($row = $result->fetch_object()){
+            $cnt ++;
             $tid = $row->TID;
-            if(!isset($returnArr[$tid]['sciname'])) $returnArr[$tid]['sciname'] = $row->SciName;
+            if(!isset($returnArr[$cnt]['sciname'])) $returnArr[$cnt]['sciname'] = $row->SciName;
+            $returnArr[$cnt]['tid'] = $tid;
+            if(!isset($returnArr[$cnt]['common'])) $returnArr[$cnt]['common'] = $row->VernacularName;
             if($this->display == 'grid'){
             	//run query on images table to get thumbnail image.
 	            $sql="SELECT i.thumbnailurl, i.url FROM images AS i WHERE tid = ".$this->conn->escape_string($tid) . " ORDER BY i.sortsequence LIMIT 1";
@@ -140,7 +149,7 @@ UNION SELECT t.tid FROM taxa as t WHERE (((t.SciName)="'.$cs.'"))))';
                 if(array_key_exists("IMAGE_DOMAIN",$GLOBALS)){
                     if(substr($imgThumbnail,0,1)=="/") $imgThumbnail = $GLOBALS["IMAGE_DOMAIN"].$imgThumbnail;
                 }
-                $returnArr[$tid]['url'] = $imgThumbnail;
+                $returnArr[$cnt]['url'] = $imgThumbnail;
             }
             elseif($this->display == 'list'){
                 $cid = $row->CID;
@@ -150,44 +159,15 @@ UNION SELECT t.tid FROM taxa as t WHERE (((t.SciName)="'.$cs.'"))))';
 	            if(array_key_exists("IMAGE_DOMAIN",$GLOBALS)){
 		            if(substr($imgThumbnail,0,1)=="/") $imgThumbnail = $GLOBALS["IMAGE_DOMAIN"].$imgThumbnail;
 	            }
-		            $returnArr[$tid]['url'] = $imgThumbnail;
+		            $returnArr[$cnt]['url'] = $imgThumbnail;
 	            //build additional attribute values
                 $attribs = $this->getGridAttribs($this->conn->escape_string($tid));
-                $returnArr[$tid]['type'] = $attribs['type'];
-                $returnArr[$tid]['sunlight'] = $attribs['sunlight'];
-                $returnArr[$tid]['moisture'] = $attribs['moisture'];
-                $returnArr[$tid]['height_string'] = $attribs['height_string'];
-                $returnArr[$tid]['width_string'] = $attribs['width_string'];
-                $returnArr[$tid]['ease'] = $attribs['ease'];
-
-                if(!isset($returnArr[$tid]['common'])) $returnArr[$tid]['common'] = $row->VernacularName;
-                //if(!isset($returnArr[$tid]['type']) && $cid == 137) {
-	            //    $returnArr[$tid]['type'] = $row->CharStateName;
-	            //    if($row->cs == 3) $returnArr[$tid]['type_class'] = "planttype1";
-	            //    if($row->cs == 2) $returnArr[$tid]['type_class'] = "planttype2";
-	            //    if($row->cs == 6) $returnArr[$tid]['type_class'] = "planttype3";
-	            //    if($row->cs == 1) $returnArr[$tid]['type_class'] = "planttype4";
-	            //    if($row->cs == 4) $returnArr[$tid]['type_class'] = "planttype5";
-	            //    if($row->cs == 5) $returnArr[$tid]['type_class'] = "planttype6";
-                //}
-                //if(!isset($returnArr[$tid]['light']) && $cid == 680) {
-                //	$returnArr[$tid]['light'] = $row->CharStateName;
-	            //    if($row->cs == 1) $returnArr[$tid]['light_class'] = "sunlight1";
-	            //    if($row->cs == 3) $returnArr[$tid]['light_class'] = "sunlight2";
-	            //    if($row->cs == 4) $returnArr[$tid]['light_class'] = "sunlight3";
-                //}
-                //if(!isset($returnArr[$tid]['moisture']) && $cid == 683) {
-                //	$returnArr[$tid]['moisture'] = $row->CharStateName;
-	            //    if($row->cs == 1) $returnArr[$tid]['moisture_class'] = "moisture1";
-	            //    if($row->cs == 2) $returnArr[$tid]['moisture_class'] = "moisture2";
-	            //    if($row->cs == 3) $returnArr[$tid]['moisture_class'] = "moisture3";
-	            //    if($row->cs == 4) $returnArr[$tid]['moisture_class'] = "moisture5";
-	            //    if($row->cs == 5) $returnArr[$tid]['moisture_class'] = "moisture4";
-                //}
-                //if(!isset($returnArr[$tid]['ease']) && $cid == 684) $returnArr[$tid]['ease'] = $row->CharStateName;
-                //if(!isset($returnArr[$tid]['maxheight']) && $cid == 140) $returnArr[$tid]['maxheight'] = $row->CharStateName;
-                //if(!isset($returnArr[$tid]['maxwidth']) && $cid == 738) $returnArr[$tid]['maxwidth'] = $row->CharStateName;
-
+                $returnArr[$cnt]['type'] = $attribs['type'];
+                $returnArr[$cnt]['sunlight'] = $attribs['sunlight'];
+                $returnArr[$cnt]['moisture'] = $attribs['moisture'];
+                $returnArr[$cnt]['height_string'] = $attribs['height_string'];
+                $returnArr[$cnt]['width_string'] = $attribs['width_string'];
+                $returnArr[$cnt]['ease'] = $attribs['ease'];
             }
         }
         $result->free();
@@ -209,6 +189,9 @@ UNION SELECT t.tid FROM taxa as t WHERE (((t.SciName)="'.$cs.'"))))';
 
     public function setDisplay($dis){
         $this->display = $dis;
+    }
+    public function setOrderBy($orderby){
+        $this->orderBy = $orderby;
     }
 
     public function getGridAttribs($tid) {
