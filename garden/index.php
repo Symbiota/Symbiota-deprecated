@@ -372,7 +372,7 @@ include($serverRoot."/header.php");
             var sciname = res[i].sciname;
             if(display == "grid"){
                 html += '<div class="searchresultgridcell">';
-                html += '<a href="../taxa/garden.php?taxon='+i+'" target="_blank">';
+                html += '<a href="../taxa/garden.php?taxon='+res[i].tid+'" target="_blank">';
                 if(res[i].url) html += '<img class="searchresultgridimage" src="'+res[i].url+'" title="'+sciname+'" alt="'+sciname+' image" />';
                 html += '<div class="searchresultgridsciname">'+(res[i].common?res[i].common+'<br>':"")+sciname+'</div>';
                 html += '</a>';
@@ -381,7 +381,7 @@ include($serverRoot."/header.php");
             if(display == "list"){
                 html += '<div class="searchResultListMainRow">';
                 html += '<div class="searchResultListSciname">';
-                html += '<a href="../taxa/garden.php?taxon='+i+'" target="_blank">'+sciname+'</a>';
+                html += '<a href="../taxa/garden.php?taxon='+res[i].tid+'" target="_blank">'+sciname+'</a>';
                 html += '</div>';
                 html += '<div class="searchResultListCommon">'+(res[i].common?res[i].common:"")+'</div>';
                 html += '<div class="searchResultListToggle">';
