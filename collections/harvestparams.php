@@ -162,7 +162,9 @@ if(isset($_REQUEST['db'])){
 	?>
 
 	<div id="innertext">
-		<h1><?php echo $SEARCHTEXT['PAGE_HEADER']; ?></h1>
+        <h3>Search the digitized collections of the Oregon State University Herbarium</h3>
+        <p>This feature gives access to all the digitized collections housed in the Oregon State University Herbarium at Corvallis, which includes specimens originating at University of Oregon (ORE) and Willamette University (WILLU) as well as Oregon State University (OSC).  Collections represented are the vascular plants, algae, bryophytes, fungi, and lichens. As part of its work to produce the Flora of Oregon in printed and digital formats, OregonFlora curates the records and taxonomy of the vascular plants of Oregon. Other specimen groups are updated by the respective collections manager(s).</p>
+		<h3><?php echo $SEARCHTEXT['PAGE_HEADER']; ?></h3>
 		<?php echo $SEARCHTEXT['GENERAL_TEXT_1']; ?>
         <div style="margin:5px;">
 			<input type='checkbox' name='showtable' id='showtable' value='1' onchange="changeTableDisplay();" /> Show results in table view
@@ -174,7 +176,7 @@ if(isset($_REQUEST['db'])){
 				<div><button type="button" class="resetbtn" onclick='resetHarvestParamsForm(this.form);'><?php echo isset($LANG['BUTTON_RESET'])?$LANG['BUTTON_RESET']:'Reset Form'; ?></button></div>
 			</div>
 			<div>
-				<h1><?php echo $SEARCHTEXT['TAXON_HEADER']; ?></h1>
+				<h3><?php echo $SEARCHTEXT['TAXON_HEADER']; ?></h3>
 				<span style="margin-left:5px;"><input type='checkbox' name='thes' value='1' CHECKED /><?php echo $SEARCHTEXT['GENERAL_TEXT_2']; ?></SPAN>
 			</div>
 			<div id="taxonSearch0">
@@ -191,7 +193,7 @@ if(isset($_REQUEST['db'])){
 			</div>
 			<div style="margin:10 0 10 0;"><hr></div>
 			<div>
-				<h1><?php echo $SEARCHTEXT['LOCALITY_HEADER']; ?></h1>
+				<h3><?php echo $SEARCHTEXT['LOCALITY_HEADER']; ?></h3>
 			</div>
 			<div>
 				<?php echo $SEARCHTEXT['COUNTRY_INPUT']; ?> <input type="text" id="country" size="43" name="country" value="" title="<?php echo $SEARCHTEXT['TITLE_TEXT_1']; ?>" />
@@ -220,7 +222,7 @@ if(isset($_REQUEST['db'])){
             ?>
 			<div style="margin:10 0 10 0;">
 				<hr>
-				<h1><?php echo $SEARCHTEXT['LAT_LNG_HEADER']; ?></h1>
+				<h3><?php echo $SEARCHTEXT['LAT_LNG_HEADER']; ?></h3>
 			</div>
 			<div style="width:300px;float:left;border:2px solid brown;padding:10px;margin-bottom:10px;">
 				<div style="font-weight:bold;">
@@ -290,7 +292,7 @@ if(isset($_REQUEST['db'])){
 			</div>
 			<div style=";clear:both;"><hr/></div>
 			<div>
-				<h1><?php echo $SEARCHTEXT['COLLECTOR_HEADER']; ?></h1>
+				<h3><?php echo $SEARCHTEXT['COLLECTOR_HEADER']; ?></h3>
 			</div>
 			<div>
 				<?php echo $SEARCHTEXT['COLLECTOR_LASTNAME']; ?>
@@ -309,7 +311,7 @@ if(isset($_REQUEST['db'])){
 				<input type="submit" class="nextbtn" value="<?php echo isset($LANG['BUTTON_NEXT'])?$LANG['BUTTON_NEXT']:'Next >'; ?>" />
 			</div>
 			<div>
-				<h1><?php echo $SEARCHTEXT['SPECIMEN_HEADER']; ?></h1>
+				<h3><?php echo $SEARCHTEXT['SPECIMEN_HEADER']; ?></h3>
 			</div>
 			<div>
 				<?php echo $SEARCHTEXT['CATALOG_NUMBER']; ?>
