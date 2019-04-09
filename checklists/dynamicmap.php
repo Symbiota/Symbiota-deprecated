@@ -130,21 +130,25 @@ elseif($coordRange > 40){
 		}
 		?>
 		<div id='innertext'>
-			<div>
-				Pan, zoom and click on map to capture coordinates, then submit coordinates to build a species list. 
-				<span id="moredetails" style="cursor:pointer;color:blue;font-size:80%;" onclick="this.style.display='none';document.getElementById('moreinfo').style.display='inline';document.getElementById('lessdetails').style.display='inline';">
-					More Details
+            <div>
+                <h3>An easy-to-use plant identification tool based on the plant features you recognize.
+                <span id="moredetails" style="cursor:pointer;color:blue;font-size:70%;" onclick="this.style.display='none';document.getElementById('moreinfo').style.display='inline';document.getElementById('lessdetails').style.display='inline';">
+					[more]
 				</span>
-				<span id="moreinfo" style="display:none;">
-					If a radius is defined, species lists are generated using occurrence data collected within the defined area.
-					If a radius is not supplied, the area is sampled in concentric rings until the sample size is determined to 
-					best represent the local species diversity. In other words, poorly collected areas will have a larger radius sampled. 
-					Setting the taxon filter will limit the return to species found within that taxonomic group.
+                </h3>
+                <p id="moreinfo" style="display:none;">
+					You can filter results to a single plant family using the dropdown below. Entering a radius is optional; if none is provided, the program calculates one to best represent the plant diversity surrounding the selected location.
+                    <span id="lessdetails" style="cursor:pointer;color:blue;display:none;" onclick="this.style.display='none';document.getElementById('moreinfo').style.display='none';document.getElementById('moredetails').style.display='inline';">
+					[less]
 				</span>
-				<span id="lessdetails" style="cursor:pointer;color:blue;font-size:80%;display:none;" onclick="this.style.display='none';document.getElementById('moreinfo').style.display='none';document.getElementById('moredetails').style.display='inline';">
-					Less Details
-				</span>
-			</div>
+				</p>
+                <ul>
+                    <li>Begin by marking on the map the approximate location of your unknown plant.</li>
+                    <li>Click &ldquo;Build Checklist&rdquo; to create a list of plants that occur in the region of your unknown.</li>
+                    <li>Select any of the recognizable characters to narrow the possibilities.</li>
+                    <li>Open the profile pages of plants in the list and compare to your unknown.</li>
+                </ul>
+            </div>
 			<div style="margin-top:5px;">
 				<form name="mapForm" action="dynamicchecklist.php" method="post" onsubmit="return checkForm();">
 					<div style="float:left;width:300px;">
@@ -161,7 +165,7 @@ elseif($coordRange > 40){
 					</div>
 					<div style="float:left;">
 						<div style="margin-right:35px;">
-							<b>Taxon Filter:</b> <input id="taxa" name="taxa" type="text" value="<?php echo $taxa; ?>" />
+							<b>Plant Family Filter:</b> <input id="taxa" name="taxa" type="text" value="<?php echo $taxa; ?>" />
 							<input id="tid" name="tid" type="hidden" value="<?php echo $tid; ?>" />
 						</div>
 						<div> 
