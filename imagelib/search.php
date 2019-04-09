@@ -297,15 +297,15 @@ if($action){
 <!--                            <input type="text" id="uploaddate2" size="32" name="uploaddate2" style="width:100px;" value="--><?php //echo (array_key_exists("uploaddate2",$previousCriteria)?$previousCriteria["uploaddate2"]:''); ?><!--" title="End date of range; leave blank if searching for single date" />-->
 <!--                        </div>-->
 <!--                    </div>-->
-					<div style="clear:both;margin:5 0 5 0;"><hr /></div>
-					<div style="margin-top:5px;">
-						Limit Image Counts: 
-						<select id="imagecount" name="imagecount">
-							<option value="all" <?php echo ((array_key_exists("imagecount",$previousCriteria))&&($previousCriteria["imagecount"]=='all')?'SELECTED ':''); ?>>All images</option>
-							<option value="taxon" <?php echo ((array_key_exists("imagecount",$previousCriteria))&&($previousCriteria["imagecount"]=='taxon')?'SELECTED ':''); ?>>One per taxon</option>
-							<option value="specimen" <?php echo ((array_key_exists("imagecount",$previousCriteria))&&($previousCriteria["imagecount"]=='specimen')?'SELECTED ':''); ?>>One per occurrence</option>
-						</select>
-					</div>
+<!--					<div style="clear:both;margin:5 0 5 0;"><hr /></div>-->
+<!--					<div style="margin-top:5px;">-->
+<!--						Limit Image Counts: -->
+<!--						<select id="imagecount" name="imagecount">-->
+<!--							<option value="all" --><?php //echo ((array_key_exists("imagecount",$previousCriteria))&&($previousCriteria["imagecount"]=='all')?'SELECTED ':''); ?><!-->All images</option>-->
+<!--							<option value="taxon" --><?php //echo ((array_key_exists("imagecount",$previousCriteria))&&($previousCriteria["imagecount"]=='taxon')?'SELECTED ':''); ?><!-->One per taxon</option>-->
+<!--							<option value="specimen" --><?php //echo ((array_key_exists("imagecount",$previousCriteria))&&($previousCriteria["imagecount"]=='specimen')?'SELECTED ':''); ?><!-->One per occurrence</option>-->
+<!--						</select>-->
+<!--					</div>-->
 					<div style="margin-top:5px;">
 						Image Display: 
 						<select id="imagedisplay" name="imagedisplay" onchange="imageDisplayChanged(this.form)">
@@ -323,10 +323,10 @@ if($action){
 									<input type='radio' name='imagetype' value='all' <?php if((!array_key_exists("imagetype",$previousCriteria)) || (array_key_exists("imagetype",$previousCriteria) && $previousCriteria["imagetype"] == 'all')) echo "CHECKED"; ?> > All Images
 								</div>
 								<div style="margin-top:5px;">
-									<input type='radio' name='imagetype' value='specimenonly' <?php if(array_key_exists("imagetype",$previousCriteria) && $previousCriteria["imagetype"] == 'specimenonly') echo "CHECKED"; ?> > Occurrence Images
+									<input type='radio' name='imagetype' value='specimenonly' <?php if(array_key_exists("imagetype",$previousCriteria) && $previousCriteria["imagetype"] == 'specimenonly') echo "CHECKED"; ?> > Vouchered occurrence Images
 								</div>
 								<div style="margin-top:5px;">
-									<input type='radio' name='imagetype' value='observationonly' <?php if(array_key_exists("imagetype",$previousCriteria) && $previousCriteria["imagetype"] == 'observationonly') echo "CHECKED"; ?> > Image Vouchered Observations
+									<input type='radio' name='imagetype' value='observationonly' <?php if(array_key_exists("imagetype",$previousCriteria) && $previousCriteria["imagetype"] == 'observationonly') echo "CHECKED"; ?> > Field photos
 								</div>
 <!--								<div style="margin-top:5px;">-->
 <!--									<input type='radio' name='imagetype' value='fieldonly' --><?php //if(array_key_exists("imagetype",$previousCriteria) && $previousCriteria["imagetype"] == 'fieldonly') echo "CHECKED"; ?><!-- > Field Images (lacking specific locality details)-->
