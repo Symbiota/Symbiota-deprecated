@@ -97,6 +97,9 @@ else{
 		}
 		?>
 		<div>
+            <h3>View the taxonomic tree reflecting all names of the vascular plants of Oregon.
+            </h3>
+            <p>Trees reflects OregonFlora taxonomy, with accepted names in regular type and synonyms in [brackets].</p>
 			<form id="tdform" name="tdform" action="taxonomydisplay.php" method='POST'>
 				<fieldset style="padding:10px;width:550px;">
 					<legend><b>Enter a taxon</b></legend>
