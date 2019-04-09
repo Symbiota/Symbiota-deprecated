@@ -246,7 +246,11 @@ include($serverRoot."/header.php");
         var divId = id+'Div';
         var labelId = id+'Label';
         var labelText = document.getElementById(labelId).innerHTML;
+        console.log(divId);
+        console.log(labelId);
+        console.log(labelText);
         if(document.getElementById(id).checked){
+            console.log('checked');
             document.getElementById(divId).classList.add("selectedOption");
             var optionObj = {name:labelText, nameCode:id};
             searchCriteriaArr.push(optionObj);
@@ -314,7 +318,7 @@ include($serverRoot."/header.php");
         http.open("POST", url, true);
         http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
         http.onreadystatechange = function() {
-            console.log(http.responseText);
+            //(http.responseText);
             if(http.readyState == 4 && http.status == 200) {
                 processResults(http.responseText);
             }
@@ -356,7 +360,7 @@ include($serverRoot."/header.php");
     }
 
     function buildResultHtml(res){
-        console.log(res);
+        //console.log(res);
         var html = '';
         if(display == "list") {
             html += '<div class="searchResultTable list-results">';
@@ -822,6 +826,88 @@ include($serverRoot."/header.php");
                         <div class="wildlifeOptIconDiv wildlife3"></div>
                         <label id="685--5Label" class="advSearchOptCheckBoxLabel tooltip" for="685--5" title="a food source for the caterpillar stage of butterflies">Butterfly larval host</label>
                     </div>
+                </div>
+
+                <div class="advSearchOptionWrapper">
+                    <div class="advSearchOptionHeader">
+                        Native Ecoregions
+                        <hr />
+                    </div>
+
+                    <input class="advSearchOptCheckBox" type="checkbox" onchange="processOption('19--1');" id="19--1">
+                    <div id="19--1Div" class="advSearchOptCheckBoxDiv unselectable with-maps">
+                        <div class="ecoregionOptIconDiv ecoregion1"></div>
+                        <label id="19--1Label" class="advSearchOptCheckBoxLabel tooltip" for="19--1" title="Basin and Range">Basin and Range</label>
+                    </div>
+
+                    <input class="advSearchOptCheckBox" type="checkbox" onchange="processOption('19--2');" id="19--2">
+                    <div id="19--2Div" class="advSearchOptCheckBoxDiv unselectable with-maps">
+                        <div class="ecoregionOptIconDiv ecoregion2"></div>
+                        <label id="19--2Label" class="advSearchOptCheckBoxLabel tooltip" for="19--2" title="Blue and Wallowa Mountains">Blue and Wallowa Mountains</label>
+                    </div>
+
+                    <input class="advSearchOptCheckBox" type="checkbox" onchange="processOption('19--3');" id="19--3">
+                    <div id="19--3Div" class="advSearchOptCheckBoxDiv unselectable with-maps">
+                        <div class="ecoregionOptIconDiv ecoregion3"></div>
+                        <label id="19--3Label" class="advSearchOptCheckBoxLabel tooltip" for="19--3" title="Cascades">Cascades</label>
+                    </div>
+
+                    <input class="advSearchOptCheckBox" type="checkbox" onchange="processOption('19--4');" id="19--4">
+                    <div id="19--4Div" class="advSearchOptCheckBoxDiv unselectable with-maps">
+                        <div class="ecoregionOptIconDiv ecoregion4"></div>
+                        <label id="19--4Label" class="advSearchOptCheckBoxLabel tooltip" for="19--4" title="Coast Range">Coast Range</label>
+                    </div>
+
+                    <input class="advSearchOptCheckBox" type="checkbox" onchange="processOption('19--5');" id="19--5">
+                    <div id="19--5Div" class="advSearchOptCheckBoxDiv unselectable with-maps">
+                        <div class="ecoregionOptIconDiv ecoregion5"></div>
+                        <label id="19--5Label" class="advSearchOptCheckBoxLabel tooltip" for="19--5" title="Columbia Basin">Columbia Basin</label>
+                    </div>
+
+                    <input class="advSearchOptCheckBox" type="checkbox" onchange="processOption('19--6');" id="19--6">
+                    <div id="19--6Div" class="advSearchOptCheckBoxDiv unselectable with-maps">
+                        <div class="ecoregionOptIconDiv ecoregion6"></div>
+                        <label id="19--6Label" class="advSearchOptCheckBoxLabel tooltip" for="19--6" title="Eastern Cascade Slopes and Foothills">Eastern Cascade Slopes and Foothills</label>
+                    </div>
+
+                    <input class="advSearchOptCheckBox" type="checkbox" onchange="processOption('19--7');" id="19--7">
+                    <div id="19--7Div" class="advSearchOptCheckBoxDiv unselectable with-maps">
+                        <div class="ecoregionOptIconDiv ecoregion7"></div>
+                        <label id="19--7Label" class="advSearchOptCheckBoxLabel tooltip" for="19--7" title="Estuarine Coast">Estuarine Coast</label>
+                    </div>
+
+                    <input class="advSearchOptCheckBox" type="checkbox" onchange="processOption('19--8');" id="19--8">
+                    <div id="19--8Div" class="advSearchOptCheckBoxDiv unselectable with-maps">
+                        <div class="ecoregionOptIconDiv ecoregion8"></div>
+                        <label id="19--8Label" class="advSearchOptCheckBoxLabel tooltip" for="19--8" title="Lava Plains">Lava Plains</label>
+                    </div>
+
+                    <input class="advSearchOptCheckBox" type="checkbox" onchange="processOption('19--9');" id="19--9">
+                    <div id="19--9Div" class="advSearchOptCheckBoxDiv unselectable with-maps">
+                        <div class="ecoregionOptIconDiv ecoregion9"></div>
+                        <label id="19--9Label" class="advSearchOptCheckBoxLabel tooltip" for="19--9" title="Owyhee Uplands">Owyhee Uplands</label>
+                    </div>
+
+                    <input class="advSearchOptCheckBox" type="checkbox" onchange="processOption('19--10');" id="19--10">
+                    <div id="19--10Div" class="advSearchOptCheckBoxDiv unselectable with-maps">
+                        <div class="ecoregionOptIconDiv ecoregion10"></div>
+                        <label id="19--10Label" class="advSearchOptCheckBoxLabel tooltip" for="19--10" title="Siskiyou Mountains">Siskiyou Mountains</label>
+                    </div>
+
+                    <input class="advSearchOptCheckBox" type="checkbox" onchange="processOption('19--11');" id="19--11">
+                    <div id="19--11Div" class="advSearchOptCheckBoxDiv unselectable with-maps">
+                        <div class="ecoregionOptIconDiv ecoregion11"></div>
+                        <label id="19--11Label" class="advSearchOptCheckBoxLabel tooltip" for="19--11" title="Willamette Valley">Willamette Valley</label>
+                    </div>
+
+                    <input class="advSearchOptCheckBox" type="checkbox" onchange="processOption('19--12');" id="19--12">
+                    <div id="19--12Div" class="advSearchOptCheckBoxDiv unselectable with-maps">
+                        <div class="ecoregionOptIconDiv ecoregion12"></div>
+                        <label id="19--12Label" class="advSearchOptCheckBoxLabel tooltip" for="19--12" title="North Basin and Slope">North Basin and Slope</label>
+                    </div>
+
+
+
                 </div>
             </div>
         </div>

@@ -1792,6 +1792,17 @@ div.growthCol {
 	display: flex;
 	align-items: center;
 }
+.advSearchOptCheckBoxDiv.with-maps {
+	padding: 10px;
+	margin: 10px 10px 10px 0;
+	font-size: 13px;
+	border: none;
+	display: flex;
+	align-items: center;
+	flex-direction: column;
+	width: 100px;
+	text-align: center;
+}
 .selectedOption {
 	background: #D4E6C8;
 }
@@ -1806,6 +1817,28 @@ div.growthCol {
 .wildlife3 {background: url("../images/wildlife_icon3.png") center; background-size: cover;}
 .wildlife4 {background: url("../images/wildlife_icon4.png") center; background-size: cover;}
 .wildlife5 {background: url("../images/wildlife_icon5.png") center; background-size: cover;}
+
+
+.ecoregionOptIconDiv {
+	width: 80px;
+	height: 60px;
+	float: left;
+}
+
+.ecoregion1 {background: url("../images/EstuarineCoast_CoastRange.png") center; background-size: cover;}
+.ecoregion2 {background: url("../images/BlueAndWallowaMountains.png") center; background-size: cover;}
+.ecoregion3 {background: url("../images/WesternCascadeMountains.png") center; background-size: cover;}
+.ecoregion4 {background: url("../images/CoastRange.png") center; background-size: cover;}
+.ecoregion5 {background: url("../images/ColumbiaBasin.png") center; background-size: cover;}
+.ecoregion6 {background: url("../images/EastCascadeMountainsAndSlope.png") center; background-size: cover;}
+.ecoregion7 {background: url("../images/EstuarineCoast.png") center; background-size: cover;}
+.ecoregion8 {background: url("../images/LavaPlains.png") center; background-size: cover;}
+.ecoregion9 {background: url("../images/OwyheeUplands.png") center; background-size: cover;}
+.ecoregion10 {background: url("../images/SiskiyouMountainsl.png") center; background-size: cover;}
+.ecoregion11 {background: url("../images/WillametteValley.png") center; background-size: cover;}
+.ecoregion12 {background: url("../images/NorthBasinAndSlope.png") center; background-size: cover;}
+
+
 
 
 .garden-content .ui-accordion .ui-accordion-header {
