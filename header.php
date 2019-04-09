@@ -63,6 +63,7 @@
                             <li><a href="<?php echo $clientRoot; ?>/collections/harvestparams.php?db[]=5,8,10,7,238,239,240,241">OSU Herbarium</a></li>
                             <li><a href="<?php echo $clientRoot; ?>/garden/index.php">Gardening with Natives</a></li>
                             <li><a href="<?php echo $clientRoot; ?>/imagelib/search.php">Image Search</a></li>
+                            <li><a href="<?php echo $clientRoot; ?>/taxa/admin/taxonomydisplay.php">Taxonomic Tree</a></li>
                         </ul>
                     </li>
                     <li class="menu-item-has-children"><a href="#">Resources</a>
@@ -70,7 +71,6 @@
                             <li><a href="<?php echo $clientRoot; ?>/pages/whats-new.php">What's New</a></li>
                             <li><a href="<?php echo $clientRoot; ?>/newsletters/index.php">Archived Newsletter</a></li>
                             <li><a href="<?php echo $clientRoot; ?>/pages/links.php">Links</a></li>
-                            <li><a href="<?php echo $clientRoot; ?>/taxa/admin/taxonomydisplay.php">Taxonomic Tree</a></li>
                         </ul>
                     </li>
                     <li class="menu-item-has-children"><a href="#">About</a>
