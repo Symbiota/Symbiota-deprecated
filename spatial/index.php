@@ -136,6 +136,7 @@ $dbArr = Array();
     </script>
 </head>
 <body class="mapbody">
+<a class="back-button" rel="external" href="../">Back</a>
 <div data-role="page" id="page1">
     <div role="main" class="ui-content">
         <a href="#defaultpanel" id="panelopenbutton" data-role="button" data-inline="true" data-icon="bars">Open</a>

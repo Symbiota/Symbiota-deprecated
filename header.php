@@ -57,7 +57,7 @@
                 <ul class="nav-menu">
                     <li class="menu-item-has-children"><a href="#">Explore Our Site</a>
                         <ul>
-                            <li><a href="<?php echo $clientRoot; ?>/spatial/index.php" target="_blank">Mapping</a></li>
+                            <li><a href="<?php echo $clientRoot; ?>/spatial/index.php">Mapping</a></li>
                             <li><a href="<?php echo $clientRoot; ?>/checklists/dynamicmap.php?interface=key">Interactive Key</a></li>
                             <li><a href="<?php echo $clientRoot; ?>/projects/index.php">Plant Inventories</a></li>
                             <li><a href="<?php echo $clientRoot; ?>/collections/harvestparams.php?db[]=5,8,10,7,238,239,240,241">OSU Herbarium</a></li>

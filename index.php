@@ -37,7 +37,7 @@ $(document).ready(function () {
 </script>
 <div class="inner-content">
     <div class="home-boxes">
-        <a href="<?php echo $clientRoot; ?>/spatial/index.php" class="home-box mapping-box" target="_blank">
+        <a href="<?php echo $clientRoot; ?>/spatial/index.php" class="home-box mapping-box">
             <img src="images/layout/mapping-box.jpg" alt="Mapping">
             <h3>Mapping</h3>
             <div class="box-overlay">
