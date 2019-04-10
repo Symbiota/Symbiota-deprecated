@@ -243,7 +243,7 @@ if($action){
 							<input type="text" id="photographer" style="width:450px;" name="photographer" value="" title="Separate multiple photographers w/ commas" />
 						</div>
 					</div>
-					<div style="margin-top:5px;">
+					<div style="margin-top:5px;clear: both;">
 						Image Display: 
 						<select id="imagedisplay" name="imagedisplay" onchange="imageDisplayChanged(this.form)">
 							<option value="thumbnail" <?php echo ((array_key_exists("imagedisplay",$previousCriteria))&&($previousCriteria["imagedisplay"]=='thumbnail')?'SELECTED ':''); ?>>Thumbnails</option>
