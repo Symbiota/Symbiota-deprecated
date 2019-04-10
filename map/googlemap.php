@@ -352,97 +352,97 @@ $coordArr = $sharedMapManager->getGeoCoords($mapWhere);
     }
     ?>
     <div id="map_canvas" style="width:100%;height:700px"></div>
-    <table title='Add Point of Reference' style="width:100%;" >
-    	<tr>
-    		<td style="width:330px" valign='top'>
-			    <fieldset>
-					<legend>Legend</legend>
-					<div style="float:left;">
-						<?php 
-						//echo $coordArr;
-						foreach($iconKeys as $iconValue){
-							echo $iconValue;
-						}
-						?>
-					</div>
-					<?php
-					if($genObs){
-						?>
-						<div style="float:right;">
-							<div>
-								<svg xmlns="http://www.w3.org/2000/svg" style="height:15px;width:15px;margin-bottom:-2px;">">
-									<g>
-										<circle cx="7.5" cy="7.5" r="7" fill="white" stroke="#000000" stroke-width="1px" ></circle>
-									</g>
-								</svg> = Collection
-							</div>
-							<div>
-								<svg style="height:14px;width:14px;margin-bottom:-2px;">" xmlns="http://www.w3.org/2000/svg">
-									<g>
-										<path stroke="#000000" d="m6.70496,0.23296l-6.70496,13.48356l13.88754,0.12255l-7.18258,-13.60611z" stroke-width="1px" fill="white"/>
-									</g>
-								</svg> = General Observation
-							</div>
-						</div>
-						<?php
-					}
-					?>
-				</fieldset>
-			</td>
-			<td style="width:375px;" valign='top'>
-				<div>
-					<fieldset>
-						<legend>Add Point of Reference</legend>
-						<div style='float:left;width:350px;'>
-							<div class="latlongdiv">
-								<div>
-									Latitude decimal: <input name='lat' id='lat' size='10' type='text' /> eg: 34.57
-								</div>
-								<div style="margin-top:5px;">
-									Longitude decimal: <input name='lng' id='lng' size='10' type='text' /> eg: -112.38
-								</div>
-								<div style='font-size:80%;margin-top:5px;'>
-									<a href='#' onclick='javascript: toggleLatLongDivs();'>Enter in D:M:S format</a>
-								</div>
-							</div>
-							<div class='latlongdiv' style='display:none;'>
-								<div>
-									Latitude: 
-									<input name='latdeg' id='latdeg' size='2' type='text' />&deg;
-									<input name='latmin' id='latmin' size='5' type='text' />&prime;
-									<input name='latsec' id='latsec' size='5' type='text' />&Prime;
-									<select name='latns' id='latns'>
-										<option value='N'>N</option>
-										<option value='S'>S</option>
-									</select>
-								</div>
-								<div style="margin-top:5px;">
-									Longitude: 
-									<input name='longdeg' id='longdeg' size='2' type='text' />&deg;
-									<input name='longmin' id='longmin' size='5' type='text' />&prime;
-									<input name='longsec' id='longsec' size='5' type='text' />&Prime;
-									<select name='longew' id='longew'>
-										<option value='E'>E</option>
-										<option value='W' selected>W</option>
-									</select>
-								</div>
-								<div style='font-size:80%;margin-top:5px;'>
-									<a href='#' onclick='toggleLatLongDivs();'>Enter in Decimal format</a>
-								</div>
-							</div>
-						</div>
-						<div style="float:right;width:100px;">
-							<div style="float:right;">
-								Marker Name: <input name='title' id='title' size='20' type='text' />
-							</div><br />
-							<div style="float:right;margin-top:10px;">
-								<input type='submit' value='Add Marker' onclick='addRefPoint();' />
-							</div>
-						</div>
-					</fieldset>
-				</div>
-			</td>
-		</tr>
-	</table>
+<!--    <table title='Add Point of Reference' style="width:100%;" >-->
+<!--    	<tr>-->
+<!--    		<td style="width:330px" valign='top'>-->
+<!--			    <fieldset>-->
+<!--					<legend>Legend</legend>-->
+<!--					<div style="float:left;">-->
+<!--						--><?php //
+//						//echo $coordArr;
+//						foreach($iconKeys as $iconValue){
+//							echo $iconValue;
+//						}
+//						?>
+<!--					</div>-->
+<!--					--><?php
+//					if($genObs){
+//						?>
+<!--						<div style="float:right;">-->
+<!--							<div>-->
+<!--								<svg xmlns="http://www.w3.org/2000/svg" style="height:15px;width:15px;margin-bottom:-2px;">">-->
+<!--									<g>-->
+<!--										<circle cx="7.5" cy="7.5" r="7" fill="white" stroke="#000000" stroke-width="1px" ></circle>-->
+<!--									</g>-->
+<!--								</svg> = Collection-->
+<!--							</div>-->
+<!--							<div>-->
+<!--								<svg style="height:14px;width:14px;margin-bottom:-2px;">" xmlns="http://www.w3.org/2000/svg">-->
+<!--									<g>-->
+<!--										<path stroke="#000000" d="m6.70496,0.23296l-6.70496,13.48356l13.88754,0.12255l-7.18258,-13.60611z" stroke-width="1px" fill="white"/>-->
+<!--									</g>-->
+<!--								</svg> = General Observation-->
+<!--							</div>-->
+<!--						</div>-->
+<!--						--><?php
+//					}
+//					?>
+<!--				</fieldset>-->
+<!--			</td>-->
+<!--			<td style="width:375px;" valign='top'>-->
+<!--				<div>-->
+<!--					<fieldset>-->
+<!--						<legend>Add Point of Reference</legend>-->
+<!--						<div style='float:left;width:350px;'>-->
+<!--							<div class="latlongdiv">-->
+<!--								<div>-->
+<!--									Latitude decimal: <input name='lat' id='lat' size='10' type='text' /> eg: 34.57-->
+<!--								</div>-->
+<!--								<div style="margin-top:5px;">-->
+<!--									Longitude decimal: <input name='lng' id='lng' size='10' type='text' /> eg: -112.38-->
+<!--								</div>-->
+<!--								<div style='font-size:80%;margin-top:5px;'>-->
+<!--									<a href='#' onclick='javascript: toggleLatLongDivs();'>Enter in D:M:S format</a>-->
+<!--								</div>-->
+<!--							</div>-->
+<!--							<div class='latlongdiv' style='display:none;'>-->
+<!--								<div>-->
+<!--									Latitude: -->
+<!--									<input name='latdeg' id='latdeg' size='2' type='text' />&deg;-->
+<!--									<input name='latmin' id='latmin' size='5' type='text' />&prime;-->
+<!--									<input name='latsec' id='latsec' size='5' type='text' />&Prime;-->
+<!--									<select name='latns' id='latns'>-->
+<!--										<option value='N'>N</option>-->
+<!--										<option value='S'>S</option>-->
+<!--									</select>-->
+<!--								</div>-->
+<!--								<div style="margin-top:5px;">-->
+<!--									Longitude: -->
+<!--									<input name='longdeg' id='longdeg' size='2' type='text' />&deg;-->
+<!--									<input name='longmin' id='longmin' size='5' type='text' />&prime;-->
+<!--									<input name='longsec' id='longsec' size='5' type='text' />&Prime;-->
+<!--									<select name='longew' id='longew'>-->
+<!--										<option value='E'>E</option>-->
+<!--										<option value='W' selected>W</option>-->
+<!--									</select>-->
+<!--								</div>-->
+<!--								<div style='font-size:80%;margin-top:5px;'>-->
+<!--									<a href='#' onclick='toggleLatLongDivs();'>Enter in Decimal format</a>-->
+<!--								</div>-->
+<!--							</div>-->
+<!--						</div>-->
+<!--						<div style="float:right;width:100px;">-->
+<!--							<div style="float:right;">-->
+<!--								Marker Name: <input name='title' id='title' size='20' type='text' />-->
+<!--							</div><br />-->
+<!--							<div style="float:right;margin-top:10px;">-->
+<!--								<input type='submit' value='Add Marker' onclick='addRefPoint();' />-->
+<!--							</div>-->
+<!--						</div>-->
+<!--					</fieldset>-->
+<!--				</div>-->
+<!--			</td>-->
+<!--		</tr>-->
+<!--	</table>-->
 </body>
 </html>
