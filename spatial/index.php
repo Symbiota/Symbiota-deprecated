@@ -69,7 +69,16 @@ $dbArr = Array();
             });
         });
 
+        // $(document).on('pageaftershow', '#page1', function(){
+        //     $( "#defaultpanel" ).panel( "open");
+        // });
+
         $(document).ready(function() {
+           $("#defaultpanel").toggleClass('ui-panel-closed ui-panel-open');
+            $( "#panelclosebutton" ).one( "click", function() {
+                $("#defaultpanel").toggleClass('ui-panel-closed ui-panel-open');
+            });
+
             $('#criteriatab').tabs({
                 beforeLoad: function( event, ui ) {
                     $(ui.panel).html("<p>Loading...</p>");
