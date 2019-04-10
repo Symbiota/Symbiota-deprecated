@@ -1651,7 +1651,7 @@ $dbArr = Array();
                     popupoverlay.setPosition(evt.coordinate);
                 }
                 else{
-                    alert('You clicked on multiple points. The info window can only display data for a single point.');
+                    alert('This point represents multiple records. Zoom on map to resolve into individual points and view data for each point.');
                 }
                 clickedFeatures = [];
             }

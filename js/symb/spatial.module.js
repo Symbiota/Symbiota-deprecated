@@ -2307,7 +2307,7 @@ function loadPoints(){
                 }
                 loadPointsEvent = false;
                 hideWorking();
-                alert('There were no records matching your query.');
+                alert('You have selected a rare plant. Please login to view precise locality information.');
             }
         });
     }
