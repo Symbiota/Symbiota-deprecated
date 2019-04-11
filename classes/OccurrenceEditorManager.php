@@ -203,6 +203,9 @@ class OccurrenceEditorManager {
 								if(!is_numeric($tStr)) $tStr = '"'.$tStr.'"';
 								$iWhere .= 'OR (o.catalognumber '.substr($term,0,1).' '.$tStr.') ';
 							}
+							elseif(strpos($term,'%')){
+								$iWhere .= 'OR (o.catalognumber LIKE "'.$term.'") ';
+							}
 							else{
 								$iWhere .= 'OR (o.catalognumber = "'.$term.'") ';
 							}
@@ -265,6 +268,9 @@ class OccurrenceEditorManager {
 							$tStr = trim(substr($term,1));
 							if(!is_numeric($tStr)) $tStr = '"'.$tStr.'"';
 							$ocnWhere .= 'OR (o.othercatalognumbers '.substr($term,0,1).' '.$tStr.') ';
+						}
+						elseif(strpos($term,'%')){
+							$ocnWhere .= 'OR (o.othercatalognumbers LIKE "'.$term.'") ';
 						}
 						else{
 							$ocnWhere .= 'OR (o.othercatalognumbers = "'.$term.'") ';
