@@ -97,15 +97,15 @@ class ChecklistLoaderManager {
 							}
 							if(array_key_exists('notes',$headerArr) && $valueArr[$headerArr['notes']]){
 								$sqlInsert .= ',notes';
-								$sqlValues .= ',"'.$this->cleanInStr($valueArr[$headerArr['notes']]).'"';
+								$sqlValues .= ',"'.$this->cleanInStr($this->encodeString($valueArr[$headerArr['notes']])).'"';
 							}
 							if(array_key_exists('internalnotes',$headerArr) && $valueArr[$headerArr['internalnotes']]){
 								$sqlInsert .= ',internalnotes';
-								$sqlValues .= ',"'.$this->cleanInStr($valueArr[$headerArr['internalnotes']]).'"';
+								$sqlValues .= ',"'.$this->cleanInStr($this->encodeString($valueArr[$headerArr['internalnotes']])).'"';
 							}
 							if(array_key_exists('source',$headerArr) && $valueArr[$headerArr['source']]){
 								$sqlInsert .= ',source';
-								$sqlValues .= ',"'.$this->cleanInStr($valueArr[$headerArr['source']]).'"';
+								$sqlValues .= ',"'.$this->cleanInStr($this->encodeString($valueArr[$headerArr['source']])).'"';
 							}
 
 							$sql = 'INSERT INTO fmchklsttaxalink (tid,clid'.$sqlInsert.') VALUES ('.$tid.', '.$this->clid.$sqlValues.')';
@@ -262,11 +262,21 @@ class ChecklistLoaderManager {
 	private function encodeString($inStr){
 		global $CHARSET;
 		$retStr = $inStr;
-		//Get rid of curly quotes
 		//Get rid of Windows curly (smart) quotes
 		$search = array(chr(145),chr(146),chr(147),chr(148),chr(149),chr(150),chr(151));
 		$replace = array("'","'",'"','"','*','-','-');
 		$inStr= str_replace($search, $replace, $inStr);
+
+		//Get rid of UTF-8 curly smart quotes and dashes
+		$badwordchars=array("\xe2\x80\x98", // left single quote
+				"\xe2\x80\x99", // right single quote
+				"\xe2\x80\x9c", // left double quote
+				"\xe2\x80\x9d", // right double quote
+				"\xe2\x80\x94", // em dash
+				"\xe2\x80\xa6" // elipses
+		);
+		$fixedwordchars=array("'", "'", '"', '"', '-', '...');
+		$inStr = str_replace($badwordchars, $fixedwordchars, $inStr);
 
 		if($inStr){
 			if(strtolower($CHARSET) == "utf-8" || strtolower($CHARSET) == "utf8"){
@@ -275,13 +285,15 @@ class ChecklistLoaderManager {
 					//$retStr = iconv("ISO-8859-1//TRANSLIT","UTF-8",$inStr);
 				}
 			}
-			elseif(strtolower($charset) == "iso-8859-1"){
+			elseif(strtolower($CHARSET) == "iso-8859-1"){
 				if(mb_detect_encoding($inStr,'UTF-8,ISO-8859-1') == "UTF-8"){
 					$retStr = utf8_decode($inStr);
 					//$retStr = iconv("UTF-8","ISO-8859-1//TRANSLIT",$inStr);
 				}
 			}
- 		}
+			//$line = iconv('macintosh', 'UTF-8', $line);
+			//mb_detect_encoding($buffer, 'windows-1251, macroman, UTF-8');
+		}
 		return $retStr;
 	}
 }
