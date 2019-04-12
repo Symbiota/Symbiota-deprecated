@@ -1,23 +1,21 @@
 <?php
 include_once($SERVER_ROOT.'/config/dbconnection.php');
+include_once($SERVER_ROOT.'/classes/Manager.php');
 include_once($SERVER_ROOT.'/classes/TaxonomyUtilities.php');
 include_once($SERVER_ROOT.'/classes/OccurrenceMaintenance.php');
 
-class ChecklistLoaderManager {
+class ChecklistLoaderManager extends Manager {
 
-	private $conn;
 	private $clid;
 	private $clMeta = array();
 	private $problemTaxa = array();
-	private $errorArr = array();
-	private $errorStr = '';
 
 	public function __construct(){
-		$this->conn = MySQLiConnectionFactory::getCon("write");
+		parent::__construct(null,'write');
 	}
 
 	public function __destruct(){
-		if(!($this->conn === null)) $this->conn->close();
+		parent::__destruct();
 	}
 
 	public function uploadCsvList($thesId){
@@ -114,12 +112,12 @@ class ChecklistLoaderManager {
 								$successCnt++;
 							}
 							else{
-								$this->errorArr[] = $sciNameStr." (TID = $tid) failed to load<br />Error msg: ".$this->conn->error;
+								$this->warningArr[] = $sciNameStr." (TID = $tid) failed to load<br />Error msg: ".$this->conn->error;
 								//echo $sql."<br />";
 							}
 						}
 						else{
-							$this->errorArr[] = $sciNameStr." failed to load (taxon must be of genus, species, or infraspecific ranking)";
+							$this->warningArr[] = $sciNameStr." failed to load (taxon must be of genus, species, or infraspecific ranking)";
 						}
 					}
 					else{
@@ -142,7 +140,7 @@ class ChecklistLoaderManager {
 			}
 		}
 		else{
-			$this->errorStr = 'ERROR: unable to locate scientific name column';
+			$this->errorMessage = 'ERROR: unable to locate scientific name column';
 		}
 		return $successCnt;
 	}
@@ -196,7 +194,7 @@ class ChecklistLoaderManager {
 		$sql = 'INSERT INTO fmchklsttaxalink(clid,tid) '.
 			'VALUES('.$this->clid.','.$tid.')';
 		if(!$this->conn->query($sql)){
-			$this->errorStr = 'ERROR adding new taxon to checklist: '.$this->conn->error;
+			$this->errorMessage = 'ERROR adding new taxon to checklist: '.$this->conn->error;
 			$status = false;
 		}
 		return $status;
@@ -212,14 +210,6 @@ class ChecklistLoaderManager {
 
 	public function getProblemTaxa(){
 		return $this->problemTaxa;
-	}
-
-	public function getErrorArr(){
-		return $this->errorArr;
-	}
-
-	public function getErrorStr(){
-		return $this->errorStr;
 	}
 
 	private function setChecklistMetadata(){
@@ -249,52 +239,6 @@ class ChecklistLoaderManager {
 			$retArr[$row->taxauthid] = $row->name;
 		}
 		return $retArr;
-	}
-
-	//Misc functions
-	private function cleanInStr($str){
-		$newStr = trim($str);
-		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
-		$newStr = $this->conn->real_escape_string($newStr);
-		return $newStr;
-	}
-
-	private function encodeString($inStr){
-		global $CHARSET;
-		$retStr = $inStr;
-		//Get rid of Windows curly (smart) quotes
-		$search = array(chr(145),chr(146),chr(147),chr(148),chr(149),chr(150),chr(151));
-		$replace = array("'","'",'"','"','*','-','-');
-		$inStr= str_replace($search, $replace, $inStr);
-
-		//Get rid of UTF-8 curly smart quotes and dashes
-		$badwordchars=array("\xe2\x80\x98", // left single quote
-				"\xe2\x80\x99", // right single quote
-				"\xe2\x80\x9c", // left double quote
-				"\xe2\x80\x9d", // right double quote
-				"\xe2\x80\x94", // em dash
-				"\xe2\x80\xa6" // elipses
-		);
-		$fixedwordchars=array("'", "'", '"', '"', '-', '...');
-		$inStr = str_replace($badwordchars, $fixedwordchars, $inStr);
-
-		if($inStr){
-			if(strtolower($CHARSET) == "utf-8" || strtolower($CHARSET) == "utf8"){
-				if(mb_detect_encoding($inStr,'UTF-8,ISO-8859-1',true) == "ISO-8859-1"){
-					$retStr = utf8_encode($inStr);
-					//$retStr = iconv("ISO-8859-1//TRANSLIT","UTF-8",$inStr);
-				}
-			}
-			elseif(strtolower($CHARSET) == "iso-8859-1"){
-				if(mb_detect_encoding($inStr,'UTF-8,ISO-8859-1') == "UTF-8"){
-					$retStr = utf8_decode($inStr);
-					//$retStr = iconv("UTF-8","ISO-8859-1//TRANSLIT",$inStr);
-				}
-			}
-			//$line = iconv('macintosh', 'UTF-8', $line);
-			//mb_detect_encoding($buffer, 'windows-1251, macroman, UTF-8');
-		}
-		return $retStr;
 	}
 }
 ?>
