@@ -76,7 +76,7 @@ if($IS_ADMIN || (array_key_exists("ClAdmin",$USER_RIGHTS) && in_array($clid,$USE
 							<li>Loading checklist...</li>
 							<?php
 							$cnt = $clLoaderManager->uploadCsvList($thesId);
-							$statusStr = $clLoaderManager->getErrorStr();
+							$statusStr = $clLoaderManager->getErrorMessage();
 							if(!$cnt && $statusStr){
 								echo '<div style="margin:20px;font-weight:bold;">';
 								echo '<div style="font-size:110%;color:red;">'.$statusStr.'</div>';
@@ -85,7 +85,7 @@ if($IS_ADMIN || (array_key_exists("ClAdmin",$USER_RIGHTS) && in_array($clid,$USE
 								exit;
 							}
 							$probCnt = count($clLoaderManager->getProblemTaxa());
-							$errorArr = $clLoaderManager->getErrorArr();
+							$errorArr = $clLoaderManager->getWarningArr();
 							?>
 							<li>Upload status...</li>
 							<li style="margin-left:10px;">Taxa successfully loaded: <?php echo $cnt; ?></li>
