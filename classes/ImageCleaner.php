@@ -70,10 +70,11 @@ class ImageCleaner extends Manager{
 		$sql .= $this->getSqlWhere().'ORDER BY RAND()';
 		//echo $sql; exit;
 		$result = $this->conn->query($sql);
-		$cnt = 1;
+		$cnt = 0;
 		if($this->verboseMode > 1) echo '<ul style="margin-left:15px;">';
 		while($row = $result->fetch_object()){
 			$status = true;
+			$cnt++;
 			$imgId = $row->imgid;
 			$this->logOrEcho($cnt.': Building thumbnail: <a href="../imgdetails.php?imgid='.$imgId.'" target="_blank">'.$imgId.'</a>...');
 			$this->conn->autocommit(false);
@@ -110,7 +111,6 @@ class ImageCleaner extends Manager{
 				//$this->conn->query($tagSql);
 			}
 			if(!$status) $this->logOrEcho($this->errorMessage,1);
-			$cnt++;
 		}
 		$result->free();
 		if($this->verboseMode > 1) echo '</ul>';
