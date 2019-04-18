@@ -11,16 +11,29 @@ $collid = (array_key_exists('collid', $_POST)?$_POST['collid']:'');
 $imgidStart = (array_key_exists('imgidstart', $_POST)?$_POST['imgidstart']:0);
 $limit = (array_key_exists('limit', $_POST)?$_POST['limit']:10000);
 $archiveImages = (array_key_exists('archiveimg', $_POST)?$_POST['archiveimg']:0);
+$delThumb = (array_key_exists('delthumb', $_POST)?$_POST['delthumb']:0);
+$delWeb = (array_key_exists('delweb', $_POST)?$_POST['delweb']:0);
+$delLarge = (array_key_exists('dellarge', $_POST)?$_POST['dellarge']:0);
 $imgidStr = (array_key_exists('imgidstr', $_POST)?$_POST['imgidstr']:'');
 $submit = (array_key_exists('submitbutton', $_POST)?$_POST['submitbutton']:'');
 
 $toolManager = new MediaTools();
 $imgidEnd = 0;
 if($IS_ADMIN){
-	if($submit == 'Process Images'){
-		if($archiveImages) $toolManager->setArchiveImages($archiveImages);
-		$toolManager->setImgidArr($imgidStr);
-		$imgidEnd = $toolManager->archiveImageFiles($imgidStart, $limit);
+	if($submit){
+		if($submit == 'Process Images'){
+			if($archiveImages) $toolManager->setArchiveImages($archiveImages);
+			$toolManager->setDeleteThumbnail($delThumb);
+			$toolManager->setDeleteWebImage($delWeb);
+			$toolManager->setDeleteOriginal($delLarge);
+			$toolManager->setImgidArr($imgidStr);
+			$imgidEnd = $toolManager->archiveImageFiles($imgidStart, $limit);
+		}
+	}
+	else{
+		$delThumb = 1;
+		$delWeb = 1;
+		$delLarge = 1;
 	}
 	?>
 	<form action="media_scripts.php" method="post">
@@ -35,8 +48,19 @@ if($IS_ADMIN){
 				<b>Batch limit: </b><input type="text" name="limit" value="<?php echo $limit; ?>" /><br />
 			</div>
 			<div style="margin:3px">
-				<input type="radio" name="archiveimg" value="0" <?php echo ($archiveImages?'':'CHECKED'); ?> /> Delete Images<br />
-				<input type="radio" name="archiveimg" value="1" <?php echo ($archiveImages?'CHECKED':''); ?> /> Archive Images<br />
+				<fieldset>
+					<legend>Action</legend>
+					<input type="radio" name="archiveimg" value="0" <?php echo ($archiveImages?'':'CHECKED'); ?> /> Delete Images<br />
+					<input type="radio" name="archiveimg" value="1" <?php echo ($archiveImages?'CHECKED':''); ?> /> Archive Images<br />
+				</fieldset>
+			</div>
+			<div style="margin:3px">
+				<fieldset>
+					<legend>Image Targets</legend>
+					<input type="checkbox" name="delthumb" value="1" <?php echo ($delThumb?'CHECKED':''); ?> /> Delete Thumbnail Derivative<br />
+					<input type="checkbox" name="delweb" value="1" <?php echo ($delWeb?'CHECKED':''); ?> /> Delete Web Derivative<br />
+					<input type="checkbox" name="dellarge" value="1" <?php echo ($delLarge?'CHECKED':''); ?> /> Delete Large Derivative<br />
+				</fieldset>
 			</div>
 			<div style="margin:3px">
 				<b>imgids (enter multiple values delimited by commas)</b><br/>
@@ -107,14 +131,31 @@ class MediaTools {
 		$sql .= 'ORDER BY i.imgid LIMIT '.$limit;
 		//echo $sql;
 		$rs = $this->conn->query($sql);
-		echo '<ol>';
+		echo '<ul>';
 		while($r = $rs->fetch_assoc()){
 			$imgId = $r['imgid'];
+			$derivArr = array('tn'=>1,'web'=>1,'lg'=>1);
+			$delArr = array();
+			if(!$r['thumbnailurl']) unset($derivArr['tn']);
+			if(!$r['url']) unset($derivArr['web']);
+			if(!$r['originalurl']) unset($derivArr['lg']);
 			//Transfer images to archive folder
-			$this->archiveImage($r['url'], $imgId);
-			$this->archiveImage($r['thumbnailurl'], $imgId);
-			$this->archiveImage($r['originalurl'], $imgId);
-			//Place INSERT sql into file in case records need to be reintalled
+			if($this->deleteThumbnail && isset($derivArr['tn'])){
+				$this->archiveImage($r['thumbnailurl'], $imgId);
+				$delArr['tn'] = 1;
+				unset($derivArr['tn']);
+			}
+			if($this->deleteWeb && isset($derivArr['web'])){
+				$this->archiveImage($r['url'], $imgId);
+				$delArr['web'] = 1;
+				unset($derivArr['web']);
+			}
+			if($this->deleteOriginal && isset($derivArr['lg'])){
+				$this->archiveImage($r['originalurl'], $imgId);
+				$delArr['lg'] = 1;
+				unset($derivArr['lg']);
+			}
+			//Place INSERT sql into file in case record needs to be reintalled
 			$insertArr = $r;
 			unset($insertArr['imgid']);
 			unset($insertArr['initialtimestamp']);
@@ -129,17 +170,30 @@ class MediaTools {
 			}
 			$insSql = 'INSERT INTO images('.implode(',', array_keys($insertArr)).') VALUES('.substr($insertStr,1).');';
 			fputcsv($this->reportFH,array($imgId,'record deleted',$insSql));
-			//Delete image from database
-			$this->conn->query('DELETE FROM images WHERE imgid = '.$imgId);
+			//Adjust database record
+			$sqlImg = '';
+			if($derivArr){
+				if(isset($delArr['tn'])) $sqlImg .= ', thumbnailurl = NULL';
+				if(isset($delArr['web'])) $sqlImg .= ', url = "empty"';
+				if(isset($delArr['lg'])) $sqlImg .= ', originalurl = NULL';
+				$sqlImg = 'UPDATE images SET '.substr($sqlImg,1).' WHERE imgid = '.$imgId;
+			}
+			else{
+				$sqlImg = 'DELETE FROM images WHERE imgid = '.$imgId;
+			}
+			if(!$this->conn->query($sqlImg)){
+				echo '<li>ERROR: '.$this->conn->error.'</li>';
+				//echo '<li>sqlImg: '.$sqlImg.'</li>';
+			}
 			if($cnt && $cnt%100 == 0){
-				echo '<li>'.$cnt.' image checked (imgid: '.$imgId.')</li>';
+				echo '<li>'.$cnt.' images checked</li>';
 				ob_flush();
 				flush();
 			}
 			$cnt++;
 			$imgidFinal = $imgId;
 		}
-		echo '</ol>';
+		echo '</ul>';
 		$rs->free();
 		fclose($this->reportFH);
 		echo '<div>Done! '.$cnt.' images '.($this->archiveImages?'archived':'deleted').'</div>';
@@ -163,6 +217,7 @@ class MediaTools {
 			}
 			else{
 				fputcsv($this->reportFH,array($imgid,'unwritable',$imgFilePath,$path));
+				echo '<li>ERROR: image unwritable (imgid: <a href="'.$GLOBALS['CLIENT_ROOT'].'/imagelib/imgdetails.php?imgid='.$imgid.'" target="_blank">'.$imgid.'</a>, path: '.$imgFilePath.')</li>';
 			}
 		}
 	}
