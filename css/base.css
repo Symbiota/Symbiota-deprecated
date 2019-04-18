@@ -6,28 +6,23 @@ body{
 	margin:	8px;
 	margin-left: auto;
 	margin-right: auto;
-	background-color: #FFFFFF;
-	color: #000000;
-	font-family: Arial, Helvetica, sans-serif;
-	font-size: 12px;
 }
 
 /*Main table framework*/
-#maintable{
+#maintable {
 	border-spacing: 0px;
-	height:		500px;
+	height: 500px;
 }
 
 #maintable td{
  	vertical-align: top;
-	font-size: 12px;
 }
 
 #header{
 }
 
 #middleleft{
-	width:		160px;
+	width:	160px;
 }
 
 #middleleftnomenu{
