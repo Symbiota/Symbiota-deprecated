@@ -103,6 +103,15 @@ class ChecklistManager {
 			else{
 				trigger_error('ERROR: unable to set checklist metadata => '.$sql, E_USER_ERROR);
 			}
+			//Temporarly needed as a separate call until db_schema_patch-1.1.sql is applied
+			$sql = 'SELECT headerurl FROM fmchecklists WHERE (clid = '.$this->clid.')';
+			$rs = $this->conn->query($sql);
+			if($rs){
+				if($r = $rs->fetch_object()){
+					$this->clMetadata['headerurl'] = $r->headerurl;
+				}
+				$rs->free();
+			}
 		}
 	}
 
@@ -206,7 +215,7 @@ class ChecklistManager {
 			}
 			if(!$retLimit || ($this->taxaCount >= (($pageNumber-1)*$retLimit) && $this->taxaCount <= ($pageNumber)*$retLimit)){
 				if(count($taxonTokens) == 1) $sciName .= " sp.";
-				if($row->rankid > 220 && !array_key_exists($row->parenttid, $this->taxaList)){
+				if($row->rankid > 220 && $this->clMetadata['type'] != 'rarespp' && !array_key_exists($row->parenttid, $this->taxaList)){
 					$this->taxaList[$row->parenttid]['taxongroup'] = '<i>'.$taxonGroup.'</i>';
 					$this->taxaList[$row->parenttid]['family'] = $family;
 					//$this->taxaList[$row->parenttid]['clid'] = $row->clid;
@@ -295,8 +304,8 @@ class ChecklistManager {
 			if($this->showImages) $this->setImages();
 			if($this->showCommon) $this->setVernaculars();
 			if($this->showSynonyms) $this->setSynonyms();
-			if($speciesRankNeededArr){
-				//Get infraspecific species ranked taxa that are not explicited linked into checklist
+			if($speciesRankNeededArr && $this->clMetadata['type'] != 'rarespp'){
+				//Get species ranked taxa that are not explicited linked into checklist
 				$sql = 'SELECT tid, sciname, author FROM taxa WHERE tid IN('.implode(',',$speciesRankNeededArr).')';
 				$rs = $this->conn->query($sql);
 				while($r = $rs->fetch_object()){
@@ -315,8 +324,7 @@ class ChecklistManager {
 				'(SELECT ts1.tid, SUBSTR(MIN(CONCAT(LPAD(i.sortsequence,6,"0"),i.imgid)),7) AS imgid '.
 				'FROM taxstatus ts1 INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '.
 				'INNER JOIN images i ON ts2.tid = i.tid '.
-				'WHERE i.sortsequence < 500 AND ts1.taxauthid = 1 AND ts2.taxauthid = 1 '.
-				'AND (ts1.tid IN('.implode(',',array_keys($this->taxaList)).')) '.
+				'WHERE i.sortsequence < 500 AND (i.thumbnailurl IS NOT NULL) AND ts1.taxauthid = 1 AND ts2.taxauthid = 1 AND (ts1.tid IN('.implode(',',array_keys($this->taxaList)).')) '.
 				'GROUP BY ts1.tid) i2 ON i.imgid = i2.imgid';
 			//echo $sql;
 			$rs = $this->conn->query($sql);
@@ -334,8 +342,7 @@ class ChecklistManager {
 					'(SELECT ts1.parenttid AS tid, SUBSTR(MIN(CONCAT(LPAD(i.sortsequence,6,"0"),i.imgid)),7) AS imgid '.
 					'FROM taxstatus ts1 INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '.
 					'INNER JOIN images i ON ts2.tid = i.tid '.
-					'WHERE i.sortsequence < 500 AND ts1.taxauthid = 1 AND ts2.taxauthid = 1 '.
-					'AND (ts1.parenttid IN('.implode(',',$missingArr).')) '.
+					'WHERE i.sortsequence < 500 AND (i.thumbnailurl IS NOT NULL) AND ts1.taxauthid = 1 AND ts2.taxauthid = 1 AND (ts1.parenttid IN('.implode(',',$missingArr).')) '.
 					'GROUP BY ts1.tid) i2 ON i.imgid = i2.imgid';
 				//echo $sql;
 				$rs2 = $this->conn->query($sql2);
@@ -418,13 +425,15 @@ class ChecklistManager {
 				$rs1 = $this->conn->query($sql1);
 				if($rs1){
 					while($r1 = $rs1->fetch_object()){
-						if($abbreviated){
-							$retArr[] = $r1->decimallatitude.','.$r1->decimallongitude;
+						if(abs($r1->decimallatitude) < 90 && abs($r1->decimallongitude) < 180){
+							if($abbreviated){
+								$retArr[] = $r1->decimallatitude.','.$r1->decimallongitude;
+							}
+							else{
+								$retArr[$r1->tid][] = array('ll'=>$r1->decimallatitude.','.$r1->decimallongitude,'sciname'=>$this->cleanOutStr($r1->sciname),'notes'=>$this->cleanOutStr($r1->notes));
+							}
+							$retCnt++;
 						}
-						else{
-							$retArr[$r1->tid][] = array('ll'=>$r1->decimallatitude.','.$r1->decimallongitude,'sciname'=>$this->cleanOutStr($r1->sciname),'notes'=>$this->cleanOutStr($r1->notes));
-						}
-						$retCnt++;
 					}
 					$rs1->free();
 				}
@@ -455,13 +464,14 @@ class ChecklistManager {
 					$rs2 = $this->conn->query($sql2);
 					if($rs2){
 						while($r2 = $rs2->fetch_object()){
-							if($abbreviated){
-								$retArr[] = $r2->decimallatitude.','.$r2->decimallongitude;
+							if(abs($r2->decimallatitude) < 90 && abs($r2->decimallongitude) < 180){
+								if($abbreviated){
+									$retArr[] = $r2->decimallatitude.','.$r2->decimallongitude;
+								}
+								else{
+									$retArr[$r2->tid][] = array('ll'=>$r2->decimallatitude.','.$r2->decimallongitude,'notes'=>$this->cleanOutStr($r2->notes),'occid'=>$r2->occid);
+								}
 							}
-							else{
-								$retArr[$r2->tid][] = array('ll'=>$r2->decimallatitude.','.$r2->decimallongitude,'notes'=>$this->cleanOutStr($r2->notes),'occid'=>$r2->occid);
-							}
-							$retCnt++;
 						}
 						$rs2->free();
 					}
@@ -536,14 +546,15 @@ class ChecklistManager {
 			if($this->childClidArr){
 				$clidStr .= ','.implode(',',array_keys($this->childClidArr));
 			}
-			$this->basicSql = 'SELECT t.tid, ctl.clid, IFNULL(ctl.familyoverride,ts.family) AS family, t.sciname, t.author, t.unitname1, t.rankid, ctl.habitat, ctl.abundance, ctl.notes, ctl.source, ts.parenttid ';
+			$this->basicSql = 'SELECT t.tid, ctl.clid, t.sciname, t.author, t.unitname1, t.rankid, ctl.habitat, ctl.abundance, ctl.notes, ctl.source, ts.parenttid, ';
 			if($this->thesFilter){
-				$this->basicSql .= 'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tidaccepted '.
+				$this->basicSql .= 'ts2.family FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tidaccepted '.
 					'INNER JOIN fmchklsttaxalink ctl ON ts.tid = ctl.tid '.
+					'INNER JOIN taxstatus ts2 ON ts.tidaccepted = ts2.tid '.
 			  		'WHERE (ts.taxauthid = '.$this->thesFilter.') AND (ctl.clid IN ('.$clidStr.')) ';
 			}
 			else{
-				$this->basicSql .= 'FROM taxa t INNER JOIN fmchklsttaxalink ctl ON t.tid = ctl.tid '.
+				$this->basicSql .= 'IFNULL(ctl.familyoverride,ts.family) AS family FROM taxa t INNER JOIN fmchklsttaxalink ctl ON t.tid = ctl.tid '.
 					'INNER JOIN taxstatus ts ON t.tid = ts.tid '.
 			  		'WHERE (ts.taxauthid = 1) AND (ctl.clid IN ('.$clidStr.')) ';
 			}

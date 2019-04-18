@@ -92,6 +92,7 @@ class PluginsManager {
 			else{
 				$sql .= 'WHERE i.InitialTimeStamp < "'.$sinceDate.'" AND i.tid IS NOT NULL ';
 			}
+			$sql .= 'AND i.sortsequence < 500 ';
 			if($imageType == 'specimen'){
 				$sql .= 'AND i.occid IS NOT NULL ';
 			}

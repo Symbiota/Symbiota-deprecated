@@ -49,13 +49,11 @@ $(document).ready(function() {
 });
 
 function showOptions(){
-	$( "#optiondiv" ).show();
-	$( "#hidespan" ).show();
+	$( "#optiondiv" ).toggle();
 }
 
 function hideOptions(){
 	$( "#optiondiv" ).hide();
-	$( "#hidespan" ).hide();
 }
 
 //Field changed and verification functions
@@ -120,14 +118,18 @@ function submitDefaultForm(f){
 			var validformat1 = /^\s*[<>]{0,1}\s{0,1}\d{4}-\d{2}-\d{2}\s*$/ //Format: yyyy-mm-dd, >yyyy-mm-dd, <yyyy-mm-dd
 			if(!validformat1.test(dateStr)){
 				alert("Event date must follow YYYY-MM-DD format. Note that 00 can be entered for a non-determined month or day.");
-				return false;
+				continueSubmit = false;
 			}
 		}
 		catch(ex){
 		}
 	}
-
-	if(continueSubmit && $( "#fcatalognumber" ).val() != ""){
+	if($( "#fcatalognumber" ).val() == ""){
+		alert("Catalog number field must have a value!");
+		continueSubmit = false;
+	}
+	
+	if(continueSubmit){
 		/*
 		url = 'rpc/occurAddData.php?sciname='+$( "#fsciname" ).val()+'&scientificnameauthorship='+$( "#fscientificnameauthorship" ).val()+'&family='+$( "#ffamily" ).val()+'&localitysecurity='+($( "#flocalitysecurity" ).prop('checked')?"1":"0");
 		url = url + '&country='+$( "#fcountry" ).val()+'&stateprovince='+$( "#fstateprovince" ).val()+'&county='+$( "#fcounty" ).val();
@@ -154,6 +156,7 @@ function submitDefaultForm(f){
 				recordedby: $( "#frecordedby" ).val(), 
 				recordnumber: $( "#frecordnumber" ).val(), 
 				eventdate: $( "#feventdate" ).val(), 
+				labelproject: $( "#flabelproject" ).val(), 
 				language: $( "#flanguage" ).val(), 
 				othercatalognumbers: $( "#fothercatalognumbers" ).val(),
 				catalognumber: $( "#fcatalognumber" ).val(),

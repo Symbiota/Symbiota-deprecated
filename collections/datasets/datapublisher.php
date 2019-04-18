@@ -326,7 +326,7 @@ include($SERVER_ROOT. '/header.php');
 			if($recFlagArr['nullBasisRec']){
 				echo '<div style="margin:10px;font-weight:bold;color:red;">There are '.$recFlagArr['nullBasisRec'].' records missing basisOfRecord and will not be published. Please go to <a href="../editor/occurrencetabledisplay.php?q_recordedby=&q_recordnumber=&q_eventdate=&q_catalognumber=&q_othercatalognumbers=&q_observeruid=&q_recordenteredby=&q_dateentered=&q_datelastmodified=&q_processingstatus=&q_customfield1=basisOfRecord&q_customtype1=NULL&q_customvalue1=&q_customfield2=&q_customtype2=EQUALS&q_customvalue2=&q_customfield3=&q_customtype3=EQUALS&q_customvalue3=&collid='.$collid.'&csmode=0&occid=&occindex=0&orderby=&orderbydir=ASC">Edit Existing Occurrence Records</a> to correct this.</div>';
 			}
-			if($publishGBIF && $dwcUri && isset($GBIF_USERNAME) && isset($GBIF_PASSWORD) && isset($GBIF_ORG_KEY)){
+			if($publishGBIF && $dwcUri && isset($GBIF_USERNAME) && isset($GBIF_PASSWORD) && isset($GBIF_ORG_KEY) && $GBIF_ORG_KEY){
 				if($collManager->getDatasetKey()){
 					$dataUrl = 'http://www.gbif.org/dataset/'.$collManager->getDatasetKey();
 					?>
@@ -338,7 +338,7 @@ include($SERVER_ROOT. '/header.php');
 				else{
 					?>
 					<div style="margin:10px;">
-						You have selected to have this collection's DwC archives published to GBIF. Please go to the
+						You have selected for this collection's DwC archive data package to be published to GBIF. Please go to the
 						<a href="https://www.gbif.org/become-a-publisher" target="_blank">GBIF Endorsement Request page</a> to
 						register your institution with GBIF and enter the Publisher Key provided by GBIF below. If your institution already exists within the
 						GBIF Organization lookup, a GBIF Publisher Key has already been assigned. The key is the remaining part of

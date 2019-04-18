@@ -7,8 +7,6 @@ $collid = $_POST["collid"];
 $lHeader = $_POST['lheading'];
 $lFooter = $_POST['lfooter'];
 $detIdArr = $_POST['detid'];
-$speciesAuthors = ((array_key_exists('speciesauthors',$_POST) && $_POST['speciesauthors'])?1:0);
-$clearQueue = ((array_key_exists('clearqueue',$_POST) && $_POST['clearqueue'])?1:0);
 $action = array_key_exists('submitaction',$_POST)?$_POST['submitaction']:'';
 $rowsPerPage = 3;
 
@@ -32,27 +30,25 @@ if($SYMB_UID){
 			p.printbreak {page-break-after:always;}
 			.lheader {width:100%;margin-bottom:5px;text-align:center;font:bold 9pt arial,sans-serif;}
 			.scientificnamediv {clear:both;font-size:10pt;}
-			.identifiedbydiv {float:left;font-size:8pt;margin-top:5px;}
-			.dateidentifieddiv {float:left;font-size:8pt;}
-			.identificationreferences {clear:both;font-size:8pt;margin-top:5px;}
-			.identificationremarks {clear:both;font-size:8pt;margin-top:5px;}
-			.lfooter {clear:both;width:100%;text-align:center;font:bold 9pt arial,sans-serif;margin-top:18px;}
+			.subfielddiv {font-size:8pt;margin-top:5px;clear:both;}
+			.lfooter {clear:both;width:100%;text-align:center;font:bold 9pt arial,sans-serif;margin-top:10px;}
 		</style>
 	</head>
 	<body style="background-color:#ffffff;">
 		<div>
-			<?php 
+			<?php
 			if($isEditor){
 				if($action){
+					$speciesAuthors = ((array_key_exists('speciesauthors',$_POST) && $_POST['speciesauthors'])?1:0);
 					$labelArr = $labelManager->getAnnoArray($_POST['detid'], $speciesAuthors);
-					if($clearQueue){
+					if(array_key_exists('clearqueue',$_POST) && $_POST['clearqueue']){
 						$labelManager->clearAnnoQueue($_POST['detid']);
 					}
 					$labelCnt = 0;
 					foreach($labelArr as $occid => $occArr){
 						$headerStr = trim($lHeader);
 						$footerStr = trim($lFooter);
-						
+
 						$dupCnt = $_POST['q-'.$occid];
 						for($i = 0;$i < $dupCnt;$i++){
 							$labelCnt++;
@@ -69,7 +65,7 @@ if($SYMB_UID){
 								}
 								?>
 								<div class="scientificnamediv">
-									<?php 
+									<?php
 									if($occArr['identificationqualifier']) echo '<span class="identificationqualifier">'.$occArr['identificationqualifier'].'</span> ';
 									$scinameStr = $occArr['sciname'];
 									$parentAuthor = (array_key_exists('parentauthor',$occArr)?' '.$occArr['parentauthor']:'');
@@ -89,36 +85,44 @@ if($SYMB_UID){
 									</span>
 									<span class="scientificnameauthorship"><?php echo $occArr['scientificnameauthorship']; ?></span>
 								</div>
-								<?php 
-								if($occArr['identificationremarks']){
-									?>
-									<div class="identificationremarks"><?php echo $occArr['identificationremarks']; ?></div>
-									<?php 
-								}
-								if($occArr['identificationreferences']){
-									?>
-									<div class="identificationreferences"><?php echo $occArr['identificationreferences']; ?></div>
-									<?php 
-								}
+								<?php
 								if($occArr['identifiedby'] || $occArr['dateidentified']){
 									if($occArr['identifiedby']){
 										?>
-										<div class="identifiedbydiv">
-											Determiner: <?php echo $occArr['identifiedby']; ?>
+										<div class="subfielddiv">
+											<?php
+											if($occArr['dateidentified']){
+												?>
+												<div style="float:right">
+													<?php echo $occArr['dateidentified']; ?>
+												</div>
+												<?php
+											}
+											?>
+											<div>
+												Det: <?php echo $occArr['identifiedby']; ?>
+											</div>
 										</div>
 										<?php
-										if($occArr['dateidentified']){
-											echo '<br />';
-										}
 									}
-									if($occArr['dateidentified']){
+									if(array_key_exists('printcatnum',$_POST) && $_POST['printcatnum'] && $occArr['catalognumber']){
 										?>
-										<div class="dateidentifieddiv">
-											Date: <?php echo $occArr['dateidentified']; ?>
+										<div class="subfielddiv">
+											Catalog #: <?php echo $occArr['catalognumber']; ?>
 										</div>
 										<?php
 									}
-								} 
+									if($occArr['identificationreferences']){
+										?>
+										<div class="subfielddiv"><?php echo $occArr['identificationreferences']; ?></div>
+										<?php
+									}
+									if($occArr['identificationremarks']){
+										?>
+										<div class="subfielddiv"><?php echo $occArr['identificationremarks']; ?></div>
+										<?php
+									}
+								}
 								if($footerStr){
 									?>
 									<div class="lfooter">
@@ -127,7 +131,7 @@ if($SYMB_UID){
 									<?php
 								}
 								?>
-							</td> 
+							</td>
 							<?php
 							if($labelCnt%$rowsPerPage == 0){
 								echo '</tr></table>'."\n";
@@ -140,7 +144,7 @@ if($SYMB_UID){
 							echo '<td></td>';
 						}
 						echo '</tr></table>'."\n"; //If label count is odd, close final labelrowdiv
-					} 
+					}
 				}
 			}
 			?>

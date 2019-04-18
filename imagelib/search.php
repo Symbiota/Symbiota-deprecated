@@ -106,8 +106,8 @@ if($action == 'search'){
 					<div style="clear:both;"></div>
 				</div>
 				<div id="criteriadiv">
-					<div style="clear:both;padding:5px 0px;">
-						<div style="float:left;">
+					<div style="clear:both;height:50px">
+						<div style="float:left;margin-top:3px">
 							<select id="taxontype" name="taxontype">
 								<?php
 								$taxonType = 1;
@@ -119,8 +119,13 @@ if($action == 'search'){
 								?>
 							</select>
 						</div>
-						<div style="float:left;margin-bottom:5px;">
-							<input id="taxa" name="taxa" type="text" style="width:450px;" value="<?php echo (isset($_REQUEST["taxa"])?$_REQUEST["taxa"]:''); ?>" title="Separate multiple names w/ commas" autocomplete="off" />
+						<div style="float:left;">
+							<?php
+							$taxonStr = '';
+							if(isset($_REQUEST["taxa"])) $taxonStr = $_REQUEST["taxa"];
+							if(is_numeric($taxonStr)) $taxonStr = $imgLibManager->getTaxaStr($taxonStr);
+							?>
+							<input id="taxa" name="taxa" type="text" style="width:450px;" value="<?php echo $taxonStr; ?>" title="Separate multiple names w/ commas" autocomplete="off" />
 						</div>
 						<div style="float:left;margin-left:10px;" >
 							<input name="usethes" type="checkbox" value="1" <?php if(!$action || (array_key_exists("usethes",$_REQUEST) && $_REQUEST["usethes"])) echo "CHECKED"; ?> >Include Synonyms
@@ -260,6 +265,7 @@ if($action == 'search'){
 								<div>
 									<?php
 									$sciname = $imgArr['sciname'];
+									if(!$sciname && $imgArr['occid'] && $occArr[$imgArr['occid']]['sciname']) $sciname = $occArr[$imgArr['occid']]['sciname'];
 									if($sciname){
 										if(strpos($imgArr['sciname'],' ')) $sciname = '<i>'.$sciname.'</i>';
 										if($imgArr['tid']) echo '<a href="#" onclick="openTaxonPopup('.$imgArr['tid'].');return false;" >';
@@ -269,8 +275,13 @@ if($action == 'search'){
 									}
 									if($imgArr['occid']){
 										echo '<a href="#" onclick="openIndPU('.$imgArr['occid'].');return false;">';
-										if(strpos($occArr[$imgArr['occid']]['catnum'], $collArr[$occArr[$imgArr['occid']]['collid']]) !== 0) echo $collArr[$occArr[$imgArr['occid']]['collid']].': ';
-										echo $occArr[$imgArr['occid']]['catnum'];
+										if($occArr[$imgArr['occid']]['recordedby']){
+											echo $occArr[$imgArr['occid']]['recordedby'];
+										}
+										else{
+											if(strpos($occArr[$imgArr['occid']]['catnum'], $collArr[$occArr[$imgArr['occid']]['collid']]) !== 0) echo $collArr[$occArr[$imgArr['occid']]['collid']].': ';
+											echo $occArr[$imgArr['occid']]['catnum'];
+										}
 										echo '</a>';
 									}
 									elseif($imgArr['uid']){

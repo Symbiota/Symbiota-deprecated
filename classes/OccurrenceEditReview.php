@@ -18,7 +18,7 @@ class OccurrenceEditReview extends Manager{
 	private $pageNumber = 0;
 	private $limitNumber;
 	private $sqlBase;
-	
+
 	function __construct(){
 		parent::__construct(null,'write');
 	}
@@ -26,7 +26,7 @@ class OccurrenceEditReview extends Manager{
 	function __destruct(){
  		parent::__destruct();
 	}
-	
+
 	public function setCollId($id){
 		if(is_numeric($id)){
 			$this->collid = $id;
@@ -42,7 +42,7 @@ class OccurrenceEditReview extends Manager{
 					$this->collAcronym .= ':'.$r->collectioncode;
 				}
 				$collName .= ')';
-				if($r->colltype == 'General Observations') $this->obsUid = $GLOBALS['SYMB_UID'];  
+				if($r->colltype == 'General Observations') $this->obsUid = $GLOBALS['SYMB_UID'];
 			}
 			$rs->free();
 		}
@@ -58,7 +58,7 @@ class OccurrenceEditReview extends Manager{
 		}
 		return 0;
 	}
-	
+
 	public function getEditArr(){
 		if($this->display == 1){
 			return $this->getOccurEditArr();
@@ -68,7 +68,7 @@ class OccurrenceEditReview extends Manager{
 		}
 		return null;
 	}
-	
+
 	//Occurrence edits (omoccuredits)
 	private function getOccurEditCnt(){
 		$sql = 'SELECT COUNT(e.ocedid) AS fullcnt '.$this->getEditSqlBase();
@@ -100,7 +100,7 @@ class OccurrenceEditReview extends Manager{
 		$rs->free();
 		return $retArr;
 	}
-	
+
 	private function getEditSqlBase(){
 		//Build SQL WHERE fragment
 		$sqlBase = '';
@@ -132,8 +132,8 @@ class OccurrenceEditReview extends Manager{
 		}
 		return $sqlBase;
 	}
-	
-	//Occurrence revisions 
+
+	//Occurrence revisions
 	private function getRevisionCnt(){
 		$sql = 'SELECT COUNT(r.orid) AS fullcnt '.$this->getRevisionSqlBase();
 		//echo $sql; exit;
@@ -165,7 +165,7 @@ class OccurrenceEditReview extends Manager{
 			$retArr[$r->occid][$r->orid][$r->appliedstatus]['editor'] = $editor;
 			$retArr[$r->occid][$r->orid][$r->appliedstatus]['extstamp'] = $r->externaltimestamp;
 			$retArr[$r->occid][$r->orid][$r->appliedstatus]['ts'] = $r->initialtimestamp;
-				
+
 			$oldValues = json_decode($r->oldvalues,true);
 			$newValues = json_decode($r->newvalues,true);
 			$cnt = 0;
@@ -216,7 +216,7 @@ class OccurrenceEditReview extends Manager{
 		}
 		return $sqlBase;
 	}
-	
+
 	//Actions
 	public function updateRecords($postArr){
 		if($this->display == 1){
@@ -246,11 +246,11 @@ class OccurrenceEditReview extends Manager{
 				if($applyTask == 'apply') $value = $r->fieldvaluenew;
 				else $value = $r->fieldvalueold;
 				$uSql = 'UPDATE omoccurrences '.
-					'SET '.$r->fieldname.' = '.($value?'"'.$value.'"':'NULL').' '.
+					'SET '.$r->fieldname.' = '.($value?'"'.$this->cleanInStr($value).'"':'NULL').' '.
 					'WHERE (occid = '.$r->occid.')';
 				//echo '<div>'.$uSql.'</div>';
 				if(!$this->conn->query($uSql)){
-					$this->warningArr[] = 'ERROR '.($applyTask == 'apply'?'appplying':'reverting').' edits: '.$this->conn->error;
+					$this->warningArr[] = 'ERROR '.($applyTask == 'apply'?'applying':'reverting').' edits: '.$this->conn->error;
 					$status = false;
 				}
 			}
@@ -283,7 +283,7 @@ class OccurrenceEditReview extends Manager{
 				$dwcArr = json_decode(($applyTask == 'apply')?$r->newvalues:$r->oldvalues);
 				$sqlFrag = '';
 				foreach($dwcArr as $fieldName => $fieldValue){
-					$sqlFrag .= ','.$fieldName.' = '.($fieldValue?'"'.$fieldValue.'"':'NULL').' ';
+					$sqlFrag .= ','.$fieldName.' = '.($fieldValue?'"'.$this->cleanInStr($fieldValue).'"':'NULL').' ';
 				}
 				$uSql = 'UPDATE omoccurrences SET '.trim($sqlFrag,', ').' WHERE (occid = '.$r->occid.')';
 				//echo '<div>'.$uSql.'</div>'; exit;
@@ -339,13 +339,13 @@ class OccurrenceEditReview extends Manager{
 		}
 		return $status;
 	}
-	
+
 	public function exportCsvFile($idStr, $exportAll = false){
 		$status = true;
 		if($this->display == 1) $idStr = $this->getFullOcedidStr($idStr);
 		//Get Records
 		$sql = '';
-		
+
 		if($this->display == 1){
 			$sql = 'SELECT e.ocedid AS id, o.occid, o.catalognumber, o.dbpk, e.fieldname, e.fieldvaluenew, e.fieldvalueold, e.reviewstatus, e.appliedstatus, '.
 				'CONCAT_WS(", ",u.lastname,u.firstname) AS username, e.initialtimestamp ';
@@ -450,7 +450,7 @@ class OccurrenceEditReview extends Manager{
 		}
 		return implode(',',$ocedidArr);
 	}
-	
+
 	//Setters, getters, misc functions
 	public function setDisplay($d){
 		if(is_numeric($d)){
@@ -473,7 +473,7 @@ class OccurrenceEditReview extends Manager{
 	public function setEditorFilter($f){
 		$this->editorFilter = $this->cleanInStr($f);
 	}
-	
+
 	public function setQueryOccidFilter($num){
 		if(is_numeric($num)){
 			$this->queryOccidFilter = $num;
@@ -503,7 +503,7 @@ class OccurrenceEditReview extends Manager{
 			$this->limitNumber = $limit;
 		}
 	}
-	
+
 	public function getObsUid(){
 		return $this->obsUid;
 	}
@@ -534,7 +534,7 @@ class OccurrenceEditReview extends Manager{
 		asort($retArr);
 		return $retArr;
 	}
-	
+
 	public function hasRevisionRecords(){
 		$status = false;
 		$sql = 'SELECT orid FROM omoccurrevisions LIMIT 1';
@@ -546,4 +546,4 @@ class OccurrenceEditReview extends Manager{
 		return $status;
 	}
 }
-?> 
+?>

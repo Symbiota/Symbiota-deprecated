@@ -3,16 +3,18 @@
 include_once('../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/DynamicChecklistManager.php');
 header("Content-Type: text/html; charset=".$CHARSET);
- 
+
 $lat = $_POST["lat"];
 $lng = $_POST["lng"];
 $radius = $_POST["radius"];
 $radiusunits = $_POST["radiusunits"];
-$dynamicRadius = (isset($dynChecklistRadius)?$dynChecklistRadius:(isset($dynKeyRadius)?$dynKeyRadius:5));
+$dynamicRadius = (isset($DYN_CHECKLIST_RADIUS)?$DYN_CHECKLIST_RADIUS:10);
 $tid = $_POST["tid"];
 $interface = $_POST["interface"];
 
 $dynClManager = new DynamicChecklistManager();
+
+
 
 if(is_numeric($radius)){
 	$dynClid = $dynClManager->createChecklist($lat, $lng, $radius, $radiusunits, $tid);

@@ -12,6 +12,7 @@ class SpecUploadDwca extends SpecUploadBase{
 	function __construct() {
  		parent::__construct();
 		$this->setUploadTargetPath();
+		ini_set('auto_detect_line_endings', true);
 	}
 
 	public function __destruct(){
@@ -44,6 +45,7 @@ class SpecUploadDwca extends SpecUploadBase{
 			else{
 				$this->createTargetSubDir();
 				$targetPath = $this->uploadTargetPath.'dwca.zip';
+				//if(!$this->copyChunked($this->path,$targetPath)){
 				if(!copy($this->path,$targetPath)){
 					$this->errorStr = 'ERROR uploading file (path: '.$targetPath.')';
 					if(!is_writable($this->uploadTargetPath)) $this->errorStr .= ', Permission issue: target directory is not writable';
@@ -483,7 +485,8 @@ class SpecUploadDwca extends SpecUploadBase{
 						foreach($this->filterArr as $fieldName => $condArr){
 							$filterIndexArr = array_keys($this->sourceArr,$fieldName);
 							$filterIndex = array_shift($filterIndexArr);
-							$targetValue = trim(strtolower($recordArr[$filterIndex]));
+							$targetValue = '';
+							if(array_key_exists($filterIndex, $recordArr)) $targetValue = trim(strtolower($recordArr[$filterIndex]));
 							foreach($condArr as $cond => $valueArr){
 								foreach($valueArr as $k => $str){
 									if(strpos($str,';')){
@@ -584,14 +587,10 @@ class SpecUploadDwca extends SpecUploadBase{
 					$this->conn->query('SET unique_checks=1');
 					$this->conn->query('SET foreign_key_checks=1');
 					$this->outputMsg('<li style="margin-left:10px;">Complete: '.$this->getTransferCount().' occurrence records loaded</li>');
-					if($this->verboseMode){
-						ob_flush();
-						flush();
-					}
 
 					if($this->getTransferCount()){
 						//Upload identification history
-						if($this->includeIdentificationHistory){
+						if($this->includeIdentificationHistory && isset($this->metaArr['ident'])){
 							$this->outputMsg('<li>Loading identification history extension... </li>');
 							if($this->uploadType == $this->RESTOREBACKUP){
 								$this->identFieldMap['occid']['field'] = 'coreid';
@@ -607,36 +606,37 @@ class SpecUploadDwca extends SpecUploadBase{
 
 						//Upload images
 						if($this->includeImages){
-							$this->outputMsg('<li>Loading image extension... </li>');
-							$this->setImageSourceArr();
-							if($this->uploadType == $this->RESTOREBACKUP){
-								$this->imageFieldMap['occid']['field'] = 'coreid';
-								$this->imageFieldMap['originalurl']['field'] = 'accessuri';
-								$this->imageFieldMap['thumbnailurl']['field'] = 'thumbnailaccessuri';
-								$this->imageFieldMap['url']['field'] = 'goodqualityaccessuri';
-								$this->imageFieldMap['owner']['field'] = 'creator';
-							}
-							$this->conn->query('SET autocommit=0');
-							$this->conn->query('SET unique_checks=0');
-							$this->conn->query('SET foreign_key_checks=0');
-							$this->uploadExtension('image',$this->imageFieldMap,$this->imageSourceArr);
-							$this->conn->query('COMMIT');
-							$this->conn->query('SET autocommit=1');
-							$this->conn->query('SET unique_checks=1');
-							$this->conn->query('SET foreign_key_checks=1');
+							if($this->setImageSourceArr()){
+								$this->outputMsg('<li>Loading image extension... </li>');
+								if($this->uploadType == $this->RESTOREBACKUP){
+									$this->imageFieldMap['occid']['field'] = 'coreid';
+									$this->imageFieldMap['originalurl']['field'] = 'accessuri';
+									$this->imageFieldMap['thumbnailurl']['field'] = 'thumbnailaccessuri';
+									$this->imageFieldMap['url']['field'] = 'goodqualityaccessuri';
+									$this->imageFieldMap['owner']['field'] = 'creator';
+								}
+								$this->conn->query('SET autocommit=0');
+								$this->conn->query('SET unique_checks=0');
+								$this->conn->query('SET foreign_key_checks=0');
+								$this->uploadExtension('image',$this->imageFieldMap,$this->imageSourceArr);
+								$this->conn->query('COMMIT');
+								$this->conn->query('SET autocommit=1');
+								$this->conn->query('SET unique_checks=1');
+								$this->conn->query('SET foreign_key_checks=1');
 
-							//Remove images that don't have an occurrence record in uploadspectemp table
-							$sql = 'DELETE ui.* '.
-								'FROM uploadimagetemp ui LEFT JOIN uploadspectemp u ON ui.collid = u.collid AND ui.dbpk = u.dbpk '.
-								'WHERE (ui.occid IS NULL) AND (ui.collid = '.$this->collId.') AND (u.collid IS NULL)';
-							if($this->conn->query($sql)){
-								$this->outputMsg('<li style="margin-left:10px;">Removing images associated with excluded occurrence records... </li>');
+								//Remove images that don't have an occurrence record in uploadspectemp table
+								$sql = 'DELETE ui.* '.
+									'FROM uploadimagetemp ui LEFT JOIN uploadspectemp u ON ui.collid = u.collid AND ui.dbpk = u.dbpk '.
+									'WHERE (ui.occid IS NULL) AND (ui.collid = '.$this->collId.') AND (u.collid IS NULL)';
+								if($this->conn->query($sql)){
+									$this->outputMsg('<li style="margin-left:10px;">Removing images associated with excluded occurrence records... </li>');
+								}
+								else{
+									$this->outputMsg('<li style="margin-left:20px;">WARNING deleting orphaned uploadimagetemp records: '.$this->conn->error.'</li> ');
+								}
+								$this->setImageTransferCount();
+								$this->outputMsg('<li style="margin-left:10px;">Complete: '.$this->imageTransferCount.' records loaded</li>');
 							}
-							else{
-								$this->outputMsg('<li style="margin-left:20px;">WARNING deleting orphaned uploadimagetemp records: '.$this->conn->error.'</li> ');
-							}
-							$this->setImageTransferCount();
-							$this->outputMsg('<li style="margin-left:10px;">Complete: '.$this->imageTransferCount.' records loaded</li>');
 						}
 
 						//Do some cleanup
@@ -682,6 +682,7 @@ class SpecUploadDwca extends SpecUploadBase{
 	}
 
 	private function setImageSourceArr(){
+		$status = false;
 		if(isset($this->metaArr['image']['fields'])){
 			foreach($this->metaArr['image']['fields'] as $k => $v){
 				$v = strtolower($v);
@@ -689,7 +690,9 @@ class SpecUploadDwca extends SpecUploadBase{
 				if(in_array($v, $this->imageSourceArr)) $prefixStr = 'dcterms:';
 				$this->imageSourceArr[$k] = $prefixStr.$v;
 			}
+			$status = true;
 		}
+		return $status;
 	}
 
 	private function removeFiles($pathFrag = ''){

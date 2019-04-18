@@ -450,11 +450,11 @@ class SpecUploadBase extends SpecUpload{
 		//Run custom cleaning Stored Procedure, if one exists
 		if($this->storedProcedure){
 			if($this->conn->query('CALL '.$this->storedProcedure)){
-				$this->outputMsg('<li style="margin-left:10px;">Stored procedure executed: '.$this->storedProcedure.'</li>');
+				$this->outputMsg('<li>Stored procedure executed: '.$this->storedProcedure.'</li>');
 				if($this->conn->more_results()) $this->conn->next_result();
 			}
 			else{
-				$this->outputMsg('<li style="margin-left:10px;"><span style="color:red;">ERROR: Stored Procedure failed ('.$this->storedProcedure.'): '.$this->conn->error.'</span></li>');
+				$this->outputMsg('<li><span style="color:red;">ERROR: Stored Procedure failed ('.$this->storedProcedure.'): '.$this->conn->error.'</span></li>');
 			}
 		}
 
@@ -587,6 +587,12 @@ class SpecUploadBase extends SpecUpload{
 		$sql = 'UPDATE uploadspectemp u INNER JOIN taxa t ON u.sciname = t.sciname '.
 			'SET u.scientificNameAuthorship = t.author '.
 			'WHERE u.scientificNameAuthorship IS NULL AND t.author IS NOT NULL';
+		$this->conn->query($sql);
+
+		//Lock security setting if set so that local system can't override
+		$sql = 'UPDATE uploadspectemp '.
+			'SET localitySecurityReason = "locked" '.
+			'WHERE localitySecurity > 0 AND localitySecurityReason IS NULL AND collid IN('.$this->collId.')';
 		$this->conn->query($sql);
 	}
 
@@ -1136,26 +1142,26 @@ class SpecUploadBase extends SpecUpload{
 		if(!$occurMain->generalOccurrenceCleaning($this->collId)){
 			$errorArr = $occurMain->getErrorArr();
 			foreach($errorArr as $errorStr){
-				echo '<li style="margin-left:20px;">'.$errorStr.'</li>';
+				$this->outputMsg('<li style="margin-left:20px;">'.$errorStr.'</li>');
 			}
 		}
 
 		$this->outputMsg('<li style="margin-left:10px;">Protecting sensitive species...</li>');
 		$protectCnt = $occurMain->protectRareSpecies($this->collId);
-		echo '<li style="margin-left:20px;">'.$protectCnt.' records protected</li>';
+		$this->outputMsg('<li style="margin-left:20px;">'.$protectCnt.' records protected</li>');
 
 		$this->outputMsg('<li style="margin-left:10px;">Updating statistics...</li>');
 		if(!$occurMain->updateCollectionStats($this->collId)){
 			$errorArr = $occurMain->getErrorArr();
 			foreach($errorArr as $errorStr){
-				echo '<li style="margin-left:20px;">'.$errorStr.'</li>';
+				$this->outputMsg('<li style="margin-left:20px;">'.$errorStr.'</li>');
 			}
 		}
 
 		$this->outputMsg('<li style="margin-left:10px;">Populating recordID UUIDs for all records... </li>');
 		$uuidManager = new UuidFactory();
 		$uuidManager->setSilent(1);
-		$uuidManager->populateGuids();
+		$uuidManager->populateGuids($this->collId);
 
 		if($this->imageTransferCount){
 			$this->outputMsg('<li style="margin-left:10px;color:orange">WARNING: Image thumbnails may need to be created using the <a href="../../imagelib/admin/thumbnailbuilder.php?collid='.$this->collId.'">Images Thumbnail Builder</a></li>');
@@ -1166,7 +1172,9 @@ class SpecUploadBase extends SpecUpload{
 		//Only import record if at least one of the minimal fields have data
 		$recMap = OccurrenceUtilities::occurrenceArrayCleaning($recMap);
 		$loadRecord = false;
-		if(isset($recMap['dbpk']) && $recMap['dbpk']) $loadRecord = true;
+		if($this->uploadType == $this->NFNUPLOAD) $loadRecord = true;
+		elseif(isset($recMap['occid']) && $recMap['occid']) $loadRecord = true;
+		elseif(isset($recMap['dbpk']) && $recMap['dbpk']) $loadRecord = true;
 		elseif(isset($recMap['catalognumber']) && $recMap['catalognumber']) $loadRecord = true;
 		elseif(isset($recMap['othercatalognumbers']) && $recMap['othercatalognumbers']) $loadRecord = true;
 		elseif(isset($recMap['occurrenceid']) && $recMap['occurrenceid']) $loadRecord = true;
@@ -1590,6 +1598,27 @@ class SpecUploadBase extends SpecUpload{
 	}
 
 	//Misc functions
+	protected function copyChunked($from, $to){
+		/*
+		 * If transfers fail for large files, you may need to increase following php.ini variables:
+		 * 		max_input_time, max_execution_time, default_socket_timeout
+		 */
+
+		//2 meg at a time
+		$buffer_size = 2097152;		//1048576;
+		$byteCount = 0;
+		$fin = fopen($from, "rb");
+		$fout = fopen($to, "w");
+		if($fin && $fout){
+			while(!feof($fin)) {
+				$byteCount += fwrite($fout, fread($fin, $buffer_size));
+			}
+		}
+		fclose($fin);
+		fclose($fout);
+		return $byteCount;
+	}
+
 	private function getMimeType($url){
 		if(!strstr($url, "http")){
 			$url = "http://".$url;

@@ -1,4 +1,4 @@
-<?php 
+<?php
 include_once('../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/ImageLibraryManager.php');
 header("Content-Type: text/html; charset=".$CHARSET);
@@ -13,27 +13,27 @@ $imgLibManager = new ImageLibraryManager();
 <title><?php echo $DEFAULT_TITLE; ?> Image Library</title>
 	<link href="../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
-	<meta name='keywords' content='' />
 	<script type="text/javascript">
 		<?php include_once($SERVER_ROOT.'/config/googleanalytics.php'); ?>
 	</script>
+	<script src="../js/symb/imagelib.search.js?ver=201902" type="text/javascript"></script>
 </head>
 <body>
 	<?php
-	$displayLeftMenu = (isset($imagelib_indexMenu)?$imagelib_indexMenu:"true");
+	$displayLeftMenu = (isset($imagelib_indexMenu)?$imagelib_indexMenu:'true');
 	include($SERVER_ROOT.'/header.php');
 	if(isset($imagelib_indexCrumbs)){
-		echo "<div class='navpath'>";
+		echo '<div class="navpath">';
 		echo $imagelib_indexCrumbs;
-		echo " <b>Image Library</b>";
-		echo "</div>";
+		echo ' <b>Image Library</b>';
+		echo '</div>';
 	}
-	?> 
+	?>
 	<!-- This is inner text! -->
 	<div id="innertext">
 		<h1>Species with Images</h1>
-		<div style="margin:0px 0px 5px 20px;">This page provides a complete list to taxa that have images. 
-		Use the controls below to browse and search for images by family, genus, or species. 
+		<div style="margin:0px 0px 5px 20px;">This page provides a complete list to taxa that have images.
+		Use the controls below to browse and search for images by family, genus, or species.
 		</div>
 		<div style="float:left;margin:10px 0px 10px 30px;">
 			<div style=''>
@@ -83,22 +83,14 @@ $imgLibManager = new ImageLibraryManager();
 					echo "<div style='margin-left:30px;'><a href='index.php?taxon=".$value."'>".$value."</a></div>";
 				}
 			}
-			elseif($target == "species"){
-				echo "<div style='margin-left:20px;margin-top:20px;margin-bottom:20px;font-weight:bold;'>Select a species to access available images.</div>";
-				$taxaList = $imgLibManager->getSpeciesList();
-				foreach($taxaList as $key => $value){
-					echo "<div style='margin-left:30px;font-style:italic;'>";
-					echo "<a href='../taxa/index.php?taxon=".$key."' target='_blank'>".$value."</a>";
-					echo "</div>";
-				}
-			}
-			elseif($taxon){
-				echo "<div style='margin-left:20px;margin-top:20px;margin-bottom:20px;font-weight:bold;'>Select a species to access available images.</div>";
+			elseif($target == 'species' || $taxon){
+				echo '<div style="margin-left:20px;margin-top:20px;margin-bottom:20px;font-weight:bold;">Select a species to access available images</div>';
 				$taxaList = $imgLibManager->getSpeciesList($taxon);
 				foreach($taxaList as $key => $value){
-					echo "<div style='margin-left:30px;font-style:italic;'>";
-					echo "<a href='../taxa/index.php?taxon=".$key."' target='_blank'>".$value."</a>";
-					echo "</div>";
+					echo '<div style="margin-left:30px;font-style:italic;">';
+					echo '<a href="#" onclick="openTaxonPopup('.$key.');return false;">'.$value.'</a> ';
+					echo '<a href="search.php?taxa='.$key.'&usethes=1&taxontype=2&submitaction=search" target="_blank"> <img src="../images/image.png" style="width:10px;" /></a> ';
+					echo '</div>';
 				}
 			}
 			else{ //Family display
@@ -110,7 +102,7 @@ $imgLibManager = new ImageLibraryManager();
 			}
 	?>
 	</div>
-	<?php 
+	<?php
 	include($SERVER_ROOT.'/footer.php');
 	?>
 </body>

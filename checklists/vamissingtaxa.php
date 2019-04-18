@@ -1,6 +1,6 @@
 <?php
 include_once('../config/symbini.php');
-include_once($SERVER_ROOT.'/classes/ChecklistVoucherAdmin.php');
+include_once($SERVER_ROOT.'/classes/ChecklistVoucherReport.php');
 
 $action = array_key_exists("submitaction",$_REQUEST)?$_REQUEST["submitaction"]:"";
 $clid = array_key_exists("clid",$_REQUEST)?$_REQUEST["clid"]:0;
@@ -8,7 +8,7 @@ $pid = array_key_exists("pid",$_REQUEST)?$_REQUEST["pid"]:"";
 $displayMode = (array_key_exists('displaymode',$_REQUEST)?$_REQUEST['displaymode']:0);
 $startIndex = array_key_exists("start",$_REQUEST)?$_REQUEST["start"]:0;
 
-$vManager = new ChecklistVoucherAdmin();
+$vManager = new ChecklistVoucherReport();
 $vManager->setClid($clid);
 $vManager->setCollectionVariables();
 
@@ -106,18 +106,25 @@ else{
 						}
 						?>
 					</table>
-					<input name="tabindex" value="1" type="hidden" />
-					<input name="clid" value="<?php echo $clid; ?>" type="hidden" />
-					<input name="pid" value="<?php echo $pid; ?>" type="hidden" />
-					<input name="displaymode" value="1" type="hidden" />
-					<input name="usecurrent" style="margin-top:8px;" value="1" type="checkbox" checked /> Add name using current taxonomy<br/>
-					<input name="submitaction" style="margin-top:8px;" value="Add Taxa and Vouchers" type="submit" />
-					<input name="start" type="hidden" value="<?php echo $startIndex; ?>" />
+					<div style="margin-top:8px;">
+						<input name="usecurrent" type="checkbox" value="1" type="checkbox" checked /> Add name using current taxonomy
+					</div>
+					<div style="margin-top:3px;">
+						<input name="excludevouchers" type="checkbox" value="1" <?php echo ($_REQUEST['excludevouchers']?'checked':''); ?>/> Add names without linking vouchers
+					</div>
+					<div style="margin-top:8px;">
+						<input name="tabindex" value="1" type="hidden" />
+						<input name="clid" value="<?php echo $clid; ?>" type="hidden" />
+						<input name="pid" value="<?php echo $pid; ?>" type="hidden" />
+						<input name="displaymode" value="1" type="hidden" />
+						<input name="start" type="hidden" value="<?php echo $startIndex; ?>" />
+						<button name="submitaction" type="submit" value="submitVouchers">Submit Vouchers</button>
+					</div>
 				</form>
 				<?php
-				echo 'Specimen count: '.$recCnt;
+				echo '<div style="float:left">Specimen count: '.$recCnt.'</div>';
 				$queryStr = 'tabindex=1&displaymode=1&clid='.$clid.'&pid='.$pid.'&start='.(++$startIndex);
-				if($recCnt > 399) echo '<a style="margin-left:10px;" href="voucheradmin.php?'.$queryStr.'">View Next 400</a>';
+				if($recCnt > 399) echo '<div style="float:right;margin-right:30px;"><a style="margin-left:10px;" href="voucheradmin.php?'.$queryStr.'">View Next 400</a></div>';
 			}
 		}
 		elseif($displayMode==2){

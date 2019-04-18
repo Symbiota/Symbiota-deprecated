@@ -33,7 +33,6 @@ if($crowdSourceMode){
 	$occManager->setCrowdSourceMode(1);
 }
 
-$isEditor = 0;		//If not editor, edits will be submitted to omoccuredits table but not applied to omoccurrences
 $displayQuery = 0;
 $isGenObs = 0;
 $collMap = Array();
@@ -84,7 +83,9 @@ if($SYMB_UID){
 		}
 	}
 
-	//0 = not editor, 1 = admin, 2 = editor
+	$isEditor = 0;
+	//0 = not editor, 1 = admin, 2 = editor, 3 = taxon editor, 4 = crowdsource editor or collection allows public edits
+	//If not editor, edits will be submitted to omoccuredits table but not applied to omoccurrences
 	if($IS_ADMIN || ($collId && array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collId,$USER_RIGHTS["CollAdmin"]))){
 		$isEditor = 1;
 	}
@@ -117,7 +118,6 @@ if($SYMB_UID){
 		}
 		elseif(array_key_exists("CollTaxon",$USER_RIGHTS) && $occId){
 			//Check to see if this user is authorized to edit this occurrence given their taxonomic editing authority
-			//0 = not editor, 2 = full editor, 3 = taxon editor, but not for this specific occurrence
 			$isEditor = $occManager->isTaxonomicEditor();
 		}
 	}
@@ -376,6 +376,7 @@ if($SYMB_UID){
 		$imgCnt = 1;
 		foreach($specImgArr as $imgId => $i2){
 			$iUrl = $i2['url'];
+			if($iUrl == 'empty' && $i2['origurl']) $iUrl = $i2['origurl'];
 			if($imgUrlPrefix && substr($iUrl,0,4) != 'http') $iUrl = $imgUrlPrefix.$iUrl;
 			$imgArr[$imgCnt]['imgid'] = $imgId;
 			$imgArr[$imgCnt]['web'] = $iUrl;
@@ -460,7 +461,7 @@ else{
 	</script>
 	<script src="../../js/symb/collections.coordinateValidation.js?ver=170310" type="text/javascript"></script>
 	<script src="../../js/symb/wktpolygontools.js?ver=180208" type="text/javascript"></script>
-	<script src="../../js/symb/collections.occureditormain.js?ver=201808" type="text/javascript"></script>
+	<script src="../../js/symb/collections.occureditormain.js?ver=201903" type="text/javascript"></script>
 	<script src="../../js/symb/collections.occureditortools.js?ver=1808" type="text/javascript"></script>
 	<script src="../../js/symb/collections.occureditorimgtools.js?ver=170310" type="text/javascript"></script>
 	<script src="../../js/jquery.imagetool-1.7.js?ver=140310" type="text/javascript"></script>
@@ -624,6 +625,17 @@ else{
 												<a href="includes/imagetab.php?<?php echo $anchorVars; ?>"
 													style="">Images</a>
 											</li>
+											<?php
+											if($occManager->traitCodingActivated()){
+												$traitAnchor = $anchorVars.'&delstates='.(isset($_POST['delstates'])?$_POST['delstates']:'');
+												?>
+												<li id="traitTab">
+													<a href="includes/traittab.php?<?php echo $traitAnchor; ?>"
+														style="">Traits</a>
+												</li>
+												<?php
+											}
+											?>
 											<li id="resourceTab">
 												<a href="includes/resourcetab.php?<?php echo $anchorVars; ?>"
 													style="">Linked Resources</a>
@@ -921,16 +933,33 @@ else{
 												echo '<input name="localautodeactivated" type="checkbox" value="1" onchange="localAutoChanged(this)" '.(defined('LOCALITYAUTOLOOKUP') && LOCALITYAUTOLOOKUP==2?'checked':'').' /> ';
 												echo 'Deactivate Locality Lookup</div>';
 											}
-											$lsHasValue = array_key_exists("localitysecurity",$occArr)&&$occArr["localitysecurity"]?1:0;
-											$lsrValue = array_key_exists('localitysecurityreason',$occArr)?$occArr['localitysecurityreason']:'';
 											?>
 											<div id="localSecurityDiv">
 												<div style="float:left;">
-													<input type="checkbox" name="localitysecurity" tabindex="0" value="1" <?php echo $lsHasValue?"CHECKED":""; ?> onchange="localitySecurityChanged(this.form);" title="Hide Locality Data from General Public" />
-													<?php echo (defined('LOCALITYSECURITYLABEL')?LOCALITYSECURITYLABEL:'Locality Security'); ?>
+													<?php
+													echo (defined('LOCALITYSECURITYLABEL')?LOCALITYSECURITYLABEL:'Security');
+													$securityCode = array_key_exists('localitysecurity',$occArr)&&$occArr['localitysecurity']?$occArr['localitysecurity']:0;
+													$lsrValue = array_key_exists('localitysecurityreason',$occArr)?$occArr['localitysecurityreason']:'';
+													$securityArr = array(1 => 'Locality Security');
+													if(isset($OCCUR_SECURITY_OPTION)){
+														if($OCCUR_SECURITY_OPTION == 2 || $OCCUR_SECURITY_OPTION == 4 || $OCCUR_SECURITY_OPTION == 6) unset($securityArr[1]);
+														if($OCCUR_SECURITY_OPTION == 2 || $OCCUR_SECURITY_OPTION == 3 || $OCCUR_SECURITY_OPTION == 7) $securityArr[2] = 'Taxonomic Security';
+														if($OCCUR_SECURITY_OPTION == 3 || $OCCUR_SECURITY_OPTION == 7) $securityArr[3] = 'Locality &amp; Taxonomic Security';
+														if($OCCUR_SECURITY_OPTION > 3) $securityArr[3] = 'Full Security';
+													}
+													?>:
+													<select name="localitysecurity" onchange="securityChanged(this.form);" title="Security Settings">
+														<option value="0">Security not applied</option>
+														<option value="0">--------------------------</option>
+														<?php
+														foreach($securityArr as $sCode => $sValue){
+															echo '<option value="'.$sCode.'" '.($securityCode==$sCode?'SELECTED':'').'>'.$sValue.'</option>';
+														}
+														?>
+													</select>
 													<a href="#" onclick="return dwcDoc('localitySecurity')"><img class="docimg" src="../../images/qmark.png" /></a><br/>
 												</div>
-												<div id="locsecreason" style="margin-left:5px;border:2px solid gray;float:left;display:<?php echo ($lsrValue?'inline':'none') ?>;padding:3px">
+												<div id="locsecreason" style="margin-left:5px;border:2px solid gray;float:left;display:<?php echo ($lsrValue||$securityCode?'inline':'none') ?>;padding:3px">
 													<div ><input name="lockLocalitySecurity" type="checkbox" onchange="securityLockChanged(this)"  <?php echo ($lsrValue?'checked':'') ?> /> Lock Security Setting</div>
 													<?php
 													echo (defined('LOCALITYSECURITYREASONLABEL')?LOCALITYSECURITYREASONLABEL:'Reason');

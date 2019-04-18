@@ -20,6 +20,9 @@ ALTER TABLE `uploadimagetemp`
   ADD COLUMN `accessrights` VARCHAR(255) NULL AFTER `copyright`,
   ADD COLUMN `rights` VARCHAR(255) NULL AFTER `accessrights`,
   ADD COLUMN `locality` VARCHAR(250) NULL AFTER `rights`;
+  
+ALTER TABLE `uploadspecparameters` 
+  CHANGE COLUMN `Path` `Path` VARCHAR(500) NULL DEFAULT NULL ;
 
 ALTER TABLE `uploadtaxa` 
   CHANGE COLUMN `UnitInd3` `UnitInd3` VARCHAR(45) NULL DEFAULT NULL ;
@@ -30,7 +33,8 @@ ALTER TABLE `uploadtaxa`
 
 
 ALTER TABLE `taxa` 
-  ADD COLUMN `locked` INT NULL AFTER `Hybrid`;
+  ADD COLUMN `locked` INT NULL AFTER `Hybrid`,
+  CHANGE COLUMN `UnitInd3` `UnitInd3` VARCHAR(15) NULL DEFAULT NULL ;
 
 ALTER TABLE `taxstatus` 
   ADD COLUMN `modifiedBy` VARCHAR(45) NULL AFTER `SortSequence`;
@@ -47,6 +51,9 @@ ALTER TABLE `taxstatus`
 
 ALTER TABLE `taxstatus` 
 ADD INDEX `Index_tid` (`tid` ASC);
+
+ALTER TABLE `taxaresourcelinks` 
+  ADD UNIQUE INDEX `UNIQUE_taxaresource` (`tid` ASC, `sourcename` ASC);
 
 
 ALTER TABLE `images` 
@@ -88,6 +95,11 @@ ALTER TABLE `omoccurrences`
   CHANGE COLUMN `labelProject` `labelProject` varchar(250) DEFAULT NULL,
   CHANGE COLUMN `georeferenceRemarks` `georeferenceRemarks` VARCHAR(500) NULL DEFAULT NULL,
   DROP INDEX `idx_occrecordedby`;
+  
+ALTER TABLE `omoccurrences` 
+  ADD UNIQUE INDEX `UNIQUE_occurrenceID` (`occurrenceID` ASC),
+  ADD INDEX `Index_occur_localitySecurity` (`localitySecurity` ASC);
+  
 
 DELETE FROM omoccurrencesfulltext 
 WHERE locality IS NULL AND recordedby IS NULL;

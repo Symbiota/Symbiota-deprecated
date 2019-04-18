@@ -623,7 +623,7 @@ class ImageLocalProcessor {
 					}
 				}
 				//Start the processing procedure
-				list($width, $height) = getimagesize($sourcePath.$fileName);
+				list($width, $height) = @getimagesize($sourcePath.$fileName);
 				if($width && $height){
 					//Get File size
 					$fileSize = 0;

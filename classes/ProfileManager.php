@@ -229,16 +229,25 @@ class ProfileManager{
 			$result->free();
 
 			//Send email
-			$subject = 'Your password';
-			$bodyStr = "Your ".$GLOBALS["DEFAULT_TITLE"]." (<a href='http://".$_SERVER['SERVER_NAME'].$GLOBALS["CLIENT_ROOT"]."'>http://".$_SERVER['SERVER_NAME'].$GLOBALS["CLIENT_ROOT"]."</a>) password has been reset to: ".$newPassword." ".
-				"<br/><br/>After logging in, you can reset your password by clicking on <a href='http://".$_SERVER['SERVER_NAME'].$GLOBALS["CLIENT_ROOT"]."/profile/viewprofile.php'>View Profile</a> link and then click the Edit Profile tab.".
-				"<br/>If you have problems with the new password, contact the System Administrator";
-			if(array_key_exists('ADMIN_EMAIL',$GLOBALS)) $bodyStr .= ': <'.$GLOBALS['ADMIN_EMAIL'].'>';
+			$subject = 'RE: Password reset';
+			$bodyStr = 'Your '.$GLOBALS["DEFAULT_TITLE"].' password has been reset to: '.$newPassword.'<br/><br/> '.
+				'After logging in, you can change your password by clicking on the My Profile link within the site menu and then selecting the Edit Profile tab. '.
+				'If you have problems, contact the System Administrator: '.$GLOBALS['ADMIN_EMAIL'].'<br/><br/>'.
+				'Data portal: <a href="http://'.$_SERVER['SERVER_NAME'].$GLOBALS['CLIENT_ROOT'].'">http://'.$_SERVER['SERVER_NAME'].$GLOBALS['CLIENT_ROOT'].'</a><br/>'.
+				'Direct link to your user profile: <a href="http://'.$_SERVER['SERVER_NAME'].$GLOBALS['CLIENT_ROOT'].'/profile/viewprofile.php?tabindex=2">http://'.$_SERVER['SERVER_NAME'].$GLOBALS['CLIENT_ROOT'].'/profile/viewprofile.php</a>';
 
-			$headerStr = "MIME-Version: 1.0 \r\n".
-				"Content-type: text/html; charset=".$CHARSET." \r\n".
+			$headerStr = "Organization: ".$GLOBALS["DEFAULT_TITLE"]." \r\n".
+				"MIME-Version: 1.0 \r\n".
+				"Content-type: text/html; charset=iso-8859-1 \r\n".
 				"To: ".$emailStr." \r\n";
-			if(array_key_exists("ADMIN_EMAIL",$GLOBALS)) $headerStr .= "From: Admin <".$GLOBALS["ADMIN_EMAIL"]."> \r\n";
+
+			if(array_key_exists("ADMIN_EMAIL",$GLOBALS) && $GLOBALS["ADMIN_EMAIL"]){
+				$headerStr .= "From: portal admin <".$GLOBALS["ADMIN_EMAIL"]."> \r\n".
+					"Reply-To: ".$GLOBALS["ADMIN_EMAIL"]." \r\n".
+					"Return-Path: ".$GLOBALS["ADMIN_EMAIL"]." \r\n";
+			}
+			$headerStr .= "X-Priority: 3\r\n".
+				"X-Mailer: PHP". phpversion() ."\r\n";
 			mail($emailStr,$subject,$bodyStr,$headerStr);
 
 			$returnStr = "Your new password was just emailed to: ".$emailStr;
@@ -285,7 +294,6 @@ class ProfileManager{
 		$person->setUrl($postArr['url']);
 		$person->setBiography($postArr['biography']);
 		$person->setIsPublic(isset($postArr['ispublic'])?1:0);
-
 
 		//Add to users table
 		$fields = 'INSERT INTO users (';
@@ -389,17 +397,19 @@ class ProfileManager{
 			//Email login
 			$subject = $GLOBALS['defaultTitle'].' Login Name';
 			$bodyStr = 'Your '.$GLOBALS['defaultTitle'].' (<a href="http://'.$_SERVER['SERVER_NAME'].$GLOBALS['CLIENT_ROOT'].'">http://'.
-				$_SERVER['SERVER_NAME'].$GLOBALS['CLIENT_ROOT'].'</a>) login name is: '.$loginStr.' ';
-			$bodyStr .= "<br/>If you continue to have login issues, contact the System Administrator ";
-			if(array_key_exists("adminEmail",$GLOBALS)){
-				$bodyStr .= "<".$GLOBALS["adminEmail"].">";
-			}
-			$headerStr = "MIME-Version: 1.0 \r\n".
-				"Content-type: text/html; charset=".$CHARSET." \r\n".
+				$_SERVER['SERVER_NAME'].$GLOBALS['CLIENT_ROOT'].'</a>) login name is: '.$loginStr.'<br/><br/>'.
+				'If you continue to have login issues, contact the System Administrator: '.$GLOBALS['ADMIN_EMAIL'];
+			$headerStr = "Organization: ".$GLOBALS["DEFAULT_TITLE"]." \r\n".
+				"MIME-Version: 1.0 \r\n".
+				"Content-type: text/html; charset=iso-8859-1 \r\n".
 				"To: ".$emailAddr." \r\n";
-			if(array_key_exists("adminEmail",$GLOBALS)){
-				$headerStr .= "From: Admin <".$GLOBALS["adminEmail"]."> \r\n";
+			if(array_key_exists('ADMIN_EMAIL',$GLOBALS)){
+				$headerStr .= "From: portal admin <".$GLOBALS["ADMIN_EMAIL"]."> \r\n".
+					"Reply-To: ".$GLOBALS["ADMIN_EMAIL"]." \r\n".
+					"Return-Path: ".$GLOBALS["ADMIN_EMAIL"]." \r\n";
 			}
+			$headerStr .= "X-Priority: 3\r\n".
+				"X-Mailer: PHP". phpversion() ."\r\n";
 			if(mail($emailAddr,$subject,$bodyStr,$headerStr)){
 				$status = true;
 			}
@@ -410,7 +420,6 @@ class ProfileManager{
 		else{
 			$this->errorStr = 'There are no users registered to email address: '.$emailAddr;
 		}
-
 		return $status;
 	}
 

@@ -177,6 +177,8 @@ if(!$researchList && !$editMode){
 </head>
 <body>
 	<?php
+	$HEADER_URL = '';
+	if(isset($projArr['headerurl']) && $projArr['headerurl']) $HEADER_URL = $CLIENT_ROOT.$projArr['headerurl'];
 	$displayLeftMenu = (isset($projects_indexMenu)?$projects_indexMenu:"true");
 	include($SERVER_ROOT.'/header.php');
 	echo "<div class='navpath'>";
@@ -381,7 +383,8 @@ if(!$researchList && !$editMode){
 						}
 						//$gMapUrl = $projManager->getGoogleStaticMap();
 						$gMapUrl = $CLIENT_ROOT.'/images/mappoint.png';
-						if($gMapUrl){
+						$coordArr = $projManager->getChecklistCoordArr();
+						if($gMapUrl && $coordArr){
 							?>
 							<div style="float:right;text-align:center;">
 								<a href="../checklists/clgmap.php?pid=<?php echo $pid;?>" title="Map Checklists">

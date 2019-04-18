@@ -1,31 +1,27 @@
 <?php
-include_once($SERVER_ROOT.'/config/dbconnection.php');
+include_once($SERVER_ROOT.'/classes/ChecklistVoucherAdmin.php');
 
-class ChecklistVoucherManager {
+class ChecklistVoucherManager extends  ChecklistVoucherAdmin{
 
-	private $conn;
 	private $tid;
 	private $taxonName;
-	private $clid;
-	private $clName;
-	private $voucherData;
 
 	function __construct() {
-		$this->conn = MySQLiConnectionFactory::getCon("write");
- 	}
+		parent::__construct();
+	}
 
- 	function __destruct(){
- 		if(!($this->conn === false)) $this->conn->close();
+	function __destruct(){
+		parent::__destruct();
 	}
 
 	public function getChecklistData(){
- 		$checklistData = Array();
- 		if($this->tid && $this->clid){
+		$checklistData = Array();
+		if($this->tid && $this->clid){
 			$sql = 'SELECT t.SciName, cllink.Habitat, cllink.Abundance, cllink.Notes, cllink.internalnotes, cllink.source, cllink.familyoverride, cl.Name, cl.type, cl.locality '.
 				'FROM fmchecklists cl INNER JOIN fmchklsttaxalink cllink ON cl.CLID = cllink.CLID '.
 				'INNER JOIN taxa t ON cllink.TID = t.TID '.
 				'WHERE (cllink.TID = '.$this->tid.') AND (cllink.CLID = '.$this->clid.')';
-	 		$result = $this->conn->query($sql);
+			$result = $this->conn->query($sql);
 			if($row = $result->fetch_object()){
 				$checklistData['habitat'] = $this->cleanOutStr($row->Habitat);
 				$checklistData['abundance'] = $this->cleanOutStr($row->Abundance);
@@ -39,7 +35,7 @@ class ChecklistVoucherManager {
 				if(!$this->taxonName) $this->taxonName = $this->cleanOutStr($row->SciName);
 			}
 			$result->free();
- 		}
+		}
 		return $checklistData;
 	}
 
@@ -187,7 +183,7 @@ class ChecklistVoucherManager {
 	//Voucher functions
 	public function getVoucherData(){
 		$voucherData = Array();
- 		if($this->tid && $this->clid){
+		if($this->tid && $this->clid){
 			$sql = 'SELECT v.occid, CONCAT_WS(" ",o.recordedby,o.recordnumber) AS collector, o.catalognumber, '.
 				'o.sciname, o.eventdate, v.notes, v.editornotes '.
 				'FROM fmvouchers v INNER JOIN omoccurrences o ON v.occid = o.occid '.
@@ -203,7 +199,7 @@ class ChecklistVoucherManager {
 				$voucherData[$occId]["editornotes"] = $row->editornotes;
 			}
 			$result->free();
- 		}
+		}
 		return $voucherData;
 	}
 
@@ -297,34 +293,5 @@ class ChecklistVoucherManager {
 	public function getTaxonName(){
 		return $this->taxonName;
 	}
-
-	public function setClid($id){
-		if(is_numeric($id)){
-			$this->clid = $id;
-		}
-	}
-
-	public function getClid(){
-		return $this->clid;
-	}
-
-	public function getClName(){
-		return $this->clName;
-	}
-
-	//Misc functions
-	private function cleanOutStr($str){
-		$newStr = str_replace('"',"&quot;",$str);
-		$newStr = str_replace("'","&apos;",$newStr);
-		//$newStr = $this->conn->real_escape_string($newStr);
-		return $newStr;
-	}
-
-	private function cleanInStr($str){
-		$newStr = trim($str);
-		$newStr = preg_replace('/\s\s+/', ' ',$newStr);
-		$newStr = $this->conn->real_escape_string($newStr);
-		return $newStr;
-	}
- }
+}
 ?>

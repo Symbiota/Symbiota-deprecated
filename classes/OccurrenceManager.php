@@ -124,7 +124,7 @@ class OccurrenceManager extends OccurrenceTaxaManager {
 				}
 				else{
 					$term = $this->cleanInStr(trim(str_ireplace(' county',' ',$value),'%'));
-					if(strlen($term) < 4) $term .= ' ';
+					//if(strlen($term) < 4) $term .= ' ';
 					$tempArr[] = '(o.county LIKE "'.$term.'%")';
 				}
 			}
@@ -180,18 +180,26 @@ class OccurrenceManager extends OccurrenceTaxaManager {
 				$lng = $pointArr[1];
 				$radius = $pointArr[2];
 				if($pointArr[3] == 'km') $radius *= 0.6214;
-				/*
-				//Formula approximates a bounding box; bounding box is for efficiency, will test practicality of doing a radius query in future
+
+				//Formulate bounding box to carete an approximate return
 				$latRadius = $radius / 69.1;
 				$longRadius = cos($pointArr[0]/57.3)*($radius/69.1);
 				$lat1 = $pointArr[0] - $latRadius;
 				$lat2 = $pointArr[0] + $latRadius;
 				$long1 = $pointArr[1] - $longRadius;
 				$long2 = $pointArr[1] + $longRadius;
-				$sqlWhere .= "AND ((o.DecimalLatitude BETWEEN ".$lat1." AND ".$lat2.") AND (o.DecimalLongitude BETWEEN ".$long1." AND ".$long2.")) ";
-				*/
+				$sqlWhere .= 'AND o.occid IN(SELECT occid FROM omoccurrences WHERE (DecimalLatitude BETWEEN '.$lat1.' AND '.$lat2.') AND (DecimalLongitude BETWEEN '.$long1.' AND '.$long2.')) ';
+				//Add a more percise circular definition that will run on bounding box points
 				$sqlWhere .= 'AND (( 3959 * acos( cos( radians('.$lat.') ) * cos( radians( o.DecimalLatitude ) ) * cos( radians( o.DecimalLongitude )'.
-					' - radians('.$lng.') ) + sin( radians('.$lat.') ) * sin(radians(o.DecimalLatitude)) ) ) < '.$radius.') ';
+						' - radians('.$lng.') ) + sin( radians('.$lat.') ) * sin(radians(o.DecimalLatitude)) ) ) < '.$radius.') ';
+				/*
+				if($this->hasFullSpatialSupport()){
+
+				}
+				else{
+
+				}
+				*/
 			}
 			$this->displaySearchArr[] = $pointArr[0]." ".$pointArr[1]." +- ".$pointArr[2].$pointArr[3];
 		}
@@ -284,6 +292,15 @@ class OccurrenceManager extends OccurrenceTaxaManager {
 			elseif($eDate1 = $this->cleanInStr($this->formatDate($dateArr[0]))){
 				$eDate2 = (count($dateArr)>1?$this->cleanInStr($this->formatDate($dateArr[1])):'');
 				if($eDate2){
+					if(substr($eDate2,-6) == '-00-00') $eDate2 = str_replace('-00-00', '-12-31', $eDate2);
+					elseif(preg_match('/-(\d{2})-00$/', $eDate2, $m)){
+						$day = '00';
+						$month = $m[1];
+						if($month == 12) $day = '31';
+						else $month++;
+						if(strlen($month) == 1) $month = '0'.$month;
+						$eDate2 = substr($eDate2,0,4).'-'.$month.'-'.$day;
+					}
 					$sqlWhere .= 'AND (o.eventdate BETWEEN "'.$eDate1.'" AND "'.$eDate2.'") ';
 				}
 				else{
@@ -369,6 +386,7 @@ class OccurrenceManager extends OccurrenceTaxaManager {
 		if($sqlWhere){
 			if(!array_key_exists("includecult",$this->searchTermArr)){
 				$sqlWhere .= "AND (o.cultivationStatus IS NULL OR o.cultivationStatus = 0) ";
+				$this->displaySearchArr[] = 'excluding cultivated/captive occurrences';
 			}
 			else{
 				$this->displaySearchArr[] = 'includes cultivated/captive occurrences';
@@ -811,7 +829,28 @@ class OccurrenceManager extends OccurrenceTaxaManager {
 		$this->voucherManager->setCollectionVariables();
 	}
 
-	//Misc return functions
+	//Misc support functions
+	private function hasFullSpatialSupport(){
+		$serverStr = '';
+		if(mysqli_get_server_info($this->conn)) $serverStr = mysqli_get_server_info($this->conn);
+		else $serverStr = shell_exec('mysql -V');
+		if($serverStr){
+			if(strpos($serverStr,'MariaDB') !== false) return true;
+			else{	//db = mysql;
+				preg_match('@[0-9]+\.[0-9]+\.[0-9]+@',$serverStr,$m);
+				$mysqlVerNums = explode(".", $m[0]);
+				if($mysqlVerNums[0] > 5) return true;
+				elseif($mysqlVerNums[0] == 5){
+					if($mysqlVerNums[1] > 6) return true;
+					elseif($mysqlVerNums[1] == 6){
+						if($mysqlVerNums[2] >= 1) return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
+
 	//Setters and getters
 	public function getClName(){
 		if(!$this->voucherManager) return false;

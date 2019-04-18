@@ -23,7 +23,6 @@ class OccurrenceListManager extends OccurrenceManager{
 				$canReadRareSpp = true;
 			}
 		}
-
 		$occArr = array();
 		$sqlWhere = $this->getSqlWhere();
 		if(!$this->recordCount || $this->reset){
@@ -50,6 +49,12 @@ class OccurrenceListManager extends OccurrenceManager{
 		$result = $this->conn->query($sql);
 		if($result){
 			while($row = $result->fetch_object()){
+				$securityClearance = ($row->localitysecurity?false:true);
+				if(!$securityClearance){
+					if($canReadRareSpp) $securityClearance = true;
+					elseif(array_key_exists("CollEditor", $GLOBALS['USER_RIGHTS']) && in_array($row->collid,$GLOBALS['USER_RIGHTS']["CollEditor"])) $securityClearance = true;
+					elseif(array_key_exists("RareSppReader", $GLOBALS['USER_RIGHTS']) && in_array($row->collid,$GLOBALS['USER_RIGHTS']["RareSppReader"])) $securityClearance = true;
+				}
 				$returnArr[$row->occid]['collid'] = $row->collid;
 				$returnArr[$row->occid]['instcode'] = $this->cleanOutStr($row->institutioncode);
 				$returnArr[$row->occid]['collcode'] = $this->cleanOutStr($row->collectioncode);
@@ -57,38 +62,45 @@ class OccurrenceListManager extends OccurrenceManager{
 				$returnArr[$row->occid]['icon'] = $row->icon;
 				$returnArr[$row->occid]["catnum"] = $this->cleanOutStr($row->catalognumber);
 				$returnArr[$row->occid]["family"] = $this->cleanOutStr($row->family);
-				$returnArr[$row->occid]["sciname"] = $this->cleanOutStr($row->sciname);
-				$returnArr[$row->occid]["tid"] = $row->tidinterpreted;
-				$returnArr[$row->occid]["author"] = $this->cleanOutStr($row->scientificnameauthorship);
+				if($securityClearance || $row->localitysecurity == 1){
+					$returnArr[$row->occid]["sciname"] = ($row->sciname?$this->cleanOutStr($row->sciname):'undetermined');
+					$returnArr[$row->occid]["tid"] = $row->tidinterpreted;
+					$returnArr[$row->occid]["author"] = $this->cleanOutStr($row->scientificnameauthorship);
+				}
 				$returnArr[$row->occid]["collector"] = $this->cleanOutStr($row->recordedby);
 				$returnArr[$row->occid]["country"] = $this->cleanOutStr($row->country);
 				$returnArr[$row->occid]["state"] = $this->cleanOutStr($row->stateprovince);
 				$returnArr[$row->occid]["county"] = $this->cleanOutStr($row->county);
 				$returnArr[$row->occid]["obsuid"] = $row->observeruid;
-				if(!$row->localitysecurity || $canReadRareSpp
-					|| (array_key_exists("CollEditor", $GLOBALS['USER_RIGHTS']) && in_array($row->collid,$GLOBALS['USER_RIGHTS']["CollEditor"]))
-					|| (array_key_exists("RareSppReader", $GLOBALS['USER_RIGHTS']) && in_array($row->collid,$GLOBALS['USER_RIGHTS']["RareSppReader"]))){
-						$locStr = str_replace('.,',',',$row->locality);
-						if($row->decimallatitude && $row->decimallongitude) $locStr .= ', '.$row->decimallatitude.' '.$row->decimallongitude;
-						$returnArr[$row->occid]["locality"] = $this->cleanOutStr(trim($locStr,' ,;'));
-						$returnArr[$row->occid]["collnum"] = $this->cleanOutStr($row->recordnumber);
-						$returnArr[$row->occid]["date"] = $row->eventdate;
-						$returnArr[$row->occid]["habitat"] = $this->cleanOutStr($row->habitat);
-						$elevStr = $row->minimumelevationinmeters;
-						if($row->maximumelevationinmeters) $elevStr .= ' - '.$row->maximumelevationinmeters;
-						$returnArr[$row->occid]["elev"] = $elevStr;
-						$occArr[] = $row->occid;
-						if($row->localitysecurity) $returnArr[$row->occid]['raremsg'] = 'Note: locality details are redacted from non-authorized users';
+				$returnArr[$row->occid]['localitysecurity'] = $row->localitysecurity;
+				if($securityClearance || $row->localitysecurity == 2){
+					$locStr = str_replace('.,',',',$row->locality);
+					if($row->decimallatitude && $row->decimallongitude) $locStr .= ', '.$row->decimallatitude.' '.$row->decimallongitude;
+					$locStr = $this->cleanOutStr(trim($locStr,' ,;'));
+					if($row->localitysecurity){
+						$locStr .= '<div style="color:orange">Note: ';
+						if($row->localitysecurity == 1){
+							$locStr .= 'locality ';
+						}
+						elseif($row->localitysecurity == 2){
+							$locStr .= 'taxonomic ';
+						}
+						elseif($row->localitysecurity == 3){
+							$locStr .= 'locality &amp; taxonomic ';
+						}
+						$locStr .= 'details are being redacted from non-authorized users</div>';
+					}
+					$returnArr[$row->occid]["locality"] = $locStr;
+					$returnArr[$row->occid]["collnum"] = $this->cleanOutStr($row->recordnumber);
+					$returnArr[$row->occid]["date"] = $row->eventdate;
+					$returnArr[$row->occid]["habitat"] = $this->cleanOutStr($row->habitat);
+					$elevStr = $row->minimumelevationinmeters;
+					if($row->maximumelevationinmeters) $elevStr .= ' - '.$row->maximumelevationinmeters;
+					$returnArr[$row->occid]["elev"] = $elevStr;
+					$occArr[] = $row->occid;
 				}
 				else{
-					$securityStr = '<span style="color:red;">Detailed locality information protected. ';
-					if($row->localitysecurityreason){
-						$securityStr .= $row->localitysecurityreason;
-					}
-					else{
-						$securityStr .= 'This is typically done to protect rare or threatened species localities.';
-					}
-					$returnArr[$row->occid]["locality"] = $securityStr.'</span>';
+					$returnArr[$row->occid]["locality"] = '<span style="color:red;">detailed locality information protected</span>';
 				}
 			}
 			$result->free();

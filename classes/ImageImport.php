@@ -3,7 +3,7 @@ include_once($SERVER_ROOT.'/config/dbconnection.php');
 include_once("ImageShared.php");
 
 class ImageImport{
-	
+
 	private $conn;
 
 	private $uploadTargetPath;
@@ -12,15 +12,16 @@ class ImageImport{
 	private $targetArr;
 	private $fieldMap = array();		//array(sourceName => symbIndex)
 	private $translationMap = array('imageurl'=>'url','accessuri'=>'url','sciname'=>'scientificname');
-	
+
 	private $verbose = 1;
 
 	function __construct() {
 		set_time_limit(2000);
+		ini_set('auto_detect_line_endings', true);
 		$this->conn = MySQLiConnectionFactory::getCon("write");
-		
+
 		$this->setUploadTargetPath();
-		
+
 		$this->targetArr = array('url','originalUrl','scientificName','tid','photographer','photographerUid','caption',
 			'locality','sourceUrl','anatomy','notes','owner','copyright','sortSequence',
 			'institutionCode','collectionCode','catalogNumber','occid');
@@ -48,10 +49,10 @@ class ImageImport{
 			if(in_array(0,$this->fieldMap) && $this->fieldMap[0]){
 				$sqlBase = 'INSERT INTO images('.implode(',',array_keys($fieldMap)).') ';
 				while($recordArr = fgetcsv($fh)){
-					
+
 					if(in_array("sciname",$fieldMap)){
-						
-						
+
+
 					}
 					//Load relavent fields into uploadtaxa table
 					$sql = $sqlBase;
@@ -95,7 +96,7 @@ class ImageImport{
 			rename($this->uploadTargetPath.$fileName,$this->uploadTargetPath.$this->uploadFileName);
         }
 	}
-	
+
 	//Basic setters and getters
 	public function setUploadFileName($fileName){
 		$this->uploadFileName = $fileName;
@@ -104,7 +105,7 @@ class ImageImport{
 	public function getUploadFileName(){
 		return $this->uploadFileName;
 	}
-	
+
 	public function getSourceArr(){
 		$sourceArr = array();
 		$fh = fopen($this->uploadTargetPath.$this->uploadFileName,'rb') or die("Can't open file");
@@ -133,7 +134,7 @@ class ImageImport{
 	public function setVerbose($verb){
 		$this->verbose = $verb;
 	}
-	
+
 	public function getTranslation($inStr){
 		$retStr = '';
 		$inStr = strtolower($inStr);
@@ -150,7 +151,7 @@ class ImageImport{
 			$tPath = $GLOBALS["serverRoot"]."/temp/downloads";
 		}
 		if(substr($tPath,-1) != '/') $tPath .= "/";
-		$this->uploadTargetPath = $tPath; 
+		$this->uploadTargetPath = $tPath;
     }
 }
 ?>

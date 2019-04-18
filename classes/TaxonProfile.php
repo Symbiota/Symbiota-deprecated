@@ -182,8 +182,7 @@ class TaxonProfile extends Manager {
 			$tidArr = Array($this->tid);
 			$sql1 = 'SELECT DISTINCT ts.tid '.
 				'FROM taxstatus ts INNER JOIN taxaenumtree tn ON ts.tid = tn.tid '.
-				'WHERE tn.taxauthid = 1 AND ts.taxauthid = 1 AND ts.tid = ts.tidaccepted '.
-				'AND tn.parenttid = '.$this->tid;
+				'WHERE tn.taxauthid = 1 AND ts.taxauthid = 1 AND ts.tid = ts.tidaccepted AND tn.parenttid = '.$this->tid;
 			$rs1 = $this->conn->query($sql1);
 			while($r1 = $rs1->fetch_object()){
 				$tidArr[] = $r1->tid;
@@ -191,19 +190,31 @@ class TaxonProfile extends Manager {
 			$rs1->free();
 
 			$tidStr = implode(",",$tidArr);
-			$sql = 'SELECT t.sciname, ti.imgid, ti.url, ti.thumbnailurl, ti.originalurl, ti.caption, ti.occid, '.
-				'IFNULL(ti.photographer,CONCAT_WS(" ",u.firstname,u.lastname)) AS photographer '.
-				'FROM images ti LEFT JOIN users u ON ti.photographeruid = u.uid '.
-				'INNER JOIN taxstatus ts ON ti.tid = ts.tid '.
-				'INNER JOIN taxa t ON ti.tid = t.tid '.
-				'WHERE (ts.taxauthid = 1 AND ts.tidaccepted IN ('.$tidStr.')) AND ti.SortSequence < 500 AND ti.thumbnailurl IS NOT NULL ';
-			if(!$this->displayLocality) $sql .= 'AND ti.occid IS NULL ';
-			$sql .= 'ORDER BY ti.sortsequence LIMIT 100';
+			$sql = 'SELECT t.sciname, i.imgid, i.url, i.thumbnailurl, i.originalurl, i.caption, i.occid, IFNULL(i.photographer,CONCAT_WS(" ",u.firstname,u.lastname)) AS photographer '.
+				'FROM images i LEFT JOIN users u ON i.photographeruid = u.uid '.
+				'INNER JOIN taxstatus ts ON i.tid = ts.tid '.
+				'INNER JOIN taxa t ON i.tid = t.tid '.
+				'WHERE (ts.taxauthid = 1 AND ts.tidaccepted IN ('.$tidStr.')) AND i.SortSequence < 500 AND i.thumbnailurl IS NOT NULL ';
+			if(!$this->displayLocality) $sql .= 'AND i.occid IS NULL ';
+			$sql .= 'ORDER BY i.sortsequence LIMIT 100';
+			/*
+			$sql = 'SELECT t.sciname, i.imgid, i.url, i.thumbnailurl, i.originalurl, i.caption, i.occid, IFNULL(i.photographer,CONCAT_WS(" ",u.firstname,u.lastname)) AS photographer '.
+				'FROM images i LEFT JOIN users u ON i.photographeruid = u.uid '.
+				'INNER JOIN taxa t ON i.tid = t.tid '.
+				'INNER JOIN taxstatus ts ON i.tid = ts.tid '.
+				'INNER JOIN taxstatus ts2 ON ts.tidaccepted = ts2.tid '.
+				'INNER JOIN taxaenumtree e ON ts2.tid = e.tid '.
+				'WHERE ts.taxauthid = 1 AND ts2.taxauthid = 1 AND e.taxauthid = 1 AND ts2.tid = ts2.tidaccepted AND e.parenttid = '.$this->tid.' AND i.SortSequence < 500 AND i.thumbnailurl IS NOT NULL ';
+			if(!$this->displayLocality) $sql .= 'AND i.occid IS NULL ';
+			$sql .= 'ORDER BY i.sortsequence LIMIT 100';
+			*/
+
 			//echo $sql;
 			$result = $this->conn->query($sql);
 			while($row = $result->fetch_object()){
 				$imgUrl = $row->url;
 				if($imgUrl == 'empty' && $row->originalurl) $imgUrl = $row->originalurl;
+				if($imgUrl == 'empty') continue;
 				$this->imageArr[$row->imgid]["url"] = $imgUrl;
 				$this->imageArr[$row->imgid]["thumbnailurl"] = $row->thumbnailurl;
 				$this->imageArr[$row->imgid]["photographer"] = $row->photographer;
@@ -542,7 +553,7 @@ class TaxonProfile extends Manager {
 					'(SELECT ts1.tid, SUBSTR(MIN(CONCAT(LPAD(i.sortsequence,6,"0"),i.imgid)),7) AS imgid '.
 					'FROM taxstatus ts1 INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.tidaccepted '.
 					'INNER JOIN images i ON ts2.tid = i.tid '.
-					'WHERE ts1.taxauthid = 1 AND ts2.taxauthid = 1 AND (ts1.tid IN('.implode(',',$tids).')) '.
+					'WHERE ts1.taxauthid = 1 AND ts2.taxauthid = 1 AND (ts1.tid IN('.implode(',',$tids).')) AND (i.thumbnailurl IS NOT NULL) AND (i.url != "empty") '.
 					'GROUP BY ts1.tid) i2 ON i.imgid = i2.imgid '.
 					'INNER JOIN taxa t ON i2.tid = t.tid '.
 					'LEFT JOIN users u ON i.photographeruid = u.uid ';

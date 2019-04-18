@@ -111,7 +111,7 @@ if($IS_ADMIN || array_key_exists("KeyEditor",$USER_RIGHTS) || array_key_exists("
 					</div>
 					<input type='submit' name='action' id='submit' value='Get Species List' />
 				</td>
-				<td width='20' background='../../images/brown_hor_strip.gif'>&nbsp;</td>
+				<td style="border-left: 1px solid black">&nbsp;</td>
 				<td valign="top">
 			  		<?php
 				  	if($action=="Get Species List" && $cfValue != "--Select a Taxon--"){

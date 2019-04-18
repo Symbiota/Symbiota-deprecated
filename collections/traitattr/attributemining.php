@@ -22,7 +22,7 @@ $collRights = array();
 if(array_key_exists("CollAdmin",$USER_RIGHTS)) $collRights = $USER_RIGHTS["CollAdmin"];
 if(array_key_exists("CollEditor",$USER_RIGHTS)) $collRights = array_merge($collRights,$USER_RIGHTS["CollEditor"]);
 
-$isEditor = 0; 
+$isEditor = 0;
 if($SYMB_UID){
 	if(!$IS_ADMIN && count($collRights) == 1){
 		//User only has right to a single collection, thus we will auto-select as the default
@@ -78,7 +78,7 @@ if($isEditor){
 
 $fieldArr = array('habitat' => 'Habitat', 'substrate' => 'Substrate', 'occurrenceremarks' => 'Occurrence Remarks (notes)',
 	'dynamicproperties' => 'Dynamic Properties', 'verbatimattributes' => 'Verbatim Attributes (description)',
-	'behavior' => 'Behavior', 'reproductivecondition' => 'Reproductive Condition', 'lifestage' => 'Life Stage', 
+	'behavior' => 'Behavior', 'reproductivecondition' => 'Reproductive Condition', 'lifestage' => 'Life Stage',
 	'sex' => 'Sex');
 ?>
 <html>
@@ -108,7 +108,7 @@ $fieldArr = array('habitat' => 'Habitat', 'substrate' => 'Substrate', 'occurrenc
 					alert("You muct select at least one field value");
 					return false;
 				}
-				
+
 				var formVerified = false;
 				$('input[name^="stateid-"]').each(function(){
 					if(this.checked == true){
@@ -151,6 +151,11 @@ $fieldArr = array('habitat' => 'Habitat', 'substrate' => 'Substrate', 'occurrenc
 				toggle("collDiv");
 				toggle("displayDiv");
 			}
+
+			function displayDetailDiv(spanObj){
+				toggle("moreSpan");
+				toggle("detailDiv");
+			}
 		</script>
 		<script src="../../js/symb/collections.traitattr.js" type="text/javascript"></script>
 		<script src="../../js/symb/shared.js" type="text/javascript"></script>
@@ -162,13 +167,13 @@ $fieldArr = array('habitat' => 'Habitat', 'substrate' => 'Substrate', 'occurrenc
 		?>
 		<div class="navpath">
 			<a href="../../index.php">Home</a> &gt;&gt;
-			<?php 
+			<?php
 			if(is_numeric($collid)) echo '<a href="../misc/collprofiles.php?collid='.$collid.'&emode=1">Collection Management</a> &gt;&gt;';
-			if($IS_ADMIN || count($collRights) > 1) echo '<a href="attributemining.php">Adjust Collection Selection</a> &gt;&gt;';
+			else if($IS_ADMIN || count($collRights) > 1) echo '<a href="attributemining.php">Adjust Collection Selection</a> &gt;&gt;';
 			?>
 			<b>Attribute Mining Tool</b>
 		</div>
-		<?php 
+		<?php
 		if($statusStr){
 			echo '<div style="color:red">';
 			echo $statusStr;
@@ -177,7 +182,7 @@ $fieldArr = array('habitat' => 'Habitat', 'substrate' => 'Substrate', 'occurrenc
 		?>
 		<!-- This is inner text! -->
 		<div id="innertext">
-			<?php 
+			<?php
 			if($collid){
 				if($collid == 'all'){
 					echo '<h2 class="heading">Searching All Collections</h2>';
@@ -199,15 +204,22 @@ $fieldArr = array('habitat' => 'Habitat', 'substrate' => 'Substrate', 'occurrenc
 				}
 				?>
 				<div style="width:650px;">
+					<div>
+						This module allows one to code Occurrence Traits based on content entered into verbatium text fields.<span id="moreSpan">.. <a href="#" onclick="displayDetailDiv(this)">more</a></span>
+						<div id="detailDiv" style="display:none">For instance, phenology traits can be coded in bulk by mapping various
+						text strings displayed within Reproductive Condition text field to a controled phenology defined within the occurrence trait fields.
+						Coded trait attributes can be downloaded and shared via the Darwin Core (DwC) Archive export and publishing tools.
+						Traits are included within a <a href="https://tools.gbif.org/dwca-validator/extension.do?id=http://rs.iobis.org/obis/terms/ExtendedMeasurementOrFact" target="_blank">Measurement Or Fact</a> DwC Extension file.</div>
+					</div>
 					<fieldset style="margin:15px;padding:15px;">
 						<legend><b>Harvesting Filter</b></legend>
 						<form name="filterform" method="post" action="attributemining.php" onsubmit="return verifyFilterForm(this)" >
 							<div>
-								Occurrence trait: 
+								Occurrence trait:
 								<select name="traitid">
 									<option value="">Select Target Trait (required)</option>
 									<option value="">------------------------------------</option>
-									<?php 
+									<?php
 									$traitNameArr = $attrManager->getTraitNames();
 									if($traitNameArr){
 										foreach($traitNameArr as $ID => $aName){
@@ -221,11 +233,11 @@ $fieldArr = array('habitat' => 'Habitat', 'substrate' => 'Substrate', 'occurrenc
 								</select>
 							</div>
 							<div>
-								Verbatim text source: 
+								Verbatim text source:
 								<select name="fieldname">
 									<option value="">Select Source Field (required)</option>
 									<option value="">------------------------------------</option>
-									<?php 
+									<?php
 									foreach($fieldArr as $k => $fName){
 										echo '<option value="'.$k.'" '.($k==$fieldName?'SELECTED':'').'>'.$fName.'</option>';
 									}
@@ -233,7 +245,7 @@ $fieldArr = array('habitat' => 'Habitat', 'substrate' => 'Substrate', 'occurrenc
 								</select>
 							</div>
 							<div>
-								Filter by text (optional): 
+								Filter by text (optional):
 								<input name="stringfilter" type="text" value="<?php echo $stringFilter; ?>" />
 							</div>
 							<div style="float:right;margin-right:20px">
@@ -241,8 +253,8 @@ $fieldArr = array('habitat' => 'Habitat', 'substrate' => 'Substrate', 'occurrenc
 								<input id="filtersubmit" name="submitform" type="submit" value="Get Field Values" />
 							</div>
 							<div>
-								Filter by taxon (optional): 
-								<input id="taxonfilter" name="taxonfilter" type="text" value="<?php echo $taxonFilter; ?>" /> 
+								Filter by taxon (optional):
+								<input id="taxonfilter" name="taxonfilter" type="text" value="<?php echo $taxonFilter; ?>" />
 								<input id="tidfilter" name="tidfilter" type="hidden" value="<?php echo $tidFilter; ?>" />
 								<span id="verify-span" style="display:none;font-weight:bold;color:green;">verifying taxonomy...</span>
 								<span id="notvalid-span" style="display:none;font-weight:bold;color:red;">taxon not valid...</span>
@@ -250,7 +262,7 @@ $fieldArr = array('habitat' => 'Habitat', 'substrate' => 'Substrate', 'occurrenc
 						</form>
 					</fieldset>
 				</div>
-				<?php 
+				<?php
 				if($traitID && $fieldName){
 					$valueArr = $attrManager->getFieldValueArr($traitID, $fieldName, $tidFilter, $stringFilter);
 					?>
@@ -261,7 +273,7 @@ $fieldArr = array('habitat' => 'Habitat', 'substrate' => 'Substrate', 'occurrenc
 								<div style="margin:5px;">
 									<b>Select Source Field Value(s)</b> - hold down control or shift buttons to select more than one value<br/>
 									<select name="fieldvalue[]" size="15" multiple="multiple" style="width:100%">
-										<?php 
+										<?php
 										foreach($valueArr as $v){
 											if($v) echo '<option value="'.$v.'">'.$v.'</option>';
 										}
@@ -269,10 +281,14 @@ $fieldArr = array('habitat' => 'Habitat', 'substrate' => 'Substrate', 'occurrenc
 									</select>
 								</div>
 								<div>
-									<?php 
+									<?php
 									$traitArr = $attrManager->getTraitArr($traitID,false);
 									$attrManager->echoFormTraits($traitID);
 									?>
+								</div>
+								<div style="margin:10px 5px;">
+									Notes:
+									<input name="notes" type="text" style="width:200px" value="" />
 								</div>
 								<div style="margin: 5px">
 									Status: <select name="reviewstatus">
@@ -301,7 +317,7 @@ $fieldArr = array('habitat' => 'Habitat', 'substrate' => 'Substrate', 'occurrenc
 				<div style="margin:15px">
 					<form name="collform" method="post" action="attributemining.php" onsubmit="return verifyCollForm(this)">
 						<input name="selectall" type="checkbox" value="1" onchange="selectAll(this)" /> <b>Select/Deselect All</b><br/>
-						<?php 
+						<?php
 						foreach($collArr as $id => $collName){
 							echo '<input name="collid[]" type="checkbox" value="'.$id.'" onchange="collidChanged(this.form)" />';
 							echo $collName;
@@ -313,9 +329,9 @@ $fieldArr = array('habitat' => 'Habitat', 'substrate' => 'Substrate', 'occurrenc
 						</div>
 					</form>
 				</div>
-				<?php 
-			} 
-			?> 
+				<?php
+			}
+			?>
 		</div>
 	</body>
 </html>

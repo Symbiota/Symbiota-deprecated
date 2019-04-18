@@ -18,7 +18,7 @@ if($rType == 'pensoftxlsx'){
 	$vManager->downloadPensoftXlsx();
 }
 else{
-	$vManager = new ChecklistVoucherAdmin();
+	$vManager = new ChecklistVoucherReport();
 	$vManager->setClid($clid);
 	$vManager->setCollectionVariables();
 	if($rType == 'fullcsv'){
@@ -26,6 +26,9 @@ else{
 	}
 	elseif($rType == 'fullvoucherscsv'){
 		$vManager->downloadVoucherCsv();
+	}
+	elseif($rType == 'fullalloccurcsv'){
+		$vManager->downloadAllOccurrenceCsv();
 	}
 	elseif($rType == 'missingoccurcsv'){
 		$vManager->exportMissingOccurCsv();

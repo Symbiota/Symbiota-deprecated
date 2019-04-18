@@ -69,7 +69,7 @@ if($editable && $action){
 	elseif($action == "Add Description Block"){
 		$statusStr = $tEditor->addDescriptionBlock($_POST);
 	}
-	elseif($action == "Edit Description Block"){
+	elseif($action == "saveDescriptionBlock"){
 		$statusStr = $tEditor->editDescriptionBlock($_POST);
 	}
 	elseif($action == "Delete Description Block"){
@@ -81,7 +81,7 @@ if($editable && $action){
 	elseif($action == "Add Statement"){
 		$statusStr = $tEditor->addStatement($_POST);
 	}
-	elseif($action == "Edit Statement"){
+	elseif($action == "saveStatementEdit"){
 		$statusStr = $tEditor->editStatement($_POST);
 	}
 	elseif($action == "Delete Statement"){
@@ -116,14 +116,8 @@ if($editable && $action){
 	<script type="text/javascript" src="../../js/symb/shared.js"></script>
 	<script type="text/javascript" src="../../js/jquery.js"></script>
 	<script type="text/javascript" src="../../js/jquery-ui.js"></script>
-	<script type="text/javascript" src="../../js/tiny_mce/tiny_mce.js"></script>
+	<script type="text/javascript" src="../../js/tinymce/tinymce.min.js"></script>
 	<script type="text/javascript">
-		tinyMCE.init({
-			mode : "textareas",
-			theme_advanced_buttons1 : "bold,italic,underline,charmap,hr,outdent,indent,link,unlink,code",
-			theme_advanced_buttons2 : "",
-			theme_advanced_buttons3 : ""
-		});
 
 		$(document).ready(function() {
 			$("#sninput").autocomplete({
@@ -162,6 +156,7 @@ if($editable && $action){
 		}
 	</script>
 	<style type="text/css">
+		.tox-dialog { min-height: 400px }
 		input{margin:3px;}
 	</style>
 </head>

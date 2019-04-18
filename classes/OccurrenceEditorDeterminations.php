@@ -12,10 +12,10 @@ class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 	public function getDetMap($identBy, $dateIdent, $sciName){
 		$retArr = array();
 		$hasCurrent = 0;
-		$sql = "SELECT detid, identifiedBy, dateIdentified, sciname, scientificNameAuthorship, ".
-			"identificationQualifier, iscurrent, appliedstatus, identificationReferences, identificationRemarks, sortsequence ".
-			"FROM omoccurdeterminations ".
-			"WHERE (occid = ".$this->occid.") ORDER BY iscurrent DESC, sortsequence";
+		$sql = 'SELECT detid, identifiedBy, dateIdentified, sciname, scientificNameAuthorship, identificationQualifier, '.
+			'iscurrent, printqueue, appliedstatus, identificationReferences, identificationRemarks, sortsequence '.
+			'FROM omoccurdeterminations '.
+			'WHERE (occid = '.$this->occid.') ORDER BY iscurrent DESC, sortsequence';
 		//echo "<div>".$sql."</div>";
 		$result = $this->conn->query($sql);
 		while($row = $result->fetch_object()){
@@ -27,6 +27,7 @@ class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 			$retArr[$detId]["identificationqualifier"] = $this->cleanOutStr($row->identificationQualifier);
 			if($row->iscurrent == 1) $hasCurrent = 1;
 			$retArr[$detId]["iscurrent"] = $row->iscurrent;
+			$retArr[$detId]['printqueue'] = $row->printqueue;
 			$retArr[$detId]["appliedstatus"] = $row->appliedstatus;
 			$retArr[$detId]["identificationreferences"] = $this->cleanOutStr($row->identificationReferences);
 			$retArr[$detId]["identificationremarks"] = $this->cleanOutStr($row->identificationRemarks);
@@ -101,7 +102,7 @@ class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 					'identificationQualifier, identificationReferences, identificationRemarks, sortsequence) '.
 					'SELECT occid, IFNULL(identifiedby,"unknown") AS idby, IFNULL(dateidentified,"s.d.") AS di, '.
 					'sciname, scientificnameauthorship, identificationqualifier, identificationreferences, identificationremarks, 10 AS sortseq '.
-					'FROM omoccurrences WHERE (occid = '.$this->occid.')';
+					'FROM omoccurrences WHERE (occid = '.$this->occid.') AND (identifiedBy IS NOT NULL OR dateIdentified IS NOT NULL OR sciname IS NOT NULL)';
 				//echo "<div>".$sqlInsert."</div>";
 				if($this->conn->query($sqlInsert)){
 					//Create and insert Symbiota GUID for determination(UUID)
@@ -273,10 +274,9 @@ class OccurrenceEditorDeterminations extends OccurrenceEditorManager{
 		//Make sure determination data within omoccurrences is in omoccurdeterminations. If already there, INSERT will fail and nothing lost
 		$sqlInsert = 'INSERT INTO omoccurdeterminations(occid, identifiedBy, dateIdentified, sciname, scientificNameAuthorship, '.
 			'identificationQualifier, identificationReferences, identificationRemarks, sortsequence) '.
-			'SELECT occid, IFNULL(identifiedby,"unknown") AS idby, '.
-			'IFNULL(dateidentified,"s.d.") AS iddate, sciname, scientificnameauthorship, '.
+			'SELECT occid, IFNULL(identifiedby,"unknown") AS idby, IFNULL(dateidentified,"s.d.") AS iddate, sciname, scientificnameauthorship, '.
 			'identificationqualifier, identificationreferences, identificationremarks, 10 AS sortseq '.
-			'FROM omoccurrences WHERE (occid = '.$this->occid.')';
+			'FROM omoccurrences WHERE (occid = '.$this->occid.') AND (identifiedBy IS NOT NULL OR dateIdentified IS NOT NULL OR sciname IS NOT NULL)';
 		if($this->conn->query($sqlInsert)){
 			//Create and insert Symbiota GUID for determination(UUID)
 			$guid = UuidFactory::getUuidV4();

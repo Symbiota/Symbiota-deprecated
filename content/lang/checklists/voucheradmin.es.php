@@ -42,14 +42,17 @@ $LANG['LISTEDBELOW'] = 'A continuaci&oacute;n se enumeran las ocurrencias que pu
 $LANG['CHECKLISTID'] = 'Checklist ID';
 $LANG['ADDNAMECURRTAX'] = ' Agregar nombre utilizando la taxonom&iacute;a actual';
 $LANG['NOVOUCHLOCA'] = 'No se localizaron vouchers';
-$LANG['LISTEDBELOWARESPECINSTRUC'] = 'A continuaci&oacute;n se enumeran las especies de la lista de control que no han sido vinculadas a esp&eacute;cimenes voucher.  Haga clic en el nombre para utilizar la instrucci&oacute;n de b&uacute;squeda de arriba para consultar de forma din&aacute;mica el conjunto de datos de ocurrencia de espec&iacute;menes voucher posibles. Utilice la lista desplegable a la derecha para mostrar los espec&iacute;menes en un formato de tabla.';
+$LANG['LISTEDBELOWARESPECINSTRUC'] = 'A continuaci&oacute;n se enumeran las especies de la lista de control que no han sido vinculadas a esp&eacute;cimenes voucher.
+Haga clic en el nombre para utilizar la instrucci&oacute;n de b&uacute;squeda de arriba para consultar de forma din&aacute;mica el conjunto de datos de ocurrencia de
+espec&iacute;menes voucher posibles. Utilice la lista desplegable a la derecha para mostrar los espec&iacute;menes en un formato de tabla.';
 $LANG['ALLTAXACONTAINVOUCH'] = 'Todos los taxones contienen enlaces a vouchers';
 $LANG['FULLSPECLIST'] = 'Listado de especies completo (CSV)';
 $LANG['FULLPRINT'] = 'Listado de especies completo (Print Friendly)';
-$LANG['FULLSPECLISTVOUCHER'] = 'Listado de especies completo con vouchers (CSV)';
-$LANG['FULLPRINTVOUCHER'] = 'Listado de especies completo con vouchers (Print Friendly)';
+$LANG['FULLSPECLISTVOUCHER'] = 'Listado de especies completo con vouchers vinculados (CSV)';
+$LANG['FULLPRINTVOUCHER'] = 'Listado de especies completo con vouchers vinculados (Print Friendly)';
+$LANG['VOUCHERONLY'] = 'Vouchers vinculados solomente (DwC-A, CSV, Tab-delimited)';
+$LANG['FULLSPECLISTALLOCCUR'] = 'Listado de especies completo con todos ocurrencias (CSV)';
 $LANG['PENSOFT_XLSX_EXPORT'] = 'Listado de especies en el formato del Pensoft';
-$LANG['VOUCHERONLY'] = 'Vouchers solomente (DwC-A, CSV, Tab-delimited)';
 $LANG['SPECMISSINGTITLE'] = 'Posibles adiciones de especies basadas en vales de muestra';
 $LANG['SPECMISSTAXA'] = 'Espec&iacute;menes de taxa faltantes del listado de Comprobaci&oacute;n (CSV)';
 $LANG['SPECMISSPELLED'] = 'Espec&iacute;menes con nombres cient&iacute;ficos mal escritos, ilegales, y problem&aacute;ticos (CSV)';

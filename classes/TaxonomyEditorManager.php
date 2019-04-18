@@ -408,7 +408,7 @@ class TaxonomyEditorManager{
 			"INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.ParentTID) ".
 			"INNER JOIN taxa t2 ON ts2.tid = t2.tid) ".
 			"LEFT JOIN kmdescr d2 ON (d1.CID = d2.CID) AND (t2.TID = d2.TID) ".
-			"WHERE (ts1.taxauthid = 1) AND (ts2.taxauthid = 1) AND (ts2.tid = ts2.tidaccepted) ".
+			"WHERE (ts1.taxauthid = '.$this->taxAuthId.') AND (ts2.taxauthid = '.$this->taxAuthId.') AND (ts2.tid = ts2.tidaccepted) ".
 			"AND (t2.tid = ".$tid.") And (d2.CID Is Null)";
 		$this->conn->query($sqlAdd1);
 
@@ -422,7 +422,7 @@ class TaxonomyEditorManager{
 				"INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.ParentTID) ".
 				"INNER JOIN taxa t2 ON ts2.tid = t2.tid) ".
 				"LEFT JOIN kmdescr d2 ON (d1.CID = d2.CID) AND (t2.TID = d2.TID) ".
-				"WHERE (ts1.taxauthid = 1) AND (ts2.taxauthid = 1) AND (ts2.tid = ts2.tidaccepted) ".
+				"WHERE (ts1.taxauthid = '.$this->taxAuthId.') AND (ts2.taxauthid = '.$this->taxAuthId.') AND (ts2.tid = ts2.tidaccepted) ".
 				"AND (t2.RankId = 180) AND (t1.tid = ".$tid.") AND (d2.CID Is Null)";
 			//echo $sqlAdd2a;
 			$this->conn->query($sqlAdd2a);
@@ -434,7 +434,7 @@ class TaxonomyEditorManager{
 				"INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.ParentTID) ".
 				"INNER JOIN taxa t2 ON ts2.tid = t2.tid) ".
 				"LEFT JOIN kmdescr d2 ON (d1.CID = d2.CID) AND (t2.TID = d2.TID) ".
-				"WHERE (ts1.taxauthid = 1) AND (ts2.taxauthid = 1) AND (ts2.family = '".
+				"WHERE (ts1.taxauthid = '.$this->taxAuthId.') AND (ts2.taxauthid = '.$this->taxAuthId.') AND (ts2.family = '".
 				$this->sciName."') AND (ts2.tid = ts2.tidaccepted) ".
 				"AND (t2.RankId = 220) AND (d2.CID Is Null)";
 			$this->conn->query($sqlAdd2b);
@@ -449,7 +449,7 @@ class TaxonomyEditorManager{
 				"INNER JOIN taxstatus ts2 ON ts1.tidaccepted = ts2.ParentTID) ".
 				"INNER JOIN taxa t2 ON ts2.tid = t2.tid) ".
 				"LEFT JOIN kmdescr d2 ON (d1.CID = d2.CID) AND (t2.TID = d2.TID) ".
-				"WHERE (ts1.taxauthid = 1) AND (ts2.taxauthid = 1) AND (ts2.tid = ts2.tidaccepted) ".
+				"WHERE (ts1.taxauthid = '.$this->taxAuthId.') AND (ts2.taxauthid = '.$this->taxAuthId.') AND (ts2.tid = ts2.tidaccepted) ".
 				"AND (t2.RankId = 220) AND (t1.tid = ".$tid.") AND (d2.CID Is Null)";
 			//echo $sqlAdd2b;
 			$this->conn->query($sqlAdd3);
@@ -643,7 +643,7 @@ class TaxonomyEditorManager{
 			$sql3 = 'INSERT IGNORE INTO omoccurgeoindex(tid,decimallatitude,decimallongitude) '.
 				'SELECT DISTINCT o.tidinterpreted, round(o.decimallatitude,2), round(o.decimallongitude,2) '.
 				'FROM omoccurrences o '.
-				'WHERE (o.tidinterpreted '.$tid.') AND (o.decimallatitude between -180 and 180) AND (o.decimallongitude between -180 and 180) '.
+				'WHERE (o.tidinterpreted '.$tid.') AND (o.decimallatitude between -90 and 90) AND (o.decimallongitude between -180 and 180) '.
 				'AND (o.cultivationStatus IS NULL OR o.cultivationStatus = 0) AND (o.coordinateUncertaintyInMeters IS NULL OR o.coordinateUncertaintyInMeters < 10000) ';
 
 			$this->conn->query($sql3);
@@ -752,18 +752,10 @@ class TaxonomyEditorManager{
 	public function transferResources($targetTid){
 		$statusStr = '';
 		if(is_numeric($targetTid)){
-			//Remap occurrence records
-			$sql ='UPDATE omoccurrences SET tidinterpreted = '.$targetTid.' WHERE tidinterpreted = '.$this->tid;
-			if(!$this->conn->query($sql)){
-				$statusStr .= 'ERROR transferring occurrence records ('.$this->conn->error.')<br/>';
-			}
-			$sql ='UPDATE omoccurdeterminations SET tidinterpreted = '.$targetTid.' WHERE tidinterpreted = '.$this->tid;
-			if(!$this->conn->query($sql)){
-				$statusStr .= 'ERROR transferring occurrence determination records ('.$this->conn->error.')<br/>';
-			}
+			//Set occurrence and determination tids to NULL within delete function function below
 
-			//Field images
-			$sql ='UPDATE IGNORE images SET tid = '.$targetTid.' WHERE tid = '.$this->tid;
+			//Field images; specimen images set to null within delete function
+			$sql ='UPDATE IGNORE images SET tid = '.$targetTid.' WHERE occid IS NULL AND tid = '.$this->tid;
 			if(!$this->conn->query($sql)){
 				$statusStr .= 'ERROR transferring image links ('.$this->conn->error.')<br/>';
 			}
@@ -823,10 +815,12 @@ class TaxonomyEditorManager{
 		if(!$this->conn->query($sql)){
 			$statusStr .= 'ERROR setting tid to NULL for occurrence images in deleteTaxon method ('.$this->conn->error.')<br/>';
 		}
+		/*
 		$sql ='DELETE FROM images WHERE tid = '.$this->tid;
 		if(!$this->conn->query($sql)){
 			$statusStr .= 'ERROR deleting remaining links in deleteTaxon method ('.$this->conn->error.')<br/>';
 		}
+		*/
 
 		//Vernaculars
 		$sql ='DELETE FROM taxavernaculars WHERE tid = '.$this->tid;
@@ -840,10 +834,14 @@ class TaxonomyEditorManager{
 			$statusStr .= 'ERROR deleting taxa description blocks in deleteTaxon method ('.$this->conn->error.')<br/>';
 		}
 
-		//Occurrences
+		//Set occurrence and determination tids to NULL; collection can clean later using the taxonomic cleaning tools
 		$sql = 'UPDATE omoccurrences SET tidinterpreted = NULL WHERE tidinterpreted = '.$this->tid;
 		if(!$this->conn->query($sql)){
 			$statusStr .= 'ERROR setting tidinterpreted to NULL in deleteTaxon method ('.$this->conn->error.')<br/>';
+		}
+		$sql ='UPDATE omoccurdeterminations SET tidinterpreted = NULL WHERE tidinterpreted = '.$this->tid;
+		if(!$this->conn->query($sql)){
+			$statusStr .= 'ERROR transferring occurrence determination records ('.$this->conn->error.')<br/>';
 		}
 
 		//Vouchers
@@ -852,7 +850,7 @@ class TaxonomyEditorManager{
 			$statusStr .= 'ERROR deleting voucher links in deleteTaxon method ('.$this->conn->error.')<br/>';
 		}
 
-		//Checklists
+		//Links to checklists
 		$sql ='DELETE FROM fmchklsttaxalink WHERE tid = '.$this->tid;
 		if(!$this->conn->query($sql)){
 			$statusStr .= 'ERROR deleting checklist links in deleteTaxon method ('.$this->conn->error.')<br/>';
@@ -1029,8 +1027,8 @@ class TaxonomyEditorManager{
 		//For now, just return the default taxonomy (taxauthid = 1)
 		$retArr = array();
 		if($this->tid){
-			$sql = "SELECT ta.taxauthid, ta.name FROM taxauthority ta INNER JOIN taxstatus ts ON ta.taxauthid = ts.taxauthid ".
-				"WHERE ta.isactive = 1 AND (ts.tid = ".$this->tid.") ORDER BY ta.taxauthid ";
+			$sql = 'SELECT ta.taxauthid, ta.name FROM taxauthority ta INNER JOIN taxstatus ts ON ta.taxauthid = ts.taxauthid '.
+				'WHERE ta.isactive = 1 AND (ts.tid = ".$this->tid.") ORDER BY ta.taxauthid ';
 			$rs = $this->conn->query($sql);
 			while($row = $rs->fetch_object()){
 				$retArr[$row->taxauthid] = $row->name;
@@ -1042,8 +1040,7 @@ class TaxonomyEditorManager{
 
 	public function getRankArr(){
 		$retArr = array();
-		$sql = 'SELECT rankid, rankname '.
-			'FROM taxonunits ';
+		$sql = 'SELECT rankid, rankname FROM taxonunits ';
 		if($this->kingdomName) $sql .= 'WHERE (kingdomname = "'.($this->kingdomName?$this->kingdomName:'Organism').'") ';
 		$sql .= 'ORDER BY rankid ';
 		//echo $sql;
@@ -1108,12 +1105,27 @@ class TaxonomyEditorManager{
 		return $retArr;
 	}
 
+	public function getChildren(){
+		$retArr = array();
+		$sql = 'SELECT t.tid, t.sciname, t.author '.
+			'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
+			'WHERE (ts.taxauthid = '.$this->taxAuthId.') AND (ts.parenttid = '.$this->tid.')';
+		$rs = $this->conn->query($sql);
+		while($r = $rs->fetch_object()){
+			$retArr[$r->tid]['name'] = $r->sciname;
+			$retArr[$r->tid]['author'] = $r->author;
+		}
+		$rs->free();
+		asort($retArr);
+		return $retArr;
+	}
+
 	public function getChildAccepted($tid){
 		if(!is_numeric($tid)) return false;
 		$retArr = array();
 		$sql = 'SELECT t.tid, t.sciname '.
 			'FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tid '.
-			'WHERE (ts.taxauthid = 1) AND (ts.parenttid = '.$tid.') AND (ts.tid = ts.tidaccepted) '.
+			'WHERE (ts.taxauthid = '.$this->taxAuthId.') AND (ts.parenttid = '.$tid.') AND (ts.tid = ts.tidaccepted) '.
 			'ORDER BY t.sciname LIMIT 20';
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){

@@ -116,7 +116,7 @@ $statusStr = "";
 					echo '</ul>';
 
 				}
-				elseif($action == 'Load Image Data'){
+				elseif($action == 'mapImageFile'){
 					//Process csv file with remote image urls
 					$imageProcessor = new ImageProcessor($specManager->getConn());
 					echo '<ul>';

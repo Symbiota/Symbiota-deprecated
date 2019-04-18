@@ -167,7 +167,9 @@ $taxaArray = $clManager->getTaxaList($pageNumber,($printMode?0:500));
 	</style>
 </head>
 <body>
-<?php
+	<?php
+	$HEADER_URL = '';
+	if(isset($clArray['headerurl']) && $clArray['headerurl']) $HEADER_URL = $CLIENT_ROOT.$clArray['headerurl'];
 	$displayLeftMenu = (isset($checklists_checklistMenu)?$checklists_checklistMenu:false);
 	if(!$printMode) include($SERVER_ROOT.'/header.php');
 	echo '<div class="navpath printoff">';
@@ -688,9 +690,9 @@ $taxaArray = $clManager->getTaxaList($pageNumber,($printMode?0:500));
 						foreach($taxaArray as $tid => $sppArr){
 							$group = $sppArr['taxongroup'];
 							if($group != $prevGroup){
-								$famUrl = "../taxa/index.php?taxauthid=1&taxon=$group&clid=".$clid;
+								$famUrl = '../taxa/index.php?taxauthid=1&taxon='.strip_tags($group).'&clid='.$clid;
 								?>
-								<div class="familydiv" id="<?php echo $group;?>" style="margin:12px 0px 3px 0px;font-weight:bold;">
+								<div class="familydiv" id="<?php echo strip_tags($group);?>" style="margin:12px 0px 3px 0px;font-weight:bold;">
 									<a href="<?php echo $famUrl; ?>" target="_blank" style="color:black;"><?php echo $group;?></a>
 								</div>
 								<?php

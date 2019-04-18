@@ -134,20 +134,27 @@ if($isEditor){
 	<link type="text/css" href="../css/jquery-ui.css" rel="Stylesheet" />
 	<script type="text/javascript" src="../js/jquery.js"></script>
 	<script type="text/javascript" src="../js/jquery-ui.js"></script>
-	<script type="text/javascript" src="../js/tiny_mce/tiny_mce.js"></script>
+	<script type="text/javascript" src="../js/tinymce/tinymce.min.js"></script>
 	<script type="text/javascript">
 		var tabIndex = <?php echo $tabIndex; ?>;
 
-		tinyMCE.init({
-			mode : "textareas",
-			theme_advanced_buttons1 : "bold,italic,underline,charmap,hr,outdent,indent,link,unlink,code",
-			theme_advanced_buttons2 : "",
-			theme_advanced_buttons3 : ""
+		tinymce.init({
+			selector: "textarea",
+			width: "100%",
+			height: 300,
+			menubar: false,
+			plugins: "link,charmap,code,paste",
+			toolbar : "bold italic underline cut copy paste outdent indent undo redo subscript superscript removeformat link charmap code",
+			default_link_target: "_blank",
+			paste_as_text: true
 		});
 
 	</script>
 	<script type="text/javascript" src="../js/symb/profile.viewprofile.js?ver=20170530"></script>
 	<script type="text/javascript" src="../js/symb/shared.js"></script>
+	<style type="text/css">
+		.tox-dialog { min-height: 400px }
+	</style>
 </head>
 <body>
 <?php

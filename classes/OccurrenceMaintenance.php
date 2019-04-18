@@ -3,19 +3,19 @@ include_once($SERVER_ROOT.'/config/dbconnection.php');
 
 class OccurrenceMaintenance {
 
-	private $conn;
+	protected $conn;
 	private $destructConn = true;
 	private $verbose = false;	// 0 = silent, 1 = echo as list item
 	private $errorArr = array();
 
-	public function __construct($con = null){
+	public function __construct($con = null, $conType = 'write'){
 		if($con){
 			//Inherits connection from another class
 			$this->conn = $con;
 			$this->destructConn = false;
 		}
 		else{
-			$this->conn = MySQLiConnectionFactory::getCon("write");
+			$this->conn = MySQLiConnectionFactory::getCon($conType);
 		}
 	}
 
@@ -167,7 +167,7 @@ class OccurrenceMaintenance {
 		$sql = 'INSERT IGNORE INTO omoccurgeoindex(tid,decimallatitude,decimallongitude) '.
 			'SELECT DISTINCT o.tidinterpreted, round(o.decimallatitude,2), round(o.decimallongitude,2) '.
 			'FROM omoccurrences o '.
-			'WHERE (o.tidinterpreted IS NOT NULL) AND (o.decimallatitude between -180 and 180) AND (o.decimallongitude between -180 and 180) '.
+			'WHERE (o.tidinterpreted IS NOT NULL) AND (o.decimallatitude between -90 and 90) AND (o.decimallongitude between -180 and 180) '.
 			'AND (o.cultivationStatus IS NULL OR o.cultivationStatus = 0) AND (o.coordinateUncertaintyInMeters IS NULL OR o.coordinateUncertaintyInMeters < 10000) ';
 		if(!$this->conn->query($sql)){
 			$errStr = 'WARNING: unable to update georeference index; '.$this->conn->error;
@@ -183,12 +183,12 @@ class OccurrenceMaintenance {
 	//Protect Rare species data
 	public function protectRareSpecies($collid = 0){
 		$status = 0;
-		$status = $this->protectGloballyRareSpecies($collid);
+		$status = $this->protectGlobalSpecies($collid);
 		$status += $this->batchProtectStateRareSpecies();
 		return $status;
 	}
 
-	public function protectGloballyRareSpecies($collid = 0){
+	public function protectGlobalSpecies($collid = 0){
 		$status = 0;
 		//protect globally rare species
 		if($this->verbose) $this->outputMsg('Protecting globally rare species... ',1);
@@ -211,22 +211,6 @@ class OccurrenceMaintenance {
 			}
 		}
 		return $status;
-	}
-
-	public function getGlobalProtectionCount(){
-		//Return count of specimens needing protection
-		$retCnt = 0;
-		$sensitiveArr = $this->getSensitiveTaxa();
-		if($sensitiveArr){
-			$sql = 'SELECT COUNT(*) AS cnt FROM omoccurrences '.
-				'WHERE (LocalitySecurity IS NULL OR LocalitySecurity = 0) AND (localitySecurityReason IS NULL) AND (tidinterpreted IN('.implode(',',$sensitiveArr).'))';
-			$rs = $this->conn->query($sql);
-			if($r = $rs->fetch_object()){
-				$retCnt = $r->cnt;
-			}
-			$rs->free();
-		}
-		return $retCnt;
 	}
 
 	private function getSensitiveTaxa(){

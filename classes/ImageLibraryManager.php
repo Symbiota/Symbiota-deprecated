@@ -96,7 +96,7 @@ class ImageLibraryManager extends OccurrenceTaxaManager{
 		else{
 			$sql .= 'WHERE ';
 		}
-		$sql .= '(i.sortsequence < 500) AND (ts.taxauthid = 1) AND (t.RankId > 219) ';
+		$sql .= '(ts.taxauthid = 1) AND (t.RankId > 219) ';
 		if($this->tidFocus) $sql .= 'AND (e.parenttid IN('.$this->tidFocus.')) AND (e.taxauthid = 1) ';
 		return $sql;
 	}
@@ -253,10 +253,12 @@ class ImageLibraryManager extends OccurrenceTaxaManager{
 		if($occArr){
 			//Get occurrence data
 			$collArr = array();
-			$sql2 = 'SELECT occid, catalognumber, stateprovince, collid FROM omoccurrences WHERE occid IN('.implode(',',$occArr).')';
+			$sql2 = 'SELECT occid, catalognumber, sciname, recordedby, stateprovince, collid FROM omoccurrences WHERE occid IN('.implode(',',$occArr).')';
 			$rs2 = $this->conn->query($sql2);
 			while($r2 = $rs2->fetch_object()){
 				$retArr['occ'][$r2->occid]['catnum'] = $r2->catalognumber;
+				$retArr['occ'][$r2->occid]['sciname'] = $r2->sciname;
+				$retArr['occ'][$r2->occid]['recordedby'] = $r2->recordedby;
 				$retArr['occ'][$r2->occid]['stateprovince'] = $r2->stateprovince;
 				$retArr['occ'][$r2->occid]['collid'] = $r2->collid;
 				$collArr[$r2->collid] = $r2->collid;
@@ -531,6 +533,19 @@ class ImageLibraryManager extends OccurrenceTaxaManager{
 		}
 		$rs->free();
 		return $retArr;
+	}
+
+	public function getTaxaStr($tid){
+		$retStr = '';
+		if(is_numeric($tid)){
+			$sql = 'SELECT sciname FROM taxa WHERE (tid = '.$tid.')';
+			$rs = $this->conn->query($sql);
+			while($r = $rs->fetch_object()) {
+				$retStr = $r->sciname;
+			}
+			$rs->free();
+		}
+		return $retStr;
 	}
 
 	//Setters and getters

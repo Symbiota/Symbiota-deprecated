@@ -67,25 +67,33 @@ $voucherProjects = $clManager->getVoucherProjects();
 	<link type="text/css" href="../css/jquery-ui.css" rel="Stylesheet" />
 	<script type="text/javascript" src="../js/jquery.js"></script>
 	<script type="text/javascript" src="../js/jquery-ui.js"></script>
-	<script type="text/javascript" src="../js/tiny_mce/tiny_mce.js"></script>
+	<script type="text/javascript" src="../js/tinymce/tinymce.min.js"></script>
 	<script type="text/javascript">
 		var clid = <?php echo $clid; ?>;
 		var tabIndex = <?php echo $tabIndex; ?>;
 
-		tinyMCE.init({
-			mode : "textareas",
-			theme_advanced_buttons1 : "bold,italic,underline,charmap,hr,outdent,indent,link,unlink,code",
-			theme_advanced_buttons2 : "",
-			theme_advanced_buttons3 : ""
+		tinymce.init({
+			selector: "textarea",
+			width: "100%",
+			height: 300,
+			menubar: false,
+			plugins: "link,charmap,code,paste",
+			toolbar : "bold italic underline cut copy paste outdent indent undo redo subscript superscript removeformat link charmap code",
+			default_link_target: "_blank",
+			paste_as_text: true
 		});
 
 	</script>
 	<script type="text/javascript" src="../js/symb/shared.js"></script>
 	<script type="text/javascript" src="../js/symb/checklists.checklistadmin.js?ver=20170530"></script>
+	<style type="text/css">
+		.tox-dialog { min-height: 400px }
+	</style>
 </head>
-
 <body>
 <?php
+//$HEADER_URL = '';
+//if(isset($clArray['headerurl']) && $clArray['headerurl']) $HEADER_URL = $CLIENT_ROOT.$clArray['headerurl'];
 $displayLeftMenu = false;
 include($SERVER_ROOT.'/header.php');
 ?>
@@ -214,48 +222,48 @@ if($clid && $isEditor){
 		</div>
 	</div>
 	<!--
-				<div id="pointtab">
-					<fieldset>
-						<legend><b>Add New Point</b></legend>
-						<form name="pointaddform" target="checklistadmin.php" method="post" onsubmit="return verifyPointAddForm(this)">
-							Taxon<br/>
-							<select name="pointtid" onchange="togglePoint(this.form);">
-								<option value="">Select Taxon</option>
-								<option value="">-----------------------</option>
-								<?php
-	$taxaArr = $clManager->getTaxa();
-	foreach($taxaArr as $tid => $sn){
-		echo '<option value="'.$tid.'">'.$sn.'</option>';
-	}
-	?>
-							</select>
-							<div id="pointlldiv" style="display:none;">
-								<div style="float:left;">
-									Latitude Centroid<br/>
-									<input id="latdec" type="text" name="pointlat" style="width:110px;" value="" />
-								</div>
-								<div style="float:left;margin-left:5px;">
-									Longitude Centroid<br/>
-									<input id="lngdec" type="text" name="pointlng" style="width:110px;" value="" />
-								</div>
-								<div style="float:left;margin:15px 0px 0px 10px;cursor:pointer;" onclick="openPointAid(<?php echo $clArray["latcentroid"].','.$clArray["longcentroid"]?>);">
-									<img src="../images/world.png" style="width:12px;" />
-								</div>
-								<div style="clear:both;">
-									Notes:<br/>
-									<input type="text" name="notes" style="width:95%" value="" />
-								</div>
-								<div>
-									<input name="submitaction" type="submit" value="Add Point" />
-									<input type="hidden" name="tabindex" value="2" />
-									<input type="hidden" name="pid" value="<?php echo $pid; ?>" />
-									<input type="hidden" name="clid" value="<?php echo $clid; ?>" />
-								</div>
-							</div>
-						</form>
-					</fieldset>
+	<div id="pointtab">
+		<fieldset>
+			<legend><b>Add New Point</b></legend>
+			<form name="pointaddform" target="checklistadmin.php" method="post" onsubmit="return verifyPointAddForm(this)">
+				Taxon<br/>
+				<select name="pointtid" onchange="togglePoint(this.form);">
+					<option value="">Select Taxon</option>
+					<option value="">-----------------------</option>
+					<?php
+					$taxaArr = $clManager->getTaxa();
+					foreach($taxaArr as $tid => $sn){
+						echo '<option value="'.$tid.'">'.$sn.'</option>';
+					}
+					?>
+				</select>
+				<div id="pointlldiv" style="display:none;">
+					<div style="float:left;">
+						Latitude Centroid<br/>
+						<input id="latdec" type="text" name="pointlat" style="width:110px;" value="" />
+					</div>
+					<div style="float:left;margin-left:5px;">
+						Longitude Centroid<br/>
+						<input id="lngdec" type="text" name="pointlng" style="width:110px;" value="" />
+					</div>
+					<div style="float:left;margin:15px 0px 0px 10px;cursor:pointer;" onclick="openPointAid(<?php echo $clArray["latcentroid"].','.$clArray["longcentroid"]?>);">
+						<img src="../images/world.png" style="width:12px;" />
+					</div>
+					<div style="clear:both;">
+						Notes:<br/>
+						<input type="text" name="notes" style="width:95%" value="" />
+					</div>
+					<div>
+						<input name="submitaction" type="submit" value="Add Point" />
+						<input type="hidden" name="tabindex" value="2" />
+						<input type="hidden" name="pid" value="<?php echo $pid; ?>" />
+						<input type="hidden" name="clid" value="<?php echo $clid; ?>" />
+					</div>
 				</div>
- -->
+			</form>
+		</fieldset>
+	</div>
+	-->
 	<?php
 	if($voucherProjects){
 		?>

@@ -47,46 +47,58 @@ if($spprid) $specManager->setProjVariables($spprid);
 					});
 				}
 
+				uploadTypeChanged();
 			});
 
 			function uploadTypeChanged(){
-				var uploadType = document.getElementById('projecttype').value;
+				var f = document.getElementById('editproj');
+				var uploadType = f.projecttype.value;
 				if(uploadType == 'local'){
 					$("div.profileDiv").show();
 					$("#titleDiv").show();
 					$("#sourcePathInfoIplant").hide();
 					$("#chooseFileDiv").hide();
-					if($("[name='sourcepath']").val() == "-- Use Default Path --") $("[name='sourcepath']").val("");
-					$("#profileEditSubmit").val("Save Profile");
+					if(f.sourcepath.value == "-- Use Default Path --") f.sourcepath.value = "";
+					f.profileEditSubmit.value = "Save Profile";
 					$("#submitDiv").show();
 				}
 				else if(uploadType == 'file'){
-					$("div.profileDiv").hide();
-					$("#chooseFileDiv").show();
-					$("#profileEditSubmit").val("Analyze Image Data File");
-					$("#submitDiv").show();
+					if(f.spprid.value){
+						$("div.profileDiv").hide();
+						$("#titleDiv").hide();
+						$("#chooseFileDiv").show();
+						//$("#specKeyPatternDiv").show();
+						//$("#patternReplaceDiv").show();
+						//$("#replaceStrDiv").show();
+						f.profileEditSubmit.value = "Analyze Image Data File";
+						$("#submitDiv").show();
+					}
+					else{
+						$("#profileEditSubmit").val("Save Profile");
+
+					}
 				}
 				else if(uploadType == 'idigbio'){
 					$("div.profileDiv").hide();
 					$("#titleDiv").show();
-					$("[name='title']").val("iDigBio CSV upload");
+					f.title.value = "iDigBio CSV upload";
 					$("#specKeyPatternDiv").show();
 					$("#patternReplaceDiv").show();
 					$("#replaceStrDiv").show();
-					if($("[name='sourcepath']").val() == "-- Use Default Path --") $("[name='sourcepath']").val("");
+					if(f.sourcepath.value == "-- Use Default Path --") f.sourcepath.value = "";
 					$("#profileEditSubmit").val("Save Profile");
 					$("#submitDiv").show();
 				}
 				else if(uploadType == 'iplant'){
 					$("div.profileDiv").hide();
 					$("#titleDiv").show();
-					$("[name='title']").val("iPlant Image Processing");
+					f.title.value = "iPlant Image Processing";
 					$("#specKeyPatternDiv").show();
 					$("#patternReplaceDiv").show();
 					$("#replaceStrDiv").show();
 					$("#sourcePathDiv").show();
 					$("#sourcePathInfoIplant").show();
-					if($("[name='sourcepath']").val() == "") $("[name='sourcepath']").val("-- Use Default Path --");
+					if(f.sourcepath.value == "") f.sourcepath.value = "-- Use Default Path --";
 					$("#profileEditSubmit").val("Save Profile");
 					$("#submitDiv").show();
 				}
@@ -110,9 +122,16 @@ if($spprid) $specManager->setProjVariables($spprid);
 						return false;
 					}
 				}
-				if(f.projecttype.value == 'file' && f.uploadfile.value == ""){
-					alert("Select a CSV file to upload");
-					return false;
+				if(f.projecttype.value == 'file'){
+					var fileName = f.uploadfile.value;
+					if(fileName == ""){
+						alert("Select a CSV file to upload");
+						return false;
+					}
+					else if(fileName.split('.').pop().toLowerCase() != "csv"){
+						alert("File must be a CSV file with .csv as the file extension");
+						return false;
+					}
 				}
 				if(f.projecttype.value == 'local'){
 					if(!isNumeric(f.webpixwidth.value)){
@@ -165,7 +184,7 @@ if($spprid) $specManager->setProjVariables($spprid);
 						return false;
 					}
 				}
-				if($("[name='matchcatalognumber']").prop("checked") == false && $("[name='matchothercatalognumbers']").prop("checked") == false){
+				if(f.matchcatalognumber.checked == false && f.matchothercatalognumbers.checked == false){
 					alert("At least one of the Match Term checkboxes need to be checked");
 					return false;
 				}
@@ -192,8 +211,12 @@ if($spprid) $specManager->setProjVariables($spprid);
 						sfArr[sfArr.length] = obj.value;
 					}
 				}
-				if(tfArr.indexOf("catalognumber") < 0 || tfArr.indexOf("originalurl") < 0){
-					alert("Catalog Number and Large Image URL must both be mapped to an incoming field");
+				if(tfArr.indexOf("catalognumber") < 0 && tfArr.indexOf("othercatalognumbers") < 0){
+					alert("Catalog Number or Other Catalog Numbers must be mapped to an import field");
+					return false;
+				}
+				if(tfArr.indexOf("originalurl") < 0){
+					alert("Large Image URL must both be mapped to an import field");
 					return false;
 				}
 				return true;
@@ -218,7 +241,7 @@ if($spprid) $specManager->setProjVariables($spprid);
 						?>
 						<form name="filemappingform" action="processor.php" method="post" onsubmit="return validateFileUploadForm(this)">
 							<fieldset>
-								<legend><b>Image File Upload Mapping</b></legend>
+								<legend><b>Image File Upload Map</b></legend>
 								<div style="margin:15px;">
 									<table class="styledtable" style="width:600px;font-family:Arial;font-size:12px;">
 										<tr><th>Source Field</th><th>Target Field</th></tr>
@@ -232,7 +255,7 @@ if($spprid) $specManager->setProjVariables($spprid);
 									<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
 									<input name="tabindex" type="hidden" value="1" />
 									<input name="filename" type="hidden" value="<?php echo $fileName; ?>" />
-									<input name="submitaction" type="submit" value="Load Image Data" />
+									<button name="submitaction" type="submit" value="mapImageFile">Map Images</button>
 								</div>
 							</fieldset>
 						</form>
@@ -266,7 +289,7 @@ if($spprid) $specManager->setProjVariables($spprid);
 						$projectType = $specManager->getProjectType();
 						?>
 						<div id="editdiv" style="display:<?php echo ($spprid?'none':'block'); ?>;position:relative;">
-							<form name="editproj" action="index.php" enctype="multipart/form-data" method="post" onsubmit="return validateProjectForm(this);">
+							<form id="editproj" name="editproj" action="index.php" enctype="multipart/form-data" method="post" onsubmit="return validateProjectForm(this);">
 								<fieldset style="padding:15px">
 									<legend><b><?php echo ($spprid?'Edit':'New'); ?> Profile</b></legend>
 									<?php
@@ -285,10 +308,10 @@ if($spprid) $specManager->setProjVariables($spprid);
 												<b>Image Mapping Type:</b>
 											</div>
 											<div style="float:left;">
-												<select name="projecttype" id="projecttype" style="width:300px;" onchange="uploadTypeChanged()" <?php echo ($spprid?'DISABLED':'');?>>
+												<select name="projecttype" id="projecttype" onchange="uploadTypeChanged(this.form)" <?php echo ($spprid?'DISABLED':'');?>>
 													<option value="">----------------------</option>
-													<option value="local">Local Image Mapping</option>
-													<option value="file">Upload Image Mapping File</option>
+													<option value="local">Map Images from a Local or Remote Server</option>
+													<option value="file">Upload Image Map CSV File</option>
 													<option value="idigbio">iDigBio Media Ingestion Report</option>
 													<option value="iplant">iPlant Image Harvest</option>
 												</select>
@@ -504,13 +527,13 @@ if($spprid) $specManager->setProjVariables($spprid);
 										</div>
 									</div>
 									<div id="chooseFileDiv" class="profileDiv" style="clear:both;padding:15px 0px;display:none">
-										<b>Select image mapping file:</b>
 										<div style="margin:5px 15px;">
+											<b>Select image mapping file:</b>
 											<input type='hidden' name='MAX_FILE_SIZE' value='20000000' />
 											<input name='uploadfile' type='file' size='70' value="Choose File" />
 										</div>
 									</div>
-									<div id="submitDiv" class="profileDiv" style="clear:both;padding:25px 15px;display:<?php echo ($projectType?'block':'none'); ?>">
+									<div id="submitDiv" class="profileDiv" style="clear:both;padding:15px;display:<?php echo ($projectType?'block':'none'); ?>">
 										<input name="spprid" type="hidden" value="<?php echo $spprid; ?>" />
 										<input name="collid" type="hidden" value="<?php echo $collid; ?>" />
 										<input name="tabindex" type="hidden" value="1" />

@@ -17,6 +17,7 @@ class ImageProcessor {
 	private $destructConn = true;
 
 	function __construct($con = null){
+		ini_set('auto_detect_line_endings', true);
 		if($con){
 			//Inherits connection from another class
 			$this->conn = $con;
@@ -56,6 +57,7 @@ class ImageProcessor {
 		}
 	}
 
+	//iPlant functions
 	public function batchProcessIPlantImages(){
 		//Start processing images for each day from the start date to the current date
 		$status = false;
@@ -77,7 +79,6 @@ class ImageProcessor {
 		if($this->logMode == 1) echo '</ul>';
 	}
 
-	//iPlant functions
 	public function processIPlantImages($pmTerm, $postArr){
 		set_time_limit(1000);
 		$lastRunDate = $postArr['startdate'];
@@ -307,8 +308,8 @@ class ImageProcessor {
 	public function echoFileMapping($fileName){
 		$fullPath = $GLOBALS['SERVER_ROOT'].(substr($GLOBALS['SERVER_ROOT'],-1) != '/'?'/':'').'temp/data/'.$fileName;
 		if($fh = fopen($fullPath,'rb')){
-			$translationMap = array('catalognumber' => 'catalognumber', 'url' => 'url', 'thumbnailurl' => 'thumbnailurl',
-				'originalurl' => 'originalurl', 'thumbnail' => 'thumbnailurl', 'large' => 'originalurl', 'web' => 'url');
+			$translationMap = array('catalognumber' => 'catalognumber', 'othercatalognumbers' => 'othercatalognumbers', 'othercatalognumber' => 'othercatalognumbers', 'url' => 'url',
+				'web' => 'url','thumbnailurl' => 'thumbnailurl', 'thumbnail' => 'thumbnailurl', 'originalurl' => 'originalurl', 'large' => 'originalurl', 'sourceurl' => 'sourceurl');
 			$headerArr = fgetcsv($fh,0,',');
 			foreach($headerArr as $i => $sourceField){
 				if($sourceField != 'collid'){
@@ -316,14 +317,17 @@ class ImageProcessor {
 					echo $sourceField;
 					$sourceField = strtolower($sourceField);
 					echo '<input type="hidden" name="sf['.$i.']" value="'.$sourceField.'" />';
+					$sourceField = preg_replace('/[^a-z]+/','',$sourceField);
 					echo '</td><td>';
 					echo '<select name="tf['.$i.']" style="background:'.(!array_key_exists($sourceField,$translationMap)?'yellow':'').'">';
 					echo '<option value="">Select Target Field</option>';
 					echo '<option value="">-------------------------</option>';
-					echo '<option value="catalognumber" '.(isset($translationMap[$sourceField]) && $translationMap[$sourceField]=='catalognumber'?'SELECTED':'').'>Catalog Number (required)</option>';
+					echo '<option value="catalognumber" '.(isset($translationMap[$sourceField]) && $translationMap[$sourceField]=='catalognumber'?'SELECTED':'').'>Catalog Number</option>';
+					echo '<option value="othercatalognumbers" '.(isset($translationMap[$sourceField]) && $translationMap[$sourceField]=='othercatalognumbers'?'SELECTED':'').'>Other Catalog Numbers</option>';
 					echo '<option value="originalurl" '.(isset($translationMap[$sourceField]) && $translationMap[$sourceField]=='originalurl'?'SELECTED':'').'>Large Image URL (required)</option>';
 					echo '<option value="url" '.(isset($translationMap[$sourceField]) && $translationMap[$sourceField]=='url'?'SELECTED':'').'>Web Image URL</option>';
 					echo '<option value="thumbnailurl" '.(isset($translationMap[$sourceField]) && $translationMap[$sourceField]=='thumbnailurl'?'SELECTED':'').'>Thumbnail URL</option>';
+					echo '<option value="sourceurl" '.(isset($translationMap[$sourceField]) && $translationMap[$sourceField]=='sourceurl'?'SELECTED':'').'>Source URL</option>';
 					echo '</select>';
 					echo '</td></tr>';
 				}
@@ -333,23 +337,28 @@ class ImageProcessor {
 
 	public function loadFileData($postArr){
 		if(isset($postArr['filename']) && isset($postArr['tf'])){
-			//Get field map
 			$fieldMap = array_flip($postArr['tf']);
-			//Load data
 			$fullPath = $GLOBALS['SERVER_ROOT'].(substr($GLOBALS['SERVER_ROOT'],-1) != '/'?'/':'').'temp/data/'.$postArr['filename'];
 			if($fh = fopen($fullPath,'rb')){
 				$headerArr = fgetcsv($fh);
 				while($recordArr = fgetcsv($fh)){
 					$catalogNumber = (isset($fieldMap['catalognumber'])?$this->cleanInStr($recordArr[$fieldMap['catalognumber']]):'');
+					$otherCatalogNumbers = (isset($fieldMap['othercatalognumbers'])?$this->cleanInStr($recordArr[$fieldMap['othercatalognumbers']]):'');
 					$originalUrl = (isset($fieldMap['originalurl'])?$this->cleanInStr($recordArr[$fieldMap['originalurl']]):'');
 					$url = (isset($fieldMap['url'])?$this->cleanInStr($recordArr[$fieldMap['url']]):'');
 					if(!$url) $url = 'empty';
 					$thumbnailUrl = (isset($fieldMap['thumbnailurl'])?$this->cleanInStr($recordArr[$fieldMap['thumbnailurl']]):'');
-					if($catalogNumber && $originalUrl){
-						echo '<li>Processing catalogNumber: '.$catalogNumber.'</li>';
-						//Get catalogNumber
+					$sourceUrl = (isset($fieldMap['sourceurl'])?$this->cleanInStr($recordArr[$fieldMap['sourceurl']]):'');
+					if(($catalogNumber || $otherCatalogNumbers) && $originalUrl){
+						echo '<li>Processing Catalog Number: '.($catalogNumber?$catalogNumber:$otherCatalogNumbers).'</li>';
 						$occArr = array();
-						$sql = 'SELECT occid FROM omoccurrences WHERE collid = '.$this->collid.' AND catalognumber = "'.$catalogNumber.'"';
+						$sql = 'SELECT occid FROM omoccurrences WHERE (collid = '.$this->collid.') ';
+						if($catalogNumber){
+							$sql .= 'AND (catalognumber = "'.$catalogNumber.'")';
+						}
+						else{
+							$sql .= 'AND (othercatalognumbers = "'.$otherCatalogNumbers.'")';
+						}
 						$rs = $this->conn->query($sql);
 						while($r = $rs->fetch_object()){
 							$occArr[] = $r->occid;
@@ -367,10 +376,11 @@ class ImageProcessor {
 									$oFileName = substr(strrchr($r1->originalurl, "/"), 1);
 									if($oFileName == $origFileName || $uFileName == $urlFileName || $oFileName == $urlFileName || $uFileName == $origFileName){
 										$sql2 = 'UPDATE images '.
-											'SET url = "'.$url.'", originalurl = "'.$originalUrl.'", thumbnailurl = '.($thumbnailUrl?'"'.$thumbnailUrl.'"':'NULL').' '.
+											'SET url = "'.$url.'", originalurl = "'.$originalUrl.'", thumbnailurl = '.($thumbnailUrl?'"'.$thumbnailUrl.'"':'NULL').', '.
+											'sourceurl = '.($sourceUrl?'"'.$sourceUrl.'"':'NULL').' '.
 											'WHERE imgid = '.$r1->imgid;
 										if($this->conn->query($sql2)){
-											echo '<li style="margin-left:10px">Existing image replaced with new image mapping: <a href="../editor/occurrenceeditor.php?occid='.$occid.'" target="_blank">'.$catalogNumber.'</a></li>';
+											echo '<li style="margin-left:10px">Existing image replaced with new image mapping: <a href="../editor/occurrenceeditor.php?occid='.$occid.'" target="_blank">'.($catalogNumber?$catalogNumber:$otherCatalogNumbers).'</a></li>';
 											//Delete physical images it previous version was mapped locally
 											$this->deleteImage($r1->url);
 											$this->deleteImage($r1->originalurl);
@@ -388,11 +398,11 @@ class ImageProcessor {
 						}
 						else{
 							//Create new occurrence record to link image
-							$sqlIns = 'INSERT INTO omoccurrences(collid,catalognumber,processingstatus,dateentered) '.
-								'VALUES('.$this->collid.',"'.$catalogNumber.'","unprocessed",now())';
+							$sqlIns = 'INSERT INTO omoccurrences(collid,'.($catalogNumber?'catalogNumber':'otherCatalogNumbers').',processingstatus,dateentered) '.
+								'VALUES('.$this->collid.',"'.($catalogNumber?$catalogNumber:$otherCatalogNumbers).'","unprocessed",now())';
 							if($this->conn->query($sqlIns)){
 								$occArr[] = $this->conn->insert_id;
-								echo '<li style="margin-left:10px">Unable to find record with matching catalogNumber; new occurrence record created</li>';
+								echo '<li style="margin-left:10px">Unable to find record with matching '.($catalogNumber?'catalogNumber':'otherCatalogNumbers').'; new occurrence record created</li>';
 							}
 							else{
 								echo '<li style="margin-left:10px">ERROR creating new occurrence record: '.$this->conn->error.'</li>';
@@ -400,10 +410,10 @@ class ImageProcessor {
 						}
 						foreach($occArr as $occid){
 							//Load image URLs
-							$sqlInsert = 'INSERT INTO images(occid,url,originalurl,thumbnailurl) '.
-								'VALUES('.$occid.',"'.$url.'","'.$originalUrl.'",'.($thumbnailUrl?'"'.$thumbnailUrl.'"':'NULL').')';
+							$sqlInsert = 'INSERT INTO images(occid,url,originalurl,thumbnailurl,sourceurl) '.
+								'VALUES('.$occid.',"'.$url.'","'.$originalUrl.'",'.($thumbnailUrl?'"'.$thumbnailUrl.'"':'NULL').','.($sourceUrl?'"'.$sourceUrl.'"':'NULL').')';
 							if($this->conn->query($sqlInsert)){
-								echo '<li style="margin-left:10px">Image URLs linked to: <a href="../editor/occurrenceeditor.php?occid='.$occid.'" target="_blank">'.$catalogNumber.'</a></li>';
+								echo '<li style="margin-left:10px">Image URLs linked to: <a href="../editor/occurrenceeditor.php?occid='.$occid.'" target="_blank">'.($catalogNumber?$catalogNumber:$otherCatalogNumbers).'</a></li>';
 							}
 							else{
 								echo '<li style="margin-left:10px">ERROR loading image: '.$this->conn->error.'</li>';
