@@ -117,7 +117,7 @@ if($action){
                 marcoPolo: {
                     url: 'rpc/imagesearchautofill.php',
                     data: {
-                        t: 'photographer'
+                        t: 'photographer_by_name'
                     },
                     formatItem: function (data){
                         return data.name;

@@ -54,21 +54,31 @@
 				$i++;
 			}
 		}
-		if($type == "photographer"){
-			$retArrRow = Array();
-			$sql = "SELECT DISTINCT u.uid, CONCAT_WS(' ',u.firstname,u.lastname) AS fullname ".
-				"FROM images AS i LEFT JOIN users AS u ON i.photographeruid = u.uid ".
-				"WHERE u.firstname LIKE '".$queryString."%' OR u.lastname LIKE '".$queryString."%' ".
-				"ORDER BY fullname ".
-				"LIMIT 10 ";
-			$result = $con->query($sql);
-			$i = 0;
-			while ($row = $result->fetch_object()) {
-				$returnArr[$i]['name'] = htmlentities($row->fullname);
-				$returnArr[$i]['id'] = htmlentities($row->uid);
-				$i++;
-			}
-		}
+        if($type == "photographer"){
+            $retArrRow = Array();
+            $sql = "SELECT DISTINCT u.uid, CONCAT_WS(' ',u.firstname,u.lastname) AS fullname ".
+                "FROM images AS i LEFT JOIN users AS u ON i.photographeruid = u.uid ".
+                "WHERE u.firstname LIKE '".$queryString."%' OR u.lastname LIKE '".$queryString."%' ".
+                "ORDER BY fullname ".
+                "LIMIT 10 ";
+            $result = $con->query($sql);
+            $i = 0;
+            while ($row = $result->fetch_object()) {
+                $returnArr[$i]['name'] = htmlentities($row->fullname);
+                $returnArr[$i]['id'] = htmlentities($row->uid);
+                $i++;
+            }
+        }
+        if($type == "photographer_by_name"){
+            $retArrRow = Array();
+            $sql = "SELECT DISTINCT photographer FROM images WHERE photographer LIKE '%".$queryString."%' ORDER BY photographer LIMIT 10 ";
+            $result = $con->query($sql);
+            $i = 0;
+            while ($row = $result->fetch_object()) {
+                $returnArr[$i]['name'] = htmlentities($row->photographer);
+                $i++;
+            }
+        }
 		if($type == "keywords"){
 			$sql = "SELECT DISTINCT keyword ".
 				"FROM imagekeywords ".

@@ -419,11 +419,11 @@ class ImageLibraryManager{
 		}
 		$this->searchTermsArr["phuid"] = '';
 		if(array_key_exists("phuidstr",$_REQUEST)){
-			$phuid = $this->cleanInStr($_REQUEST["phuidstr"]);
-			if($phuid){
-				$this->searchTermsArr["phuid"] = $phuid;
-			}
-		}
+            $phuid = $this->cleanInStr($_REQUEST["phuidstr"]);
+            if($phuid){
+                $this->searchTermsArr["phuid"] = $phuid;
+            }
+        }
 		$this->searchTermsArr["tags"] = '';
 		if(array_key_exists("tags",$_REQUEST)){
 			$tags = $this->cleanInStr($_REQUEST["tags"]);
@@ -600,9 +600,22 @@ class ImageLibraryManager{
 			}
 			$sqlWhere .= "AND (".implode(" OR ",$tempArr).") ";
 		}
-		if(array_key_exists("phuid",$this->searchTermsArr)&&$this->searchTermsArr["phuid"]){
-			$sqlWhere .= "AND (i.photographeruid IN(".$this->searchTermsArr["phuid"].")) ";
-		}
+        //if(array_key_exists("phuid",$this->searchTermsArr)&&$this->searchTermsArr["phuid"]){
+        //    $sqlWhere .= "AND (i.photographeruid IN(".$this->searchTermsArr["phuid"].")) ";
+        //}
+        if(array_key_exists("phuid",$this->searchTermsArr)&&$this->searchTermsArr["phuid"]){
+            $photographer_array = json_decode($_REQUEST['phjson'],true);
+            //echo '<pre>'; print_r($photographer_array);echo '</pre>';
+            if(is_array($photographer_array )){
+                $i=0;
+                $sqlWhere .= "AND (";
+                foreach($photographer_array as $photographer){
+                    $sqlWhere .= " i.photographer = '".$this->conn->real_escape_string($photographer['name'])."' OR ";
+                }
+                $sqlWhere = substr($sqlWhere, 0, -4);
+                $sqlWhere .= ") ";
+            }
+        }
 		if(array_key_exists("tags",$this->searchTermsArr)&&$this->searchTermsArr["tags"]){
 			$sqlWhere .= 'AND (it.keyvalue = "'.$this->searchTermsArr["tags"].'") ';
 		}
@@ -693,6 +706,7 @@ class ImageLibraryManager{
         }
 		$sql .= "LIMIT ".$bottomLimit.",".$cntPerPage;
 		//echo "<div>Spec sql: ".$sql."</div>";
+		//print_r($_REQUEST);
 		$result = $this->conn->query($sql);
 		while($r = $result->fetch_object()){
 			$imgId = $r->imgid;
@@ -757,7 +771,8 @@ class ImageLibraryManager{
 		}
 		if($full){
 			if(isset($this->searchTermsArr["phuid"]) && $this->searchTermsArr["phuid"]){
-				$sql .= 'INNER JOIN users u ON i.photographeruid = u.uid ';
+				//$sql .= 'INNER JOIN users u ON i.photographeruid = u.uid ';
+                $sql .= 'LEFT JOIN users u ON i.photographeruid = u.uid ';
 			}
 			else{
 				$sql .= 'LEFT JOIN users u ON i.photographeruid = u.uid ';
