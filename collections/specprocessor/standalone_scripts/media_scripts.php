@@ -141,19 +141,22 @@ class MediaTools {
 			if(!$r['originalurl']) unset($derivArr['lg']);
 			//Transfer images to archive folder
 			if($this->deleteThumbnail && isset($derivArr['tn'])){
-				$this->archiveImage($r['thumbnailurl'], $imgId);
-				$delArr['tn'] = 1;
-				unset($derivArr['tn']);
+				if($this->archiveImage($r['thumbnailurl'], $imgId)){
+					$delArr['tn'] = 1;
+					unset($derivArr['tn']);
+				}
 			}
 			if($this->deleteWeb && isset($derivArr['web'])){
-				$this->archiveImage($r['url'], $imgId);
-				$delArr['web'] = 1;
-				unset($derivArr['web']);
+				if($this->archiveImage($r['url'], $imgId)){
+					$delArr['web'] = 1;
+					unset($derivArr['web']);
+				}
 			}
 			if($this->deleteOriginal && isset($derivArr['lg'])){
-				$this->archiveImage($r['originalurl'], $imgId);
-				$delArr['lg'] = 1;
-				unset($derivArr['lg']);
+				if($this->archiveImage($r['originalurl'], $imgId)){
+					$delArr['lg'] = 1;
+					unset($derivArr['lg']);
+				}
 			}
 			//Place INSERT sql into file in case record needs to be reintalled
 			$insertArr = $r;
@@ -176,14 +179,16 @@ class MediaTools {
 				if(isset($delArr['tn'])) $sqlImg .= ', thumbnailurl = NULL';
 				if(isset($delArr['web'])) $sqlImg .= ', url = "empty"';
 				if(isset($delArr['lg'])) $sqlImg .= ', originalurl = NULL';
-				$sqlImg = 'UPDATE images SET '.substr($sqlImg,1).' WHERE imgid = '.$imgId;
+				if($sqlImg) $sqlImg = 'UPDATE images SET '.substr($sqlImg,1).' WHERE imgid = '.$imgId;
 			}
 			else{
 				$sqlImg = 'DELETE FROM images WHERE imgid = '.$imgId;
 			}
-			if(!$this->conn->query($sqlImg)){
-				echo '<li>ERROR: '.$this->conn->error.'</li>';
-				//echo '<li>sqlImg: '.$sqlImg.'</li>';
+			if($sqlImg){
+				if(!$this->conn->query($sqlImg)){
+					echo '<li>ERROR: '.$this->conn->error.'</li>';
+					echo '<li style="margin-left:15px;">sqlImg: '.$sqlImg.'</li>';
+				}
 			}
 			if($cnt && $cnt%100 == 0){
 				echo '<li>'.$cnt.' images checked</li>';
@@ -196,11 +201,12 @@ class MediaTools {
 		echo '</ul>';
 		$rs->free();
 		fclose($this->reportFH);
-		echo '<div>Done! '.$cnt.' images '.($this->archiveImages?'archived':'deleted').'</div>';
+		echo '<div>Done! '.$cnt.' images handled</div>';
 		return $imgidFinal;
 	}
 
 	private function archiveImage($imgFilePath, $imgid){
+		$status = false;
 		if($imgFilePath){
 			if(substr($imgFilePath,0,4) == 'http') {
 				$imgFilePath = substr($imgFilePath,strpos($imgFilePath,"/",9));
@@ -209,10 +215,10 @@ class MediaTools {
 			if(is_writable($path)){
 				if($this->archiveImages){
 					$fileName = substr($path, strrpos($path, '/'));
-					rename($path,$this->archiveDir.'/'.$fileName);
+					if(rename($path,$this->archiveDir.'/'.$fileName)) $status = true;
 				}
 				else{
-					unlink($path);
+					if(unlink($path)) $status = true;
 				}
 			}
 			else{
@@ -220,6 +226,7 @@ class MediaTools {
 				echo '<li>ERROR: image unwritable (imgid: <a href="'.$GLOBALS['CLIENT_ROOT'].'/imagelib/imgdetails.php?imgid='.$imgid.'" target="_blank">'.$imgid.'</a>, path: '.$imgFilePath.')</li>';
 			}
 		}
+		return $status;
 	}
 
 	//Setters and getters

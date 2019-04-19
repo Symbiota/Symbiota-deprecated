@@ -5,6 +5,10 @@ body{
 	width: 80%;
 	min-width:950px;
 	margin-top:0px;
+	background-color: #FFFFFF;
+	color: #000000;
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 12px;
 }
 
 /*Main table framework*/
