@@ -603,7 +603,7 @@ class ImageLibraryManager{
         //if(array_key_exists("phuid",$this->searchTermsArr)&&$this->searchTermsArr["phuid"]){
         //    $sqlWhere .= "AND (i.photographeruid IN(".$this->searchTermsArr["phuid"].")) ";
         //}
-        if(array_key_exists("phuid",$this->searchTermsArr)&&$this->searchTermsArr["phuid"]){
+        if(array_key_exists("phuidstr",$_REQUEST)){
             $photographer_array = json_decode($_REQUEST['phjson'],true);
             //echo '<pre>'; print_r($photographer_array);echo '</pre>';
             if(is_array($photographer_array )){
