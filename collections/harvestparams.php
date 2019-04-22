@@ -103,7 +103,7 @@ $searchVar = $collManager->getQueryTermStr();
 				<hr>
 				<h1><?php echo $LANG['LAT_LNG_HEADER']; ?></h1>
 			</div>
-			<div style="width:270px;height:120px;float:left;border:2px solid brown;padding:10px;margin-bottom:10px;">
+			<div style="float:left;border:2px solid brown;padding:10px;margin-bottom:10px;">
 				<div style="clear:both;float:right;">
 					<a href="#" onclick="openCoordAid('rectangle');return false;"><img src="../images/world.png" width="15px" title="<?php echo $LANG['GLOBE_TITLE']; ?>" /></a>
 				</div>
@@ -111,14 +111,14 @@ $searchVar = $collManager->getQueryTermStr();
 					<?php echo $LANG['LL_BOUND_TEXT']; ?>
 				</div>
 				<div>
-					<?php echo $LANG['LL_BOUND_NLAT']; ?>: <input type="text" id="upperlat" name="upperlat" size="7" value="" onchange="cleanNumericInput(this);" style="margin-left:9px;">
+					<?php echo $LANG['LL_BOUND_NLAT']; ?>: <input type="text" id="upperlat" name="upperlat" size="7" value="" onchange="cleanNumericInput(this);">
 					<select id="upperlat_NS" name="upperlat_NS">
 						<option id="ulN" value="N"><?php echo $LANG['LL_N_SYMB']; ?></option>
 						<option id="ulS" value="S"><?php echo $LANG['LL_S_SYMB']; ?></option>
 					</select>
 				</div>
 				<div>
-					<?php echo $LANG['LL_BOUND_SLAT']; ?>: <input type="text" id="bottomlat" name="bottomlat" size="7" value="" onchange="cleanNumericInput(this);" style="margin-left:7px;">
+					<?php echo $LANG['LL_BOUND_SLAT']; ?>: <input type="text" id="bottomlat" name="bottomlat" size="7" value="" onchange="cleanNumericInput(this);">
 					<select id="bottomlat_NS" name="bottomlat_NS">
 						<option id="blN" value="N"><?php echo $LANG['LL_N_SYMB']; ?></option>
 						<option id="blS" value="S"><?php echo $LANG['LL_S_SYMB']; ?></option>
@@ -139,7 +139,7 @@ $searchVar = $collManager->getQueryTermStr();
 					</select>
 				</div>
 			</div>
-			<div style="width:260px;height:120px;float:left;border:2px solid brown;padding:10px;margin-left:10px;">
+			<div style="float:left;border:2px solid brown;padding:10px;margin-left:10px;">
 				<div style="clear:both;float:right;">
 					<a href="#" onclick="openCoordAid('polygon');return false;"><img src="../images/world.png" width="15px" title="<?php echo $LANG['GLOBE_TITLE']; ?>" /></a>
 				</div>
@@ -147,10 +147,10 @@ $searchVar = $collManager->getQueryTermStr();
 					<?php echo isset($LANG['LL_POLYGON_TEXT'])?$LANG['LL_POLYGON_TEXT']:''; ?>
 				</div>
 				<div>
-					<textarea id="footprintwkt" name="footprintwkt" style="width:250px;height:100px;zIndex:999"></textarea>
+					<textarea id="footprintwkt" name="footprintwkt" style="zIndex:999"></textarea>
 				</div>
 			</div>
-			<div style="width:240px; float:left;border:2px solid brown;padding:10px;margin-left:10px;">
+			<div style="float:left;border:2px solid brown;padding:10px;margin-left:10px;">
 				<div style="clear:both;float:right;">
 					<a href="#" onclick="openCoordAid('circle');return false;"><img src="../images/world.png" width="15px" title="<?php echo $LANG['GLOBE_TITLE']; ?>" /></a>
 				</div>
@@ -158,7 +158,7 @@ $searchVar = $collManager->getQueryTermStr();
 					<?php echo $LANG['LL_P-RADIUS_TEXT']; ?>
 				</div>
 				<div>
-					<?php echo $LANG['LL_P-RADIUS_LAT']; ?>: <input type="text" id="pointlat" name="pointlat" size="7" value="" onchange="cleanNumericInput(this);" style="margin-left:11px;">
+					<?php echo $LANG['LL_P-RADIUS_LAT']; ?>: <input type="text" id="pointlat" name="pointlat" size="7" value="" onchange="cleanNumericInput(this);">
 					<select id="pointlat_NS" name="pointlat_NS">
 						<option id="N" value="N"><?php echo $LANG['LL_N_SYMB']; ?></option>
 						<option id="S" value="S"><?php echo $LANG['LL_S_SYMB']; ?></option>
@@ -172,7 +172,7 @@ $searchVar = $collManager->getQueryTermStr();
 					</select>
 				</div>
 				<div>
-					<?php echo $LANG['LL_P-RADIUS_RADIUS']; ?>: <input type="text" id="radius" name="radius" size="5" value="" style="margin-left:15px;" onchange="cleanNumericInput(this);">
+					<?php echo $LANG['LL_P-RADIUS_RADIUS']; ?>: <input type="text" id="radius" name="radius" size="5" value="" onchange="cleanNumericInput(this);">
 					<select id="radiusunits" name="radiusunits">
 						<option value="km"><?php echo $LANG['LL_P-RADIUS_KM']; ?></option>
 						<option value="mi"><?php echo $LANG['LL_P-RADIUS_MI']; ?></option>
