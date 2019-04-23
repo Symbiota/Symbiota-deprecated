@@ -53,6 +53,8 @@ body{
 
 /*Central div in the middle center table div */
 #innertext{
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 12px;
 }
 
 #innertext a{
