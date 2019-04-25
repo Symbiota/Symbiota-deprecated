@@ -65,7 +65,7 @@ $smManager = new SiteMapManager();
 				<li><a href="misc/usagepolicy.php"><?php echo $LANG['USAGEPOLICY'];?></a></li>
 			</ul>
 
-			<div style="margin-top:10px;"><h2><?php echo $LANG['TAXONOMY'];?></h2></div>
+            <div style="margin-top:10px;"><h2><?php echo $LANG['TAXONOMY'];?></h2></div>
 			<ul>
 				<li><a href="taxa/admin/taxonomydisplay.php"><?php echo $LANG['TAXTREE'];?></a></li>
 				<li><a href="taxa/admin/taxonomydynamicdisplay.php"><?php echo $LANG['DYNTAXTREE'];?></a></li>
@@ -224,6 +224,11 @@ $smManager = new SiteMapManager();
 						}
 						?>
 					</ul>
+
+                    <h3><?php echo $LANG['REFMODULE'];?></h3>
+                    <ul>
+                        <li><a href="references/index.php"><?php echo $LANG['REFMANAGER'];?></a></li>
+                    </ul>
 
 					<h3><?php echo $LANG['BIOINV'];?></h3>
 					<ul>
