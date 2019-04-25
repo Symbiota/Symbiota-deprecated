@@ -200,20 +200,20 @@ $taxaArray = $clManager->getTaxaList($pageNumber,($printMode?0:500));
 		if($clid || $dynClid){
 			if($clid && $isEditor){
 				?>
-				<div class="printoff" style="float:right;width:90px;">
+				<div class="printoff" style="float:right;width:auto;">
 					<span style="">
 						<a href="checklistadmin.php?clid=<?php echo $clid.'&pid='.$pid; ?>" style="margin-right:10px;" title="Checklist Administration">
-							<img style="border:0px;height:15px;" src="../images/editadmin.png" />
+							<img src="../images/editadmin.png" srcset="../images/editA.svg" style="height:15px" />
 						</a>
 					</span>
 					<span style="">
 						<a href="voucheradmin.php?clid=<?php echo $clid.'&pid='.$pid; ?>" style="margin-right:10px;" title="Manage Linked Voucher">
-							<img style="border:0px;height:15px;" src="../images/editvoucher.png" />
+							<img style="border:0px;height:15px;" src="../images/editvoucher.png" srcset="../images/editV.svg" style="height:15px" />
 						</a>
 					</span>
 					<span style="" onclick="toggle('editspp');return false;">
 						<a href="#" title="Edit Species List">
-							<img style="border:0px;height:15px;" src="../images/editspp.png" />
+							<img style="border:0px;height:15px;" src="../images/editspp.png" srcset="../images/editspp.svg" style="height:15px" />
 						</a>
 					</span>
 				</div>
@@ -230,7 +230,7 @@ $taxaArray = $clManager->getTaxaList($pageNumber,($printMode?0:500));
 				?>
 				<div class="printoff" style="float:left;padding:5px;">
 					<a href="../ident/key.php?clid=<?php echo $clid."&pid=".$pid."&dynclid=".$dynClid;?>&taxon=All+Species">
-						<img src='../images/key.png' style="width:15px;border:0px;" title='Open Symbiota Key' />
+						<img src='../images/key.png' srcset="../images/key.svg" style="width:15px; height:15px" title='Open Symbiota Key' />
 					</a>
 				</div>
 				<?php
@@ -449,7 +449,7 @@ $taxaArray = $clManager->getTaxaList($pageNumber,($printMode?0:500));
 										<input type="image" name="printlist" value="Print List" src="../images/print.png" onclick="changeOptionFormAction('checklist.php','_blank');" />
 									</div>
 									<div class="button" id="wordicondiv" style='float:right;margin-right:10px;width:16px;height:16px;padding:2px;<?php echo ($showImages?'display:none;':''); ?>' title="Export to DOCX">
-										<input type="image" name="exportdoc" value="Export to DOCX" src="../images/wordicon.png" onclick="changeOptionFormAction('mswordexport.php','_self');" />
+										<input type="image" name="exportdoc" value="Export to DOCX" src="../images/wordicon.png" srcset="../images/file-text.svg" onclick="changeOptionFormAction('mswordexport.php','_self');" />
 									</div>
 								</div>
 							</fieldset>
@@ -526,7 +526,7 @@ $taxaArray = $clManager->getTaxaList($pageNumber,($printMode?0:500));
 								?>
 								<span title="Display Vouchers in Simply Map">
 									<a href="checklistmap.php?clid=<?php echo $clid.'&thesfilter='.$thesFilter.'&taxonfilter='.$taxonFilter; ?>" target="_blank">
-										<img src="<?php echo $googleUrl; ?>" style="border:0px;width:30px" />
+										<img src="<?php echo $googleUrl; ?>" srcset="../images/globe.svg" style="border:0px;width:30px" />
 									</a>
 								</span>
 								<?php
@@ -534,7 +534,7 @@ $taxaArray = $clManager->getTaxaList($pageNumber,($printMode?0:500));
 							if($coordArr){
 								?>
 								<span style="margin:5px">
-									<a href="../collections/map/index.php?clid=<?php echo $clid.'&cltype=vouchers&taxonfilter='.$taxonFilter; ?>&db=all&type=1&reset=1" target="_blank"><img src="../images/world.png" style="width:30px" title="<?php echo (isset($LANG['VOUCHERS_DYNAMIC_MAP'])?$LANG['VOUCHERS_DYNAMIC_MAP']:'Display Vouchers in Dynamic Map'); ?>" /></a>
+									<a href="../collections/map/index.php?clid=<?php echo $clid.'&cltype=vouchers&taxonfilter='.$taxonFilter; ?>&db=all&type=1&reset=1" target="_blank"><img src="../images/world.png" srcset="../images/globe.svg" style="width:30px" title="<?php echo (isset($LANG['VOUCHERS_DYNAMIC_MAP'])?$LANG['VOUCHERS_DYNAMIC_MAP']:'Display Vouchers in Dynamic Map'); ?>" /></a>
 								</span>
 								<?php
 							}
