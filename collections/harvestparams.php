@@ -105,7 +105,7 @@ $searchVar = $collManager->getQueryTermStr();
 			</div>
 			<div style="float:left;border:2px solid brown;padding:10px;margin-bottom:10px;">
 				<div style="clear:both;float:right;">
-					<a href="#" onclick="openCoordAid('rectangle');return false;"><img src="../images/world.png" width="15px" title="<?php echo $LANG['GLOBE_TITLE']; ?>" /></a>
+					<a href="#" onclick="openCoordAid('rectangle');return false;"><img src="../images/world.png" srcset="../images/globe.svg" width="15px" title="<?php echo $LANG['GLOBE_TITLE']; ?>" /></a>
 				</div>
 				<div style="font-weight:bold;">
 					<?php echo $LANG['LL_BOUND_TEXT']; ?>
@@ -141,7 +141,7 @@ $searchVar = $collManager->getQueryTermStr();
 			</div>
 			<div style="float:left;border:2px solid brown;padding:10px;margin-left:10px;">
 				<div style="clear:both;float:right;">
-					<a href="#" onclick="openCoordAid('polygon');return false;"><img src="../images/world.png" width="15px" title="<?php echo $LANG['GLOBE_TITLE']; ?>" /></a>
+					<a href="#" onclick="openCoordAid('polygon');return false;"><img src="../images/world.png" srcset="../images/globe.svg" width="15px" title="<?php echo $LANG['GLOBE_TITLE']; ?>" /></a>
 				</div>
 				<div style="font-weight:bold;">
 					<?php echo isset($LANG['LL_POLYGON_TEXT'])?$LANG['LL_POLYGON_TEXT']:''; ?>
@@ -152,7 +152,7 @@ $searchVar = $collManager->getQueryTermStr();
 			</div>
 			<div style="float:left;border:2px solid brown;padding:10px;margin-left:10px;">
 				<div style="clear:both;float:right;">
-					<a href="#" onclick="openCoordAid('circle');return false;"><img src="../images/world.png" width="15px" title="<?php echo $LANG['GLOBE_TITLE']; ?>" /></a>
+					<a href="#" onclick="openCoordAid('circle');return false;"><img src="../images/world.png" srcset="../images/globe.svg" width="15px" title="<?php echo $LANG['GLOBE_TITLE']; ?>" /></a>
 				</div>
 				<div style="font-weight:bold;">
 					<?php echo $LANG['LL_P-RADIUS_TEXT']; ?>

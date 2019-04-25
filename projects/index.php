@@ -208,7 +208,7 @@ if(!$researchList && !$editMode){
 			if($isEditor && !$newProj){
 				?>
 				<div style="float:right;" title="<?php echo $LANG['TOGGLEEDIT'];?>">
-					<a href="#" onclick="toggleById('tabs');return false;"><img style="border:0px;" src="../images/edit.png"/></a>
+					<a href="#" onclick="toggleById('tabs');return false;"><img src="../images/edit.png" srcset="../images/edit.svg" style="width:20px;height:20px;" /></a>
 				</div>
 				<?php
 			}
@@ -231,7 +231,7 @@ if(!$researchList && !$editMode){
 			}
 			if($isEditor){
 				?>
-				<div id="tabs" style="height:550px;margin:10px;display:<?php echo ($newProj||$editMode?'block':'none'); ?>;">
+				<div id="tabs" style="height:auto;margin:10px;display:<?php echo ($newProj||$editMode?'block':'none'); ?>;">
 					<ul>
 						<li><a href="#mdtab"><span><?php echo $LANG['METADATA'];?></span></a></li>
 						<?php
@@ -362,10 +362,10 @@ if(!$researchList && !$editMode){
 						<div style="font-weight:bold;font-size:130%;">
 							<?php echo $LANG['RESCHECK'];?>
 							<span onclick="toggleResearchInfoBox(this);" title="<?php echo $LANG['QUESRESSPEC'];?>" style="cursor:pointer;">
-								<img src="../images/qmark_big.png" style="height:15px;"/>
+								<img src="../images/qmark_big.png" srcset="../images/help-circle.svg" style="width:15px; height:15px;" />
 							</span>
 							<a href="../checklists/clgmap.php?pid=<?php echo $pid;?>" title="<?php echo $LANG['MAPCHECK'];?>">
-								<img src='../images/world.png' style='width:14px;border:0' />
+								<img src='../images/world.png'  srcset="../images/globe.svg" style="width:15px; height:15px;" />
 							</a>
 						</div>
 						<div id="researchlistpopup" class="genericpopup" style="display:none;">
