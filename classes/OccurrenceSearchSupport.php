@@ -168,7 +168,7 @@ class OccurrenceSearchSupport {
 													$codeStr = ' ('.$collName2['instcode'];
 													if($collName2['collcode']) $codeStr .= '-'.$collName2['collcode'];
 													$codeStr .= ')';
-													echo $collName2["collname"].$codeStr;
+													echo '<div class="collectionname">'.$collName2["collname"].'</div><div class="collectioncode">'.$codeStr.'</div>';
 													?>
 													<a href='<?php echo $CLIENT_ROOT; ?>/collections/misc/collprofiles.php?collid=<?php echo $collid; ?>' target="_blank">
 														<?php echo (isset($LANG['MORE_INFO'])?$LANG['MORE_INFO']:'more info...'); ?>
@@ -222,10 +222,10 @@ class OccurrenceSearchSupport {
 						<td>
 							<div class="collectiontitle">
 								<?php
-								$codeStr = ' ('.$cArr['instcode'];
+								$codeStr = '('.$cArr['instcode'];
 								if($cArr['collcode']) $codeStr .= '-'.$cArr['collcode'];
 								$codeStr .= ')';
-								echo $cArr["collname"].$codeStr;
+								echo '<div class="collectionname">'.$cArr["collname"].'</div> <div class="collectioncode">'.$codeStr.'</div> ';
 								?>
 								<a href = '<?php echo $CLIENT_ROOT; ?>/collections/misc/collprofiles.php?collid=<?php echo $collid; ?>' target="_blank">
 									<?php echo (isset($LANG['MORE_INFO'])?$LANG['MORE_INFO']:'more info...'); ?>
