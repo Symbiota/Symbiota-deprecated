@@ -15,7 +15,7 @@ if($formSubmit){
 		$refId = $refManager->getRefId();
 	}
 	elseif($formSubmit === 'Edit Reference'){
-		if($_POST['refGroup'] == 1){
+		/*if($_POST['refGroup'] == 1){
 			$statusStr = $refManager->editBookReference($_POST);
 		}
 		elseif($_POST['refGroup'] == 2){
@@ -23,7 +23,8 @@ if($formSubmit){
 		}
 		else{
 			$statusStr = $refManager->editReference($_POST);
-		}
+		}*/
+        $statusStr = $refManager->editReference($_POST);
 	}
 }
 $refGroup = 0;
