@@ -110,7 +110,7 @@ $searchVar = $collManager->getQueryTermStr();
 				<div style="font-weight:bold;">
 					<?php echo $LANG['LL_BOUND_TEXT']; ?>
 				</div>
-				<div>
+				<div style="margin-top: 3px">
 					<?php echo $LANG['LL_BOUND_NLAT']; ?>: <input type="text" id="upperlat" name="upperlat" size="7" value="" onchange="cleanNumericInput(this);">
 					<select id="upperlat_NS" name="upperlat_NS">
 						<option id="ulN" value="N"><?php echo $LANG['LL_N_SYMB']; ?></option>
@@ -146,8 +146,8 @@ $searchVar = $collManager->getQueryTermStr();
 				<div style="font-weight:bold;">
 					<?php echo isset($LANG['LL_POLYGON_TEXT'])?$LANG['LL_POLYGON_TEXT']:''; ?>
 				</div>
-				<div>
-					<textarea id="footprintwkt" name="footprintwkt" style="zIndex:999"></textarea>
+				<div style="margin-top:3px;">
+					<textarea id="footprintwkt" name="footprintwkt" style="zIndex:999;height:95px"></textarea>
 				</div>
 			</div>
 			<div style="float:left;border:2px solid brown;padding:10px;margin-left:10px;">
