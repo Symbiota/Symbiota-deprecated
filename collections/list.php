@@ -111,12 +111,14 @@ $occurArr = $collManager->getSpecimenMap($pageNumber,$cntPerPage);
 				<div style="float:right;">
 					<form action="download/index.php" method="post" style="float:left" onsubmit="targetPopup(this)">
 						<button class="ui-button ui-widget ui-corner-all" style="margin:5px;padding:5px;cursor: pointer" title="<?php echo $LANG['DOWNLOAD_SPECIMEN_DATA']; ?>">
-							<img src="../images/dl2.png" style="width:15px" />
+							<img src="../../images/dl2.png" srcset="../images/download.svg" class="svg-icon" style="width:15px; height:15px" />
 						</button>
 						<input name="searchvar" type="hidden" value="<?php echo $searchVar; ?>" />
 						<input name="dltype" type="hidden" value="specimen" />
 					</form>
-					<button class="ui-button ui-widget ui-corner-all" style="margin:5px;padding:5px;cursor: pointer;" onclick="copyUrl()" title="Copy URL to Clipboard"><img src="../images/link2.png" style="width:15px" /></button>
+					<button class="ui-button ui-widget ui-corner-all" style="margin:5px;padding:5px;cursor: pointer;" onclick="copyUrl()" title="Copy URL to Clipboard">
+						<img src="../../images/dl2.png" srcset="../images/link.svg" class="svg-icon" style="width:15px; height:15px" />
+					</button>
 				</div>
 				<div style="margin:5px;">
 					<?php
@@ -195,7 +197,7 @@ $occurArr = $collManager->getSpecimenMap($pageNumber,$cntPerPage);
 						if($isEditor || ($SYMB_UID && $SYMB_UID == $fieldArr['obsuid'])){
 							echo '<div style="float:right;" title="'.$LANG['OCCUR_EDIT_TITLE'].'">';
 							echo '<a href="editor/occurrenceeditor.php?occid='.$occid.'" target="_blank">';
-							echo '<img src="../images/edit.png" style="border:solid 1px gray;height:13px;" /></a></div>';
+							echo '<img src="../images/edit.png" srcset="../images/edit.svg" style="width:15px;height:15px;" /></a></div>';
 						}
 						$targetClid = $collManager->getSearchTerm("targetclid");
 						if($collManager->getClName() && $targetTid && array_key_exists('mode', $_REQUEST)){
@@ -270,7 +272,7 @@ $occurArr = $collManager->getSpecimenMap($pageNumber,$cntPerPage);
 		<div id="maps" style="min-height:400px;margin-bottom:10px;">
 			<form action="download/index.php" method="post" style="float:right" onsubmit="targetPopup(this)">
 				<button class="ui-button ui-widget ui-corner-all" style="margin:5px;padding:5px;cursor: pointer" title="<?php echo $LANG['DOWNLOAD_SPECIMEN_DATA']; ?>">
-					<img src="../images/dl2.png" style="width:15px" />
+					<img src="../../images/dl2.png" srcset="../images/download.svg" class="svg-icon" style="width:15px; height:15px" />
 				</button>
 				<input name="searchvar" type="hidden" value="<?php echo $searchVar; ?>" />
 				<input name="dltype" type="hidden" value="georef" />
@@ -280,9 +282,11 @@ $occurArr = $collManager->getSpecimenMap($pageNumber,$cntPerPage);
 				<h2><?php echo $LANG['GOOGLE_MAP_HEADER']; ?></h2>
 			</div>
 			<div style='margin:10 0 0 20;'>
-				<a href="#" onclick="openMapPU();" >
-					<?php echo $LANG['GOOGLE_MAP_DISPLAY']; ?>
-				</a>
+				<button>
+					<a href="#" onclick="openMapPU();" >
+						<?php echo $LANG['GOOGLE_MAP_DISPLAY']; ?>
+					</a>
+				</button>
 			</div>
 			<div style='margin:10 0 0 20;'>
 				<?php echo $LANG['GOOGLE_MAP_DESCRIPTION'];?>

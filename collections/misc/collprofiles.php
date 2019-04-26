@@ -287,11 +287,13 @@ if($SYMB_UID){
 											<?php echo $LANG['REVIEW_SPEC_EDITS']; ?>
 										</a>
 									</li>
+									<!--
 									<li>
 										<a href="../reports/accessreport.php?collid=<?php echo $collid; ?>">
 											<?php echo (isset($LANG['ACCESS_REPORT'])?$LANG['ACCESS_REPORT']:'View Access Statistics'); ?>
 										</a>
 									</li>
+									 -->
 									<?php
 								}
 								?>
