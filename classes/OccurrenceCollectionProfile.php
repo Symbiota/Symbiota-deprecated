@@ -42,7 +42,7 @@ class OccurrenceCollectionProfile {
 			$sql .= 'WHERE (c.collid = '.$this->collid.') ';
 		}
 		else{
-			$sql .= 'WHERE s.recordcnt > 0 ORDER BY c.SortSeq, c.CollectionName';
+			$sql .= 'ORDER BY c.SortSeq, c.CollectionName';
 		}
 		//echo $sql;
 		$rs = $this->conn->query($sql);
