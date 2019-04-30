@@ -6,6 +6,8 @@ $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:'';
 $collid = array_key_exists("collid",$_REQUEST)?$_REQUEST["collid"]:0;
 $cond = array_key_exists("cond",$_REQUEST)?$_REQUEST["cond"]:'';
 $collType = array_key_exists("colltype",$_REQUEST)?$_REQUEST["colltype"]:'specimens';
+$schemaType = array_key_exists('schema',$_REQUEST)?$_REQUEST['schema']:'dwc';
+$extended = array_key_exists('extended',$_REQUEST)?$_REQUEST['extended']:0;
 $includeDets = array_key_exists("dets",$_REQUEST)?$_REQUEST["dets"]:1;
 $includeImgs = array_key_exists("imgs",$_REQUEST)?$_REQUEST["imgs"]:1;
 $includeAttributes = array_key_exists("attr",$_REQUEST)?$_REQUEST["attr"]:0;
@@ -41,6 +43,8 @@ if($cond){
 		}
 	}
 }
+$dwcaHandler->setSchemaType($schemaType);
+$dwcaHandler->setExtended($extended);
 $dwcaHandler->setIncludeDets($includeDets);
 $dwcaHandler->setIncludeImgs($includeImgs);
 $dwcaHandler->setIncludeAttributes($includeAttributes);
