@@ -198,13 +198,16 @@ include($SERVER_ROOT. '/header.php');
 		echo '<div style="font-weight:bold;font-size:120%;">'.$collArr['collectionname'].'</div>';
 		?>
 		<div style="margin:10px;">
-			Use the controls below to publish occurrence data within this collection as a
-			<a href="http://rs.tdwg.org/dwc/terms/guides/text/index.htm">Darwin Core Archive (DwC-A)</a> file.
-			A DwC-A file is a single compressed ZIP file that contains one to several data files along with a meta.xml
+			Use the controls below to publish occurrence data from this collection as a
+			<a href="https://en.wikipedia.org/wiki/Darwin_Core_Archive" target="_blank">Darwin Core Archive (DwC-A)</a> file.
+			DwC-A files are a single compressed ZIP file that contains one to several data files along with a meta.xml
 			document that describes the content.
 			The occurrence data file is required, but identifications (determinations) and image metadata are optional.
-			Fields within the occurrences.csv file are defined by the <a href="http://rs.tdwg.org/dwc/terms/index.htm">Darwin Core</a>
+			Fields within the occurrences.csv file are defined by the <a href="http://rs.tdwg.org/dwc/terms/" target="_blank">Darwin Core</a>
 			exchange standard.
+			We recommend that you also review instructions for
+			<a href="http://symbiota.org/docs/darwin-core-archive-data-publishing/" target="_blank">Publishing Occurrence Data to iDigBio</a>
+			and <a href="http://symbiota.org/docs/publishing-to-gbif-from-a-symbiota-portal/" target="_blank">Publishing Occurrence Data to GBIF</a>.
 		</div>
 		<?php
 	}
@@ -213,11 +216,11 @@ include($SERVER_ROOT. '/header.php');
 		<div style="margin:10px;">
 			The following downloads are occurrence data packages from collections
 			that have chosen to publish their complete dataset as a
-			<a href="http://rs.tdwg.org/dwc/terms/guides/text/index.htm">Darwin Core Archive (DwC-A)</a> file.
-			A DwC-A file is a single compressed ZIP file that contains one to several data files along with a meta.xml
+			<a href="https://en.wikipedia.org/wiki/Darwin_Core_Archive" target="_blank">Darwin Core Archive (DwC-A)</a> file.
+			A DwC-A file is a single compressed ZIP file that contains one to several data files, along with a meta.xml
 			document that describes the content.
-			The archives below contain three comma separated (CSV) files containing occurrences, identifications (determinations), and image metadata.
-			Fields within the occurrences.csv file are defined by the <a href="http://rs.tdwg.org/dwc/terms/index.htm">Darwin Core</a>
+			Archives published through this portal contain three comma separated (CSV) files containing occurrences, identifications (determinations), and image metadata.
+			Fields within the occurrences.csv file are defined by the <a href="http://rs.tdwg.org/dwc/terms/" target="_blank">Darwin Core</a>
 			exchange standard. The identification and image files follow the DwC extensions for those data types.
 		</div>
 		<div style="margin:10px;">
