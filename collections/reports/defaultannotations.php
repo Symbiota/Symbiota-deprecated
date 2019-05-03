@@ -8,7 +8,7 @@ $lHeader = $_POST['lheading'];
 $lFooter = $_POST['lfooter'];
 $detIdArr = $_POST['detid'];
 $action = array_key_exists('submitaction',$_POST)?$_POST['submitaction']:'';
-$rowsPerPage = 3;
+$rowsPerPage = array_key_exists('rowcount',$_POST)?$_POST['rowcount']:3;;
 
 $labelManager = new OccurrenceLabel();
 $labelManager->setCollid($collid);
@@ -25,8 +25,18 @@ if($SYMB_UID){
 		<title><?php echo $DEFAULT_TITLE; ?> Default Annotations</title>
 		<style type="text/css">
 			body {font-family:arial,sans-serif;}
-			table.labels {page-break-before:auto;page-break-inside:avoid;border-spacing:5px;}
-			table.labels td {width:<?php echo ($rowsPerPage==1?'600px':(100/$rowsPerPage).'%'); ?>;border:1px solid black;padding:8px;}
+			table.labels { page-break-before:auto; }
+			table.labels tr td { page-break-inside: avoid; white-space: nowrap; }
+			<?php
+			$marginSize = 5;
+			if(array_key_exists('marginsize',$_POST) && $_POST['marginsize']) $marginSize = $_POST['marginsize'];
+			echo 'table.labels {border-spacing:'.$marginSize.'px;}';
+			$widthStr = '600px';
+			if($rowsPerPage > 1) $widthStr = 100/$rowsPerPage.'%';
+			$borderWidth = 1;
+			if(array_key_exists('borderwidth',$_POST)) $borderWidth = $_POST['borderwidth'];
+			?>
+			table.labels td {width:<?php echo $widthStr; ?>;padding:8px;border:<?php echo $borderWidth; ?>px solid black;}
 			p.printbreak {page-break-after:always;}
 			.lheader {width:100%;margin-bottom:5px;text-align:center;font:bold 9pt arial,sans-serif;}
 			.scientificnamediv {clear:both;font-size:10pt;}
@@ -45,14 +55,14 @@ if($SYMB_UID){
 						$labelManager->clearAnnoQueue($_POST['detid']);
 					}
 					$labelCnt = 0;
+					echo '<table class="labels">';
 					foreach($labelArr as $occid => $occArr){
 						$headerStr = trim($lHeader);
 						$footerStr = trim($lFooter);
-
 						$dupCnt = $_POST['q-'.$occid];
 						for($i = 0;$i < $dupCnt;$i++){
 							$labelCnt++;
-							if($rowsPerPage == 1 || $labelCnt%$rowsPerPage == 1) echo '<table class="labels"><tr>'."\n";
+							if($rowsPerPage == 1 || $labelCnt%$rowsPerPage == 1) echo '<tr>'."\n";
 							?>
 							<td class="" valign="top">
 								<?php
@@ -134,10 +144,11 @@ if($SYMB_UID){
 							</td>
 							<?php
 							if($labelCnt%$rowsPerPage == 0){
-								echo '</tr></table>'."\n";
+								echo '</tr>'."\n";
 							}
 						}
 					}
+					echo '</table>';
 					if($labelCnt%$rowsPerPage){
 						$remaining = $rowsPerPage-($labelCnt%$rowsPerPage);
 						for($i = 0;$i < $remaining;$i++){

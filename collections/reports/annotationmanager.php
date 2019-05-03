@@ -188,7 +188,30 @@ if($isEditor){
 									<b>Remove selected annotations from queue</b>
 								</div>
 							</div>
-							<div style="float:left;margin-left:200px">
+							<div style="float:left;margin-left:50px">
+								<div style="">
+									<b>Border Width:</b>
+									<select name="borderwidth">
+										<option value="0">0</option>
+										<option value="1" selected>1</option>
+										<option value="2">2</option>
+										<option value="3">3</option>
+									</select>
+								</div>
+								<div style="margin-top:4px;">
+									<b>Rows per page:</b>
+									<select name="rowcount">
+										<option value="1">1</option>
+										<option value="2">2</option>
+										<option value="3" selected>3</option>
+									</select>
+								</div>
+								<div style="margin-top:4px;">
+									<b>Spacing between labels:</b>
+									<input type="text" name="marginsize" value="5" style="width:25px" />
+								</div>
+							</div>
+							<div style="float:left;margin-left:50px">
 								<input type="hidden" name="collid" value="<?php echo $collid; ?>" />
 								<input type="submit" name="submitaction" onclick="changeAnnoFormTarget(this.form, 'browser');" value="Print in Browser" />
 								<?php

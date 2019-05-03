@@ -13,7 +13,7 @@ $lHeader = $_POST['lheading'];
 $lFooter = $_POST['lfooter'];
 $detIdArr = $_POST['detid'];
 $action = array_key_exists('submitaction',$_POST)?$_POST['submitaction']:'';
-$rowsPerPage = 3;
+$rowsPerPage = array_key_exists('rowcount',$_POST)?$_POST['rowcount']:3;
 
 $sectionStyle = array();
 if($rowsPerPage==1){
@@ -60,7 +60,16 @@ $phpWord->addFontStyle('scientificnameFont', array('bold'=>true,'italic'=>true,'
 $phpWord->addFontStyle('scientificnameinterFont', array('bold'=>true,'size'=>10,'name'=>'Arial'));
 $phpWord->addFontStyle('scientificnameauthFont', array('size'=>10,'name'=>'Arial'));
 $phpWord->addFontStyle('identifiedFont', array('size'=>8,'name'=>'Arial'));
-$tableStyle = array('width'=>100,'borderColor'=>'000000','borderSize'=>2,'cellMargin'=>75);
+$marginSize = 80;
+if(array_key_exists('marginsize',$_POST) && $_POST['marginsize']) $marginSize = 16*$_POST['marginsize'];
+$tableStyle = array('width'=>100,'cellMargin'=>$marginSize);
+$borderWidth = 2;
+if(array_key_exists('borderwidth',$_POST)) $borderWidth = $_POST['borderwidth'];
+if($borderWidth) $borderWidth++;
+if($borderWidth){
+	$tableStyle['borderColor'] = '000000';
+	$tableStyle['borderSize'] = $borderWidth;
+}
 $colRowStyle = array('cantSplit'=>true);
 $phpWord->addTableStyle('defaultTable',$tableStyle,$colRowStyle);
 $cellStyle = array('valign'=>'top');
