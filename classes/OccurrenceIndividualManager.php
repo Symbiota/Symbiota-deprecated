@@ -297,7 +297,7 @@ class OccurrenceIndividualManager extends Manager{
 		if(isset($GLOBALS['SYMB_UID']) && $GLOBALS['SYMB_UID']){
 	 		$con = MySQLiConnectionFactory::getCon("write");
 			$sql = 'INSERT INTO omoccurcomments(occid,comment,uid,reviewstatus) '.
-				'VALUES('.$this->occid.',"'.$this->cleanInStr($commentStr).'",'.$GLOBALS['SYMB_UID'].',1)';
+				'VALUES('.$this->occid.',"'.$this->cleanInStr(strip_tags($commentStr)).'",'.$GLOBALS['SYMB_UID'].',1)';
 			//echo 'sql: '.$sql;
 			if($con->query($sql)){
 				$status = true;
