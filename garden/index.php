@@ -803,27 +803,27 @@ include($serverRoot."/header.php");
                     </div>
                     <input class="advSearchOptCheckBox" type="checkbox" onchange="processOption('685--2');" id="685--2">
                     <div id="685--2Div" class="advSearchOptCheckBoxDiv unselectable with-icons">
-                        <div class="wildlifeOptIconDiv wildlife2"></div>
+                        <div class="wildlifeOptIconDiv wildlife2 clickable-icon"></div>
                         <label id="685--2Label" class="advSearchOptCheckBoxLabel tooltip" for="685--2" title="a nectar or pollen source for native bees, honeybees, and others">Pollinators</label>
                     </div>
                     <input class="advSearchOptCheckBox" type="checkbox" onchange="processOption('685--1');" id="685--1">
                     <div id="685--1Div" class="advSearchOptCheckBoxDiv unselectable with-icons">
-                        <div class="wildlifeOptIconDiv wildlife4"></div>
+                        <div class="wildlifeOptIconDiv wildlife4 clickable-icon"></div>
                         <label id="685--1Label" class="advSearchOptCheckBoxLabel tooltip" for="685--1" title="provides nectar for adult butterflies">Butterfly nectar source</label>
                     </div>
                     <input class="advSearchOptCheckBox" type="checkbox" onchange="processOption('685--6');" id="685--6">
                     <div id="685--6Div" class="advSearchOptCheckBoxDiv unselectable with-icons">
-                        <div class="wildlifeOptIconDiv wildlife1"></div>
+                        <div class="wildlifeOptIconDiv wildlife1 clickable-icon"></div>
                         <label id="685--6Label" class="advSearchOptCheckBoxLabel tooltip" for="685--6" title="provides a significant food source for hummingbirds">Hummingbirds</label>
                     </div>
                     <input class="advSearchOptCheckBox" type="checkbox" onchange="processOption('685--3');" id="685--3">
                     <div id="685--3Div" class="advSearchOptCheckBoxDiv unselectable with-icons">
-                        <div class="wildlifeOptIconDiv wildlife5"></div>
+                        <div class="wildlifeOptIconDiv wildlife5 clickable-icon"></div>
                         <label id="685--3Label" class="advSearchOptCheckBoxLabel tooltip" for="685--3" title="provides a food source or habitat for pest-eating insects or parasitoids ">Pest-eating insects</label>
                     </div>
                     <input class="advSearchOptCheckBox" type="checkbox" onchange="processOption('685--5');" id="685--5">
                     <div id="685--5Div" class="advSearchOptCheckBoxDiv unselectable with-icons">
-                        <div class="wildlifeOptIconDiv wildlife3"></div>
+                        <div class="wildlifeOptIconDiv wildlife3 clickable-icon"></div>
                         <label id="685--5Label" class="advSearchOptCheckBoxLabel tooltip" for="685--5" title="a food source for the caterpillar stage of butterflies">Butterfly larval host</label>
                     </div>
                 </div>
@@ -836,73 +836,73 @@ include($serverRoot."/header.php");
 
                     <input class="advSearchOptCheckBox" type="checkbox" onchange="processOption('19--1');" id="19--1">
                     <div id="19--1Div" class="advSearchOptCheckBoxDiv unselectable with-maps">
-                        <div class="ecoregionOptIconDiv ecoregion1"></div>
+                        <div class="ecoregionOptIconDiv ecoregion1 clickable-icon"></div>
                         <label id="19--1Label" class="advSearchOptCheckBoxLabel tooltip" for="19--1" title="Basin and Range">Basin and Range</label>
                     </div>
 
                     <input class="advSearchOptCheckBox" type="checkbox" onchange="processOption('19--2');" id="19--2">
                     <div id="19--2Div" class="advSearchOptCheckBoxDiv unselectable with-maps">
-                        <div class="ecoregionOptIconDiv ecoregion2"></div>
+                        <div class="ecoregionOptIconDiv ecoregion2 clickable-icon"></div>
                         <label id="19--2Label" class="advSearchOptCheckBoxLabel tooltip" for="19--2" title="Blue and Wallowa Mountains">Blue and Wallowa Mountains</label>
                     </div>
 
                     <input class="advSearchOptCheckBox" type="checkbox" onchange="processOption('19--3');" id="19--3">
                     <div id="19--3Div" class="advSearchOptCheckBoxDiv unselectable with-maps">
-                        <div class="ecoregionOptIconDiv ecoregion3"></div>
+                        <div class="ecoregionOptIconDiv ecoregion3 clickable-icon"></div>
                         <label id="19--3Label" class="advSearchOptCheckBoxLabel tooltip" for="19--3" title="Cascades">Cascades</label>
                     </div>
 
                     <input class="advSearchOptCheckBox" type="checkbox" onchange="processOption('19--4');" id="19--4">
                     <div id="19--4Div" class="advSearchOptCheckBoxDiv unselectable with-maps">
-                        <div class="ecoregionOptIconDiv ecoregion4"></div>
+                        <div class="ecoregionOptIconDiv ecoregion4 clickable-icon"></div>
                         <label id="19--4Label" class="advSearchOptCheckBoxLabel tooltip" for="19--4" title="Coast Range">Coast Range</label>
                     </div>
 
                     <input class="advSearchOptCheckBox" type="checkbox" onchange="processOption('19--5');" id="19--5">
                     <div id="19--5Div" class="advSearchOptCheckBoxDiv unselectable with-maps">
-                        <div class="ecoregionOptIconDiv ecoregion5"></div>
+                        <div class="ecoregionOptIconDiv ecoregion5 clickable-icon"></div>
                         <label id="19--5Label" class="advSearchOptCheckBoxLabel tooltip" for="19--5" title="Columbia Basin">Columbia Basin</label>
                     </div>
 
                     <input class="advSearchOptCheckBox" type="checkbox" onchange="processOption('19--6');" id="19--6">
                     <div id="19--6Div" class="advSearchOptCheckBoxDiv unselectable with-maps">
-                        <div class="ecoregionOptIconDiv ecoregion6"></div>
+                        <div class="ecoregionOptIconDiv ecoregion6 clickable-icon"></div>
                         <label id="19--6Label" class="advSearchOptCheckBoxLabel tooltip" for="19--6" title="Eastern Cascade Slopes and Foothills">Eastern Cascade Slopes and Foothills</label>
                     </div>
 
                     <input class="advSearchOptCheckBox" type="checkbox" onchange="processOption('19--7');" id="19--7">
                     <div id="19--7Div" class="advSearchOptCheckBoxDiv unselectable with-maps">
-                        <div class="ecoregionOptIconDiv ecoregion7"></div>
+                        <div class="ecoregionOptIconDiv ecoregion7 clickable-icon"></div>
                         <label id="19--7Label" class="advSearchOptCheckBoxLabel tooltip" for="19--7" title="Estuarine Coast">Estuarine Coast</label>
                     </div>
 
                     <input class="advSearchOptCheckBox" type="checkbox" onchange="processOption('19--8');" id="19--8">
                     <div id="19--8Div" class="advSearchOptCheckBoxDiv unselectable with-maps">
-                        <div class="ecoregionOptIconDiv ecoregion8"></div>
+                        <div class="ecoregionOptIconDiv ecoregion8 clickable-icon"></div>
                         <label id="19--8Label" class="advSearchOptCheckBoxLabel tooltip" for="19--8" title="Lava Plains">Lava Plains</label>
                     </div>
 
                     <input class="advSearchOptCheckBox" type="checkbox" onchange="processOption('19--9');" id="19--9">
                     <div id="19--9Div" class="advSearchOptCheckBoxDiv unselectable with-maps">
-                        <div class="ecoregionOptIconDiv ecoregion9"></div>
+                        <div class="ecoregionOptIconDiv ecoregion9 clickable-icon"></div>
                         <label id="19--9Label" class="advSearchOptCheckBoxLabel tooltip" for="19--9" title="Owyhee Uplands">Owyhee Uplands</label>
                     </div>
 
                     <input class="advSearchOptCheckBox" type="checkbox" onchange="processOption('19--10');" id="19--10">
                     <div id="19--10Div" class="advSearchOptCheckBoxDiv unselectable with-maps">
-                        <div class="ecoregionOptIconDiv ecoregion10"></div>
+                        <div class="ecoregionOptIconDiv ecoregion10 clickable-icon"></div>
                         <label id="19--10Label" class="advSearchOptCheckBoxLabel tooltip" for="19--10" title="Siskiyou Mountains">Siskiyou Mountains</label>
                     </div>
 
                     <input class="advSearchOptCheckBox" type="checkbox" onchange="processOption('19--11');" id="19--11">
                     <div id="19--11Div" class="advSearchOptCheckBoxDiv unselectable with-maps">
-                        <div class="ecoregionOptIconDiv ecoregion11"></div>
+                        <div class="ecoregionOptIconDiv ecoregion11 clickable-icon"></div>
                         <label id="19--11Label" class="advSearchOptCheckBoxLabel tooltip" for="19--11" title="Willamette Valley">Willamette Valley</label>
                     </div>
 
                     <input class="advSearchOptCheckBox" type="checkbox" onchange="processOption('19--12');" id="19--12">
                     <div id="19--12Div" class="advSearchOptCheckBoxDiv unselectable with-maps">
-                        <div class="ecoregionOptIconDiv ecoregion12"></div>
+                        <div class="ecoregionOptIconDiv ecoregion12 clickable-icon"></div>
                         <label id="19--12Label" class="advSearchOptCheckBoxLabel tooltip" for="19--12" title="North Basin and Slope">North Basin and Slope</label>
                     </div>
 
@@ -1215,6 +1215,10 @@ include($serverRoot."/footer.php");
         theme: 'tooltipster-light',
         debug: false
     });
+    $( ".clickable-icon" ).click(function() {
+        $(this).nextAll('label').first().trigger("click");
+    });
+
 </script>
 </body>
 </html>

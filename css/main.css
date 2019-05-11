@@ -1761,6 +1761,9 @@ div.growthCol {
 #availabilityPane .advSearchOptionWrapper {
 	padding-top: 20px;
 }
+.clickable-icon {
+	cursor: pointer;
+}
 .advSearchOptionWrapper {
 	width: 100%;
 	margin: auto;
