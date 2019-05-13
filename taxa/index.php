@@ -3,8 +3,8 @@ include_once('../config/symbini.php');
 include_once($SERVER_ROOT.'/content/lang/taxa/index.'.$LANG_TAG.'.php');
 include_once($SERVER_ROOT.'/classes/TaxonProfileManager.php');
 Header("Content-Type: text/html; charset=".$CHARSET);
-
-$taxonValue = array_key_exists("taxon",$_REQUEST)?$_REQUEST["taxon"]:""; 
+$commonValue = array_key_exists("common",$_REQUEST)?$_REQUEST["common"]:"";
+$taxonValue = array_key_exists("taxon",$_REQUEST)?$_REQUEST["taxon"]:"";
 $taxAuthId = array_key_exists("taxauthid",$_REQUEST)?$_REQUEST["taxauthid"]:1; 
 $clValue = array_key_exists("cl",$_REQUEST)?$_REQUEST["cl"]:0;
 $projValue = array_key_exists("proj",$_REQUEST)?$_REQUEST["proj"]:0;
