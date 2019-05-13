@@ -51,6 +51,15 @@
 		        $quicksearch = $pluginManager->createQuickSearch($buttonText,$searchText,$placeholderText);
 		        echo $quicksearch;
 		        ?>
+                <!--  common name search temporarily added here for testing.-->
+                <form id="common-quick-search" action="<?php echo $CLIENT_ROOT ?>/taxa/common.php">
+                    <div class="common-search-wrapper">
+                        <div class="input-label">Common name search</div>
+                        <div class="input-wrapper">
+                            <input type="text" name="common" id="quicksearchcommon" placeholder="Enter common name here" a />
+                            <button id="garden-common-search-but" type="submit" ><i class="fa fa-search"></i></button>
+                        </div>
+                </form>
             </div><!-- .search-wrapper -->
             <nav class="main-navigation" id="site-navigation">
                 <button class="menu-toggle" id="menu-button" aria-controls="primary-menu" aria-expanded="false">&#8681; Menu</button>
