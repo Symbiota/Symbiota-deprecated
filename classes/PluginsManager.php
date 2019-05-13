@@ -392,7 +392,7 @@ class PluginsManager {
 		if($searchText){
 			$html .= '<div id="quicksearchtext" ><b>'.$searchText.'</b></div>';
 		}
-		$html .= '<input type="text" name="taxon" placeholder="'.$placeholderText.'" id="quicksearchtaxon" title="Enter taxon name here." />';
+		$html .= '<input type="text" name="taxon" placeholder="'.$placeholderText.'" id="quicksearchtaxon" title="“Enter scientific name here. List includes accepted names and synonyms”." />';
 		$html .= '<button name="formsubmit"  id="quicksearchbutton" type="submit" value="Search Terms">'.$buttonText.'</button>';
 		$html .= '</form>';
 
