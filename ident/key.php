@@ -178,6 +178,7 @@ if($chars){
                                     <?php
                                     if($FLORA_MOD_IS_ACTIVE){
                                         echo '<a href="../checklists/checklist.php?cl='.$clid.'&dynclid='.$dynClid.'&proj='.$projValue.'" target="_blank">';
+                                        echo '<a href="../checklists/checklist.php?cl='.$clid.'&dynclid='.$dynClid.'&proj='.$projValue.'" target="_blank" title="Open in downloadable checklist view">';
                                     }
                                     echo $dataManager->getClName()." ";
                                     if($FLORA_MOD_IS_ACTIVE){
