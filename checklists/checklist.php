@@ -361,7 +361,7 @@ $taxaArray = $clManager->getTaxaList($pageNumber,($printMode?0:500));
 			<div>
 				<hr/>
 			</div>
-			<div>
+			<div id="checklist-container">
 				<!-- Option box -->
 				<div class="printoff" id="cloptiondiv">
 					<div style="">
@@ -562,7 +562,7 @@ $taxaArray = $clManager->getTaxaList($pageNumber,($printMode?0:500));
 					}
 					?>
 				</div>
-				<div>
+				<div id="img-container">
 					<div style="margin:3px;">
 						<?php
 						echo '<b>'.$LANG['FAMILIES'].'</b>: ';
