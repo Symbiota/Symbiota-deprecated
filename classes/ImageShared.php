@@ -31,7 +31,6 @@ class ImageShared{
 	private $caption;
 	private $photographer;
 	private $photographerUid;
-	private $sourceUrl;
 	private $format;
 	private $owner;
 	private $locality;
@@ -43,6 +42,11 @@ class ImageShared{
 	private $copyright;
 	private $notes;
 	private $sortSeq;
+
+	private $sourceUrl;
+	private $imgLgUrl;
+	private $imgWebUrl;
+	private $imgTnUrl;
 
 	private $activeImgId = 0;
 
@@ -187,15 +191,15 @@ class ImageShared{
 		return false;
 	}
 
-	public function copyImageFromUrl($sourceUri){
+	public function copyImageFromUrl(){
 		//Returns full path
-		if(!$sourceUri){
+		if(!$this->sourceUrl){
 			$this->errArr[] = 'FATAL ERROR: Image source uri NULL in copyImageFromUrl method';
 			//trigger_error('Image source uri NULL in copyImageFromUrl method',E_USER_ERROR);
 			return false;
 		}
-		if(!$this->uriExists($sourceUri)){
-			$this->errArr[] = 'FATAL ERROR: Image source file ('.$sourceUri.') does not exist in copyImageFromUrl method';
+		if(!$this->uriExists($this->sourceUrl)){
+			$this->errArr[] = 'FATAL ERROR: Image source file ('.$this->sourceUrl.') does not exist in copyImageFromUrl method';
 			//trigger_error('Image source file ('.$sourceUri.') does not exist in copyImageFromUrl method',E_USER_ERROR);
 			return false;
 		}
@@ -210,11 +214,25 @@ class ImageShared{
 			return false;
 		}
 		//Clean and copy file
-		$fileName = $this->cleanFileName($sourceUri);
+		$fileName = $this->cleanFileName($this->sourceUrl);
 		$context = stream_context_create( array( "http" => array( "header" => "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36" ) ) );
-		if(copy($sourceUri, $this->targetPath.$fileName.$this->imgExt, $this->context)){
+		if(copy($this->sourceUrl, $this->targetPath.$fileName.$this->imgExt, $this->context)){
 			$this->sourcePath = $this->targetPath.$fileName.$this->imgExt;
 			$this->imgName = $fileName;
+			$this->imgLgUrl = $fileName.$this->imgExt;
+			if($this->imgWebUrl){
+				$webFileName = $fileName.'_web'.$this->imgExt;
+				if(copy($this->imgWebUrl, $this->targetPath.$webFileName, $this->context)){
+					$this->imgWebUrl = $webFileName;
+				}
+			}
+			if($this->imgTnUrl){
+				$tnFileName = $fileName.'_tn'.$this->imgExt;
+				if(copy($this->imgTnUrl, $this->targetPath.$tnFileName, $this->context)){
+					$this->imgTnUrl = $tnFileName;
+				}
+			}
+
 			//$this->testOrientation();
 			return true;
 		}
@@ -345,12 +363,12 @@ class ImageShared{
 			//trigger_error('Image file name null in processImage function',E_USER_ERROR);
 			return false;
 		}
-		$imgPath = $this->targetPath.$this->imgName.$this->imgExt;
 
 		//Create thumbnail
-		$imgTnUrl = '';
-		if($this->createNewImage('_tn',$this->tnPixWidth,70)){
-			$imgTnUrl = $this->imgName.'_tn.jpg';
+		if(!$this->imgTnUrl){
+			if($this->createNewImage('_tn',$this->tnPixWidth,70)){
+				$this->imgTnUrl = $this->imgName.'_tn.jpg';
+			}
 		}
 
 		//Get image variable
@@ -360,23 +378,22 @@ class ImageShared{
 		$this->setSourceFileSize();
 
 		//Create large image
-		$imgLgUrl = "";
-		if($this->mapLargeImg){
+		if($this->mapLargeImg && !$this->imgLgUrl){
 			if($this->sourceWidth > ($this->webPixWidth*1.2) || $this->sourceFileSize > $this->webFileSizeLimit){
 				//Source image is wide enough can serve as large image, or it's too large to serve as basic web image
 				if(substr($this->sourcePath,0,7)=='http://' || substr($this->sourcePath,0,8)=='https://') {
-					$imgLgUrl = $this->sourcePath;
+					$this->imgLgUrl = $this->sourcePath;
 				}
 				else{
 					if($this->sourceWidth < ($this->lgPixWidth*1.2)){
 						//Image width is small enough to serve as large image
 						if(copy($this->sourcePath,$this->targetPath.$this->imgName.'_lg'.$this->imgExt, $this->context)){
-							$imgLgUrl = $this->imgName.'_lg'.$this->imgExt;
+							$this->imgLgUrl = $this->imgName.'_lg'.$this->imgExt;
 						}
 					}
 					else{
 						if($this->createNewImage('_lg',$this->lgPixWidth)){
-							$imgLgUrl = $this->imgName.'_lg.jpg';
+							$this->imgLgUrl = $this->imgName.'_lg.jpg';
 						}
 					}
 				}
@@ -384,34 +401,27 @@ class ImageShared{
 		}
 
 		//Create web url
-		$imgWebUrl = '';
-		if(substr($this->sourcePath,0,7)=='http://' || substr($this->sourcePath,0,8)=='https://'){
-			$imgWebUrl = $this->sourcePath;
-		}
-		if(!$imgWebUrl){
+		if(!$this->imgWebUrl){
 			if($this->sourceWidth < ($this->webPixWidth*1.2) && $this->sourceFileSize < $this->webFileSizeLimit){
-				//Image width and file size is small enough to serve as web image
+				//Source image width and file size is small enough to serve as web image
 				if(strtolower(substr($this->sourcePath,0,7)) == 'http://' || strtolower(substr($this->sourcePath,0,8)) == 'https://'){
 					if(copy($this->sourcePath, $this->targetPath.$this->imgName.$this->imgExt, $this->context)){
-						$imgWebUrl = $this->imgName.$this->imgExt;
+						$this->imgWebUrl = $this->imgName.$this->imgExt;
 					}
 				}
 				else{
-					$imgWebUrl = $this->imgName.$this->imgExt;
+					$this->imgWebUrl = $this->imgName.$this->imgExt;
 				}
 			}
 			else{
 				//Image width or file size is too large
 				$newWidth = ($this->sourceWidth<($this->webPixWidth*1.2)?$this->sourceWidth:$this->webPixWidth);
 				$this->createNewImage('',$newWidth);
-				$imgWebUrl = $this->imgName.'.jpg';
+				$this->imgWebUrl = $this->imgName.'.jpg';
 			}
 		}
 
-		$status = true;
-		if($imgWebUrl){
-			$status = $this->databaseImage($imgWebUrl,$imgTnUrl,$imgLgUrl);
-		}
+		$status = $this->databaseImage();
 		return $status;
 	}
 
@@ -518,18 +528,19 @@ class ImageShared{
 		return $status;
 	}
 
-	private function databaseImage($imgWebUrl,$imgTnUrl,$imgLgUrl){
-		$status = true;
-		if($imgWebUrl){
+	private function databaseImage(){
+		$status = false;
+		if($this->imgWebUrl){
+			$status = true;
 			$urlBase = $this->getUrlBase();
-			if(strtolower(substr($imgWebUrl,0,7)) != 'http://' && strtolower(substr($imgWebUrl,0,8)) != 'https://'){
-				$imgWebUrl = $urlBase.$imgWebUrl;
+			if(strtolower(substr($this->imgWebUrl,0,7)) != 'http://' && strtolower(substr($this->imgWebUrl,0,8)) != 'https://'){
+				$this->imgWebUrl = $urlBase.$this->imgWebUrl;
 			}
-			if($imgTnUrl && strtolower(substr($imgTnUrl,0,7)) != 'http://' && strtolower(substr($imgTnUrl,0,8)) != 'https://'){
-				$imgTnUrl = $urlBase.$imgTnUrl;
+			if($this->imgTnUrl && strtolower(substr($this->imgTnUrl,0,7)) != 'http://' && strtolower(substr($this->imgTnUrl,0,8)) != 'https://'){
+				$this->imgTnUrl = $urlBase.$this->imgTnUrl;
 			}
-			if($imgLgUrl && strtolower(substr($imgLgUrl,0,7)) != 'http://' && strtolower(substr($imgLgUrl,0,8)) != 'https://'){
-				$imgLgUrl = $urlBase.$imgLgUrl;
+			if($this->imgLgUrl && strtolower(substr($this->imgLgUrl,0,7)) != 'http://' && strtolower(substr($this->imgLgUrl,0,8)) != 'https://'){
+				$this->imgLgUrl = $urlBase.$this->imgLgUrl;
 			}
 
 			//If is an occurrence image, get tid from occurrence
@@ -546,9 +557,9 @@ class ImageShared{
 			$sql = 'INSERT INTO images (tid, url, thumbnailurl, originalurl, photographer, photographeruid, format, caption, '.
 				'owner, sourceurl, copyright, locality, occid, notes, username, sortsequence, sourceIdentifier, ' .
 				' rights, accessrights) '.
-				'VALUES ('.($this->tid?$this->tid:'NULL').',"'.$imgWebUrl.'",'.
-				($imgTnUrl?'"'.$imgTnUrl.'"':'NULL').','.
-				($imgLgUrl?'"'.$imgLgUrl.'"':'NULL').','.
+				'VALUES ('.($this->tid?$this->tid:'NULL').',"'.$this->imgWebUrl.'",'.
+				($this->imgTnUrl?'"'.$this->imgTnUrl.'"':'NULL').','.
+				($this->imgLgUrl?'"'.$this->imgLgUrl.'"':'NULL').','.
 				($this->photographer?'"'.$this->photographer.'"':'NULL').','.
 				($this->photographerUid?$this->photographerUid:'NULL').','.
 				($this->format?'"'.$this->format.'"':'NULL').','.
@@ -604,7 +615,7 @@ class ImageShared{
 			'WHERE (imgid = '.$imgIdDel.')';
 			$this->conn->query($sqlArchive);
 		}
-		$rs->close();
+		$rs->free();
 
 		if($occid){
 			//Remove any OCR text blocks linked to the image
@@ -917,6 +928,14 @@ class ImageShared{
 
 	public function setSourceUrl($v){
 		$this->sourceUrl = $this->cleanInStr($v);
+	}
+
+	public function setImgWebUrl($v){
+		$this->imgWebUrl = $this->cleanInStr($v);
+	}
+
+	public function setImgTnUrl($v){
+		$this->imgTnUrl = $this->cleanInStr($v);
 	}
 
 	public function getTargetPath(){

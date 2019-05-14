@@ -40,12 +40,20 @@ $photographerArr = $occManager->getPhotographerArr();
 					<div class="targetdiv" style="display:none;">
 						<div style="margin-bottom:10px;">
 							Enter a URL to an image already located on a web server.
-							If the image is larger than a typical web image, the url will be saved as the large version
-							and a basic web derivative will be created.
+							If there is only on version of the image available, enter into top field and leave other fields empty.
+							If thumbnail and medium versions are not available, local image derivative will be created.
 						</div>
 						<div>
-							<b>Image URL:</b><br/>
+							<b>Image URL (required):</b><br/>
 							<input type='text' name='imgurl' size='70'/>
+						</div>
+						<div>
+							<b>Medium version (optional<?php echo (isset($IMG_WEB_WIDTH) && $IMG_WEB_WIDTH?', +-'.$IMG_WEB_WIDTH.'px':''); ?>):</b><br/>
+							<input type='text' name='weburl' size='70'/>
+						</div>
+						<div>
+							<b>Thumbnail version (optional<?php echo (isset($IMG_TN_WIDTH) && $IMG_TN_WIDTH?', +-'.$IMG_TN_WIDTH.'px':''); ?>):</b><br/>
+							<input type='text' name='tnurl' size='70'/>
 						</div>
 						<div style="float:right;text-decoration:underline;font-weight:bold;">
 							<a href="#" onclick="toggle('targetdiv');return false;">
@@ -53,7 +61,7 @@ $photographerArr = $occManager->getPhotographerArr();
 							</a>
 						</div>
 						<div>
-							<input type="checkbox" name="copytoserver" value="1" /> Copy large image to Server (if left unchecked, source URL will server as large version)
+							<input type="checkbox" name="copytoserver" value="1" /> Copy over images to server (if left unchecked, source URLs will be used)
 						</div>
 					</div>
 					<div>

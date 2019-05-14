@@ -121,13 +121,9 @@ class TPImageEditorManager extends TPEditorManager{
 		$imgManager->setTargetPath($this->family.'/'.date('Ym').'/');
 		if($imgPath){
 			$imgManager->setMapLargeImg(true);
+			$imgManager->parseUrl($imgPath);
 			$importUrl = (array_key_exists('importurl',$postArr) && $postArr['importurl']==1?true:false);
-			if($importUrl){
-				$imgManager->copyImageFromUrl($imgPath);
-			}
-			else{
-				$imgManager->parseUrl($imgPath);
-			}
+			if($importUrl) $imgManager->copyImageFromUrl();
 		}
 		else{
 			if(array_key_exists('createlargeimg',$postArr) && $postArr['createlargeimg']==1){

@@ -1162,12 +1162,17 @@ function verifyDetForm(f){
 function verifyImgAddForm(f){
 	var filePath = f.elements["imgfile"].value;
 	if(filePath == ""){
-		alert("Select an image file or enter a URL to an existing image");
-		return false;
+		if(f.elements["imgurl"].value == ""){
+			alert("Select an image file or enter a URL to an existing image");
+			return false;
+		}
+		else{
+			filePath = f.elements["imgfile"].value
+		}
 	}
 	filePath = filePath.toLowerCase();
-	if((filePath.indexOf(".jpg") == -1) && (filePath.indexOf(".jpeg") == -1) && (filePath.indexOf(".gif") == -1) && (filePath.indexOf(".png") == -1)){
-		alert("Input file must be a vaild web image with the proper file extension (e.g. .jpg)");
+	if((filePath.indexOf(".tif") > -1) || (filePath.indexOf(".png") > -1) && (filePath.indexOf(".dng") > -1)){
+		alert("Input file must be a web-optimized image (e.g. jpg). File appears to be an archival image (e.g. tif, png, dng, etc).");
 		return false;
 	}
 	return true;
