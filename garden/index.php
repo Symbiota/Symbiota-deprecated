@@ -1115,10 +1115,10 @@ include($serverRoot."/header.php");
             <div class="displaySettingDiv">
                 <div class="gridDisplayDiv">
                     Order by:&nbsp;
-                    <input name="orderby" id="orderbysci" type="radio" value="sci" onchange="getSearchResults();" checked/> Scientific Name
+                    <input name="orderby" id="orderbysci" type="radio" value="sci" onchange="getSearchResults();" /> Scientific Name
                 </div>
                 <div class="listDisplayDiv">
-                    <input name="orderby" id="orderbycommon" type="radio" value="common" onchange="getSearchResults();" /> Common Name
+                    <input name="orderby" id="orderbycommon" type="radio" value="common" onchange="getSearchResults();" checked /> Common Name
                 </div>
             </div>
             <div class="displaySettingDiv">
