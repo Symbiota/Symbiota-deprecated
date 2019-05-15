@@ -272,13 +272,13 @@ class OccurrenceEditorImages extends OccurrenceEditorManager {
 		$sourceImgUri = $postArr['imgurl'];
 		if($sourceImgUri){
 			//Source image is a URI supplied by user
+			$imgManager->parseUrl($sourceImgUri);
+			if(isset($postArr['weburl']) && $postArr['weburl']) $imgManager->setImgWebUrl($postArr['weburl']);
+			if(isset($postArr['tnurl']) && $postArr['tnurl']) $imgManager->setImgTnUrl($postArr['tnurl']);
 			if(array_key_exists('copytoserver',$postArr) && $postArr['copytoserver']){
-				if(!$imgManager->copyImageFromUrl($sourceImgUri)){
+				if(!$imgManager->copyImageFromUrl()){
 					$status = false;
 				}
-			}
-			else{
-				$imgManager->parseUrl($sourceImgUri);
 			}
 		}
 		else{
