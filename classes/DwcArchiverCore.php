@@ -297,8 +297,6 @@ class DwcArchiverCore extends Manager{
 					$taxaManager = new OccurrenceTaxaManager();
 					$taxaArr = array();
 					$taxaArr['taxa'] = implode(';',$condArr['EQUALS']);
-					//$taxaArr['usethes'] = 1;
-					//$taxaArr['taxontype'] = 2;
 					$taxaManager->setTaxonRequestVariable($taxaArr);
 					$sqlFrag .= $taxaManager->getTaxonWhereFrag();
 				}
@@ -398,7 +396,7 @@ class DwcArchiverCore extends Manager{
      * Render the records as RDF in a turtle serialization following the TDWG
      *  DarwinCore RDF Guide.
      *
-     * @return strin containing turtle serialization of selected dwc records.
+     * @return string containing turtle serialization of selected dwc records.
      */
     public function getAsTurtle() {
        $debug = false;
@@ -415,7 +413,7 @@ class DwcArchiverCore extends Manager{
        $arr = $this->getDwcArray();
 	   $occurTermArr = $this->occurrenceFieldArr['terms'];
        $dwcguide223 = "";
-       foreach ($arr as $rownum => $dwcArray)  {
+       foreach ($arr as $dwcArray)  {
           if ($debug) { print_r($dwcArray);  }
           if (isset($dwcArray['occurrenceID'])||(isset($dwcArray['catalogNumber']) && isset($dwcArray['collectionCode']))) {
              $occurrenceid = $dwcArray['occurrenceID'];
@@ -537,7 +535,7 @@ class DwcArchiverCore extends Manager{
        $this->schemaType='dwc';
        $arr = $this->getDwcArray();
 	   $occurTermArr = $this->occurrenceFieldArr['terms'];
-       foreach ($arr as $rownum => $dwcArray)  {
+       foreach ($arr as $dwcArray)  {
           if ($debug) { print_r($dwcArray);  }
           if (isset($dwcArray['occurrenceID'])||(isset($dwcArray['catalogNumber']) && isset($dwcArray['collectionCode']))) {
              $occurrenceid = $dwcArray['occurrenceID'];
@@ -696,10 +694,8 @@ class DwcArchiverCore extends Manager{
 			}
 			$this->setServerDomain();
 			$urlPathPrefix = $this->serverDomain.$GLOBALS['CLIENT_ROOT'].(substr($GLOBALS['CLIENT_ROOT'],-1)=='/'?'':'/');
-			$hasRecords = false;
 			$cnt = 0;
 			while($r = $rs->fetch_assoc()){
-				$hasRecords = true;
 				//Protect sensitive records
 				if($this->redactLocalities && $r["localitySecurity"] == 1 && !in_array($r['collid'],$this->rareReaderArr)){
 					$protectedFields = array();
@@ -952,7 +948,7 @@ class DwcArchiverCore extends Manager{
 		if($this->schemaType == 'dwc' || $this->schemaType == 'pensoft' || $this->schemaType == 'backup'){
 			unset($termArr['collId']);
 		}
-		foreach($termArr as $k => $v){
+		foreach($termArr as $v){
 			$fieldElem = $newDoc->createElement('field');
 			$fieldElem->setAttribute('index',$occCnt);
 			$fieldElem->setAttribute('term',$v);
@@ -984,7 +980,7 @@ class DwcArchiverCore extends Manager{
 			$detCnt = 1;
 			$termArr = $this->determinationFieldArr['terms'];
 			unset($termArr['detid']);
-			foreach($termArr as $k => $v){
+			foreach($termArr as $v){
 				$fieldElem = $newDoc->createElement('field');
 				$fieldElem->setAttribute('index',$detCnt);
 				$fieldElem->setAttribute('term',$v);
@@ -1016,7 +1012,7 @@ class DwcArchiverCore extends Manager{
 			$imgCnt = 1;
 			$termArr = $this->imageFieldArr['terms'];
 			unset($termArr['imgid']);
-			foreach($termArr as $k => $v){
+			foreach($termArr as $v){
 				$fieldElem = $newDoc->createElement('field');
 				$fieldElem->setAttribute('index',$imgCnt);
 				$fieldElem->setAttribute('term',$v);
@@ -1046,7 +1042,7 @@ class DwcArchiverCore extends Manager{
 
 			$mofCnt = 1;
 			$termArr = $this->attributeFieldArr['terms'];
-			foreach($termArr as $k => $v){
+			foreach($termArr as $v){
 				$fieldElem = $newDoc->createElement('field');
 				$fieldElem->setAttribute('index',$mofCnt);
 				$fieldElem->setAttribute('term',$v);
@@ -1214,7 +1210,6 @@ class DwcArchiverCore extends Manager{
 
 		$newDoc->appendChild($rootElem);
 
-		$cArr = array();
 		$datasetElem = $newDoc->createElement('dataset');
 		$rootElem->appendChild($datasetElem);
 
@@ -1312,7 +1307,7 @@ class DwcArchiverCore extends Manager{
 
 		if(array_key_exists('associatedParty',$emlArr)){
 			$associatedPartyArr = $emlArr['associatedParty'];
-			foreach($associatedPartyArr as $cnt => $assocArr){
+			foreach($associatedPartyArr as $assocArr){
 				$assocElem = $newDoc->createElement('associatedParty');
 				$addrArr = array();
 				if(isset($assocArr['address'])){
@@ -1542,7 +1537,7 @@ class DwcArchiverCore extends Manager{
 				$link = $urlPathPrefix.'collections/misc/collprofiles.php?collid='.$cArr['collid'];
 				$type = 'HTML';
 			}
-			$typeTitleElem = $newDoc->createElement('type','DWCA');
+			$typeTitleElem = $newDoc->createElement('type',$type);
 			$itemElem->appendChild($typeTitleElem);
 
 			//link
@@ -1559,7 +1554,6 @@ class DwcArchiverCore extends Manager{
 			$pubDateTitleElem = $newDoc->createElement('pubDate');
 			$pubDateTitleElem->appendChild($newDoc->createTextNode($dateStr));
 			$itemElem->appendChild($pubDateTitleElem);
-			$itemArr[$title] = $itemElem;
 			$channelElem->appendChild($itemElem);
 		}
 		return $newDoc->saveXML();
@@ -1777,7 +1771,8 @@ class DwcArchiverCore extends Manager{
 
 	private function writeDeterminationFile(){
 		$this->logOrEcho("Creating identification file (".date('h:i:s A').")... ");
-		$fh = fopen($this->targetPath.$this->ts.'-det'.$this->fileExt, 'w');
+		$filePath = $this->targetPath.$this->ts.'-det'.$this->fileExt;
+		$fh = fopen($filePath, 'w');
 		if(!$fh){
 			$this->logOrEcho('ERROR establishing output file ('.$filePath.'), perhaps target folder is not readable by web server.');
 			return false;
@@ -1816,9 +1811,9 @@ class DwcArchiverCore extends Manager{
 	}
 
 	private function writeImageFile(){
-
 		$this->logOrEcho("Creating image file (".date('h:i:s A').")... ");
-		$fh = fopen($this->targetPath.$this->ts.'-images'.$this->fileExt, 'w');
+		$filePath = $this->targetPath.$this->ts.'-images'.$this->fileExt;
+		$fh = fopen($filePath, 'w');
 		if(!$fh){
 			$this->logOrEcho('ERROR establishing output file ('.$filePath.'), perhaps target folder is not readable by web server.');
 			return false;
@@ -1923,7 +1918,8 @@ class DwcArchiverCore extends Manager{
 
 	private function writeAttributeFile(){
 		$this->logOrEcho("Creating occurrence Attributes file as MeasurementsOrFact extension (".date('h:i:s A').")... ");
-		$fh = fopen($this->targetPath.$this->ts.'-attr'.$this->fileExt, 'w');
+		$filePath = $this->targetPath.$this->ts.'-attr'.$this->fileExt;
+		$fh = fopen($filePath, 'w');
 		if(!$fh){
 			$this->logOrEcho('ERROR establishing output file ('.$filePath.'), perhaps target folder is not readable by web server.');
 			return false;
