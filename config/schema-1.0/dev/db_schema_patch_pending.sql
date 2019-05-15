@@ -55,6 +55,37 @@ ADD INDEX `Index_tid` (`tid` ASC);
 ALTER TABLE `taxaresourcelinks` 
   ADD UNIQUE INDEX `UNIQUE_taxaresource` (`tid` ASC, `sourcename` ASC);
 
+#Paleo tables
+CREATE TABLE `omoccurpaleo` (
+  `paleoID` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `occid` INT UNSIGNED NOT NULL,
+  `eon` VARCHAR(65) NULL,
+  `era` VARCHAR(65) NULL,
+  `period` VARCHAR(65) NULL,
+  `epoch` VARCHAR(65) NULL,
+  `earlyInterval` VARCHAR(65) NULL,
+  `lateInterval` VARCHAR(65) NULL,
+  `absoluteAge` VARCHAR(65) NULL,
+  `storageAge` VARCHAR(65) NULL,
+  `stage` VARCHAR(65) NULL,
+  `localStage` VARCHAR(65) NULL,
+  `biozone` VARCHAR(130) NULL,
+  `biostratigraphy` VARCHAR(65) NULL COMMENT 'Flora or Fanua',
+  `group` VARCHAR(65) NULL,
+  `formation` VARCHAR(65) NULL,
+  `taxonEnvironment` VARCHAR(65) NULL COMMENT 'Marine or not',
+  `member` VARCHAR(65) NULL,
+  `lithology` VARCHAR(65) NULL,
+  `stratRemarks` VARCHAR(250) NULL,
+  `lithDescription` VARCHAR(250) NULL,
+  `element` VARCHAR(250) NULL,
+  `slideProperties` VARCHAR(1000) NULL,
+  `initialtimestamp` TIMESTAMP NULL DEFAULT current_timestamp,
+  PRIMARY KEY (`paleoID`),
+  INDEX `FK_paleo_occid_idx` (`occid` ASC),
+  CONSTRAINT `FK_paleo_occid`  FOREIGN KEY (`occid`)  REFERENCES `omoccurrences` (`occid`)  ON DELETE CASCADE  ON UPDATE CASCADE
+) COMMENT = 'Occurrence Paleo tables';
+
 
 ALTER TABLE `images` 
   ADD INDEX `Index_images_datelastmod` (`InitialTimeStamp` ASC);
