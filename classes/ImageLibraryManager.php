@@ -417,11 +417,18 @@ class ImageLibraryManager{
 				$this->searchTermsArr["state"] = $str;
 			}
 		}
-		$this->searchTermsArr["phuid"] = '';
-		if(array_key_exists("phuidstr",$_REQUEST)){
-            $phuid = $this->cleanInStr($_REQUEST["phuidstr"]);
-            if($phuid){
-                $this->searchTermsArr["phuid"] = $phuid;
+        //$this->searchTermsArr["phuid"] = '';
+        //if(array_key_exists("phuidstr",$_REQUEST)){
+        //    $phuid = $this->cleanInStr($_REQUEST["phuidstr"]);
+        //    if($phuid){
+        //        $this->searchTermsArr["phuid"] = $phuid;
+        //    }
+        //}
+        $this->searchTermsArr["phjson"] = '';
+        if(array_key_exists("phjson",$_REQUEST)){
+            $phjson = $_REQUEST["phjson"];
+            if($phjson){
+                $this->searchTermsArr["phjson"] = json_decode($phjson);
             }
         }
 		$this->searchTermsArr["tags"] = '';
@@ -603,13 +610,15 @@ class ImageLibraryManager{
         //if(array_key_exists("phuid",$this->searchTermsArr)&&$this->searchTermsArr["phuid"]){
         //    $sqlWhere .= "AND (i.photographeruid IN(".$this->searchTermsArr["phuid"].")) ";
         //}
-        if(array_key_exists("phuidstr",$_REQUEST)){
-            $photographer_array = json_decode($_REQUEST['phjson'],true);
+        if(array_key_exists("phjson",$this->searchTermsArr)){
+            $photographer_array = (array) $this->searchTermsArr['phjson'];
+            //var_dump($photographer_array);
             //echo '<pre>'; print_r($photographer_array);echo '</pre>';
             if(is_array($photographer_array )){
                 $i=0;
                 $sqlWhere .= "AND (";
                 foreach($photographer_array as $photographer){
+                    $photographer = (array) $photographer;
                     $sqlWhere .= " i.photographer = '".$this->conn->real_escape_string($photographer['name'])."' OR ";
                 }
                 $sqlWhere = substr($sqlWhere, 0, -4);
