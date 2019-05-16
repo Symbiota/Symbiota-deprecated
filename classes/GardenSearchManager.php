@@ -179,8 +179,8 @@ UNION SELECT t.tid FROM taxa as t WHERE (((t.SciName)="'.$cs.'"))))';
     public function orderResults($returnArr)
     {
         if($this->orderBy == 'common'){
-            array_multisort(array_column($returnArr, 'common_sort'), SORT_ASC,
-            array_column($returnArr, 'common'),      SORT_ASC,
+            array_multisort(array_column($returnArr, 'common_sort'), SORT_ASC|SORT_NATURAL|SORT_FLAG_CASE,
+            array_column($returnArr, 'common'),      SORT_ASC|SORT_NATURAL|SORT_FLAG_CASE,
             $returnArr);
         }
         return $returnArr;
