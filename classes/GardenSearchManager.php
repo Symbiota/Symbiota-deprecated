@@ -104,29 +104,18 @@ UNION SELECT t.tid FROM taxa as t WHERE (((t.SciName)="'.$cs.'"))))';
         $this->sql = '';
         $sqlWhere = 'WHERE ('.implode(' AND ',$this->sqlWhereArr).') ';
         if($this->display == 'grid'){
-            $sqlSelect = 'SELECT t.TID, t.SciName, v.VernacularName ';
+            $sqlSelect = 'SELECT t.TID, t.SciName ';
             $sqlFrom = 'FROM taxa AS t LEFT JOIN taxaenumtree AS te ON t.TID = te.parenttid ';
-            $sqlFrom .= 'LEFT JOIN taxavernaculars AS v ON t.TID = v.TID ';
-            //joining with images is SLOW!  Comment out next line, and run additional query in loop
-            //$sqlFrom .= 'LEFT JOIN images AS i ON (te.tid = i.tid OR t.TID = i.tid) ';
-            //if(isset($this->searchParamsArr['common'])) $sqlFrom .= 'LEFT JOIN taxavernaculars AS v ON t.TID = v.TID ';
-            //$sqlWhere .= 'AND te.taxauthid = 1 ';
-            $sqlSuffix = 'GROUP BY t.TID ';
-            $sqlSuffix .= $this->orderBy == 'common' ? 'ORDER BY v.VernacularName ' : 'ORDER BY t.SciName ';
         }
         elseif($this->display == 'list'){
             $sqlSelect = 'SELECT t.TID, t.SciName, v.VernacularName, kd.CID, ks.CharStateName, ks.cs ';
             $sqlFrom = 'FROM taxa AS t LEFT JOIN taxavernaculars AS v ON t.TID = v.TID ';
-	        //joining with images is SLOW!  Comment out next line, and run additional query in loop
 	        $sqlFrom .= 'LEFT JOIN kmdescr AS kd ON t.TID = kd.TID ';
             $sqlFrom .= 'LEFT JOIN kmcs AS ks ON kd.CID = ks.cid AND kd.CS = ks.cs ';
-	        //$sqlFrom .= 'LEFT JOIN images AS i ON (t.TID = i.tid) ';
-            //$sqlWhere .= 'AND (kd.CID IN(137,680,683,140,738,684)) ';
-            $sqlSuffix = 'GROUP BY t.TID ';
-            $sqlSuffix .= $this->orderBy == 'common' ? 'ORDER BY v.VernacularName ' : 'ORDER BY t.SciName ';
         }
+        $sqlSuffix = 'GROUP BY t.TID ';
+        $sqlSuffix .= ' ORDER BY t.SciName ';
         $this->sql = $sqlSelect.$sqlFrom.$sqlWhere.$sqlSuffix;
-        //if($this->orderBy == 'common')var_dump($this->sql);
     }
 
     public function getDataArr(){
@@ -139,28 +128,11 @@ UNION SELECT t.tid FROM taxa as t WHERE (((t.SciName)="'.$cs.'"))))';
             $tid = $row->TID;
             if(!isset($returnArr[$cnt]['sciname'])) $returnArr[$cnt]['sciname'] = $row->SciName;
             $returnArr[$cnt]['tid'] = $tid;
-            if(!isset($returnArr[$cnt]['common'])) $returnArr[$cnt]['common'] = $row->VernacularName;
-            if($this->display == 'grid'){
-            	//run query on images table to get thumbnail image.
-	            $sql="SELECT i.thumbnailurl, i.url FROM images AS i WHERE tid = ".$this->conn->escape_string($tid) . " ORDER BY i.sortsequence LIMIT 1";
-	            //show large image instead of thumbnail in grid, as thumb is too small
-	            $imgThumbnail = $this->conn->query($sql)->fetch_object()->url;
-                //prepend image domain if image does not already contain a domain
-                if(array_key_exists("IMAGE_DOMAIN",$GLOBALS)){
-                    if(substr($imgThumbnail,0,1)=="/") $imgThumbnail = $GLOBALS["IMAGE_DOMAIN"].$imgThumbnail;
-                }
-                $returnArr[$cnt]['url'] = $imgThumbnail;
-            }
-            elseif($this->display == 'list'){
-                $cid = $row->CID;
-	            //run query on images table to get thumbnail image.
-	            $sql="SELECT i.thumbnailurl FROM images AS i WHERE tid = ".$this->conn->escape_string($tid) . " ORDER BY i.sortsequence LIMIT 1";
-	            $imgThumbnail = $this->conn->query($sql)->fetch_object()->thumbnailurl;
-	            if(array_key_exists("IMAGE_DOMAIN",$GLOBALS)){
-		            if(substr($imgThumbnail,0,1)=="/") $imgThumbnail = $GLOBALS["IMAGE_DOMAIN"].$imgThumbnail;
-	            }
-		            $returnArr[$cnt]['url'] = $imgThumbnail;
-	            //build additional attribute values
+            $returnArr[$cnt]['url'] = $this->getMainImage($tid);
+            $returnArr[$cnt]['common'] = $this->getVernacularBySortOrder($tid, 1);
+            $returnArr[$cnt]['common_sort'] = $this->getVernacularBySortOrder($tid, 100);
+            if($this->display == 'list'){
+                $returnArr[$cnt]['url'] = $this->getMainImage($tid);
                 $attribs = $this->getGridAttribs($this->conn->escape_string($tid));
                 $returnArr[$cnt]['type'] = $attribs['type'];
                 $returnArr[$cnt]['sunlight'] = $attribs['sunlight'];
@@ -171,6 +143,45 @@ UNION SELECT t.tid FROM taxa as t WHERE (((t.SciName)="'.$cs.'"))))';
             }
         }
         $result->free();
+        $returnArr = $this->orderResults($returnArr);
+        //print_r($returnArr);
+        return $returnArr;
+    }
+
+    public function getVernacularBySortOrder($tid,$sortSequence = 1)
+    {
+        $sql = "Select VernacularName FROM taxavernaculars ";
+        $sql .= "WHERE tid = ";
+        $sql .= $this->conn->escape_string($tid);
+        $sql .= " AND SortSequence = ";
+        $sql .= $this->conn->escape_string($sortSequence);
+        //echo $sql;
+        $result = $this->conn->query($sql);
+        if($result) {
+            $row = $result->fetch_array();
+            return $row['VernacularName'];
+        }
+        return false;
+    }
+
+    public function getMainImage($tid)
+    {
+        $sql="SELECT i.thumbnailurl FROM images AS i WHERE tid = ".$this->conn->escape_string($tid) . " ORDER BY i.sortsequence LIMIT 1";
+        $imgThumbnail = $this->conn->query($sql)->fetch_object()->thumbnailurl;
+        //prepend image domain if image does not already contain a domain
+        if(array_key_exists("IMAGE_DOMAIN",$GLOBALS)){
+            if(substr($imgThumbnail,0,1)=="/") $imgThumbnail = $GLOBALS["IMAGE_DOMAIN"].$imgThumbnail;
+        }
+        return $imgThumbnail;
+    }
+
+    public function orderResults($returnArr)
+    {
+        if($this->orderBy == 'common'){
+            array_multisort(array_column($returnArr, 'common_sort'), SORT_ASC,
+            array_column($returnArr, 'common'),      SORT_ASC,
+            $returnArr);
+        }
         return $returnArr;
     }
 

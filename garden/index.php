@@ -374,7 +374,7 @@ include($serverRoot."/header.php");
                 html += '<div class="searchresultgridcell">';
                 html += '<a href="../taxa/garden.php?taxon='+res[i].tid+'" target="_blank">';
                 if(res[i].url) html += '<img class="searchresultgridimage" src="'+res[i].url+'" title="'+sciname+'" alt="'+sciname+' image" />';
-                html += '<div class="searchresultgridsciname">'+(res[i].common?res[i].common+'<br>':"")+sciname+'</div>';
+                html += '<div class="searchresultgridsciname">'+(res[i].common?res[i].common+' ('+res[i].common_sort+')<br>':"")+sciname+'</div>';
                 html += '</a>';
                 html += '</div>';
             }
