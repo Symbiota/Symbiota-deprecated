@@ -104,8 +104,9 @@ UNION SELECT t.tid FROM taxa as t WHERE (((t.SciName)="'.$cs.'"))))';
         $this->sql = '';
         $sqlWhere = 'WHERE ('.implode(' AND ',$this->sqlWhereArr).') ';
         if($this->display == 'grid'){
-            $sqlSelect = 'SELECT t.TID, t.SciName ';
+            $sqlSelect = 'SELECT t.TID, t.SciName, v.VernacularName ';
             $sqlFrom = 'FROM taxa AS t LEFT JOIN taxaenumtree AS te ON t.TID = te.parenttid ';
+            $sqlFrom .= 'LEFT JOIN taxavernaculars AS v ON t.TID = v.TID ';
         }
         elseif($this->display == 'list'){
             $sqlSelect = 'SELECT t.TID, t.SciName, v.VernacularName, kd.CID, ks.CharStateName, ks.cs ';
