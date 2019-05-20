@@ -56,9 +56,9 @@ $LANG['SPECIMEN_HEADER'] = 'Specimen Criteria:';
 $LANG['CATALOG_NUMBER'] = 'Catalog Number:';
 $LANG['INCLUDE_OTHER_CATNUM'] = 'Include other catalog numbers and GUIDs';
 $LANG['OTHER_CATNUM'] = 'Other Catalog Number:';
-$LANG['TYPE'] = 'Limit to Type Specimens Only';
-$LANG['HAS_IMAGE'] = 'Limit to Specimens with Images Only';
-$LANG['HAS_GENETIC'] = 'Limit to Specimens with Genetic Data Only';
+$LANG['TYPE'] = 'Limit to Type Specimens';
+$LANG['HAS_IMAGE'] = 'Limit to Specimens with Images';
+$LANG['HAS_GENETIC'] = 'Limit to Specimens with Genetic Data';
 
 //Following used in mapboundingbox.php
 $LANG['MBB_TITLE'] = 'Coordinate Mapper';

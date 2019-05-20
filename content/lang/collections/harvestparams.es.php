@@ -56,9 +56,9 @@ $LANG['SPECIMEN_HEADER'] = 'Cat&aacute;logo de la Colecci&oacute;n:';
 $LANG['CATALOG_NUMBER'] = 'N&uacute;mero de Cat&aacute;logo:';
 $LANG['INCLUDE_OTHER_CATNUM'] = 'Includa todos n&uacute;meros de cat&eacute;logo y GUIDs';
 $LANG['OTHER_CATNUM'] = 'Otro N&uacute;mero de Cat&aacute;logo:';
-$LANG['TYPE'] = 'Limitar Solamente a Ejemplares Tipo';
-$LANG['HAS_IMAGE'] = 'Limitar Solamente a Ejemplares con Im&aacute;genes';
-$LANG['HAS_GENETIC'] = 'Limitar Solamente a Ejemplares con datos gen&eacute;ticos';
+$LANG['TYPE'] = 'Limitar a Ejemplares Tipo';
+$LANG['HAS_IMAGE'] = 'Limitar a Ejemplares con Im&aacute;genes';
+$LANG['HAS_GENETIC'] = 'Limitar a Ejemplares con datos gen&eacute;ticos';
 
 //Following used in mapboundingbox.php
 $LANG['MBB_TITLE'] = 'Mapeador de Coordenadas';
