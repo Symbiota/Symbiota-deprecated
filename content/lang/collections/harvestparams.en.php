@@ -55,8 +55,8 @@ $LANG['TITLE_TEXT_4'] = 'End date of range; leave blank if searching for single 
 $LANG['SPECIMEN_HEADER'] = 'Specimen Criteria';
 $LANG['CATALOG_NUMBER'] = 'Catalog Number';
 $LANG['INCLUDE_OTHER_CATNUM'] = 'Include other catalog numbers and GUIDs';
-$LANG['TYPE'] = 'Limit to Type Specimens Only';
-$LANG['HAS_IMAGE'] = 'Limit to Specimens with Images Only';
-$LANG['HAS_GENETIC'] = 'Limit to Specimens with Genetic Data Only';
+$LANG['TYPE'] = 'Limit to Type Specimens';
+$LANG['HAS_IMAGE'] = 'Limit to Specimens with Images';
+$LANG['HAS_GENETIC'] = 'Limit to Specimens with Genetic Data';
 $LANG['INCLUDE_CULTIVATED'] = 'Include cultivated/captive occurrences';
 ?>
