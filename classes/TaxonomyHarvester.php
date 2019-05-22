@@ -856,7 +856,7 @@ class TaxonomyHarvester extends Manager{
 			'class' => 60, 'cl.' => 60, 'subclass' => 70, 'subcl.' => 70, 'infraclass' => 80, 'superorder' => 90, 'superord.' => 90, 'order' => 100, 'ord.' => 100, 'suborder' => 110, 'subord.' => 110,
 			'superfamily' => 130, 'family' => 140, 'fam.' => 140, 'subfamily' => 150, 'tribe' => 160, 'subtribe' => 170, 'genus' => 180, 'gen.' => 180,
 			'subgenus' => 190, 'section' => 200, 'subsection' => 210, 'species' => 220, 'sp.' => 220, 'subspecies' => 230, 'ssp.' => 230, 'subsp.' => 230, 'infraspecies' => 230,
-			'variety' => 240, 'var.' => 240, 'morph' => 240, 'subvariety' => 250, 'form' => 260, 'f.' => 260, 'subform' => 270, 'cultivated' => 300);
+			'variety' => 240, 'var.' => 240, 'morph' => 240, 'subvariety' => 250, 'form' => 260, 'fo.' => 260, 'f.' => 260, 'subform' => 270, 'cultivated' => 300);
 		if(isset($taxonArr['taxonRank']) && $taxonArr['taxonRank']){
 			$taxonRank = strtolower($taxonArr['taxonRank']);
 			if(array_key_exists($taxonRank, $rankArr)){

@@ -170,7 +170,7 @@ class SpecUpload{
 			$outputHeader = true;
 
 			$sql = $this->getPendingImportSql($searchVariables) ;
-			//echo "<div>".$sql."</div>"; exit;
+			//echo "<div>".$sql."</div>";
 			$rs = $this->conn->query($sql);
 			if($rs->num_rows){
 				//Determine which fields have data
@@ -184,7 +184,7 @@ class SpecUpload{
 				$rs->data_seek(0);
 				while($r = $rs->fetch_assoc()){
 					if($outputHeader){
-						fputcsv($outstream,array_keys($fieldMap));
+						fputcsv($outstream,array_keys(array_intersect_key($r, $fieldMap)));
 						$outputHeader = false;
 					}
 					fputcsv($outstream,array_intersect_key($r, $fieldMap));
