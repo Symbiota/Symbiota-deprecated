@@ -304,38 +304,40 @@ class DwcArchiverCore extends Manager{
 					$sqlFrag2 = '';
 					foreach($condArr as $cond => $valueArr){
 						if($cond == 'NULL'){
-							$sqlFrag2 .= 'OR o.'.$field.' IS NULL ';
+							$sqlFrag2 .= 'AND (o.'.$field.' IS NULL) ';
 						}
 						elseif($cond == 'NOTNULL'){
-							$sqlFrag2 .= 'OR o.'.$field.' IS NOT NULL ';
+							$sqlFrag2 .= 'AND (o.'.$field.' IS NOT NULL) ';
 						}
 						elseif($cond == 'EQUALS'){
-							$sqlFrag2 .= 'OR o.'.$field.' IN("'.implode('","',$valueArr).'") ';
+							$sqlFrag2 .= 'AND (o.'.$field.' IN("'.implode('","',$valueArr).'")) ';
 						}
 						elseif($cond == 'NOTEQUALS'){
-							$sqlFrag2 .= 'OR o.'.$field.' NOT IN("'.implode('","',$valueArr).'") ';
+							$sqlFrag2 .= 'AND (o.'.$field.' NOT IN("'.implode('","',$valueArr).'")) ';
 						}
 						else{
+							$sqlFrag3 = '';
 							foreach($valueArr as $value){
 								if($cond == 'STARTS'){
-									$sqlFrag2 .= 'OR o.'.$field.' LIKE "'.$value.'%" ';
+									$sqlFrag3 .= 'OR (o.'.$field.' LIKE "'.$value.'%") ';
 								}
 								elseif($cond == 'LIKE'){
-									$sqlFrag2 .= 'OR o.'.$field.' LIKE "%'.$value.'%" ';
+									$sqlFrag3 .= 'OR (o.'.$field.' LIKE "%'.$value.'%") ';
 								}
 								elseif($cond == 'NOTLIKE'){
-									$sqlFrag2 .= 'OR o.'.$field.' NOT LIKE "%'.$value.'%" ';
+									$sqlFrag3 .= 'OR (o.'.$field.' NOT LIKE "%'.$value.'%") ';
 								}
 								elseif($cond == 'LESSTHAN'){
-									$sqlFrag2 .= 'OR o.'.$field.' < "'.$value.'" ';
+									$sqlFrag3 .= 'OR (o.'.$field.' < "'.$value.'") ';
 								}
 								elseif($cond == 'GREATERTHAN'){
-									$sqlFrag2 .= 'OR o.'.$field.' > "'.$value.'" ';
+									$sqlFrag3 .= 'OR (o.'.$field.' > "'.$value.'") ';
 								}
 							}
+							$sqlFrag2 .= 'AND ('.substr($sqlFrag3,3).') ';
 						}
 					}
-					if($sqlFrag2) $sqlFrag .= 'AND ('.substr($sqlFrag2,3).') ';
+					if($sqlFrag2) $sqlFrag .= 'AND ('.substr($sqlFrag2,4).') ';
 				}
 			}
 		}
