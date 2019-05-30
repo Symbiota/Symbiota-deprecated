@@ -884,10 +884,10 @@ class OccurrenceManager{
 		foreach($this->taxaArr as $taxonName => $taxonArr){
 			$str = $taxonName;
 			if(array_key_exists("sciname",$taxonArr)){
-				$str .= " => ".implode(",",$taxonArr["sciname"]);
+				$str .= " => ".implode(", ",$taxonArr["sciname"]);
 			}
 			if(array_key_exists("synonyms",$taxonArr)){
-				$str .= " (".implode(",",$taxonArr["synonyms"]).")";
+				$str .= " (".implode(", ",$taxonArr["synonyms"]).")";
 			}
 			$returnArr[] = $str;
 		}

@@ -46,7 +46,7 @@ if($collManager->getClName() && $targetTid){
 $htmlStr .= '</div><div style="margin:5px;">';
 $htmlStr .= '<div><b>'.$LANG['DATASET'].':</b> '.$collManager->getDatasetSearchStr().'</div>';
 if($taxaSearchStr = $collManager->getTaxaSearchStr()){
-	$htmlStr .= '<div><b>'.$LANG['TAXA'].':</b> '.$taxaSearchStr.'</div>';
+	$htmlStr .= '<div><b>'.$LANG['TAXA'].':</b> '.wordwrap($taxaSearchStr, 115, "<br />\n", true).'</div>';
 }
 if($localSearchStr = $collManager->getLocalSearchStr()){
 	$htmlStr .= '<div><b>'.$LANG['SEARCH_CRITERIA'].':</b> '.$localSearchStr.'</div>';
