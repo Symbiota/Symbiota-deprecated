@@ -530,7 +530,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 								echo '</div>';
 							}
 							if($occArr['verbatimeventdate']){
-								echo '<div><b>Verbatim Date:</b>'.$occArr['verbatimeventdate'].'</div>';
+								echo '<div><b>Verbatim Date: </b>'.$occArr['verbatimeventdate'].'</div>';
 							}
 						}
 						?>
