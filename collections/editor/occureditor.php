@@ -5,6 +5,12 @@ include_once($SERVER_ROOT.'/classes/ProfileManager.php');
 header("Content-Type: text/html; charset=".$CHARSET);
 header('Access-Control-Allow-Origin: http://www.catalogueoflife.org/col/webservice');
 
+if(!file_exists('../../content/occureditor/occurEditorDefaultConf.php')){
+	echo 'ERROR: Portal is not configured properly. Go to directory '.$_SERVER_ROOT.'/content/occureditor/ and rename all file to remove "_template" for the file name. ';
+	echo 'Alternatively, you can also run the setup.sh file located within the config directory';
+	exit;
+}
+
 $occId = array_key_exists('occid',$_REQUEST)?$_REQUEST['occid']:'';
 $tabTarget = array_key_exists('tabtarget',$_REQUEST)?$_REQUEST['tabtarget']:0;
 $collId = array_key_exists('collid',$_REQUEST)?$_REQUEST['collid']:0;
@@ -50,38 +56,11 @@ if($SYMB_UID){
 	$occManager->setOccId($occId);
 	$occManager->setCollId($collId);
 	$collMap = $occManager->getCollMap();
-	if(isset($collMap['collid']) && $collId != $collMap['collid']){
-		$collId = $collMap['collid'];
-		$occManager->setCollId($collId);
-	}
+	if($occManager->getCollId() && $collId != $occManager->getCollId()) $collId = $occManager->getCollId();
+	if($collMap && $collMap['colltype'] == 'General Observations') $isGenObs = 1;
 
-	if($collMap && $collMap['colltype']=='General Observations') $isGenObs = 1;
-
-	//Bring in config variables
-	if($isGenObs){
-		if(file_exists('includes/config/occurVarGenObs'.$SYMB_UID.'.php')){
-			//Specific to particular collection
-			include('includes/config/occurVarGenObs'.$SYMB_UID.'.php');
-		}
-		elseif(file_exists('includes/config/occurVarGenObsDefault.php')){
-			//Specific to Default values for portal
-			include('includes/config/occurVarGenObsDefault.php');
-		}
-	}
-	else{
-		if($collId && file_exists('includes/config/occurVarColl'.$collId.'.php')){
-			//Specific to particular collection
-			include('includes/config/occurVarColl'.$collId.'.php');
-		}
-		elseif(file_exists('includes/config/occurVarDefault.php')){
-			//Specific to Default values for portal
-			include('includes/config/occurVarDefault.php');
-		}
-		if($crowdSourceMode && file_exists('includes/config/crowdSourceVar.php')){
-			//Specific to Crowdsourcing
-			include('includes/config/crowdSourceVar.php');
-		}
-	}
+	//Need to set 3 kinds of config vars: 1) default portal settings, collection defined, and user defined
+	include('../../content/occureditor/occurEditorDefaultConf.php');
 
 	$isEditor = 0;
 	//0 = not editor, 1 = admin, 2 = editor, 3 = taxon editor, 4 = crowdsource editor or collection allows public edits
@@ -223,7 +202,7 @@ if($SYMB_UID){
 			}
 			elseif($action == "Remap Image"){
 				if($occManager->remapImage($_POST["imgid"], $_POST["targetoccid"])){
-					$statusStr = 'SUCCESS: Image remapped to record <a href="occurrenceeditor.php?occid='.$_POST["targetoccid"].'" target="_blank">'.$_POST["targetoccid"].'</a>';
+					$statusStr = 'SUCCESS: Image remapped to record <a href="occureditor.php?occid='.$_POST["targetoccid"].'" target="_blank">'.$_POST["targetoccid"].'</a>';
 				}
 				else{
 					$statusStr = 'ERROR linking image to new specimen: '.$occManager->getErrorStr();
@@ -322,10 +301,10 @@ if($SYMB_UID){
 				$collMap = $occManager->getCollMap();
 				//if(isset($collMap['collid'])) $collId = $collMap['collid'];
 				if(!$isEditor){
-					if(isset($USER_RIGHTS["CollAdmin"]) && in_array($collMap['collid'],$USER_RIGHTS["CollAdmin"])){
+					if(isset($USER_RIGHTS["CollAdmin"]) && in_array($occManager->getCollId(),$USER_RIGHTS["CollAdmin"])){
 						$isEditor = 1;
 					}
-					elseif(isset($USER_RIGHTS["CollEditor"]) && in_array($collMap['collid'],$USER_RIGHTS["CollEditor"])){
+					elseif(isset($USER_RIGHTS["CollEditor"]) && in_array($occManager->getCollId(),$USER_RIGHTS["CollEditor"])){
 						$isEditor = 1;
 					}
 				}
@@ -363,7 +342,7 @@ if($SYMB_UID){
 			if($occIndex<$qryCnt-1) $navStr .= '</a> ';
 			if(!$crowdSourceMode){
 				$navStr .= '&nbsp;&nbsp;&nbsp;&nbsp;';
-				$navStr .= '<a href="occurrenceeditor.php?gotomode=1&collid='.$collId.'" onclick="return verifyLeaveForm()" title="New Record">&gt;*</a>';
+				$navStr .= '<a href="occureditor.php?gotomode=1&collid='.$collId.'" onclick="return verifyLeaveForm()" title="New Record">&gt;*</a>';
 			}
 			$navStr .= '</b>';
 		}
@@ -396,7 +375,7 @@ if($SYMB_UID){
 
 }
 else{
-	header('Location: ../../profile/index.php?refurl=../collections/editor/occurrenceeditor.php?'.$_SERVER['QUERY_STRING']);
+	header('Location: ../../profile/index.php?refurl=../collections/editor/occureditor.php?'.$_SERVER['QUERY_STRING']);
 }
 ?>
 <html>
@@ -404,32 +383,19 @@ else{
 	<meta http-equiv="Content-Type" content="text/html; charset=<?php echo $CHARSET; ?>">
 	<title><?php echo $DEFAULT_TITLE; ?> Occurrence Editor</title>
 	<link href="../../css/jquery-ui.css" type="text/css" rel="stylesheet" />
-    <?php
-    if($crowdSourceMode == 1){
-		?>
-		<link href="includes/config/occureditorcrowdsource.css?ver=1811" type="text/css" rel="stylesheet" id="editorCssLink" />
-		<?php
-    }
-    else{
-		?>
-		<link href="../../css/occureditor.css?ver=181127" type="text/css" rel="stylesheet" id="editorCssLink" />
-		<?php
-		if(isset($CSSARR)){
-			foreach($CSSARR as $cssVal){
-				echo '<link href="includes/config/'.$cssVal.'?ver=170601" type="text/css" rel="stylesheet" />';
-			}
-		}
-		if(isset($JSARR)){
-			foreach($JSARR as $jsVal){
-				echo '<script src="includes/config/'.$jsVal.'?ver=170601" type="text/javascript"></script>';
-			}
-		}
+	<?php
+	foreach($CSS_ARR as $cssKey => $cssFile){
+		echo '<link href="'.$CLIENT_ROOT.'/content/occureditor/'.$cssFile.'?ver='.$CACHE_VERSION.'" type="text/css" rel="stylesheet" />'."\n";
 	}
-    ?>
+	if($crowdSourceMode == 1) echo '<link href="'.$CLIENT_ROOT.'/content/occureditor/occureditorcrowdsource.css?ver='.$CACHE_VERSION.'" type="text/css" rel="stylesheet" />'."\n";
+	foreach($JS_ARR as $jsVal){
+		echo '<script src="includes/config/'.$jsVal.'?ver=170601" type="text/javascript"></script>';
+	}
+	?>
 	<script src="../../js/jquery.js?ver=140310" type="text/javascript"></script>
 	<script src="../../js/jquery-ui.js?ver=140310" type="text/javascript"></script>
 	<script type="text/javascript">
-		var collId = "<?php echo (isset($collMap['collid'])?$collMap['collid']:$collId); ?>";
+		var collId = "<?php echo $occManager->getCollId(); ?>";
 		var csMode = "<?php echo $crowdSourceMode; ?>";
 		var tabTarget = <?php echo (is_numeric($tabTarget)?$tabTarget:'0'); ?>;
 		var imgArr = [];
@@ -448,15 +414,15 @@ else{
 		?>
 
 		function requestImage(){
-            $.ajax({
-                type: "POST",
-                url: 'rpc/makeactionrequest.php',
-                data: { <?php echo " occid: '$occId' , "; ?> requesttype: 'Image' },
-                success: function( response ) {
-                   $('div#imagerequestresult').html(response);
-                }
-            });
-        }
+			$.ajax({
+				type: "POST",
+				url: 'rpc/makeactionrequest.php',
+				data: { <?php echo " occid: '$occId' , "; ?> requesttype: 'Image' },
+				success: function( response ) {
+				   $('div#imagerequestresult').html(response);
+				}
+			});
+		}
 
 	</script>
 	<script src="../../js/symb/collections.coordinateValidation.js?ver=170310" type="text/javascript"></script>
@@ -530,7 +496,7 @@ else{
 							else{
 								if($isEditor == 1 || $isEditor == 2){
 									?>
-									<a href="../misc/collprofiles.php?collid=<?php echo (isset($collMap['collid'])?$collMap['collid']:$collId); ?>&emode=1" onclick="return verifyLeaveForm()">Collection Management</a> &gt;&gt;
+									<a href="../misc/collprofiles.php?collid=<?php echo $occManager->getCollId(); ?>&emode=1" onclick="return verifyLeaveForm()">Collection Management</a> &gt;&gt;
 									<?php
 								}
 							}
@@ -650,7 +616,7 @@ else{
 									?>
 								</ul>
 								<div id="occdiv">
-									<form id="fullform" name="fullform" action="occurrenceeditor.php" method="post" onsubmit="return verifyFullForm(this);">
+									<form id="fullform" name="fullform" action="occureditor.php" method="post" onsubmit="return verifyFullForm(this);">
 										<fieldset>
 											<legend><b>Collector Info</b></legend>
 											<?php
@@ -770,10 +736,10 @@ else{
 													<input type="text" name="startdayofyear" tabindex="24" value="<?php echo array_key_exists('startdayofyear',$occArr)?$occArr['startdayofyear']:''; ?>" onchange="inputIsNumeric(this, 'Start Day of Year');fieldChanged('startdayofyear');" title="Start Day of Year" /> -
 													<input type="text" name="enddayofyear" tabindex="26" value="<?php echo array_key_exists('enddayofyear',$occArr)?$occArr['enddayofyear']:''; ?>" onchange="inputIsNumeric(this, 'End Day of Year');fieldChanged('enddayofyear');" title="End Day of Year" />
 												</div>
-                                                <div id="endDateDiv">
-                                                    <?php echo (defined('ENDDATELABEL')?ENDDATELABEL:'Calculate End Day of Year'); ?>:
-                                                    <input type="text" id="endDate" value="" onchange="endDateChanged();" />
-                                                </div>
+												<div id="endDateDiv">
+													<?php echo (defined('ENDDATELABEL')?ENDDATELABEL:'Calculate End Day of Year'); ?>:
+													<input type="text" id="endDate" value="" onchange="endDateChanged();" />
+												</div>
 											</div>
 											<?php
 											if(isset($ACTIVATE_EXSICCATI) && $ACTIVATE_EXSICCATI){
@@ -1358,10 +1324,10 @@ else{
 														?>
 													</select>
 												</div>
-                                                <div id="dataGeneralizationsDiv" title="aka data generalizations">
-                                                    <?php echo (defined('DATAGENERALIZATIONSLABEL')?DATAGENERALIZATIONSLABEL:'Data Generalizations'); ?><br/>
-                                                    <input type="text" name="datageneralizations" tabindex="121" value="<?php echo array_key_exists('datageneralizations',$occArr)?$occArr['datageneralizations']:''; ?>" onchange="fieldChanged('datageneralizations');" />
-                                                </div>
+												<div id="dataGeneralizationsDiv" title="aka data generalizations">
+													<?php echo (defined('DATAGENERALIZATIONSLABEL')?DATAGENERALIZATIONSLABEL:'Data Generalizations'); ?><br/>
+													<input type="text" name="datageneralizations" tabindex="121" value="<?php echo array_key_exists('datageneralizations',$occArr)?$occArr['datageneralizations']:''; ?>" onchange="fieldChanged('datageneralizations');" />
+												</div>
 											</div>
 											<?php
 											if($occId){

@@ -39,7 +39,7 @@ function toggleCoordDiv(){
 	}
 }
 
-function toggleCsMode(modeId){
+function toggleCsMode(modeId){ 
 	if(modeId == 1){
 		document.getElementById("editorCssLink").href = "includes/config/occureditorcrowdsource.css?ver=170201";
 		document.getElementById("longtagspan").style.display = "block";

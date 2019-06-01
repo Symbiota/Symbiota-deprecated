@@ -53,31 +53,36 @@ class OccurrenceEditorManager {
 		if(!$this->isShareConn && $this->conn !== false) $this->conn->close();
 	}
 
-
 	public function getCollMap(){
-		if(!$this->collMap){
-			if(!$this->occid && !$this->collId) return null;
-			$sql = 'SELECT c.collid, c.collectionname, c.institutioncode, c.collectioncode, c.colltype, c.managementtype, c.publicedits FROM omcollections c ';
-			if($this->occid){
-				$sql .= 'INNER JOIN omoccurrences o ON c.collid = o.collid WHERE (o.occid = '.$this->occid.')';
-			}
-			elseif($this->collId){
-				$sql .= 'WHERE (c.collid = '.$this->collId.')';
-			}
-			$rs = $this->conn->query($sql);
-			if($row = $rs->fetch_object()){
-				$this->collMap['collid'] = $row->collid;
-				$this->collMap['collectionname'] = $this->cleanOutStr($row->collectionname);
-				$this->collMap['institutioncode'] = $row->institutioncode;
-				$this->collMap['collectioncode'] = $row->collectioncode;
-				$this->collMap['colltype'] = $row->colltype;
-				$this->collMap['managementtype'] = $row->managementtype;
-				$this->collMap['publicedits'] = $row->publicedits;
-			}
-			$rs->free();
-		}
-		if($this->collMap && !$this->collId) $this->collId = $this->collMap['collid'];
+		if(!$this->collMap) $this->setCollMap();
 		return $this->collMap;
+	}
+
+	private function setCollMap(){
+		if(!$this->collMap){
+			if(!$this->occid && !$this->collId) return false;
+			if(!$this->collId){
+				$sql = 'SELECT collid FROM omoccurrences WHERE occid = '.$this->occid;
+				$rs = $this->conn->query($sql);
+				if($r = $rs->fetch_object()){
+					$this->collId = $r->collid;
+				}
+				$rs->free();
+			}
+			if($this->collId){
+				//$sql = 'SELECT collid, collectionname, institutioncode, collectioncode, colltype, managementtype, publicedits, dynamicproperties FROM omcollections WHERE (collid = '.$this->collId.')';
+				$sql = 'SELECT * FROM omcollections WHERE (collid = '.$this->collId.')';
+				$rs = $this->conn->query($sql);
+				if($row = $rs->fetch_assoc()){
+					$this->collMap = array_change_key_case($row);
+					$this->collMap['collectionname'] = $this->cleanOutStr($row->collectionname);
+				}
+				$rs->free();
+			}
+			else{
+				return false;
+			}
+		}
 	}
 
 	public function setQueryVariables($overrideQry = false){
@@ -662,7 +667,7 @@ class OccurrenceEditorManager {
 			if($indexArr) $this->occidIndexArr = $indexArr;
 			if($retArr && count($retArr) == 1){
 				if(!$this->occid) $this->occid = key($retArr);
-				if(!$this->collMap) $this->getCollMap();
+				if(!$this->collMap) $this->setCollMap();
 				if(!$retArr[$this->occid]['institutioncode']) $retArr[$this->occid]['institutioncode'] = $this->collMap['institutioncode'];
 				if(!$retArr[$this->occid]['collectioncode']) $retArr[$this->occid]['collectioncode'] = $this->collMap['collectioncode'];
 				if(!$retArr[$this->occid]['ownerinstitutioncode']) $retArr[$this->occid]['ownerinstitutioncode'] = $this->collMap['institutioncode'];
@@ -1170,7 +1175,7 @@ class OccurrenceEditorManager {
 				$archiveObj = json_encode($archiveArr);
 				$sqlArchive = 'UPDATE guidoccurrences '.
 					'SET archivestatus = 1, archiveobj = "'.$this->cleanInStr($this->encodeStrTargeted($archiveObj,'utf8',$CHARSET)).'" '.
-				'WHERE (occid = '.$delOccid.')';
+					'WHERE (occid = '.$delOccid.')';
 				//echo $sqlArchive;
 				$this->conn->query($sqlArchive);
 			}
@@ -2108,9 +2113,7 @@ class OccurrenceEditorManager {
 	}
 
 	public function getCollId(){
-		if(!$this->collId){
-			$this->getCollMap();
-		}
+		if(!$this->collId) $this->setCollMap();
 		return $this->collId;
 	}
 

@@ -241,16 +241,6 @@ $(document).ready(function() {
 	if(getCookie("autodupe") == 1) editForm.autodupe.checked = true; 
 });
 
-function toggleStyle(){
-	var cssObj = document.getElementById('editorCssLink');
-	if(cssObj.href == "../../css/occureditorcrowdsource.css?ver=20150402"){
-		cssObj.href = "../../css/occureditor.css?ver=20150402";
-	}
-	else{
-		cssObj.href = "../../css/occureditorcrowdsource.css?ver=20150402";
-	}
-}
-
 function toggleQueryForm(){
 	toggle("querydiv");
 	var statusDiv = document.getElementById('statusdiv');

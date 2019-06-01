@@ -20,6 +20,11 @@ cp ../css/jquery-ui_template.css ../css/jquery-ui.css
 echo "Creating default Data Usage Policy page: /misc/usagepolicy_template.php"
 cp ../misc/usagepolicy_template.php ../misc/usagepolicy.php
 
+#Occurrence Editor config files
+echo "Creating occurrence editor default configuration file"
+cp occurEditorDefaultConf_template.php occurEditorDefaultConf.php
+
+
 #Adjust file permission to give write access to certain folders and files
 echo "Adjusting file permissions"
 chmod 777 ../webservices/dwc/rss.xml
