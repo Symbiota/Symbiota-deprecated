@@ -567,7 +567,7 @@ class OccurrenceCollectionProfile {
 
 	public function setAggKeys($aggKeyArr){
 		if($aggKeyArr){
-			if(isset($aggKeyArr['organizationKey']) && $aggKeyArr['organizationKey']) $this->organizationKey = $aggKeyArr['organizationKey'];
+			if(isset($aggKeyArr['organizationKey'])) $this->organizationKey = $aggKeyArr['organizationKey'];
 			if(isset($aggKeyArr['installationKey']) && $aggKeyArr['installationKey']) $this->installationKey = $aggKeyArr['installationKey'];
 			if(isset($aggKeyArr['datasetKey']) && $aggKeyArr['datasetKey']) $this->datasetKey = $aggKeyArr['datasetKey'];
 			if(isset($aggKeyArr['endpointKey']) && $aggKeyArr['endpointKey']) $this->endpointKey = $aggKeyArr['endpointKey'];
@@ -635,14 +635,12 @@ class OccurrenceCollectionProfile {
 			if($this->datasetKey) $aggKeyArr['datasetKey'] = $this->datasetKey;
 			if($this->endpointKey) $aggKeyArr['endpointKey'] = $this->endpointKey;
 			if($this->idigbioKey) $aggKeyArr['idigbioKey'] = $this->idigbioKey;
-			if($aggKeyArr){
-				$conn = MySQLiConnectionFactory::getCon("write");
-				$sql = 'UPDATE omcollections SET aggKeysStr = "'.$this->cleanInStr(json_encode($aggKeyArr)).'" WHERE (collid = '.$this->collid.')';
-				if(!$conn->query($sql)){
-					return 'ERROR saving key: '.$conn->error;
-				}
-				$conn->close();
+			$conn = MySQLiConnectionFactory::getCon("write");
+			$sql = 'UPDATE omcollections SET aggKeysStr = '.($aggKeyArr?'"'.$this->cleanInStr(json_encode($aggKeyArr)).'"':'NULL').' WHERE (collid = '.$this->collid.')';
+			if(!$conn->query($sql)){
+				return 'ERROR saving key: '.$conn->error;
 			}
+			$conn->close();
 		}
 		return $status;
 	}

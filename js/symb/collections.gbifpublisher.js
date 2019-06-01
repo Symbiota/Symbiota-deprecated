@@ -101,22 +101,6 @@ function callGbifCurl(type,url,data){
 	return key;
 }
 
-function getOrganization(f){
-	var urlStr = "http://api.gbif.org/v1/organization/" + f.organizationKey.value;
-	$.ajax({
-		method: "GET",
-		dateType: "json",
-		url: urlStr
-	})
-	.done(function( retJson ) {
-		$("#validKeyMsg").show();
-		f.formsubmit.disabled = false;
-	})
-	.fail(function() {
-		alert("Key does not appear to be valid. Please contact your portal administrator for assistance.");
-	});
-}
-
 function datasetExists(f){
 	if(f.dwcUri.value != ""){
 		var urlStr = f.dwcUri.value;
