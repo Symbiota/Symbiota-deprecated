@@ -372,7 +372,7 @@ include($SERVER_ROOT. '/header.php');
 							<input type="hidden" id="endpointKey" name="endpointKey" value="" />
 							<input type="hidden" id="dwcUri" name="dwcUri" value="<?php echo $dwcUri; ?>" />
 							<input type="hidden" name="formsubmit" value="savekey" />
-							<button type="submit" id="validatebtn" name="validate" disabled>Validate &amp; Save Key</button>
+							<button type="submit" id="validatebtn" name="validate" disabled>Validate Key</button>
 							<?php
 							if($collManager->getOrganizationKey()){
 								?>
@@ -391,9 +391,10 @@ include($SERVER_ROOT. '/header.php');
 										'Symbiota collection:%20'.$collPath.'%0A%0A'.
 										'Sincerely, %0A%0A%0A%0A%0A%0A';
 									?>
-									Before submitting your data to GBIF, you will need to contact GBIF
+									Before submitting your data to GBIF, you will need to contact GBIF helpdesk
 									(<a href="mailto:helpdesk@gbif.org?subject=Publishing%20data%20from%20Symbiota%20portal%20to%20GBIF...&body=<?php echo $bodyStr; ?>">helpdesk@gbif.org</a>)
-									requesting that the <b><?php echo $GBIF_USERNAME; ?></b> GBIF user is given permission to create and update datasets for your collection.
+									with a request for the GBIF account (GBIF user: <b><?php echo $GBIF_USERNAME; ?></b>) associated with the Symbiota portal installation
+									to be provided permission to create and update datasets within your GBIF publishing instance.
 									Click on the email address above to automatically generate an email message within your email client.<br/><br/>
 									<button type="button" onclick="processGbifOrgKey(this.form);">Submit Data</button>
 									<img id="workingcircle" src="../../images/ajax-loader_sm.gif" style="margin-bottom:-4px;width:20px;display:none;" />
