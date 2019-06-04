@@ -383,19 +383,22 @@ include($SERVER_ROOT. '/header.php');
 									$collPath .= $_SERVER["SERVER_NAME"];
 									if($_SERVER["SERVER_PORT"] && $_SERVER["SERVER_PORT"] != 80) $collPath .= ':'.$_SERVER["SERVER_PORT"];
 									$collPath .= $CLIENT_ROOT.'/collections/misc/collprofiles.php?collid='.$collid;
-									$bodyStr = 'Please%20provide%20the%20following%20GBIF%20user%20permission%20to%20create%20and%20update%20datasets%20for%20the%20following%20GBIF%20publisher.%0A'.
-										'Once%20these%20permissions%20are%20assigned,%20we%20will%20be%20pushing%20a%20DwC-Archive%20from%20the%20following%20Symbiota%20collection%20to%20GBIF.%0A%0A'.
-										'GBIF%20user:%20'.$GBIF_USERNAME.'%0A'.
-										'GBIF%20publisher%20identifier:%20'.$collManager->getOrganizationKey().'%0A'.
-										'GBIF%20publisher:%20https://www.gbif.org/publisher/'.$collManager->getOrganizationKey().'%0A'.
-										'Symbiota collection:%20'.$collPath.'%0A%0A'.
-										'Sincerely, %0A%0A%0A%0A%0A%0A';
+									$bodyStr = 'Please provide the following GBIF user permission to create and update datasets for the following GBIF publisher.<br/>'.
+										'Once these permissions are assigned, we will be pushing a DwC-Archive from the following Symbiota collection to GBIF.<br/><br/>'.
+										'GBIF user: '.$GBIF_USERNAME.'<br/>'.
+										'GBIF publisher identifier: '.$collManager->getOrganizationKey().'<br/>'.
+										'GBIF publisher: https://www.gbif.org/publisher/'.$collManager->getOrganizationKey().'<br/>'.
+										'Symbiota collection: '.$collPath.'<br/><br/>'.
+										'Sincerely, <br/><br/><br/><br/><br/><br/>';
 									?>
 									Before submitting your data to GBIF, you will need to contact GBIF helpdesk
-									(<a href="mailto:helpdesk@gbif.org?subject=Publishing%20data%20from%20Symbiota%20portal%20to%20GBIF...&body=<?php echo $bodyStr; ?>">helpdesk@gbif.org</a>)
-									with a request for the GBIF account (GBIF user: <b><?php echo $GBIF_USERNAME; ?></b>) associated with the Symbiota portal installation
-									to be provided permission to create and update datasets within your GBIF publishing instance.
-									Click on the email address above to automatically generate an email message within your email client.<br/><br/>
+									(<a href="mailto:helpdesk@gbif.org?subject=Publishing%20data%20from%20Symbiota%20portal%20to%20GBIF...&body=<?php echo rawurlencode(str_replace('<br/>', "\n", $bodyStr)); ?>">helpdesk@gbif.org</a>)
+									with a request for the GBIF account user &quot;<b><?php echo $GBIF_USERNAME; ?></b>&quot; that is associated with this Symbiota portal installation
+									to be provided permission to create datasets within your GBIF publishing instance.
+									Click the email address in the previous sentence to automatically generate an email message within your email client,
+									or click <a href="#" onclick="toggle('emailMsg');return false;" style="color:blue">here</a> to display a recommended draft email message.
+									<fieldset id="emailMsg" style="display:none;padding:15px;margin:15px"><legend>Email Draft</legend><?php echo trim($bodyStr,' <br/>'); ?></fieldset>
+									<br/><br/>
 									<button type="button" onclick="processGbifOrgKey(this.form);">Submit Data</button>
 									<img id="workingcircle" src="../../images/ajax-loader_sm.gif" style="margin-bottom:-4px;width:20px;display:none;" />
 								</div>
