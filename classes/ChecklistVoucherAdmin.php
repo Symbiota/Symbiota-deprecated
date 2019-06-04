@@ -40,7 +40,7 @@ class ChecklistVoucherAdmin {
 				$childStr = "";
 				$rsChild = $this->conn->query($sql);
 				while($r = $rsChild->fetch_object()){
-					$this->childClidArr[$r->clidchild] = $r->name;
+					$this->childClidArr[] = $r->clidchild;
 					$childStr .= ','.$r->clidchild;
 				}
 				$sql = $sqlBase.substr($childStr,1).')';

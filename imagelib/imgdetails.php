@@ -9,7 +9,7 @@ $eMode = array_key_exists("emode",$_REQUEST)?$_REQUEST["emode"]:0;
 
 $imgManager = new ImageDetailManager($imgId,($action?'write':'readonly'));
 
-$imgArr = $imgManager->getImageMetadata($imgId);
+$imgArr = $imgManager->getImageMetadata();
 $isEditor = false;
 if($IS_ADMIN || $imgArr["username"] === $USERNAME || ($imgArr["photographeruid"] && $imgArr["photographeruid"] == $SYMB_UID)){
     $isEditor = true;

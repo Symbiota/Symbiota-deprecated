@@ -321,7 +321,7 @@ class ChecklistVoucherReport extends ChecklistVoucherAdmin {
 		if($this->childClidArr){
 			$clidStr .= ','.implode(',',$this->childClidArr);
 		}
-		$sql = 'SELECT '.$idType.' as id FROM fmvouchers WHERE CLID IN('.$clidStr.')';
+		$sql = 'SELECT DISTINCT '.$idType.' as id FROM fmvouchers WHERE CLID IN('.$clidStr.')';
 		$rs = $this->conn->query($sql);
 		while($r = $rs->fetch_object()){
 			$retArr[] = $r->id;
