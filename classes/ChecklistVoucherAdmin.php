@@ -366,7 +366,7 @@ class ChecklistVoucherAdmin {
 		return $retStatus;
 	}
 
-	public function linkVoucher($taxa,$occid){
+	public function linkVoucher($taxa,$occid,$morphoSpecies=""){
 		if(!is_numeric($taxa)){
 			$rs = $this->conn->query('SELECT tid FROM taxa WHERE (sciname = "'.$this->conn->real_escape_string($taxa).'")');
 			if($r = $rs->fetch_object()){
@@ -384,7 +384,7 @@ class ChecklistVoucherAdmin {
 			}
 			else{
 				//trigger_error('Attempting to resolve by adding species to checklist; '.$this->conn->error,E_USER_WARNING);
-				$sql2 = 'INSERT INTO fmchklsttaxalink(tid,clid) VALUES('.$taxa.','.$this->clid.')';
+				$sql2 = 'INSERT INTO fmchklsttaxalink(tid,clid,morphospecies) VALUES('.$taxa.','.$this->clid.',"'.$morphoSpecies.'")';
 				if($this->conn->query($sql2)){
 					if($this->conn->query($sql)){
 						return 1;
@@ -458,11 +458,11 @@ class ChecklistVoucherAdmin {
 				$tidVoucher = $r1->tidinterpreted;
 			}
 			$rs1->free();
-			//Make sure
+			//Make sure target name is already linked to checklist
 			$sql2 = 'INSERT IGNORE INTO fmchklsttaxalink(tid, clid, morphospecies, familyoverride, habitat, abundance, notes, explicitExclude, source, internalnotes, dynamicProperties) '.
-					'SELECT '.$tidVoucher.' as tid, c.clid, c.morphospecies, c.familyoverride, c.habitat, c.abundance, c.notes, c.explicitExclude, c.source, c.internalnotes, c.dynamicProperties '.
-					'FROM fmchklsttaxalink c INNER JOIN fmvouchers v ON c.tid = v.tid AND c.clid = v.clid '.
-					'WHERE (c.clid = '.$this->clid.') AND (v.occid = '.$occid.')';
+				'SELECT '.$tidVoucher.' as tid, c.clid, c.morphospecies, c.familyoverride, c.habitat, c.abundance, c.notes, c.explicitExclude, c.source, c.internalnotes, c.dynamicProperties '.
+				'FROM fmchklsttaxalink c INNER JOIN fmvouchers v ON c.tid = v.tid AND c.clid = v.clid '.
+				'WHERE (c.clid = '.$this->clid.') AND (v.occid = '.$occid.')';
 			$this->conn->query($sql2);
 			//Transfer voucher to new name
 			$sql3 = 'UPDATE fmvouchers SET tid = '.$tidVoucher.' WHERE (clid = '.$this->clid.') AND (occid = '.$occid.')';
@@ -471,7 +471,7 @@ class ChecklistVoucherAdmin {
 		if(array_key_exists('removetaxa',$postArr)){
 			//Remove taxa where all vouchers have been removed
 			$sql4 = 'DELETE c.* FROM fmchklsttaxalink c LEFT JOIN fmvouchers v ON c.clid = v.clid AND c.tid = v.tid '.
-					'WHERE (c.clid = '.$this->clid.') AND (c.tid IN('.implode(',', $removeTidArr).')) AND (v.clid IS NULL)';
+				'WHERE (c.clid = '.$this->clid.') AND (c.tid IN('.implode(',', $removeTidArr).')) AND (v.clid IS NULL)';
 			$this->conn->query($sql4);
 		}
 	}

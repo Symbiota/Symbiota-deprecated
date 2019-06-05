@@ -70,7 +70,7 @@ function initAutoComplete(formElem){
 	});
 }
 
-function linkVoucher(occidIn, clidIn){
+function linkVoucher(occidIn, clidIn){ 
 	$.ajax({
 		type: "POST",
 		url: "rpc/linkvoucher.php",
