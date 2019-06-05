@@ -229,6 +229,9 @@ class ChecklistManager {
 					if($row->source) $clStr .= ", <u>source</u>: ".$row->source;
 					if($clStr) $this->taxaList[$tid]["notes"] = substr($clStr,2);
 				}
+				//$morphoStr = $row->morphospecies;
+				//if(!$morphoStr) $morphoStr = 0;
+				//$this->taxaList[$tid][$morphoStr]['sciname'] = $sciName;
 				$this->taxaList[$tid]['sciname'] = $sciName;
 				$this->taxaList[$tid]['family'] = $family;
 				$this->taxaList[$tid]['taxongroup'] = '<i>'.$taxonGroup.'</i>';
@@ -546,7 +549,7 @@ class ChecklistManager {
 			if($this->childClidArr){
 				$clidStr .= ','.implode(',',array_keys($this->childClidArr));
 			}
-			$this->basicSql = 'SELECT t.tid, ctl.clid, t.sciname, t.author, t.unitname1, t.rankid, ctl.habitat, ctl.abundance, ctl.notes, ctl.source, ts.parenttid, ';
+			$this->basicSql = 'SELECT t.tid, ctl.clid, CONCAT_WS(" ",t.sciname, ctl.morphospecies) as sciname, t.author, t.unitname1, t.rankid, ctl.habitat, ctl.abundance, ctl.notes, ctl.source, ts.parenttid, ';
 			if($this->thesFilter){
 				$this->basicSql .= 'ts2.family FROM taxa t INNER JOIN taxstatus ts ON t.tid = ts.tidaccepted '.
 					'INNER JOIN fmchklsttaxalink ctl ON ts.tid = ctl.tid '.
@@ -734,11 +737,10 @@ class ChecklistManager {
 		$term = preg_replace('/\s{1}x{1}\s{0,1}$/i', ' _ ', $term);
 		$term = preg_replace('/\s{1}[\D]{1}\s{1}/i', ' _ ', $term);
 		if($term){
-			$sql = 'SELECT tid, sciname FROM taxa WHERE (rankid > 179) AND (sciname LIKE "'.$term.'%") ORDER BY sciname';
+			$sql = 'SELECT tid, sciname FROM taxa WHERE (rankid > 179) AND (sciname LIKE "'.$term.'%")';
 			$rs = $this->conn->query($sql);
 			while($r = $rs->fetch_object()){
-				$retArr[$r->tid]['id'] = $r->tid;
-				$retArr[$r->tid]['value'] = $r->sciname;
+				$retArr[] = $r->sciname;
 			}
 			$rs->free();
 		}

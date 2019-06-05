@@ -34,6 +34,7 @@ $LANG['DISPLAYIMG'] = 'Mostrar como Im&aacute;genes';
 $LANG['SYNONYMS'] = 'Sin&oacute;nimos';
 $LANG['NEWSPECIES'] = 'Agregar Especie Nueva al Listado de Comprobaci&oacute;n';
 $LANG['TAXON'] = 'Tax&oacute;n';
+$LANG['MORPHOSPECIES'] = 'Morfoespecies Sufijo';
 $LANG['FAMILYOVERRIDE'] = 'Ignorar Familia';
 $LANG['HABITAT'] = 'H&aacute;bitat';
 $LANG['ABUNDANCE'] = 'Abundancia';

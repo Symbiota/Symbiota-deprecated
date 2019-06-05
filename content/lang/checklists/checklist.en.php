@@ -34,6 +34,7 @@ $LANG['DISPLAYIMG'] = 'Display as Images';
 $LANG['SYNONYMS'] = 'Synonyms';
 $LANG['NEWSPECIES'] = 'Add New Species to Checklist';
 $LANG['TAXON'] = 'Taxon';
+$LANG['MORPHOSPECIES'] = 'Morphospecies Suffix';
 $LANG['FAMILYOVERRIDE'] = 'Family Override';
 $LANG['HABITAT'] = 'Habitat';
 $LANG['ABUNDANCE'] = 'Abundance';

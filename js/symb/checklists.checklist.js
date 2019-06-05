@@ -16,6 +16,12 @@ $(document).ready(function() {
 		minLength: 4,
 		autoFocus: true
 	});
+	
+	$("#speciestoadd").autocomplete({
+		source: "rpc/speciessuggest.php",
+		minLength: 4,
+		autoFocus: true
+	});
 
 });
 

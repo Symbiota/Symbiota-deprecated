@@ -104,11 +104,11 @@ if($IS_ADMIN || (array_key_exists("ClAdmin",$USER_RIGHTS) && in_array($clid,$USE
 	$isEditor = true;
 }
 if($isEditor){
-	//Add species to checklist
 	if(array_key_exists("tidtoadd",$_POST) && is_numeric($_POST["tidtoadd"])){
 		$dataArr = array();
 		$dataArr["tid"] = $_POST["tidtoadd"];
 		if($_POST["familyoverride"]) $dataArr["familyoverride"] = $_POST["familyoverride"];
+		if($_POST['morphospecies']) $dataArr['morphospecies'] = $_POST['morphospecies'];
 		if($_POST["habitat"]) $dataArr["habitat"] = $_POST["habitat"];
 		if($_POST["abundance"]) $dataArr["abundance"] = $_POST["abundance"];
 		if($_POST["notes"]) $dataArr["notes"] = $_POST["notes"];
@@ -141,7 +141,7 @@ $taxaArray = $clManager->getTaxaList($pageNumber,($printMode?0:500));
 		} );
 
 	</script>
-	<script type="text/javascript" src="../js/symb/checklists.checklist.js?ver=201812"></script>
+	<script type="text/javascript" src="../js/symb/checklists.checklist.js?ver=201901"></script>
 	<style type="text/css">
 		#sddm{margin:0;padding:0;z-index:30;}
 		#sddm:hover {background-color:#EAEBD8;}
@@ -467,6 +467,12 @@ $taxaArray = $clManager->getTaxaList($pageNumber,($printMode?0:500));
 										<input type="text" id="speciestoadd" name="speciestoadd" style="width:174px;" />
 										<input type="hidden" id="tidtoadd" name="tidtoadd" value="" />
 									</div>
+									<!--
+									<div>
+										<b><?php echo $LANG['MORPHOSPECIES']; ?>:</b><br/>
+										<input type="text" name="morphospecies" style="width:122px;" title="" />
+									</div>
+									-->
 									<div>
 										<b><?php echo $LANG['FAMILYOVERRIDE']; ?>:</b><br/>
 										<input type="text" name="familyoverride" style="width:122px;" title="Only enter if you want to override current family" />
