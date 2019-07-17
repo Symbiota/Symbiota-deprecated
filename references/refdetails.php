@@ -88,7 +88,7 @@ header("Content-Type: text/html; charset=".$charset);
 	</style>
 	<script type="text/javascript" src="../js/jquery.js"></script>
 	<script type="text/javascript" src="../js/jquery-ui.js"></script>
-	<script type="text/javascript" src="../js/symb/references.index.js?ver=2"></script>
+	<script type="text/javascript" src="../js/symb/references.index.js?ver=3"></script>
 	<script type="text/javascript">
 		var refid = <?php echo $refId; ?>;
 
@@ -144,7 +144,7 @@ header("Content-Type: text/html; charset=".$charset);
 				
 				<div id="refdetaildiv" style="">
 					<div style="width:300px;float:right;">
-						<form name='authorform' id='authorform' action='index.php' method='post'>
+						<form name='authorform' id='authorform' action='refdetails.php' method='post' onsubmit="addAuthorToRef();">
 							<fieldset>
 								<legend><b>Authors</b></legend>
 								<div>
@@ -154,6 +154,7 @@ header("Content-Type: text/html; charset=".$charset);
 									<div>
 										<input type="text" name="addauthorsearch" id="addauthorsearch" style="width:200px;" value="" size="20" />
 										<input id="refauthorid" name="refauthorid" type="hidden" value="" />
+                                        <input name="refid" type="hidden" value="<?php echo $refId; ?>" />
 									</div>
 								</div>
 								<hr />
