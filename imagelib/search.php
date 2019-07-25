@@ -1,4 +1,4 @@
-<?php 
+<?php
 include_once('../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/ImageLibraryManager.php');
 header("Content-Type: text/html; charset=".$CHARSET);
@@ -69,19 +69,25 @@ if($action){
 <html>
 <head>
 <title><?php echo $defaultTitle; ?> Image Library</title>
-	<link href="../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
-	<link href="../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
-	<link href="../css/jquery-ui.css" type="text/css" rel="Stylesheet" />
-	<meta name='keywords' content='' />
-	<script type="text/javascript">
-		<?php include_once($SERVER_ROOT.'/config/googleanalytics.php'); ?>
-	</script>
 </head>
 <body>
 
 	<?php
 	$displayLeftMenu = (isset($imagelib_indexMenu)?$imagelib_indexMenu:"true");
 	include($SERVER_ROOT.'/header.php');
+  ?>
+
+  <link href="../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+  <link href="../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
+  <link href="../css/jquery-ui.css" type="text/css" rel="Stylesheet" />
+  <meta name='keywords' content='' />
+  <script type="text/javascript" src="<?php echo $clientRoot . '/js/jquery-ui-1.12.1/external/jquery/jquery.js'?>"></script>
+  <script type="text/javascript" src="<?php echo $clientRoot . '/js/jquery-ui-1.12.1/jquery-ui.js'?>"></script>
+  <script type="text/javascript">
+    <?php include_once($SERVER_ROOT.'/config/googleanalytics.php'); ?>
+  </script>
+
+  <?php
 	if(isset($imagelib_indexCrumbs)){
 		echo "<div class='navpath'>";
 		echo $imagelib_indexCrumbs;
@@ -213,7 +219,7 @@ if($action){
 				}
 				?>
 			</ul>
-			
+
 			<form name="imagesearchform" id="imagesearchform" action="search.php" method="get" onsubmit="return submitImageForm();">
 				<div id="criteriadiv">
 					<div id="thesdiv" style="margin-left:160px;display:<?php echo ((array_key_exists("nametype",$previousCriteria) && $previousCriteria["nametype"] == "3")?'none':'block'); ?>;" >
@@ -237,14 +243,14 @@ if($action){
 					<div style="clear:both;margin:5 0 5 0;"><hr /></div>
 					<div>
 						<div style="float:left;margin-right:8px;padding-top:8px;">
-							Photographers: 
+							Photographers:
 						</div>
 						<div style="float:left;margin-bottom:10px;">
 							<input type="text" id="photographer" style="width:450px;" name="photographer" value="" title="Separate multiple photographers w/ commas" />
 						</div>
 					</div>
 					<div style="margin-top:5px;clear: both;">
-						Image Display: 
+						Image Display:
 						<select id="imagedisplay" name="imagedisplay" onchange="imageDisplayChanged(this.form)">
 							<option value="thumbnail" <?php echo ((array_key_exists("imagedisplay",$previousCriteria))&&($previousCriteria["imagedisplay"]=='thumbnail')?'SELECTED ':''); ?>>Thumbnails</option>
 							<option value="taxalist" <?php echo ((array_key_exists("imagedisplay",$previousCriteria))&&($previousCriteria["imagedisplay"]=='taxalist')?'SELECTED ':''); ?>>Taxa List</option>
@@ -278,9 +284,9 @@ if($action){
 					<button id="loadimages" style='margin: 20px' name="submitaction" type="submit" value="Load Images" >Load Images</button>
 					<div style="clear:both;"></div>
 				</div>
-				
+
 				<div id="collectiondiv">
-					<?php 
+					<?php
 					if($specArr || $obsArr){
 						?>
 						<div id="specobsdiv">
@@ -288,12 +294,12 @@ if($action){
 								<input id="dballcb" name="db[]" class="specobs" value='all' type="checkbox" onclick="selectAll(this);" <?php echo ((!$dbArr || in_array('all',$dbArr))?'checked':''); ?>/>
 								Select/Deselect all <a href="<?php echo $CLIENT_ROOT; ?>/collections/misc/collprofiles.php">Collections</a>
 							</div>
-							<?php 
+							<?php
 							if($specArr){
 								echo '<button id="loadimages" style="float:right;" name="submitaction" type="submit" value="Load Images" >Load Images</button>';
 								$imgLibManager->outputFullMapCollArr($dbArr,$specArr);
 							}
-							if($specArr && $obsArr) echo '<hr style="clear:both;margin:20px 0px;"/>'; 
+							if($specArr && $obsArr) echo '<hr style="clear:both;margin:20px 0px;"/>';
 							if($obsArr){
 								echo '<button id="loadimages" style="float:right;" name="submitaction" type="submit" value="Load Images" >Load Images</button>';
 								$imgLibManager->outputFullMapCollArr($dbArr,$obsArr);
@@ -301,13 +307,13 @@ if($action){
 							?>
 							<div style="clear:both;"></div>
 						</div>
-						<?php 
+						<?php
 					}
 					?>
 					<div style="clear:both;"></div>
 				</div>
 			</form>
-			
+
 			<?php
 			if($imageArr || $taxaList){
 				?>
@@ -362,7 +368,7 @@ if($action){
 								?>
 								<div class="tndiv" style="margin-bottom:15px;margin-top:15px;">
 									<div class="tnimg">
-										<?php 
+										<?php
 										if($imgArr['occid']){
 											echo '<a href="#" onclick="openIndPU('.$imgArr['occid'].');return false;">';
 										}
@@ -374,7 +380,7 @@ if($action){
 										?>
 									</div>
 									<div>
-										<?php 
+										<?php
 										$sciname = $imgArr['sciname'];
 										if($sciname){
 											if(strpos($imgArr['sciname'],' ')) $sciname = '<i>'.$sciname.'</i>';
@@ -423,10 +429,10 @@ if($action){
 				<?php
 			}
 			?>
-		
+
 		</div>
 	</div>
-	<?php 
+	<?php
 	include($SERVER_ROOT.'/footer.php');
 	?>
 </body>

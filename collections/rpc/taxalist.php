@@ -9,24 +9,28 @@
 //		$sql = "SELECT DISTINCT o.sciname FROM omoccurrences o WHERE o.TidInterpreted IS NOT NULL AND o.sciname LIKE '".$queryString."%' ORDER BY o.sciname LIMIT 8";
 		$sql = "";
 		if($taxonType == 5){
+      $limit = array_key_exists('l',$_REQUEST) ? $con->real_escape_string($_REQUEST['l']) : 50;
 			$sql = "SELECT DISTINCT v.vernacularname AS sciname ".
 				"FROM taxavernaculars v ".
 				"WHERE v.vernacularname LIKE '%".$queryString."%' ".
-				"limit 50 ";
+				"limit $limit ";
 		}
 		elseif($taxonType == 4){
+      $limit = array_key_exists('l',$_REQUEST) ? $con->real_escape_string($_REQUEST['l']) : 20;
 			$sql = "SELECT sciname ".
 				"FROM taxa ".
 				"WHERE rankid > 20 AND rankid < 140 AND sciname LIKE '".$queryString."%' ".
-				'LIMIT 20';
+				"LIMIT $limit";
 		}
 		elseif($taxonType == 2){
+      $limit = array_key_exists('l',$_REQUEST) ? $con->real_escape_string($_REQUEST['l']) : 20;
 			$sql = "SELECT DISTINCT family AS sciname ".
 				"FROM taxstatus ".
 				"WHERE family LIKE '".$queryString."%' ".
-				"LIMIT 20";
+				"LIMIT $limit";
 		}
 		else{
+      $limit = array_key_exists('l',$_REQUEST) ? $con->real_escape_string($_REQUEST['l']) : 20;
 			$sql = "SELECT DISTINCT sciname ".
 				"FROM taxa ".
 				"WHERE sciname LIKE '".$queryString."%' ";
@@ -36,7 +40,7 @@
 			else{
 				$sql .= "AND rankid >= 140 ";
 			}
-			$sql .= 'LIMIT 20';
+			$sql .= "LIMIT $limit";
 		}
 		$result = $con->query($sql);
 		while ($row = $result->fetch_object()) {

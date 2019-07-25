@@ -1,0 +1,39 @@
+version: '3.7'
+services:
+  nginx:
+    image: bitnami/nginx
+    container_name: of-nginx
+    depends_on: [ "php" ]
+    ports: [ "8080:8080" ]
+    volumes:
+      - ./docker/nginx.conf:/opt/bitnami/nginx/conf/server_blocks/symbosu.conf:ro
+      - .:/app
+      - ./docker/config/symbini.php:/app/config/symbini.php:ro
+      - ./docker/config/dbconnection.php:/app/config/dbconnection.php:ro
+
+  php:
+    image: local/php-fpm
+    container_name: of-php
+    build:
+      context: ./docker
+      dockerfile: ./php-fpm.dockerfile
+    volumes:
+      - .:/app
+      - ./docker/config/symbini.php:/app/config/symbini.php:ro
+      - ./docker/config/dbconnection.php:/app/config/dbconnection.php:ro
+
+  mariadb:
+    image: mariadb
+    container_name: of-db
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: symbiota
+    volumes:
+      - vol-oregonflora-db:/var/lib/mysql
+      - ./docker/db-init.sql:/docker-entrypoint-initdb.d/0.sql:ro
+      - ./config/schema-1.0/utf8/db_schema-1.0.sql:/docker-entrypoint-initdb.d/1.sql:ro
+      - ./config/schema-1.0/utf8/db_schema_patch-1.1.sql:/docker-entrypoint-initdb.d/2.sql:ro
+
+volumes:
+  vol-oregonflora-db:
+    name: vol-oregonflora-db

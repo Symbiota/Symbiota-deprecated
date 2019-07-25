@@ -138,26 +138,30 @@ if($isEditor){
 	<meta http-equiv="X-Frame-Options" content="deny">
 	<link href="../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
-	<link type="text/css" href="../css/jquery-ui.css" rel="Stylesheet" />
-	<script type="text/javascript" src="../js/jquery.js"></script>
-	<script type="text/javascript" src="../js/jquery-ui.js"></script>
-	<script type="text/javascript" src="../js/tiny_mce/tiny_mce.js"></script>
-	<script type="text/javascript">
-		var tabIndex = <?php echo $tabIndex; ?>;
-		tinyMCE.init({
-			mode : "textareas",
-			theme_advanced_buttons1 : "bold,italic,underline,charmap,hr,outdent,indent,link,unlink,code",
-			theme_advanced_buttons2 : "",
-			theme_advanced_buttons3 : ""
-		});
-	</script>
-	<script type="text/javascript" src="../js/symb/profile.viewprofile.js?ver=20170530"></script>
-	<script type="text/javascript" src="../js/symb/shared.js"></script>
 </head>
 <body>
 <?php
 $displayLeftMenu = (isset($profile_viewprofileMenu)?$profile_viewprofileMenu:"true");
 include($SERVER_ROOT.'/header.php');
+?>
+
+  <link type="text/css" href="../css/jquery-ui.css" rel="Stylesheet" />
+  <script type="text/javascript" src="../js/jquery.js"></script>
+  <script type="text/javascript" src="../js/jquery-ui.js"></script>
+  <script type="text/javascript" src="../js/tiny_mce/tiny_mce.js"></script>
+  <script type="text/javascript">
+    var tabIndex = <?php echo $tabIndex; ?>;
+    tinyMCE.init({
+      mode : "textareas",
+      theme_advanced_buttons1 : "bold,italic,underline,charmap,hr,outdent,indent,link,unlink,code",
+      theme_advanced_buttons2 : "",
+      theme_advanced_buttons3 : ""
+    });
+  </script>
+  <script type="text/javascript" src="../js/symb/profile.viewprofile.js?ver=20170530"></script>
+  <script type="text/javascript" src="../js/symb/shared.js"></script>
+
+<?php
 if(isset($profile_viewprofileCrumbs)){
 	echo "<div class='navpath'>";
 	echo $profile_viewprofileCrumbs;

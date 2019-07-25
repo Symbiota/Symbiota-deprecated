@@ -45,140 +45,144 @@ if(isset($_REQUEST['db'])){
 	<title><?php echo $DEFAULT_TITLE.' '.$LANG['PAGE_TITLE']; ?></title>
 	<link href="../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
-	<link type="text/css" href="../css/jquery-ui.css" rel="Stylesheet" />
-	<style type="text/css">
-		.ui-tabs .ui-tabs-nav li { width:32%; }
-		.ui-tabs .ui-tabs-nav li a { margin-left:10px;}
-	</style>
-	<script type="text/javascript" src="../js/jquery.js?ver=20130917"></script>
-	<script type="text/javascript" src="../js/jquery-ui.js?ver=20130917"></script>
-    <script type="text/javascript" src="../js/symb/collections.search.js"></script>
-    <script type="text/javascript">
-		<?php include_once($SERVER_ROOT.'/config/googleanalytics.php'); ?>
-	</script>
-	<script type="text/javascript">
-        var starrJson = '';
-        var collJson = '';
-        var listPage = <?php echo $pageNumber; ?>;
-
-        $(document).ready(function() {
-            <?php
-            if($stArrSearchJson){
-                ?>
-                starrJson = '<?php echo $stArrSearchJson; ?>';
-                sessionStorage.jsonstarr = starrJson;
-                <?php
-            }
-            else{
-                ?>
-                if(sessionStorage.jsonstarr){
-                    starrJson = sessionStorage.jsonstarr;
-                }
-                <?php
-            }
-            ?>
-
-            <?php
-            if($stArrCollJson){
-                ?>
-                collJson = '<?php echo $stArrCollJson; ?>';
-                sessionStorage.jsoncollstarr = collJson;
-                <?php
-            }
-            else{
-                ?>
-                if(sessionStorage.jsoncollstarr){
-                    collJson = sessionStorage.jsoncollstarr;
-                }
-                <?php
-            }
-            ?>
-
-            <?php
-            if(!$resetPageNum){
-                ?>
-                if(sessionStorage.collSearchPage){
-                    listPage = sessionStorage.collSearchPage;
-                }
-                else{
-                    sessionStorage.collSearchPage = listPage;
-                }
-                <?php
-            }
-            else{
-                echo "sessionStorage.collSearchPage = listPage;\n";
-            }
-            ?>
-
-            document.getElementById("taxatablink").href = 'checklist.php?starr='+starrJson+'&jsoncollstarr='+collJson+'&taxonfilter=<?php echo $taxonFilter; ?>';
-            document.getElementById("mapdllink").href = 'download/index.php?starr='+starrJson+'&jsoncollstarr='+collJson+'&dltype=georef';
-            document.getElementById("kmldlcolljson").value = collJson;
-            document.getElementById("kmldlstjson").value = starrJson;
-
-            setOccurrenceList(listPage);
-            $('#tabs').tabs({
-                active: <?php echo $tabIndex; ?>,
-                beforeLoad: function( event, ui ) {
-                    $(ui.panel).html("<p>Loading...</p>");
-                }
-            });
-        });
-
-        function setOccurrenceList(listPage){
-            sessionStorage.collSearchPage = listPage;
-            document.getElementById("queryrecords").innerHTML = "<p>Loading... <img src='../images/workingcircle.gif' width='15px' /></p>";
-            <?php
-			//echo "console.log('rpc/getoccurrencelist.php?starr='+starrJson+'&jsoncollstarr='+collJson+'&page='+listPage+'&targettid=".$targetTid."');";
-            ?>
-            $.ajax({
-                type: "POST",
-                url: "rpc/getoccurrencelist.php",
-                data: {
-                    starr: starrJson,
-                    jsoncollstarr: collJson,
-                    targettid: <?php echo $targetTid; ?>,
-                    page: listPage
-                },
-                dataType: "html"
-            }).done(function(msg) {
-                if(!msg) msg = "<p>An error occurred retrieving records.</p>";
-                document.getElementById("queryrecords").innerHTML = msg;
-            });
-        }
-
-		function addAllVouchersToCl(clidIn){
-			var occJson = document.getElementById("specoccjson").value;
-
-			$.ajax({
-				type: "POST",
-				url: "rpc/addallvouchers.php",
-				data: { clid: clidIn, jsonOccArr: occJson, tid: <?php echo ($targetTid?$targetTid:'0'); ?> }
-			}).done(function( msg ) {
-				if(msg == "1"){
-					alert("Success! All vouchers added to checklist.");
-				}
-				else{
-					alert(msg);
-				}
-			});
-		}
-
-        function copySearchUrl(){
-            var urlPrefix = document.getElementById('urlPrefixBox').value;
-            var urlFixed = urlPrefix+'&page='+sessionStorage.collSearchPage;
-            var copyBox = document.getElementById('urlFullBox');
-            copyBox.value = urlFixed;
-            copyBox.focus();
-            copyBox.setSelectionRange(0,copyBox.value.length);
-            document.execCommand("copy");
-            copyBox.value = '';
-        }
-    </script>
 </head>
 <body>
 <?php
 	$displayLeftMenu = (isset($collections_listMenu)?$collections_listMenu:false);
 	include($SERVER_ROOT.'/header.php');
+?>
+
+<link type="text/css" href="../css/jquery-ui.css" rel="Stylesheet" />
+<style type="text/css">
+  .ui-tabs .ui-tabs-nav li { width:32%; }
+  .ui-tabs .ui-tabs-nav li a { margin-left:10px;}
+</style>
+<script type="text/javascript" src="../js/jquery.js?ver=20130917"></script>
+<script type="text/javascript" src="../js/jquery-ui.js?ver=20130917"></script>
+  <script type="text/javascript" src="../js/symb/collections.search.js"></script>
+  <script type="text/javascript">
+  <?php include_once($SERVER_ROOT.'/config/googleanalytics.php'); ?>
+</script>
+  <script type="text/javascript">
+    var starrJson = '';
+    var collJson = '';
+    var listPage = <?php echo $pageNumber; ?>;
+
+    $(document).ready(function() {
+        <?php
+        if($stArrSearchJson){
+            ?>
+            starrJson = '<?php echo $stArrSearchJson; ?>';
+            sessionStorage.jsonstarr = starrJson;
+            <?php
+        }
+        else{
+            ?>
+            if(sessionStorage.jsonstarr){
+                starrJson = sessionStorage.jsonstarr;
+            }
+            <?php
+        }
+        ?>
+
+        <?php
+        if($stArrCollJson){
+            ?>
+            collJson = '<?php echo $stArrCollJson; ?>';
+            sessionStorage.jsoncollstarr = collJson;
+            <?php
+        }
+        else{
+            ?>
+            if(sessionStorage.jsoncollstarr){
+                collJson = sessionStorage.jsoncollstarr;
+            }
+            <?php
+        }
+        ?>
+
+        <?php
+        if(!$resetPageNum){
+            ?>
+            if(sessionStorage.collSearchPage){
+                listPage = sessionStorage.collSearchPage;
+            }
+            else{
+                sessionStorage.collSearchPage = listPage;
+            }
+            <?php
+        }
+        else{
+            echo "sessionStorage.collSearchPage = listPage;\n";
+        }
+        ?>
+
+        document.getElementById("taxatablink").href = 'checklist.php?starr='+starrJson+'&jsoncollstarr='+collJson+'&taxonfilter=<?php echo $taxonFilter; ?>';
+        document.getElementById("mapdllink").href = 'download/index.php?starr='+starrJson+'&jsoncollstarr='+collJson+'&dltype=georef';
+        document.getElementById("kmldlcolljson").value = collJson;
+        document.getElementById("kmldlstjson").value = starrJson;
+
+        setOccurrenceList(listPage);
+        $('#tabs').tabs({
+            active: <?php echo $tabIndex; ?>,
+            beforeLoad: function( event, ui ) {
+                $(ui.panel).html("<p>Loading...</p>");
+            }
+        });
+    });
+
+    function setOccurrenceList(listPage){
+        sessionStorage.collSearchPage = listPage;
+        document.getElementById("queryrecords").innerHTML = "<p>Loading... <img src='../images/workingcircle.gif' width='15px' /></p>";
+        <?php
+  //echo "console.log('rpc/getoccurrencelist.php?starr='+starrJson+'&jsoncollstarr='+collJson+'&page='+listPage+'&targettid=".$targetTid."');";
+        ?>
+        $.ajax({
+            type: "POST",
+            url: "rpc/getoccurrencelist.php",
+            data: {
+                starr: starrJson,
+                jsoncollstarr: collJson,
+                targettid: <?php echo $targetTid; ?>,
+                page: listPage
+            },
+            dataType: "html"
+        }).done(function(msg) {
+            if(!msg) msg = "<p>An error occurred retrieving records.</p>";
+            document.getElementById("queryrecords").innerHTML = msg;
+        });
+    }
+
+    function addAllVouchersToCl(clidIn){
+      var occJson = document.getElementById("specoccjson").value;
+
+      $.ajax({
+        type: "POST",
+        url: "rpc/addallvouchers.php",
+        data: { clid: clidIn, jsonOccArr: occJson, tid: <?php echo ($targetTid?$targetTid:'0'); ?> }
+      }).done(function( msg ) {
+        if(msg == "1"){
+          alert("Success! All vouchers added to checklist.");
+        }
+        else{
+          alert(msg);
+        }
+      });
+    }
+
+    function copySearchUrl(){
+        var urlPrefix = document.getElementById('urlPrefixBox').value;
+        var urlFixed = urlPrefix+'&page='+sessionStorage.collSearchPage;
+        var copyBox = document.getElementById('urlFullBox');
+        copyBox.value = urlFixed;
+        copyBox.focus();
+        copyBox.setSelectionRange(0,copyBox.value.length);
+        document.execCommand("copy");
+        copyBox.value = '';
+    }
+  </script>
+
+<?php
 	if(isset($collections_listCrumbs)){
 		if($collections_listCrumbs){
 			echo '<div class="navpath">';

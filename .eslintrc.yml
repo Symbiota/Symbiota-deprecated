@@ -1,0 +1,12 @@
+---
+
+env:
+  browser: true
+
+parserOptions:
+  ecmaVersion: 8
+
+rules:
+  curly: error
+  quotes: ["warn", "double"]
+  semi: error

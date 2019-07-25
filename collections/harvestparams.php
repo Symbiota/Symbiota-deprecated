@@ -34,114 +34,118 @@ if(isset($_REQUEST['db'])){
     <title><?php echo $defaultTitle.' '.$SEARCHTEXT['PAGE_TITLE']; ?></title>
 	<link href="../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
-	<link href="../css/jquery-ui.css" type="text/css" rel="Stylesheet" />
-	<script type="text/javascript" src="../js/jquery.js"></script>
-	<script type="text/javascript" src="../js/jquery-ui.js"></script>
-    <script type="text/javascript" src="../js/symb/collections.harvestparams.js?ver=9"></script>
-    <script type="text/javascript">
-        var starrJson = '';
-
-        $(document).ready(function() {
-            <?php
-            if($stArrCollJson){
-                echo "sessionStorage.jsoncollstarr = '".$stArrCollJson."';\n";
-            }
-
-            if($stArrSearchJson){
-                ?>
-                starrJson = '<?php echo $stArrSearchJson; ?>';
-                sessionStorage.jsonstarr = starrJson;
-                setHarvestParamsForm();
-                <?php
-            }
-            else{
-                ?>
-                if(sessionStorage.jsonstarr){
-                    starrJson = sessionStorage.jsonstarr;
-                    setHarvestParamsForm();
-                }
-                <?php
-            }
-            ?>
-        });
-
-        function checkHarvestparamsForm(frm){
-            <?php
-            if(!$SOLR_MODE){
-                ?>
-                //make sure they have filled out at least one field.
-                if ((frm.taxa.value == '') && (frm.country.value == '') && (frm.state.value == '') && (frm.county.value == '') &&
-                    (frm.locality.value == '') && (frm.upperlat.value == '') && (frm.pointlat.value == '') && (frm.catnum.value == '') &&
-                    (frm.elevhigh.value == '') && (frm.eventdate2.value == '') && (frm.typestatus.checked == false) && (frm.hasimages.checked == false) && (frm.hasgenetic.checked == false) &&
-                    (frm.collector.value == '') && (frm.collnum.value == '') && (frm.eventdate1.value == '') && (frm.elevlow.value == '')) {
-                    if(sessionStorage.jsoncollstarr){
-                        var jsonArr = JSON.parse(sessionStorage.jsoncollstarr);
-                        for(i in jsonArr){
-                            if(jsonArr[i] == 'all'){
-                                alert("Please fill in at least one search parameter!");
-                                return false;
-                            }
-                        }
-                    }
-                    else{
-                        alert("Please fill in at least one search parameter!");
-                        return false;
-                    }
-                }
-                <?php
-            }
-            ?>
-
-            if(frm.upperlat.value != '' || frm.bottomlat.value != '' || frm.leftlong.value != '' || frm.rightlong.value != ''){
-                // if Lat/Long field is filled in, they all should have a value!
-                if(frm.upperlat.value == '' || frm.bottomlat.value == '' || frm.leftlong.value == '' || frm.rightlong.value == ''){
-                    alert("Error: Please make all Lat/Long bounding box values contain a value or all are empty");
-                    return false;
-                }
-
-                // Check to make sure lat/longs are valid.
-                if(Math.abs(frm.upperlat.value) > 90 || Math.abs(frm.bottomlat.value) > 90 || Math.abs(frm.pointlat.value) > 90){
-                    alert("Latitude values can not be greater than 90 or less than -90.");
-                    return false;
-                }
-                if(Math.abs(frm.leftlong.value) > 180 || Math.abs(frm.rightlong.value) > 180 || Math.abs(frm.pointlong.value) > 180){
-                    alert("Longitude values can not be greater than 180 or less than -180.");
-                    return false;
-                }
-                if(parseFloat(frm.upperlat.value) < parseFloat(frm.bottomlat.value)){
-                    alert("Your northern latitude value is less then your southern latitude value. Please correct this.");
-                    return false;
-                }
-                if(parseFloat(frm.leftlong.value) > parseFloat(frm.rightlong.value)){
-                    alert("Your western longitude value is greater then your eastern longitude value. Please correct this. Note that western hemisphere longitudes in the decimal format are negitive.");
-                    return false;
-                }
-            }
-
-            //Same with point radius fields
-            if(frm.pointlat.value != '' || frm.pointlong.value != '' || frm.radius.value != ''){
-                if(frm.pointlat.value == '' || frm.pointlong.value == '' || frm.radius.value == ''){
-                    alert("Error: Please make all Lat/Long point-radius values contain a value or all are empty");
-                    return false;
-                }
-            }
-
-            if(frm.elevlow.value || frm.elevhigh.value){
-                if(isNaN(frm.elevlow.value) || isNaN(frm.elevhigh.value)){
-                    alert("Error: Please enter only numbers for elevation values");
-                    return false;
-                }
-            }
-
-            return true;
-        }
-    </script>
 </head>
 <body>
 
 <?php
 	$displayLeftMenu = (isset($collections_harvestparamsMenu)?$collections_harvestparamsMenu:false);
 	include($serverRoot.'/header.php');
+?>
+
+  <link href="../css/jquery-ui.css" type="text/css" rel="Stylesheet" />
+  <script type="text/javascript" src="../js/jquery.js"></script>
+  <script type="text/javascript" src="../js/jquery-ui.js"></script>
+  <script type="text/javascript" src="../js/symb/collections.harvestparams.js?ver=9"></script>
+  <script type="text/javascript">
+      var starrJson = '';
+
+      $(document).ready(function() {
+          <?php
+          if($stArrCollJson){
+              echo "sessionStorage.jsoncollstarr = '".$stArrCollJson."';\n";
+          }
+
+          if($stArrSearchJson){
+              ?>
+              starrJson = '<?php echo $stArrSearchJson; ?>';
+              sessionStorage.jsonstarr = starrJson;
+              setHarvestParamsForm();
+              <?php
+          }
+          else{
+              ?>
+              if(sessionStorage.jsonstarr){
+                  starrJson = sessionStorage.jsonstarr;
+                  setHarvestParamsForm();
+              }
+              <?php
+          }
+          ?>
+      });
+
+      function checkHarvestparamsForm(frm){
+          <?php
+          if(!$SOLR_MODE){
+              ?>
+              //make sure they have filled out at least one field.
+              if ((frm.taxa.value == '') && (frm.country.value == '') && (frm.state.value == '') && (frm.county.value == '') &&
+                  (frm.locality.value == '') && (frm.upperlat.value == '') && (frm.pointlat.value == '') && (frm.catnum.value == '') &&
+                  (frm.elevhigh.value == '') && (frm.eventdate2.value == '') && (frm.typestatus.checked == false) && (frm.hasimages.checked == false) && (frm.hasgenetic.checked == false) &&
+                  (frm.collector.value == '') && (frm.collnum.value == '') && (frm.eventdate1.value == '') && (frm.elevlow.value == '')) {
+                  if(sessionStorage.jsoncollstarr){
+                      var jsonArr = JSON.parse(sessionStorage.jsoncollstarr);
+                      for(i in jsonArr){
+                          if(jsonArr[i] == 'all'){
+                              alert("Please fill in at least one search parameter!");
+                              return false;
+                          }
+                      }
+                  }
+                  else{
+                      alert("Please fill in at least one search parameter!");
+                      return false;
+                  }
+              }
+              <?php
+          }
+          ?>
+
+          if(frm.upperlat.value != '' || frm.bottomlat.value != '' || frm.leftlong.value != '' || frm.rightlong.value != ''){
+              // if Lat/Long field is filled in, they all should have a value!
+              if(frm.upperlat.value == '' || frm.bottomlat.value == '' || frm.leftlong.value == '' || frm.rightlong.value == ''){
+                  alert("Error: Please make all Lat/Long bounding box values contain a value or all are empty");
+                  return false;
+              }
+
+              // Check to make sure lat/longs are valid.
+              if(Math.abs(frm.upperlat.value) > 90 || Math.abs(frm.bottomlat.value) > 90 || Math.abs(frm.pointlat.value) > 90){
+                  alert("Latitude values can not be greater than 90 or less than -90.");
+                  return false;
+              }
+              if(Math.abs(frm.leftlong.value) > 180 || Math.abs(frm.rightlong.value) > 180 || Math.abs(frm.pointlong.value) > 180){
+                  alert("Longitude values can not be greater than 180 or less than -180.");
+                  return false;
+              }
+              if(parseFloat(frm.upperlat.value) < parseFloat(frm.bottomlat.value)){
+                  alert("Your northern latitude value is less then your southern latitude value. Please correct this.");
+                  return false;
+              }
+              if(parseFloat(frm.leftlong.value) > parseFloat(frm.rightlong.value)){
+                  alert("Your western longitude value is greater then your eastern longitude value. Please correct this. Note that western hemisphere longitudes in the decimal format are negitive.");
+                  return false;
+              }
+          }
+
+          //Same with point radius fields
+          if(frm.pointlat.value != '' || frm.pointlong.value != '' || frm.radius.value != ''){
+              if(frm.pointlat.value == '' || frm.pointlong.value == '' || frm.radius.value == ''){
+                  alert("Error: Please make all Lat/Long point-radius values contain a value or all are empty");
+                  return false;
+              }
+          }
+
+          if(frm.elevlow.value || frm.elevhigh.value){
+              if(isNaN(frm.elevlow.value) || isNaN(frm.elevhigh.value)){
+                  alert("Error: Please enter only numbers for elevation values");
+                  return false;
+              }
+          }
+
+          return true;
+      }
+  </script>
+
+  <?php
 	if(isset($collections_harvestparamsCrumbs)){
 		if($collections_harvestparamsCrumbs){
 			echo '<div class="navpath">';

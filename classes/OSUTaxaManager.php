@@ -292,7 +292,7 @@ class OSUTaxaManager {
         if(!$tids){
             $sql = 'SELECT DISTINCT t.sciname, t.tid, t.securitystatus '.
                 'FROM taxa t INNER JOIN taxstatus ts ON t.Tid = ts.tidaccepted '.
-                'INNER JOIN taxaenumtree te ON ts.tid = te.tid '.
+                'INNER JOIN taxaenumtree te ON ts.tidaccepted = te.tid '.
                 'WHERE (te.taxauthid = 1) AND (ts.taxauthid = 1) AND (t.rankid >= 220) AND (te.parenttid = '.$this->tid.')';
             //echo $sql;
 

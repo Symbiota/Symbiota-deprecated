@@ -32,85 +32,86 @@ elseif($coordRange > 40){
 <html>
 <head>
 	<title><?php echo $DEFAULT_TITLE; ?> - Dynamic Checklist Generator</title>
-	<link href="../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
-	<link href="../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
-	<link href="../css/jquery-ui.css" type="text/css" rel="stylesheet" />
-	<script src="../js/jquery.js" type="text/javascript"></script>
-	<script src="../js/jquery-ui.js" type="text/javascript"></script>
 	<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
-	<script src="//maps.googleapis.com/maps/api/js?<?php echo (isset($GOOGLE_MAP_KEY) && $GOOGLE_MAP_KEY?'key='.$GOOGLE_MAP_KEY:''); ?>"></script>
+</head>
+<body style="background-color:#ffffff;" onload="initialize()">
+	<?php
+		$displayLeftMenu = false;
+		include($SERVER_ROOT.'/header.php');
+  ?>
 
-	<script type="text/javascript">
-	    var map;
-	    var currentMarker;
-	  	var zoomLevel = 5;
-	  	var submitCoord = false;
+  <link href="../css/jquery-ui.css" type="text/css" rel="stylesheet" />
+  <script src="../js/jquery.js" type="text/javascript"></script>
+  <script src="../js/jquery-ui.js" type="text/javascript"></script>
+  <script src="//maps.googleapis.com/maps/api/js?<?php echo (isset($GOOGLE_MAP_KEY) && $GOOGLE_MAP_KEY?'key='.$GOOGLE_MAP_KEY:''); ?>"></script>
+  <script type="text/javascript">
+      var map;
+      var currentMarker;
+      var zoomLevel = 5;
+      var submitCoord = false;
 
         $(document).ready(function() {
-        	$( "#taxa" ).autocomplete({
-        		source: function( request, response ) {
-        			$.getJSON( "rpc/speciessuggest.php", { term: request.term, level: 'high' }, response );
-        		},
-        		minLength: 2,
-        		autoFocus: true,
-        		select: function( event, ui ) {
-        			if(ui.item){
-        				$( "#tid" ).val(ui.item.id);
-        			}
-				}
-        	});
-			
+          $( "#taxa" ).autocomplete({
+            source: function( request, response ) {
+              $.getJSON( "rpc/speciessuggest.php", { term: request.term, level: 'high' }, response );
+            },
+            minLength: 2,
+            autoFocus: true,
+            select: function( event, ui ) {
+              if(ui.item){
+                $( "#tid" ).val(ui.item.id);
+              }
+        }
+          });
+
         });
 
-	    function initialize(){
-	    	var dmLatLng = new google.maps.LatLng(<?php echo $latCen.",".$longCen; ?>);
-	    	var dmOptions = {
-				zoom: <?php echo $zoomInt; ?>,
-				center: dmLatLng,
-				mapTypeId: google.maps.MapTypeId.TERRAIN
-			};
+      function initialize(){
+        var dmLatLng = new google.maps.LatLng(<?php echo $latCen.",".$longCen; ?>);
+        var dmOptions = {
+        zoom: <?php echo $zoomInt; ?>,
+        center: dmLatLng,
+        mapTypeId: google.maps.MapTypeId.TERRAIN
+      };
 
-	    	map = new google.maps.Map(document.getElementById("map_canvas"), dmOptions);
-	    	
-			google.maps.event.addListener(map, 'click', function(event) {
-	            mapZoom = map.getZoom();
-	            startLocation = event.latLng;
-	            setTimeout("placeMarker()", 500);
-	        });
-	    }
-	
-	    function placeMarker() {
-			if(currentMarker) currentMarker.setMap();
-	        if(mapZoom == map.getZoom()){
-	            var marker = new google.maps.Marker({
-	                position: startLocation,
-	                map: map
-	            });
-				currentMarker = marker;
+        map = new google.maps.Map(document.getElementById("map_canvas"), dmOptions);
 
-		        var latValue = startLocation.lat();
-		        var lonValue = startLocation.lng();
-		        latValue = latValue.toFixed(5);;
-		        lonValue = lonValue.toFixed(5);
-				document.getElementById("latbox").value = latValue;
+      google.maps.event.addListener(map, 'click', function(event) {
+              mapZoom = map.getZoom();
+              startLocation = event.latLng;
+              setTimeout("placeMarker()", 500);
+          });
+      }
+
+      function placeMarker() {
+      if(currentMarker) currentMarker.setMap();
+          if(mapZoom == map.getZoom()){
+              var marker = new google.maps.Marker({
+                  position: startLocation,
+                  map: map
+              });
+        currentMarker = marker;
+
+            var latValue = startLocation.lat();
+            var lonValue = startLocation.lng();
+            latValue = latValue.toFixed(5);;
+            lonValue = lonValue.toFixed(5);
+        document.getElementById("latbox").value = latValue;
                 document.getElementById("lngbox").value = lonValue;
                 document.getElementById("latlngspan").innerHTML = latValue + ", " + lonValue;
                 document.mapForm.buildchecklistbutton.disabled = false;
                 submitCoord = true;
-			}
-	    }
+      }
+      }
 
-		function checkForm(){
-			if(submitCoord) return true;
-			alert("You must first click on map to capture coordinate points");
-			return false;
-		}
-	</script>
-</head> 
-<body style="background-color:#ffffff;" onload="initialize()">
-	<?php 
-		$displayLeftMenu = false;
-		include($SERVER_ROOT.'/header.php');
+    function checkForm(){
+      if(submitCoord) return true;
+      alert("You must first click on map to capture coordinate points");
+      return false;
+    }
+  </script>
+
+  <?php
 		if(isset($checklists_dynamicmapCrumbs)){
 			if($checklists_dynamicmapCrumbs){
 				echo "<div class='navpath'>";
@@ -123,10 +124,10 @@ elseif($coordRange > 40){
 		else{
 			?>
 			<div class='navpath'>
-				<a href='../index.php'>Home</a> &gt; 
+				<a href='../index.php'>Home</a> &gt;
 				<b>Dynamic Map</b>
 			</div>
-			<?php 
+			<?php
 		}
 		?>
 		<div id='innertext'>
@@ -159,7 +160,7 @@ elseif($coordRange > 40){
 							<input type="hidden" id="lngbox" name="lng" value="" />
 						</div>
 						<div>
-							<b>Point (Lat, Long):</b> 
+							<b>Point (Lat, Long):</b>
 							<span id="latlngspan"> &lt; Click on map &gt; </span>
 						</div>
 					</div>
@@ -168,9 +169,9 @@ elseif($coordRange > 40){
 							<b>Plant Family Filter:</b> <input id="taxa" name="taxa" type="text" value="<?php echo $taxa; ?>" />
 							<input id="tid" name="tid" type="hidden" value="<?php echo $tid; ?>" />
 						</div>
-						<div> 
-							<b>Radius:</b> 
-							<input name="radius" value="(optional)" type="text" style="width:140px;" onfocus="this.value = ''" /> 
+						<div>
+							<b>Radius:</b>
+							<input name="radius" value="(optional)" type="text" style="width:140px;" onfocus="this.value = ''" />
 							<select name="radiusunits">
 								<option value="km">Kilometers</option>
 								<option value="mi">Miles</option>
