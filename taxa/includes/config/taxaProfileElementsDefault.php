@@ -1,12 +1,20 @@
 <?php
 ob_start();
-?>
-<div id="editbutton">
-    <a href="admin/tpeditor.php?tid=<?php echo $taxonManager->getTid(); ?>" <?php echo 'title="'.$LANG['EDIT_TAXON_DATA'].'"'; ?>>
-        <img id='editicon' src='../images/edit.png'/>
-    </a>
-</div>
-<?php
+$isTaxonEditor = false;
+if($SYMB_UID){
+    if($IS_ADMIN || array_key_exists("TaxonProfile",$USER_RIGHTS)){
+        $isTaxonEditor = true;
+    }
+}
+if($isTaxonEditor){
+    ?>
+    <div id="editbutton">
+        <a href="admin/tpeditor.php?tid=<?php echo $taxonManager->getTid(); ?>" <?php echo 'title="'.$LANG['EDIT_TAXON_DATA'].'"'; ?>>
+            <img id='editicon' src='../images/edit.png'/>
+        </a>
+    </div>
+    <?php
+}
 $editButtonDiv = ob_get_clean();
 
 ob_start();
