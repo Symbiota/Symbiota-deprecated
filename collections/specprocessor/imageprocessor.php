@@ -277,13 +277,13 @@ if($spprid) $specManager->setProjVariables($spprid);
 										?>
 										<div>
 											<div style="width:180px;float:left;">
-												<b>Image Mapping Type:</b>
+												<b>Process Type:</b>
 											</div>
 											<div style="float:left;">
 												<select name="projecttype" id="projecttype" style="width:300px;" onchange="uploadTypeChanged()" <?php echo ($spprid?'DISABLED':'');?>>
 													<option value="">----------------------</option>
 													<option value="local">Local Image Mapping</option>
-													<option value="file">Upload Image Data File</option>
+													<option value="file">Image Data File</option>
 													<option value="idigbio">iDigBio Media Ingestion Report</option>
 													<option value="iplant">iPlant Image Harvest</option>
 												</select>
@@ -499,7 +499,7 @@ if($spprid) $specManager->setProjVariables($spprid);
 										</div>
 									</div>
 									<div id="chooseFileDiv" class="profileDiv" style="clear:both;padding:15px 0px;display:none">
-										<b>Select image mapping file:</b>
+										<b>Select image data file:</b>
 										<div style="margin:5px 15px;">
 											<input type='hidden' name='MAX_FILE_SIZE' value='20000000' />
 											<input name='uploadfile' type='file' size='70' value="Choose File" />
