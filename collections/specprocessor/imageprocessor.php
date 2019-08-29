@@ -283,7 +283,7 @@ if($spprid) $specManager->setProjVariables($spprid);
 												<select name="projecttype" id="projecttype" style="width:300px;" onchange="uploadTypeChanged()" <?php echo ($spprid?'DISABLED':'');?>>
 													<option value="">----------------------</option>
 													<option value="local">Local Image Mapping</option>
-													<option value="file">Upload Image Mapping File</option>
+													<option value="file">Upload Image Data File</option>
 													<option value="idigbio">iDigBio Media Ingestion Report</option>
 													<option value="iplant">iPlant Image Harvest</option>
 												</select>
