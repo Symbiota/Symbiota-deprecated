@@ -200,7 +200,7 @@ if($spprid) $specManager->setProjVariables($spprid);
 		<div id="innertext" style="background-color:white;">
 			<div style="padding:15px;">
 				These tools are designed to aid collection managers in batch processing specimen images. 
-				Contact portal manager for helping in setting up a new workflow. 
+				Contact portal manager for help in setting up a new workflow.
 				Once a profile is established, the collection manager can use this form to manually trigger image processing.
 				For more information, see the Symbiota documentation for 
 				<b><a href="http://symbiota.org/docs/batch-loading-specimen-images-2/" target="_blank">recommended practices</a></b> for 
