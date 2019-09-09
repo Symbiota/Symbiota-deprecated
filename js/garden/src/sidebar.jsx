@@ -168,7 +168,12 @@ class PlantSlider extends React.Component {
 
   componentDidMount() {
     const sliderId = `slider-container-${this.props.name}`;
-    this.slider = new Slider(`#${sliderId}`);
+    this.slider = new Slider(`#${sliderId}`, {
+      value: this.props.value.map((i) => parseInt(i)),
+      ticks: [0, 10, 20, 30, 40, 50],
+      ticks_labels: ["0", "", "", "", "", "50+"],
+      ticks_snap_bounds: 1
+    });
 
     if (this.props.onChange) {
       const onChangeEvent = this.props.onChange;
@@ -193,10 +198,6 @@ class PlantSlider extends React.Component {
           type="text"
           className="bootstrap-slider"
           name={ this.props.name }
-          data-slider-value="[0, 50]"
-          data-slider-ticks="[0, 10, 20, 30, 40, 50]"
-          data-slider-ticks-labels='["0", "", "", "", "", "50+"]'
-          data-slider-ticks-snap-bounds="1"
           onChange={ (e) => this.props.onChange(e) }
         />
         <br/>
@@ -207,6 +208,10 @@ class PlantSlider extends React.Component {
     );
   }
 }
+
+PlantSlider.defaultProps = {
+  value: [0, 50]
+};
 
 class SideBarDropdown extends React.Component {
   constructor(props) {
@@ -272,20 +277,6 @@ SideBarDropdown.defaultProps = {
 class SideBar extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
-      search: '',
-    };
-
-    this.onSearchTextChanged = this.onSearchTextChanged.bind(this);
-    this.onSearch = this.onSearch.bind(this);
-  }
-
-  onSearchTextChanged(event) {
-    this.setState({ search: event.target.value });
-  }
-
-  onSearch() {
-    this.props.onSearch(this.state.search);
   }
 
   render() {
@@ -300,9 +291,9 @@ class SideBar extends React.Component {
 
         {/* Search */}
         <SideBarSearch
-          onChange={ this.onSearchTextChanged }
-          onClick={ this.onSearch }
-          value={ this.state.search }
+          onChange={ this.props.onSearchTextChanged }
+          onClick={ this.props.onSearch }
+          value={ this.props.searchText }
           isLoading={ this.props.isLoading }
         />
 
@@ -330,6 +321,7 @@ class SideBar extends React.Component {
               <PlantSlider
                 label="Height (ft)"
                 name="height"
+                value={ this.props.height }
                 onChange={ this.props.onHeightChanged } />
             </div>
             <div
@@ -339,6 +331,7 @@ class SideBar extends React.Component {
               <PlantSlider
                 label="Width (ft)"
                 name="width"
+                value={ this.props.width }
                 onChange={ this.props.onWidthChanged } />
             </div>
           </div>

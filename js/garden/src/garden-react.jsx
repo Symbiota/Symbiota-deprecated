@@ -10,18 +10,32 @@ const CLIENT_ROOT = "..";
 
 function getUrlQueryParams(url) {
   let params = {};
-  try {
-    let queryParams = url.split("?")[1].split("&");
+  if (url.includes("?")) {
+    let queryParams = url.split("?")[1].trim("&").split("&");
     for (let i = 0; i < queryParams.length; i++) {
-      console.log(queryParams[i]);
       let [key, val] = queryParams[i].split("=");
       params[key] = val;
     }
-  } catch (e) {
-    // console.error(`error parsing query params: ${e}`);
+  }
+  return params;
+}
+
+function addUrlQueryParam(key, val) {
+  const params = getUrlQueryParams(window.location.search);
+  params[key] = val;
+
+  const paramKeys = Object.keys(params);
+  let queryParams = [];
+
+  for (let i = 0; i < paramKeys.length; i++) {
+    let k = paramKeys[i];
+    let v = params[k];
+    if (v.toString() !== '') {
+      queryParams.push(`${k}=${v}`);
+    }
   }
 
-  return params;
+  return queryParams.length > 0 ? `?${queryParams.join("&")}` : "";
 }
 
 function getChecklistPage(clid) {
@@ -62,16 +76,20 @@ function MainContentContainer(props) {
 class GardenPageApp extends React.Component {
   constructor(props) {
     super(props);
+    const queryParams = getUrlQueryParams(window.location.search);
+
     this.state = {
       isLoading: false,
-      sunlight: "",
-      moisture: "",
-      height: [0, 50],
-      width: [0, 50],
+      sunlight: ("sunlight" in queryParams ? queryParams["sunlight"] : ""),
+      moisture: ("moisture" in queryParams ? queryParams["moisture"] : ""),
+      height: ("height" in queryParams ? queryParams["height"].split(",").map((i) => parseInt(i)) : [0, 50]),
+      width: ("width" in queryParams ? queryParams["width"].split(",").map((i) => parseInt(i)) : [0, 50]),
+      searchText: ("search" in queryParams ? queryParams["search"] : ""),
       searchResults: [],
       cannedSearches: []
     };
 
+    this.onSearchTextChanged = this.onSearchTextChanged.bind(this);
     this.onSearch = this.onSearch.bind(this);
     this.onSearchResults = this.onSearchResults.bind(this);
     this.onSunlightChanged =  this.onSunlightChanged.bind(this);
@@ -87,19 +105,26 @@ class GardenPageApp extends React.Component {
         this.setState({ cannedSearches: JSON.parse(res) });
       });
 
-    // Load initial results
-    let queryParams = getUrlQueryParams(window.location.search);
-    let search = '';
-    if ("search" in queryParams) {
-      search = queryParams["search"];
-    }
-    this.onSearch(search);
+    // Load search results
+    this.onSearch();
+  }
+
+
+  onSearchTextChanged(event) {
+    this.setState({ searchText: event.target.value });
   }
 
   // On search start
-  onSearch(searchText) {
+  onSearch() {
+    const newQueryStr = addUrlQueryParam("search", this.state.searchText);
+    window.history.replaceState(
+      { query: newQueryStr },
+      '',
+      window.location.pathname + newQueryStr
+    );
+
     this.setState({ isLoading: true });
-    httpGet(`${CLIENT_ROOT}/garden/rpc/api.php?search=${searchText}`)
+    httpGet(`${CLIENT_ROOT}/garden/rpc/api.php?search=${this.state.searchText}`)
       .then((res) => {
         this.onSearchResults(JSON.parse(res));
       })
@@ -117,33 +142,52 @@ class GardenPageApp extends React.Component {
   }
 
   onSunlightChanged(event) {
-    this.setState({ sunlight: event.target.value }, () => {
-      console.log(`sunlight: ${this.state.sunlight}`);
-    });
+    this.setState({ sunlight: event.target.value });
+    let newQueryStr = addUrlQueryParam("sunlight", event.target.value);
+    window.history.replaceState({ query: newQueryStr }, '', window.location.pathname + newQueryStr);
   }
 
   onMoistureChanged(event) {
-    this.setState({ moisture: event.target.value }, () => {
-      console.log(`moisture: ${this.state.moisture}`);
-    });
+    this.setState({ moisture: event.target.value });
+    let newQueryStr = addUrlQueryParam("moisture", event.target.value);
+    window.history.replaceState({ query: newQueryStr }, '', window.location.pathname + newQueryStr);
   }
 
   onHeightChanged(event) {
     this.setState({ height: event.target.value });
+    let newQueryStr = '';
+
+    if (event.target.value[0] === 0 && event.target.value[1] === 50) {
+      newQueryStr = addUrlQueryParam("height", '');
+    } else {
+      newQueryStr = addUrlQueryParam("height", event.target.value);
+    }
+
+    window.history.replaceState(
+      {query: newQueryStr},
+      '',
+      window.location.pathname + newQueryStr
+    );
   }
 
   onWidthChanged(event) {
     this.setState({ width: event.target.value });
+    let newQueryStr = '';
+
+    if (event.target.value[0] === 0 && event.target.value[1] === 50) {
+      newQueryStr = addUrlQueryParam("width", '');
+    } else {
+      newQueryStr = addUrlQueryParam("width", event.target.value);
+    }
+
+    window.history.replaceState(
+      {query: newQueryStr},
+      '',
+      window.location.pathname + newQueryStr
+    );
   }
 
   render() {
-    // const searchResults = this.state.searchResults.filter((item) => {
-    //   return (
-    //     filterByWidth(item, this.state.width[0], this.state.width[1]) &&
-    //     filterByHeight(item, this.state.height[0] && this.state.height[1])
-    //   );
-    // });
-
     return (
       <div>
         <InfographicDropdown />
@@ -156,7 +200,9 @@ class GardenPageApp extends React.Component {
               moisture={ this.state.moisture }
               height={ this.state.height }
               width={ this.state.width }
+              searchText={ this.state.searchText }
               onSearch={ this.onSearch }
+              onSearchTextChanged={ this.onSearchTextChanged }
               onSunlightChanged={ this.onSunlightChanged }
               onMoistureChanged={ this.onMoistureChanged }
               onHeightChanged={ this.onHeightChanged }
@@ -182,7 +228,7 @@ class GardenPageApp extends React.Component {
             <div className="row">
               <SearchResultGrid>
                 {
-                  this.state.searchResults.filter((item) => { return filterByHeight(item, this.state.height) }).map((result, idx) => {
+                  this.state.searchResults.filter((item) => { return filterByHeight(item, this.state.height) }).map((result) => {
                     let filterWidth = filterByWidth(result, this.state.width);
                     let filterHeight = filterByWidth(result, this.state.height);
                     let display = filterWidth && filterHeight;
