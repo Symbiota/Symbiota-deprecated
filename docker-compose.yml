@@ -8,8 +8,6 @@ services:
     volumes:
       - ./docker/nginx.conf:/opt/bitnami/nginx/conf/server_blocks/symbosu.conf:ro
       - .:/app
-      - ./docker/config/symbini.php:/app/config/symbini.php:ro
-      - ./docker/config/dbconnection.php:/app/config/dbconnection.php:ro
 
   php:
     image: local/php-fpm
@@ -19,8 +17,6 @@ services:
       dockerfile: ./php-fpm.dockerfile
     volumes:
       - .:/app
-      - ./docker/config/symbini.php:/app/config/symbini.php:ro
-      - ./docker/config/dbconnection.php:/app/config/dbconnection.php:ro
 
   mariadb:
     image: mariadb

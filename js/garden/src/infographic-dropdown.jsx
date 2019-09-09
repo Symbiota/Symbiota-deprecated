@@ -1,6 +1,6 @@
 "use strict";
 
-const CLIENT_ROOT = "../../..";
+const CLIENT_ROOT = "../..";
 
 class InfographicDropdown extends React.Component {
   constructor(props) {

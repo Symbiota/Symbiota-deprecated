@@ -2,7 +2,7 @@
 
 import HelpButton from "./help-button.jsx";
 
-const CLIENT_ROOT = "../../..";
+const CLIENT_ROOT = "../..";
 
 const searchButtonStyle = {
   width: "2em",

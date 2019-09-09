@@ -1,4 +1,4 @@
-const CLIENT_ROOT = "../../..";
+const CLIENT_ROOT = "../..";
 
 const helpButtonStyle = {
   float: "right",
