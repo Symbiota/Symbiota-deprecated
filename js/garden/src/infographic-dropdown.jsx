@@ -1,5 +1,7 @@
 "use strict";
 
+const CLIENT_ROOT = "../../..";
+
 class InfographicDropdown extends React.Component {
   constructor(props) {
     super(props);
@@ -60,7 +62,7 @@ class InfographicDropdown extends React.Component {
           }}
           onClick={ this.onButtonClicked.bind(this) }>
           <img
-            src="/images/garden/collapse-arrow.png"
+            src={ `${CLIENT_ROOT}/images/garden/collapse-arrow.png` }
             className={ "will-v-flip" + (this.state.isCollapsed ? " v-flip" : "") }
             style={{
               width: "4em",

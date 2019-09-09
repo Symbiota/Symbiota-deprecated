@@ -6,6 +6,8 @@ import { SearchResultGrid, SearchResult } from "./search-results.jsx";
 import { CannedSearchContainer, CannedSearchResult } from "./canned-searches.jsx";
 import httpGet from "./http-get.js";
 
+const CLIENT_ROOT = "../../..";
+
 function getUrlQueryParams(url) {
   let params = {};
   try {
@@ -24,11 +26,11 @@ function getUrlQueryParams(url) {
 
 function getChecklistPage(clid) {
   const gardenPid = 3;
-  return `/checklists/checklist.php?cl=${clid}&pid=${gardenPid}`;
+  return `${CLIENT_ROOT}/checklists/checklist.php?cl=${clid}&pid=${gardenPid}`;
 }
 
 function getTaxaPage(tid) {
-  return `../taxa/garden.php?taxon=${tid}`;
+  return `${CLIENT_ROOT}/taxa/garden.php?taxon=${tid}`;
 }
 
 function MainContentContainer(props) {
@@ -64,7 +66,7 @@ class GardenPageApp extends React.Component {
 
   componentDidMount() {
     // Load canned searches
-    httpGet("/garden/rpc/api.php?canned=true")
+    httpGet(`${CLIENT_ROOT}/garden/rpc/api.php?canned=true`)
       .then((res) => {
         this.setState({ cannedSearches: JSON.parse(res) });
       });
@@ -81,7 +83,7 @@ class GardenPageApp extends React.Component {
   // On search start
   onSearch(searchText) {
     this.setState({ isLoading: true });
-    httpGet(`/garden/rpc/api.php?search=${searchText}`)
+    httpGet(`${CLIENT_ROOT}/garden/rpc/api.php?search=${searchText}`)
       .then((res) => {
         this.onSearchResults(JSON.parse(res));
       })

@@ -2,6 +2,8 @@
 
 import HelpButton from "./help-button.jsx";
 
+const CLIENT_ROOT = "../../..";
+
 const searchButtonStyle = {
   width: "2em",
   height: "2em",
@@ -78,7 +80,7 @@ function SearchButton(props) {
     <button className="my-auto" style={ searchButtonStyle } onClick={ props.onClick }>
       <img
         style={{ display: props.isLoading ? "none" : "block" }}
-        src="/images/garden/search-green.png"
+        src={ `${CLIENT_ROOT}/images/garden/search-green.png` }
         alt="search plants"/>
       <div
         className="mx-auto text-success spinner-border spinner-border-sm"
@@ -244,7 +246,7 @@ class SideBarDropdown extends React.Component {
             <img
               className={ "ml-auto will-v-flip" + (this.state.isExpanded ? " v-flip" : "") }
               style={{ background: "black", borderRadius: "50%", height: "2em", width: "2em" }}
-              src="/images/garden/expand-arrow.png"
+              src={ `${CLIENT_ROOT}/images/garden/expand-arrow.png` }
               alt="collapse"
             />
           </button>

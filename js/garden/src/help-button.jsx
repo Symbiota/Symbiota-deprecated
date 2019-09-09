@@ -1,3 +1,5 @@
+const CLIENT_ROOT = "../../..";
+
 const helpButtonStyle = {
   float: "right",
   padding: 0,
@@ -33,7 +35,8 @@ class HelpButton extends React.Component {
         <img
           style={{ width: "1.25em" }}
           alt="help"
-          src="/images/garden/help.png"/>
+          src={ `${CLIENT_ROOT}/images/garden/help.png` }
+        />
       </button>
     );
   }

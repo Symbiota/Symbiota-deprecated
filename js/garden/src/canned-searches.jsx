@@ -1,3 +1,5 @@
+const CLIENT_ROOT = "../../..";
+
 function CannedSearchResult(props) {
   return (
     <div className="mx-2" style={ props.style }>
@@ -34,7 +36,7 @@ class CannedSearchContainer extends React.Component {
             <button>
               <img
                 style={{transform: "rotate(-90deg)", width: "2em", height: "2em"}}
-                src="/images/garden/collapse-arrow.png"
+                src={ `${CLIENT_ROOT}/images/garden/collapse-arrow.png` }
                 alt="scroll left"/>
             </button>
           </div>
@@ -54,7 +56,7 @@ class CannedSearchContainer extends React.Component {
             <button>
               <img
                 style={{transform: "rotate(90deg)", width: "2em", height: "2em"}}
-                src="/images/garden/collapse-arrow.png"
+                src={ `${CLIENT_ROOT}/images/garden/collapse-arrow.png` }
                 alt="scroll right"/>
             </button>
           </div>

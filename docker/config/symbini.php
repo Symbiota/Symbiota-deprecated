@@ -15,7 +15,7 @@ $TEMP_DIR_ROOT = $SERVER_ROOT.'/temp';				//Must be writable by Apache; will use
 $LOG_PATH = $SERVER_ROOT.'/content/logs';					//Must be writable by Apache; will use <SYMBIOTA_ROOT>/temp/logs if not specified
 
 //the root for the image directory
-$IMAGE_DOMAIN = '';				//Domain path to images, if different from portal
+$IMAGE_DOMAIN = 'https://symbiota.oregonflora.org';				//Domain path to images, if different from portal
 $IMAGE_ROOT_URL = '';				//URL path to images
 $IMAGE_ROOT_PATH = '';			//Writable path to images, especially needed for downloading images
 
