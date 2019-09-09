@@ -33,6 +33,22 @@ function getTaxaPage(tid) {
   return `${CLIENT_ROOT}/taxa/garden.php?taxon=${tid}`;
 }
 
+function filterByWidth(item, minMax) {
+  const withinMin = item.avg_width >= minMax[0];
+  if (minMax[0] === 50) {
+    return withinMin;
+  }
+  return withinMin && item.avg_width <= minMax[1];
+}
+
+function filterByHeight(item, minMax) {
+  const withinMin = item.avg_height >= minMax[0];
+  if (minMax[1] === 50) {
+    return withinMin;
+  }
+  return withinMin && item.avg_height <= minMax[1];
+}
+
 function MainContentContainer(props) {
   return (
     <div className="container mx-auto p-4" style={{ maxWidth: "1400px" }}>
@@ -113,18 +129,21 @@ class GardenPageApp extends React.Component {
   }
 
   onHeightChanged(event) {
-    this.setState({ height: event.target.value }, () => {
-      console.log(`height: ${this.state.height}`);
-    });
+    this.setState({ height: event.target.value });
   }
 
   onWidthChanged(event) {
-    this.setState({ width: event.target.value }, () => {
-      console.log(`width: ${this.state.width}`);
-    });
+    this.setState({ width: event.target.value });
   }
 
   render() {
+    // const searchResults = this.state.searchResults.filter((item) => {
+    //   return (
+    //     filterByWidth(item, this.state.width[0], this.state.width[1]) &&
+    //     filterByHeight(item, this.state.height[0] && this.state.height[1])
+    //   );
+    // });
+
     return (
       <div>
         <InfographicDropdown />
@@ -163,16 +182,21 @@ class GardenPageApp extends React.Component {
             <div className="row">
               <SearchResultGrid>
                 {
-                  this.state.searchResults.map((result, idx) =>
-                    <SearchResult
-                      style={{ display: (idx < 20 ? "initial" : "none") }}
-                      key={ result.tid }
-                      href={ getTaxaPage(result.tid) }
-                      src={ result.image }
-                      commonName={ result.vernacularname ? result.vernacularname : '' }
-                      sciName={ result.sciname }
-                    />
-                  )
+                  this.state.searchResults.filter((item) => { return filterByHeight(item, this.state.height) }).map((result, idx) => {
+                    let filterWidth = filterByWidth(result, this.state.width);
+                    let filterHeight = filterByWidth(result, this.state.height);
+                    let display = filterWidth && filterHeight;
+                    return (
+                      <SearchResult
+                        style={{display: display ? "initial" : "none" }}
+                        key={result.tid}
+                        href={getTaxaPage(result.tid)}
+                        src={result.image}
+                        commonName={result.vernacularname ? result.vernacularname : ''}
+                        sciName={result.sciname}
+                      />
+                    )
+                  })
                 }
               </SearchResultGrid>
             </div>
