@@ -9,12 +9,20 @@
  * @return {string} The path based on $IMAGE_ROOT_URL and $IMAGE_DOMAIN
  */
   function resolve_img_path($dbPath) {
+    $result = $dbPath;
+
     if (substr($dbPath, 0, 4) !== "http") {
-      if (key_exists("IMAGE_ROOT_URL", $GLOBALS) && strpos($dbPath, $GLOBALS["IMAGE_ROOT_URL"]) !== 0) {
-        $result = $GLOBALS["IMAGE_ROOT_URL"] . $dbPath;
+      if (key_exists("IMAGE_ROOT_URL", $GLOBALS)
+          && $GLOBALS["IMAGE_ROOT_URL"] !== ""
+          && strpos($dbPath, $GLOBALS["IMAGE_ROOT_URL"]) !== 0) {
+
+        $result = $GLOBALS["IMAGE_ROOT_URL"] . $result;
       }
-      if (key_exists("IMAGE_DOMAIN", $GLOBALS) && strpos($dbPath, $GLOBALS["IMAGE_DOMAIN"]) !== 0) {
-        $result = $GLOBALS["IMAGE_DOMAIN"] . $dbPath;
+      if (key_exists("IMAGE_DOMAIN", $GLOBALS)
+          && $GLOBALS["IMAGE_DOMAIN"] !== ""
+          && strpos($dbPath, $GLOBALS["IMAGE_DOMAIN"]) !== 0) {
+
+        $result = $GLOBALS["IMAGE_DOMAIN"] . $result;
       }
     }
 
