@@ -72,11 +72,6 @@ button {
   font-size: 0.8em;
 }
 
-#infographic-dropdown {
-  position: relative;
-  background-image: url(/images/garden/DIG4082-green@2x.png);
-}
-
 #infographic-dropdown * {
   color: white !important;
 }

@@ -1,6 +1,6 @@
 "use strict";
 
-const CLIENT_ROOT = "../..";
+const CLIENT_ROOT = "..";
 
 class InfographicDropdown extends React.Component {
   constructor(props) {
@@ -18,7 +18,9 @@ class InfographicDropdown extends React.Component {
     return (
       <div
         id="infographic-dropdown"
-        className="container-fluid p-5 d-print-none">
+        className="container-fluid p-5 d-print-none"
+        style={{ position: "relative", backgroundImage: `url(${CLIENT_ROOT}/images/garden/DIG4082-green@2x.png)` }}
+      >
 
         <div className="row">
           <div className="col">

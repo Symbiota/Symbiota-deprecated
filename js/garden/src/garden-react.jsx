@@ -6,7 +6,7 @@ import { SearchResultGrid, SearchResult } from "./search-results.jsx";
 import { CannedSearchContainer, CannedSearchResult } from "./canned-searches.jsx";
 import httpGet from "./http-get.js";
 
-const CLIENT_ROOT = "../..";
+const CLIENT_ROOT = "..";
 
 function getUrlQueryParams(url) {
   let params = {};
