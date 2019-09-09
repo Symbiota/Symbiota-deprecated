@@ -5,6 +5,23 @@
   $clidGardenAll = 54;
 
 /**
+ * @param $dbPath {string} Path to the image in the Symbiota database
+ * @return {string} The path based on $IMAGE_ROOT_URL and $IMAGE_DOMAIN
+ */
+  function resolve_img_path($dbPath) {
+    if (substr($dbPath, 0, 4) !== "http") {
+      if (key_exists("IMAGE_ROOT_URL", $GLOBALS) && strpos($dbPath, $GLOBALS["IMAGE_ROOT_URL"]) !== 0) {
+        $result = $GLOBALS["IMAGE_ROOT_URL"] . $dbPath;
+      }
+      if (key_exists("IMAGE_DOMAIN", $GLOBALS) && strpos($dbPath, $GLOBALS["IMAGE_DOMAIN"]) !== 0) {
+        $result = $GLOBALS["IMAGE_DOMAIN"] . $dbPath;
+      }
+    }
+
+    return $result;
+  }
+
+/**
    * Runs the given query & returns the results as an array of associative arrays
    */
   function run_query($sql) {
@@ -35,17 +52,7 @@
 
     if (count($res) > 0 && key_exists("thumbnailurl", $res[0])) {
       $result = $res[0]["thumbnailurl"];
-
-      if (substr($result, 0, 4) !== "http") {
-        if (key_exists("IMAGE_ROOT_URL", $GLOBALS)) {
-          $result = $GLOBALS["IMAGE_ROOT_URL"] . $result;
-        }
-        if (key_exists("IMAGE_DOMAIN", $GLOBALS)) {
-          $result = $GLOBALS["IMAGE_DOMAIN"] . $result;
-        }
-      }
-
-      return $result;
+      return resolve_img_path($result);
     }
 
     return "";
@@ -84,16 +91,7 @@
     $results = [];
 
     foreach ($resultsTmp as $result) {
-//      if (substr($result["iconurl"], 0, 4) !== "http") {
-//        if (key_exists("IMAGE_ROOT_URL", $GLOBALS)) {
-//          $result["iconurl"] = $GLOBALS["IMAGE_ROOT_URL"] . $result;
-//        }
-//        if (key_exists("IMAGE_DOMAIN", $GLOBALS)) {
-//          $result["iconurl"] = $GLOBALS["IMAGE_DOMAIN"] . $result;
-//        }
-//      }
-      // Temp for testing
-      $result["iconurl"] = explode("portal", $result["iconurl"])[1];
+      $result["iconurl"] = resolve_img_path($result["iconurl"]);
       array_push($results, $result);
     }
 
