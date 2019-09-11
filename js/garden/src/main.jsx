@@ -48,19 +48,45 @@ function getTaxaPage(tid) {
 }
 
 function filterByWidth(item, minMax) {
-  const withinMin = item.avg_width >= minMax[0];
+  const withinMin = item.width[0] >= minMax[0];
   if (minMax[0] === 50) {
     return withinMin;
   }
-  return withinMin && item.avg_width <= minMax[1];
+  return withinMin && item.width[1] <= minMax[1];
 }
 
 function filterByHeight(item, minMax) {
-  const withinMin = item.avg_height >= minMax[0];
+  const withinMin = item.height[0] >= minMax[0];
   if (minMax[1] === 50) {
     return withinMin;
   }
-  return withinMin && item.avg_height <= minMax[1];
+  return withinMin && item.height[1] <= minMax[1];
+}
+
+function filterBySunlight(item, sunlight) {
+  switch (sunlight) {
+    case "sun":
+      return item.sunlight.includes("sun");
+    case "partshade":
+      return item.sunlight.includes("part shade");
+    case "fullshade":
+      return item.sunlight.includes("shade");
+    default:
+      return true;
+  }
+}
+
+function filterByMoisture(item, moisture) {
+  switch (moisture) {
+    case ("dry"):
+      return item.moisture.includes("dry");
+    case ("wet"):
+      return item.moisture.includes("wet");
+    case ("moderate"):
+      return item.moisture.includes("moist");
+    default:
+      return true;
+  }
 }
 
 function MainContentContainer(props) {
@@ -231,7 +257,9 @@ class GardenPageApp extends React.Component {
                   this.state.searchResults.filter((item) => { return filterByHeight(item, this.state.height) }).map((result) => {
                     let filterWidth = filterByWidth(result, this.state.width);
                     let filterHeight = filterByWidth(result, this.state.height);
-                    let display = filterWidth && filterHeight;
+                    let filterSunlight = filterBySunlight(result, this.state.sunlight);
+                    let filterMoisture = filterByMoisture(result, this.state.moisture);
+                    let display = filterWidth && filterHeight && filterSunlight && filterMoisture;
                     return (
                       <SearchResult
                         style={{display: display ? "initial" : "none" }}
