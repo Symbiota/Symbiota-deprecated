@@ -99,12 +99,13 @@ class TPImageEditorManager extends TPEditorManager{
 	}
 	
 	public function loadImage($postArr){
-		$status = true;
+		$tid = ($this->tid?$this->tid:$postArr['tid']);
+ 		$status = true;
 		$imgManager = new ImageShared();
 		
 		$imgPath = $postArr["filepath"];
 
-		$imgManager->setTid($this->tid);
+		$imgManager->setTid($tid);
 		$imgManager->setCaption($postArr['caption']);
 		$imgManager->setPhotographer($postArr['photographer']);
 		$imgManager->setPhotographerUid($postArr['photographeruid']);
@@ -118,7 +119,7 @@ class TPImageEditorManager extends TPEditorManager{
 		if(!$sort) $sort = 40;
 		$imgManager->setSortSeq($sort);
 
-		$imgManager->setTargetPath($this->family.'/'.date('Ym').'/');
+		$imgManager->setTargetPath(($this->family?$this->family.'/':'').date('Ym').'/');
 		if($imgPath){
 			$imgManager->setMapLargeImg(true);
 			$importUrl = (array_key_exists('importurl',$postArr) && $postArr['importurl']==1?true:false);

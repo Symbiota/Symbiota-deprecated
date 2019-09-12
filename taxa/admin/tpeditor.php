@@ -11,7 +11,6 @@ $lang = array_key_exists("lang",$_REQUEST)?$_REQUEST["lang"]:"";
 $action = array_key_exists("action",$_REQUEST)?$_REQUEST["action"]:"";
 $tabIndex = array_key_exists("tabindex",$_REQUEST)?$_REQUEST["tabindex"]:0;
 
-$tEditor;
 $tImageEditor = new TPImageEditorManager();
 $tDescEditor = new TPDescEditorManager();
 $tEditor = new TPEditorManager();
@@ -88,10 +87,10 @@ if($editable && $action){
 				$imgSortArr[substr($sortKey,6)]  = $sortValue;
 			}
 		}
-		$statusStr = $tEditor->$tImageEditor($imgSortArr);
+		$statusStr = $tImageEditor->editImageSort($imgSortArr);
 	} 
 	elseif($action === "Upload Image"){
-		if($tEditor->$tImageEditor($_POST)){
+		if($tImageEditor->loadImage($_POST)){
 			$statusStr = 'Image uploaded successful';
 		}
 		if($tEditor->getErrorStr()){

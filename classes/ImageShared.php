@@ -328,7 +328,7 @@ class ImageShared{
 		$path .= $subPath;
 		$url .= $subPath;
 		if(!file_exists($path)){
-			if(!mkdir( $path, 0777, true )){
+			if(!mkdir($path, 0777, true) && !is_dir($path)){
 				$this->errArr[] = 'FATAL ERROR: Unable to create directory: '.$path;
 				//trigger_error('Unable to create directory: '.$path,E_USER_ERROR);
 				return false;
