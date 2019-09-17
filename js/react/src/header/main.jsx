@@ -1,3 +1,7 @@
+function getScollPos() {
+  return document.body.scrollTop || document.documentElement.scrollTop;
+}
+
 function ImageLink(props) {
   return (
     <a href={ props.href }>
@@ -9,17 +13,40 @@ function ImageLink(props) {
 class HeaderApp extends React.Component {
   constructor(props) {
     super(props);
+    this.state = {
+      isCollapsed: getScollPos() > 80,
+      scrollLock: false
+    };
+  }
+
+  componentDidMount() {
+    const siteHeader = document.getElementById("site-header");
+    siteHeader.addEventListener("transitionstart", () => {
+      this.setState({ scrollLock: true });
+    });
+    siteHeader.addEventListener("transitionend", () => {
+      this.setState({ scrollLock: false });
+    });
+    siteHeader.addEventListener("transitioncancel", () => {
+      this.setState({ scrollLock: false });
+    });
+    window.addEventListener("scroll", () => {
+      if (!this.state.scrollLock) {
+        this.setState({isCollapsed: getScollPos() > (80 + siteHeader.offsetHeight)});
+      }
+    });
   }
 
   render() {
     return (
       <nav
-        style={{backgroundImage: `url(${this.props.clientRoot}/images/header/OF-Header_May8.png)`}}
-        className="navbar navbar-expand-lg navbar-dark bg-dark site-header">
+        id="site-header"
+        style={{ backgroundImage: `url(${this.props.clientRoot}/images/header/OF-Header_May8.png)` }}
+        className={ `navbar navbar-expand-lg navbar-dark bg-dark site-header ${this.state.isCollapsed ? "site-header-scroll" : ''}` }>
 
         <a className="navbar-brand" href={ `${this.props.clientRoot}/` }>
           <img id="site-header-logo"
-               src="/images/header/oregonflora-logo.png"
+               src={ this.state.isCollapsed ? "/images/header/oregonflora-logo-sm.png" : "/images/header/oregonflora-logo.png" }
                alt="OregonFlora"/>
         </a>
 

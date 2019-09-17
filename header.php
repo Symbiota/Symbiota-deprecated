@@ -50,7 +50,7 @@
 </script>
 
 <!-- Render header -->
-<div id="site-header"></div>
+<div id="header-app"></div>
 
 <script
   src='<?php echo $GLOBALS["CLIENT_ROOT"] . "/js/react/dist/header.js" ?>'
@@ -58,7 +58,7 @@
 </script>
 
 <script>
-  const domContainer = document.getElementById("site-header");
+  const domContainer = document.getElementById("header-app");
   OregonFlora.renderHeader(
     {clientRoot: "<?php echo $GLOBALS['CLIENT_ROOT'] ?>"},
     domContainer
