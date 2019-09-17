@@ -1,6 +1,6 @@
 "use strict";
 
-import HelpButton from "./help-button.jsx";
+import HelpButton from "./helpButton.jsx";
 
 const CLIENT_ROOT = "..";
 

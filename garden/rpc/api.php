@@ -117,10 +117,10 @@
   }
 
   /**
-   * Returns canned searches for the garden page
+   * Returns canned searches for the react page
    */
   function get_canned_searches() {
-    $sql = "select clid, name, iconurl from fmchecklists where parentclid = " . $GLOBALS["clidGardenAll"] . ";";
+    $sql = "select clid, name, iconurl from fmchecklists where parentclid = " . $GLOBALS["CLID_GARDEN_ALL"] . ";";
     $resultsTmp = run_query($sql);
     $results = [];
 
@@ -143,7 +143,7 @@
 
     // TODO: Clean params
 
-    # Select all garden taxa that have some sort of name
+    # Select all react taxa that have some sort of name
     $sql = "SELECT t.tid, t.sciname, v.vernacularname FROM taxa as t ";
     $sql .= "LEFT JOIN taxavernaculars AS v ON t.tid = v.tid ";
     $sql .= "RIGHT JOIN fmchklsttaxalink AS chk ON t.tid = chk.tid ";

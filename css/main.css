@@ -573,7 +573,7 @@ span.h3 {
 /* end welcome section */
 
 
-/* garden section */
+/* react section */
 .garden-wrapper {
 	display: flex;
 	flex-wrap: wrap;
@@ -600,7 +600,7 @@ span.h3 {
 .garden-wrapper a:link, .garden-wrapper a:active, .garden-wrapper a:visited, .garden-wrapper a:hover {
 	color: #ffffff !important;
 }
-/* end garden section */
+/* end react section */
 
 /* news section */
 .news-wrapper {

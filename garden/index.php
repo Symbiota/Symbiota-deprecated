@@ -13,8 +13,6 @@ header("Content-Type: text/html; charset=".$CHARSET);
     <link href="<?php echo $CLIENT_ROOT; ?>/css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
     <link href="<?php echo $CLIENT_ROOT; ?>/css/garden.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 
-    <script type="text/javascript" src="https://unpkg.com/react@16/umd/react.development.js" crossorigin></script>
-    <script type="text/javascript" src="https://unpkg.com/react-dom@16/umd/react-dom.development.js" crossorigin></script>
   </head>
   <body>
     <?php
@@ -34,8 +32,8 @@ header("Content-Type: text/html; charset=".$CHARSET);
     </script>
 
     <div id="page-content" style="min-height: 50em;">
-      <div id="react-app"></div>
-      <script type="text/javascript" src="<?php echo $CLIENT_ROOT ?>/js/garden/dist/garden.js"></script>
+      <div id="garden-page"></div>
+      <script type="text/javascript" src="<?php echo $CLIENT_ROOT ?>/js/react/dist/garden.js"></script>
     </div>
 
     <?php

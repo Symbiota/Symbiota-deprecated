@@ -2,8 +2,15 @@ const path = require("path");
 
 module.exports = {
   context: path.resolve(__dirname, "src"),
-  entry: { "garden": path.resolve(__dirname, "src", "main.jsx") },
-  output: { "path": path.resolve(__dirname, "dist") },
+  entry: {
+    garden: path.resolve(__dirname, "src", "garden", "main.jsx"),
+    header: path.resolve(__dirname, "src", "header", "main.jsx")
+  },
+  output: {
+    path: path.resolve(__dirname, "dist"),
+    libraryTarget: "var",
+    library: "OregonFlora"
+  },
   module: {
     rules: [
       {

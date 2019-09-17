@@ -1,10 +1,10 @@
 "use strict";
 
-import InfographicDropdown from "./infographic-dropdown.jsx";
+import InfographicDropdown from "./infographicDropdown.jsx";
 import SideBar from "./sidebar.jsx";
-import { SearchResultGrid, SearchResult } from "./search-results.jsx";
-import { CannedSearchContainer, CannedSearchResult } from "./canned-searches.jsx";
-import httpGet from "./http-get.js";
+import { SearchResultGrid, SearchResult } from "./searchResults.jsx";
+import { CannedSearchContainer, CannedSearchResult } from "./cannedSearches.jsx";
+import httpGet from "./httpGet.js";
 
 const CLIENT_ROOT = "..";
 
@@ -282,5 +282,5 @@ class GardenPageApp extends React.Component {
   }
 }
 
-const domContainer = document.getElementById("react-app");
+const domContainer = document.getElementById("garden-page");
 ReactDOM.render(<GardenPageApp />, domContainer);
