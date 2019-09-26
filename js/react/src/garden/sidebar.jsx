@@ -1,17 +1,9 @@
 "use strict";
 
 import HelpButton from "./helpButton.jsx";
+import {SearchWidget} from "../common/search.jsx";
 
 const CLIENT_ROOT = "..";
-
-const searchButtonStyle = {
-  width: "2em",
-  height: "2em",
-  padding: "0.3em",
-  marginLeft: "0.5em",
-  borderRadius: "50%",
-  background: "rgba(255, 255, 255, 0.5)"
-};
 
 /**
  * @param valueArray {number[]} An array in the form [min, max]
@@ -67,60 +59,6 @@ class SideBarHeading extends React.Component {
           Start applying characteristics, and the matching plants will appear at
           right.
         </p>
-      </div>
-    );
-  }
-}
-
-/**
- * Sidebar 'plant search' button
- */
-function SearchButton(props) {
-  return (
-    <button className="my-auto" style={ searchButtonStyle } onClick={ props.onClick }>
-      <img
-        style={{ display: props.isLoading ? "none" : "block" }}
-        src={ `${CLIENT_ROOT}/images/garden/search-green.png` }
-        alt="search plants"/>
-      <div
-        className="mx-auto text-success spinner-border spinner-border-sm"
-        style={{ display: props.isLoading ? "block" : "none" }}
-        role="status"
-        aria-hidden="true"/>
-    </button>
-  );
-}
-
-/**
- * Sidebar 'plant search' text field & button
- */
-class SideBarSearch extends React.Component {
-  constructor(props) {
-    super(props);
-    this.onKeyUp = this.onKeyUp.bind(this);
-  }
-
-  onKeyUp(event) {
-    const enterKey = 13;
-    if ((event.which || event.keyCode) === enterKey) {
-      event.preventDefault();
-      const fakeEvent = { target: { value: this.props.value } };
-      this.props.onClick(fakeEvent);
-    }
-  }
-
-  render() {
-    return (
-      <div className="input-group w-100 mb-4 p-2">
-        <input
-          name="search"
-          type="text"
-          placeholder="Search plants by name"
-          className="form-control"
-          onKeyUp={ this.onKeyUp }
-          onChange={ this.props.onChange }
-          value={ this.props.value }/>
-        <SearchButton onClick={ this.props.onClick } isLoading={ this.props.isLoading }/>
       </div>
     );
   }
@@ -290,7 +228,7 @@ class SideBar extends React.Component {
         <SideBarHeading />
 
         {/* Search */}
-        <SideBarSearch
+        <SearchWidget
           onChange={ this.props.onSearchTextChanged }
           onClick={ this.props.onSearch }
           value={ this.props.searchText }

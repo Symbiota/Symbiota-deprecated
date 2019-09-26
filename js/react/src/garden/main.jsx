@@ -282,5 +282,5 @@ class GardenPageApp extends React.Component {
   }
 }
 
-const domContainer = document.getElementById("garden-page");
+const domContainer = document.getElementById("react-garden");
 ReactDOM.render(<GardenPageApp />, domContainer);

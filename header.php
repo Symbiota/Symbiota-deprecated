@@ -44,25 +44,12 @@
   crossorigin>
 </script>
 
-<script
-  src='<?php echo $GLOBALS["CLIENT_ROOT"] . "/js/header.js" ?>'
-  type="text/javascript">
-</script>
-
 <!-- Render header -->
-<div id="header-app"></div>
+<div id="react-header" data-props='{ "clientRoot": "<?php echo $GLOBALS["CLIENT_ROOT"] ?>" }'></div>
 
 <script
   src='<?php echo $GLOBALS["CLIENT_ROOT"] . "/js/react/dist/header.js" ?>'
   type="text/javascript">
-</script>
-
-<script>
-  const domContainer = document.getElementById("header-app");
-  OregonFlora.renderHeader(
-    {clientRoot: "<?php echo $GLOBALS['CLIENT_ROOT'] ?>"},
-    domContainer
-  );
 </script>
 
 <div id="site-content">

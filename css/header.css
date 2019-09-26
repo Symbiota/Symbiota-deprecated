@@ -3,7 +3,7 @@ body {
   margin: 0;
 }
 
-#header-app {
+#react-header {
   position: sticky;
   position: -webkit-sticky; /* Safari */
   top: 0;

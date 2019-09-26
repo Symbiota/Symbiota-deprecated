@@ -1,12 +1,68 @@
+import SearchWidget from "../common/search.jsx";
+
+const dropDowns = [
+  { title: "Explore Our Site" },
+  { title: "Resources" },
+  { title: "About" },
+  { title: "Contribute" },
+];
+
+const dropDownChildren = {
+  "Explore Our Site": [
+    { title: "Mapping", href: "/spatial/index.php" },
+    { title: "Interactive Key", href: "/checklists/dynamicmap.php?interface=key" },
+    { title: "Plant Inventories", href: "/projects/index.php" },
+    { title: "OSU Herbarium", href: "/collections/harvestparams.php?db[]=5,8,10,7,238,239,240,241" },
+    { title: "Gardening with Natives", href: "/garden/index.php" },
+    { title: "Image Search", href: "/imagelib/search.php" },
+    { title: "Taxanomic Tree", href: "/taxa/admin/taxonomydisplay.php" },
+  ],
+  "Resources": [
+    { title: "What's New", href: "/pages/whats-new.php" },
+    { title: "Archived Newsletters", href: "/newsletters/index.php" },
+    { title: "Links", href: "/pages/links.php" }
+  ],
+  "About": [
+    { title: "Mission and History", href: "/pages/mission.php" },
+    { title: "Contact Info", href: "/pages/contact.php" },
+    { title: "Project Participants", href: "/pages/project-participants.php" },
+  ],
+  "Contribute": [
+    { title: "Donate", href: "/pages/donate.php" },
+    { title: "Volunteer", href: "/pages/volunteer.php" },
+    { title: "Merchandise", href: "/pages/merchandise.php" },
+  ]
+};
+
 function getScollPos() {
   return document.body.scrollTop || document.documentElement.scrollTop;
 }
 
-function ImageLink(props) {
+function HeaderDropdownItem(props) {
   return (
-    <a href={ props.href }>
-      <img src={ props.src } alt={ props.src } />
-    </a>
+    <a className="dropdown-item" href={ props.href }>{ props.title }</a>
+  );
+}
+
+function HeaderDropdown(props) {
+  let id = props.title.replace(/[^a-zA-Z_]/g, '').toLowerCase();
+  id = `header-dropdown-${id}`;
+  return (
+    <li className="nav-item dropdown">
+      <a
+        id={ id }
+        className="nav-link dropdown-toggle"
+        href="#"
+        role="button"
+        data-toggle="dropdown"
+        aria-haspopup="true"
+        aria-expanded="false">
+        { props.title }
+      </a>
+      <div className="dropdown-menu" aria-labelledby={ id }>
+        { props.children }
+      </div>
+    </li>
   );
 }
 
@@ -15,8 +71,21 @@ class HeaderApp extends React.Component {
     super(props);
     this.state = {
       isCollapsed: getScollPos() > 80,
-      scrollLock: false
+      scrollLock: false,
+      isLoading: false,
+      searchText: ''
     };
+
+    this.onSearchTextChanged = this.onSearchTextChanged.bind(this);
+    this.onSearch = this.onSearch.bind(this);
+  }
+
+  onSearchTextChanged() {
+    this.setState({ searchText: event.target.value });
+  }
+
+  onSearch() {
+    this.setState({ isLoading: true });
   }
 
   componentDidMount() {
@@ -46,23 +115,53 @@ class HeaderApp extends React.Component {
 
         <a className="navbar-brand" href={ `${this.props.clientRoot}/` }>
           <img id="site-header-logo"
-               src={ this.state.isCollapsed ? "/images/header/oregonflora-logo-sm.png" : "/images/header/oregonflora-logo.png" }
+               src={
+                 this.state.isCollapsed
+                   ? `${this.props.clientRoot}/images/header/oregonflora-logo-sm.png`
+                   : "/images/header/oregonflora-logo.png"
+               }
                alt="OregonFlora"/>
         </a>
 
+        <div id="site-header-dropdowns" className="collapse navbar-collapse">
+          <ul className="navbar-nav">
+            {
+              dropDowns.map((dropdownData) => {
+                return (
+                  <HeaderDropdown key={ dropdownData.title } title={ dropdownData.title }>
+                    {
+                      dropDownChildren[dropdownData.title].map((dropDownChildData) => {
+                        return (
+                          <HeaderDropdownItem
+                            key={ dropDownChildData.title }
+                            title={ dropDownChildData.title }
+                            href={ `${ this.props.clientRoot }${ dropDownChildData.href }` }
+                          />
+                        )
+                      })
+                    }
+                  </HeaderDropdown>
+                )
+              })
+            }
+          </ul>
+        </div>
 
+        <SearchWidget
+          isLoading={ this.state.isLoading }
+          onClick={ this.onSearch }
+          onChange={ this.onSearchTextChanged }
+          value={ this.state.searchText }
+          style={{ marginLeft: "auto", marginTop: "auto", marginBottom: "auto", maxWidth: "20em" }}
+        />
       </nav>
     );
   }
 }
 
-module.exports = {
-  "renderHeader": (props, targetNode) => {
-    const component = React.createElement(HeaderApp, props, null);
-    ReactDOM.render(component, targetNode);
-    return component;
-  }
-};
+const domContainer = document.getElementById("react-header");
+const dataProps = JSON.parse(domContainer.getAttribute("data-props"));
+ReactDOM.render(<HeaderApp clientRoot={ dataProps["clientRoot"] } />, domContainer);
 
       {/*
       <!-- Holds dropdowns on mobile -->

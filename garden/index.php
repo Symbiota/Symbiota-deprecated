@@ -32,7 +32,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
     </script>
 
     <div id="page-content" style="min-height: 50em;">
-      <div id="garden-page"></div>
+      <div id="react-garden"></div>
       <script type="text/javascript" src="<?php echo $CLIENT_ROOT ?>/js/react/dist/garden.js"></script>
     </div>
 
