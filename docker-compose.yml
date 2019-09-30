@@ -12,6 +12,7 @@ services:
   php:
     image: local/php-fpm
     container_name: of-php
+    depends_on: mariadb
     build:
       context: ./docker
       dockerfile: ./php-fpm.dockerfile
