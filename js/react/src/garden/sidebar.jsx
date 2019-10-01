@@ -1,17 +1,9 @@
 "use strict";
 
-import HelpButton from "./help-button.jsx";
+import HelpButton from "./helpButton.jsx";
+import {SearchWidget} from "../common/search.jsx";
 
 const CLIENT_ROOT = "..";
-
-const searchButtonStyle = {
-  width: "2em",
-  height: "2em",
-  padding: "0.3em",
-  marginLeft: "0.5em",
-  borderRadius: "50%",
-  background: "rgba(255, 255, 255, 0.5)"
-};
 
 /**
  * @param valueArray {number[]} An array in the form [min, max]
@@ -73,60 +65,6 @@ class SideBarHeading extends React.Component {
 }
 
 /**
- * Sidebar 'plant search' button
- */
-function SearchButton(props) {
-  return (
-    <button className="my-auto" style={ searchButtonStyle } onClick={ props.onClick }>
-      <img
-        style={{ display: props.isLoading ? "none" : "block" }}
-        src={ `${CLIENT_ROOT}/images/garden/search-green.png` }
-        alt="search plants"/>
-      <div
-        className="mx-auto text-success spinner-border spinner-border-sm"
-        style={{ display: props.isLoading ? "block" : "none" }}
-        role="status"
-        aria-hidden="true"/>
-    </button>
-  );
-}
-
-/**
- * Sidebar 'plant search' text field & button
- */
-class SideBarSearch extends React.Component {
-  constructor(props) {
-    super(props);
-    this.onKeyUp = this.onKeyUp.bind(this);
-  }
-
-  onKeyUp(event) {
-    const enterKey = 13;
-    if ((event.which || event.keyCode) === enterKey) {
-      event.preventDefault();
-      const fakeEvent = { target: { value: this.props.value } };
-      this.props.onClick(fakeEvent);
-    }
-  }
-
-  render() {
-    return (
-      <div className="input-group w-100 mb-4 p-2">
-        <input
-          name="search"
-          type="text"
-          placeholder="Search plants by name"
-          className="form-control"
-          onKeyUp={ this.onKeyUp }
-          onChange={ this.props.onChange }
-          value={ this.props.value }/>
-        <SearchButton onClick={ this.props.onClick } isLoading={ this.props.isLoading }/>
-      </div>
-    );
-  }
-}
-
-/**
  * 'Plant Need' dropdown with label
  */
 function PlantNeed(props) {
@@ -168,7 +106,12 @@ class PlantSlider extends React.Component {
 
   componentDidMount() {
     const sliderId = `slider-container-${this.props.name}`;
-    this.slider = new Slider(`#${sliderId}`);
+    this.slider = new Slider(`#${sliderId}`, {
+      value: this.props.value.map((i) => parseInt(i)),
+      ticks: [0, 10, 20, 30, 40, 50],
+      ticks_labels: ["0", "", "", "", "", "50+"],
+      ticks_snap_bounds: 1
+    });
 
     if (this.props.onChange) {
       const onChangeEvent = this.props.onChange;
@@ -193,10 +136,6 @@ class PlantSlider extends React.Component {
           type="text"
           className="bootstrap-slider"
           name={ this.props.name }
-          data-slider-value="[0, 50]"
-          data-slider-ticks="[0, 10, 20, 30, 40, 50]"
-          data-slider-ticks-labels='["0", "", "", "", "", "50+"]'
-          data-slider-ticks-snap-bounds="1"
           onChange={ (e) => this.props.onChange(e) }
         />
         <br/>
@@ -207,6 +146,10 @@ class PlantSlider extends React.Component {
     );
   }
 }
+
+PlantSlider.defaultProps = {
+  value: [0, 50]
+};
 
 class SideBarDropdown extends React.Component {
   constructor(props) {
@@ -272,20 +215,6 @@ SideBarDropdown.defaultProps = {
 class SideBar extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
-      search: '',
-    };
-
-    this.onSearchTextChanged = this.onSearchTextChanged.bind(this);
-    this.onSearch = this.onSearch.bind(this);
-  }
-
-  onSearchTextChanged(event) {
-    this.setState({ search: event.target.value });
-  }
-
-  onSearch() {
-    this.props.onSearch(this.state.search);
   }
 
   render() {
@@ -299,10 +228,12 @@ class SideBar extends React.Component {
         <SideBarHeading />
 
         {/* Search */}
-        <SideBarSearch
-          onChange={ this.onSearchTextChanged }
-          onClick={ this.onSearch }
-          value={ this.state.search }
+        <SearchWidget
+          name="search-garden-sidebar"
+          placeholder="Search plants by name"
+          onChange={ this.props.onSearchTextChanged }
+          onClick={ this.props.onSearch }
+          value={ this.props.searchText }
           isLoading={ this.props.isLoading }
         />
 
@@ -330,6 +261,7 @@ class SideBar extends React.Component {
               <PlantSlider
                 label="Height (ft)"
                 name="height"
+                value={ this.props.height }
                 onChange={ this.props.onHeightChanged } />
             </div>
             <div
@@ -339,6 +271,7 @@ class SideBar extends React.Component {
               <PlantSlider
                 label="Width (ft)"
                 name="width"
+                value={ this.props.width }
                 onChange={ this.props.onWidthChanged } />
             </div>
           </div>

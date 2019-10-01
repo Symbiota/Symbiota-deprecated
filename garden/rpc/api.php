@@ -1,8 +1,14 @@
 <?php
+  ob_start();
   include_once("../../config/symbini.php");
   include_once($GLOBALS["SERVER_ROOT"] . "/config/dbconnection.php");
 
-  $clidGardenAll = 54;
+  $CLID_GARDEN_ALL = 54;
+
+  $CID_SUNLIGHT = 680;
+  $CID_MOISTURE = 683;
+  $CID_WIDTH = 738;
+  $CID_HEIGHT = 140;
 
 /**
  * @param $dbPath {string} Path to the image in the Symbiota database
@@ -66,35 +72,55 @@
     return "";
   }
 
-  function get_size_for_tid($tid) {
-    $HEIGHT_KEY = 140;
-    $WIDTH_KEY = 738;
+  function get_attribs_for_tid($tid) {
+    $all_attr_sql = 'SELECT kmdescr.cid as attr_key, lower(kmcs.charstatename) as attr_val FROM kmdescr ';
+    $all_attr_sql .= 'INNER JOIN kmcs on (kmdescr.cid = kmcs.cid AND kmdescr.cs = kmcs.cs) ';
+    $all_attr_sql .= "WHERE kmdescr.tid = $tid;";
 
-    $height_sql = "SELECT avg(cs) as avg_height FROM kmdescr WHERE tid = $tid AND cid = $HEIGHT_KEY;";
-    $width_sql = "SELECT avg(cs) as avg_width FROM kmdescr WHERE tid = $tid AND cid = $WIDTH_KEY;";
+    $attr_res = run_query($all_attr_sql);
+    $attr_array = [
+        "height" => [],
+        "width" => [],
+        "sunlight" => [],
+        "moisture" => []
+    ];
 
-    $height_res = run_query($height_sql);
-    $width_res = run_query($width_sql);
-
-    $avg_width = 0;
-    $avg_height = 0;
-
-    if (count($height_res) > 0 && key_exists("avg_height", $height_res[0]) && is_numeric($height_res[0]["avg_height"])) {
-      $avg_height = floatval($height_res[0]["avg_height"]);
+    foreach ($attr_res as $attr) {
+      $attr_key = intval($attr["attr_key"]);
+      $attr_val = $attr["attr_val"];
+      switch ($attr_key) {
+        case $GLOBALS["CID_HEIGHT"]:
+          array_push($attr_array["height"], intval($attr_val));
+          break;
+        case $GLOBALS["CID_WIDTH"]:
+          array_push($attr_array["width"], intval($attr_val));
+          break;
+        case $GLOBALS["CID_SUNLIGHT"]:
+          array_push($attr_array["sunlight"], $attr_val);
+          break;
+        case $GLOBALS["CID_MOISTURE"]:
+          array_push($attr_array["moisture"], $attr_val);
+          break;
+        default:
+          break;
+      }
     }
 
-    if (count($width_res) > 0 && key_exists("avg_width", $width_res[0]) && is_numeric($width_res[0]["avg_width"])) {
-      $avg_width = floatval($width_res[0]["avg_width"]);
+    foreach (["width", "height"] as $k) {
+      if (count($attr_array[$k]) > 1) {
+        $tmp = [min($attr_array[$k]), max($attr_array[$k])];
+        $attr_array[$k] = $tmp;
+      }
     }
 
-    return [$avg_width, $avg_height];
+    return $attr_array;
   }
 
   /**
-   * @return {[]} Canned searches for the garden page
+   * Returns canned searches for the react page
    */
   function get_canned_searches() {
-    $sql = "select clid, name, iconurl from fmchecklists where parentclid = " . $GLOBALS["clidGardenAll"] . ";";
+    $sql = "select clid, name, iconurl from fmchecklists where parentclid = " . $GLOBALS["CLID_GARDEN_ALL"] . ";";
     $resultsTmp = run_query($sql);
     $results = [];
 
@@ -117,11 +143,11 @@
 
     // TODO: Clean params
 
-    # Select all garden taxa that have some sort of name
+    # Select all react taxa that have some sort of name
     $sql = "SELECT t.tid, t.sciname, v.vernacularname FROM taxa as t ";
     $sql .= "LEFT JOIN taxavernaculars AS v ON t.tid = v.tid ";
     $sql .= "RIGHT JOIN fmchklsttaxalink AS chk ON t.tid = chk.tid ";
-    $sql .= "WHERE chk.clid = " . $GLOBALS["clidGardenAll"] . " ";
+    $sql .= "WHERE chk.clid = " . $GLOBALS["CLID_GARDEN_ALL"] . " ";
     $sql .= "AND (t.sciname IS NOT NULL OR v.vernacularname IS NOT NULL) ";
 
     if ($search !== null) {
@@ -135,21 +161,13 @@
 
     // Populate image urls
     foreach ($resultsTmp as $result) {
-      $size = get_size_for_tid($result["tid"]);
-      $result["avg_width"] = $size[0];
-      $result["avg_height"] = $size[1];
-
+      $result = array_merge($result, get_attribs_for_tid($result["tid"]));
       $result["image"] = get_image_for_tid($result["tid"]);
-      if ($result["image"] !== "") {
-        array_push($results, $result);
-      }
+      array_push($results, $result);
     }
 
     return $results;
   }
-
-  // Begin View
-  header("Content-Type", "application/json; charset=utf-8");
 
   $searchResults = [];
   if (key_exists("canned", $_GET) && $_GET["canned"] === "true") {
@@ -158,6 +176,11 @@
     $searchResults = get_garden_taxa($_GET);
   }
 
+  // Begin View
+  error_reporting(E_ALL);
+  ini_set("display_errors", true);
+  header("Content-Type: application/json; charset=UTF-8");
   echo json_encode($searchResults, JSON_NUMERIC_CHECK);
+  ob_end_flush();
 ?>
 

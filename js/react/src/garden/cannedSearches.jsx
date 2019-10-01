@@ -31,17 +31,17 @@ class CannedSearchContainer extends React.Component {
         <h1 style={{color: "black", fontWeight: "bold", fontSize: "1.75em"}}>
           Kickstart your search with one of our native plant collections:
         </h1>
-        <div className="w-100 rounded-border p-3 row" style={{background: "#DFEFD3"}}>
-          <div className="col-auto p-0 m-0">
+        <div className="w-100 rounded-border p-3" style={{background: "#DFEFD3"}}>
+          <div className="p-0 m-0" style={{ position: "relative" }}>
             <button>
               <img
-                style={{transform: "rotate(-90deg)", width: "2em", height: "2em"}}
+                style={{transform: "rotate(-90deg)", width: "2em", height: "2em" }}
                 src={ `${CLIENT_ROOT}/images/garden/collapse-arrow.png` }
                 alt="scroll left"/>
             </button>
           </div>
 
-          <div className="col p-0 m-1">
+          <div className="p-0 m-1">
             <div
               style={{
                 display: "grid",
@@ -52,10 +52,10 @@ class CannedSearchContainer extends React.Component {
             </div>
           </div>
 
-          <div className="col-auto p-0 m-0">
+          <div className="p-0 m-0">
             <button>
               <img
-                style={{transform: "rotate(90deg)", width: "2em", height: "2em"}}
+                style={{ transform: "rotate(90deg)", width: "2em", height: "2em" }}
                 src={ `${CLIENT_ROOT}/images/garden/collapse-arrow.png` }
                 alt="scroll right"/>
             </button>
