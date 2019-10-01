@@ -38,8 +38,15 @@ body {
   display: none;
 }
 
-#site-header-dropdowns .dropdown-toggle:hover, .dropdown-toggle:focus {
-  background: #DFEFD3;
+#site-header .header-button {
+  background: none;
+  text-transform: uppercase;
+  font-weight: bold;
+  font-size: 0.9em;
+}
+
+#site-header-dropdowns .dropdown-toggle:hover, #site-header-dropdowns .dropdown-toggle:focus, .header-button:hover {
+  background: #DFEFD3 !important;
   color: black !important;
   border-radius: 0.5em;
 }

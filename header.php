@@ -35,6 +35,11 @@
 
 <script
   type="text/javascript"
+  src="https://cdn.jsdelivr.net/gh/xcash/bootstrap-autocomplete@v2.2.2/dist/latest/bootstrap-autocomplete.min.js">
+</script>
+
+<script
+  type="text/javascript"
   src="https://unpkg.com/react@16/umd/react.development.js"
   crossorigin>
 </script>
@@ -52,4 +57,4 @@
   type="text/javascript">
 </script>
 
-<div id="site-content">
+<div id="site-content" class="mt-5">

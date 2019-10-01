@@ -229,6 +229,7 @@ class SideBar extends React.Component {
 
         {/* Search */}
         <SearchWidget
+          name="search-garden-sidebar"
           placeholder="Search plants by name"
           onChange={ this.props.onSearchTextChanged }
           onClick={ this.props.onSearch }

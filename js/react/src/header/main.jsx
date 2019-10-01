@@ -34,6 +34,24 @@ const dropDownChildren = {
   ]
 };
 
+function HeaderButton(props) {
+  return (
+    <a href={ props.href }>
+      <button className={ "col header-button" }>
+        { props.title }
+      </button>
+    </a>
+  );
+}
+
+function HeaderButtonBar(props) {
+  return (
+    <div className="row mr-3" style={ props.style }>
+      { props.children }
+    </div>
+  );
+}
+
 function getScollPos() {
   return document.body.scrollTop || document.documentElement.scrollTop;
 }
@@ -86,6 +104,7 @@ class HeaderApp extends React.Component {
 
   onSearch() {
     this.setState({ isLoading: true });
+    window.location = `${this.props.clientRoot}/taxa/index.php?common=` + encodeURIComponent(`${this.state.searchText}`);
   }
 
   componentDidMount() {
@@ -147,14 +166,26 @@ class HeaderApp extends React.Component {
           </ul>
         </div>
 
-        <SearchWidget
-          placeholder="Search all plants"
-          isLoading={ this.state.isLoading }
-          onClick={ this.onSearch }
-          onChange={ this.onSearchTextChanged }
-          value={ this.state.searchText }
-          style={{ marginLeft: "auto", marginTop: "auto", marginBottom: "auto", maxWidth: "20em" }}
-        />
+        <div className={ "ml-auto mr-4" + (this.state.isCollapsed ? " my-auto" : "") }>
+          <HeaderButtonBar style={{ display: this.state.isCollapsed ? 'none' : 'flex' }}>
+            <HeaderButton title="Contact" href={ `${this.props.clientRoot}/pages/contact.php` } />
+            <HeaderButton title="Donate" href={ `${this.props.clientRoot}/pages/donate.php` } />
+            <HeaderButton title="Login" href={ `${this.props.clientRoot}/profile/index.php?refurl=${ location.pathname }` } />
+          </HeaderButtonBar>
+
+          <div className="row">
+            <SearchWidget
+              name="search-header"
+              placeholder="Search all plants"
+              isLoading={ this.state.isLoading }
+              onClick={ this.onSearch }
+              onChange={ this.onSearchTextChanged }
+              value={ this.state.searchText }
+              autoComplete={ true }
+              autoCompleteUrl={ `${this.props.clientRoot}/webservices/autofillsearch.php` }
+            />
+          </div>
+        </div>
       </nav>
     );
   }
