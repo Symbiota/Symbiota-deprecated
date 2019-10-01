@@ -354,7 +354,7 @@ if($clArray["locality"]){
 					echo "<div><span style='font-weight:bold;'>".(isset($LANG['CITATION'])?$LANG['CITATION']:'Citation').":</span> ".$pubStr."</div>";
 				}
 			}
-			if($clValue && $clArray["parentclid"]== 54 && $clArray["iconurl"] !='') {//react collection ?>
+			if($clValue && $clArray["parentclid"]== 54 && $clArray["iconurl"] !='') {//garden collection ?>
                 <div class="checklist-left">
                     <img src="<?php echo $clArray['iconurl'] ?>" alt="<?php echo $clArray['iconurl'] ?>">
                 </div>
@@ -720,8 +720,8 @@ if($clArray["locality"]){
 							<div class="grid-item">
 								<div class="image-item">
 									<?php
-                                    if($clValue && $clArray["parentclid"]== 54) {//react collection
-                                        $spUrl = "../taxa/react.php?taxauthid=1&taxon=$tid&cl=".$clid;
+                                    if($clValue && $clArray["parentclid"]== 54) {//garden collection
+                                        $spUrl = "../taxa/garden.php?taxauthid=1&taxon=$tid&cl=".$clid;
                                     }else{
                                         $spUrl = "../taxa/index.php?taxauthid=1&taxon=$tid&cl=".$clid;
                                     }
@@ -783,8 +783,8 @@ if($clArray["locality"]){
 									$prevfam = $family;
 								}
 							}
-                            if($clValue && $clArray["parentclid"]== 54) {//react collection
-                                $spUrl = "../taxa/react.php?taxauthid=1&taxon=$tid&cl=".$clid;
+                            if($clValue && $clArray["parentclid"]== 54) {//garden collection
+                                $spUrl = "../taxa/garden.php?taxauthid=1&taxon=$tid&cl=".$clid;
                             }else{
                                 $spUrl = "../taxa/index.php?taxauthid=1&taxon=$tid&cl=".$clid;
                             }

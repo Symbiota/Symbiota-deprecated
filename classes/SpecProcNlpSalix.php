@@ -1528,7 +1528,7 @@ class SpecProcNlpSalix
 		if(strstr($Name,"'") !== false)
 			$Name = mysqli_real_escape_string($this->conn,$Name);
 
-		$PregNotNames = "(\b(arizona|municip|herbarium|agua|province|parish|port|university|mun|county|botanical|react|planta[s]?|reserva|conserva|comunidad|pacific|date|north|south|canal|mountain|national|image|collection|island[s]?)\b)i";  //Known to be confused with names
+		$PregNotNames = "(\b(arizona|municip|herbarium|agua|province|parish|port|university|mun|county|botanical|garden|planta[s]?|reserva|conserva|comunidad|pacific|date|north|south|canal|mountain|national|image|collection|island[s]?)\b)i";  //Known to be confused with names
 		$Score -= 5*(preg_match_all($PregNotNames,$Name,$match));
 		$query = "SELECT recordedBy FROM omoccurrences where recordedBy LIKE '$Name' LIMIT 1";
 		$result = $this->conn->query($query);
@@ -1566,7 +1566,7 @@ class SpecProcNlpSalix
 		for($L=0;$L<count($this->LabelArray);$L++)
 			{
 			$RankArray[$L] = 0;
-			$PregNotNames = "(\b(national|nacional|municip|trail|peak|mountain|herbarium|agua|province|university|mun|county|botanical|react|forestal|pacific|island[s]?)\b)i";  //Known to be confused with names
+			$PregNotNames = "(\b(national|nacional|municip|trail|peak|mountain|herbarium|agua|province|university|mun|county|botanical|garden|forestal|pacific|island[s]?)\b)i";  //Known to be confused with names
 			$RankArray[$L] -= 5*(preg_match_all($PregNotNames,$this->LabelLines[$L],$match));
 			
 			if(preg_match("(By[:\s]{0,2}(\b[A-Z][a-z]{3,20}\b)\s+(\b[A-Z][a-z]{3,20}\b))", $this->LabelLines[$L]))
@@ -2064,7 +2064,7 @@ class SpecProcNlpSalix
 	//*****************************************************************************
 	private function LabeledRegion($Type)
 		{ //Looks for a labeled region, such as "County: xxx"  or "Prov: yyy" on the label
-		$BadWords = "(\b(copyright|herbarium|react|database|institute|instituto|vascular|university|specimen|botanical\b))i";
+		$BadWords = "(\b(copyright|herbarium|garden|database|institute|instituto|vascular|university|specimen|botanical\b))i";
 		$PrePreg = "((\b[A-Z][a-z]{1,20}\b)?[\s]*(\b[A-Z][a-z]{1,20}\b)[\s]*";
 		switch($Type)
 			{
@@ -2386,7 +2386,7 @@ class SpecProcNlpSalix
 	private function SeekState($CountryId,$m=-1)
 		{
 		//Given the country (or if none assume USA), scan the whole label for a contained state.
-		$BadWords = "(\b(copyright|herbarium|react|database|institute|instituto|vascular|university|specimen|botanical\b))i";
+		$BadWords = "(\b(copyright|herbarium|garden|database|institute|instituto|vascular|university|specimen|botanical\b))i";
 		
 		//Query the database for all the states in the given country.
 		$query = "SELECT stateName,stateId from lkupstateprovince where countryId like '$CountryId'";
@@ -2448,7 +2448,7 @@ class SpecProcNlpSalix
 		{//Rank the lines for likelihood of containing country or state
 		
 		//If these words are on the line, then probably not country or state.  In fact, they can contain the wrong state word, such as "University of Arizona", etc.
-		$BadWords = "(\b(copyright|herbarium|react|database|institute|instituto|vascular|university|specimen|botanical\b))i";
+		$BadWords = "(\b(copyright|herbarium|garden|database|institute|instituto|vascular|university|specimen|botanical\b))i";
 		
 		//If the line has been assigned to one of these conflict fields, then probably not country or state
 		$BadFields = array("recordedBy","family","identifiedBy","associatedCollectors","sciname","infraspecificEpithet");
@@ -2507,7 +2507,7 @@ class SpecProcNlpSalix
 		$Fields = array("occurrenceRemarks","habitat","locality","verbatimAttributes","substrate");
 		
 		//List of words that usually mean the whole line does not belong to a wordstats field
-		$BadWords = "(\b(copyright|herbarium|react|database|institute|instituto|university|plants of|aceae of|flora de|univ|et al)\b)i";
+		$BadWords = "(\b(copyright|herbarium|garden|database|institute|instituto|university|plants of|aceae of|flora de|univ|et al)\b)i";
 		
 		for($L=0;$L<count($this->LabelLines);$L++)
 			{
@@ -2997,7 +2997,7 @@ class SpecProcNlpSalix
 		{//Called by ScoreOneLine and also by associated species routine
 		//Return the most probable field and the score for that field in the passed-by-reference variables
 		$Fields = array("occurrenceRemarks","habitat","locality","verbatimAttributes","substrate");
-		$BadWords = "(\b(copyright|herbarium|react|database)\b)i";
+		$BadWords = "(\b(copyright|herbarium|garden|database)\b)i";
 		$ScoreArray  = array_fill_keys($Fields,0);
 		if(preg_match($BadWords,$TempString) > 0)
 			{ //The words in the BadWords array are not likely to be in any of the wordstats fields.

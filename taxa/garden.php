@@ -64,7 +64,7 @@ $descr = Array();
 
 include('includes/config/taxaProfileElementsGarden.php');
 
-//is page a react page?
+//is page a garden page?
 $isGardenProfile = $OSUManager ? $OSUManager->isGardenProfile() : false;
 if(!$isGardenProfile) {
     header("Location:index.php?taxon=" . $taxonManager->getTid());
