@@ -52,7 +52,7 @@ export class SearchWidget extends React.Component {
         <input
           name="search"
           type="text"
-          placeholder="Search plants by name"
+          placeholder={ this.props.placeholder }
           className="form-control"
           onKeyUp={this.onKeyUp}
           onChange={this.props.onChange}

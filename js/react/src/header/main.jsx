@@ -148,6 +148,7 @@ class HeaderApp extends React.Component {
         </div>
 
         <SearchWidget
+          placeholder="Search all plants"
           isLoading={ this.state.isLoading }
           onClick={ this.onSearch }
           onChange={ this.onSearchTextChanged }
