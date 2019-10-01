@@ -137,7 +137,7 @@ class HeaderApp extends React.Component {
                src={
                  this.state.isCollapsed
                    ? `${this.props.clientRoot}/images/header/oregonflora-logo-sm.png`
-                   : "/images/header/oregonflora-logo.png"
+                   : `${this.props.clientRoot}/images/header/oregonflora-logo.png`
                }
                alt="OregonFlora"/>
         </a>
