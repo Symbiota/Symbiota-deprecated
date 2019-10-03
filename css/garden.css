@@ -104,7 +104,45 @@ button {
 #canned-searches .card-text, #search-results .card-text, .canned-title {
   text-transform: capitalize;
   font-weight: bold;
-  text-align: center;
-  font-size: 0.7em;
   color: #1E352F !important;
+  font-size: initial;
+}
+
+#canned-searches .btn-filter {
+  color: white;
+  background-image: linear-gradient(#5FB021, #468019);
+  font-weight: bold;
+  border-radius: 0.5em;
+}
+
+#canned-searches .btn-learn {
+  color: #1E352F !important;
+  background: none;
+  border: 0.1em solid #DFEFD3;
+  font-weight: bold;
+  border-radius: 0.5em;
+}
+
+#canned-searches .scroll-btn {
+  border-radius: 50%;
+}
+
+#canned-searches .scroll-btn:active {
+  background: rgba(0, 100, 0, 0.1) !important;
+}
+
+.canned-search-result {
+  transition: opacity 0.1s;
+}
+
+.canned-search-result.slideRight {
+  transform: translateX(-100%);
+  opacity: 50%;
+  transition: opacity 0.1s, transform 0.2s ease-in-out 0s;
+}
+
+.canned-search-result.slideLeft {
+  transform: translateX(100%);
+  opacity: 50%;
+  transition: opacity 0.1s, transform 0.2s ease-in-out 0s;
 }

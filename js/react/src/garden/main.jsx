@@ -38,11 +38,6 @@ function addUrlQueryParam(key, val) {
   return queryParams.length > 0 ? `?${queryParams.join("&")}` : "";
 }
 
-function getChecklistPage(clid) {
-  const gardenPid = 3;
-  return `${CLIENT_ROOT}/checklists/checklist.php?cl=${clid}&pid=${gardenPid}`;
-}
-
 function getTaxaPage(tid) {
   return `${CLIENT_ROOT}/taxa/garden.php?taxon=${tid}`;
 }
@@ -237,19 +232,7 @@ class GardenPageApp extends React.Component {
           </div>
           <div className="col mx-2">
             <div className="row">
-              <CannedSearchContainer>
-                {
-                  this.state.cannedSearches.map((result, idx) =>
-                    <CannedSearchResult
-                      style={{ display: (idx < 4 ? "initial" : "none") }}
-                      key={ result.clid }
-                      title={ result.name }
-                      src={ result.iconurl }
-                      href={ getChecklistPage(result.clid) }
-                    />
-                  )
-                }
-              </CannedSearchContainer>
+              <CannedSearchContainer searches={ this.state.cannedSearches }/>
             </div>
             <div className="row">
               <SearchResultGrid>
