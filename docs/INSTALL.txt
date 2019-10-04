@@ -35,20 +35,20 @@ http://symbiota.org/docs/symbiota-introduction/establishing-a-regional-flora-or-
       Make sure to run the scripts in the correct order 
       (e.g. db_schema_patch_1.0.1.sql, db_schema_patch_1.0.2.sql, etc) 
 3. Configure the Symbiota Portal - modify following configuration files
-   a. Symbiota configuration - rename 
-      /config/symbini_template.php to /config/symbini.php. 
+   a. Symbiota configuration - copy
+      /config/symbini_template.php as /config/symbini.php.
       Modify variables within to match your project environment. See 
       Symbiota configuration help page for more information on this 
       subject.
-   b. Database connection - rename 
-      /config/dbconnection_template.php to /config/dbconnection.php. 
+   b. Database connection - copy
+      /config/dbconnection_template.php as /config/dbconnection.php.
       modify with readonly and read/write logs, passwords, and schema names.
-   c. Homepage - rename /index_template.php to index.php. This is your  
+   c. Homepage - copy /index_template.php as index.php. This is your
       home page to which will need introductory text, graphics, etc.
    d. Layout - header.php and footer.php are used by all pages to establish 
       uniform layout. menu.php is needed if a left menu is preferred. 
-      Within the base installation folder, rename header_template.php and  
-      footer_template.php to remove _template from file name.  
+      Within the base installation folder, copy header_template.php and
+      footer_template.php, and rename to remove _template from file name.
       * header.php: Within file, change /images/layout/defaultheader.jpg 
         to /images/layout/header.jpg. Add your header to /images/layout/
         folder. Change /images/layout/defaultleftstrip.gif as desired. 
@@ -56,8 +56,8 @@ http://symbiota.org/docs/symbiota-introduction/establishing-a-regional-flora-or-
         complex header configurations are possible. 
       * footer.php: modify as you did with header.php file.
    e. Files for style control - Go to /css/ and 
-      rename main_template.css, speciesprofile_template.css, and jquery-ui_template.css files
-      removing _template from file names. Modify these files to match 
+      copy main_template.css, speciesprofile_template.css, and jquery-ui_template.css files
+      and rename to remove _template from file names. Modify these files to match
       desired style and layout for all pages. 
 4. File permissions - the web server needs write access to the following files and folders
    - All folders in /temp/
