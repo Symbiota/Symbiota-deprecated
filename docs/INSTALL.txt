@@ -56,7 +56,7 @@ http://symbiota.org/docs/symbiota-introduction/establishing-a-regional-flora-or-
         complex header configurations are possible. 
       * footer.php: modify as you did with header.php file.
    e. Files for style control - Go to /css/ and 
-      rename main_template.css and speciesprofile_template.css files 
+      rename main_template.css, speciesprofile_template.css, and jquery-ui_template.css files
       removing _template from file names. Modify these files to match 
       desired style and layout for all pages. 
 4. File permissions - the web server needs write access to the following files and folders
