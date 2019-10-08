@@ -15,7 +15,7 @@ body{
 
 /*Main table framework*/
 #maintable{
-	border-spacing: 0px;
+	border-spacing: 0;
 	width:		900px; 
 	height:		500px;
 }
@@ -169,7 +169,7 @@ div.button {
 }
 
 div.button img {
-	border:	0px;	
+	border:	0;
 }
 
 div.button:hover {
@@ -265,29 +265,29 @@ div.button:hover {
 	float: right;
 	width: 335px;
 	margin: 8px;
-	padding: 5px 5px 0px 5px;
+	padding: 5px 5px 0 5px;
 	-moz-border-radius: 5px;
 	-webkit-border-radius: 5px;
 	border: 1px solid black;	
 }
 
 #quicksearchtext{
-	margin-top:0px;
-	padding-bottom:0px;
+	margin-top:0;
+	padding-bottom:0;
 }
 
 #quicksearchtaxon{
 	width: 250px;
-	margin-bottom:0px;
-	padding-bottom:0px;
+	margin-bottom:0;
+	padding-bottom:0;
 	font-family: Arial, Helvetica, sans-serif;
 }
 
 #quicksearchbutton{
 	margin-left:10px;
-	margin-top:0px;
-	margin-bottom:0px;
-	padding-bottom:0px;
+	margin-top:0;
+	margin-bottom:0;
+	padding-bottom:0;
 }
 
 /* Slideshow Plugin */
@@ -344,16 +344,15 @@ div.mf_container {
 	border: 1px solid #aaa;
 	cursor: text;
 	display: inline-block;
-	padding: 2px;
-	margin-left: 0px;
-	padding-left: 0px;
+	margin-left: 0;
+	padding: 2px 2px 2px 0;
 	width: 494px;
 }
 
 div.mf_container ol.mf_list {
 	display: inline;
-	margin-left: 0px;
-	padding-left: 0px;
+	margin-left: 0;
+	padding-left: 0;
 }
 
 div.mf_container ol.mf_list li.mf_item {
@@ -406,10 +405,10 @@ ol.mp_list {
 	position: absolute;
 	width: 498px;
 	z-index: 99999;
-	margin-top: 0px;
-	margin-bottom: 0px;
-	margin-left: 0px;
-	padding-left: 0px;
+	margin-top: 0;
+	margin-bottom: 0;
+	margin-left: 0;
+	padding-left: 0;
 }
 
 ol.mp_list li {

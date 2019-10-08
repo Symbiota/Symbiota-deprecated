@@ -24,7 +24,8 @@ if($editable){
 			mode : "textareas",
 			theme_advanced_buttons1 : "bold,italic,underline,charmap,hr,outdent,indent,link,unlink,code",
 			theme_advanced_buttons2 : "",
-			theme_advanced_buttons3 : ""
+			theme_advanced_buttons3 : "",
+            valid_elements: "*[*]"
 		});
 	</script>
 	<div style="float:right;" onclick="toggle('adddescrblock');" title="Add a New Description">
