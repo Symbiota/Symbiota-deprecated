@@ -31,6 +31,10 @@ header("Content-Type: text/html; charset=".$CHARSET);
       crossorigin="anonymous">
     </script>
 
+    <!-- Canned search carsousel -->
+    <link rel="stylesheet" type="text/css" charset="UTF-8" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.6.0/slick.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.6.0/slick-theme.min.css" />
+
     <div id="page-content" style="min-height: 50em;">
       <div id="react-garden"></div>
       <script type="text/javascript" src="<?php echo $CLIENT_ROOT ?>/js/react/dist/garden.js"></script>

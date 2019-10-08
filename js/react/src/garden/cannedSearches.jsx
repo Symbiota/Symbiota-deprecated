@@ -1,3 +1,6 @@
+import React from "react";
+import Carousel from "react-slick";
+
 const CLIENT_ROOT = "..";
 
 function getChecklistPage(clid) {
@@ -7,9 +10,7 @@ function getChecklistPage(clid) {
 
 function CannedSearchResult(props) {
   return (
-    <div
-        className={ "mx-1 py-2 col canned-search-result" + (props.isSlidingLeft ? " slideLeft" : "") + (props.isSlidingRight ? " slideRight" : "") }
-        style={ Object.assign({ background: "#EFFFE3", color: "#3B631D", textAlign: "center", borderRadius: "2%" }, props.style) }>
+    <div className={ "py-2 canned-search-result" }>
       <h4 className="canned-title">{ props.title }</h4>
       <div className="card" style={{ padding: "0.5em" }} >
         <a href={ props.href }>
@@ -68,60 +69,50 @@ class CannedSearchContainer extends React.Component {
   }
 
   render() {
+    const slickSettings = {
+      autoplay: true,
+      autoplaySpeed: 5000,
+      dots: false,
+      infinite: true,
+      slidesToShow: 4,
+      slidesToScroll: 1
+    };
+
     return (
-      <div id="canned-searches" className="w-100 mt-1 p-3 rounded-border" style={{ background: "#DFEFD3" }}>
-          <h1 style={{color: "black", fontWeight: "bold", fontSize: "1.75em"}}>
-            Or start with these plant combinations:
-          </h1>
-
-        <div className="w-100 row mt-3 mx-auto p-0">
-          <div className="d-flex align-items-center p-0 m-0 col-auto">
-              <button className="mr-1 ml-0 p-0 scroll-btn" onClick={ this.scrollLeft }>
-                <img
-                  style={{transform: "rotate(-90deg)", width: "3em", height: "3em" }}
-                  src={ `${CLIENT_ROOT}/images/garden/collapse-arrow.png` }
-                  alt="scroll left"/>
-              </button>
+      <div id="canned-searches" className="row mt-1 p-3 mx-0 rounded-border" style={{ background: "#DFEFD3" }}>
+        <div className="col">
+          <div className="row">
+            <h1 className="col" style={{ fontWeight: "bold", fontSize: "1.75em"}}>
+              Or start with these plant combinations:
+            </h1>
           </div>
 
-          <div className="px-2 m-0 col">
-            <div
-              className="row"
-              style={{ overflow: "hidden" }}
-            >
-              {
-                [0, 1, 2, 3].map((i) => {
-                  if (this.props.searches.length > 0) {
-                    let searchResult = this.props.searches[(i + this.state.offset) % this.props.searches.length];
-                    return (
-                        <CannedSearchResult
-                          key={searchResult.clid}
-                          title={searchResult.name}
-                          src={searchResult.iconurl}
-                          href={getChecklistPage(searchResult.clid)}
-                          isSlidingLeft={ this.state.isSlidingLeft }
-                          isSlidingRight={ this.state.isSlidingRight }
-                          onLearnMore={() => {
-                            console.log(`Learn more about ${searchResult.name}!`)
-                          }}
-                          onFilter={() => {
-                            console.log(`Filter for ${searchResult.name}!`)
-                          }}
-                        />
-                    );
+          <div className="row">
+            <div className="col">
+              <div>
+                <Carousel { ...slickSettings } className="mx-auto"  style={{ maxWidth: "90%" }}>
+                  {
+                    this.props.searches.map((searchResult) => {
+                      return (
+                        <div key={searchResult.clid} className="p-1">
+                          <CannedSearchResult
+                            title={searchResult.name}
+                            src={searchResult.iconurl}
+                            href={getChecklistPage(searchResult.clid)}
+                            onLearnMore={() => {
+                              console.log(`Learn more about ${searchResult.name}!`)
+                            }}
+                            onFilter={() => {
+                              console.log(`Filter for ${searchResult.name}!`)
+                            }}
+                          />
+                        </div>
+                      );
+                    })
                   }
-                })
-              }
+                </Carousel>
+              </div>
             </div>
-          </div>
-
-          <div className="d-flex align-items-center p-0 m-0 col-auto">
-            <button className="mr-0 ml-1 p-0 scroll-btn" onClick={ this.scrollRight }>
-              <img
-                style={{ transform: "rotate(90deg)", width: "3em", height: "3em" }}
-                src={ `${CLIENT_ROOT}/images/garden/collapse-arrow.png` }
-                alt="scroll right"/>
-            </button>
           </div>
         </div>
       </div>
@@ -129,4 +120,4 @@ class CannedSearchContainer extends React.Component {
   }
 }
 
-export { CannedSearchContainer, CannedSearchResult };
+export default CannedSearchContainer;

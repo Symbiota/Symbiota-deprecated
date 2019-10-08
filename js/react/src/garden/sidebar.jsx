@@ -1,4 +1,4 @@
-"use strict";
+import React from "react";
 
 import HelpButton from "./helpButton.jsx";
 import {SearchWidget} from "../common/search.jsx";
@@ -221,7 +221,7 @@ class SideBar extends React.Component {
     return (
       <div
         id="sidebar"
-        className="m-2 rounded-border"
+        className="m-1 p-3 rounded-border"
         style={ this.props.style }>
 
         {/* Title & Subtitle */}

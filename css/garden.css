@@ -1,5 +1,10 @@
-body {
+* {
   font-family: 'Source Sans Pro', sans-serif !important;
+  min-height: 0 !important;
+  min-width: 0 !important;
+}
+
+body {
   margin: 0;
   padding: 0;
 }
@@ -81,16 +86,16 @@ button {
   width: 25em;
 }
 
-#sidebar * {
-  color: black !important;
-}
-
 #sidebar input::placeholder {
   color: #9FD07A;
 }
 
 #canned-searches .card, #search-results .card {
   box-shadow: 0 0.1em 0.5em 0.1em rgba(100, 100, 100, 0.3);
+}
+
+#search-results .card-text {
+  font-size: 0.9em !important;
 }
 
 #canned-searches .card:hover, #search-results .card:hover {
@@ -131,18 +136,25 @@ button {
   background: rgba(0, 100, 0, 0.1) !important;
 }
 
-.canned-search-result {
-  transition: opacity 0.1s;
+#canned-searches .canned-search-result {
+  color: #3B631D !important;
+  background: #EFFFE3;
+  text-align: center;
+  border-radius: 2%;
+  max-width: 15em;
 }
 
-.canned-search-result.slideRight {
-  transform: translateX(-100%);
-  opacity: 50%;
-  transition: opacity 0.1s, transform 0.2s ease-in-out 0s;
+#sidebar *, h1, h2, h3, h4, h5 {
+  color: #1E352F;
 }
 
-.canned-search-result.slideLeft {
-  transform: translateX(100%);
-  opacity: 50%;
-  transition: opacity 0.1s, transform 0.2s ease-in-out 0s;
+#view-opts {
+  border-bottom: 1px dotted darkgreen;
+  font-size: 0.9em;
+}
+
+#view-opts .fake-button {
+  cursor: pointer;
+  border-radius: 10%;
+  padding: 0.5em;
 }

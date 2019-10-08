@@ -1,3 +1,5 @@
+import React from "react";
+
 function SearchResult(props) {
   let resStyle = Object.assign(
     { width: "100%", height: "100%", padding: "0.5em" },

@@ -1,9 +1,12 @@
 "use strict";
 
+import React from "react";
+import ReactDOM from "react-dom";
+
 import InfographicDropdown from "./infographicDropdown.jsx";
 import SideBar from "./sidebar.jsx";
 import { SearchResultGrid, SearchResult } from "./searchResults.jsx";
-import { CannedSearchContainer, CannedSearchResult } from "./cannedSearches.jsx";
+import CannedSearchContainer from "./cannedSearches.jsx";
 import httpGet from "./httpGet.js";
 
 const CLIENT_ROOT = "..";
@@ -87,12 +90,78 @@ function filterByMoisture(item, moisture) {
 function MainContentContainer(props) {
   return (
     <div className="container mx-auto p-4" style={{ maxWidth: "1400px" }}>
-      <div className="row">
-        {props.children}
+      {props.children}
+    </div>
+  );
+}
+
+function ViewOpts(props) {
+  const selectedStyle = {
+    background: "#DFEFD3",
+    color: "#3B631D"
+  };
+
+  const unselectedStyle = {
+    color: "#9FD07A"
+  };
+
+  return (
+    <div id="view-opts" className="row mx-2 mt-3 py-2" style={{  }}>
+      <h2 className="col font-weight-bold">Your search results:</h2>
+      <div className="col-auto">
+        <div className="row my-3">
+          <div className="col text-right p-0">
+            View as:
+          </div>
+          <div className="col">
+            <span
+              className="fake-button"
+              style={ props.viewType === "grid" ? selectedStyle : unselectedStyle }
+              onClick={ () => { props.onViewTypeClicked("grid") } }
+            >
+              Grid
+            </span>
+            <span
+              className="fake-button"
+              style={ props.viewType === "list" ? selectedStyle : unselectedStyle }
+              onClick={ () => { props.onViewTypeClicked("list") } }
+            >
+              List
+            </span>
+          </div>
+        </div>
+        <div className="row my-3">
+          <div className="col text-right p-0">
+            Sort by name:
+          </div>
+          <div className="col">
+            <span
+              className="fake-button"
+              style={ props.sortBy === "vernacularname" ? selectedStyle : unselectedStyle }
+              onClick={ () => { props.onSortByClicked("vernacularname") } }
+            >
+              Common
+            </span>
+            <span
+              className="fake-button"
+              style={ props.sortBy === "sciname" ? selectedStyle : unselectedStyle }
+              onClick={ () => { props.onSortByClicked("sciname") } }
+            >
+              Scientific
+            </span>
+          </div>
+        </div>
       </div>
     </div>
   );
 }
+
+ViewOpts.defaultProps = {
+  sortBy: "vernacularname",
+  viewType: "grid",
+  onSortByClicked: () => {},
+  onViewTypeClicked: () => {}
+};
 
 class GardenPageApp extends React.Component {
   constructor(props) {
@@ -107,7 +176,9 @@ class GardenPageApp extends React.Component {
       width: ("width" in queryParams ? queryParams["width"].split(",").map((i) => parseInt(i)) : [0, 50]),
       searchText: ("search" in queryParams ? queryParams["search"] : ""),
       searchResults: [],
-      cannedSearches: []
+      cannedSearches: [],
+      sortBy: "vernacularname",
+      viewType: "grid"
     };
 
     this.onSearchTextChanged = this.onSearchTextChanged.bind(this);
@@ -117,6 +188,8 @@ class GardenPageApp extends React.Component {
     this.onMoistureChanged =  this.onMoistureChanged.bind(this);
     this.onHeightChanged =  this.onHeightChanged.bind(this);
     this.onWidthChanged =  this.onWidthChanged.bind(this);
+    this.sortBy = this.sortBy.bind(this);
+    this.viewType = this.viewType.bind(this);
   }
 
   componentDidMount() {
@@ -208,57 +281,79 @@ class GardenPageApp extends React.Component {
     );
   }
 
+  sortBy(type) {
+    this.setState({
+      sortBy: type,
+      searchResults: this.state.searchResults.sort((a, b) => { return a[type] > b[type] ? 1 : -1 })
+    });
+  }
+
+  viewType(type) {
+    this.setState({ viewType: type });
+  }
+
   render() {
     return (
       <div>
         <InfographicDropdown />
         <MainContentContainer>
-          <div className="col-auto">
-            <SideBar
-              style={{ background: "#DFEFD3" }}
-              isLoading={ this.state.isLoading }
-              sunlight={ this.state.sunlight }
-              moisture={ this.state.moisture }
-              height={ this.state.height }
-              width={ this.state.width }
-              searchText={ this.state.searchText }
-              onSearch={ this.onSearch }
-              onSearchTextChanged={ this.onSearchTextChanged }
-              onSunlightChanged={ this.onSunlightChanged }
-              onMoistureChanged={ this.onMoistureChanged }
-              onHeightChanged={ this.onHeightChanged }
-              onWidthChanged={ this.onWidthChanged }
-            />
-          </div>
-          <div className="col mx-2">
-            <div className="row">
-              <CannedSearchContainer searches={ this.state.cannedSearches }/>
+          <div className="row">
+            <div className="col-auto">
+              <SideBar
+                style={{ background: "#DFEFD3" }}
+                isLoading={ this.state.isLoading }
+                sunlight={ this.state.sunlight }
+                moisture={ this.state.moisture }
+                height={ this.state.height }
+                width={ this.state.width }
+                searchText={ this.state.searchText }
+                onSearch={ this.onSearch }
+                onSearchTextChanged={ this.onSearchTextChanged }
+                onSunlightChanged={ this.onSunlightChanged }
+                onMoistureChanged={ this.onMoistureChanged }
+                onHeightChanged={ this.onHeightChanged }
+                onWidthChanged={ this.onWidthChanged }
+              />
             </div>
-            <div className="row">
-              <SearchResultGrid>
-                {
-                  this.state.searchResults.filter((item) => { return filterByHeight(item, this.state.height) }).map((result) => {
-                    let filterWidth = filterByWidth(result, this.state.width);
-                    let filterHeight = filterByWidth(result, this.state.height);
-                    let filterSunlight = filterBySunlight(result, this.state.sunlight);
-                    let filterMoisture = filterByMoisture(result, this.state.moisture);
-                    let display = filterWidth && filterHeight && filterSunlight && filterMoisture;
-                    return (
-                      <SearchResult
-                        style={{display: display ? "initial" : "none" }}
-                        key={result.tid}
-                        href={getTaxaPage(result.tid)}
-                        src={result.image}
-                        commonName={result.vernacularname ? result.vernacularname : ''}
-                        sciName={result.sciname}
-                      />
-                    )
-                  })
-                }
-              </SearchResultGrid>
+            <div className="col">
+              <div className="row">
+                <div className="col">
+                  <CannedSearchContainer searches={ this.state.cannedSearches }/>
+                </div>
+              </div>
+              <div className="row">
+                <div className="col">
+                  <ViewOpts
+                    viewType={ this.state.viewType }
+                    sortBy={ this.state.sortBy }
+                    onSortByClicked={ this.sortBy }
+                    onViewTypeClicked={ this.viewType }
+                  />
+                  <SearchResultGrid>
+                    {
+                      this.state.searchResults.filter((item) => { return filterByHeight(item, this.state.height) }).map((result) => {
+                        let filterWidth = filterByWidth(result, this.state.width);
+                        let filterHeight = filterByWidth(result, this.state.height);
+                        let filterSunlight = filterBySunlight(result, this.state.sunlight);
+                        let filterMoisture = filterByMoisture(result, this.state.moisture);
+                        let display = filterWidth && filterHeight && filterSunlight && filterMoisture;
+                        return (
+                          <SearchResult
+                            style={{display: display ? "initial" : "none" }}
+                            key={result.tid}
+                            href={getTaxaPage(result.tid)}
+                            src={result.image}
+                            commonName={result.vernacularname ? result.vernacularname : ''}
+                            sciName={result.sciname}
+                          />
+                        )
+                      })
+                    }
+                  </SearchResultGrid>
+                </div>
+              </div>
             </div>
           </div>
-
         </MainContentContainer>
       </div>
     );

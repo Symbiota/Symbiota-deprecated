@@ -17,5 +17,10 @@
     "babel-loader": "^8.0.6",
     "webpack": "^4.39.3",
     "webpack-cli": "^3.3.9"
+  },
+  "dependencies": {
+    "react": "^16.10.2",
+    "react-dom": "^16.10.2",
+    "react-slick": "^0.25.2"
   }
 }

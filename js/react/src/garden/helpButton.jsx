@@ -1,3 +1,5 @@
+import React from "react";
+
 const CLIENT_ROOT = "..";
 
 const helpButtonStyle = {

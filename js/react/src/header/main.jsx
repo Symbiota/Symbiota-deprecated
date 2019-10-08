@@ -1,3 +1,5 @@
+import React from "react";
+import ReactDOM from "react-dom";
 import SearchWidget from "../common/search.jsx";
 
 const dropDowns = [
