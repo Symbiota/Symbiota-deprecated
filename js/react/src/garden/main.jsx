@@ -3,9 +3,10 @@
 import React from "react";
 import ReactDOM from "react-dom";
 
+import IconButton from "../common/iconButton.jsx";
 import InfographicDropdown from "./infographicDropdown.jsx";
 import SideBar from "./sidebar.jsx";
-import { SearchResultGrid, SearchResult } from "./searchResults.jsx";
+import { SearchResultContainer, SearchResult } from "./searchResults.jsx";
 import CannedSearchContainer from "./cannedSearches.jsx";
 import httpGet from "./httpGet.js";
 
@@ -106,51 +107,42 @@ function ViewOpts(props) {
   };
 
   return (
-    <div id="view-opts" className="row mx-2 mt-3 py-2" style={{  }}>
-      <h2 className="col font-weight-bold">Your search results:</h2>
+    <div id="view-opts" className="row mx-2 mt-3 px-0 py-2">
+      <div className="col">
+        <h3 className="font-weight-bold">Your search results:</h3>
+        <div>{/* TODO: Tag container */}</div>
+      </div>
+      <div className="col text-right p-0 m-0">
+        <p>View as:</p>
+        <p>Sort by name:</p>
+      </div>
       <div className="col-auto">
-        <div className="row my-3">
-          <div className="col text-right p-0">
-            View as:
-          </div>
-          <div className="col">
-            <span
-              className="fake-button"
-              style={ props.viewType === "grid" ? selectedStyle : unselectedStyle }
-              onClick={ () => { props.onViewTypeClicked("grid") } }
-            >
-              Grid
-            </span>
-            <span
-              className="fake-button"
-              style={ props.viewType === "list" ? selectedStyle : unselectedStyle }
-              onClick={ () => { props.onViewTypeClicked("list") } }
-            >
-              List
-            </span>
-          </div>
-        </div>
-        <div className="row my-3">
-          <div className="col text-right p-0">
-            Sort by name:
-          </div>
-          <div className="col">
-            <span
-              className="fake-button"
-              style={ props.sortBy === "vernacularname" ? selectedStyle : unselectedStyle }
-              onClick={ () => { props.onSortByClicked("vernacularname") } }
-            >
-              Common
-            </span>
-            <span
-              className="fake-button"
-              style={ props.sortBy === "sciname" ? selectedStyle : unselectedStyle }
-              onClick={ () => { props.onSortByClicked("sciname") } }
-            >
-              Scientific
-            </span>
-          </div>
-        </div>
+        <p>
+          <IconButton
+            title="Grid"
+            icon={ `${CLIENT_ROOT}/images/garden/gridViewIcon.png` }
+            onClick={ () => { props.onViewTypeClicked("grid") } }
+            isSelected={ props.viewType === "grid" }
+          />
+          <IconButton
+            title="List"
+            icon={ `${CLIENT_ROOT}/images/garden/listViewIcon.png` }
+            onClick={ () => { props.onViewTypeClicked("list") } }
+            isSelected={ props.viewType === "list" }
+          />
+        </p>
+        <p>
+          <IconButton
+            title="Common Name"
+            onClick={ () => { props.onSortByClicked("vernacularname") } }
+            isSelected={ props.sortBy === "vernacularname" }
+          />
+          <IconButton
+            title="Scientific Name"
+            onClick={ () => { props.onSortByClicked("sciname") } }
+            isSelected={ props.sortBy === "sciname" }
+          />
+        </p>
       </div>
     </div>
   );
@@ -329,7 +321,7 @@ class GardenPageApp extends React.Component {
                     onSortByClicked={ this.sortBy }
                     onViewTypeClicked={ this.viewType }
                   />
-                  <SearchResultGrid>
+                  <SearchResultContainer viewType={ this.state.viewType }>
                     {
                       this.state.searchResults.filter((item) => { return filterByHeight(item, this.state.height) }).map((result) => {
                         let filterWidth = filterByWidth(result, this.state.width);
@@ -339,6 +331,7 @@ class GardenPageApp extends React.Component {
                         let display = filterWidth && filterHeight && filterSunlight && filterMoisture;
                         return (
                           <SearchResult
+                            viewType={ this.state.viewType }
                             style={{display: display ? "initial" : "none" }}
                             key={result.tid}
                             href={getTaxaPage(result.tid)}
@@ -349,7 +342,7 @@ class GardenPageApp extends React.Component {
                         )
                       })
                     }
-                  </SearchResultGrid>
+                  </SearchResultContainer>
                 </div>
               </div>
             </div>

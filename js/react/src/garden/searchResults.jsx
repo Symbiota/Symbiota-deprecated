@@ -1,29 +1,67 @@
 import React from "react";
 
+const gridImageStyle = {
+  height: "7em",
+  width: "100%",
+  objectFit: "cover",
+  borderRadius: "0.25em"
+};
+
+const listImageStyle = {
+  height: "2em",
+  width: "2em",
+  objectFit: "cover",
+  borderRadius: "0.25em"
+};
+
+const containerGridStyle = {
+  display: "grid",
+  gridTemplateColumns: "repeat(5, 1fr)",
+  gridAutoRows: "15em",
+  gridGap: "0.5em",
+  justifyContent: "center"
+};
+
+const gridResultStyle = {
+  width: "100%",
+  height: "100%",
+  padding: "0.5em"
+};
+
+const listResultStyle = {
+  width: "100%",
+  marginTop: "0.1em",
+  marginBottom: "0.1em"
+};
+
 function SearchResult(props) {
-  let resStyle = Object.assign(
-    { width: "100%", height: "100%", padding: "0.5em" },
-    props.style
-  );
+  const useGrid = props.viewType === "grid";
+  const style = useGrid ? gridResultStyle : listResultStyle;
+
   return (
-    <div className="card" style={ resStyle }>
+    <div className="card" style={ style }>
       <a href={ props.href }>
-        <img
-          className="card-img-top"
-          style={{ height: "7em", width: "100%", objectFit: "cover", borderRadius: "0.25em" }}
-          alt={ props.title }
-          src={ props.src }
-        />
-        <div className="card-body px-0" style={{ overflow: "hidden" }}>
-          <div className="card-text">{ props.commonName }</div>
-          <div className="card-text">{ props.sciName }</div>
+        <div className={ useGrid ? "" : "card-body" }>
+          <img
+            className={ useGrid ? "card-img-top" : "d-inline-block mr-1" }
+            style={ useGrid ? gridImageStyle : listImageStyle }
+            alt={ props.title }
+            src={ props.src }
+          />
+          <div className={ (useGrid ? "card-body" : "d-inline py-1") + " px-0" } style={{ overflow: "hidden" }}>
+            <div className={ "card-text" + (useGrid ? "" : " d-inline") }>
+              { props.commonName }
+              { useGrid ? <br/> : " - " }
+              { props.sciName }
+            </div>
+          </div>
         </div>
       </a>
     </div>
   );
 }
 
-class SearchResultGrid extends React.Component {
+class SearchResultContainer extends React.Component {
   constructor(props) {
     super(props);
   }
@@ -33,13 +71,7 @@ class SearchResultGrid extends React.Component {
       <div
         id="search-results"
         className="mt-4 w-100"
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(5, 1fr)",
-          gridAutoRows: "15em",
-          gridGap: "0.5em",
-          justifyContent: "center"
-        }}
+        style={ this.props.viewType === "grid" ? containerGridStyle : {} }
       >
         { this.props.children }
       </div>
@@ -47,4 +79,4 @@ class SearchResultGrid extends React.Component {
   }
 }
 
-export { SearchResultGrid, SearchResult };
+export { SearchResultContainer, SearchResult };
