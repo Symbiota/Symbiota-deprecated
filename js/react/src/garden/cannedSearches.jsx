@@ -1,6 +1,8 @@
 import React from "react";
 import Carousel from "react-slick";
 
+import HelpButton from "../common/helpButton.jsx";
+
 const CLIENT_ROOT = "..";
 
 function getChecklistPage(clid) {
@@ -8,64 +10,81 @@ function getChecklistPage(clid) {
   return `${CLIENT_ROOT}/checklists/checklist.php?cl=${clid}&pid=${gardenPid}`;
 }
 
-function CannedSearchResult(props) {
-  return (
-    <div className={ "py-2 canned-search-result" }>
-      <h4 className="canned-title">{ props.title }</h4>
-      <div className="card" style={{ padding: "0.5em" }} >
-        <a href={ props.href }>
-          <div className="card-body" style={{ padding: "0" }}>
-            <img
-              className="d-block"
-              style={{ width: "100%", height: "7em", borderRadius: "0.25em", objectFit: "cover" }}
-              src={ props.src }
-              alt={ props.src }
-            />
-          </div>
-        </a>
+const helpHtml = `
+
+`;
+
+class CannedSearchResult extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      hover: false
+    };
+
+    this.onMouseOver = this.onMouseOver.bind(this);
+    this.onMouseOut = this.onMouseOut.bind(this);
+  }
+
+  onMouseOver() {
+    this.setState({ hover: true });
+  }
+
+  onMouseOut() {
+    this.setState({ hover: false });
+  }
+
+  render() {
+    return (
+      <div className={"py-2 canned-search-result"}>
+        <h4 className="canned-title">{this.props.title}</h4>
+        <div className="card" style={{padding: "0.5em"}}>
+          <a href={this.props.href}>
+            <div className="card-body" style={{padding: "0"}}>
+              <div style={{ position: "relative", width: "100%", height: "7em", borderRadius: "0.25em"}}>
+                <img
+                  className="d-block"
+                  style={{width: "100%", height: "100%", objectFit: "cover"}}
+                  src={this.props.src}
+                  alt={this.props.src}
+                  onMouseOver={ this.onMouseOver }
+                />
+                <div
+                  className="text-center text-capitalize w-100 h-100 px-2 py-1 align-items-center"
+                  style={{
+                    display: this.state.hover ? "flex" : "none",
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    zIndex: 1000,
+                    fontSize: "0.75em",
+                    color: "white",
+                    background: "rgba(100, 100, 100, 0.8)",
+                    overflow: "hidden"
+                  }}
+                  onMouseOut={ this.onMouseOut }
+                >
+                  {this.props.description}
+                </div>
+              </div>
+            </div>
+          </a>
+        </div>
+        <div className="mt-2 px-2">
+          <button className="w-100 px-3 my-1 btn-filter" onClick={this.props.onFilter}>
+            Filter for these
+          </button>
+          <button className="w-100 px-3 my-1 btn-learn" onClick={this.props.onLearnMore}>
+            Learn more
+          </button>
+        </div>
       </div>
-      <div className="mt-2 px-2">
-        <button className="w-100 px-3 my-1 btn-filter" onClick={ props.onFilter }>
-          Filter for these
-        </button>
-        <button className="w-100 px-3 my-1 btn-learn" onClick={ props.onLearnMore }>
-          Learn more
-        </button>
-      </div>
-    </div>
-  );
+    );
+  }
 }
 
 class CannedSearchContainer extends React.Component {
   constructor(props) {
     super(props);
-
-    this.state = {
-      offset: 0,
-      isSlidingLeft: false,
-      isSlidingRight: false
-    };
-
-    this.scrollLeft = this.scrollLeft.bind(this);
-    this.scrollRight = this.scrollRight.bind(this);
-  }
-
-  scrollLeft() {
-    this.setState({ isSlidingLeft: true }, () => {
-      let newOffset = this.state.offset === 0 ? this.props.searches.length - 1 : this.state.offset - 1;
-      this.setState({ offset: newOffset }, () => {
-        window.setTimeout(() => this.setState({ isSlidingLeft: false }), 200);
-      });
-    });
-  }
-
-  scrollRight() {
-    this.setState({ isSlidingRight: true }, () => {
-      let newOffset = (this.state.offset + 1) % this.props.searches.length ;
-      this.setState({ offset: newOffset }, () => {
-        window.setTimeout(() => this.setState({ isSlidingRight: false }), 200);
-      });
-    });
   }
 
   render() {
@@ -85,6 +104,10 @@ class CannedSearchContainer extends React.Component {
             <h1 className="col" style={{ fontWeight: "bold", fontSize: "1.75em"}}>
               Or start with these plant combinations:
             </h1>
+            {/* TODO: Re-enable once we have help verbiage */}
+            <div className="col-auto d-none">
+              <HelpButton title="Garden collections" html={ helpHtml } />
+            </div>
           </div>
 
           <div className="row">
@@ -97,7 +120,8 @@ class CannedSearchContainer extends React.Component {
                         <div key={searchResult.clid} className="p-1">
                           <CannedSearchResult
                             title={searchResult.name}
-                            src={searchResult.iconurl}
+                            description={ searchResult.description }
+                            src={ `${CLIENT_ROOT}/${searchResult.iconUrl}` }
                             href={getChecklistPage(searchResult.clid)}
                             onLearnMore={() => {
                               console.log(`Learn more about ${searchResult.name}!`)

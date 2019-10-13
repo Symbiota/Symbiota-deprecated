@@ -36,29 +36,33 @@ const listResultStyle = {
 
 function SearchResult(props) {
   const useGrid = props.viewType === "grid";
-  const style = useGrid ? gridResultStyle : listResultStyle;
+  let style = useGrid ? gridResultStyle : listResultStyle;
 
-  return (
-    <div className="card" style={ style }>
-      <a href={ props.href }>
-        <div className={ useGrid ? "" : "card-body" }>
-          <img
-            className={ useGrid ? "card-img-top" : "d-inline-block mr-1" }
-            style={ useGrid ? gridImageStyle : listImageStyle }
-            alt={ props.title }
-            src={ props.src }
-          />
-          <div className={ (useGrid ? "card-body" : "d-inline py-1") + " px-0" } style={{ overflow: "hidden" }}>
-            <div className={ "card-text" + (useGrid ? "" : " d-inline") }>
-              { props.commonName }
-              { useGrid ? <br/> : " - " }
-              { props.sciName }
+  if (props.display) {
+    return (
+      <div className="card" style={style}>
+        <a href={props.href}>
+          <div className={useGrid ? "" : "card-body"}>
+            <img
+              className={useGrid ? "card-img-top" : "d-inline-block mr-1"}
+              style={useGrid ? gridImageStyle : listImageStyle}
+              alt={props.title}
+              src={props.src}
+            />
+            <div className={(useGrid ? "card-body" : "d-inline py-1") + " px-0"} style={{overflow: "hidden"}}>
+              <div className={"card-text" + (useGrid ? "" : " d-inline")}>
+                {props.commonName}
+                {useGrid ? <br/> : " - "}
+                {props.sciName}
+              </div>
             </div>
           </div>
-        </div>
-      </a>
-    </div>
-  );
+        </a>
+      </div>
+    );
+  }
+
+  return <span style={{ display: "none" }}/>;
 }
 
 class SearchResultContainer extends React.Component {

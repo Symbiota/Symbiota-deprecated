@@ -11,7 +11,7 @@
   crossorigin="anonymous">
 <link
   rel='stylesheet'
-  href='<?php echo $GLOBALS["CLIENT_ROOT"] . "/css/header.css"?>'
+  href='<?php echo $GLOBALS["CLIENT_ROOT"] . "/css/compiled/header.css"?>'
   type='text/css'>
 
 <script

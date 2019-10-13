@@ -47,6 +47,7 @@ class TaxonProfileManager {
  		$this->con = MySQLiConnectionFactory::getCon("readonly");
  		//Default settings
  		$this->taxAuthId = 1;			//0 = do not resolve taxonomy (no thesaurus); 1 = default taxonomy; > 1 = other taxonomies
+        $this->acceptedTaxa = array();
  	}
 
  	public function __destruct(){

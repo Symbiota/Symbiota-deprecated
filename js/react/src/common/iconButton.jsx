@@ -15,7 +15,7 @@ class IconButton extends React.Component {
     return (
       <span
         className="fake-button align-middle justify-content-center"
-        style={ this.props.isSelected ? selectedStyle : unselectedStyle }
+        style={ Object.assign({}, this.props.isSelected ? selectedStyle : unselectedStyle, this.props.style) }
         onClick={ this.props.onClick }
       >
       <img
@@ -36,6 +36,7 @@ class IconButton extends React.Component {
 IconButton.defaultProps = {
   title: "",
   icon: "",
+  style: {},
   onClick: null,
   onClickImg: null
 };

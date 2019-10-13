@@ -16,7 +16,9 @@ const searchButtonStyle = {
  */
 function SearchButton(props) {
   return (
-    <button className="my-auto" style={ Object.assign(searchButtonStyle, props.style) } onClick={props.onClick}>
+    <button
+      className="my-auto" style={ Object.assign({}, searchButtonStyle, props.style) }
+      onClick={ props.isLoading ? () => {} : props.onClick}>
       <img
         style={{display: props.isLoading ? "none" : "block"}}
         src={`${CLIENT_ROOT}/images/garden/search-green.png`}
@@ -41,14 +43,13 @@ export class SearchWidget extends React.Component {
 
   componentDidMount() {
     $(`#autocomplete-${this.props.name}`).autoComplete().on("autocomplete.select", (item) => {
-      console.log(item);
       this.props.onChange(item);
     });
   }
 
   onKeyUp(event) {
     const enterKey = 13;
-    if ((event.which || event.keyCode) === enterKey) {
+    if ((event.which || event.keyCode) === enterKey && !this.props.isLoading) {
       event.preventDefault();
       const fakeEvent = {target: {value: this.props.value}};
       this.props.onClick(fakeEvent);
@@ -83,7 +84,8 @@ export class SearchWidget extends React.Component {
 SearchWidget.defaultProps = {
   name: '',
   autoComplete: false,
-  autoCompleteUrl: ''
+  autoCompleteUrl: '',
+  buttonStyle: {}
 };
 
 export default SearchWidget;

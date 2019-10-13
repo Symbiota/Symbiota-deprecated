@@ -72,6 +72,7 @@ class OSUTaxaManager {
         $this->con = MySQLiConnectionFactory::getCon("readonly");
         //Default settings
         $this->taxAuthId = 1;			//0 = do not resolve taxonomy (no thesaurus); 1 = default taxonomy; > 1 = other taxonomies
+        $this->acceptedTaxa = array();
     }
 
     public function __destruct(){
@@ -958,7 +959,7 @@ class OSUTaxaManager {
         $attribs["bloom_months"] = implode(", ",array_map(function($a){
             return $a["charstatename"];
         },$tmp[165]));
-        $num_commercial = count($tmp[209]);
+//        $num_commercial = count($tmp[209]);
         $attribs["flower_color"] = implode(", ",array_map(function($a){
             return $a["charstatename"];
         },$tmp[612]));
@@ -972,7 +973,7 @@ class OSUTaxaManager {
             return $a["charstatename"];
         },$tmp[684]));
         $attribs["sunlight"] = "";
-        $attribs["sunlight_array"] = "";
+        $attribs["sunlight_array"] = [];
         foreach ($tmp[680] as $value) { //sunlight
             switch ($value['charstatename']) {
                 case "sun":

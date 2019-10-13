@@ -1,6 +1,6 @@
 import React from "react";
 
-import HelpButton from "./helpButton.jsx";
+import HelpButton from "../common/helpButton.jsx";
 import {SearchWidget} from "../common/search.jsx";
 
 const CLIENT_ROOT = "..";
@@ -101,7 +101,10 @@ function PlantNeed(props) {
 class PlantSlider extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { description: "(Any size)" }
+    this.state = { description: "(Any size)" };
+    this.slider = null;
+    this.registerSliderEvent = this.registerSliderEvent.bind(this);
+    this.reset = this.reset.bind(this);
   }
 
   componentDidMount() {
@@ -113,8 +116,18 @@ class PlantSlider extends React.Component {
       ticks_snap_bounds: 1
     });
 
+    this.registerSliderEvent();
+  }
+
+  componentWillUnmount() {
+    this.slider.destroy();
+    this.slider = null;
+  }
+
+  registerSliderEvent() {
     if (this.props.onChange) {
       const onChangeEvent = this.props.onChange;
+      this.slider.off("slide");
       this.slider.on("slide", (sliderArray) => {
         this.setState({ description: getSliderDescription(sliderArray) });
         const fakeEvent = { target: { value: sliderArray } };
@@ -123,8 +136,12 @@ class PlantSlider extends React.Component {
     }
   }
 
-  componentWillUnmount() {
-    this.slider.destroy();
+  reset() {
+    if (this.slider !== null) {
+      this.slider.refresh();
+      this.setState({ description: getSliderDescription(PlantSlider.defaultProps.value) });
+      this.registerSliderEvent();
+    }
   }
 
   render() {
@@ -215,6 +232,19 @@ SideBarDropdown.defaultProps = {
 class SideBar extends React.Component {
   constructor(props) {
     super(props);
+    this.sliderRefWidth = React.createRef();
+    this.sliderRefHeight = React.createRef();
+
+    this.resetWidth = this.resetWidth.bind(this);
+    this.resetHeight = this.resetHeight.bind(this);
+  }
+
+  resetWidth() {
+    this.sliderRefWidth.current.reset();
+  }
+
+  resetHeight() {
+    this.sliderRefHeight.current.reset();
   }
 
   render() {
@@ -259,6 +289,7 @@ class SideBar extends React.Component {
           <div className="mt-2 row d-flex justify-content-center">
             <div className="col-sm-5 mr-2">
               <PlantSlider
+                ref={ this.sliderRefHeight }
                 label="Height (ft)"
                 name="height"
                 value={ this.props.height }
@@ -269,6 +300,7 @@ class SideBar extends React.Component {
             />
             <div className="col-sm-5 ml-2">
               <PlantSlider
+                ref={ this.sliderRefWidth }
                 label="Width (ft)"
                 name="width"
                 value={ this.props.width }

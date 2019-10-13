@@ -1,7 +1,11 @@
 <?php
   ob_start();
   include_once("../../config/symbini.php");
-  include_once($GLOBALS["SERVER_ROOT"] . "/config/dbconnection.php");
+
+  global $SERVER_ROOT, $CHARSET;
+  include_once($SERVER_ROOT . "/classes/Functional.php");
+
+  $TABLE_FIELDS =  json_decode(file_get_contents($SERVER_ROOT . "/meta/tableFields.json"), true);
 
   $CLID_GARDEN_ALL = 54;
 
@@ -35,37 +39,21 @@
     return $result;
   }
 
-/**
-   * Runs the given query & returns the results as an array of associative arrays
-   */
-  function run_query($sql) {
-    $conn = MySQLiConnectionFactory::getCon("readonly");
-    $outResults = [];
-
-    if ($conn !== null) {
-      $res = $conn->query($sql);
-      if ($res) {
-        while($row = $res->fetch_assoc()) {
-          array_push($outResults, $row);
-        }
-        $res->free();
-      }
-
-      $conn->close();
-    }
-
-    return $outResults;
-  }
-
   /**
    * Returns the most prominent image for the given taxa ID
+   * @param tid int The tid for the image
+   * @return string The first thumbnail for $tid, else "" if one does not exist
    */
-  function get_image_for_tid($tid) {
-    $sql = "SELECT i.thumbnailurl FROM images AS i WHERE tid = $tid ORDER BY i.sortsequence LIMIT 1;";
+  function get_thumbnail_for_tid($tid) {
+    global $TABLE_FIELDS;
+
+    $sql = get_select_statement("images", [ $TABLE_FIELDS["IMAGES"]["THUMBNAIL_URL"] ]);
+    $sql .= 'WHERE ' . $TABLE_FIELDS["IMAGES"]["TID"] . " = $tid ";
+    $sql .= 'ORDER BY ' . $TABLE_FIELDS["IMAGES"]["SORT_SEQUENCE"] . ' LIMIT 1;';
     $res = run_query($sql);
 
-    if (count($res) > 0 && key_exists("thumbnailurl", $res[0])) {
-      $result = $res[0]["thumbnailurl"];
+    if (count($res) > 0 && key_exists($TABLE_FIELDS["IMAGES"]["THUMBNAIL_URL"], $res[0])) {
+      $result = $res[0][$TABLE_FIELDS["IMAGES"]["THUMBNAIL_URL"]];
       return resolve_img_path($result);
     }
 
@@ -73,9 +61,18 @@
   }
 
   function get_attribs_for_tid($tid) {
-    $all_attr_sql = 'SELECT kmdescr.cid as attr_key, lower(kmcs.charstatename) as attr_val FROM kmdescr ';
-    $all_attr_sql .= 'INNER JOIN kmcs on (kmdescr.cid = kmcs.cid AND kmdescr.cs = kmcs.cs) ';
-    $all_attr_sql .= "WHERE kmdescr.tid = $tid;";
+    global $TABLE_FIELDS;
+    $all_attr_sql = get_select_statement(
+        "kmdescr",
+        [
+            'kmdescr.' . $TABLE_FIELDS['KMDESCR']['CID'] . ' as attr_key',
+            'lower(kmcs.' . $TABLE_FIELDS['KMCS']['CHAR_STATE_NAME'] . ') as attr_val'
+        ]
+    );
+    $all_attr_sql .= 'INNER JOIN kmcs on ';
+    $all_attr_sql .= '(kmdescr.' . $TABLE_FIELDS['KMDESCR']['CID'] . ' = kmcs.' . $TABLE_FIELDS['KMCS']['CID'] . ' ';
+    $all_attr_sql .= 'AND kmdescr.' . $TABLE_FIELDS['KMDESCR']['CS'] . ' = kmcs.' . $TABLE_FIELDS['KMCS']['CS'] . ') ';
+    $all_attr_sql .= 'WHERE ' . $TABLE_FIELDS['KMDESCR']['TID'] . " = $tid";
 
     $attr_res = run_query($all_attr_sql);
     $attr_array = [
@@ -86,19 +83,21 @@
     ];
 
     foreach ($attr_res as $attr) {
+      global $CID_WIDTH, $CID_HEIGHT, $CID_MOISTURE, $CID_SUNLIGHT;
+
       $attr_key = intval($attr["attr_key"]);
       $attr_val = $attr["attr_val"];
       switch ($attr_key) {
-        case $GLOBALS["CID_HEIGHT"]:
+        case $CID_HEIGHT:
           array_push($attr_array["height"], intval($attr_val));
           break;
-        case $GLOBALS["CID_WIDTH"]:
+        case $CID_WIDTH:
           array_push($attr_array["width"], intval($attr_val));
           break;
-        case $GLOBALS["CID_SUNLIGHT"]:
+        case $CID_SUNLIGHT:
           array_push($attr_array["sunlight"], $attr_val);
           break;
-        case $GLOBALS["CID_MOISTURE"]:
+        case $CID_MOISTURE:
           array_push($attr_array["moisture"], $attr_val);
           break;
         default:
@@ -120,41 +119,60 @@
    * Returns canned searches for the react page
    */
   function get_canned_searches() {
-    $sql = "select clid, name, iconurl from fmchecklists where parentclid = " . $GLOBALS["CLID_GARDEN_ALL"] . ";";
-    $resultsTmp = run_query($sql);
-    $results = [];
+    global $TABLE_FIELDS, $CLID_GARDEN_ALL;
 
-    foreach ($resultsTmp as $result) {
-      $result["iconurl"] = resolve_img_path($result["iconurl"]);
-      array_push($results, $result);
-    }
-
-    return $results;
+    $sql = get_select_statement(
+        "fmchecklists",
+        [
+          $TABLE_FIELDS['CHECKLISTS']['CLID'],
+          $TABLE_FIELDS['CHECKLISTS']['NAME'],
+          $TABLE_FIELDS['CHECKLISTS']['ICON_URL'],
+          $TABLE_FIELDS['CHECKLISTS']['TITLE'] . ' as description',
+        ]
+    );
+    $sql .= 'WHERE ' . $TABLE_FIELDS['CHECKLISTS']['PARENT_CLID'] . ' = ' . $CLID_GARDEN_ALL;
+    return run_query($sql);
   }
 
   /**
    * Returns all unique taxa with thumbnail urls
+   * @params $_GET
    */
   function get_garden_taxa($params) {
+    global $TABLE_FIELDS, $CLID_GARDEN_ALL;
+
     $search = null;
     if (key_exists("search", $params) && $params["search"] !== "" && $params["search"] !== null) {
-      $search = $params["search"];
+      $search = strtolower(preg_replace("/[;()-]/", '', $params["search"]));
     }
 
-    // TODO: Clean params
+    # Select all garden taxa that have some sort of name
+    $sql = get_select_statement(
+        "taxa",
+        [
+            't.' . $TABLE_FIELDS['TAXA']['TID'],
+            't.' . $TABLE_FIELDS['TAXA']['SCINAME'],
+            'v.' . $TABLE_FIELDS['TAXA_VERNACULARS']['VERNACULAR_NAME']
+        ]
+    );
+    // Abbreviation for 'taxa' table name
+    $sql .= 't ';
 
-    # Select all react taxa that have some sort of name
-    $sql = "SELECT t.tid, t.sciname, v.vernacularname FROM taxa as t ";
-    $sql .= "LEFT JOIN taxavernaculars AS v ON t.tid = v.tid ";
-    $sql .= "RIGHT JOIN fmchklsttaxalink AS chk ON t.tid = chk.tid ";
-    $sql .= "WHERE chk.clid = " . $GLOBALS["CLID_GARDEN_ALL"] . " ";
-    $sql .= "AND (t.sciname IS NOT NULL OR v.vernacularname IS NOT NULL) ";
+    $sql .= 'LEFT JOIN taxavernaculars v ON t.tid = v.tid ';
+    $sql .= 'RIGHT JOIN fmchklsttaxalink chk ON t.tid = chk.tid ';
+    $sql .= "WHERE chk.clid = $CLID_GARDEN_ALL ";
 
-    if ($search !== null) {
-      $sql .= "AND (t.sciname LIKE '$search%' OR v.vernacularname LIKE '$search%') ";
+    if ($search === null) {
+      $sql .= 'AND (t.' . $TABLE_FIELDS['TAXA']['SCINAME']. ' IS NOT NULL ';
+      $sql .= 'OR v.' . $TABLE_FIELDS['TAXA_VERNACULARS']['VERNACULAR_NAME'] . ' IS NOT NULL) ';
+    }
+    else {
+      $sql .= 'AND (lower(t.' . $TABLE_FIELDS['TAXA']['SCINAME'] . ") LIKE \"$search%\" ";
+      $sql .= 'OR lower(v. ' . $TABLE_FIELDS['TAXA_VERNACULARS']['VERNACULAR_NAME'] . ") LIKE \"$search%\") ";
     }
 
-    $sql .= "GROUP BY t.tid ORDER BY v.vernacularname;";
+    $sql .= 'GROUP BY t.' . $TABLE_FIELDS['TAXA']['TID'] . ' ';
+    $sql .= 'ORDER BY v.' . $TABLE_FIELDS['TAXA_VERNACULARS']['VERNACULAR_NAME'];
 
     $resultsTmp = run_query($sql);
     $results = [];
@@ -162,7 +180,7 @@
     // Populate image urls
     foreach ($resultsTmp as $result) {
       $result = array_merge($result, get_attribs_for_tid($result["tid"]));
-      $result["image"] = get_image_for_tid($result["tid"]);
+      $result["image"] = get_thumbnail_for_tid($result["tid"]);
       array_push($results, $result);
     }
 
