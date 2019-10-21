@@ -116,7 +116,7 @@ if($tid){
 				<form enctype='multipart/form-data' action='tpeditor.php' id='imageaddform' method='post' target='_self' onsubmit='return submitAddImageForm(this);'>
 					<fieldset style='margin:15px;padding:15px;width:90%;'>
 				    	<legend><b>Add a New Image</b></legend>
-						<div style='padding:10px;width:550px;border:1px solid yellow;background-color:FFFF99;'>
+						<div style='padding:10px;width:600px;border:1px solid yellow;background-color:#FFFF99;'>
 							<div class="targetdiv" style="display:block;">
 								<div style="font-weight:bold;font-size:110%;margin-bottom:5px;">
 									Select an image file located on your computer that you want to upload:
