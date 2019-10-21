@@ -45,7 +45,7 @@ $lastPage = (int) ($recordCnt / $cntPerPage) + 1;
 $startPage = ($pageNumber > 4?$pageNumber - 4:1);
 if($lastPage > $startPage){
 	$endPage = ($lastPage > $startPage + 9?$startPage + 9:$lastPage);
-	$paginationStr = "<div><div style='clear:both;margin:5 0 5 0;'><hr /></div><div style='float:left;'>\n";
+	$paginationStr = "<div><div style='clear:both;margin:5px 0 5px 0;'><hr /></div><div style='float:left;'>\n";
 	$hrefPrefix = "<a href='#' onclick='changeRecordPage(starr,";
 	$pageBar = '';
 	if($startPage > 1){
@@ -70,14 +70,14 @@ if($lastPage > $startPage){
 	if($endNum > $recordCnt) $endNum = $recordCnt;
 	$pageBar .= "Page ".$pageNumber.", records ".$beginNum."-".$endNum." of ".$recordCnt;
 	$paginationStr .= $pageBar;
-	$paginationStr .= "</div><div style='clear:both;margin:5 0 5 0;'><hr /></div></div>";
+	$paginationStr .= "</div><div style='clear:both;margin:5px 0 5px 0;'><hr /></div></div>";
 
 	$recordListHtml = '<div>';
 	$recordListHtml .= $paginationStr;
 	$recordListHtml .= '</div>';
 }
 else{
-	$recordListHtml .= "<div style='clear:both;margin:5 0 5 0;'><hr /></div>";
+	$recordListHtml .= "<div style='clear:both;margin:5px 0 5px 0;'><hr /></div>";
 }
 if($occArr){
 	$recordListHtml .= '<form name="selectform" id="selectform" action="" method="post" onsubmit="" target="_blank">';
@@ -85,7 +85,7 @@ if($occArr){
 	$recordListHtml .= '<input name="" id="selectallcheck" value="" type="checkbox" onclick="selectAll(this);" '.($allSelected==true?"checked":"").' />';
 	$recordListHtml .= 'Select/Deselect all Records';
 	$recordListHtml .= '</div>';
-	$recordListHtml .= '<table class="styledtable" style="font-family:Arial;font-size:12px;margin-left:-15px;">';
+	$recordListHtml .= '<table class="styledtable" style="font-family:Arial,sans-serif;font-size:12px;margin-left:-15px;">';
 	$recordListHtml .= '<tr>';
 	$recordListHtml .= '<th style="width:10px;"></th>';
 	$recordListHtml .= '<th>Catalog #</th>';
@@ -97,7 +97,7 @@ if($occArr){
 	foreach($occArr as $occId => $recArr){
 		$trCnt++;
 		$infoBoxLabel = "'".$recArr["c"]."'";
-		$recordListHtml .= '<tr '.($trCnt%2?'class="alt"':'').' id="tr'.$occId.'" >';
+		$recordListHtml .= '<tr '.(($trCnt%2)?'class="alt"':'').' id="tr'.$occId.'" >';
 		$recordListHtml .= '<td style="width:10px;">';
 		$recordListHtml .= '<input type="checkbox" class="occcheck" id="ch'.$occId.'" name="occid[]" value="'.$occId.'" onchange="findSelections(this);" '.(in_array($occId,$selections)?"checked":"").' />';
 		$recordListHtml .= '</td>';
@@ -120,7 +120,6 @@ else{
 	$recordListHtml .= 'No records found matching the query';
 	$recordListHtml .= '</div>';
 }
-$recordListHtml = utf8_encode($recordListHtml);
 
 //output the response
 echo json_encode($recordListHtml);
