@@ -1,6 +1,7 @@
 <?php
 include_once('../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/ProfileManager.php');
+include_once($SERVER_ROOT.'/classes/ChecklistAdmin.php');
 header("Content-Type: text/html; charset=".$charset);
 
 $userId = $_REQUEST["userid"];
@@ -9,12 +10,14 @@ $userId = $_REQUEST["userid"];
 if(!is_numeric($userId)) $userId = 0;
 
 $pHandler = new ProfileManager();
+$clManager = new ChecklistAdmin();
 $middle = $pHandler->checkFieldExists('users','middleinitial');
 $pHandler->setUid($userId);
 $person = $pHandler->getPerson();
 $tokenCount = $pHandler->getTokenCnt();
 $isSelf = true;
 if($userId != $SYMB_UID) $isSelf = false;
+$listArr = $clManager->getManagementLists($userId);
 ?>
 <div style="padding:15px;">
 	<div>
@@ -191,8 +194,15 @@ if($userId != $SYMB_UID) $isSelf = false;
 		<form name="delprofileform" action="viewprofile.php" method="post" onsubmit="return window.confirm('Are you sure you want to delete profile?');">
 			<fieldset style='padding:15px;width:200px;'>
 		    	<legend><b>Delete Profile</b></legend>
-				<input type="hidden" name="userid" value="<?php echo $userId;?>" />
-	    		<input type="submit" name="action" value="Delete Profile" />
+                <?php
+                if($listArr){
+                    echo '<div style="color:red;dockerfont-weight:bold;margin-bottom:15px;">';
+                    echo 'Profile cannot be deleted until all checklists associated with the account are removed';
+                    echo '</div>';
+                }
+                ?>
+                <input type="hidden" name="userid" value="<?php echo $userId;?>" />
+	    		<input type="submit" name="action" value="Delete Profile" <?php echo ($listArr?'DISABLED':''); ?> />
 			</fieldset>
 		</form>
 	</div>
