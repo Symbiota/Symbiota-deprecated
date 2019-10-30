@@ -1,7 +1,5 @@
 import React from "react";
 
-const CLIENT_ROOT = "..";
-
 const searchButtonStyle = {
   width: "2em",
   height: "2em",
@@ -21,7 +19,7 @@ function SearchButton(props) {
       onClick={ props.isLoading ? () => {} : props.onClick}>
       <img
         style={{display: props.isLoading ? "none" : "block"}}
-        src={`${CLIENT_ROOT}/images/garden/search-green.png`}
+        src={`${props.clientRoot}/images/garden/search-green.png`}
         alt="search plants"/>
       <div
         className="mx-auto text-success spinner-border spinner-border-sm"
@@ -42,9 +40,17 @@ export class SearchWidget extends React.Component {
   }
 
   componentDidMount() {
-    $(`#autocomplete-${this.props.name}`).autoComplete().on("autocomplete.select", (item) => {
-      this.props.onChange(item);
+    const autoComplete = $(`#autocomplete-${this.props.name}`).autoComplete({
+      minLength: 2,
+      formatResult: (item) => {
+        return item.text;
+      }
     });
+
+    autoComplete.on("autocomplete.select", (item) => {
+      this.props.onChange(item);
+      this.props.onClick();
+    })
   }
 
   onKeyUp(event) {
@@ -58,7 +64,7 @@ export class SearchWidget extends React.Component {
 
   render() {
     return (
-      <div className="input-group w-100 mb-4 p-2" style={ this.props.style }>
+      <div className="search-widget input-group w-100 mb-4 p-2" style={ this.props.style }>
         <input
           id={ `autocomplete-${ this.props.name }` }
           name="search"
@@ -75,6 +81,7 @@ export class SearchWidget extends React.Component {
           onClick={this.props.onClick}
           isLoading={this.props.isLoading}
           style={ this.props.buttonStyle }
+          clientRoot={ this.props.clientRoot }
         />
       </div>
     );
@@ -85,7 +92,8 @@ SearchWidget.defaultProps = {
   name: '',
   autoComplete: false,
   autoCompleteUrl: '',
-  buttonStyle: {}
+  buttonStyle: {},
+  clientRoot: ''
 };
 
 export default SearchWidget;

@@ -5,7 +5,7 @@
   global $SERVER_ROOT, $CHARSET;
   include_once($SERVER_ROOT . "/classes/Functional.php");
 
-  $TABLE_FIELDS =  json_decode(file_get_contents($SERVER_ROOT . "/meta/tableFields.json"), true);
+  $TABLE_FIELDS = json_decode(file_get_contents($SERVER_ROOT . "/meta/tableFields.json"), true);
 
   $CLID_GARDEN_ALL = 54;
 
@@ -14,9 +14,47 @@
   $CID_WIDTH = 738;
   $CID_HEIGHT = 140;
 
+  # Plant features
+  $CID_FLOWER_COLOR = 612;
+  $CID_BLOOM_MONTHS = 165;
+  $CID_WILDLIFE_SUPPORT = 685;
+  $CID_LIFESPAN = 136;
+  $CID_FOLIAGE_TYPE = 100;
+  $CID_PLANT_TYPE = 137;
+
+  # Growth & maintenance
+  $CID_LANDSCAPE_USES = 679;
+  $CID_CULTIVATION_PREFS = 767;
+  $CID_BEHAVIOR = 688;
+  $CID_PROPAGATION = 670;
+  $CID_EASE_GROWTH = 684;
+
+  # Beyond the garden
+  $CID_HABITAT = 163;
+  $CID_ECOREGION = 19;
+
+  /**
+   * @param $cid int Attribute ID in db
+   * @return string[] Array of all distinct values for the cid
+   */
+  function get_all_attrib_vals($cid) {
+    global $TABLE_FIELDS;
+    $sql = 'SELECT DISTINCT ' . $TABLE_FIELDS['KMCS']['CHAR_STATE_NAME'] . ' FROM kmcs ';
+    $sql .= 'WHERE ' . $TABLE_FIELDS['KMCS']['CID'] . " = $cid";
+
+    $results = [];
+    $res_tmp = run_query($sql);
+    foreach ($res_tmp as $r) {
+      array_push($results, $r[$TABLE_FIELDS['KMCS']['CHAR_STATE_NAME']]);
+    }
+
+    sort($results);
+    return $results;
+  }
+
 /**
- * @param $dbPath {string} Path to the image in the Symbiota database
- * @return {string} The path based on $IMAGE_ROOT_URL and $IMAGE_DOMAIN
+ * @param $dbPath string Path to the image in the Symbiota database
+ * @return string The path based on $IMAGE_ROOT_URL and $IMAGE_DOMAIN
  */
   function resolve_img_path($dbPath) {
     $result = $dbPath;
@@ -44,7 +82,7 @@
    * @param tid int The tid for the image
    * @return string The first thumbnail for $tid, else "" if one does not exist
    */
-  function get_thumbnail_for_tid($tid) {
+  function get_thumbnail($tid) {
     global $TABLE_FIELDS;
 
     $sql = get_select_statement("images", [ $TABLE_FIELDS["IMAGES"]["THUMBNAIL_URL"] ]);
@@ -60,8 +98,60 @@
     return "";
   }
 
-  function get_attribs_for_tid($tid) {
+  /**
+   * @param $tid TID to query
+   * @return array Array of vernacular names for the TID
+   */
+  function get_vernacular_names($tid) {
     global $TABLE_FIELDS;
+
+    $vn_sql = get_select_statement(
+        "taxavernaculars",
+        [
+            $TABLE_FIELDS['TAXA_VERNACULARS']['VERNACULAR_NAME'],
+            $TABLE_FIELDS['TAXA_VERNACULARS']['LANGUAGE'],
+        ]
+    );
+    $vn_sql .= ' WHERE ' . $TABLE_FIELDS['TAXA']['TID'] . " = $tid ";
+    $vn_sql .= ' ORDER BY ' . $TABLE_FIELDS['TAXA_VERNACULARS']['SORT_SEQ'] . ';';
+
+    return run_query($vn_sql);
+  }
+
+  /**
+   * @param $tid TID to query
+   * @return array Array of garden checklists that the TID is a member of
+   */
+  function get_checklists($tid) {
+    global $TABLE_FIELDS;
+    global $CLID_GARDEN_ALL;
+
+    $cl_sql = get_select_statement(
+        "fmchklsttaxalink tl",
+        [
+            'tl.' . $TABLE_FIELDS["CHECKLISTS"]["CLID"]
+        ]
+    );
+
+    $cl_sql .= 'INNER JOIN taxa t ON ';
+    $cl_sql .= 'tl.' . $TABLE_FIELDS["TAXA"]["TID"] . ' = t.' . $TABLE_FIELDS["TAXA"]["TID"] . ' ';
+    $cl_sql .= 'INNER JOIN fmchecklists cl ON ';
+    $cl_sql .= 'tl.' . $TABLE_FIELDS["CHECKLISTS"]["CLID"] . ' = cl.' . $TABLE_FIELDS["CHECKLISTS"]["CLID"] . ' ';
+    $cl_sql .= 'WHERE t.' . $TABLE_FIELDS["TAXA"]["TID"] . " = $tid AND ";
+    $cl_sql .= 'cl.' . $TABLE_FIELDS["CHECKLISTS"]["PARENT_CLID"] . " = $CLID_GARDEN_ALL ";
+    $cl_sql .= 'GROUP BY ' . $TABLE_FIELDS["CHECKLISTS"]["CLID"];
+
+    return run_query($cl_sql);
+  }
+
+  function get_attribs($tid) {
+    global $TABLE_FIELDS;
+    global $CID_WIDTH, $CID_HEIGHT;
+    global $CID_MOISTURE, $CID_SUNLIGHT;
+    global $CID_FLOWER_COLOR, $CID_BLOOM_MONTHS, $CID_WILDLIFE_SUPPORT, $CID_LIFESPAN, $CID_FOLIAGE_TYPE, $CID_PLANT_TYPE;
+    global $CID_LANDSCAPE_USES, $CID_CULTIVATION_PREFS, $CID_BEHAVIOR, $CID_PROPAGATION, $CID_EASE_GROWTH;
+    global $CID_ECOREGION, $CID_HABITAT;
+
     $all_attr_sql = get_select_statement(
         "kmdescr",
         [
@@ -76,15 +166,32 @@
 
     $attr_res = run_query($all_attr_sql);
     $attr_array = [
-        "height" => [],
-        "width" => [],
-        "sunlight" => [],
-        "moisture" => []
+      "height" => [],
+      "width" => [],
+      "sunlight" => [],
+      "moisture" => [],
+      "features" => [
+        "flower_color" => [],
+        "bloom_months" => [],
+        "wildlife_support" => [],
+        "lifespan" => [],
+        "foliage_type" => [],
+        "plant_type" => []
+      ],
+      "growth_maintenance" => [
+        "landscape_uses" => [],
+        "cultivation_prefs" => [],
+        "behavior" => [],
+        "propagation" => [],
+        "ease_growth" => [],
+      ],
+      "beyond_garden" => [
+        "eco_region" => [],
+        "habitat" => []
+      ]
     ];
 
     foreach ($attr_res as $attr) {
-      global $CID_WIDTH, $CID_HEIGHT, $CID_MOISTURE, $CID_SUNLIGHT;
-
       $attr_key = intval($attr["attr_key"]);
       $attr_val = $attr["attr_val"];
       switch ($attr_key) {
@@ -99,6 +206,45 @@
           break;
         case $CID_MOISTURE:
           array_push($attr_array["moisture"], $attr_val);
+          break;
+        case $CID_FLOWER_COLOR:
+          array_push($attr_array["features"]["flower_color"], $attr_val);
+          break;
+        case $CID_BLOOM_MONTHS:
+          array_push($attr_array["features"]["bloom_months"], $attr_val);
+          break;
+        case $CID_WILDLIFE_SUPPORT:
+          array_push($attr_array["features"]["wildlife_support"], $attr_val);
+          break;
+        case $CID_LIFESPAN:
+          array_push($attr_array["features"]["lifespan"], $attr_val);
+          break;
+        case $CID_FOLIAGE_TYPE:
+          array_push($attr_array["features"]["foliage_type"], $attr_val);
+          break;
+        case $CID_PLANT_TYPE:
+          array_push($attr_array["features"]["plant_type"], $attr_val);
+          break;
+        case $CID_LANDSCAPE_USES:
+          array_push($attr_array["growth_maintenance"]["landscape_uses"], $attr_val);
+          break;
+        case $CID_CULTIVATION_PREFS:
+          array_push($attr_array["growth_maintenance"]["cultivation_prefs"], $attr_val);
+          break;
+        case $CID_BEHAVIOR:
+          array_push($attr_array["growth_maintenance"]["behavior"], $attr_val);
+          break;
+        case $CID_PROPAGATION:
+          array_push($attr_array["growth_maintenance"]["propagation"], $attr_val);
+          break;
+        case $CID_EASE_GROWTH:
+          array_push($attr_array["growth_maintenance"]["ease_growth"], $attr_val);
+          break;
+        case $CID_ECOREGION:
+          array_push($attr_array["beyond_garden"]["eco_region"], $attr_val);
+          break;
+        case $CID_HABITAT:
+          array_push($attr_array["beyond_garden"]["habitat"], $attr_val);
           break;
         default:
           break;
@@ -151,8 +297,7 @@
         "taxa",
         [
             't.' . $TABLE_FIELDS['TAXA']['TID'],
-            't.' . $TABLE_FIELDS['TAXA']['SCINAME'],
-            'v.' . $TABLE_FIELDS['TAXA_VERNACULARS']['VERNACULAR_NAME']
+            't.' . $TABLE_FIELDS['TAXA']['SCINAME']
         ]
     );
     // Abbreviation for 'taxa' table name
@@ -179,8 +324,29 @@
 
     // Populate image urls
     foreach ($resultsTmp as $result) {
-      $result = array_merge($result, get_attribs_for_tid($result["tid"]));
-      $result["image"] = get_thumbnail_for_tid($result["tid"]);
+      $result = array_merge($result, get_attribs($result["tid"]));
+      $result["image"] = get_thumbnail($result["tid"]);
+
+      $result["checklists"] = [];
+      $clidsTemp = get_checklists($result["tid"]);
+      foreach ($clidsTemp as $clid) {
+        array_push($result["checklists"], $clid[$TABLE_FIELDS['CHECKLISTS']['CLID']]);
+      }
+
+      $result["vernacular"] = [];
+      $result["vernacular"]["names"] = [];
+      $vernacularsTmp = get_vernacular_names($result["tid"]);
+      foreach ($vernacularsTmp as $vn) {
+        $basename_is_set = array_key_exists("basename", $result["vernacular"]);
+
+        if (!$basename_is_set && strtolower($vn[$TABLE_FIELDS['TAXA_VERNACULARS']['LANGUAGE']]) === 'basename') {
+          $result["vernacular"]["basename"] = $vn[$TABLE_FIELDS['TAXA_VERNACULARS']['VERNACULAR_NAME']];
+        } else {
+          array_push($result["vernacular"]["names"], $vn[$TABLE_FIELDS['TAXA_VERNACULARS']['VERNACULAR_NAME']]);
+        }
+      }
+      $result['vernacular']['names'] = array_unique($result["vernacular"]["names"]);
+
       array_push($results, $result);
     }
 
@@ -190,6 +356,8 @@
   $searchResults = [];
   if (key_exists("canned", $_GET) && $_GET["canned"] === "true") {
     $searchResults = get_canned_searches();
+  } else if (key_exists("attr", $_GET) && is_numeric($_GET['attr'])) {
+    $searchResults = get_all_attrib_vals(intval($_GET['attr']));
   } else {
     $searchResults = get_garden_taxa($_GET);
   }

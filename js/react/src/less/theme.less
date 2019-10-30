@@ -16,6 +16,20 @@ body {
   margin: 0;
 }
 
+button {
+  border: none;
+  padding-top: 0.25em;
+  padding-bottom: 0.25em;
+  outline: none !important;
+  color: white;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  border: none;
+}
+
 .text-uppercase() {
   text-transform: uppercase;
 }
@@ -34,4 +48,62 @@ body {
 
 .bg-light-grn() {
   background: @light-green !important;
+}
+
+.border-rounded-sm() {
+  border-width: 0.15em;
+  border-radius: 0.5em !important;
+}
+
+.border-rounded-med() {
+  border-width: 0.25em;
+  border-radius: 0.5em !important;
+}
+
+.dropdown-hover() {
+  background: @light-green !important;
+  border-color: @med-green !important;
+  .text-drk-grn();
+}
+
+.navbar-toggler, .dropdown-menu {
+  background-color: @med-green;
+}
+
+.dropdown-toggle {
+  .border-rounded-sm();
+  &::after {
+    display: none;
+  }
+}
+
+.dropdown-item {
+  .text-drk-grn();
+  .text-uppercase();
+}
+
+.dropdown-toggle, .header-button, .dropdown-item {
+  &:hover, &:active, &.active {
+    .dropdown-hover();
+  }
+}
+
+.nav-link {
+  color: white !important;
+
+  &:hover {
+    .text-drk-grn();
+  }
+}
+
+.search-widget {
+  input[type=text] {
+    .border-rounded-med();
+    border-color: transparent;
+    box-shadow: none !important;
+
+    &:focus, &:active {
+      border-color: @med-green;
+    }
+  }
 }

@@ -15,6 +15,19 @@ function arrayCompare(a1, a2) {
   return true;
 }
 
+function getPlantAttrText(filter) {
+  const attrKeys = Object.keys(filter.val);
+  let itemText = '';
+  for (let i in attrKeys) {
+    let attrKey = attrKeys[i];
+    if (filter.val[attrKey].length > 0) {
+      itemText += `${attrKey.replace(/_/g, ' ')}: ${filter.val[attrKey].join(', ')}`;
+    }
+  }
+
+  return itemText;
+}
+
 class ViewOpts extends React.Component {
   render() {
     return (
@@ -62,6 +75,41 @@ class ViewOpts extends React.Component {
                       itemText = `Search: ${filter.val}`;
                     }
                     break;
+                  case "checklistId":
+                    if (filter.val === ViewOpts.DEFAULT_CLID) {
+                      showItem = false;
+                    } else {
+                      itemText = (
+                        filter.val in this.props.checklistNames ?
+                          `Checklist: ${this.props.checklistNames[filter.val]}` :
+                          ''
+                      );
+                    }
+                    break;
+                  case "plantFeatures": {
+                    // itemText = getPlantAttrText(filter);
+                    // if (itemText === '') {
+                    //   showItem = false;
+                    // }
+                    showItem = false;
+                    break;
+                  }
+                  case "growthMaintenance": {
+                    // itemText = getPlantAttrText(filter);
+                    // if (itemText === '') {
+                    //   showItem = false;
+                    // }
+                    showItem = false;
+                    break;
+                  }
+                  case "beyondGarden": {
+                    // itemText = getPlantAttrText(filter);
+                    // if (itemText === '') {
+                    //   showItem = false;
+                    // }
+                    showItem = false;
+                    break;
+                  }
                   default:
                     break;
                 }
@@ -131,6 +179,7 @@ ViewOpts.defaultProps = {
   sortBy: "vernacularName",
   viewType: "grid",
   filters: [],
+  checklistNames: {},
   onSortByClicked: () => {},
   onViewTypeClicked: () => {},
   onFilterClicked: () => {}
@@ -141,5 +190,6 @@ ViewOpts.DEFAULT_MOISTURE = "";
 ViewOpts.DEFAULT_WIDTH = [0, 50];
 ViewOpts.DEFAULT_HEIGHT = [0, 50];
 ViewOpts.DEFAULT_SEARCH_TEXT = "";
+ViewOpts.DEFAULT_CLID = -1;
 
 export default ViewOpts;

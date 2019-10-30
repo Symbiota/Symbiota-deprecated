@@ -51,9 +51,9 @@ function SearchResult(props) {
             />
             <div className={(useGrid ? "card-body" : "d-inline py-1") + " px-0"} style={{overflow: "hidden"}}>
               <div className={"card-text" + (useGrid ? "" : " d-inline")}>
-                {props.commonName}
+                <span className="text-capitalize">{props.commonName}</span>
                 {useGrid ? <br/> : " - "}
-                {props.sciName}
+                <span className="font-italic">{props.sciName}</span>
               </div>
             </div>
           </div>

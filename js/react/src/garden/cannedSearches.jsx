@@ -38,42 +38,40 @@ class CannedSearchResult extends React.Component {
       <div className={"py-2 canned-search-result"}>
         <h4 className="canned-title">{this.props.title}</h4>
         <div className="card" style={{padding: "0.5em"}}>
-          <a href={this.props.href}>
-            <div className="card-body" style={{padding: "0"}}>
-              <div style={{ position: "relative", width: "100%", height: "7em", borderRadius: "0.25em"}}>
-                <img
-                  className="d-block"
-                  style={{width: "100%", height: "100%", objectFit: "cover"}}
-                  src={this.props.src}
-                  alt={this.props.src}
-                  onMouseOver={ this.onMouseOver }
-                />
-                <div
-                  className="text-center text-capitalize w-100 h-100 px-2 py-1 align-items-center"
-                  style={{
-                    display: this.state.hover ? "flex" : "none",
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    zIndex: 1000,
-                    fontSize: "0.75em",
-                    color: "white",
-                    background: "rgba(100, 100, 100, 0.8)",
-                    overflow: "hidden"
-                  }}
-                  onMouseOut={ this.onMouseOut }
-                >
-                  {this.props.description}
-                </div>
+          <div className="card-body" style={{padding: "0"}}>
+            <div style={{ position: "relative", width: "100%", height: "7em", borderRadius: "0.25em"}}>
+              <img
+                className="d-block"
+                style={{width: "100%", height: "100%", objectFit: "cover"}}
+                src={this.props.src}
+                alt={this.props.src}
+                onMouseOver={ this.onMouseOver }
+              />
+              <div
+                className="text-center text-capitalize w-100 h-100 px-2 py-1 align-items-center"
+                style={{
+                  display: this.state.hover ? "flex" : "none",
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  zIndex: 1000,
+                  fontSize: "0.75em",
+                  color: "white",
+                  background: "rgba(100, 100, 100, 0.8)",
+                  overflow: "hidden"
+                }}
+                onMouseOut={ this.onMouseOut }
+              >
+                {this.props.description}
               </div>
             </div>
-          </a>
+          </div>
         </div>
         <div className="mt-2 px-2">
           <button className="w-100 px-3 my-1 btn-filter" onClick={this.props.onFilter}>
             Filter for these
           </button>
-          <button className="w-100 px-3 my-1 btn-learn" onClick={this.props.onLearnMore}>
+          <button className="w-100 px-3 my-1 btn-learn" onClick={ () => { window.location = this.props.href } }>
             Learn more
           </button>
         </div>
@@ -121,14 +119,9 @@ class CannedSearchContainer extends React.Component {
                           <CannedSearchResult
                             title={searchResult.name}
                             description={ searchResult.description }
-                            src={ `${CLIENT_ROOT}/${searchResult.iconUrl}` }
+                            src={ `${searchResult.iconUrl}` }
                             href={getChecklistPage(searchResult.clid)}
-                            onLearnMore={() => {
-                              console.log(`Learn more about ${searchResult.name}!`)
-                            }}
-                            onFilter={() => {
-                              console.log(`Filter for ${searchResult.name}!`)
-                            }}
+                            onFilter={() => { this.props.onFilter(searchResult.clid); }}
                           />
                         </div>
                       );
@@ -143,5 +136,9 @@ class CannedSearchContainer extends React.Component {
     );
   }
 }
+
+CannedSearchContainer.defaultProps = {
+  onFilter: () => {},
+};
 
 export default CannedSearchContainer;

@@ -2,6 +2,7 @@ import React from "react";
 
 import HelpButton from "../common/helpButton.jsx";
 import {SearchWidget} from "../common/search.jsx";
+import FeatureSelector from "./featureSelector.jsx";
 
 const CLIENT_ROOT = "..";
 
@@ -213,7 +214,7 @@ class SideBarDropdown extends React.Component {
         </div>
         <div id={dropDownId} className="collapse">
           <div className="card card-body mt-2">
-            Blah blah blah blah
+            { this.props.children }
           </div>
         </div>
       </div>
@@ -223,7 +224,7 @@ class SideBarDropdown extends React.Component {
 
 SideBarDropdown.defaultProps = {
   title: '',
-  style: { padding: "1em", backgroundColor: "white", borderRadius: "0.5em", fontSize: "initial" }
+  style: { padding: "1em", backgroundColor: "white", borderRadius: "0.5em", fontSize: "initial" },
 };
 
 /**
@@ -265,6 +266,9 @@ class SideBar extends React.Component {
           onClick={ this.props.onSearch }
           value={ this.props.searchText }
           isLoading={ this.props.isLoading }
+          clientRoot={ CLIENT_ROOT }
+          autoComplete={ true }
+          autoCompleteUrl={ `${CLIENT_ROOT}/garden/rpc/autofillsearch.php` }
         />
 
         {/* Sunlight & Moisture */}
@@ -311,9 +315,57 @@ class SideBar extends React.Component {
 
         {/* Dropdowns */}
         <div>
-          <SideBarDropdown title="Plant features" />
-          <SideBarDropdown title="Growth & maintenance" />
-          <SideBarDropdown title="Beyond the garden" />
+          <SideBarDropdown title="Plant features">
+            {
+              Object.keys(this.props.plantFeatures).map((plantFeature) => {
+                return (
+                  <FeatureSelector
+                    key={ plantFeature }
+                    title={ plantFeature }
+                    items={ this.props.plantFeatures[plantFeature] }
+                    onChange={ (featureKey) => {
+                      this.props.onPlantFeaturesChanged(plantFeature, featureKey)
+                    }}
+                  />
+                )
+              })
+            }
+          </SideBarDropdown>
+
+          <SideBarDropdown title="Growth & maintenance">
+            {
+              Object.keys(this.props.growthMaintenance).map((plantFeature) => {
+                return (
+                  <FeatureSelector
+                    key={ plantFeature }
+                    title={ plantFeature }
+                    items={ this.props.growthMaintenance[plantFeature] }
+                    onChange={ (featureKey) => {
+                      this.props.onGrowthMaintenanceChanged(plantFeature, featureKey)
+                    }}
+                  />
+                )
+              })
+            }
+          </SideBarDropdown>
+
+          <SideBarDropdown title="Beyond the garden">
+            {
+              Object.keys(this.props.beyondGarden).map((plantFeature) => {
+                return (
+                  <FeatureSelector
+                    key={ plantFeature }
+                    title={ plantFeature }
+                    items={ this.props.beyondGarden[plantFeature] }
+                    onChange={ (featureKey) => {
+                      this.props.onBeyondGardenChanged(plantFeature, featureKey)
+                    }}
+                  />
+                )
+              })
+            }
+          </SideBarDropdown>
+
           <SideBarDropdown title="Availability (Coming soon)" disabled={ true } />
         </div>
       </div>
@@ -326,6 +378,12 @@ SideBar.defaultProps = {
   moisture: '',
   width: [0, 50],
   height: [0, 50],
+  plantFeatures: {},
+  growthMaintenance: {},
+  beyondGarden: {},
+  onPlantFeaturesChanged: () => {},
+  onGrowthMaintenanceChanged: () => {},
+  onBeyondGardenChanged: () => {}
 };
 
 export default SideBar;

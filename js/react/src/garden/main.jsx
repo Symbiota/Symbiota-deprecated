@@ -12,6 +12,28 @@ import httpGet from "../common/httpGet.js";
 
 const CLIENT_ROOT = "..";
 
+const ATTRIBS_PLANT_FEATURE = {
+  "flower_color": 612,
+  "bloom_months": 165,
+  "wildlife_support": 685,
+  "lifespan": 136,
+  "foliage_type": 100,
+  "plant_type": 137
+};
+
+const ATTRIBS_GROWTH_MAINTENANCE = {
+  "landscape_uses": 679,
+  "cultivation_prefs": 767,
+  "behavior": 688,
+  "propagation": 670,
+  "ease_growth": 684
+};
+
+const ATTRIBS_BEYOND_GARDEN = {
+  "eco_region": 19,
+  "habitat": 163
+};
+
 function getUrlQueryParams(url) {
   let params = {};
   if (url.includes("?")) {
@@ -44,6 +66,62 @@ function addUrlQueryParam(key, val) {
 
 function getTaxaPage(tid) {
   return `${CLIENT_ROOT}/taxa/garden.php?taxon=${tid}`;
+}
+
+function getCommonNameStr(item, searchText) {
+  const basename = item.vernacular.basename;
+  const names = item.vernacular.names;
+
+  let cname = '';
+  for (let i in names) {
+    let currentName = names[i];
+    if (searchText.toLowerCase().includes(currentName) || currentName.toLowerCase().includes(searchText)) {
+      cname = currentName;
+      break;
+    }
+  }
+  if (cname === '') {
+    cname = names[0];
+  }
+
+  if (cname.includes(basename) && basename !== cname) {
+    return `${basename}, ${cname.replace(basename, '')}`
+  }
+
+  return cname;
+}
+
+function getAttributeArr(keymap) {
+  return new Promise((resolve, reject) => {
+    let pArr = [];
+    let keys = Object.keys(keymap);
+    for (let i in keys) {
+      let attrib_key = keys[i];
+      pArr.push(
+        httpGet(`./rpc/api.php?attr=${keymap[attrib_key]}`)
+          .then((res) => {
+            return {
+              "title": attrib_key,
+              "values": JSON.parse(res)
+            };
+          })
+      )
+    }
+    Promise.all(pArr).then((vals) => { resolve(vals); }).catch((err) => { reject(err); });
+  });
+}
+
+function getAttribMatrixFromArr(attribArray) {
+  const attribMatrix = {};
+  for (let i in attribArray) {
+    let attrObj = attribArray[i];
+    attribMatrix[attrObj.title] = {};
+    for (let j in attrObj.values) {
+      let attrVal = attrObj.values[j];
+      attribMatrix[attrObj.title][attrVal] = false;
+    }
+  }
+  return attribMatrix;
 }
 
 function filterByWidth(item, minMax) {
@@ -88,6 +166,33 @@ function filterByMoisture(item, moisture) {
   }
 }
 
+function filterByChecklist(item, clid) {
+  return clid === -1 || item.checklists.includes(clid);
+}
+
+function filterByPlantAttribs(item, itemFilterName, filterMap) {
+  let plantFeatureKeys = Object.keys(filterMap);
+  let success = true;
+  let iterSuccess;
+  let itemFeatures = item[itemFilterName];
+  // For each filter type
+  for (let i in plantFeatureKeys) {
+    iterSuccess = false;
+
+    // flower_color, eco_region, etc.
+    let featureKey = plantFeatureKeys[i];
+
+    // blue, green, Cascades, etc.
+    let featureVals = filterMap[featureKey].map(item => item.toLowerCase());
+    let itemVals = itemFeatures[featureKey].map(item => item.toLowerCase());
+
+    // Is the intersection length greater than zero?
+    iterSuccess = featureVals.length === 0 || featureVals.filter(item => itemVals.includes(item)).length > 0;
+    success = success && iterSuccess;
+  }
+  return success;
+}
+
 function MainContentContainer(props) {
   return (
     <div className="container mx-auto p-4" style={{ maxWidth: "1400px" }}>
@@ -108,13 +213,20 @@ class GardenPageApp extends React.Component {
         moisture: ("moisture" in queryParams ? queryParams["moisture"] : ViewOpts.DEFAULT_MOISTURE),
         height: ("height" in queryParams ? queryParams["height"].split(",").map((i) => parseInt(i)) : ViewOpts.DEFAULT_HEIGHT),
         width: ("width" in queryParams ? queryParams["width"].split(",").map((i) => parseInt(i)) : ViewOpts.DEFAULT_WIDTH),
-        searchText: ''
+        checklistId: ("clid" in queryParams ? parseInt(queryParams["clid"]) : ViewOpts.DEFAULT_CLID),
+        searchText: '',
+        plantFeatures: {},
+        growthMaintenance: {},
+        beyondGarden: {}
       },
       searchText: ("search" in queryParams ? queryParams["search"] : ViewOpts.DEFAULT_SEARCH_TEXT),
       searchResults: [],
       cannedSearches: [],
       sortBy: ("sortBy" in queryParams ? queryParams["sortBy"] : "vernacularName"),
       viewType: ("viewType" in queryParams ? queryParams["viewType"] : "grid"),
+      plantFeatureState: {},
+      growthMaintenanceState: {},
+      beyondGardenState: {}
     };
 
     // To Refresh sliders
@@ -130,6 +242,12 @@ class GardenPageApp extends React.Component {
     this.onSortByChanged = this.onSortByChanged.bind(this);
     this.onViewTypeChanged = this.onViewTypeChanged.bind(this);
     this.onFilterRemoved = this.onFilterRemoved.bind(this);
+    this.onCannedFilter = this.onCannedFilter.bind(this);
+    this.toggleFeatureCollectionVal = this.toggleFeatureCollectionVal.bind(this);
+    this.onPlantFeaturesChanged = this.onPlantFeaturesChanged.bind(this);
+    this.onGrowthMaintenanceChanged = this.onGrowthMaintenanceChanged.bind(this);
+    this.onBeyondGardenChanged = this.onBeyondGardenChanged.bind(this);
+    this.updateFeatureCollectionFilters = this.updateFeatureCollectionFilters.bind(this);
   }
 
   componentDidMount() {
@@ -141,6 +259,80 @@ class GardenPageApp extends React.Component {
 
     // Load search results
     this.onSearch();
+
+    // Load sidebar options
+    Promise.all([
+      getAttributeArr(ATTRIBS_PLANT_FEATURE),
+      getAttributeArr(ATTRIBS_GROWTH_MAINTENANCE),
+      getAttributeArr(ATTRIBS_BEYOND_GARDEN)
+    ]).then((res) => {
+        const allPlantFeatures = res[0];
+        const allGrowthMaintainence = res[1];
+        const allBeyondGarden = res[2];
+        const newFilters = Object.assign({}, this.state.filters);
+
+        for (let i in allPlantFeatures) {
+          let featureKey = allPlantFeatures[i];
+          newFilters.plantFeatures[featureKey.title] = [];
+        }
+
+        for (let i in allGrowthMaintainence) {
+          let featureKey = allGrowthMaintainence[i];
+          newFilters.growthMaintenance[featureKey.title] = [];
+        }
+
+        for (let i in allBeyondGarden) {
+          let featureKey = allBeyondGarden[i];
+          newFilters.beyondGarden[featureKey.title] = [];
+        }
+
+        const newFeatures = Object.assign({}, this.state.plantFeatureState, getAttribMatrixFromArr(allPlantFeatures));
+        const newGrowth = Object.assign({}, this.state.growthMaintenanceState, getAttribMatrixFromArr(allGrowthMaintainence));
+        const newBeyond = Object.assign({}, this.state.beyondGardenState, getAttribMatrixFromArr(allBeyondGarden));
+        this.setState({
+          plantFeatureState: newFeatures,
+          growthMaintenanceState: newGrowth,
+          beyondGardenState: newBeyond,
+          filters: newFilters
+        });
+      }
+    )
+    .catch((err) => {
+      console.error(err);
+    });
+  }
+
+  toggleFeatureCollectionVal(featureCollection, featureCollectionFilterName, featureKey, featureVal) {
+    const changeObj = {};
+    const newCollection = Object.assign({}, this.state[featureCollection]);
+    changeObj[featureVal] = !this.state[featureCollection][featureKey][featureVal];
+    newCollection[featureKey] = Object.assign({}, newCollection[featureKey], changeObj);
+    const stateObj = {};
+    stateObj[featureCollection] = newCollection;
+    this.setState(stateObj, () => {
+      this.updateFeatureCollectionFilters(featureCollectionFilterName, featureCollection, featureKey, featureVal);
+    });
+  }
+
+  updateFeatureCollectionFilters(featureCollectionFilter, featureCollectionStateName, featureKey, featureVal) {
+    const isInFilters = this.state.filters[featureCollectionFilter][featureKey].includes(featureVal);
+    const stateVal = this.state[featureCollectionStateName][featureKey][featureVal];
+    let changed = false;
+    let newFilters;
+    if (stateVal && !isInFilters) {
+      newFilters = Object.assign({}, this.state.filters);
+      newFilters[featureCollectionFilter][featureKey].push(featureVal);
+      changed = true;
+    } else if (isInFilters) {
+      newFilters = Object.assign({}, this.state.filters);
+      newFilters[featureCollectionFilter][featureKey] = newFilters[featureCollectionFilter][featureKey].filter(
+        (item) => item !== featureVal
+      );
+      changed = true;
+    }
+    if (changed) {
+      this.setState({ filters: newFilters });
+    }
   }
 
   onFilterRemoved(key) {
@@ -162,6 +354,15 @@ class GardenPageApp extends React.Component {
         break;
       case "searchText":
         this.setState({ searchText: ViewOpts.DEFAULT_SEARCH_TEXT }, () => this.onSearch());
+        break;
+      case "checklistId":
+        this.onCannedFilter(ViewOpts.DEFAULT_CLID);
+        break;
+      case "plantFeatures":
+        break;
+      case "growthMaintenance":
+        break;
+      case "beyondGarden":
         break;
       default:
         break;
@@ -196,9 +397,19 @@ class GardenPageApp extends React.Component {
 
   // On search end
   onSearchResults(results) {
-    this.setState({
-      searchResults: results.sort((a, b) => { return a[this.state.sortBy] > b[this.state.sortBy] ? 1 : -1 })
-    });
+    let newResults;
+    if (this.state.sortBy === "sciName") {
+      newResults = results.sort((a, b) => { return a["sciName"] > b["sciName"] ? 1 : -1 });
+    } else {
+      newResults = results.sort((a, b) => {
+        return (
+          getCommonNameStr(a, this.state.searchText).toLowerCase() >
+          getCommonNameStr(b, this.state.searchText).toLowerCase() ? 1 : -1
+        );
+      });
+    }
+
+    this.setState({ searchResults: newResults });
   }
 
   onSunlightChanged(event) {
@@ -247,10 +458,34 @@ class GardenPageApp extends React.Component {
     );
   }
 
+  onPlantFeaturesChanged(featureKey, featureVal) {
+    this.toggleFeatureCollectionVal("plantFeatureState", "plantFeatures", featureKey, featureVal);
+  }
+
+  onGrowthMaintenanceChanged(featureKey, featureVal) {
+    this.toggleFeatureCollectionVal("growthMaintenanceState", "growthMaintenance", featureKey, featureVal);
+  }
+
+  onBeyondGardenChanged(featureKey, featureVal) {
+    this.toggleFeatureCollectionVal("beyondGardenState", "beyondGarden", featureKey, featureVal);
+  }
+
   onSortByChanged(type) {
+    let newResults;
+    if (type === "sciName") {
+      newResults = this.state.searchResults.sort((a, b) => { return a["sciName"] > b["sciName"] ? 1 : -1 });
+    } else {
+      newResults = this.state.searchResults.sort((a, b) => {
+        return (
+          getCommonNameStr(a, this.state.searchText).toLowerCase() >
+          getCommonNameStr(b, this.state.searchText).toLowerCase() ? 1 : -1
+        );
+      });
+    }
+
     this.setState({
       sortBy: type,
-      searchResults: this.state.searchResults.sort((a, b) => { return a[type] > b[type] ? 1 : -1 })
+      searchResults: newResults
     });
 
     let newType;
@@ -276,7 +511,22 @@ class GardenPageApp extends React.Component {
     window.history.replaceState({ query: newQueryStr }, '', window.location.pathname + newQueryStr);
   }
 
+  onCannedFilter(clid) {
+    this.setState({ filters: Object.assign({}, this.state.filters, { checklistId: clid }) });
+    if (clid === -1) {
+      clid = '';
+    }
+    let newQueryStr = addUrlQueryParam("clid", clid);
+    window.history.replaceState({ query: newQueryStr }, '', window.location.pathname + newQueryStr);
+  }
+
   render() {
+    const checkListMap = {};
+    for (let i in this.state.cannedSearches) {
+      let search = this.state.cannedSearches[i];
+      checkListMap[search.clid] = search.name;
+    }
+
     return (
       <div>
         <InfographicDropdown />
@@ -291,6 +541,9 @@ class GardenPageApp extends React.Component {
                 moisture={ this.state.filters.moisture }
                 height={ this.state.filters.height }
                 width={ this.state.filters.width }
+                plantFeatures={ this.state.plantFeatureState }
+                growthMaintenance={ this.state.growthMaintenanceState }
+                beyondGarden={ this.state.beyondGardenState }
                 searchText={ this.state.searchText }
                 onSearch={ this.onSearch }
                 onSearchTextChanged={ this.onSearchTextChanged }
@@ -298,12 +551,18 @@ class GardenPageApp extends React.Component {
                 onMoistureChanged={ this.onMoistureChanged }
                 onHeightChanged={ this.onHeightChanged }
                 onWidthChanged={ this.onWidthChanged }
+                onPlantFeaturesChanged={ this.onPlantFeaturesChanged }
+                onGrowthMaintenanceChanged={ this.onGrowthMaintenanceChanged }
+                onBeyondGardenChanged={ this.onBeyondGardenChanged }
               />
             </div>
             <div className="col">
               <div className="row">
                 <div className="col">
-                  <CannedSearchContainer searches={ this.state.cannedSearches }/>
+                  <CannedSearchContainer
+                    searches={ this.state.cannedSearches }
+                    onFilter={ this.onCannedFilter }
+                  />
                 </div>
               </div>
               <div className="row">
@@ -314,6 +573,7 @@ class GardenPageApp extends React.Component {
                     onSortByClicked={ this.onSortByChanged }
                     onViewTypeClicked={ this.onViewTypeChanged }
                     onFilterClicked={ this.onFilterRemoved }
+                    checklistNames={ checkListMap }
                     filters={
                       Object.keys(this.state.filters).map((filterKey) => {
                         return { key: filterKey, val: this.state.filters[filterKey] }
@@ -323,11 +583,24 @@ class GardenPageApp extends React.Component {
                   <SearchResultContainer viewType={ this.state.viewType }>
                     {
                       this.state.searchResults.map((result) =>  {
+                        let filterChecklist = filterByChecklist(result, this.state.filters.checklistId);
                         let filterWidth = filterByWidth(result, this.state.filters.width);
                         let filterHeight = filterByHeight(result, this.state.filters.height);
                         let filterSunlight = filterBySunlight(result, this.state.filters.sunlight);
                         let filterMoisture = filterByMoisture(result, this.state.filters.moisture);
-                        let showResult = filterWidth && filterHeight && filterSunlight && filterMoisture;
+                        let filterFeatures = filterByPlantAttribs(result, "features", this.state.filters.plantFeatures);
+                        let filterGrowthMaint = filterByPlantAttribs(result, "growth_maintenance", this.state.filters.growthMaintenance);
+                        let filterBeyondGarden = filterByPlantAttribs(result, "beyond_garden", this.state.filters.beyondGarden);
+                        let showResult = (
+                          filterChecklist &&
+                          filterWidth &&
+                          filterHeight &&
+                          filterSunlight &&
+                          filterMoisture &&
+                          filterFeatures &&
+                          filterBeyondGarden &&
+                          filterGrowthMaint
+                        );
                         return (
                           <SearchResult
                             key={ result.tid }
@@ -335,7 +608,7 @@ class GardenPageApp extends React.Component {
                             display={ showResult }
                             href={ getTaxaPage(result.tid) }
                             src={ result.image }
-                            commonName={ result.vernacularName ? result.vernacularName : '' }
+                            commonName={ getCommonNameStr(result, this.state.searchText) }
                             sciName={ result.sciName ? result.sciName : '' }
                           />
                         )
