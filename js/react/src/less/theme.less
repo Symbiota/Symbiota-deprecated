@@ -2,6 +2,7 @@
 @med-green: #5FB021;
 @dark-green: #3C641E;
 @dark-grn-type: #1E352F;
+@type-primary: #000000C2;
 
 @font: 'Source Sans Pro', sans-serif !important;
 
@@ -17,11 +18,67 @@ body {
 }
 
 button {
-  border: none;
+  background: none !important;
+  outline: none !important;
+  border: none !important;
   padding-top: 0.25em;
   padding-bottom: 0.25em;
-  outline: none !important;
+}
+
+a {
+  color: @type-primary !important;
+  &:active {
+    color: @dark-green !important;
+  }
+}
+
+.btn {
+  box-shadow: none !important;
+  border: none !important;
+}
+
+.btn-primary {
+  .btn();
+
   color: white;
+  background-image: linear-gradient(#5FB021, #468019) !important;
+  font-weight: bold;
+  border: none;
+  border-radius: 0.5em;
+
+  &:active {
+    color: @dark-green !important;
+    opacity: 90%;
+  }
+}
+
+.btn-secondary {
+  .btn();
+
+  .text-drk-grn();
+  background: none !important;
+  border: 2px solid @light-green !important;
+  font-weight: bold;
+  border-radius: 0.5em;
+
+  &:active {
+    background: @med-green !important;
+    opacity: 90%;
+  }
+}
+
+.btn-search {
+  width: 2em;
+  height: 2em;
+  padding: 0.3em;
+  margin-left: 0.5em;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.75) !important;
+
+  &:active {
+    background: @med-green !important;
+    opacity: 90%;
+  }
 }
 
 img {

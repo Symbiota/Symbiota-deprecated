@@ -1,0 +1,30 @@
+@import "./theme.less";
+
+@media screen and (max-width: 900px) {
+  #footer-app {
+    display: none;
+  }
+}
+
+#footer-app {
+  .navbar {
+    background: @med-green;
+    box-shadow: 0 5em 5em 2em @light-green;
+  }
+
+  .nav-item {
+    color: white;
+    margin-left: 1em;
+    margin-right: 1em;
+    .text-uppercase();
+    .text-bold();
+  }
+
+  #footer-content {
+    color: @type-primary;
+
+    p {
+      max-width: 25em;
+    }
+  }
+}

@@ -68,10 +68,10 @@ class CannedSearchResult extends React.Component {
           </div>
         </div>
         <div className="mt-2 px-2">
-          <button className="w-100 px-3 my-1 btn-filter" onClick={this.props.onFilter}>
+          <button className="w-100 px-3 my-1 btn btn-primary" onClick={this.props.onFilter}>
             Filter for these
           </button>
-          <button className="w-100 px-3 my-1 btn-learn" onClick={ () => { window.location = this.props.href } }>
+          <button className="w-100 px-3 my-1 btn btn-secondary" onClick={ () => { window.location = this.props.href } }>
             Learn more
           </button>
         </div>

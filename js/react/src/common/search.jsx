@@ -1,21 +1,12 @@
 import React from "react";
 
-const searchButtonStyle = {
-  width: "2em",
-  height: "2em",
-  padding: "0.3em",
-  marginLeft: "0.5em",
-  borderRadius: "50%",
-  background: "rgba(255, 255, 255, 0.5)"
-};
-
 /**
  * Sidebar 'plant search' button
  */
 function SearchButton(props) {
   return (
     <button
-      className="my-auto" style={ Object.assign({}, searchButtonStyle, props.style) }
+      className="my-auto btn-search" style={ props.style }
       onClick={ props.isLoading ? () => {} : props.onClick}>
       <img
         style={{display: props.isLoading ? "none" : "block"}}

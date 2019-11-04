@@ -4,11 +4,6 @@
   }
 }
 
-button {
-  background: none;
-  outline: none !important;
-}
-
 .will-v-flip {
   transition: transform 0.5s;
 }

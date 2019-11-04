@@ -25,6 +25,8 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: password
       MYSQL_DATABASE: symbiota
+    ports:
+      - 3306:3306
     volumes:
       - vol-oregonflora-db:/var/lib/mysql
       - ./docker/db-init.sql:/docker-entrypoint-initdb.d/0.sql:ro

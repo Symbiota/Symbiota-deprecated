@@ -20,6 +20,7 @@ const commonConfig = {
 const reactConfig = {
   entry: {
     header: path.join(SRC_DIR, "header", "main.jsx"),
+    footer: path.join(SRC_DIR, "footer", "main.jsx"),
     garden: path.join(SRC_DIR, "garden", "main.jsx"),
     gardenTaxa: path.join(SRC_DIR, "gardenTaxa", "main.jsx"),
     taxa: path.join(SRC_DIR, "taxa", "main.jsx")
@@ -46,6 +47,7 @@ const reactConfig = {
 const lessConfig = {
   entry: {
     header: path.join(SRC_DIR, "less", "header.less"),
+    footer: path.join(SRC_DIR, "less", "footer.less"),
     garden: path.join(SRC_DIR, "less", "garden.less"),
     taxa: path.join(SRC_DIR, "less", "taxa.less")
   },
