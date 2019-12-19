@@ -18,6 +18,7 @@ OregonFlora development differs in the following ways:
 for Apache, PHP, and MariaDB/MySQL
 2. Install Composer for PHP
 3. Run the following in the repository root to install the PHP dependencies: `composer install`
+4. Generate Doctrine's proxies `php vendor/bin/doctrine orm:generate-proxies`
 
 ### To build the front end:
 Install NodeJS and run the following from [./js/react](./js/react/)

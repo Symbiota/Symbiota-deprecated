@@ -53,7 +53,7 @@ export class SearchWidget extends React.Component {
   }
 
   onSuggestionsRequested() {
-    httpGet(`../../webservices/autofillsearch.php?q=${this.state.currentValue}`).then((res) => {
+    httpGet(`${this.props.clientRoot}/webservices/autofillsearch.php?q=${this.state.currentValue}`).then((res) => {
       return JSON.parse(res);
     }).catch((err) => {
       console.error(err);
