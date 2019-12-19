@@ -5,14 +5,15 @@ import ReactDOM from "react-dom";
 
 import InfographicDropdown from "./infographicDropdown.jsx";
 import SideBar from "./sidebar.jsx";
-import { SearchResultContainer, SearchResult } from "./searchResults.jsx";
+import {SearchResult, SearchResultContainer} from "./searchResults.jsx";
 import CannedSearchContainer from "./cannedSearches.jsx";
 import ViewOpts from "./viewOpts.jsx";
 import httpGet from "../common/httpGet.js";
+import {addUrlQueryParam, getUrlQueryParams} from "../common/queryParams.js";
 
 const CLIENT_ROOT = "..";
 
-const ATTRIBS_PLANT_FEATURE = {
+const CIDS_PLANT_FEATURE = {
   "flower_color": 612,
   "bloom_months": 165,
   "wildlife_support": 685,
@@ -21,7 +22,7 @@ const ATTRIBS_PLANT_FEATURE = {
   "plant_type": 137
 };
 
-const ATTRIBS_GROWTH_MAINTENANCE = {
+const CIDS_GROWTH_MAINTENANCE = {
   "landscape_uses": 679,
   "cultivation_prefs": 767,
   "behavior": 688,
@@ -29,50 +30,20 @@ const ATTRIBS_GROWTH_MAINTENANCE = {
   "ease_growth": 684
 };
 
-const ATTRIBS_BEYOND_GARDEN = {
+const CIDS_BEYOND_GARDEN = {
   "eco_region": 19,
   "habitat": 163
 };
 
-function getUrlQueryParams(url) {
-  let params = {};
-  if (url.includes("?")) {
-    let queryParams = url.split("?")[1].trim("&").split("&");
-    for (let i = 0; i < queryParams.length; i++) {
-      let [key, val] = queryParams[i].split("=");
-      params[key] = val;
-    }
-  }
-  return params;
-}
-
-function addUrlQueryParam(key, val) {
-  const params = getUrlQueryParams(window.location.search);
-  params[key] = val;
-
-  const paramKeys = Object.keys(params);
-  let queryParams = [];
-
-  for (let i = 0; i < paramKeys.length; i++) {
-    let k = paramKeys[i];
-    let v = params[k];
-    if (v.toString() !== '') {
-      queryParams.push(`${k}=${v}`);
-    }
-  }
-
-  return queryParams.length > 0 ? `?${queryParams.join("&")}` : "";
-}
-
 function getTaxaPage(tid) {
-  return `${CLIENT_ROOT}/taxa/garden.php?taxon=${tid}`;
+  return `${CLIENT_ROOT}/taxa/index.php?taxon=${tid}`;
 }
 
 function getCommonNameStr(item, searchText) {
   const basename = item.vernacular.basename;
   const names = item.vernacular.names;
 
-  let cname = '';
+  let cname = basename;
   for (let i in names) {
     let currentName = names[i];
     if (searchText.toLowerCase().includes(currentName) || currentName.toLowerCase().includes(searchText)) {
@@ -80,7 +51,7 @@ function getCommonNameStr(item, searchText) {
       break;
     }
   }
-  if (cname === '') {
+  if (cname === '' && names.length > 0) {
     cname = names[0];
   }
 
@@ -105,7 +76,7 @@ function getAttributeArr(keymap) {
               "values": JSON.parse(res)
             };
           })
-      )
+      );
     }
     Promise.all(pArr).then((vals) => { resolve(vals); }).catch((err) => { reject(err); });
   });
@@ -262,9 +233,9 @@ class GardenPageApp extends React.Component {
 
     // Load sidebar options
     Promise.all([
-      getAttributeArr(ATTRIBS_PLANT_FEATURE),
-      getAttributeArr(ATTRIBS_GROWTH_MAINTENANCE),
-      getAttributeArr(ATTRIBS_BEYOND_GARDEN)
+      getAttributeArr(CIDS_PLANT_FEATURE),
+      getAttributeArr(CIDS_GROWTH_MAINTENANCE),
+      getAttributeArr(CIDS_BEYOND_GARDEN)
     ]).then((res) => {
         const allPlantFeatures = res[0];
         const allGrowthMaintainence = res[1];
@@ -369,8 +340,8 @@ class GardenPageApp extends React.Component {
     }
   }
 
-  onSearchTextChanged(event) {
-    this.setState({ searchText: event.target.value });
+  onSearchTextChanged(text) {
+    this.setState({ searchText: text });
   }
 
   // On search start

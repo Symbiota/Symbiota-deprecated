@@ -1,0 +1,51 @@
+@light-green: #DFEFD3;
+@med-green: #5FB021;
+@dark-green: #3C641E;
+@dark-grn-type: #1E352F;
+@type-primary: #000000C2;
+
+@font: 'Source Sans Pro', sans-serif !important;
+
+.text-capitalize() {
+  text-transform: capitalize;
+}
+
+.text-italic() {
+  font-style: italic;
+}
+
+.text-uppercase() {
+  text-transform: uppercase;
+}
+
+.text-bold() {
+  font-weight: bold !important;
+}
+
+.text-drk-grn() {
+  color: @dark-grn-type !important;
+}
+
+.text-center() {
+  text-align: center;
+}
+
+.bg-light-grn() {
+  background: @light-green !important;
+}
+
+.border-rounded-sm() {
+  border-width: 0.15em;
+  border-radius: 0.5em !important;
+}
+
+.border-rounded-med() {
+  border-width: 0.25em;
+  border-radius: 0.5em !important;
+}
+
+.dropdown-hover() {
+  background: @light-green !important;
+  border-color: @med-green !important;
+  .text-drk-grn();
+}

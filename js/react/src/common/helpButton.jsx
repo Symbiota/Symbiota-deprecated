@@ -2,14 +2,6 @@ import React from "react";
 
 const CLIENT_ROOT = "..";
 
-const helpButtonStyle = {
-  float: "right",
-  padding: 0,
-  marginLeft: "auto",
-  borderRadius: "50%",
-  background: "#5FB021",
-};
-
 class HelpButton extends React.Component {
   constructor(props) {
     super(props);
@@ -33,7 +25,7 @@ class HelpButton extends React.Component {
 
   render() {
     return (
-      <button id={ this.getHelpButtonId() } style={ helpButtonStyle }>
+      <button id={ this.getHelpButtonId() } className="help-button">
         <img
           style={{ width: "1.25em" }}
           alt="help"

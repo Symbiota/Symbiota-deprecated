@@ -100,13 +100,14 @@ class HeaderApp extends React.Component {
     this.onSearch = this.onSearch.bind(this);
   }
 
-  onSearchTextChanged() {
-    this.setState({ searchText: event.target.value });
+  onSearchTextChanged(text) {
+    this.setState({ searchText: text });
   }
 
   onSearch() {
     this.setState({ isLoading: true });
-    window.location = `${this.props.clientRoot}/taxa/index.php?common=` + encodeURIComponent(`${this.state.searchText}`);
+    console.log(this.state.searchText);
+    window.location = `${this.props.clientRoot}/taxa/index.php?search=` + encodeURIComponent(this.state.searchText);
   }
 
   componentDidMount() {
@@ -125,6 +126,26 @@ class HeaderApp extends React.Component {
         this.setState({isCollapsed: getScollPos() > (80 + siteHeader.offsetHeight)});
       }
     });
+  }
+
+  getLoginButtons() {
+    if (this.props.userName !== "") {
+      return (
+        <HeaderButtonBar style={{ display: this.state.isCollapsed ? 'none' : 'flex' }}>
+          <div className="col header-button mx-auto my-auto">Hello, { this.props.userName }!</div>
+          <HeaderButton title="My Profile" href={ `${this.props.clientRoot}/profile/viewprofile.php` } />
+          <HeaderButton title="Logout" href={ `${this.props.clientRoot}/profile/index.php?submit=logout` } />
+        </HeaderButtonBar>
+      );
+    }
+
+    return (
+      <HeaderButtonBar style={{ display: this.state.isCollapsed ? 'none' : 'flex' }}>
+        <HeaderButton title="Contact" href={ `${this.props.clientRoot}/pages/contact.php` } />
+        <HeaderButton title="Donate" href={ `${this.props.clientRoot}/pages/donate.php` } />
+        <HeaderButton title="Login" href={ `${this.props.clientRoot}/profile/index.php?refurl=${ location.pathname }` } />
+      </HeaderButtonBar>
+    );
   }
 
   render() {
@@ -169,22 +190,14 @@ class HeaderApp extends React.Component {
         </div>
 
         <div className={ "ml-auto mr-4" + (this.state.isCollapsed ? " my-auto" : "") }>
-          <HeaderButtonBar style={{ display: this.state.isCollapsed ? 'none' : 'flex' }}>
-            <HeaderButton title="Contact" href={ `${this.props.clientRoot}/pages/contact.php` } />
-            <HeaderButton title="Donate" href={ `${this.props.clientRoot}/pages/donate.php` } />
-            <HeaderButton title="Login" href={ `${this.props.clientRoot}/profile/index.php?refurl=${ location.pathname }` } />
-          </HeaderButtonBar>
+          { this.getLoginButtons() }
 
           <div className="row">
             <SearchWidget
-              name="search-header"
               placeholder="Search all plants"
               isLoading={ this.state.isLoading }
               onClick={ this.onSearch }
               onChange={ this.onSearchTextChanged }
-              value={ this.state.searchText }
-              autoComplete={ true }
-              autoCompleteUrl={ `${this.props.clientRoot}/webservices/autofillsearch.php` }
               clientRoot={ this.props.clientRoot }
             />
           </div>
@@ -196,7 +209,7 @@ class HeaderApp extends React.Component {
 
 const domContainer = document.getElementById("react-header");
 const dataProps = JSON.parse(domContainer.getAttribute("data-props"));
-ReactDOM.render(<HeaderApp clientRoot={ dataProps["clientRoot"] } />, domContainer);
+ReactDOM.render(<HeaderApp clientRoot={ dataProps["clientRoot"] } userName={ dataProps["userName"] } />, domContainer);
 
       {/*
       <!-- Holds dropdowns on mobile -->

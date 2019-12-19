@@ -11,6 +11,7 @@ services:
 
   php:
     image: local/php-fpm
+    userns_mode: host    
     container_name: of-php
     depends_on: [ "mariadb" ]
     build:
@@ -28,11 +29,13 @@ services:
     ports:
       - 3306:3306
     volumes:
-      - vol-oregonflora-db:/var/lib/mysql
+      - of-db:/var/lib/mysql
       - ./docker/db-init.sql:/docker-entrypoint-initdb.d/0.sql:ro
       - ./config/schema-1.0/utf8/db_schema-1.0.sql:/docker-entrypoint-initdb.d/1.sql:ro
       - ./config/schema-1.0/utf8/db_schema_patch-1.1.sql:/docker-entrypoint-initdb.d/2.sql:ro
 
 volumes:
-  vol-oregonflora-db:
-    name: vol-oregonflora-db
+  of-db:
+    name: scratch/docker/of-db
+    driver: gluster:latest
+

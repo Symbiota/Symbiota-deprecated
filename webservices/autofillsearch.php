@@ -28,22 +28,15 @@ if (array_key_exists("q", $_REQUEST)) {
   $res_common = run_query($sql_common);
 
   for ($i = 0; $i < count($res_sci); $i++) {
-    $result = array();
-    $result["id"] = $res_sci[$i]["tid"];
-    $result["text"] = $res_sci[$i]["sciname"];
-    array_push($results, $result);
+    array_push($results, $res_sci[$i]["sciname"]);
   }
 
   for ($i = 0; $i < count($res_common); $i++) {
-    $result = array();
-    $result["id"] = $res_common[$i]["tid"];
-    $result["text"] = $res_common[$i]["commonname"];
-    array_push($results, $result);
+    array_push($results, $res_common[$i]["commonname"]);
   }
 
   sort($results);
 }
 
 echo json_encode($results);
-
 ?>

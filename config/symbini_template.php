@@ -8,6 +8,7 @@ $ADMIN_EMAIL = '';
 $CHARSET = '';					//ISO-8859-1 or UTF-8
 $PORTAL_GUID = '';				//Typically a UUID
 $SECURITY_KEY = '';				//Typically a UUID used to verify access to certain web service
+$IS_DEV = true;         // Is this dev or prod mode?
 
 $CLIENT_ROOT = '';				//URL path to project root folder (relative path w/o domain, e.g. '/seinet')
 $SERVER_ROOT = '';				//Full path to Symbiota project root folder

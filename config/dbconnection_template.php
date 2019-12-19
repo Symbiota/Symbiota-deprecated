@@ -21,6 +21,15 @@ class MySQLiConnectionFactory {
         )
     );
 
+    public static function getConParams($type) {
+        foreach (MySQLiConnectionFactory::$SERVERS as $c) {
+            if ($c["type"] === $type) {
+                return $c;
+            }
+        }
+        return null;
+    }
+
     public static function getCon($type) {
         // Figure out which connections are open, automatically opening any connections
         // which are failed or not yet opened but can be (re)established.

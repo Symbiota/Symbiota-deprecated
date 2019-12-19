@@ -1,5 +1,5 @@
 import React from "react";
-import Carousel from "react-slick";
+import Slider from "../common/slider.jsx";
 
 import HelpButton from "../common/helpButton.jsx";
 
@@ -86,15 +86,6 @@ class CannedSearchContainer extends React.Component {
   }
 
   render() {
-    const slickSettings = {
-      autoplay: true,
-      autoplaySpeed: 5000,
-      dots: false,
-      infinite: true,
-      slidesToShow: 4,
-      slidesToScroll: 1
-    };
-
     return (
       <div id="canned-searches" className="row mt-1 p-3 mx-0 rounded-border" style={{ background: "#DFEFD3" }}>
         <div className="col">
@@ -111,7 +102,7 @@ class CannedSearchContainer extends React.Component {
           <div className="row">
             <div className="col">
               <div>
-                <Carousel { ...slickSettings } className="mx-auto"  style={{ maxWidth: "90%" }}>
+                <Slider>
                   {
                     this.props.searches.map((searchResult) => {
                       return (
@@ -127,7 +118,7 @@ class CannedSearchContainer extends React.Component {
                       );
                     })
                   }
-                </Carousel>
+                </Slider>
               </div>
             </div>
           </div>

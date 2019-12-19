@@ -12,6 +12,7 @@ include_once("../config/symbini.php");
       include("$SERVER_ROOT/header.php");
     ?>
     <!-- Include page style here to override anything in header -->
+    <link rel="stylesheet" type="text/css" href="<?php echo $CLIENT_ROOT?>/css/compiled/theme.css">
     <link rel="stylesheet" type="text/css" href="<?php echo $CLIENT_ROOT?>/css/compiled/taxa.css">
 
     <!-- This is inner text! -->
@@ -21,7 +22,7 @@ include_once("../config/symbini.php");
     </div>
 
     <?php
-      include($SERVER_ROOT.'/footer.php');
+      include("$SERVER_ROOT/footer.php");
     ?>
   </body>
 

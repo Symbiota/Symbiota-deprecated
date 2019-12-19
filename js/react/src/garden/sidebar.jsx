@@ -70,7 +70,7 @@ class SideBarHeading extends React.Component {
  */
 function PlantNeed(props) {
   return (
-    <div className = "input-group pt-3 mt-3" style={{ borderTop: "1px dashed black" }}>
+    <div className = "input-group pt-3 mt-3 dashed-border">
       <label className="font-weight-bold" htmlFor={ props.label.toLowerCase() }>
         { props.label }
       </label>
@@ -264,11 +264,8 @@ class SideBar extends React.Component {
           placeholder="Search plants by name"
           onChange={ this.props.onSearchTextChanged }
           onClick={ this.props.onSearch }
-          value={ this.props.searchText }
           isLoading={ this.props.isLoading }
           clientRoot={ CLIENT_ROOT }
-          autoComplete={ true }
-          autoCompleteUrl={ `${CLIENT_ROOT}/garden/rpc/autofillsearch.php` }
         />
 
         {/* Sunlight & Moisture */}

@@ -1,7 +1,6 @@
 <?php
 include_once('../config/symbini.php');
 include_once($serverRoot.'/classes/ProfileManager.php');
-header("Content-Type: text/html; charset=".$charset);
 header('Cache-Control: no-cache, no-cache="set-cookie", no-store, must-revalidate');
 header('Pragma: no-cache'); // HTTP 1.0.
 header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
@@ -98,7 +97,8 @@ else{
 <head>
 	<title><?php echo $defaultTitle; ?> Login</title>
 	<meta http-equiv="X-Frame-Options" content="deny">
-	<link href="../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
+  <meta charset="<?php echo $charset ?>"/>
+  <link href="../css/base.css?ver=<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet" />
 	<link href="../css/main.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />
 	<script type="text/javascript">
 		if(!navigator.cookieEnabled){
