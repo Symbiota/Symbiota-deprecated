@@ -8,7 +8,8 @@ RUN apt-get update &&   \
         php-gd          \
         php-mbstring    \
         php-mysql       \
-        php-zip
+        php-zip         \
+        unzip
 
 COPY cache-control.ini /opt/bitnami/php/etc/conf.d/
 

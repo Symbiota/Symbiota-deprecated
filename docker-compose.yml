@@ -35,7 +35,5 @@ services:
       - ./config/schema-1.0/utf8/db_schema_patch-1.1.sql:/docker-entrypoint-initdb.d/2.sql:ro
 
 volumes:
-  of-db:
-    name: scratch/docker/of-db
-    driver: gluster:latest
+  of-db: { name: vol-oregonflora-db }
 

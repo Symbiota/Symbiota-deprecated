@@ -1,0 +1,50 @@
+.search-result-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  grid-auto-rows: 15em;
+  grid-gap: 0.5em;
+  justify-content: center;
+}
+
+.search-result {
+  box-shadow: 0 0.1em 0.5em 0.1em rgba(100, 100, 100, 0.3);
+  &:hover {
+    background: #DFEFD3 !important;
+  }
+
+  &.grid-result {
+    width: 100%;
+    height: 100%;
+    padding: 0.5em;
+  }
+
+  &.list-result {
+    width: 100%;
+    margin-top: 0.1em;
+    margin-bottom: 0.1em;
+  }
+
+  .card-text {
+    font-size: 0.9em !important;
+  }
+
+  .card-text, .canned-title {
+    font-weight: bold;
+    color: #1E352F !important;
+    font-size: initial;
+  }
+
+  .grid-image {
+    height: 7em;
+    width: 100%;
+    object-fit: cover;
+    border-radius: 0.25em;
+  }
+
+  .list-image {
+    height: 2em;
+    width: 2em;
+    object-fit: cover;
+    border-radius: 0.25em;
+  }
+}

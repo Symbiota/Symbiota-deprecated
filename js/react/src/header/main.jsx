@@ -93,21 +93,26 @@ class HeaderApp extends React.Component {
       isCollapsed: getScollPos() > 80,
       scrollLock: false,
       isLoading: false,
-      searchText: ''
+      searchText: '',
     };
 
     this.onSearchTextChanged = this.onSearchTextChanged.bind(this);
     this.onSearch = this.onSearch.bind(this);
   }
 
-  onSearchTextChanged(text) {
-    this.setState({ searchText: text });
+  onSearchTextChanged(e) {
+    this.setState({ searchText: e.target.value });
   }
 
-  onSearch() {
+  onSearch(searchObj) {
     this.setState({ isLoading: true });
-    console.log(this.state.searchText);
-    window.location = `${this.props.clientRoot}/taxa/index.php?search=` + encodeURIComponent(this.state.searchText);
+    let targetUrl = `${this.props.clientRoot}/taxa/`;
+    if (searchObj.value !== -1) {
+      targetUrl += `index.php?taxon=${searchObj.value}`;
+    } else {
+      targetUrl += `search.php?search=${ encodeURIComponent(searchObj.text) }`;
+    }
+    window.location = targetUrl;
   }
 
   componentDidMount() {
@@ -195,10 +200,12 @@ class HeaderApp extends React.Component {
           <div className="row">
             <SearchWidget
               placeholder="Search all plants"
-              isLoading={ this.state.isLoading }
-              onClick={ this.onSearch }
-              onChange={ this.onSearchTextChanged }
               clientRoot={ this.props.clientRoot }
+              isLoading={ this.state.isLoading }
+              textValue={ this.state.searchText }
+              onTextValueChanged={ this.onSearchTextChanged }
+              onSearch={ this.onSearch }
+              suggestionUrl={ `${this.props.clientRoot}/webservices/autofillsearch.php` }
             />
           </div>
         </div>

@@ -1,42 +1,44 @@
 <?php
 
 include_once("../config/symbini.php");
-include_once($SERVER_ROOT . "/config/dbconnection.php");
-include_once($SERVER_ROOT . "/classes/Functional.php");
+include_once($SERVER_ROOT . "/config/SymbosuEntityManager.php");
 
+$RANK_GENUS = 180;
 $results = [];
-header("Content-Type: application/json; charset=utf-8");
 
 if (array_key_exists("q", $_REQUEST)) {
-  $sql_sciname = "SELECT DISTINCT t.sciname as sciname, t.tid as tid ";
-  $sql_sciname .= "FROM taxa t ";
+  $em = SymbosuEntityManager::getEntityManager();
 
-  $sql_sciname .= "WHERE LOWER(t.sciname) LIKE LOWER('" . $_REQUEST['q'] . "%') ";
-  $sql_sciname .= "AND t.rankId >= 220 ";
-  $sql_sciname .= "ORDER BY t.sciname ";
-  $sql_sciname .= "LIMIT 3;";
+  $sciNameResults = $em->createQueryBuilder()
+    ->select("t.sciname as text, t.tid as value")
+    ->from("Taxa", "t")
+    ->where("t.sciname LIKE :search")
+    ->andWhere("t.rankid > $RANK_GENUS")
+    ->groupBy("t.tid")
+    ->setParameter("search", $_REQUEST["q"] . '%')
+    ->setMaxResults(3)
+    ->getQuery()
+    ->getArrayResult();
 
-  $sql_common = "SELECT DISTINCT v.vernacularname as commonname, t.tid as tid ";
-  $sql_common .= "FROM taxavernaculars v ";
-  $sql_common .= "INNER JOIN taxa t on v.tid = t.tid ";
-  $sql_common .= "WHERE LOWER(v.vernacularname) LIKE LOWER('" . $_REQUEST['q'] . "%') ";
-  $sql_common .= "AND t.rankId >= 220 ";
-  $sql_common .= "ORDER BY v.sortsequence ";
-  $sql_common .= "LIMIT 3;";
+  $vernacularResults = $em->createQueryBuilder()
+    ->select("v.vernacularname as text", "t.tid as value")
+    ->from("Taxa", "t")
+    ->innerJoin("Taxavernaculars", "v", "WITH", "t.tid = v.tid")
+    ->where("v.vernacularname LIKE :search")
+    ->andWhere("t.rankid > $RANK_GENUS")
+    ->groupBy("v.vernacularname")
+    ->setParameter("search", $_REQUEST["q"] . '%')
+    ->orderBy("v.sortsequence")
+    ->setMaxResults(3)
+    ->getQuery()
+    ->getArrayResult();
 
-  $res_sci = run_query($sql_sciname);
-  $res_common = run_query($sql_common);
-
-  for ($i = 0; $i < count($res_sci); $i++) {
-    array_push($results, $res_sci[$i]["sciname"]);
-  }
-
-  for ($i = 0; $i < count($res_common); $i++) {
-    array_push($results, $res_common[$i]["commonname"]);
-  }
-
-  sort($results);
+  $results = array_merge($sciNameResults, $vernacularResults);
+  usort($results, function ($a, $b) {
+    return strcmp($a["text"], $b["text"]);
+  });
 }
 
+header("Content-Type: application/json; charset=utf-8");
 echo json_encode($results);
 ?>

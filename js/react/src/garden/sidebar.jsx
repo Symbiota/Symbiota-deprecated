@@ -260,12 +260,13 @@ class SideBar extends React.Component {
 
         {/* Search */}
         <SearchWidget
-          name="search-garden-sidebar"
           placeholder="Search plants by name"
-          onChange={ this.props.onSearchTextChanged }
-          onClick={ this.props.onSearch }
-          isLoading={ this.props.isLoading }
           clientRoot={ CLIENT_ROOT }
+          isLoading={ this.props.isLoading }
+          textValue={ this.props.searchText }
+          onTextValueChanged={ this.props.onSearchTextChanged }
+          onSearch={ this.props.onSearch }
+          suggestionUrl={ this.props.searchSuggestionUrl }
         />
 
         {/* Sunlight & Moisture */}
@@ -378,6 +379,8 @@ SideBar.defaultProps = {
   plantFeatures: {},
   growthMaintenance: {},
   beyondGarden: {},
+  searchText: '',
+  searchSugestionUrl: '',
   onPlantFeaturesChanged: () => {},
   onGrowthMaintenanceChanged: () => {},
   onBeyondGardenChanged: () => {}

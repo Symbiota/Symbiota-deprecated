@@ -5,11 +5,12 @@ import ReactDOM from "react-dom";
 
 import InfographicDropdown from "./infographicDropdown.jsx";
 import SideBar from "./sidebar.jsx";
-import {SearchResult, SearchResultContainer} from "./searchResults.jsx";
+import {SearchResult, SearchResultContainer} from "../common/searchResults.jsx";
 import CannedSearchContainer from "./cannedSearches.jsx";
 import ViewOpts from "./viewOpts.jsx";
 import httpGet from "../common/httpGet.js";
 import {addUrlQueryParam, getUrlQueryParams} from "../common/queryParams.js";
+import {getCommonNameStr, getTaxaPage} from "../common/taxaUtils";
 
 const CLIENT_ROOT = "..";
 
@@ -34,33 +35,6 @@ const CIDS_BEYOND_GARDEN = {
   "eco_region": 19,
   "habitat": 163
 };
-
-function getTaxaPage(tid) {
-  return `${CLIENT_ROOT}/taxa/index.php?taxon=${tid}`;
-}
-
-function getCommonNameStr(item, searchText) {
-  const basename = item.vernacular.basename;
-  const names = item.vernacular.names;
-
-  let cname = basename;
-  for (let i in names) {
-    let currentName = names[i];
-    if (searchText.toLowerCase().includes(currentName) || currentName.toLowerCase().includes(searchText)) {
-      cname = currentName;
-      break;
-    }
-  }
-  if (cname === '' && names.length > 0) {
-    cname = names[0];
-  }
-
-  if (cname.includes(basename) && basename !== cname) {
-    return `${basename}, ${cname.replace(basename, '')}`
-  }
-
-  return cname;
-}
 
 function getAttributeArr(keymap) {
   return new Promise((resolve, reject) => {
@@ -177,6 +151,7 @@ class GardenPageApp extends React.Component {
     super(props);
     const queryParams = getUrlQueryParams(window.location.search);
 
+    // TODO: searchText is both a core state value and a state.filters value; How can we make the filtering system more efficient?
     this.state = {
       isLoading: false,
       filters: {
@@ -184,8 +159,8 @@ class GardenPageApp extends React.Component {
         moisture: ("moisture" in queryParams ? queryParams["moisture"] : ViewOpts.DEFAULT_MOISTURE),
         height: ("height" in queryParams ? queryParams["height"].split(",").map((i) => parseInt(i)) : ViewOpts.DEFAULT_HEIGHT),
         width: ("width" in queryParams ? queryParams["width"].split(",").map((i) => parseInt(i)) : ViewOpts.DEFAULT_WIDTH),
+        searchText: ("search" in queryParams ? queryParams["search"] : ViewOpts.DEFAULT_SEARCH_TEXT),
         checklistId: ("clid" in queryParams ? parseInt(queryParams["clid"]) : ViewOpts.DEFAULT_CLID),
-        searchText: '',
         plantFeatures: {},
         growthMaintenance: {},
         beyondGarden: {}
@@ -229,7 +204,7 @@ class GardenPageApp extends React.Component {
       });
 
     // Load search results
-    this.onSearch();
+    this.onSearch({ text: this.state.searchText, value: -1 });
 
     // Load sidebar options
     Promise.all([
@@ -324,7 +299,10 @@ class GardenPageApp extends React.Component {
         this.sideBarRef.current.resetHeight();
         break;
       case "searchText":
-        this.setState({ searchText: ViewOpts.DEFAULT_SEARCH_TEXT }, () => this.onSearch());
+        this.setState({
+          searchText: ViewOpts.DEFAULT_SEARCH_TEXT },
+          () => this.onSearch({ text: ViewOpts.DEFAULT_SEARCH_TEXT, value: -1 })
+        );
         break;
       case "checklistId":
         this.onCannedFilter(ViewOpts.DEFAULT_CLID);
@@ -340,21 +318,25 @@ class GardenPageApp extends React.Component {
     }
   }
 
-  onSearchTextChanged(text) {
-    this.setState({ searchText: text });
+  onSearchTextChanged(e) {
+    this.setState({ searchText: e.target.value });
   }
 
   // On search start
-  onSearch() {
-    const newQueryStr = addUrlQueryParam("search", this.state.searchText);
+  onSearch(searchObj) {
+    const newQueryStr = addUrlQueryParam("search", searchObj.text);
     window.history.replaceState(
       { query: newQueryStr },
       '',
       window.location.pathname + newQueryStr
     );
 
-    this.setState({ isLoading: true, filters: Object.assign({}, this.state.filters, { searchText: this.state.searchText }) });
-    httpGet(`${CLIENT_ROOT}/garden/rpc/api.php?search=${this.state.searchText}`)
+    this.setState({
+      isLoading: true,
+      searchText: searchObj.text,
+      filters: Object.assign({}, this.state.filters, { searchText: searchObj.text })
+    });
+    httpGet(`${CLIENT_ROOT}/garden/rpc/api.php?search=${searchObj.text}`)
       .then((res) => {
         this.onSearchResults(JSON.parse(res));
       })
@@ -374,8 +356,8 @@ class GardenPageApp extends React.Component {
     } else {
       newResults = results.sort((a, b) => {
         return (
-          getCommonNameStr(a, this.state.searchText).toLowerCase() >
-          getCommonNameStr(b, this.state.searchText).toLowerCase() ? 1 : -1
+          getCommonNameStr(a).toLowerCase() >
+          getCommonNameStr(b).toLowerCase() ? 1 : -1
         );
       });
     }
@@ -448,8 +430,8 @@ class GardenPageApp extends React.Component {
     } else {
       newResults = this.state.searchResults.sort((a, b) => {
         return (
-          getCommonNameStr(a, this.state.searchText).toLowerCase() >
-          getCommonNameStr(b, this.state.searchText).toLowerCase() ? 1 : -1
+          getCommonNameStr(a).toLowerCase() >
+          getCommonNameStr(b).toLowerCase() ? 1 : -1
         );
       });
     }
@@ -516,6 +498,7 @@ class GardenPageApp extends React.Component {
                 growthMaintenance={ this.state.growthMaintenanceState }
                 beyondGarden={ this.state.beyondGardenState }
                 searchText={ this.state.searchText }
+                searchSuggestionUrl="./rpc/autofillsearch.php"
                 onSearch={ this.onSearch }
                 onSearchTextChanged={ this.onSearchTextChanged }
                 onSunlightChanged={ this.onSunlightChanged }
@@ -577,9 +560,9 @@ class GardenPageApp extends React.Component {
                             key={ result.tid }
                             viewType={ this.state.viewType }
                             display={ showResult }
-                            href={ getTaxaPage(result.tid) }
+                            href={ getTaxaPage(CLIENT_ROOT, result.tid) }
                             src={ result.image }
-                            commonName={ getCommonNameStr(result, this.state.searchText) }
+                            commonName={ getCommonNameStr(result) }
                             sciName={ result.sciName ? result.sciName : '' }
                           />
                         )

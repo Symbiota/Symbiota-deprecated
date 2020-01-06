@@ -174,7 +174,7 @@ class TaxaManager {
         "behavior" => [],
         "propagation" => [],
         "ease_growth" => [],
-        "spreads_vigorously" => false,
+        "spreads_vigorously" => null,
         "other_cult_prefs" => []
       ],
       "beyond_garden" => [
@@ -248,7 +248,7 @@ class TaxaManager {
           array_push($attr_array["growth_maintenance"]["ease_growth"], $attr_val);
           break;
         case TaxaManager::$CID_SPREADS:
-          $attr_array["growth_maintenance"]["spreads_vigorously"] = $attr_val === "yes" ? true : false;
+          $attr_array["growth_maintenance"]["spreads_vigorously"] = $attr_val;
           break;
         case TaxaManager::$CID_OTHER_CULT_PREFS:
           array_push($attr_array["growth_maintenance"]["other_cult_prefs"], $attr_val);

@@ -56,12 +56,10 @@ function searchTaxa($searchTerm) {
   $taxaRepo = SymbosuEntityManager::getEntityManager()->getRepository("Taxa");
   $taxaResults = $taxaRepo->createQueryBuilder("t")
     ->innerJoin("Taxavernaculars", "v", "WITH", "t.tid = v.tid")
-    ->where("t.sciname = :search")
-    ->orWhere("v.vernacularname = :search")
-    ->orWhere("t.sciname like ':search%'")
-    ->orWhere("v.vernacularname like ':search%'")
+    ->orWhere("t.sciname LIKE :search")
+    ->orWhere("v.vernacularname LIKE :search")
     ->groupBy("t.tid")
-    ->setParameter("search", $searchTerm)
+    ->setParameter("search", $searchTerm . '%')
     ->getQuery()
     ->getResult();
 
