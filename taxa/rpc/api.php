@@ -74,12 +74,38 @@ function searchTaxa($searchTerm) {
   return $results;
 }
 
+function getSubTaxa($parentTid) {
+  $results = [];
+  $taxaRepo = SymbosuEntityManager::getEntityManager()->getRepository("Taxa");
+  $taxaResults = $taxaRepo->createQueryBuilder("t")
+    ->innerJoin("Taxaenumtree", "te", "WITH", "t.tid = te.tid")
+    ->where("te.parenttid = :parenttid")
+    ->groupBy("t.tid")
+    ->setParameter("parenttid", $parentTid)
+    ->getQuery()
+    ->getResult();
+
+  if ($taxaResults != null) {
+    foreach ($taxaResults as $t) {
+      $tm = TaxaManager::fromModel($t);
+      $tj = taxaManagerToJSON($tm);
+      array_push($results, $tj);
+    }
+  }
+
+  return $results;
+}
+
 $result = [];
 if (array_key_exists("search", $_GET)) {
   $result = searchTaxa($_GET["search"]);
 }
 else if (array_key_exists("taxon", $_GET) && is_numeric($_GET["taxon"])) {
   $result = getTaxon($_GET["taxon"]);
+} else if (array_key_exists("family", $_GET) && is_numeric($_GET["family"])) {
+  $result = getSubTaxa($_GET["family"]);
+} else if (array_key_exists("genus", $_GET) && is_numeric($_GET["genus"])) {
+  $result = getSubTaxa($_GET["genus"]);
 }
 
 // Begin View

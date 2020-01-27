@@ -2,6 +2,10 @@ export function getTaxaPage(clientRoot, tid) {
   return `${clientRoot}/taxa/index.php?taxon=${tid}`;
 }
 
+export function getGardenTaxaPage(clientRoot, tid) {
+  return `${clientRoot}/taxa/garden.php?taxon=${tid}`;
+}
+
 export function getCommonNameStr(item) {
   const basename = item.vernacular.basename;
   const names = item.vernacular.names;

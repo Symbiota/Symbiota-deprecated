@@ -95,7 +95,7 @@ export class SearchWidget extends React.Component {
           }
         </div>
         <SearchButton
-          onClick={ () => this.props.onSearch({ text: this.props.textValue, value: -1 }) }
+          onClick={ () => this.props.onSearch({ text: this.props.textValue }) }
           isLoading={this.props.isLoading}
           style={ this.props.buttonStyle }
           clientRoot={ this.props.clientRoot }

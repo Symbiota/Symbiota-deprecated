@@ -64,7 +64,7 @@ class OccurrenceListManager extends OccurrenceManager{
         }
         $pageRequest = ($pageRequest - 1)*$cntPerPage;
         $sql .= "LIMIT ".$pageRequest.",".$cntPerPage;
-        //echo "<div>Spec sql: ".$sql."</div>";
+//        echo "<div>Spec sql: ".$sql."</div>";
         $result = $this->conn->query($sql);
         while($row = $result->fetch_object()){
             $occId = $row->occid;

@@ -5,7 +5,7 @@ function SearchResult(props) {
 
   if (props.display) {
     return (
-      <a href={props.href} className="text-decoration-none">
+      <a href={props.href} className="text-decoration-none" style={{ maxWidth: "185px" }}>
         <div className={ "card search-result " + (useGrid ? "grid-result" : "list-result") }>
             <div className={useGrid ? "" : "card-body"}>
               <img

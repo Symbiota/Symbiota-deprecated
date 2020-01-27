@@ -10,7 +10,7 @@ import CannedSearchContainer from "./cannedSearches.jsx";
 import ViewOpts from "./viewOpts.jsx";
 import httpGet from "../common/httpGet.js";
 import {addUrlQueryParam, getUrlQueryParams} from "../common/queryParams.js";
-import {getCommonNameStr, getTaxaPage} from "../common/taxaUtils";
+import {getCommonNameStr, getGardenTaxaPage} from "../common/taxaUtils";
 
 const CLIENT_ROOT = "..";
 
@@ -204,7 +204,7 @@ class GardenPageApp extends React.Component {
       });
 
     // Load search results
-    this.onSearch({ text: this.state.searchText, value: -1 });
+    this.onSearch({ text: this.state.searchText });
 
     // Load sidebar options
     Promise.all([
@@ -560,7 +560,7 @@ class GardenPageApp extends React.Component {
                             key={ result.tid }
                             viewType={ this.state.viewType }
                             display={ showResult }
-                            href={ getTaxaPage(CLIENT_ROOT, result.tid) }
+                            href={ getGardenTaxaPage(CLIENT_ROOT, result.tid) }
                             src={ result.image }
                             commonName={ getCommonNameStr(result) }
                             sciName={ result.sciName ? result.sciName : '' }

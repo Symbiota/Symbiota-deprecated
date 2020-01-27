@@ -29,11 +29,10 @@ services:
     ports:
       - 3306:3306
     volumes:
-      - of-db:/var/lib/mysql
+      - vol-oregonflora-db:/var/lib/mysql
       - ./docker/db-init.sql:/docker-entrypoint-initdb.d/0.sql:ro
       - ./config/schema-1.0/utf8/db_schema-1.0.sql:/docker-entrypoint-initdb.d/1.sql:ro
       - ./config/schema-1.0/utf8/db_schema_patch-1.1.sql:/docker-entrypoint-initdb.d/2.sql:ro
 
 volumes:
-  of-db: { name: vol-oregonflora-db }
-
+  vol-oregonflora-db: { external: true }
