@@ -61,50 +61,57 @@ function obfuscate($email) {
 include( $serverRoot . "/header.php" );
 ?>
 
-<!-- if you need a full width colum, just put it outside of .inner-content -->
-<!-- .inner-content makes a column max width 1100px, centered in the viewport -->
-<div class="inner-content">
+
+<div id="info-page">
+    <div id="titlebackground"></div>
+    <!-- if you need a full width column, just put it outside of .inner-content -->
+    <!-- .inner-content makes a column max width 1100px, centered in the viewport -->
+    <div class="inner-content">
     <!-- place static page content here. -->
-    <h2>Staff</h2>
-    <p>Linda Hardison, Director</p>
-    <p><?php echo obfuscate('hardisol@science.oregonstate.edu'); ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 541-737-4338</p>
-    <p>&nbsp;</p>
-    <p>Thea Jaster, Database manager, botanist</p>
-    <p><?php echo obfuscate('jastert@science.oregonstate.edu'); ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 541-737-2445</p>
-    <p>&nbsp;</p>
-    <p>Stephen Meyers, Taxonomic Director</p>
-    <p><?php echo obfuscate('meyersst@science.oregonstate.edu'); ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 541-737-4338</p>
-    <p>&nbsp;</p>
-    <p>Katie Mitchell, Database manager, botanist</p>
-    <p><?php echo obfuscate('mitchelk@science.oregonstate.edu'); ?></p>
-    <p>&nbsp;</p>
-    <p>John Myers, Illustrator</p>
-    <p><?php echo obfuscate('myersj8@oregonstate.edu'); ?></p>
-    <p>&nbsp;</p>
-    <p>Tanya Harvey, <em>Flora of Oregon</em> Graphic Designer</p>
-    <p><?php echo obfuscate('tanya@westerncascades.com'); ?></p>
-    <p>&nbsp;</p>
-    <h2>Advisory Council</h2>
-    <p>Lynda Boyer</p>
-    <p>Jason Bradford</p>
-    <p>Daniel Luoma</p>
-    <p>Will McClatchey</p>
-    <p>Joan Seevers</p>
-    <p>Robert Soreng</p>
-    <p>&nbsp;</p>
-    <h2>Project Associates</h2>
-    <p>The <a target="_blank" href="http://npsoregon.org/">Native Plant Society of Oregon (NPSO)</a> has been a sponsor of OregonFlora since the project’s inception in 1994. The Society and its chapters provide financial support and promote the exchange of plant observation data and photographs.</p>
-    <p>Our close ties with the <a target="_blank" href="http://oregonstate.edu/dept/botany/herbarium/">OSU Herbarium</a> are mutually beneficial &mdash; the Herbarium excels as a dynamic resource with exceptional depth in its Oregon collections, and the Flora Project enhances their value with careful taxonomic analysis.</p>
-    <p>This website uses the <a target="_blank" href="http://symbiota.org/docs/">Symbiota</a> platform with customized modules. Our website is hosted at the <a target="_blank" href="http://my.science.oregonstate.edu/">College of Science Information Network</a> (COSINe) at Oregon State University.</p>
-    <p>We collaborate and share information with numerous groups: academic institutions, federal agencies (Oregon/Washington Bureau of Land Management, US Forest Service), state organizations (Oregon Natural Heritage Information Center), Metro, Native Plant Society of Oregon, and individuals.</p>
-    <p>&nbsp;</p>
-    <h2>Key Supporters</h2>
-    <p>John and Betty Soreng Environmental Fund of the Oregon Community Foundation</p>
-    <p>Oregon/Washington Bureau of Land Management</p>
-    <p>Native Plant Society of Oregon</p>
-    <p>Metro (Portland Oregon)</p>
-    <p>Department of Botany &amp; Plant Pathology, Oregon State University</p>
-</div> <!-- .inner-content -->
+        <h1>Project Participants</h1>
+        <h2>Staff</h2>
+        <p>Linda Hardison, Director<br />hardisol@science.oregonstate.edu&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 541-737-4338</p>
+        <p>Stephen Meyers, Taxonomic Director<br />meyersst@science.oregonstate.edu&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 541-737-4338</p>
+        <p>Thea Jaster, Database manager, botanist<br />jastert@science.oregonstate.edu&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 541-737-2445</p>
+        <p>Katie Mitchell, Database manager, botanist<br />mitchelk@science.oregonstate.edu</p>
+        <p>John Myers, Illustrator</p>
+        <p>Tanya Harvey, <em>Flora of Oregon</em> graphic designer<br /><a href="mailto:tanya@westerncascades.com">tanya@westerncascades.com</a></p>
+        <h2>Affiliates</h2>
+        <p>Dennis Albert</p>
+        <p>Jason Bradford</p>
+        <p>Gerald Carr</p>
+        <p>Kenton Chambers</p>
+        <p>Brant Cothern</p>
+        <p>Christian Feuillet</p>
+        <p>Richard Halse</p>
+        <p>George Kral</p>
+        <h2>Students (2020)</h2>
+        <p>Rosa Arellanes</p>
+        <p>Mya Falk</p>
+        <p>Amadeo Ramos</p>
+        <p>Yan Yan</p>
+        <h2>Advisory Council</h2>
+        <p>Lynda Boyer</p>
+        <p>Jason Bradford</p>
+        <p>Daniel Luoma</p>
+        <p>Will McClatchey</p>
+        <p>Joan Seevers</p>
+        <p>Robert Soreng</p>
+        <h2>Project Partners</h2>
+        <p>The Native Plant Society of Oregon (NPSO) has been a sponsor of OregonFlora since the project&rsquo;s inception in 1994. The Society and its chapters provide financial support and promote the exchange of plant observation data and photographs.</p>
+        <p>Our close ties with the OSU Herbarium are mutually beneficial &mdash; the Herbarium excels as a dynamic resource with exceptional depth in its Oregon collections, and OregonFlora enhances their value with careful taxonomic analysis and digital presentation within the context of the OregonFlora tools.</p>
+        <p>This website uses the Symbiota platform with customized modules. Our website is hosted at the College of Science Information Network (COSINe) at Oregon State University.</p>
+        <p>We collaborate and share information with numerous groups: academic institutions, federal agencies (Oregon/Washington Bureau of Land Management, US Forest Service), state organizations (Oregon Biodiversity Information Center), Metro, Native Plant Society of Oregon, and individuals.&nbsp;</p>
+        <h2>Key Supporters</h2>
+        <p>John and Betty Soreng Environmental Fund of the Oregon Community Foundation</p>
+        <p>Oregon/Washington Bureau of Land Management</p>
+        <p>Native Plant Society of Oregon</p>
+        <p>Metro (Portland Oregon)</p>
+        <p>Barbara J. Mendius Administrative Trust</p>
+        <p>USDA--Natural Resources Conservation Service (Oregon)</p>
+        <p>Department of Botany &amp; Plant Pathology, Oregon State University</p>`
+    </div> <!-- .inner-content -->
+</div> <!-- #info-page -->
 
 <?php
 include( $serverRoot . "/footer.php" );
