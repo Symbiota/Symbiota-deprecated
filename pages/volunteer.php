@@ -61,21 +61,28 @@ function obfuscate($email) {
 <?php
 include( $serverRoot . "/header.php" );
 ?>
-
-<!-- if you need a full width colum, just put it outside of .inner-content -->
-<!-- .inner-content makes a column max width 1100px, centered in the viewport -->
-<div class="inner-content">
-    <!-- place static page content here. -->
-    <h1>Volunteer</h1>
-    <p>We welcome volunteers of all ages and skill levels. There are a variety of ways to participate: data entry, technical editing, program assistance, and event planning can be done at our location or remotely. Field work opportunities of weed control, data gathering, and planting are periodically scheduled; check this page for availability.</p>
-    <p>If you would like to contribute species lists, photographs, or other information to OregonFlora, or if you would like to volunteer, contact us at <?php echo obfuscate('ofpflora@oregonflora.org'); ?>.</p>
-    <div>
-        <img src="images/volunteer1.jpg" alt="Volunteer">
-        <img src="images/volunteer2.jpg" alt="Volunteer">
-        <img src="images/volunteer3.jpg" alt="Volunteer">
-    </div>
-</div> <!-- .inner-content -->
-
+<div id="info-page">
+    <section id="titlebackground" style="background-image: url('/images/header/h1redberry.png');">
+        <div class="inner-content">
+            <h1>Volunteer</h1>
+        </div>
+    </section>
+    <section>
+        <!-- if you need a full width colum, just put it outside of .inner-content -->
+        <!-- .inner-content makes a column max width 1100px, centered in the viewport -->
+        <div class="inner-content">
+            <!-- place static page content here. -->
+            <h2>Be a part of the OregonFlora team!</h2>
+            <p>Nature lovers, computer geeks, artists, field workers, history buffs… People with widely different backgrounds and interests find satisfaction in helping OregonFlora. Join the nearly 1,000 people of all ages and skills that have volunteered since our program began! There are a variety of ways to participate: data entry, technical editing and writing, program assistance, and event planning can be done at our location or remotely. Field work opportunities of weed control, data gathering, and planting are periodically scheduled; check our News and Events page for details.</p>
+            <p>If you would like to contribute species lists, photographs, or other information to OregonFlora,  or if you would like to volunteer, contact us at: <a href="mailto:ofpflora@oregonflora.org">ofpflora@oregonflora.org</a>.</p>
+            <div>
+                <img src="images/volunteer1.jpg" alt="Volunteer">
+                <img src="images/volunteer2.jpg" alt="Volunteer">
+                <img src="images/volunteer3.jpg" alt="Volunteer">
+            </div>
+        </div> <!-- .inner-content -->
+    </section>
+</div>
 <?php
 include( $serverRoot . "/footer.php" );
 ?>

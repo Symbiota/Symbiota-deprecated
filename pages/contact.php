@@ -19,23 +19,25 @@ header( "Content-Type: text/html; charset=" . $charset );
 <?php
 include( $serverRoot . "/header.php" );
 ?>
-
 <div id="info-page">
-    <div id="titlebackground"></div>
-    <!-- if you need a full width column, just put it outside of .inner-content -->
-    <!-- .inner-content makes a column max width 1100px, centered in the viewport -->
-    <div class="inner-content">
-        <!-- place static page content here. -->
-        <h1>Contact Us</h1>
-        <h2>Location:</h2>
-        <p>1048 Cordley Hall<br />Oregon State University<br />Corvallis, OR 97331</p>
-        <h2>Mailing Address:</h2>
-        <p>OregonFlora<br />Dept. Botany &amp; Plant Pathology<br />Oregon State University<br />Corvallis, OR 97331-2902</p>
-        <h2>Correspondence:</h2>
-        <p>OregonFlora<br/>Dr. Linda K. Hardison, Director<br/>Dept. Botany &amp; Plant Pathology<br/>Oregon State University<br/>Corvallis, OR 97331-2902<br/>541-737-4338</p>
-        <h2>Send contributions of species lists, digital images, and other data to:</h2>
-        <p>ofpflora@oregonflora.org</p>
-    </div> <!-- .inner-content -->
+    <section id="titlebackground" style="background-image: url('/images/header/h1leaf.png');">
+        <div class="inner-content">
+            <h1>Contact Us</h1>
+        </div>
+    </section>
+    <section>
+        <div class="inner-content">
+            <!-- place static page content here. -->
+            <h2>Location:</h2>
+            <p>1048 Cordley Hall<br />Oregon State University<br />Corvallis, OR 97331</p>
+            <h2>Mailing Address:</h2>
+            <p>OregonFlora<br />Dept. Botany &amp; Plant Pathology<br />Oregon State University<br />Corvallis, OR 97331-2902</p>
+            <h2>Correspondence:</h2>
+            <p>OregonFlora<br/>Dr. Linda K. Hardison, Director<br/>Dept. Botany &amp; Plant Pathology<br/>Oregon State University<br/>Corvallis, OR 97331-2902<br/>541-737-4338</p>
+            <h2>Send contributions of species lists, digital images, and other data to:</h2>
+            <p><a href="mailto:ofpflora@oregonflora.org">ofpflora@oregonflora.org</a></p>
+        </div> <!-- .inner-content -->
+    </section>
 </div> <!-- #info-page -->
 <?php
 include( $serverRoot . "/footer.php" );

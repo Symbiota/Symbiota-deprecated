@@ -143,24 +143,19 @@ img {
 }
 
 div#info-page{
-  position: relative;
   padding-bottom: 20px;
 
   #titlebackground{
-    position: absolute;
-    background: darkgreen url("/portal/images/header/h1leaf.png") 50% 1450px;
-    width: 1120px;
-    height: 120px;
-    z-index: -100;
-    left: 50%;
-    transform: translateX(-50%);
-    margin-right: auto;
+    background-color: darkgreen;
+    background-repeat: no-repeat;
+    background-position: center top;
+    background-size: cover;
   }
   .h1, h1{
     color: white;
     font-size: 60px;
     font-weight: bold;
-    padding-top: 40px;
+    padding: 45px 0 20px 0;
   }
   .h2, h2{
     color: black;
@@ -191,5 +186,8 @@ div#info-page{
     font-size: .9rem;
     font-style: italic;
     line-height: 1.2;
+  }
+  a{
+    text-decoration: underline;
   }
 }
