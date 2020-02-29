@@ -35,7 +35,7 @@ const dropDownChildren = {
   "Contribute": [
     { title: "Donate", href: "/pages/donate.php" },
     { title: "Volunteer", href: "/pages/volunteer.php" },
-    { title: "Merchandise", href: "/pages/merchandise.php" },
+    { title: "Oregon Flora Store", href: "/pages/store.php" },
   ]
 };
 
