@@ -6,6 +6,7 @@ header( "Content-Type: text/html; charset=" . $charset );
 function obfuscate($email) {
     //build the mailto link
     $unencrypted_link = '<a href="mailto:'.$email.'">'.$email.'</a>';
+    $noscript_link = "email";
     //put them together and encrypt
     return '<script type="text/javascript">Rot13.write(\''.str_rot13($unencrypted_link).'\');</script><noscript>'.$noscript_link . '</noscript>';
 }
@@ -74,7 +75,7 @@ include( $serverRoot . "/header.php" );
             <!-- place static page content here. -->
             <h2>Be a part of the OregonFlora team!</h2>
             <p>Nature lovers, computer geeks, artists, field workers, history buffs… People with widely different backgrounds and interests find satisfaction in helping OregonFlora. Join the nearly 1,000 people of all ages and skills that have volunteered since our program began! There are a variety of ways to participate: data entry, technical editing and writing, program assistance, and event planning can be done at our location or remotely. Field work opportunities of weed control, data gathering, and planting are periodically scheduled; check our News and Events page for details.</p>
-            <p>If you would like to contribute species lists, photographs, or other information to OregonFlora,  or if you would like to volunteer, contact us at: <a href="mailto:ofpflora@oregonflora.org">ofpflora@oregonflora.org</a>.</p>
+            <p>If you would like to contribute species lists, photographs, or other information to OregonFlora,  or if you would like to volunteer, contact us at: <?php echo obfuscate("ofpflora@oregonflora.org") ?>.</p>
             <div>
                 <img src="images/volunteer1.jpg" alt="Volunteer">
                 <img src="images/volunteer2.jpg" alt="Volunteer">

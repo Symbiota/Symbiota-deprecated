@@ -2,6 +2,14 @@
 //error_reporting(E_ALL);
 include_once( "../config/symbini.php" );
 header( "Content-Type: text/html; charset=" . $charset );
+
+function obfuscate($email) {
+  //build the mailto link
+  $unencrypted_link = '<a href="mailto:'.$email.'">'.$email.'</a>';
+  $noscript_link = "email";
+  //put them together and encrypt
+  return '<script type="text/javascript">Rot13.write(\''.str_rot13($unencrypted_link).'\');</script><noscript>'.$noscript_link . '</noscript>';
+}
 ?>
 <html>
 <head>

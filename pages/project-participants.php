@@ -6,6 +6,7 @@ header( "Content-Type: text/html; charset=" . $charset );
 function obfuscate($email) {
     //build the mailto link
     $unencrypted_link = '<a href="mailto:'.$email.'">'.$email.'</a>';
+    $noscript_link = "email";
     //put them together and encrypt
     return '<script type="text/javascript">Rot13.write(\''.str_rot13($unencrypted_link).'\');</script><noscript>'.$noscript_link . '</noscript>';
 }
@@ -74,12 +75,11 @@ include( $serverRoot . "/header.php" );
             <div class="inner-content">
             <!-- place static page content here. -->
                 <h2>Staff</h2>
-                <p>Linda Hardison, Director<br /><a href="mailto:hardisol@science.oregonstate.edu">hardisol@science.oregonstate.edu</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 541-737-4338</p>
-                <p>Stephen Meyers, Taxonomic Director<br /><a href="mailto:meyersst@science.oregonstate.edu">meyersst@science.oregonstate.edu</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 541-737-4338</p>
-                <p>Thea Jaster, Database manager, botanist<br /><a href="mailto:jastert@science.oregonstate.edu">jastert@science.oregonstate.edu</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 541-737-2445</p>
-                <p>Katie Mitchell, Database manager, botanist<br /><a href="mailto:mitchelk@science.oregonstate.edu">mitchelk@science.oregonstate.edu</a></p>
-                <p>John Myers, Illustrator</p>
-                <p>Tanya Harvey, <em>Flora of Oregon</em> graphic designer<br /><a href="mailto:tanya@westerncascades.com">tanya@westerncascades.com</a></p>
+                <p>Linda Hardison, Director<br /><?php echo obfuscate("hardisol@science.oregonstate.edu") ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 541-737-4338</p>
+                <p>Stephen Meyers, Taxonomic Director<br /><?php echo obfuscate("meyersst@science.oregonstate.edu") ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 541-737-4338</p>
+                <p>Thea Jaster, Database manager, botanist<br /><?php echo obfuscate("jastert@science.oregonstate.edu") ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 541-737-2445</p>
+                <p>Katie Mitchell, Database manager, botanist<br /><?php echo obfuscate("mitchelk@science.oregonstate.edu") ?></p>
+                <p>Tanya Harvey, <em>Flora of Oregon</em> graphic designer<br /><?php echo obfuscate("tanya@westerncascades.com") ?></p>
                 <h2>Affiliates</h2>
                 <p>Dennis Albert</p>
                 <p>Jason Bradford</p>
