@@ -63,13 +63,13 @@ function obfuscate($email) {
 include( $serverRoot . "/header.php" );
 ?>
 <div id="info-page">
-    <section id="titlebackground" style="background-image: url('/images/header/h1redberry.png');">
+    <section id="titlebackground" class="title-redberry">
         <div class="inner-content">
             <h1>Volunteer</h1>
         </div>
     </section>
     <section>
-        <!-- if you need a full width colum, just put it outside of .inner-content -->
+        <!-- if you need a full width column, just put it outside of .inner-content -->
         <!-- .inner-content makes a column max width 1100px, centered in the viewport -->
         <div class="inner-content">
             <!-- place static page content here. -->

@@ -28,7 +28,9 @@ function obfuscate($email) {
 include( $serverRoot . "/header.php" );
 ?>
 <div id="info-page">
-    <section id="titlebackground" style="background-image: url('/images/header/h1leaf.png');">
+    <section id="titlebackground" class="title-leaf">
+        <!-- if you need a full width column, just put it outside of .inner-content -->
+        <!-- .inner-content makes a column max width 1100px, centered in the viewport -->
         <div class="inner-content">
             <h1>Contact Us</h1>
         </div>

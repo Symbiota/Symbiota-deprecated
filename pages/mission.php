@@ -20,7 +20,7 @@ header( "Content-Type: text/html; charset=" . $charset );
 include( $serverRoot . "/header.php" );
 ?>
 <div id="info-page">
-    <section id="titlebackground" style="background-image: url('/images/header/h1leaf.png');">
+    <section id="titlebackground" class="title-leaf">
         <div class="inner-content">
             <h1>Mission and History</h1>
         </div>

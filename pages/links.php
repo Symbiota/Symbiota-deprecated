@@ -21,7 +21,7 @@ include( $serverRoot . "/header.php" );
 ?>
 
 <div id="info-page">
-    <section id="titlebackground" style="background-image: url('/images/header/h1blueberry.png');">
+    <section id="titlebackground" class="title-blueberry">
         <div class="inner-content">
             <h1>Recommended online resources</h1>
         </div>
@@ -101,8 +101,8 @@ include( $serverRoot . "/header.php" );
 
             <h2>Connect with OregonFlora on Social Media</h2>
             <p>
-                <a target="_blank" href="https://www.facebook.com/OregonFlora/"><img src="/pages/images/icon-facebook.png" width=80px alt="Facebook" title="Facebook"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                <a target="_blank" href="https://www.instagram.com/oregonflora/?hl=en"><img src="/pages/images/icon-instagram.png" width=80px alt="Instagram" title="Instagram"</a></p>
+                <a target="_blank" href="https://www.facebook.com/OregonFlora/"><img src="./images/icon-facebook.png" width=80px alt="Facebook" title="Facebook"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <a target="_blank" href="https://www.instagram.com/oregonflora/?hl=en"><img src="./images/icon-instagram.png" width=80px alt="Instagram" title="Instagram"</a></p>
 
         </div> <!-- .inner-content -->
     </section>

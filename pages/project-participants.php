@@ -64,7 +64,7 @@ include( $serverRoot . "/header.php" );
 
 <div id="info-page">
     <div id="info-page">
-        <section id="titlebackground" style="background-image: url('/images/header/h1leaf.png');">
+        <section id="titlebackground" class="title-leaf">
             <div class="inner-content">
                 <h1>Project Participants</h1>
             </div>
