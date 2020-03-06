@@ -27,6 +27,7 @@ button {
 
 a {
   color: @type-primary !important;
+
   &:active {
     color: @dark-green !important;
   }
@@ -99,6 +100,7 @@ img {
 
 .dropdown-toggle {
   .border-rounded-sm();
+
   &::after {
     display: none;
   }
@@ -147,67 +149,141 @@ img {
   background: #5FB021 !important;
 }
 
-div#info-page{
+div#info-page {
   padding-bottom: 20px;
 
-  #titlebackground{
+  #titlebackground {
     background-color: darkgreen;
     background-repeat: no-repeat;
     background-position: center top;
     background-size: cover;
-    &.title-leaf{
+
+    &.title-leaf {
       background-image: url("@{subdir}/images/header/h1leaf.png");
     }
-    &.title-redberry{
+
+    &.title-redberry {
       background-image: url("@{subdir}/images/header/h1redberry.png");
     }
-    &.title-blueberry{
+
+    &.title-blueberry {
       background-image: url("@{subdir}/images/header/h1blueberry.png");
     }
   }
-  .h1, h1{
+
+  .h1, h1 {
     color: white;
     font-size: 60px;
     font-weight: bold;
     padding: 45px 0 20px 0;
   }
-  .h2, h2{
+
+  .h2, h2 {
     color: black;
     font-size: 32px;
     font-weight: bold;
     margin-top: 2rem;
     margin-bottom: 1rem;
-    .subhead{
+
+    .subhead {
       font-size: 36px;
       margin-bottom: 2rem;
     }
   }
-  .h3, h3{
+
+  .h3, h3 {
     color: black;
     font-size: 25px;
     font-weight: bold;
     margin-top: 1rem;
     margin-bottom: 1rem;
   }
-  ul{
+
+  ul {
     padding-inline-start: 20px;
   }
+
   p,
-  li{
+  li {
     font-size: 22px;
   }
-  .figure-caption{
+
+  .figure-caption {
     font-size: 0.9rem;
     font-style: italic;
     line-height: 1.2;
   }
-  a{
+
+  a {
     text-decoration: underline;
   }
-  span.link-details{
+
+  span.link-details {
     display: block;
     font-size: 0.9em;
     font-style: italic;
     padding-left: 1em;
+  }
+
+  .store-item {
+    border: 1px dashed #707070;
+    border-radius: 8px;
+    margin-top: 2em;
+
+    .store-item-info {
+      padding: 25px 40px;
+    }
+
+    .store-item-title {
+      font-weight: bold;
+      font-size: 36px;
+    }
+
+    .store-item-subtitle {
+      margin-top: -18px;
+      font-weight: bold;
+      font-size: 25px;
+    }
+
+    .store-item-pic{
+      padding: 20px 25px;
+      img{
+        width: 100%;
+        max-width: 350px;
+      }
+    }
+    .store-item-purchase {
+      background-color: #DFEFD3;
+      min-height: 82px;
+      padding: 18px 0;
+
+      div, p{
+        margin-bottom: 0;
+        display: inline-table;
+        vertical-align: center;
+      }
+
+      .store-item-price p{
+        font-size: 28px;
+        padding-left: 30px;
+      }
+
+      .store-item-link {
+        float: right;
+        padding: 0 30px;
+
+        .btn {
+          text-decoration: none;
+          font-weight: normal;
+          font-size: 18px;
+        }
+
+        img{
+          padding-left: 10px;
+          background-color: #DFEFD3;
+          border-radius: 6px;
+        }
+      }
+    }
   }
 }

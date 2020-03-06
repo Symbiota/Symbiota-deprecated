@@ -1,7 +1,7 @@
 <?php
 //error_reporting(E_ALL);
-include_once( "../config/symbini.php" );
-header( "Content-Type: text/html; charset=" . $charset );
+include_once("../config/symbini.php");
+header("Content-Type: text/html; charset=" . $charset);
 ?>
 <html>
 <head>
@@ -11,13 +11,13 @@ header( "Content-Type: text/html; charset=" . $charset );
     <link href="../css/main.css?<?php echo $CSS_VERSION_LOCAL; ?>" type="text/css" rel="stylesheet"/>
     <meta name='keywords' content=''/>
     <script type="text/javascript">
-		<?php include_once( $serverRoot . '/config/googleanalytics.php' ); ?>
+        <?php include_once($serverRoot . '/config/googleanalytics.php'); ?>
     </script>
 
 </head>
 <body>
 <?php
-include( $serverRoot . "/header.php" );
+include($serverRoot . "/header.php");
 ?>
 
 <div id="info-page">
@@ -31,41 +31,108 @@ include( $serverRoot . "/header.php" );
         <!-- .inner-content makes a column max width 1100px, centered in the viewport -->
         <div class="inner-content">
             <!-- place static page content here. -->
-            <div class="col-wrapper">
-                <div class="our-books">
-                    <h3>Flora of Oregon</h3>
-                    <p>A detailed  reference containing plant descriptions, identification keys, pen and ink illustrations, and front chapters covering diverse topics. The three-volume set is the first comprehensive flora for the state in almost 60 years.</p>
-                    <div class="vol1">
-                        <img src="../images/layout/flora-of-oregon-book.jpg" alt="Flora of Oregon Vol 1" class="image-left">
-                        <strong>Flora of Oregon
-                            Volume 1:</strong>
-                        Pteridophytes, Gymnosperms, and Monocots <br><br>
-                        <a href="https://shop.brit.org/products/floraoforegon1" class="btn" target="_blank">Order Online</a>
+            <h2>Help support our work while learning about the diverse plants of Oregon. Here we share our comprehensive
+                and research-based information in beautiful, easy-to-use tools.</h2>
+            <div class="store-item">
+                <div class="row">
+                    <div class="store-item-info col-lg-8">
+                        <p class="store-item-title">Flora of Oregon Volume 1:</p>
+                        <p class="store-item-subtitle">Pteridophytes, Gymnosperms, and Monocots</p>
+                        <div class="store-item-desc">
+                            <p>OregonFlora, Oregon State University, and Botanical Research Institute of Texas have
+                                collaborated to publish Volume 1 of the Flora of Oregon.</p>
+                            <p>The first comprehensive plant guide for the state in over 50 years, and the first that is
+                                illustrated, Volume 1 addresses the ferns, conifers, grasses, sedges, and lilies—1,054
+                                taxa of native and naturalized plants. Plant identification keys, descriptions, and an
+                                Oregon map with the distribution for each taxon are provided. Pen and ink illustrations
+                                of 521 species are interspersed with the descriptions.</p>
+                            <p>Chapters describe the state’s ecology and predominant plant habitats, 50 of the best
+                                places to see wildflowers, and biographical sketches of notable Oregon botanists.
+                                Appendices detail taxa restricted to a single ecoregion, endemics, and those not
+                                collected in more than 50 years.</p>
+                            <p>The Flora of Oregon is a valuable reference for naturalists, ecologists, historians, and
+                                policy-makers and a welcome resource for all who study the biodiversity of Oregon.</p>
+                        </div>
                     </div>
-                    <div class="vol2">
-                        <img src="../images/layout/flora-of-oregon-book2.jpg" alt="Flora of Oregon Vol 2" class="image-left">
-                        <strong>Flora of Oregon
-                            Volume 2:</strong>
-                        Dicots Adoxaceae - Fagaceae <br><br>
-                        <a href="pdfs/SponsorshipBrochure.pdf " class="btn" target="_blank">Available late 2019</a>
-                    </div>
-                </div>
-                <div class="our-app" style="clear: both;">
-                    <h3><br>Oregon Wildflowers App</h3>
-                    <a href="http://www.highcountryapps.com/OregonWildflowers.aspx" target="_blank"><img src="../images/layout/oregon-wildflowers-app.jpg" alt="Oregon Wildflowers App" class="image-left"></a>
-                    <div>
-                        <p>An identification guide to over 1,050 wildflowers, shrubs and vines across the state. Works
-                            without an internet connection once downloaded onto your mobile phone or tablet.</p>
-                        <p><a href="https://play.google.com/store/apps/details?id=com.emountainworks.android.oregonfieldguide" target="_blank"><img src="../images/layout/icon-google-play.png" alt="Google Play"></a></p>
-                        <p><a href="https://itunes.apple.com/us/app/id828499164&mt=8" target="_blank"><img src="../images/layout/icon-apple-app-store.png" alt="Apple App Store"></a></p>
+                    <div class="store-item-pic col-lg-4">
+                        <img src="./images/flora_vol1.png" alt="Flora of Oregon Vol 1">
                     </div>
                 </div>
-            </div>
-        </div> <!-- .inner-content -->
-    </section>
+                <div class="store-item-purchase">
+                    <div class="store-item-price">
+                        <p>$75.00</p>
+                    </div>
+                    <div class="store-item-link">
+                        <p><a href="https://shop.brit.org/Flora-of-Oregon" target="_blank"
+                              class="btn btn-primary btn-lg active" role="button" aria-pressed="true">Learn more or
+                                purchase online</a></p>
+                    </div>
+                </div>
+            </div><!-- .store-item -->
+            <div class="store-item">
+                <div class="row">
+                    <div class="store-item-info col-lg-8">
+                        <p class="store-item-title">Flora of Oregon Volume 2: </p>
+                        <p class="store-item-subtitle">Dicots Aizoaceae - Fagaceae</p>
+                        <div class="store-item-desc">
+                            <p>Upholding the unparalleled standards of quality and design established
+                                with the first volume, Volume 2 presents 1,677 taxa of Oregon dicots from families Aizoaceae
+                                through Fagaceae. Notable groups include the Asteraceae (representing >11% of the state’s
+                                flora), the mustard family (Brassicaceae), stonecrops (Crassulaceae), and the legumes
+                                (Fabaceae). The richly-illustrated front chapters cover gardening with native plants and
+                                plant-insect interactions with a focus on butterflies and pollinators. Appendices list
+                                butterfly-foodplant pairs, pollinator specialists and their targeted plants, native garden
+                                plants that support insects, and features of native species used for gardening and
+                                landscaping.</p>
+                        </div>
+                    </div>
+                    <div class="store-item-pic col-lg-4">
+                        <img src="./images/flora_vol2.png" alt="Flora of Oregon Vol 2">
+                    </div>
+                </div>
+                <div class="store-item-purchase">
+                    <div class="store-item-price">
+                        <p>Preorders available in early 2020.</p>
+                    </div>
+                    <div class="store-item-link">
 
+                    </div>
+                </div>
+            </div><!-- .store-item -->
+            <div class="store-item">
+                <div class="row">
+                    <div class="store-item-info col-lg-8">
+                        <p class="store-item-title">Oregon Wildflowers App</p>
+                        <div class="store-item-desc">
+                            <p>Capture OregonFlora’s depth of knowledge on your mobile device with this plant identification
+                                app. Select from any of a dozen characters you recognize in your unknown plant to identify
+                                more than 1,050 common wildflowers, shrubs, and vines found in Oregon and adjacent areas of
+                                Washington, Idaho, and northern California. The app provides images, range maps, bloom
+                                period, and technical descriptions. Save your favorites, or create and share species lists.
+                                The app does not need an Internet connection to run, so you can use it no matter how remote
+                                your wanderings take you.</p>
+                        </div>
+                    </div>
+                    <div class="store-item-pic col-lg-4">
+                        <img src="./images/flora_app.png" alt="Oregon Wildflowers App">
+                    </div>
+                </div>
+                <div class="store-item-purchase">
+                    <div class="store-item-price">
+                        <p>$9.99</p>
+                    </div>
+                    <div class="store-item-link">
+                        <p>
+                            <a href="https://apps.apple.com/us/app/id828499164" target="_blank" alt="Oregon Wildflowers App on Apple Store"><img src="./images/applestore.png" alt="Apple Store button" width="150px"></a><a href="https://play.google.com/store/apps/details?id=com.emountainworks.android.oregonfieldguide" target="_blank" alt="Oregon Wildflowers App on Google play"><img src="./images/googleplay.png" alt="Google play button" width="150px"></a>
+                        </p>
+                    </div>
+                </div>
+            </div><!-- .store-item -->
+        </div><!-- .inner-content -->
+    </section>
+</div>
 <?php
-include( $serverRoot . "/footer.php" );
+include($serverRoot . "/footer.php");
 ?>
 
 </body>
