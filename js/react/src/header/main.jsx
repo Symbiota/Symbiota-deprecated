@@ -18,9 +18,9 @@ const dropDownChildren = {
     { title: "Interactive Key", href: "/checklists/dynamicmap.php?interface=key" },
     { title: "Plant Inventories", href: "/projects/index.php" },
     { title: "OSU Herbarium", href: "/collections/harvestparams.php?db[]=5,8,10,7,238,239,240,241" },
-    { title: "Gardening with Natives", href: "/garden/index.php" },
+    { title: "Grow Natives", href: "/garden/index.php" },
     { title: "Image Search", href: "/imagelib/search.php" },
-    { title: "Taxanomic Tree", href: "/taxa/admin/taxonomydisplay.php" },
+    { title: "Taxonomic Tree", href: "/taxa/admin/taxonomydisplay.php" },
   ],
   "Resources": [
     { title: "What's New", href: "/pages/whats-new.php" },
