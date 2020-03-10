@@ -25,14 +25,14 @@ const CIDS_PLANT_FEATURE = {
 
 const CIDS_GROWTH_MAINTENANCE = {
   "landscape_uses": 679,
-  "cultivation_prefs": 767,
+  "cultivation_preferences": 767,
   "behavior": 688,
-  "propagation": 670,
-  "ease_growth": 684
+  "propagation": 740,
+  "ease_of_growth": 684
 };
 
 const CIDS_BEYOND_GARDEN = {
-  "eco_region": 19,
+  "ecoregion": 19,
   "habitat": 163
 };
 
@@ -124,7 +124,7 @@ function filterByPlantAttribs(item, itemFilterName, filterMap) {
   for (let i in plantFeatureKeys) {
     iterSuccess = false;
 
-    // flower_color, eco_region, etc.
+    // flower_color, ecoregion, etc.
     let featureKey = plantFeatureKeys[i];
 
     // blue, green, Cascades, etc.
@@ -403,7 +403,6 @@ class GardenPageApp extends React.Component {
     } else {
       newQueryStr = addUrlQueryParam("width", event.target.value);
     }
-
     window.history.replaceState(
       {query: newQueryStr},
       '',

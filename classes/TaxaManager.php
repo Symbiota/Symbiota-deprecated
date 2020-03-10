@@ -25,7 +25,7 @@ class TaxaManager {
   private static $CID_LANDSCAPE_USES = 679;
   private static $CID_CULTIVATION_PREFS = 767;
   private static $CID_BEHAVIOR = 688;
-  private static $CID_PROPAGATION = 670;
+  private static $CID_PROPAGATION = 740;
   private static $CID_EASE_GROWTH = 684;
   
   # Beyond the garden
@@ -170,15 +170,15 @@ class TaxaManager {
       ],
       "growth_maintenance" => [
         "landscape_uses" => [],
-        "cultivation_prefs" => [],
+        "cultivation_preferences" => [],
         "behavior" => [],
         "propagation" => [],
-        "ease_growth" => [],
+        "ease_of_growth" => [],
         "spreads_vigorously" => null,
         "other_cult_prefs" => []
       ],
       "beyond_garden" => [
-        "eco_region" => [],
+        "ecoregion" => [],
         "habitat" => []
       ]
     ];
@@ -236,7 +236,7 @@ class TaxaManager {
           array_push($attr_array["growth_maintenance"]["landscape_uses"], $attr_val);
           break;
         case TaxaManager::$CID_CULTIVATION_PREFS:
-          array_push($attr_array["growth_maintenance"]["cultivation_prefs"], $attr_val);
+          array_push($attr_array["growth_maintenance"]["cultivation_preferences"], $attr_val);
           break;
         case TaxaManager::$CID_BEHAVIOR:
           array_push($attr_array["growth_maintenance"]["behavior"], $attr_val);
@@ -245,7 +245,7 @@ class TaxaManager {
           array_push($attr_array["growth_maintenance"]["propagation"], $attr_val);
           break;
         case TaxaManager::$CID_EASE_GROWTH:
-          array_push($attr_array["growth_maintenance"]["ease_growth"], $attr_val);
+          array_push($attr_array["growth_maintenance"]["ease_of_growth"], $attr_val);
           break;
         case TaxaManager::$CID_SPREADS:
           $attr_array["growth_maintenance"]["spreads_vigorously"] = $attr_val;
@@ -254,7 +254,7 @@ class TaxaManager {
           array_push($attr_array["growth_maintenance"]["other_cult_prefs"], $attr_val);
           break;
         case TaxaManager::$CID_ECOREGION:
-          array_push($attr_array["beyond_garden"]["eco_region"], $attr_val);
+          array_push($attr_array["beyond_garden"]["ecoregion"], $attr_val);
           break;
         case TaxaManager::$CID_HABITAT:
           array_push($attr_array["beyond_garden"]["habitat"], $attr_val);

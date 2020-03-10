@@ -48,7 +48,7 @@ class CannedSearchResult extends React.Component {
                 onMouseOver={ this.onMouseOver }
               />
               <div
-                className="text-center text-capitalize w-100 h-100 px-2 py-1 align-items-center"
+                className="text-center text-sentence w-100 h-100 px-2 py-1 align-items-center"
                 style={{
                   display: this.state.hover ? "flex" : "none",
                   position: "absolute",
@@ -71,7 +71,7 @@ class CannedSearchResult extends React.Component {
           <button className="w-100 px-3 my-1 btn btn-primary" onClick={this.props.onFilter}>
             Filter for these
           </button>
-          <button className="w-100 px-3 my-1 btn btn-secondary" onClick={ () => { window.location = this.props.href } }>
+          <button className="w-100 px-3 my-1 btn btn-secondary" onClick={ () => { window.open(this.props.href) } }>
             Learn more
           </button>
         </div>

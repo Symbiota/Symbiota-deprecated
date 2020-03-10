@@ -102,8 +102,8 @@ class TaxaApp extends React.Component {
             sizeMaturity += "' wide";
           }
 
-          let ease_growth = res.characteristics.growth_maintenance.ease_growth;
-          ease_growth = ease_growth.length > 0 ? ease_growth[0] : "";
+          let ease_of_growth = res.characteristics.growth_maintenance.ease_of_growth;
+          ease_of_growth = ease_of_growth.length > 0 ? ease_of_growth[0] : "";
 
           const spreads_vigorously = res.characteristics.growth_maintenance.spreads_vigorously;
 
@@ -119,7 +119,7 @@ class TaxaApp extends React.Component {
               "Size at maturity": sizeMaturity,
               "Cultivation tolerances": res.characteristics.sunlight,
               "Wildlife support": res.characteristics.features.wildlife_support,
-              "Ease of growth": ease_growth
+              "Ease of growth": ease_of_growth
             },
             plantFacts: {
               "Plant Type": plantType,
@@ -131,7 +131,7 @@ class TaxaApp extends React.Component {
               "Wildlife support": res.characteristics.features.wildlife_support
             },
             growthMaintenance: {
-              "Ease of cultivation": res.characteristics.growth_maintenance.cultivation_prefs,
+              "Ease of cultivation": res.characteristics.growth_maintenance.cultivation_preferences,
               "Spreads vigorously": spreads_vigorously === null ? "" : spreads_vigorously,
               "Other cultivation factors": res.characteristics.growth_maintenance.other_cult_prefs,
               "Plant behavior": res.characteristics.growth_maintenance.behavior,

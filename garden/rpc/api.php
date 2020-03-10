@@ -18,7 +18,7 @@
         "clid" => $cl->getClid(),
         "name" => $cl->getName(),
         "iconUrl" => $cl->getIconurl(),
-        "description" => $cl->getTitle()
+        "description" => ucfirst($cl->getTitle())
       ]);
     }
 

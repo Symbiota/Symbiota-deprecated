@@ -364,7 +364,7 @@ class SideBar extends React.Component {
             }
           </SideBarDropdown>
 
-          <SideBarDropdown title="Availability (Coming soon)" disabled={ true } />
+          <SideBarDropdown title="Commercial Availability (Coming soon)" disabled={ true } />
         </div>
       </div>
     );

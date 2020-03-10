@@ -5,7 +5,7 @@ function SearchResult(props) {
 
   if (props.display) {
     return (
-      <a href={props.href} className="text-decoration-none" style={{ maxWidth: "185px" }}>
+      <a href={props.href} className="text-decoration-none" style={{ maxWidth: "185px" }} target="_blank">
         <div className={ "card search-result " + (useGrid ? "grid-result" : "list-result") }>
             <div className={useGrid ? "" : "card-body"}>
               <img
@@ -15,7 +15,7 @@ function SearchResult(props) {
               />
               <div className={(useGrid ? "card-body" : "d-inline py-1") + " px-0"} style={{overflow: "hidden"}}>
                 <div className={"card-text" + (useGrid ? "" : " d-inline")}>
-                  <span className="text-capitalize">{props.commonName}</span>
+                  <span className="text-lowercase">{props.commonName}</span>
                   {useGrid ? <br/> : " - "}
                   <span className="font-italic">{props.sciName}</span>
                 </div>
