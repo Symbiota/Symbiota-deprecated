@@ -10,7 +10,7 @@ const slickSettings = {
   slidesToScroll: 1
 };
 
-function Slider(props) {
+function GardenCarousel(props) {
     return (
       <Carousel { ...slickSettings } className="mx-auto"  style={{ maxWidth: "90%" }}>
         { props.children }
@@ -18,4 +18,4 @@ function Slider(props) {
     );
 }
 
-export default Slider;
+export default GardenCarousel;

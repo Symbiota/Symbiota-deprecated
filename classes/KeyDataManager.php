@@ -428,7 +428,7 @@ class KeyDataManager extends Manager{
             $displayName = $row->DisplayName;
             unset($sppArr);
             if(array_key_exists($family, $returnArray)) $sppArr = $returnArray[$family];
-            if(!$returnArray[$family][$tid]){
+            if(!isset($returnArray[$family][$tid])){
                 $count++;
                 $sppArr[$tid] = $displayName;
                 $returnArray[$family] = $sppArr;

@@ -2,6 +2,8 @@ import ReactDOM from "react-dom";
 import React from "react";
 import httpGet from "../common/httpGet.js";
 import { getUrlQueryParams } from "../common/queryParams.js";
+import GardenCarousel from "../common/gardenCarousel.jsx";
+import ImageModal from "../common/modal.jsx";
 
 function showItem(item) {
   const isArray = Array.isArray(item);
@@ -61,22 +63,32 @@ class TaxaApp extends React.Component {
       isGardenTaxa: false,
       highlights: {},
       plantFacts: {},
-      growthMaintenance: {}
+      growthMaintenance: {},
+      isOpen: false,
+      tid: null,
+      currImage: 0
     };
-
     this.getTid = this.getTid.bind(this);
   }
 
   getTid() {
     return parseInt(this.props.tid);
   }
-
+	toggleImageModal = (_currImage) => {
+		this.setState({
+			currImage: _currImage	
+		});
+    this.setState({
+      isOpen: !this.state.isOpen
+    });
+  }
   componentDidMount() {
     if (this.getTid() === -1) {
       window.location = "/";
     } else {
       httpGet(`./rpc/api.php?taxon=${this.props.tid}`)
         .then((res) => {
+       		// /taxa/rpc/api.php?taxon=2454
           res = JSON.parse(res);
 
           let foliageType = res.characteristics.features.foliage_type;
@@ -146,10 +158,13 @@ class TaxaApp extends React.Component {
           console.error(err);
         });
     }
-  }
+  }//componentDidMount
+  
+
 
   render() {
     return (
+    
       <div className="container my-5 py-2" style={{ minHeight: "45em" }}>
         <div className="row">
           <div className="col">
@@ -176,6 +191,46 @@ class TaxaApp extends React.Component {
               */}
               { this.state.description.replace(/(<\/?[^>]+>)|(&[^;]+;)/g, "") }
             </p>
+            <div className="mt-4 dashed-border">
+            
+            	<h3 className="text-capitalize text-light-green font-weight-bold mt-2">{ this.state.vernacularNames[0] } images</h3>
+							<div className="slider-wrapper">
+  						<GardenCarousel>
+								{
+									this.state.images.map((image,index) => {
+										return (					
+												<div key={image.url} className={"py-2"}>
+												<div className="card" style={{padding: "0.5em"}}>
+													<div className="card-body" style={{padding: "0"}}>
+														<div style={{ position: "relative", width: "100%", height: "7em", borderRadius: "0.25em"}}>
+															
+															<img
+																className="d-block"
+																style={{width: "100%", height: "100%", objectFit: "cover"}}
+																src={image.thumbnailurl}
+																alt={image.thumbnailurl}
+																onClick={() => this.toggleImageModal(index)}
+															/>
+														</div>
+													</div>
+												</div>
+											</div>
+										);
+									})
+								}
+							</GardenCarousel>
+							</div>
+							<ImageModal 
+								show={this.state.isOpen}
+								currImage={this.state.currImage}
+								images={this.state.images}
+								onClose={this.toggleImageModal}
+							>
+								<h3>
+								{ this.state.vernacularNames[0] } images
+								</h3>
+							</ImageModal>
+            </div>
           </div>
           <div className="col-auto mx-4">
             <SideBarSection title="Highlights" items={ this.state.highlights } />

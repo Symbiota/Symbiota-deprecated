@@ -1,5 +1,5 @@
 import React from "react";
-import Slider from "../common/slider.jsx";
+import GardenCarousel from "../common/gardenCarousel.jsx";
 
 import HelpButton from "../common/helpButton.jsx";
 
@@ -102,7 +102,7 @@ class CannedSearchContainer extends React.Component {
           <div className="row">
             <div className="col">
               <div>
-                <Slider>
+                <GardenCarousel>
                   {
                     this.props.searches.map((searchResult) => {
                       return (
@@ -118,7 +118,7 @@ class CannedSearchContainer extends React.Component {
                       );
                     })
                   }
-                </Slider>
+                </GardenCarousel>
               </div>
             </div>
           </div>
