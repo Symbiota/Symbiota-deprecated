@@ -13,12 +13,21 @@
     height: 8em;
     padding-top: 4em;
     transition: height 0.5s, padding-top 0.5s;
-
-    #site-header-logo {
-      margin-left: 4em;
-      border: 0.5em solid rgba(255, 255, 255, 0.2);
-    }
-
+		.navbar-brand {
+			padding-top: 0;
+			#site-header-logo {
+				margin-left: 4em;
+				/*border: 0.5em solid rgba(255, 255, 255, 0.2);*/
+				width: 97px;
+				height: auto;
+			}
+		}
+		&.site-header-scroll {
+			.navbar-brand {
+				padding-top: .8rem;
+			}
+		
+		}
     #site-header-dropdowns {
       .text-uppercase();
       .text-bold();

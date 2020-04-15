@@ -57,7 +57,7 @@ function HeaderButtonBar(props) {
   );
 }
 
-function getScollPos() {
+function getScrollPos() {
   return document.body.scrollTop || document.documentElement.scrollTop;
 }
 
@@ -93,7 +93,7 @@ class HeaderApp extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      isCollapsed: getScollPos() > 80,
+      isCollapsed: getScrollPos() > 0,
       scrollLock: false,
       isLoading: false,
       searchText: '',
@@ -141,7 +141,7 @@ class HeaderApp extends React.Component {
     });
     window.addEventListener("scroll", () => {
       if (!this.state.scrollLock) {
-        this.setState({isCollapsed: getScollPos() > (80 + siteHeader.offsetHeight)});
+        this.setState({isCollapsed: getScrollPos() > (siteHeader.offsetHeight)});
       }
     });
   }
