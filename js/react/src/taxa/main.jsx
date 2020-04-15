@@ -227,7 +227,7 @@ class TaxaApp extends React.Component {
 								onClose={this.toggleImageModal}
 							>
 								<h3>
-								{ this.state.vernacularNames[0] } images
+									<span className="text-capitalize">{ this.state.vernacularNames[0] }</span> images
 								</h3>
 							</ImageModal>
             </div>

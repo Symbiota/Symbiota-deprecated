@@ -277,14 +277,17 @@ class TaxaManager {
   private static function populateImages($tid) {
     $em = SymbosuEntityManager::getEntityManager();
     $images = $em->createQueryBuilder()
-      ->select(["i.thumbnailurl", "i.url", "i.photographer", "i.locality", "i.owner", "i.copyright"])# i.InitialTimeStamp does not match Photographed date in Notes
+      ->select(["i.thumbnailurl", "i.url", "i.photographer", "i.owner", "i.copyright", "i.notes","o.year", "o.month", "o.day","o.country","o.stateprovince","o.county","o.locality","o.recordedby","c.collectionname"])#
       ->from("Images", "i")
+      ->innerJoin("omoccurrences","o","WITH","i.occid = o.occid")
+      ->innerJoin("omcollections","c","WITH","c.collid = o.collid")
       ->where("i.tid = :tid")
       ->setParameter("tid", $tid)
       ->orderBy("i.sortsequence")
       ->getQuery()
       ->execute();
-    $images = array_map("TaxaManager::resolvePaths",$images);
+    
+    $images = array_map("TaxaManager::processImageData",$images);
     /*foreach ($images as $key => $image) {
     	list($width, $height) = getimagesize($image['url']);
     	echo $width;
@@ -299,10 +302,17 @@ class TaxaManager {
     return $return;
   }
   
-  private static function resolvePaths($img) {
+  private static function processImageData($img) {
   		foreach ($img as $field => $value) {
   			if ($field == 'thumbnailurl' || $field == 'url') {
   				$img[$field] = resolve_img_path($value);
+  			}elseif( $field == 'year' && $value == '' && !empty($img['notes'])) {
+  				#Photographed: Aug 9, 2008
+  				$date = str_replace("Photographed: ",'',$img['notes']);
+  				$datestamp = strtotime($date);
+  				$img['year'] = date("Y",$datestamp);
+  				$img['day'] = date("j",$datestamp);
+  				$img['month'] = date("n",$datestamp);
   			}
   		}
   		return $img;

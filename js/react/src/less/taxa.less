@@ -62,8 +62,14 @@
 		margin: 0 auto;
 		padding: 30px;
 		overflow: hidden;
-		h3 {
+		h3, h4 {
 			margin-left: 12.5%;
+		}
+		h3 {
+			margin-bottom: .2rem;
+		}
+		h4 {
+			font-size: .88rem;
 		}
 		
 		.lightbox-wrapper {
@@ -84,14 +90,14 @@
 							}
 							.image-wrapper {
 								text-align: center;
-								height: 80%;
+								height: 75%;
 								img {
 									margin: 0 auto;
 								}
 							}
 							.image-details {
 								margin: 1em auto;
-								height: 20%;
+								height: 25%;
 								width: 80%;
 								color: @gray-type;
 								font-size: .88rem;
@@ -99,9 +105,8 @@
 								.row {
 									margin-bottom: .25rem;
 									padding-bottom: .25rem;
-									border-bottom: 1px dotted @gray-type;
-									&:last-child {
-										border-bottom: none;
+									&.line-item{
+										border-bottom: 1px dotted @gray-type;
 									}
 									.col {
 										padding-left: 0;
@@ -119,6 +124,7 @@
 									font-size: .88rem;
 									border: 1px solid @med-green !important;
 									color: @gray-type !important;
+									padding: .2rem .75rem;
 									&:hover {
 										color: white !important;
 									}
@@ -133,6 +139,9 @@
 				.slick-list {
 					margin-top: .3rem;
 					position: relative;
+					.slick-track {
+						max-height: 100%;
+					}
 					.card {
 						background-color: transparent;
 						border-radius: 0;

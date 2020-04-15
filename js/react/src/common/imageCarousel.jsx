@@ -66,6 +66,7 @@ export default class ImageCarousel extends Component {
 					{	this.props.images.map((image,index) => {
 						return (
 							<div key={image.url}>
+								<h4>From the {image.collectionname}</h4>
 								<div className="slide-wrapper">
 									<div className="image-wrapper">
 									<img
@@ -79,7 +80,7 @@ export default class ImageCarousel extends Component {
 									</div>
 									
 									<div className="container image-details">
-										<div className="row">
+										<div className="row line-item">
 											<div className="col label">
 												Collector: 
 											</div>
@@ -87,12 +88,20 @@ export default class ImageCarousel extends Component {
 												 {image.photographer}
 											</div>
 										</div>
-										<div className="row">
+										<div className="row line-item">
 											<div className="col label">
 												Locality: 
 											</div>
 											<div className="col value">
-												 {image.locality}
+												 {image.country}, {image.stateprovince}, {image.county}
+											</div>
+										</div>
+										<div className="row">
+											<div className="col label">
+												Date: 
+											</div>
+											<div className="col value">
+												 {image.year}-{image.month}-{image.day}
 											</div>
 										</div>
 										<div className="row image-link">
