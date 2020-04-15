@@ -1,5 +1,7 @@
 import React, { Component }  from "react";
 import Slider from "react-slick";
+import {getImageDetailPage} from "../common/taxaUtils";
+const CLIENT_ROOT = "..";
 
 export default class ImageCarousel extends Component {
   constructor(props) {
@@ -65,7 +67,7 @@ export default class ImageCarousel extends Component {
 					
 					{	this.props.images.map((image,index) => {
 						return (
-							<div key={image.url}>
+							<div key={image.url} data-id={image.imgid}>
 								<h4>From the {image.collectionname}</h4>
 								<div className="slide-wrapper">
 									<div className="image-wrapper">
@@ -101,12 +103,16 @@ export default class ImageCarousel extends Component {
 												Date: 
 											</div>
 											<div className="col value">
-												 {image.year}-{image.month}-{image.day}
+												 {image.fulldate}
 											</div>
 										</div>
 										<div className="row image-link">
 											<div className="col">
-												<button className="btn" style={{color: "white"}}>See the full record for this image</button>
+												<a 
+													className="btn" 
+													style={{color: "white"}}
+													href={ getImageDetailPage(CLIENT_ROOT, image.imgid) }
+												>See the full record for this image</a>
 											</div>
 										</div>
 									</div>									

@@ -277,7 +277,7 @@ class TaxaManager {
   private static function populateImages($tid) {
     $em = SymbosuEntityManager::getEntityManager();
     $images = $em->createQueryBuilder()
-      ->select(["i.thumbnailurl", "i.url", "i.photographer", "i.owner", "i.copyright", "i.notes","o.year", "o.month", "o.day","o.country","o.stateprovince","o.county","o.locality","o.recordedby","c.collectionname"])#
+      ->select(["i.imgid, i.thumbnailurl", "i.url", "i.photographer", "i.owner", "i.copyright", "i.notes","o.year", "o.month", "o.day","o.country","o.stateprovince","o.county","o.locality","o.recordedby","c.collectionname"])#
       ->from("Images", "i")
       ->innerJoin("omoccurrences","o","WITH","i.occid = o.occid")
       ->innerJoin("omcollections","c","WITH","c.collid = o.collid")
@@ -288,17 +288,14 @@ class TaxaManager {
       ->execute();
     
     $images = array_map("TaxaManager::processImageData",$images);
-    /*foreach ($images as $key => $image) {
+    /*
+    #too slow
+    foreach ($images as $key => $image) {
     	list($width, $height) = getimagesize($image['url']);
     	echo $width;
     }*/
     
     $return = $images;
-    #$return = array_map("TaxaManager::resolvePaths",$images);
-    /*	$return = array_map(
-			function($img) { return [ "thumbnailurl" => resolve_img_path($img["thumbnailurl"]), "url" => resolve_img_path($img["url"]) ]; },
-				$images
-			);*/
     return $return;
   }
   
@@ -306,13 +303,23 @@ class TaxaManager {
   		foreach ($img as $field => $value) {
   			if ($field == 'thumbnailurl' || $field == 'url') {
   				$img[$field] = resolve_img_path($value);
-  			}elseif( $field == 'year' && $value == '' && !empty($img['notes'])) {
-  				#Photographed: Aug 9, 2008
-  				$date = str_replace("Photographed: ",'',$img['notes']);
-  				$datestamp = strtotime($date);
-  				$img['year'] = date("Y",$datestamp);
-  				$img['day'] = date("j",$datestamp);
-  				$img['month'] = date("n",$datestamp);
+  			}elseif( $field == 'year') {
+  				$img['fulldate'] = '';
+  				if ($value == '' && !empty($img['notes'])){#Photographed: Aug 9, 2008 or Photographed: date unknown
+						$date = str_replace("Photographed: ",'',$img['notes']);
+						$img['fulldate'] = $date;
+						/*$datestamp = strtotime($date);
+						if (false !== $datestamp) {
+							$img['year'] = date("Y",$datestamp);
+							$img['day'] = date("j",$datestamp);
+							$img['month'] = date("n",$datestamp);
+						}*/
+						
+					}else{
+						if (!empty($img['day']) && !empty($img['month'])) {
+							$img['fulldate'] = $img['year'] . '-' . $img['month'] . '-' . $img['day'];
+						}
+					}
   			}
   		}
   		return $img;

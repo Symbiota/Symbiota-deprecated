@@ -6,6 +6,10 @@ export function getGardenTaxaPage(clientRoot, tid) {
   return `${clientRoot}/taxa/garden.php?taxon=${tid}`;
 }
 
+export function getImageDetailPage(clientRoot, imgid) {
+  return `${clientRoot}/imagelib/imgdetails.php?imgid=${imgid}`;
+}
+
 export function getCommonNameStr(item) {
   const basename = item.vernacular.basename;
   const names = item.vernacular.names;
