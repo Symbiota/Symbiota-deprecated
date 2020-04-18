@@ -1,20 +1,22 @@
 import React from "react";
-import Carousel from "react-slick";
+import Slider from "react-slick";
 
 const slickSettings = {
   autoplay: true,
   autoplaySpeed: 5000,
   dots: false,
   infinite: true,
-  slidesToShow: 4,
+  slidesToShow: 5,
   slidesToScroll: 1
 };
-
+/*
+	moving the slideshow loop into this page will mean making the toggle accessible to both this and taxa/main.jsx - I've tried twice
+*/
 function GardenCarousel(props) {
     return (
-      <Carousel { ...slickSettings } className="mx-auto"  style={{ maxWidth: "90%" }}>
+      <Slider { ...slickSettings } className="mx-auto"  style={{ maxWidth: "90%" }}>
         { props.children }
-      </Carousel>
+      </Slider>
     );
 }
 

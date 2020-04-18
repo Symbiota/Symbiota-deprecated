@@ -195,23 +195,22 @@ class TaxaApp extends React.Component {
             
             	<h3 className="text-capitalize text-light-green font-weight-bold mt-2">{ this.state.vernacularNames[0] } images</h3>
 							<div className="slider-wrapper">
-  						<GardenCarousel>
+  						<GardenCarousel
+  							images={this.state.images}>
 								{
 									this.state.images.map((image,index) => {
 										return (					
-												<div key={image.url} className={"py-2"}>
+											<div key={image.url}>
 												<div className="card" style={{padding: "0.5em"}}>
-													<div className="card-body" style={{padding: "0"}}>
-														<div style={{ position: "relative", width: "100%", height: "7em", borderRadius: "0.25em"}}>
-															
-															<img
-																className="d-block"
-																style={{width: "100%", height: "100%", objectFit: "cover"}}
-																src={image.thumbnailurl}
-																alt={image.thumbnailurl}
-																onClick={() => this.toggleImageModal(index)}
-															/>
-														</div>
+													<div style={{ position: "relative", width: "100%", height: "7em", borderRadius: "0.25em"}}>
+														
+														<img
+															className="d-block"
+															style={{width: "100%", height: "100%", objectFit: "cover"}}
+															src={image.thumbnailurl}
+															alt={image.thumbnailurl}
+															onClick={() => this.toggleImageModal(index)}
+														/>
 													</div>
 												</div>
 											</div>
