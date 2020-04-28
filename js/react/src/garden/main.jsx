@@ -71,6 +71,12 @@ function getAttribMatrixFromArr(attribArray) {
 
 function filterByWidth(item, minMax) {
   const withinMin = item.width[0] >= minMax[0];
+	/*if (item.tid == 8066) {
+		console.log(item);
+		console.log(minMax[0]);
+		console.log(item.width[0]);
+  	console.log(withinMin);
+	}*/
   if (minMax[1] === 50) {
     return withinMin;
   }
