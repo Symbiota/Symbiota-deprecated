@@ -22,8 +22,8 @@ include_once("../config/symbini.php");
 
     <!-- This is inner text! -->
     <div id="innertext">
-      <div id="react-taxa-app"></div>
-      <script src="<?php echo $CLIENT_ROOT?>/js/react/dist/taxa.js"></script>
+      <div id="react-taxa-garden-app"></div>
+      <script src="<?php echo $CLIENT_ROOT?>/js/react/dist/taxa-garden.js"></script>
     </div>
 
     <?php

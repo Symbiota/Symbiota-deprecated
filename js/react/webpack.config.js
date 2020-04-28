@@ -28,7 +28,8 @@ const reactConfig = {
     footer: path.join(SRC_DIR, "footer", "main.jsx"),
     garden: path.join(SRC_DIR, "garden", "main.jsx"),
     taxa: path.join(SRC_DIR, "taxa", "main.jsx"),
-    "taxa-search": path.join(SRC_DIR, "taxa", "search.jsx")
+    "taxa-search": path.join(SRC_DIR, "taxa", "search.jsx"),
+    "taxa-garden": path.join(SRC_DIR, "taxa", "taxa-garden.jsx")
   },
   output: {
     path: REACT_OUT_DIR

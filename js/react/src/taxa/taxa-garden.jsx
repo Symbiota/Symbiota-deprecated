@@ -168,8 +168,8 @@ class TaxaApp extends React.Component {
       <div className="container my-5 py-2" style={{ minHeight: "45em" }}>
         <div className="row">
           <div className="col">
-            <h1 className="text-capitalize">{ this.state.sciName }</h1>
-            <h2 className="font-italic">{ this.state.vernacularNames[0] }</h2>
+            <h1 className="text-capitalize">{ this.state.vernacularNames[0] }</h1>
+            <h2 className="font-italic">{ this.state.sciName }</h2>
           </div>
           <div className="col-auto">
             <button className="d-block my-2 btn-primary">Printable page</button>
@@ -246,7 +246,7 @@ TaxaApp.defaultProps = {
   tid: -1,
 };
 
-const domContainer = document.getElementById("react-taxa-app");
+const domContainer = document.getElementById("react-taxa-garden-app");
 const queryParams = getUrlQueryParams(window.location.search);
 if (queryParams.search) {
   window.location = `./search.php?search=${encodeURIComponent(queryParams.search)}`;
