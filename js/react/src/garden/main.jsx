@@ -241,6 +241,7 @@ class GardenPageApp extends React.Component {
         const newFeatures = Object.assign({}, this.state.plantFeatureState, getAttribMatrixFromArr(allPlantFeatures));
         const newGrowth = Object.assign({}, this.state.growthMaintenanceState, getAttribMatrixFromArr(allGrowthMaintainence));
         const newBeyond = Object.assign({}, this.state.beyondGardenState, getAttribMatrixFromArr(allBeyondGarden));
+        //console.log(newFeatures);
         this.setState({
           plantFeatureState: newFeatures,
           growthMaintenanceState: newGrowth,

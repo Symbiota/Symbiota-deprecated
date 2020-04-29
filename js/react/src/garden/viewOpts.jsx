@@ -29,6 +29,21 @@ function getPlantAttrText(filter) {
 }
 
 class ViewOpts extends React.Component {
+	
+	buildButton(filterKey,itemText) {
+		return (
+			<IconButton
+				key={ filterKey }
+				title={ itemText }
+				icon={ `${CLIENT_ROOT}/images/garden/x-out.png` }
+				isSelected={ true }
+				style={{ margin: "0.1em" }}
+				onClick={ () => { this.props.onFilterClicked(filterKey); } }
+			/>
+		)
+	}
+
+
   render() {
     return (
       <div id="view-opts" className="row mx-2 mt-3 px-0 py-2">
@@ -87,11 +102,11 @@ class ViewOpts extends React.Component {
                     }
                     break;
                   case "plantFeatures": {
-                    // itemText = getPlantAttrText(filter);
-                    // if (itemText === '') {
-                    //   showItem = false;
-                    // }
-                    showItem = false;
+                  	console.log(filter);
+                     itemText = getPlantAttrText(filter);
+                     if (itemText === '') {
+                       showItem = false;
+                     }
                     break;
                   }
                   case "growthMaintenance": {
@@ -116,14 +131,7 @@ class ViewOpts extends React.Component {
 
                 if (showItem) {
                   return (
-                    <IconButton
-                      key={ filter.key }
-                      title={ itemText }
-                      icon={ `${CLIENT_ROOT}/images/garden/x-out.png` }
-                      isSelected={ true }
-                      style={{ margin: "0.1em" }}
-                      onClick={ () => { this.props.onFilterClicked(filter.key); } }
-                    />
+                    this.buildButton(filter.key,itemText)
                   );
                 }
               })
