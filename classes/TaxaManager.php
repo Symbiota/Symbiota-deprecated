@@ -32,6 +32,9 @@ class TaxaManager {
   private static $CID_HABITAT = 163;
   private static $CID_ECOREGION = 19;
 
+	# from TaxonProfileManager
+	private $langArr = array();
+	
   // ORM Model
   protected $model;
 
@@ -39,7 +42,17 @@ class TaxaManager {
   protected $images;
   protected $characteristics;
   protected $checklists;
-  protected $description;
+  protected $descriptions;
+  protected $gardenId;
+  protected $gardenDescription;
+  protected $synonyms;
+  protected $origin;
+  protected $family;
+  protected $parentTid;
+  protected $taxalinks;
+  protected $rarePlantFactSheet;
+  protected $rankId;
+  protected $spp;
 
   public function __construct($tid=-1) {
     if ($tid !== -1) {
@@ -50,14 +63,20 @@ class TaxaManager {
       $this->images = TaxaManager::populateImages($this->getTid());
       $this->characteristics = TaxaManager::populateCharacteristics($this->getTid());
       $this->checklists = TaxaManager::populateChecklists($this->getTid());
-      $this->description = $this->populateDescription();
+      $this->descriptions = $this->populateDescriptions($this->getTid());
+      $this->gardenDescription = $this->populateGardenDescription($this->getTid());
+      $this->populateTaxalinks($this->getTid());
+      $this->spp = $this->populateSpp($this->getTid());
     } else {
       $this->model = null;
       $this->basename = '';
       $this->images = [];
       $this->characteristics = [];
       $this->checklists = [];
-      $this->description = "";
+      $this->descriptions = [];
+      $this->gardenId = -1;
+      $this->gardenDescription = '';
+      $this->spp = [];
     }
   }
 
@@ -68,37 +87,79 @@ class TaxaManager {
     $newTaxa->images = TaxaManager::populateImages($model->getTid());
     $newTaxa->characteristics = TaxaManager::populateCharacteristics($model->getTid());
     $newTaxa->checklists = TaxaManager::populateChecklists($model->getTid());
-    $newTaxa->description = $newTaxa->populateDescription($model->getTid());
+    $newTaxa->descriptions = $newTaxa->populateDescriptions($model->getTid());
+    $newTaxa->gardenDescription = $newTaxa->populateGardenDescription($model->getTid());
+    $newTaxa->spp = $newTaxa->populateSpp($model->getTid());
     return $newTaxa;
   }
-
-  public function isGardenTaxa() {
-    // Since we only populate children of garden checklist anyway
-    return count($this->checklists) > 0;
-  }
+  
+	public function setLanguage($lang){
+		$lang = strtolower($lang);
+		if($lang == 'en' || $lang == 'english') $this->langArr = array('en','english');
+		elseif($lang == 'es' || $lang == 'spanish') $this->langArr = array('es','spanish','espanol');
+		elseif($lang == 'fr' || $lang == 'french') $this->langArr =  array('fr','french');
+	}
 
   public function getTid() {
     return $this->model->getTid();
   }
-
   public function getSciname() {
     return $this->model->getSciname();
   }
-
+  public function getAuthor() {
+    return $this->model->getAuthor();
+  }
+  public function getRankId() {
+    return $this->model->getRankid();
+  }
   public function getVernacularNames() {
     return $this->model->getVernacularNames()
+      ->filter(function($vn) { return strtolower($vn->getLanguage()) === "english"; })
       ->map(function($vn) { return $vn->getVernacularName(); })
       ->toArray();
   }
 
+  public function getSynonyms() {
+  	$this->synonyms = $this->populateSynonyms($this->getTid());
+    return $this->synonyms;
+  }
+  public function getOrigin() {
+  	$this->origin = $this->populateOrigin($this->getTid());
+  	return $this->origin;
+  }
+  public function getFamily() {
+  	$this->family = $this->populateStatusFields($this->getTid())['family'];
+  	return $this->family;
+  }
+  public function getParentTid() {
+  	$this->parentTid = $this->populateStatusFields($this->getTid())['parenttid'];
+  	return $this->parentTid;
+  }
+	public function getGardenId() {
+  	$this->gardenId = $this->populateGardenId($this->getTid());
+		return $this->gardenId;
+	}
+  public function getTaxalinks() {
+    $this->populateTaxalinks($this->getTid());
+  	return $this->taxalinks;
+  }
+  public function getRarePlantFactSheet() {
+    $this->populateTaxalinks($this->getTid());
+  	return $this->rarePlantFactSheet;
+  }
   public function getBasename() {
     return $this->basename;
   }
-
   public function getImages() {
     return $this->images;
   }
-
+	public function getImagesByBasisOfRecord() {
+		$return = array();
+		foreach ($this->images as $image) {
+			$return[$image['basisofrecord']][] = $image;
+		}
+		return $return;
+	}
   public function getThumbnail() {
     return $this->images[0]["thumbnailurl"];
   }
@@ -111,22 +172,139 @@ class TaxaManager {
     return $this->checklists;
   }
 
-  public function getDescription() {
-    return $this->description;
+  public function getDescriptions() {
+    return $this->descriptions;
   }
 
-  private function populateDescription() {
-    $em = SymbosuEntityManager::getEntityManager();
-    $stmts = $em->createQueryBuilder()
-      ->select(["ts.statement"])
-      ->from("Taxadescrstmt", "ts")
-      ->innerJoin("Taxadescrblock", "tb", "WITH", "ts.tdbid = tb.tdbid")
-      ->where("tb.tid = :tid")
-      ->orderBy("ts.sortsequence")
-      ->setParameter("tid", $this->getTid())
-      ->getQuery()
-      ->execute();
+  public function getGardenDescription() {
+    return $this->gardenDescription;
+  }
+  public function getSpp() {
+  	return $this->spp;
+  }
+  
+  public function isGardenTaxa() {
+    // Since we only populate children of garden checklist anyway
+    return count($this->checklists) > 0;
+  }
 
+  private function populateGardenId() {
+  /*
+  	If this->tid is in Garden checklist, return it
+  	else check if parentId is in garden checklist; if so, return it
+  */
+  	$return = -1;
+  	if ($this->isGardenTaxa()) {
+  		$return = $this->getTid();
+  	}elseif ($this->getRankId() > 220){
+  		$parentId = $this->getParentTid();
+
+			$em = SymbosuEntityManager::getEntityManager();
+			$clQuery = $em->createQueryBuilder()
+				->select(["cl.clid"])
+				->from("Fmchklsttaxalink", "tl")
+				->innerJoin("Fmchecklists", "cl", "WITH", "tl.clid = cl.clid")
+				->where("tl.tid = :tid")
+				->andWhere("cl.parentclid = " . Fmchecklists::$CLID_GARDEN_ALL)
+				->setParameter("tid", $parentId)
+				->getQuery()
+				->execute();
+
+				if (sizeof($clQuery)) {
+					$return = $parentId;
+				}
+  	}
+  	
+  	return $return;
+  }
+	private function populateSpp($tid = null) {
+		$return = array();
+  	if ($tid) {
+  		if ($this->getRankId() >= 140) {#less complicated than what's in OSUTaxaManager::setSppData() for now
+  	
+				$em = SymbosuEntityManager::getEntityManager();
+  			$taxaRepo = SymbosuEntityManager::getEntityManager()->getRepository("Taxa");
+  			#$spp = $taxaRepo->createQueryBuilder("t")
+				$spp = $em->createQueryBuilder()
+					->select(["t.tid, t.sciname, t.securitystatus"])
+					->from("Taxa", "t")
+					->innerJoin("Taxaenumtree", "te", "WITH", "t.tid = te.tid")
+					->innerJoin("Taxstatus", "ts", "WITH", "t.tid = ts.tidaccepted")
+					->where("te.taxauthid = 1")
+					->andWhere("ts.taxauthid = 1")
+					->andWhere("t.rankid >= 220")
+					->andWhere("te.parenttid = :tid")
+					->setParameter("tid", $tid)
+					->distinct()
+					->getQuery()
+					->execute();
+									
+				foreach($spp as $n => $rowArr){
+  				$taxaModel = $taxaRepo->find($rowArr['tid']);
+  				$taxa = TaxaManager::fromModel($taxaModel);
+      		$tj = taxaManagerToJSON($taxa);
+  				$return[] = $tj;
+		
+				}
+			}
+		}
+		return $return;
+	}
+
+  private function populateGardenDescription($tid = null) {
+  	$return = '';
+  	$descriptions = $this->getDescriptions();
+  	foreach ($descriptions as $key => $block) {
+  		if (strcasecmp($block['caption'],'Gardening with Natives') === 0) {
+  			$statement = array_shift($block['desc']);		
+  			if (!empty($statement)) {
+	  			$return = $statement;
+	  		}
+  		}
+  	}
+  	return $return;  
+  }
+  private function populateDescriptions($tid = null) {
+  	$retArr = array();
+  	if ($tid) {
+			$em = SymbosuEntityManager::getEntityManager();
+			$rsArr = $em->createQueryBuilder()
+				->select(["ts.tid, tdb.tdbid, tdb.caption, tdb.source, tdb.sourceurl, tdb.language, tds.tdsid, tds.heading, tds.statement, tds.displayheader"])
+				->from("Taxstatus", "ts")
+				->innerJoin("Taxadescrblock", "tdb", "WITH", "ts.tid = tdb.tid")
+				->innerJoin("Taxadescrstmt", "tds", "WITH", "tds.tdbid = tdb.tdbid")
+				->where("ts.tidaccepted = :tid")
+				->andWhere("ts.taxauthid = 1")
+				->orderBy("tdb.displaylevel,tds.sortsequence")
+				->setParameter("tid", $tid)
+				->getQuery()
+				->execute();
+				
+				/* copied from TaxonProfileManager */
+        //Get descriptions associated with accepted name only
+				$usedCaptionArr = array();
+				foreach($rsArr as $n => $rowArr){
+					if($rowArr['tid'] == $tid){
+						$retArr = $this->loadDescriptionArr($rowArr, $retArr);
+						$usedCaptionArr[] = $rowArr['caption'];
+					}
+				}
+				//Then add description linked to synonyms ONLY if one doesn't exist with same caption
+				reset($rsArr);
+				foreach($rsArr as $n => $rowArr){
+					if($rowArr['tid'] != $tid && !in_array($rowArr['caption'], $usedCaptionArr)){
+						$retArr = $this->loadDescriptionArr($rowArr, $retArr);
+					}
+				}
+        ksort($retArr);
+		}
+		if (sizeof($retArr)) {
+    	return $retArr[0];#I don't know what situation would require the whole array, so this for now
+		}else{
+			return [];
+		}
+   	#return $retArr;
+    /*
     $result = "";
     if (count($stmts) > 0) {
       // Somebody must've copied & pasted from Word or something
@@ -134,10 +312,23 @@ class TaxaManager {
       if (!$result) {
         return $stmts[0]["statement"];
       }
-    }
-    return $result;
+    }*/
   }
-
+  /* copied from TaxonProfileManager */
+	private function loadDescriptionArr($rowArr,$retArr){
+		$indexKey = 0;
+		#if(!in_array(strtolower($rowArr['language']), $this->langArr)){
+		#	$indexKey = 1;
+		#}
+		if(!isset($retArr[$indexKey]) || !array_key_exists($rowArr['tdbid'],$retArr[$indexKey])){
+			$retArr[$indexKey][$rowArr['tdbid']]["caption"] = $rowArr['caption'];
+			$retArr[$indexKey][$rowArr['tdbid']]["source"] = $rowArr['source'];
+			$retArr[$indexKey][$rowArr['tdbid']]["url"] = $rowArr['sourceurl'];
+		}
+		$retArr[$indexKey][$rowArr['tdbid']]["desc"][$rowArr['tdsid']] = ($rowArr['displayheader'] && $rowArr['heading']?"<b>".$rowArr['heading']."</b>: ":"").$rowArr['statement'];
+		return $retArr;
+	}
+  
   private static function populateChecklists($tid) {
     $em = SymbosuEntityManager::getEntityManager();
     $clQuery = $em->createQueryBuilder()
@@ -153,6 +344,8 @@ class TaxaManager {
       $clQuery->getQuery()->execute()
     );
   }
+  
+
 
   private static function getEmptyCharacteristics() {
     return [
@@ -183,7 +376,80 @@ class TaxaManager {
       ]
     ];
   }
-
+  private function populateSynonyms($tid) {
+    $em = SymbosuEntityManager::getEntityManager();
+    $synonyms = $em->createQueryBuilder()
+      ->select(["t.sciname", "t.author"])
+      ->from("taxstatus", "ts")
+      ->innerJoin("taxa", "t", "WITH", "ts.tid = t.tid")
+      ->where("ts.tidaccepted = :tid")
+      ->andWhere("t.tid != :tid")
+      ->andWhere("ts.taxauthid = 1")
+      ->andWhere("ts.sortsequence < 90")
+      ->setParameter("tid", $tid)
+      ->orderBy("ts.sortsequence, t.sciname")->getQuery()->execute();
+    /*$synonyms = array_map(
+      function ($sy) { return $sy["sciname"] . " " . $sy["author"]; },
+      $synonyms->getQuery()->execute()
+    );*/
+    return $synonyms;
+  }
+  private function populateOrigin($tid = null){
+  	$return = null;
+  	if ($tid) {
+			$em = SymbosuEntityManager::getEntityManager();
+			$origin = $em->createQueryBuilder()
+				->select(["ctl.nativity"])
+				->from("Fmchklsttaxalink", "ctl")
+				->where("ctl.tid = :tid")
+				->andWhere("ctl.clid = 1")
+				->setParameter("tid", $tid)
+      	->getQuery()
+      	->execute();
+			$return = $origin[0]['nativity'];
+		}
+		return $return;
+ 	}
+ 	private function populateStatusFields($tid = null) {
+  	$return = null;
+  	if ($tid) {
+			$em = SymbosuEntityManager::getEntityManager();
+			$status = $em->createQueryBuilder()
+				->select(["ts.family, ts.parenttid"])
+				->from("Taxstatus", "ts")
+				->where("ts.tidaccepted = :tid")
+				->setParameter("tid", $tid)
+      	->getQuery()
+      	->execute();
+			$return = $status[0];
+		}
+		return $return;
+ 	
+ 	}
+  
+  private function populateTaxalinks($tid = null){
+  	$return = null;
+  	$this->rarePlantFactSheet = '';
+  	if ($tid) {
+			$em = SymbosuEntityManager::getEntityManager();
+			$links = $em->createQueryBuilder()
+				->select(["tl.url","tl.title"])
+				->from("Taxalinks", "tl")
+				->where("tl.tid = :tid")
+				->setParameter("tid", $tid)
+      	->getQuery()
+      	->execute();
+		}
+		
+  	foreach ($links as $idx => $arr) {
+  		if (strcasecmp($arr['title'],"Rare Plant Fact Sheet") === 0) {
+  			$this->rarePlantFactSheet = $arr['url'];
+  			unset($links[$idx]);
+  		}
+  	}
+		$this->taxalinks = $links;
+ 	}
+ 	
   private static function populateCharacteristics($tid) {
     $em = SymbosuEntityManager::getEntityManager();
     $attributeQuery = $em->createQueryBuilder()
@@ -277,7 +543,7 @@ class TaxaManager {
   private static function populateImages($tid) {
     $em = SymbosuEntityManager::getEntityManager();
     $images = $em->createQueryBuilder()
-      ->select(["i.imgid, i.thumbnailurl", "i.url", "i.photographer", "i.owner", "i.copyright", "i.notes","o.year", "o.month", "o.day","o.country","o.stateprovince","o.county","o.locality","o.recordedby","c.collectionname"])#
+      ->select(["i.imgid, i.thumbnailurl", "i.url", "i.photographer", "i.owner", "i.copyright", "i.notes","o.year", "o.month", "o.day","o.country","o.stateprovince","o.county","o.locality","o.recordedby","o.basisofrecord","c.collectionname"])#
       ->from("Images", "i")
       ->innerJoin("omoccurrences","o","WITH","i.occid = o.occid")
       ->innerJoin("omcollections","c","WITH","c.collid = o.collid")
@@ -289,7 +555,7 @@ class TaxaManager {
     
     $images = array_map("TaxaManager::processImageData",$images);
     /*
-    #too slow
+    #getimagesize is too slow here
     foreach ($images as $key => $image) {
     	list($width, $height) = getimagesize($image['url']);
     	echo $width;
@@ -336,6 +602,9 @@ class TaxaManager {
     return $basename;
   }
   
+  
+#    	global $LANG_TAG;
+ #   var_dump($LANG_TAG);
   private static function getAllCids() {
     return [
       # Basic characteristics

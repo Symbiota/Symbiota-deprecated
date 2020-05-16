@@ -60,7 +60,6 @@ class TaxaApp extends React.Component {
       vernacularNames: [],
       images: [],
       description: "",
-      isGardenTaxa: false,
       highlights: {},
       plantFacts: {},
       growthMaintenance: {},
@@ -90,7 +89,6 @@ class TaxaApp extends React.Component {
         .then((res) => {
        		// /taxa/rpc/api.php?taxon=2454
           res = JSON.parse(res);
-
           let foliageType = res.characteristics.features.foliage_type;
           foliageType = foliageType.length > 0 ? foliageType[0] : null;
 
@@ -124,8 +122,7 @@ class TaxaApp extends React.Component {
             basename: res.vernacular.basename,
             vernacularNames: res.vernacular.names,
             images: res.images,
-            isGardenTaxa: res.isGardenTaxa,
-            description: res.description,
+            description: res.gardenDescription,
             highlights: {
               "Plant type": plantType,
               "Size at maturity": sizeMaturity,

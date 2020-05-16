@@ -12,6 +12,7 @@ import httpGet from "../common/httpGet.js";
 import {addUrlQueryParam, getUrlQueryParams} from "../common/queryParams.js";
 import {getCommonNameStr, getGardenTaxaPage} from "../common/taxaUtils";
 
+
 const CLIENT_ROOT = "..";
 
 const CIDS_PLANT_FEATURE = {

@@ -1,11 +1,19 @@
 import React from "react";
 import Slider from "react-slick";
+/*
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { library } from "@fortawesome/fontawesome-svg-core";
+import { faCoffee } from '@fortawesome/free-solid-svg-icons'
+library.add(faCoffee)
 
+  nextArrow: <FontAwesomeIcon icon="faCoffee" />,
+  prevArrow: <FontAwesomeIcon icon="faCoffee" />
+*/
 const slickSettings = {
   autoplay: true,
   autoplaySpeed: 5000,
   dots: false,
-  infinite: true,
+  infinite: false,
   slidesToShow: 5,
   slidesToScroll: 1
 };

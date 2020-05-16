@@ -1,4 +1,5 @@
 @import "./mixins.less";
+@import '../../node_modules/react-tabs/style/react-tabs.less';
 
 #react-taxa-garden-app {
   .text-drk-grn();
@@ -25,8 +26,9 @@
   }  
   /*
   .slick-prev {
-  	&:before {
-  		content: '<';
+  	&:after {
+	  content: "\f104";
+    font: 40px/1 'FontAwesome';
   	}
   }
   .slick-next {
@@ -79,7 +81,7 @@
 				height: 77%;
 				.slick-list {
 					.slick-track {
-						.slick-slide {		
+						.slick-slide {	
 							div {
 								max-height: 100%;
 							}
@@ -172,3 +174,60 @@
 		
 	}
 }
+#react-taxa-app {
+	.img-main-wrapper {
+		max-height: 485px;
+		overflow: hidden;
+		img {
+			/*width: 100%;*/
+		}
+	}
+	ul.single-border-item {
+		width: 100%;
+		li {
+			display: block;
+		}
+	}
+	.related {
+		.related-sciname {
+			font-style: italic;
+			font-weight: bold;
+		}
+		.fa-arrow-circle-up {
+			transform: rotate(315deg);
+			color: @med-green;
+		}
+		.fa-arrow-circle-down {
+			transform: rotate(315deg);
+			color: @med-green;
+		}
+	}
+	.fa-edit {
+		color: @med-green;
+	}
+	.synonym-item {
+		.synonym-sciname {
+			font-style: italic;
+		}
+	}
+	.reference {
+		text-align: right;
+		margin-bottom: 1rem;
+	}
+  .slick-slide {
+		height: auto;
+	}
+	.spp-wrapper {
+		display: flex;
+		flex-flow: row wrap;
+		.card {
+			flex-basis: 20%;
+			h4 {
+				font-size: .8em;
+				font-style: italic;
+				text-align: center;
+			}
+		}
+	}
+}
+

@@ -30,16 +30,31 @@ class Taxadescrstmt
   /**
    * @var string
    *
+   * @ORM\Column(name="heading")
+   */
+  private $heading;
+  
+  /**
+   * @var string
+   *
    * @ORM\Column(name="statement")
    */
   private $statement;
 
+  /**
+   * @var int
+   *
+   * @ORM\Column(name="displayheader")
+   */
+  private $displayheader;
+  
   /**
    * @var integer
    *
    * @ORM\Column(name="sortsequence")
    */
   private $sortsequence;
+  
 
   public function getTdsid() {
     return $this->tdsid;

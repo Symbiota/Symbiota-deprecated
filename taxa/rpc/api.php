@@ -4,7 +4,6 @@ include_once("../../config/symbini.php");
 include_once("$SERVER_ROOT/config/SymbosuEntityManager.php");
 include_once("$SERVER_ROOT/classes/Functional.php");
 include_once("$SERVER_ROOT/classes/TaxaManager.php");
-include_once("{$SERVER_ROOT}/classes/OSUTaxaManager.php");
 
 $result = [];
 
@@ -14,14 +13,25 @@ function getEmptyTaxon() {
   return [
     "tid" => -1,
     "sciname" => '',
-    "description" => '',
-    "isGardenTaxa" => false,
+    "author" => '',
+    "parentTid" => -1,
+    "rankId" => -1,
+    "descriptions" => [],
+    "gardenDescription" => '',
+    "gardenId" => -1,
     "images" => [],
+    "imagesBasis" => [],
     "vernacular" => [
       "basename" => '',
       "names" => []
     ],
-    "characteristics" => []
+    "synonyms" => [],
+    "taxalinks" => [],
+    "rarePlantFactSheet" => '',
+    "origin"	=> '',
+    "family" 	=> '',
+    "characteristics" => [],
+    "spp" => [],
   ];
 }
 
@@ -32,31 +42,26 @@ function taxaManagerToJSON($taxaObj) {
   if ($taxaObj !== null) {
     $result["tid"] = $taxaObj->getTid();
     $result["sciname"] = $taxaObj->getSciname();
-    $result["description"] = $taxaObj->getDescription();
-    $result["isGardenTaxa"] = $taxaObj->isGardenTaxa();
+    $result["parentTid"] = $taxaObj->getParentTid();   
+    $result["rankId"] = $taxaObj->getRankId();  
+    $result["author"] = $taxaObj->getAuthor();
+    $result["descriptions"] = $taxaObj->getDescriptions();
+    $result["gardenDescription"] = $taxaObj->getGardenDescription();
+    $result["gardenId"] = $taxaObj->getGardenId();
     $result["images"] = $taxaObj->getImages();
+    $result["imagesBasis"] = $taxaObj->getImagesByBasisOfRecord();
     $result["vernacular"] = [
       "basename" => $taxaObj->getBasename(),
       "names" => $taxaObj->getVernacularNames()
     ];
+    $result["synonyms"] = $taxaObj->getSynonyms();
+    $result["origin"] = $taxaObj->getOrigin();
+    $result["family"] = $taxaObj->getFamily();
+    $result["taxalinks"] = $taxaObj->getTaxalinks();
+    $result["rarePlantFactSheet"] = $taxaObj->getRarePlantFactSheet();
     $result["characteristics"] = $taxaObj->getCharacteristics();
     $result["checklists"] = $taxaObj->getChecklists();
-      
-    $OSUManager = new OSUTaxaManager();
-    #if($taxAuthId || $taxAuthId === "0") $OSUManager->setTaxAuthId($taxAuthId);
-    #if($clValue) $OSUManager->setClName($clValue);
-    #if($projValue) $OSUManager->setProj($projValue);
-    #if($lang) $OSUManager->setLanguage($lang);
-    #if($taxonValue) {
-        $OSUManager->setTaxon($result["tid"]);
-        $OSUManager->setAttributes();
-        $result["synonyms"] = $OSUManager->getSynonymArr();
-        $result["vernaculars"] = $OSUManager->getVernacularStr();
-        $result["family"] = $OSUManager->getFamily();
-        $result["links"] = $OSUManager->getTaxaLinks();
-    #}
-    
-    
+    $result["spp"] = $taxaObj->getSpp();     
   }
   return $result;
 }
