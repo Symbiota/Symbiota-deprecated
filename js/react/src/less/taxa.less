@@ -43,7 +43,68 @@
 		max-height: 150px;
 		overflow: hidden; 
   }
-  
+
+}
+#react-taxa-app {
+	.img-main-wrapper {
+		max-height: 485px;
+		overflow: hidden;
+		img {
+			/*width: 100%;*/
+		}
+	}
+	ul.single-border-item {
+		width: 100%;
+		li {
+			display: block;
+		}
+	}
+	.related {
+		.related-sciname {
+			font-style: italic;
+			font-weight: bold;
+		}
+		.fa-arrow-circle-up {
+			transform: rotate(315deg);
+			color: @med-green;
+		}
+		.fa-arrow-circle-down {
+			transform: rotate(315deg);
+			color: @med-green;
+		}
+	}
+	.fa-edit {
+		color: @med-green;
+	}
+	.synonym-item {
+		.synonym-sciname {
+			font-style: italic;
+		}
+	}
+	.reference {
+		text-align: right;
+		margin-bottom: 1rem;
+	}
+  .slick-slide {
+		height: auto;
+	}
+	.spp-wrapper {
+		display: flex;
+		flex-flow: row wrap;
+		.card {
+			flex-basis: 20%;
+			h4 {
+				font-size: .8em;
+				font-style: italic;
+				text-align: center;
+			}
+		}
+	}
+}
+
+
+#react-taxa-garden-app,
+#react-taxa-app {
   .modal-backdrop {
 		position: 'fixed';
 		top: 64;
@@ -54,7 +115,9 @@
     background-color: @dark-gray;
 		padding: 32 50 0;
 	};
-
+	.close-modal {
+		cursor: pointer;
+	}
 	// The modal "window"
 	.modal-content {
 		background-color: transparent;
@@ -171,63 +234,5 @@
 				padding: .3em;
 			}
 		}
-		
 	}
 }
-#react-taxa-app {
-	.img-main-wrapper {
-		max-height: 485px;
-		overflow: hidden;
-		img {
-			/*width: 100%;*/
-		}
-	}
-	ul.single-border-item {
-		width: 100%;
-		li {
-			display: block;
-		}
-	}
-	.related {
-		.related-sciname {
-			font-style: italic;
-			font-weight: bold;
-		}
-		.fa-arrow-circle-up {
-			transform: rotate(315deg);
-			color: @med-green;
-		}
-		.fa-arrow-circle-down {
-			transform: rotate(315deg);
-			color: @med-green;
-		}
-	}
-	.fa-edit {
-		color: @med-green;
-	}
-	.synonym-item {
-		.synonym-sciname {
-			font-style: italic;
-		}
-	}
-	.reference {
-		text-align: right;
-		margin-bottom: 1rem;
-	}
-  .slick-slide {
-		height: auto;
-	}
-	.spp-wrapper {
-		display: flex;
-		flex-flow: row wrap;
-		.card {
-			flex-basis: 20%;
-			h4 {
-				font-size: .8em;
-				font-style: italic;
-				text-align: center;
-			}
-		}
-	}
-}
-

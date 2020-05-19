@@ -2,6 +2,7 @@ import ReactDOM from "react-dom";
 import React from "react";
 import httpGet from "../common/httpGet.js";
 import { getUrlQueryParams } from "../common/queryParams.js";
+import {getGardenTaxaPage} from "../common/taxaUtils";
 import GardenCarousel from "../common/gardenCarousel.jsx";
 import ImageModal from "../common/modal.jsx";
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
@@ -11,6 +12,7 @@ import { library } from "@fortawesome/fontawesome-svg-core";
 import { faArrowCircleUp,faArrowCircleDown,faEdit } from '@fortawesome/free-solid-svg-icons'
 library.add(faArrowCircleUp,faArrowCircleDown,faEdit)
 
+const CLIENT_ROOT = "..";
 
 
 function stripHtml(str) {
@@ -28,7 +30,7 @@ function BorderedItem(props) {
 
   if (isArray) {
     value = (
-      <ul className="list-unstyled p-0 m-0">
+      <ul className="border-item list-unstyled p-0 m-0">
         { props.value.map((v) => <li key={ v }>{ v }</li>) }
       </ul>
     );
@@ -44,7 +46,7 @@ function BorderedItem(props) {
 function SynonymItem(props) {
   let value = props.value;
   return (
-    <div className={ "row dashed-border py-2" }>
+    <div className={ "synonym-item row dashed-border py-2" }>
       <div className="col font-weight-bold">Synonyms</div>
       <div className="col text-capitalize">{ 
       	Object.entries(value)
@@ -73,7 +75,7 @@ function MoreInfoItem(props) {
 						if (v.url.indexOf('pdf') > 0) {
 							return (
 								<li key={ v.url }>
-									<a href={v.url}><button className="d-block my-2 btn-primary"><img src="/images/pdf24.png" />{v.title}</button></a>
+									<a href={v.url}><button className="d-block my-2 btn-primary"><img src="{CLIENT_ROOT}/images/pdf24.png" />{v.title}</button></a>
 								</li>
 							)
 						}else{
@@ -90,7 +92,7 @@ function MoreInfoItem(props) {
   }
 
   return (
-    <div className={ "row dashed-border py-2" }>
+    <div className={ "more-info row dashed-border py-2" }>
       <div className="col font-weight-bold">{ props.keyName }</div>
       <div className="col text-capitalize">{ value }</div>
     </div>
@@ -157,7 +159,7 @@ function SideBarSection(props) {
     return showItem(v);
   });
   return (
-      <div className={ "mb-5 " + (itemKeys.length > 0 ? "" : "d-none") }>
+      <div className={ "sidebar-section mb-5 " + (itemKeys.length > 0 ? "" : "d-none") }>
         <h3 className="text-light-green font-weight-bold mb-3">{ props.title }</h3>
         {
           itemKeys.map((key) => {
@@ -188,8 +190,8 @@ function SppItem(props) {
 	return (
 		<div key={image.imgid} className="card">
 			<a href={sppUrl}>
-			<h4>{item.sciname}</h4>
-			<div style={{ position: "relative", width: "100%", height: "7em", borderRadius: "0.25em"}}>														
+				<h4>{item.sciname}</h4>
+				<div className="img-thumbnail" style={{ position: "relative", width: "100%", height: "7em", borderRadius: "0.25em"}}>														
 					<img
 						className="d-block"
 						style={{width: "100%", height: "100%", objectFit: "cover"}}
@@ -197,7 +199,10 @@ function SppItem(props) {
 						alt={image.thumbnailurl}
 					/>
 				</div>
-				</a>
+				<div className="map-preview">
+					<img src={ `${CLIENT_ROOT}/images/map-temp.png` }/>
+				</div>
+			</a>
 		</div>						
 	)
 
@@ -261,14 +266,13 @@ class TaxaChooser extends React.Component {
   
   render() {
 		const res = this.props.res;
-		console.log(res);
   	return (
 			<div className="container my-5 py-2 taxa-chooser" style={{ minHeight: "45em" }}>
 				<div className="row">
 
 					<div className="col">
 						<h1 className="text-capitalize">{ res.sciName } { res.author }</h1>
-						<h2 className="font-italic">{ res.family }</h2>
+						<h2 className="text-capitalize font-italic">{ res.family }</h2>
 						{ res.rankId > 140 && 
 							<div className="related">
 								<span className="related-links"> 
@@ -315,6 +319,7 @@ class TaxaDetail extends React.Component {
   }
 
 	toggleImageModal = (_currImage) => {
+		//console.log(_currImage);
 		this.setState({
 			currImage: _currImage	
 		});
@@ -324,13 +329,14 @@ class TaxaDetail extends React.Component {
   }
 	render() {
 		const res = this.props.res;
+		const allImages = res.images.HumanObservation.concat(res.images.PreservedSpecimen);
 		return (
 	
 			<div className="container my-5 py-2 taxa-detail" style={{ minHeight: "45em" }}>
 				<div className="row">
 					<div className="col">
 						<h1 className="text-capitalize">{ res.sciName } { res.author }</h1>
-						<h2 className="font-italic">{ res.vernacularNames[0] }</h2>
+						<h2 className="text-capitalize font-italic">{ res.vernacularNames[0] }</h2>
 					</div>
 					<div className="col-auto">
 						<button className="d-block my-2 btn-primary">Printable page</button>
@@ -400,16 +406,6 @@ class TaxaDetail extends React.Component {
 								}
 							</GardenCarousel>
 							</div>
-							<ImageModal 
-								show={res.isOpen}
-								currImage={res.currImage}
-								images={res.images.HumanObservation}
-								onClose={this.toggleImageModal}
-							>
-								<h3>
-									<span className="text-capitalize">{ res.vernacularNames[0] }</span> photos
-								</h3>
-							</ImageModal>
 						</div>
 					
 				 
@@ -430,7 +426,7 @@ class TaxaDetail extends React.Component {
 															style={{width: "100%", height: "100%", objectFit: "cover"}}
 															src={image.thumbnailurl}
 															alt={image.thumbnailurl}
-															onClick={() => this.toggleImageModal(index)}
+															onClick={() => this.toggleImageModal(index + res.images.HumanObservation.length)}
 														/>
 													</div>
 												</div>
@@ -441,20 +437,20 @@ class TaxaDetail extends React.Component {
 							</GardenCarousel>
 							</div>
 							<ImageModal 
-								show={res.isOpen}
-								currImage={res.currImage}
-								images={res.images.PreservedSpecimen}
+								show={this.state.isOpen}
+								currImage={this.state.currImage}
+								images={allImages}
 								onClose={this.toggleImageModal}
 							>
 								<h3>
-									<span className="text-capitalize">{ res.vernacularNames[0] }</span> herbarium specimens
+									<span className="text-capitalize">{ res.vernacularNames[0] }</span> images
 								</h3>
 							</ImageModal>
 						</div>            
 					
 					
 					</div>
-					<div className="col-auto mx-4">
+					<div className="col-auto mx-4 sidebar">
 						<SideBarSection title="Highlights" items={ res.highlights } />
 						<SideBarSection title="Web links" items={ res.taxalinks } />
 					</div>
@@ -524,7 +520,7 @@ class TaxaApp extends React.Component {
 						moreInfo.push({title: "Rare Plant Fact Sheet", url: res.rarePlantFactSheet});
 					}
 					if (res.gardenId > 0) {
-						let gardenUrl = '/taxa/garden.php?taxon=' + res.gardenId;
+						let gardenUrl = getGardenTaxaPage(CLIENT_ROOT, res.gardenId);
 						moreInfo.push({title: "Garden Fact Sheet", url: gardenUrl});
 					}
 					
@@ -575,15 +571,11 @@ class TaxaApp extends React.Component {
   }//componentDidMount
 
 	render() {
-		//choose here
+		//choose page
 		if (this.state.rankId <= 180) {
-			return <TaxaChooser 
-				res = { this.state }
-			/>;
+			return <TaxaChooser res = { this.state } />;
 		}else{
-			return <TaxaDetail 
-				res = { this.state }
-			/>;
+			return <TaxaDetail res = { this.state } />;
 		}
   }
 }

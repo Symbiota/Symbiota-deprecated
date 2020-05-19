@@ -3,7 +3,12 @@ import PropTypes from 'prop-types';
 //import httpGet from "../common/httpGet.js";
 const CLIENT_ROOT = "..";
 import ImageCarousel from "../common/imageCarousel.jsx";
-import IconButton from "../common/iconButton.jsx";
+//import IconButton from "../common/iconButton.jsx";
+
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { library } from "@fortawesome/fontawesome-svg-core";
+import { faTimesCircle } from '@fortawesome/free-solid-svg-icons'
+library.add(faTimesCircle)
 
 class ImageModal extends React.Component {//https://daveceddia.com/open-modal-in-react/
 
@@ -26,10 +31,8 @@ class ImageModal extends React.Component {//https://daveceddia.com/open-modal-in
 
 
           <div className="footer">
-            <IconButton
-							icon={ `${CLIENT_ROOT}/images/garden/x-out.png` }
-							onClick={this.props.onClose}
-						/>    
+						<FontAwesomeIcon className="close-modal" icon="times-circle" 
+							onClick={this.props.onClose}/>
           </div>
         </div>
       </div>
