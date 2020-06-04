@@ -1,0 +1,68 @@
+@import "./mixins.less";
+
+
+#react-inventory-app {
+	.inventory-header {//common to both chooser and detail view
+		width: 100%;
+		height: 155px;
+		background-image: url("/images/inventory/explore_subhead.jpg");
+		background-size: cover;
+		color: white;
+		a {
+			color: white !important;
+		}
+	}
+
+	.inventory-chooser {//select from a list of projects
+		.project-item {
+			clear: both;
+			.project-header {
+				display: flex;
+				flex-flow: row nowrap;
+				background-color: @light-green;
+			}
+			.more-less {
+				clear: both;
+			}
+			.project-image {
+				float: left;
+			}
+		}
+	}
+	.inventory-detail {//view project detail
+		.table-header {
+			background-color: @light-green;
+			display: flex;
+			flex-flow: row nowrap;
+			.table-filter {
+				input {
+					font-size: 1.3rem;
+					&::placeholder {
+						font-size: 1rem;
+					}
+				}
+			}
+			.table-nav {
+				display: flex;
+				flex-flow: row nowrap;
+				.table-sort {
+					button {
+						color: @med-green;
+						background-color: transparent;
+						&.sort-asc,
+						&.sort-desc {
+							color: black;
+							background-color: white !important;
+						}
+					}
+				}
+				.lngSort img {//East-west icons
+					height: 34px;
+				}
+				.nameSort {
+					font-size: 1.4em;
+				}
+			}
+		}	
+	}
+}
