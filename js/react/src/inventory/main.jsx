@@ -77,7 +77,7 @@ class InventoryDetail extends React.Component {
 				
 				let googleMapUrl = '';				
 				if (res.checklists.length > 0) {
-					googleMapUrl = 'https://maps.google.com/maps/api/staticmap?maptype=terrain&key=AIzaSyBCKVDTse49LEVHZ6gWDl1OD4WihbS4Xfc';
+					googleMapUrl = 'https://maps.google.com/maps/api/staticmap?maptype=terrain&key=AIzaSyBmcl6Y-gu3bGdmp7LIQaDCa43TKLrP7qY';
 					googleMapUrl += '&size=640x400&zoom=6';
 					let latLng = res.checklists.map((checklist) => checklist.latcentroid + ',' + checklist.longcentroid);
 					googleMapUrl += '&markers=size:tiny%7C' + latLng.join("%7C");					
