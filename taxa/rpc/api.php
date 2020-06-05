@@ -9,69 +9,13 @@ $result = [];
 
 $CLID_GARDEN_ALL = 54;
 
-function getEmptyTaxon() {
-  return [
-    "tid" => -1,
-    "sciname" => '',
-    "author" => '',
-    "parentTid" => -1,
-    "rankId" => -1,
-    "descriptions" => [],
-    "gardenDescription" => '',
-    "gardenId" => -1,
-    "images" => [],
-    "imagesBasis" => [],
-    "vernacular" => [
-      "basename" => '',
-      "names" => []
-    ],
-    "synonyms" => [],
-    "taxalinks" => [],
-    "rarePlantFactSheet" => '',
-    "origin"	=> '',
-    "family" 	=> '',
-    "characteristics" => [],
-    "spp" => [],
-  ];
-}
-
-function taxaManagerToJSON($taxaObj) {
-
-  $result = getEmptyTaxon();
-
-  if ($taxaObj !== null) {
-    $result["tid"] = $taxaObj->getTid();
-    $result["sciname"] = $taxaObj->getSciname();
-    $result["parentTid"] = $taxaObj->getParentTid();   
-    $result["rankId"] = $taxaObj->getRankId();  
-    $result["author"] = $taxaObj->getAuthor();
-    $result["descriptions"] = $taxaObj->getDescriptions();
-    $result["gardenDescription"] = $taxaObj->getGardenDescription();
-    $result["gardenId"] = $taxaObj->getGardenId();
-    $result["images"] = $taxaObj->getImages();
-    $result["imagesBasis"] = $taxaObj->getImagesByBasisOfRecord();
-    $result["vernacular"] = [
-      "basename" => $taxaObj->getBasename(),
-      "names" => $taxaObj->getVernacularNames()
-    ];
-    $result["synonyms"] = $taxaObj->getSynonyms();
-    $result["origin"] = $taxaObj->getOrigin();
-    $result["family"] = $taxaObj->getFamily();
-    $result["taxalinks"] = $taxaObj->getTaxalinks();
-    $result["rarePlantFactSheet"] = $taxaObj->getRarePlantFactSheet();
-    $result["characteristics"] = $taxaObj->getCharacteristics();
-    $result["checklists"] = $taxaObj->getChecklists();
-    $result["spp"] = $taxaObj->getSpp();     
-  }
-  return $result;
-}
 
 function getTaxon($tid) {
   $em = SymbosuEntityManager::getEntityManager();
   $taxaRepo = $em->getRepository("Taxa");
   $taxaModel = $taxaRepo->find($tid);
   $taxa = TaxaManager::fromModel($taxaModel);
-  return taxaManagerToJSON($taxa);
+  return TaxaManager::taxaManagerToJSON($taxa);
 }
 
 function searchTaxa($searchTerm) {
@@ -89,7 +33,7 @@ function searchTaxa($searchTerm) {
   if ($taxaResults != null) {
     foreach ($taxaResults as $t) {
       $tm = TaxaManager::fromModel($t);
-      $tj = taxaManagerToJSON($tm);
+      $tj = TaxaManager::taxaManagerToJSON($tm);
       array_push($results, $tj);
     }
   }
@@ -111,7 +55,7 @@ function getSubTaxa($parentTid) {
   if ($taxaResults != null) {
     foreach ($taxaResults as $t) {
       $tm = TaxaManager::fromModel($t);
-      $tj = taxaManagerToJSON($tm);
+      $tj = TaxaManager::taxaManagerToJSON($tm);
       array_push($results, $tj);
     }
   }

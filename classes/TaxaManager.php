@@ -242,7 +242,7 @@ class TaxaManager {
 				foreach($spp as $n => $rowArr){
   				$taxaModel = $taxaRepo->find($rowArr['tid']);
   				$taxa = TaxaManager::fromModel($taxaModel);
-      		$tj = taxaManagerToJSON($taxa);
+      		$tj = TaxaManager::taxaManagerToJSON($taxa);
   				$return[] = $tj;
 		
 				}
@@ -635,6 +635,64 @@ class TaxaManager {
       TaxaManager::$CID_ECOREGION
     ];
   }
+  
+  public static function taxaManagerToJSON($taxaObj) {
+
+		$result = TaxaManager::getEmptyTaxon();
+
+		if ($taxaObj !== null) {
+			$result["tid"] = $taxaObj->getTid();
+			$result["sciname"] = $taxaObj->getSciname();
+			$result["parentTid"] = $taxaObj->getParentTid();   
+			$result["rankId"] = $taxaObj->getRankId();  
+			$result["author"] = $taxaObj->getAuthor();
+			$result["descriptions"] = $taxaObj->getDescriptions();
+			$result["gardenDescription"] = $taxaObj->getGardenDescription();
+			$result["gardenId"] = $taxaObj->getGardenId();
+			$result["images"] = $taxaObj->getImages();
+			$result["imagesBasis"] = $taxaObj->getImagesByBasisOfRecord();
+			$result["vernacular"] = [
+				"basename" => $taxaObj->getBasename(),
+				"names" => $taxaObj->getVernacularNames()
+			];
+			$result["synonyms"] = $taxaObj->getSynonyms();
+			$result["origin"] = $taxaObj->getOrigin();
+			$result["family"] = $taxaObj->getFamily();
+			$result["taxalinks"] = $taxaObj->getTaxalinks();
+			$result["rarePlantFactSheet"] = $taxaObj->getRarePlantFactSheet();
+			$result["characteristics"] = $taxaObj->getCharacteristics();
+			$result["checklists"] = $taxaObj->getChecklists();
+			$result["spp"] = $taxaObj->getSpp();     
+		}
+		return $result;
+	}
+	public static function getEmptyTaxon() {
+		return [
+			"tid" => -1,
+			"sciname" => '',
+			"author" => '',
+			"parentTid" => -1,
+			"rankId" => -1,
+			"descriptions" => [],
+			"gardenDescription" => '',
+			"gardenId" => -1,
+			"images" => [],
+			"imagesBasis" => [],
+			"vernacular" => [
+				"basename" => '',
+				"names" => []
+			],
+			"synonyms" => [],
+			"taxalinks" => [],
+			"rarePlantFactSheet" => '',
+			"origin"	=> '',
+			"family" 	=> '',
+			"characteristics" => [],
+			"spp" => [],
+		];
+	}
+
+  
 }
 
 ?>
