@@ -43,19 +43,31 @@ a {
 
   color: white !important;
   background-image: linear-gradient(#5FB021, #468019) !important;
-  font-weight: bold;
+  font-weight: 600;
+  font-size: 14px;
   border: none;
   border-radius: 0.5em;
+  padding: 0.3em 0.6em;
+  text-align: left;
+  line-height: 16px;
 
   &:active {
     color: @dark-green !important;
     opacity: 90%;
   }
-  /*&.pdf {
+  &.pdf {
   	&:before {
-  		content: url('/images/pdf24.png');
-  	}
-  }*/
+      position: relative;
+      top: 0.1em;
+      background-image: url('@{subdir}/images/pdf24.png');
+      background-repeat: no-repeat;
+      background-size: 16px 16px;
+      display: inline-block;
+      width: 20px;
+      height: 16px;
+      content:"";
+    }
+  }
 }
 
 .btn-secondary {
@@ -138,6 +150,120 @@ img {
 
     &:focus, &:active {
       border-color: @med-green;
+    }
+  }
+}
+
+#react-taxa-app{
+
+  h1{
+    font-weight: 700;
+  }
+  h2{
+    font-weight: 600;
+  }
+  h3{
+    font-size: 1.4rem;
+    color: @med-green;
+  }
+  .description-tabs{
+
+    .react-tabs__tab-list{
+      margin-bottom: 0px;
+      font-weight: 600;
+      border-bottom: 2px solid @med-green;
+
+      li{
+        margin-bottom: -1px;
+      }
+
+      .react-tabs__tab{
+        background-color: @med-green;
+        color: white;
+        border-top: 2px solid @med-green;
+        border-bottom: 2px solid @med-green;
+        border-left: 2px solid @med-green;
+        border-right: 2px solid @med-green;
+        margin-right: 0.5em;
+        border-top-left-radius: 10px;
+        border-top-right-radius: 10px;
+
+        &.react-tabs__tab--selected{
+          border-bottom: 2px solid @ivory;
+          background-color: @ivory;
+          color: black;
+
+        }
+      }
+    }
+
+    .react-tabs__tab-panel{
+      background-color: @ivory;
+      padding: 1.8em;
+      border-width: 2px;
+      border-left: @med-green 2px solid;
+      border-right: @med-green 2px solid;
+      border-bottom: @med-green 2px solid;
+
+      .reference{
+        font-style: italic;
+        font-weight: bold;
+      }
+    }
+  }
+
+  .slick-next, .slick-prev{
+    color: @med-green;
+  }
+
+  .card {
+    margin-right: 8px;
+  }
+
+  #subspecies .card{
+    box-shadow: 2px 4px #999;
+  }
+
+  .sidebar-section {
+    font-size: 14px;
+    font-weight: 400;
+
+    h3 {
+      font-size: 1.2rem;
+      margin-bottom: 0.2em !important;
+    }
+
+    .related-sciname {
+      font-size: 18px;
+      line-height: 14px;
+    }
+
+    .related,
+    .related-sciname,
+    .related-nav,
+    .col {
+      padding-left: 0px;
+      padding-right: 0px;
+    }
+
+    .row {
+      margin-left: 0px;
+      margin-right: 0px;
+      padding-top: .2rem !important;
+      padding-bottom: .2rem !important;
+    }
+
+    &.weblinks {
+
+      li {
+        padding-top: .2rem !important;
+        padding-bottom: .2rem !important;
+
+        a {
+          font-weight: bold;
+          text-decoration: underline;
+        }
+      }
     }
   }
 }

@@ -46,7 +46,7 @@ function BorderedItem(props) {
 function SynonymItem(props) {
   let value = props.value;
   return (
-    <div className={ "synonym-item row dashed-border py-2" }>
+    <div className={ "synonym-item row dashed-border py-1" }>
       <div className="col font-weight-bold">Synonyms</div>
       <div className="col text-capitalize">{ 
       	Object.entries(value)
@@ -159,7 +159,7 @@ function SideBarSection(props) {
     return showItem(v);
   });
   return (
-      <div className={ "sidebar-section mb-5 " + (itemKeys.length > 0 ? "" : "d-none") }>
+      <div className={ "sidebar-section mb-5 " + props.classes + ' ' + (itemKeys.length > 0 ? "" : "d-none") }>
         <h3 className="text-light-green font-weight-bold mb-3">{ props.title }</h3>
         {
           itemKeys.map((key) => {
@@ -181,6 +181,7 @@ function SideBarSection(props) {
     </div>
   );
 }
+
 function SppItem(props) {
 	const item = props.item;
 	const image = item.images[0];
@@ -343,8 +344,8 @@ class TaxaDetail extends React.Component {
 						<button className="d-block my-2 btn-secondary" disabled={ true }>Add to basket</button>
 					</div>
 				</div>
-				<div className="row mt-2">
-					<div className="col">
+				<div className="row mt-2 row-cols-sm-2">
+					<div className="col-sm-8 px-4">
 						<div className="img-main-wrapper">
 							<img
 								id="img-main"
@@ -450,9 +451,9 @@ class TaxaDetail extends React.Component {
 					
 					
 					</div>
-					<div className="col-auto mx-4 sidebar">
-						<SideBarSection title="Highlights" items={ res.highlights } />
-						<SideBarSection title="Web links" items={ res.taxalinks } />
+					<div className="col-sm-4 sidebar">
+						<SideBarSection title="Highlights" items={ res.highlights } classes="highlights" />
+						<SideBarSection title="Web links" items={ res.taxalinks} classes="weblinks" />
 					</div>
 				</div>
 			</div>
