@@ -560,7 +560,6 @@ class TaxaManager {
     	list($width, $height) = getimagesize($image['url']);
     	echo $width;
     }*/
-    
     $return = $images;
     return $return;
   }

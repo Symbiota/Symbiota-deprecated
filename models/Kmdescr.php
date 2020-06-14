@@ -5,7 +5,7 @@
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Kmcs
+ * Kmdescr
  *
  * @ORM\Table(name="kmdescr")
  * @ORM\Entity
