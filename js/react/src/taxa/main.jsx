@@ -9,8 +9,9 @@ import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 //import 'react-tabs/style/react-tabs.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { library } from "@fortawesome/fontawesome-svg-core";
-import { faArrowCircleUp,faArrowCircleDown,faEdit } from '@fortawesome/free-solid-svg-icons'
-library.add(faArrowCircleUp,faArrowCircleDown,faEdit)
+import { Link, DirectLink, Element, Events, animateScroll as scroll, scrollSpy, scroller } from 'react-scroll'
+import { faArrowCircleUp, faArrowCircleDown, faEdit, faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons'
+library.add(faArrowCircleUp, faArrowCircleDown, faEdit, faChevronDown, faChevronUp)
 
 const CLIENT_ROOT = "..";
 
@@ -43,26 +44,54 @@ function BorderedItem(props) {
     </div>
   );
 }
-function SynonymItem(props) {
-  let value = props.value;
-  return (
-    <div className={ "synonym-item row dashed-border py-1" }>
-      <div className="col font-weight-bold">Synonyms</div>
-      <div className="col text-capitalize">{ 
-      	Object.entries(value)
-      	.map(([key, obj]) => {
-      		return (
-      			<span key={ key} className={ "synonym-item" } >
-							<span className={ "synonym-sciname" }>{obj.sciname}</span>
-							<span className={ "synonym-author" }> { obj.author }</span>
-						</span>
-      		)
-      	})
-      	.reduce((prev, curr) => [prev, ', ', curr])
-       }
-      </div>
-    </div>
-  );
+class SynonymItem extends React.Component {
+  constructor(props) {
+    super(props);
+		this.state = {
+			showSynonyms: false,
+			//hiddenSynonyms: false,
+			maxSynonyms: 3
+		};
+  }
+  toggleSynonyms = () => {
+  	this.setState({ showSynonyms: !this.state.showSynonyms });
+  }
+	getRenderedItems() {
+		if (this.state.showSynonyms || this.props.value.length <= this.state.maxSynonyms) {
+			return this.props.value;
+		}
+		return this.props.value.slice(0,this.state.maxSynonyms);
+	}
+
+  render() {
+		return (
+			<div className={ "synonym-item row dashed-border py-1" }>
+				<div className="col font-weight-bold">Synonyms</div>
+				<div className="col text-capitalize">{ 
+					Object.entries(this.getRenderedItems())
+					.map(([key, obj]) => {
+						return (
+							<span key={ key} className={ "synonym-item" } >
+								<span className={ "synonym-sciname" }>{obj.sciname}</span>
+								<span className={ "synonym-author" }> { obj.author }</span>
+							</span>
+						)
+					})
+					.reduce((prev, curr) => [prev, ', ', curr])
+				 }
+				{this.props.value.length > this.state.maxSynonyms && 	
+					<span>...
+					<div className="up-down-toggle">
+						<FontAwesomeIcon icon={this.state.showSynonyms? "chevron-up" : "chevron-down"}
+							onClick={this.toggleSynonyms}		
+						/>
+					</div>
+					</span>
+				}
+				</div>
+			</div>
+		);
+	}
 }
 function MoreInfoItem(props) {
   let value = props.value;
@@ -75,13 +104,13 @@ function MoreInfoItem(props) {
 						if (v.url.indexOf('pdf') > 0) {
 							return (
 								<li key={ v.url }>
-									<a href={v.url}><button className="d-block my-2 btn-primary"><img src="{CLIENT_ROOT}/images/pdf24.png" />{v.title}</button></a>
+									<a href={v.url}><button className="d-block my-2 btn-primary"><img src={ `${CLIENT_ROOT}/images/pdf24.png` } />{v.title}</button></a>
 								</li>
 							)
 						}else{
 							return (
 								<li key={ v.url }>
-									<a href={v.url}><button className="pdf d-block my-2 btn-primary">{v.title}</button></a>
+									<a href={v.url}><button className="d-block my-2 btn-primary">{v.title}</button></a>
 								</li>
 							)
 						}
@@ -137,9 +166,17 @@ function RelatedBorderedItem(props) {
 						<span className="separator">/</span>
 					}
 					{ props.value[2].length > 0 && 
-						<a href={ props.value[2] }>
-							<FontAwesomeIcon icon="arrow-circle-down" />
-						</a>
+					
+						<Link 
+								to="spp-wrapper"
+								spy={true}
+								smooth={true}
+								duration={400}
+								offset={-180}
+							>	
+							<FontAwesomeIcon icon="arrow-circle-down"	/>
+						</Link>	
+						
 					}
 				</span>
 			</div>		
@@ -281,7 +318,7 @@ class TaxaChooser extends React.Component {
 										<FontAwesomeIcon icon="arrow-circle-up" />
 									</a>
 								</span>
-								<span className="related-label">Related</span>
+								<span className="related-label">{res.sciName}</span>
 							</div>
 						}
 					</div>
@@ -291,7 +328,7 @@ class TaxaChooser extends React.Component {
 				</div>
 				
 				<div className="row dashed-border">
-					<div className="spp-wrapper">
+					<Element className="spp-wrapper" name="spp-wrapper">
 						{
 							res.spp.map((spp,index) => {
 								return (
@@ -299,7 +336,7 @@ class TaxaChooser extends React.Component {
 								)
 							})
 						}
-					</div>
+					</Element>
 				</div>
 			</div>
 		)
@@ -316,7 +353,6 @@ class TaxaDetail extends React.Component {
 			isOpen: false,
 			currImage: 0
 		};
-    
   }
 
 	toggleImageModal = (_currImage) => {
@@ -378,7 +414,6 @@ class TaxaDetail extends React.Component {
 								</div> 			
 							</div>
 						}
-
 					
 						<div className="mt-4 dashed-border" id="photos">     
 							<h3 className="text-capitalize text-light-green font-weight-bold mt-2">Photo images</h3>
@@ -408,7 +443,6 @@ class TaxaDetail extends React.Component {
 							</GardenCarousel>
 							</div>
 						</div>
-					
 				 
 						<div className="mt-4 dashed-border" id="herbarium">     
 							<h3 className="text-capitalize text-light-green font-weight-bold mt-2">Herbarium specimens</h3>
