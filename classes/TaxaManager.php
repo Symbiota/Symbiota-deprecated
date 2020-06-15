@@ -66,7 +66,7 @@ class TaxaManager {
       #$this->descriptions = $this->populateDescriptions($this->getTid());
       $this->gardenDescription = $this->populateGardenDescription($this->getTid());
       $this->populateTaxalinks($this->getTid());
-      $this->spp = $this->populateSpp($this->getTid());
+      #$this->spp = $this->populateSpp($this->getTid());
     } else {
       $this->model = null;
       $this->basename = '';
@@ -76,7 +76,7 @@ class TaxaManager {
       $this->descriptions = [];
       $this->gardenId = -1;
       $this->gardenDescription = '';
-      $this->spp = [];
+      #$this->spp = [];
     }
   }
 
