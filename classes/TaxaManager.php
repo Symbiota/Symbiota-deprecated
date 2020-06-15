@@ -76,7 +76,7 @@ class TaxaManager {
       $this->descriptions = [];
       $this->gardenId = -1;
       $this->gardenDescription = '';
-      #$this->spp = [];
+      $this->spp = [];
     }
   }
 
@@ -89,7 +89,7 @@ class TaxaManager {
     $newTaxa->checklists = TaxaManager::populateChecklists($model->getTid());
     #$newTaxa->descriptions = $newTaxa->populateDescriptions($model->getTid());
     $newTaxa->gardenDescription = $newTaxa->populateGardenDescription($model->getTid());
-    $newTaxa->spp = $newTaxa->populateSpp($model->getTid());
+    #$newTaxa->spp = $newTaxa->populateSpp($model->getTid());
     return $newTaxa;
   }
   
