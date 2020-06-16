@@ -63,10 +63,10 @@ class TaxaManager {
       $this->images = TaxaManager::populateImages($this->getTid());
       $this->characteristics = TaxaManager::populateCharacteristics($this->getTid());
       $this->checklists = TaxaManager::populateChecklists($this->getTid());
-      #$this->descriptions = $this->populateDescriptions($this->getTid());
+      $this->descriptions = $this->populateDescriptions($this->getTid());
       $this->gardenDescription = $this->populateGardenDescription($this->getTid());
       $this->populateTaxalinks($this->getTid());
-      #$this->spp = $this->populateSpp($this->getTid());
+      $this->spp = $this->populateSpp($this->getTid());
     } else {
       $this->model = null;
       $this->basename = '';

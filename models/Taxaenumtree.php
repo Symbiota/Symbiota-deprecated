@@ -49,7 +49,7 @@ class Taxaenumtree
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="NONE")
      */
-    private $taxauthid;
+    private $taxauthid;#@ORM\Column(name="taxauthid", type="integer", nullable=false)
 
 
     /**

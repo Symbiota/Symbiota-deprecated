@@ -4,10 +4,12 @@
 
 use Doctrine\ORM\Mapping as ORM;
 
+# @ORM\Table(name="taxstatus", uniqueConstraints={@ORM\UniqueConstraint(name="PRIMARY", columns={"tid", "tidaccepted", "taxauthid"})}, indexes={@ORM\Index(name="FK_taxstatus_tidacc", columns={"tidaccepted"}), @ORM\Index(name="FK_taxstatus_taid", columns={"taxauthid"}), @ORM\Index(name="Index_ts_family", columns={"family"}), @ORM\Index(name="Index_parenttid", columns={"parenttid"}), @ORM\Index(name="Index_hierarchy", columns={"hierarchystr"})})
+
 /**
  * Taxstatus
  *
- * @ORM\Table(name="taxstatus", uniqueConstraints={@ORM\UniqueConstraint(name="PRIMARY", columns={"tid", "tidaccepted", "taxauthid"})}, indexes={@ORM\Index(name="FK_taxstatus_tidacc", columns={"tidaccepted"}), @ORM\Index(name="FK_taxstatus_taid", columns={"taxauthid"}), @ORM\Index(name="Index_ts_family", columns={"family"}), @ORM\Index(name="Index_parenttid", columns={"parenttid"}), @ORM\Index(name="Index_hierarchy", columns={"hierarchystr"})})
+ * @ORM\Table(name="taxstatus")
  * @ORM\Entity
  */
 class Taxstatus
