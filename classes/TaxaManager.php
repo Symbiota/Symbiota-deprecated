@@ -87,9 +87,9 @@ class TaxaManager {
     $newTaxa->images = TaxaManager::populateImages($model->getTid());
     $newTaxa->characteristics = TaxaManager::populateCharacteristics($model->getTid());
     $newTaxa->checklists = TaxaManager::populateChecklists($model->getTid());
-    #$newTaxa->descriptions = $newTaxa->populateDescriptions($model->getTid());
+    $newTaxa->descriptions = $newTaxa->populateDescriptions($model->getTid());
     $newTaxa->gardenDescription = $newTaxa->populateGardenDescription($model->getTid());
-    #$newTaxa->spp = $newTaxa->populateSpp($model->getTid());
+    $newTaxa->spp = $newTaxa->populateSpp($model->getTid());
     return $newTaxa;
   }
   
