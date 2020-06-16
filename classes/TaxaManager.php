@@ -230,7 +230,7 @@ class TaxaManager {
 					->from("Taxa", "t")
 					->innerJoin("Taxaenumtree", "te", "WITH", "t.tid = te.tid")
 					->innerJoin("Taxstatus", "ts", "WITH", "t.tid = ts.tidaccepted")
-					#->where("te.taxauthid = :taxauthid")
+					->where("te.taxauthid = :taxauthid")
 					->andWhere("ts.taxauthid = :taxauthid")
 					->andWhere("t.rankid >= :rankid")
 					->andWhere("te.parenttid = :tid")
