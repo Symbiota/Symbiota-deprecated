@@ -77,7 +77,7 @@ else if (array_key_exists("taxon", $_GET) && is_numeric($_GET["taxon"])) {
 */
   $em = SymbosuEntityManager::getEntityManager();
 try {
-    $repo = $em->getClassMetadata('Taxstatus');
+    $repo = $em->getClassMetadata('Taxaenumtree');
     echo "PASS";
     var_dump($repo);
 } catch (Doctrine\Common\Persistence\Mapping\MappingException $e) {
