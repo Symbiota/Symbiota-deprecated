@@ -2,49 +2,111 @@
 
 
 #react-inventory-app {
+
 	.inventory-header {//common to both chooser and detail view
 		width: 100%;
 		height: 155px;
 		background-image: url("/images/inventory/explore_subhead.jpg");
 		background-size: cover;
 		color: white;
+
 		a {
 			color: white !important;
 		}
 	}
 
 	.inventory-chooser {//select from a list of projects
+		font-size: 1.1rem;
+
+		h2 {
+			font-weight: 600;
+			font-size: 1.5rem;
+			margin: 1em 0;
+		}
+
 		.project-item {
 			clear: both;
+			margin-bottom: 1em;
+			border: 1px dotted @dark-gray;
+			border-radius: 0.5em;
+
 			.project-header {
-				display: flex;
-				flex-flow: row nowrap;
+				border-top-left-radius: 0.5em;
+				border-top-right-radius: 0.5em;
 				background-color: @light-green;
+				padding: 0.2em 0.5em 0.5em 0.5em;
+				margin-left: 0;
+				margin-right: 0;
+
+				.btn-primary {
+					margin-top: -4px;
+					display: inline-block;
+				}
+
+				h3 {
+					display: inline-block;
+					font-size: 1.5em;
+					font-weight: 600;
+					padding: 0.1em 0.8em;
+					margin-bottom: 0;
+				}
 			}
+
+			.project-content {
+				padding: 1em 6em;
+			}
+
+			.project-description {
+				padding: 1.5em 2em;
+			}
+
+			.project-explore {
+				float: right;
+				margin-right: 1em;
+			}
+
 			.more-less {
-				clear: both;
+				float: right;
+				font-size: 14px;
+				color: @med-green;
+				text-transform: uppercase;
+				margin-top: 0.3em;
+				margin-right: 15px;
+
+				svg {
+					margin-left: 0.5em;
+				}
 			}
-			.project-image {
-				float: left;
+
+			.less{
+				margin-right: 23px;
+				margin-bottom: 2em;
 			}
 		}
 	}
+
 	.inventory-detail {//view project detail
+
 		.table-header {
 			background-color: @light-green;
 			display: flex;
 			flex-flow: row nowrap;
+
 			.table-filter {
+
 				input {
 					font-size: 1.3rem;
+
 					&::placeholder {
 						font-size: 1rem;
 					}
 				}
 			}
+
 			.table-nav {
 				display: flex;
 				flex-flow: row nowrap;
+
 				.table-sort {
 					button {
 						color: @med-green;
@@ -56,9 +118,11 @@
 						}
 					}
 				}
+
 				.lngSort img {//East-west icons
 					height: 34px;
 				}
+
 				.nameSort {
 					font-size: 1.4em;
 				}

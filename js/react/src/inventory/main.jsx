@@ -222,7 +222,7 @@ class InventoryChooser extends React.Component {
       <div className="container inventory-chooser" style={{ minHeight: "45em" }}>
         <div className="row inventory-header">
         	<div className="col">
-						<div className="row">
+						<div className="row crumbs">
 							<CrumbBuilder crumbs={ CRUMBS }/>
 						</div>
 						<div className="row">
@@ -251,14 +251,14 @@ class InventoryChooser extends React.Component {
 										
 														<div className="project-default">
 															<div className="project-header">
-																	<button className="btn-primary"><a href={ CLIENT_ROOT + '/projects/index.php?pid=' + project.pid } >Explore</a></button>
+                                                                <div className="more more-less" onClick={() => this.toggleProjectDisplay(index)}>
+                                                                    More
+                                                                    <FontAwesomeIcon icon="chevron-down" />
+                                                                </div>
+                                                                <div className="">
+                                                                    <a className="btn btn-primary" role="button" href={ CLIENT_ROOT + '/projects/index.php?pid=' + project.pid } >Explore</a>
 																	<h3>{project.projname}</h3>
-																	<div className="more more-less">
-																		<div onClick={() => this.toggleProjectDisplay(index)}>
-																			More
-																			<FontAwesomeIcon icon="chevron-down" />
-																		</div>
-																	</div>
+                                                                </div>
 															</div>
 															<div className="project-content" dangerouslySetInnerHTML={{__html: project.fulldescription}} />
 														</div>
@@ -267,21 +267,22 @@ class InventoryChooser extends React.Component {
 												{project.display == 'expanded' && 
 												
 														<div className="project-expanded">
-															<div className="project-image">
-																<img src={ CLIENT_ROOT + '/images/inventory/flora_oregon.png' } />
-															</div>
-															<div className="project-map-image">
-																<img src={ CLIENT_ROOT + '/images/inventory/flora_or_map.png' } />
-															</div>
-															<div className="project-description" dangerouslySetInnerHTML={{__html: project.fulldescription}} />					
-															<button className="btn-primary"><a href={ CLIENT_ROOT + '/projects/index.php?pid=' + project.pid } >Explore</a></button>
-													
-															<div className="less more-less">
-																<div onClick={() => this.toggleProjectDisplay(index)}>
-																	Less
-																	<FontAwesomeIcon icon="chevron-up" />
-																</div>
-															</div>
+                                                            <div className="row">
+                                                                <div className="project-image col-sm-8 pr-0">
+                                                                    <img className="img-fluid" src={ CLIENT_ROOT + '/images/inventory/flora_oregon_lg.png' } />
+                                                                </div>
+                                                                <div className="col-sm pl-0">
+                                                                    <div className="project-map-image">
+                                                                    <img className="img-fluid" src={ CLIENT_ROOT + '/images/inventory/flora_or_map_lg.png' } />
+                                                                    </div>
+                                                                    <div className="project-description" dangerouslySetInnerHTML={{__html: project.fulldescription}} />
+                                                                    <a className="btn btn-primary project-explore" role="button" href={ CLIENT_ROOT + '/projects/index.php?pid=' + project.pid } >Explore</a>
+                                                                </div>
+                                                            </div>
+                                                            <div className="less more-less" onClick={() => this.toggleProjectDisplay(index)}>
+                                                                Less
+                                                                <FontAwesomeIcon icon="chevron-up" />
+                                                            </div>
 														</div>
 													
 												}
