@@ -135,33 +135,35 @@ class InventoryDetail extends React.Component {
         </div>
         <div className="row map">
           <div className="col">
-						<img src={this.state.googleMapUrl} title="Project map" alt="Map representation of checklists" />
+              <img  className="img-fluid" src={this.state.googleMapUrl} title="Project map" alt="Map representation of checklists" />
           </div>
         </div>
-        <div className="row mt-2 project-header">
-          <div className="col">
+        <div className="row mt-4 project-header ">
+          <div className="col research-checklists">
           	<h3>Research checklists</h3><span className="explain">(referenced in the map above)</span>
           </div>
         </div>
         <div className="row mt-2 project-key project-checklists">
-          <div className="col project-icons">
-						<FontAwesomeIcon icon="list-ul" />
-          </div>
-          <div className="col">
-          	<em>Explore</em> plants that have been discovered at the listed location.
-          </div>
+            <div className="col">
+                <div className="project-icons">
+                    <FontAwesomeIcon icon="list-ul" />
+                </div>
+                <span className="verticalSeparator"></span>
+              	<p><strong>EXPLORE</strong> plants that have been discovered at the listed location.</p>
+            </div>
         </div>
         <div className="row mt-2 project-key project-identify">
-          <div className="col project-icons">
-						<FontAwesomeIcon icon="search-plus" />
-          </div>
-          <div className="col">
-          	<em>Identify</em> a plant you've discovered at that location, using a host of characteristics.
-          </div>
+            <div className="col">
+                <div className="project-icons">
+                    <FontAwesomeIcon icon="search-plus" />
+                </div>
+                <span className="verticalSeparator"></span>
+                <p><strong>IDENTIFY</strong> a plant you've discovered at that location, using a host of characteristics.</p>
+            </div>
         </div>
-        <div className="row mt-2 checklists-table">
+        <div className="row mt-4 mb-4 checklists-table">
           <div className="col">
-						<ChecklistTable checklists={ this.state.checklists } pid={ pid }/>
+              <ChecklistTable checklists={ this.state.checklists } pid={ pid }/>
           </div>
         </div>
       </div>

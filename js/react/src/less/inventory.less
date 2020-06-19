@@ -3,6 +3,8 @@
 
 #react-inventory-app {
 
+	font-size: 1.1rem;
+
 	.inventory-header {//common to both chooser and detail view
 		width: 100%;
 		height: 155px;
@@ -15,14 +17,13 @@
 		}
 	}
 
-	.inventory-chooser {//select from a list of projects
-		font-size: 1.1rem;
+	h2 {
+		font-weight: 600;
+		font-size: 1.5rem;
+		margin: 1em 0;
+	}
 
-		h2 {
-			font-weight: 600;
-			font-size: 1.5rem;
-			margin: 1em 0;
-		}
+	.inventory-chooser { //select from a list of projects
 
 		.project-item {
 			clear: both;
@@ -85,48 +86,193 @@
 		}
 	}
 
-	.inventory-detail {//view project detail
+	.inventory-detail { //view project detail
 
-		.table-header {
-			background-color: @light-green;
-			display: flex;
-			flex-flow: row nowrap;
+		h3 {
+			display: inline-block;
+			color: @med-green;
+			font-weight: 600;
+			font-size: 1.2rem;
+			margin-right: 1em;
+		}
 
-			.table-filter {
+		.project-key {
+			
+			.fa-list-ul {
+				color: @med-green;
+			}
 
-				input {
-					font-size: 1.3rem;
+			.project-icons {
+				background: @light-green;
+				padding: 6px;
+				display: inline-block;
 
-					&::placeholder {
-						font-size: 1rem;
-					}
+				svg {
+					width: 15px;
+					height: 13px;
 				}
 			}
 
-			.table-nav {
+			.verticalSeparator {
+				border-right: 1px dotted @dark-gray;
+				margin: 0 0.5em;
+			}
+
+			p {
+				display: inline-block;
+				margin-bottom: 0;
+			}
+		}
+
+		.checklists-table {
+
+			.table-header {
+				background-color: @light-green;
 				display: flex;
 				flex-flow: row nowrap;
+				padding: 0.6em;
 
-				.table-sort {
-					button {
+				.table-filter {
+					padding-right: 1em;
+					padding-top: 8px;
+					width: 45%;
+
+					input {
 						color: @med-green;
-						background-color: transparent;
-						&.sort-asc,
-						&.sort-desc {
-							color: black;
-							background-color: white !important;
+						border-color: @med-green;
+						font-size: 1rem;
+						width: 100%;
+						padding: 0 5px;
+
+						&::placeholder {
+							color: @med-green;
+							font-size: 1rem;
 						}
 					}
 				}
 
-				.lngSort img {//East-west icons
-					height: 34px;
-				}
+				.table-nav {
+					display: flex;
+					justify-content: space-between;
+					flex-flow: row nowrap;
+					width: 55%;
+					padding-left: 1em;
 
-				.nameSort {
-					font-size: 1.4em;
+					.table-sort {
+						button {
+							color: @med-green;
+							background-color: transparent;
+							padding: 0;
+							vertical-align: top;
+
+							&.sort-asc,
+							&.sort-desc {
+								color: black;
+								background-color: white !important;
+							}
+
+							&.nameSort {
+								width: 48px;
+								height: 34px;
+							}
+
+						}
+					}
+
+					.lngSort img { //East-west icons
+						height: 34px;
+					}
+
+					.nameSort {
+						font-size: 1.4em;
+					}
+
+					.table-pag-top {
+						text-align: center;
+
+						button {
+							color: @med-green;
+
+							&:disabled{
+								color: lightgray;
+							}
+						}
+
+
+						.rows-results {
+							display: block;
+							text-transform: uppercase;
+							font-size: 0.8rem;
+						}
+					}
 				}
 			}
-		}	
+
+			table {
+				width: 100%;
+
+				tr {
+					border-bottom: 1px dotted @dark-gray;
+
+					td {
+						padding: 0.6em 0;
+					}
+
+					td:nth-child(1) {
+						width: auto;
+					}
+
+					td:nth-child(2) {
+						width: 100px;
+						text-align: right;
+
+						.verticalSeparator {
+							border-right: 1px dotted @dark-gray;
+							margin: 0 0.5em;
+						}
+
+						a {
+							background: @light-green;
+							padding: 6px;
+
+							svg {
+								width: 15px;
+								height: 13px;
+							}
+						}
+
+						.fa-list-ul {
+							color: @med-green;
+						}
+
+					}
+				}
+			}
+
+			.table-footer .table-pag-bottom{
+				display: flex;
+				justify-content: space-between;
+				margin-top: 0.4em;
+
+				a, button {
+					text-transform: uppercase;
+					color: @med-green!important;
+					padding: 0;
+
+					&:disabled {
+						color: lightgrey!important;
+					}
+				}
+
+				.previous svg {
+					margin-right: 1em;
+				}
+
+				.back-to-top svg,
+				.next svg {
+					margin-left: 0.5em;
+				}
+			}
+		}
 	}
 }
