@@ -271,7 +271,7 @@ class TaxaManager {
   	if ($tid) {
 			$em = SymbosuEntityManager::getEntityManager();
 			$rsArr = $em->createQueryBuilder()
-				->select(["ts.tid, tdb.tdbid, tdb.language"])#, tdb.source, tdb.sourceurl, tdb.caption, tds.tdsid, tds.heading, tds.statement, tds.displayheader
+				->select(["ts.tid, tdb.tdbid, tdb.source"])#, tdb.language, tdb.source, tdb.sourceurl, tdb.caption, tds.tdsid, tds.heading, tds.statement, tds.displayheader
 				->from("Taxstatus", "ts")
 				->innerJoin("Taxadescrblock", "tdb", "WITH", "ts.tid = tdb.tid")
 				#->innerJoin("Taxadescrstmts", "tds", "WITH", "tds.tdbid = tdb.tdbid")
