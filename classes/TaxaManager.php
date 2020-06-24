@@ -276,7 +276,7 @@ class TaxaManager {
 				->innerJoin("Taxadescrblock", "tdb", "WITH", "ts.tid = tdb.tid")
 				#->innerJoin("Taxadescrstmts", "tds", "WITH", "tds.tdbid = tdb.tdbid")
 				->where("ts.tidaccepted = :tid")
-				#->andWhere("ts.taxauthid = 1")
+				->andWhere("ts.taxauthid = 1")
 				#->orderBy("tdb.displaylevel,tds.sortsequence")
 				->setParameter("tid", $tid)
 				->getQuery()
