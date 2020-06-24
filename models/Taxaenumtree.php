@@ -7,7 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * Taxaenumtree
  *
- * @ORM\Table(name="taxaenumtree", indexes={@ORM\Index(name="FK_tet_taxa2", columns={"parenttid"}), @ORM\Index(name="FK_tet_taxa", columns={"tid"}), @ORM\Index(name="FK_tet_taxauth", columns={"taxauthid"})})
+ * @ORM\Table(name="taxaenumtree", uniqueConstraints={@ORM\UniqueConstraint(name="PRIMARY", columns={"tid", "taxauthid", "parenttid"})}, indexes={@ORM\Index(name="FK_tet_taxa2", columns={"parenttid"}), @ORM\Index(name="FK_tet_taxa", columns={"tid"}), @ORM\Index(name="FK_tet_taxauth", columns={"taxauthid"})})
  * @ORM\Entity
  */
 class Taxaenumtree
