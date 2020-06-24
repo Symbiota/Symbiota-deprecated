@@ -66,7 +66,7 @@ class TaxaManager {
       #$this->descriptions = $this->populateDescriptions($this->getTid());
       $this->gardenDescription = $this->populateGardenDescription($this->getTid());
       $this->populateTaxalinks($this->getTid());
-      #$this->spp = $this->populateSpp($this->getTid());
+      $this->spp = $this->populateSpp($this->getTid());
     } else {
       $this->model = null;
       $this->basename = '';
@@ -89,7 +89,7 @@ class TaxaManager {
     $newTaxa->checklists = TaxaManager::populateChecklists($model->getTid());
     #$newTaxa->descriptions = $newTaxa->populateDescriptions($model->getTid());
     $newTaxa->gardenDescription = $newTaxa->populateGardenDescription($model->getTid());
-    #$newTaxa->spp = $newTaxa->populateSpp($model->getTid());
+    $newTaxa->spp = $newTaxa->populateSpp($model->getTid());
     return $newTaxa;
   }
   
@@ -230,7 +230,7 @@ class TaxaManager {
 					->from("Taxa", "t")
 					->innerJoin("Taxaenumtree", "te", "WITH", "t.tid = te.tid")
 					->innerJoin("Taxstatus", "ts", "WITH", "t.tid = ts.tidaccepted")
-					#->where("te.taxauthid = :taxauthid")
+					->where("te.taxauthid = :taxauthid")
 					->andWhere("ts.taxauthid = :taxauthid")
 					->andWhere("t.rankid >= :rankid")
 					->andWhere("te.parenttid = :tid")
