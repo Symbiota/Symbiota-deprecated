@@ -51,7 +51,7 @@ class Taxaenumtree
      * @ORM\JoinColumn(name="taxauthid", referencedColumnName="taxauthid")
      * 
      */
-    private $taxauthid;#   @ORM\GeneratedValue(strategy="NONE")   @ORM\Column(name="taxauthid", type="integer", nullable=false)
+    private $taxauthid;
 
 
     /**
