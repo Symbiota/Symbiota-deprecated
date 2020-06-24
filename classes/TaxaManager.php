@@ -271,17 +271,18 @@ class TaxaManager {
   	if ($tid) {
 			$em = SymbosuEntityManager::getEntityManager();
 			$rsArr = $em->createQueryBuilder()
-				->select(["ts.tid, tdb.tdbid, tdb.source, tdb.sourceurl, tdb.language, tds.tdsid, tds.heading, tds.statement, tds.displayheader"])#tdb.caption, 
+				->select(["ts.tid"])#, tdb.tdbid, tdb.caption, tdb.source, tdb.sourceurl, tdb.language, tds.tdsid, tds.heading, tds.statement, tds.displayheader
 				->from("Taxstatus", "ts")
-				->innerJoin("Taxadescrblock", "tdb", "WITH", "ts.tid = tdb.tid")
-				->innerJoin("Taxadescrstmts", "tds", "WITH", "tds.tdbid = tdb.tdbid")
+				#->innerJoin("Taxadescrblock", "tdb", "WITH", "ts.tid = tdb.tid")
+				#->innerJoin("Taxadescrstmts", "tds", "WITH", "tds.tdbid = tdb.tdbid")
 				->where("ts.tidaccepted = :tid")
-				->andWhere("ts.taxauthid = 1")
-				->orderBy("tdb.displaylevel,tds.sortsequence")
+				#->andWhere("ts.taxauthid = 1")
+				#->orderBy("tdb.displaylevel,tds.sortsequence")
 				->setParameter("tid", $tid)
 				->getQuery()
 				->execute();
 				
+				var_dump($rsArr);exit;
 				/* copied from TaxonProfileManager */
         //Get descriptions associated with accepted name only
 				$usedCaptionArr = array();
