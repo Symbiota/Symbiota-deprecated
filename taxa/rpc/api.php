@@ -62,7 +62,7 @@ function getSubTaxa($parentTid) {
 
   return $results;
 }
-
+/*
 $result = [];
 if (array_key_exists("search", $_GET)) {
   $result = searchTaxa($_GET["search"]);
@@ -74,6 +74,14 @@ else if (array_key_exists("taxon", $_GET) && is_numeric($_GET["taxon"])) {
 } else if (array_key_exists("genus", $_GET) && is_numeric($_GET["genus"])) {
   $result = getSubTaxa($_GET["genus"]);
 }
+*/
+
+
+  $em = SymbosuEntityManager::getEntityManager();
+  $repo = $em->getRepository("Taxaenumtree");
+  #$model = $repo->find($id);
+  #$taxaenumtree = Taxaenumtree::fromModel($model);
+var_dump($repo);
 
 // Begin View
 header("Content-Type: application/json; charset=utf-8");
