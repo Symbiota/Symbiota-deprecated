@@ -29,18 +29,19 @@ class Taxadescrblock
   private $tdbid;
 
   /**
+   * @var string|null
+   *
+   * @ORM\Column(name="caption")
+   */
+  private $caption;
+  
+  /**
    * @var integer
    *
    * @ORM\Column(name="tid")
    */
   private $tid;
   
-  /**
-   * @var string|null
-   *
-   * @ORM\Column(name="caption")
-   */
-  private $caption;
   
   /**
    * @var string|null
