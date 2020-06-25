@@ -62,7 +62,7 @@ function getSubTaxa($parentTid) {
 
   return $results;
 }
-
+/*
 $result = [];
 if (array_key_exists("search", $_GET)) {
   $result = searchTaxa($_GET["search"]);
@@ -74,7 +74,7 @@ else if (array_key_exists("taxon", $_GET) && is_numeric($_GET["taxon"])) {
 } else if (array_key_exists("genus", $_GET) && is_numeric($_GET["genus"])) {
   $result = getSubTaxa($_GET["genus"]);
 }
-
+*/
 
 /*
   $em = SymbosuEntityManager::getEntityManager();
@@ -83,6 +83,22 @@ else if (array_key_exists("taxon", $_GET) && is_numeric($_GET["taxon"])) {
   #$taxaenumtree = Taxaenumtree::fromModel($model);
 var_dump($repo);
 */
+
+$con = MySQLiConnectionFactory::getCon("readonly");
+$sql = 'SELECT ts.tid, tdb.tdbid, tdb.caption, tdb.source, tdb.sourceurl, '.
+				'tds.tdsid, tds.heading, tds.statement, tds.displayheader, tdb.language '.
+				'FROM taxstatus ts INNER JOIN taxadescrblock tdb ON ts.tid = tdb.tid '.
+				'INNER JOIN taxadescrstmts tds ON tdb.tdbid = tds.tdbid '.
+				'WHERE (ts.tidaccepted = ' . 6076 . ') AND (ts.taxauthid = 1) '.
+				'ORDER BY tdb.displaylevel,tds.sortsequence';
+//echo $sql; exit;
+$rs = $con->query($sql);
+while($r = $rs->fetch_assoc()){
+	var_dump($r);
+}
+$rs->free();
+
+
 // Begin View
 header("Content-Type: application/json; charset=utf-8");
 echo json_encode($result, JSON_NUMERIC_CHECK | JSON_INVALID_UTF8_SUBSTITUTE);
