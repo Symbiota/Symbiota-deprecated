@@ -35,13 +35,7 @@ class Taxadescrblock
    */
   private $caption;
   
-  /**
-   * @var integer
-   *
-   * @ORM\Column(name="tid")
-   */
-  private $tid;
-  
+
   
   /**
    * @var string|null
