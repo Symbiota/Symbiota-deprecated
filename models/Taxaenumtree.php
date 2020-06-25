@@ -47,8 +47,7 @@ class Taxaenumtree
      * @var integer
      *
      * @ORM\Id
-     * @ORM\ManyToOne(targetEntity="Taxauthority")
-     * @ORM\JoinColumn(name="taxauthid", referencedColumnName="taxauthid")
+     * @ORM\GeneratedValue(strategy="NONE")
      * 
      */
     private $taxauthid;
