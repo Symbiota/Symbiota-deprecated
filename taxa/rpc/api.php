@@ -78,7 +78,7 @@ else if (array_key_exists("taxon", $_GET) && is_numeric($_GET["taxon"])) {
 
 
   $em = SymbosuEntityManager::getEntityManager();
-  $repo = $em->getRepository("Taxaenumtree");
+  $repo = $em->getRepository("Taxadescrblock");
   #$model = $repo->find($id);
   #$taxaenumtree = Taxaenumtree::fromModel($model);
 var_dump($repo);
