@@ -24,7 +24,7 @@ class Taxaenumtree
      *
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="NONE")
-     * @ORM\OneToOne(targetEntity="Taxa")
+     * @ORM\ManyToOne(targetEntity="Taxa")
      * @ORM\JoinColumns({
      *   @ORM\JoinColumn(name="tid", referencedColumnName="TID")
      * })
@@ -36,7 +36,7 @@ class Taxaenumtree
      *
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="NONE")
-     * @ORM\OneToOne(targetEntity="Taxa")
+     * @ORM\ManyToOne(targetEntity="Taxa")
      * @ORM\JoinColumns({
      *   @ORM\JoinColumn(name="parenttid", referencedColumnName="TID")
      * })
@@ -49,7 +49,7 @@ class Taxaenumtree
      *
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="NONE")
-     * @ORM\OneToOne(targetEntity="Taxauthority")
+     * @ORM\ManyToOne(targetEntity="Taxauthority")
      * @ORM\JoinColumns({
      *   @ORM\JoinColumn(name="taxauthid", referencedColumnName="taxauthid")
      * })
