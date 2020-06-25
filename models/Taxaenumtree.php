@@ -12,6 +12,12 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Taxaenumtree
 {
+    /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="initialtimestamp", type="datetime", nullable=false, options={"default"="CURRENT_TIMESTAMP"})
+     */
+    private $initialtimestamp = 'CURRENT_TIMESTAMP';
 
     /**
      * @var \Taxa
