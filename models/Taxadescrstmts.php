@@ -5,12 +5,12 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Taxadescrstmt
+ * Taxadescrstmts
  *
  * @ORM\Table(name="taxadescrstmts")
  * @ORM\Entity
  */
-class Taxadescrstmt
+class Taxadescrstmts
 {
   /**
    * @var integer

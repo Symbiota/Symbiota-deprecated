@@ -135,33 +135,35 @@ class InventoryDetail extends React.Component {
         </div>
         <div className="row map">
           <div className="col">
-						<img src={this.state.googleMapUrl} title="Project map" alt="Map representation of checklists" />
+              <img  className="img-fluid" src={this.state.googleMapUrl} title="Project map" alt="Map representation of checklists" />
           </div>
         </div>
-        <div className="row mt-2 project-header">
-          <div className="col">
+        <div className="row mt-4 project-header ">
+          <div className="col research-checklists">
           	<h3>Research checklists</h3><span className="explain">(referenced in the map above)</span>
           </div>
         </div>
         <div className="row mt-2 project-key project-checklists">
-          <div className="col project-icons">
-						<FontAwesomeIcon icon="list-ul" />
-          </div>
-          <div className="col">
-          	<em>Explore</em> plants that have been discovered at the listed location.
-          </div>
+            <div className="col">
+                <div className="project-icons">
+                    <FontAwesomeIcon icon="list-ul" />
+                </div>
+                <span className="verticalSeparator"></span>
+              	<p><strong>EXPLORE</strong> plants that have been discovered at the listed location.</p>
+            </div>
         </div>
         <div className="row mt-2 project-key project-identify">
-          <div className="col project-icons">
-						<FontAwesomeIcon icon="search-plus" />
-          </div>
-          <div className="col">
-          	<em>Identify</em> a plant you've discovered at that location, using a host of characteristics.
-          </div>
+            <div className="col">
+                <div className="project-icons">
+                    <FontAwesomeIcon icon="search-plus" />
+                </div>
+                <span className="verticalSeparator"></span>
+                <p><strong>IDENTIFY</strong> a plant you've discovered at that location, using a host of characteristics.</p>
+            </div>
         </div>
-        <div className="row mt-2 checklists-table">
+        <div className="row mt-4 mb-4 checklists-table">
           <div className="col">
-						<ChecklistTable checklists={ this.state.checklists } pid={ pid }/>
+              <ChecklistTable checklists={ this.state.checklists } pid={ pid }/>
           </div>
         </div>
       </div>
@@ -222,7 +224,7 @@ class InventoryChooser extends React.Component {
       <div className="container inventory-chooser" style={{ minHeight: "45em" }}>
         <div className="row inventory-header">
         	<div className="col">
-						<div className="row">
+						<div className="row crumbs">
 							<CrumbBuilder crumbs={ CRUMBS }/>
 						</div>
 						<div className="row">
@@ -251,14 +253,14 @@ class InventoryChooser extends React.Component {
 										
 														<div className="project-default">
 															<div className="project-header">
-																	<button className="btn-primary"><a href={ CLIENT_ROOT + '/projects/index.php?pid=' + project.pid } >Explore</a></button>
+                                                                <div className="more more-less" onClick={() => this.toggleProjectDisplay(index)}>
+                                                                    More
+                                                                    <FontAwesomeIcon icon="chevron-down" />
+                                                                </div>
+                                                                <div className="">
+                                                                    <a className="btn btn-primary" role="button" href={ CLIENT_ROOT + '/projects/index.php?pid=' + project.pid } >Explore</a>
 																	<h3>{project.projname}</h3>
-																	<div className="more more-less">
-																		<div onClick={() => this.toggleProjectDisplay(index)}>
-																			More
-																			<FontAwesomeIcon icon="chevron-down" />
-																		</div>
-																	</div>
+                                                                </div>
 															</div>
 															<div className="project-content" dangerouslySetInnerHTML={{__html: project.fulldescription}} />
 														</div>
@@ -267,21 +269,22 @@ class InventoryChooser extends React.Component {
 												{project.display == 'expanded' && 
 												
 														<div className="project-expanded">
-															<div className="project-image">
-																<img src={ CLIENT_ROOT + '/images/inventory/flora_oregon.png' } />
-															</div>
-															<div className="project-map-image">
-																<img src={ CLIENT_ROOT + '/images/inventory/flora_or_map.png' } />
-															</div>
-															<div className="project-description" dangerouslySetInnerHTML={{__html: project.fulldescription}} />					
-															<button className="btn-primary"><a href={ CLIENT_ROOT + '/projects/index.php?pid=' + project.pid } >Explore</a></button>
-													
-															<div className="less more-less">
-																<div onClick={() => this.toggleProjectDisplay(index)}>
-																	Less
-																	<FontAwesomeIcon icon="chevron-up" />
-																</div>
-															</div>
+                                                            <div className="row">
+                                                                <div className="project-image col-sm-8 pr-0">
+                                                                    <img className="img-fluid" src={ CLIENT_ROOT + '/images/inventory/flora_oregon_lg.png' } />
+                                                                </div>
+                                                                <div className="col-sm pl-0">
+                                                                    <div className="project-map-image">
+                                                                    <img className="img-fluid" src={ CLIENT_ROOT + '/images/inventory/flora_or_map_lg.png' } />
+                                                                    </div>
+                                                                    <div className="project-description" dangerouslySetInnerHTML={{__html: project.fulldescription}} />
+                                                                    <a className="btn btn-primary project-explore" role="button" href={ CLIENT_ROOT + '/projects/index.php?pid=' + project.pid } >Explore</a>
+                                                                </div>
+                                                            </div>
+                                                            <div className="less more-less" onClick={() => this.toggleProjectDisplay(index)}>
+                                                                Less
+                                                                <FontAwesomeIcon icon="chevron-up" />
+                                                            </div>
 														</div>
 													
 												}

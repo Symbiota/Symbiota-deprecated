@@ -63,7 +63,7 @@ class TaxaManager {
       $this->images = TaxaManager::populateImages($this->getTid());
       $this->characteristics = TaxaManager::populateCharacteristics($this->getTid());
       $this->checklists = TaxaManager::populateChecklists($this->getTid());
-      $this->descriptions = $this->populateDescriptions($this->getTid());
+      #$this->descriptions = $this->populateDescriptions($this->getTid());
       $this->gardenDescription = $this->populateGardenDescription($this->getTid());
       $this->populateTaxalinks($this->getTid());
       $this->spp = $this->populateSpp($this->getTid());
@@ -87,7 +87,7 @@ class TaxaManager {
     $newTaxa->images = TaxaManager::populateImages($model->getTid());
     $newTaxa->characteristics = TaxaManager::populateCharacteristics($model->getTid());
     $newTaxa->checklists = TaxaManager::populateChecklists($model->getTid());
-    $newTaxa->descriptions = $newTaxa->populateDescriptions($model->getTid());
+    #$newTaxa->descriptions = $newTaxa->populateDescriptions($model->getTid());
     $newTaxa->gardenDescription = $newTaxa->populateGardenDescription($model->getTid());
     $newTaxa->spp = $newTaxa->populateSpp($model->getTid());
     return $newTaxa;
@@ -230,11 +230,13 @@ class TaxaManager {
 					->from("Taxa", "t")
 					->innerJoin("Taxaenumtree", "te", "WITH", "t.tid = te.tid")
 					->innerJoin("Taxstatus", "ts", "WITH", "t.tid = ts.tidaccepted")
-					->where("te.taxauthid = 1")
-					->andWhere("ts.taxauthid = 1")
-					->andWhere("t.rankid >= 220")
+					#->where("te.taxauthid = :taxauthid")#this line causes an error on live, but not on my machine; all values are 1 anyway so commenting out
+					->andWhere("ts.taxauthid = :taxauthid")
+					->andWhere("t.rankid >= :rankid")
 					->andWhere("te.parenttid = :tid")
-					->setParameter("tid", $tid)
+					->setParameter(":tid", $tid)
+					->setParameter(":taxauthid", 1)
+					->setParameter(":rankid", 220)
 					->distinct()
 					->getQuery()
 					->execute();
@@ -269,17 +271,18 @@ class TaxaManager {
   	if ($tid) {
 			$em = SymbosuEntityManager::getEntityManager();
 			$rsArr = $em->createQueryBuilder()
-				->select(["ts.tid, tdb.tdbid, tdb.caption, tdb.source, tdb.sourceurl, tdb.language, tds.tdsid, tds.heading, tds.statement, tds.displayheader"])
+				->select(["ts.tid, tdb.tdbid, tdb.caption"])#, tdb.language, tdb.source, tdb.sourceurl, tds.tdsid, tds.heading, tds.statement, tds.displayheader
 				->from("Taxstatus", "ts")
 				->innerJoin("Taxadescrblock", "tdb", "WITH", "ts.tid = tdb.tid")
-				->innerJoin("Taxadescrstmt", "tds", "WITH", "tds.tdbid = tdb.tdbid")
+				#->innerJoin("Taxadescrstmts", "tds", "WITH", "tds.tdbid = tdb.tdbid")
 				->where("ts.tidaccepted = :tid")
 				->andWhere("ts.taxauthid = 1")
-				->orderBy("tdb.displaylevel,tds.sortsequence")
+				#->orderBy("tdb.displaylevel,tds.sortsequence")
 				->setParameter("tid", $tid)
 				->getQuery()
 				->execute();
 				
+				var_dump($rsArr);exit;
 				/* copied from TaxonProfileManager */
         //Get descriptions associated with accepted name only
 				$usedCaptionArr = array();
@@ -406,7 +409,9 @@ class TaxaManager {
 				->setParameter("tid", $tid)
       	->getQuery()
       	->execute();
-			$return = $origin[0]['nativity'];
+      if (isset($origin[0])) {
+				$return = $origin[0]['nativity'];
+			}
 		}
 		return $return;
  	}
