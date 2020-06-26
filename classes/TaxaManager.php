@@ -230,7 +230,7 @@ class TaxaManager {
 					->from("Taxa", "t")
 					->innerJoin("Taxaenumtree", "te", "WITH", "t.tid = te.tid")
 					->innerJoin("Taxstatus", "ts", "WITH", "t.tid = ts.tidaccepted")
-					#->where("te.taxauthid = :taxauthid")#this line causes an error on live, but not on my machine; all values are 1 anyway so commenting out
+					->where("te.taxauthid = :taxauthid")#this line causes an error on live, but not on my machine; all values are 1 anyway so commenting out
 					->andWhere("ts.taxauthid = :taxauthid")
 					->andWhere("t.rankid >= :rankid")
 					->andWhere("te.parenttid = :tid")
