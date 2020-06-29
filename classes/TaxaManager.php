@@ -274,10 +274,10 @@ class TaxaManager {
 				->select(["ts.tid, tdb.tdbid, tdb.caption"])#, tdb.language, tdb.source, tdb.sourceurl, tds.tdsid, tds.heading, tds.statement, tds.displayheader
 				->from("Taxstatus", "ts")
 				->innerJoin("Taxadescrblock", "tdb", "WITH", "ts.tid = tdb.tid")
-				#->innerJoin("Taxadescrstmts", "tds", "WITH", "tds.tdbid = tdb.tdbid")
+				->innerJoin("Taxadescrstmts", "tds", "WITH", "tds.tdbid = tdb.tdbid")
 				->where("ts.tidaccepted = :tid")
 				->andWhere("ts.taxauthid = 1")
-				#->orderBy("tdb.displaylevel,tds.sortsequence")
+				->orderBy("tdb.displaylevel,tds.sortsequence")
 				->setParameter("tid", $tid)
 				->getQuery()
 				->execute();
