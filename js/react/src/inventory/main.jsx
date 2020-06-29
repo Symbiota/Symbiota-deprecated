@@ -3,7 +3,7 @@ import React, { useMemo, useState, useEffect } from "react";
 import httpGet from "../common/httpGet.js";
 import { getUrlQueryParams } from "../common/queryParams.js";
 import Table from "./table.jsx";
-import CrumbBuilder from "../common/crumbBuilder.jsx";
+import PageHeader from "../common/pageHeader.jsx";
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { library } from "@fortawesome/fontawesome-svg-core";
@@ -105,18 +105,11 @@ class InventoryDetail extends React.Component {
   render() {
 		let pid = this.getPid();
     return (
-    
+    <div className="wrapper">
+			<div className="page-header">
+					<PageHeader crumbs={ CRUMBS } bgClass="explore" title={ this.state.projname } />
+			</div>
       <div className="container inventory-detail" style={{ minHeight: "45em" }}>
-      <div className="row inventory-header">
-        	<div className="col">
-						<div className="row">
-							<CrumbBuilder crumbs={ CRUMBS }/>
-						</div>
-						<div className="row">
-            <h1 className="text-capitalize">{ this.state.projname }</h1>
-						</div>
-					</div>
-        </div>
         <div className="row">
           <div className="col">
             <h2 dangerouslySetInnerHTML={{__html: this.state.fullDescription}} />   
@@ -167,6 +160,7 @@ class InventoryDetail extends React.Component {
           </div>
         </div>
       </div>
+    </div>
     );
   }
 }
@@ -220,18 +214,12 @@ class InventoryChooser extends React.Component {
 
   render() {
     return (
-    
+    <div className="wrapper">
+			<div className="page-header">
+				<PageHeader crumbs={ CRUMBS } bgClass="explore" title={ 'Inventory Projects' } />
+      </div>
       <div className="container inventory-chooser" style={{ minHeight: "45em" }}>
-        <div className="row inventory-header">
-        	<div className="col">
-						<div className="row crumbs">
-							<CrumbBuilder crumbs={ CRUMBS }/>
-						</div>
-						<div className="row">
-							<h1 className="text-capitalize">Inventory Projects</h1>
-						</div>
-					</div>
-        </div>
+
         <div className="row">
           <div className="col">
             <h2>Inventories are curated species lists from a defined area. In short, it’s a great way to explore Oregon flora through the lens of where a plant actually calls home. </h2>
@@ -295,6 +283,7 @@ class InventoryChooser extends React.Component {
           </div>
         </div>
       </div>
+    </div>
     );
   }
 }

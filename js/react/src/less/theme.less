@@ -2,8 +2,8 @@
 @import "./search-results.less";
 
 //Variable for project paths since relative paths not allowed
-@subdir: "/portal";
-//@subdir: "";
+//@subdir: "/portal";
+@subdir: "";
 
 
 * {
@@ -17,6 +17,11 @@ body {
   margin: 0;
 }
 
+.inner-content {
+	max-width: 1120px;
+	margin: 0 auto;
+	padding: 0 20px;
+}
 button {
   background: none !important;
   outline: none !important;
@@ -172,6 +177,49 @@ img {
 	}
 }
 */
+
+
+.page-header {
+
+  #titlebackground {
+    background-color: darkgreen;
+    background-repeat: no-repeat;
+    background-position: center top;
+    background-size: cover;
+
+    &.title-leaf {
+      background-image: url("@{subdir}/images/header/h1leaf.png");
+    }
+
+    &.title-redberry {
+      background-image: url("@{subdir}/images/header/h1redberry.png");
+    }
+
+    &.title-blueberry {
+      background-image: url("@{subdir}/images/header/h1blueberry.png");
+    }
+    
+    &.explore {
+      background-image: url("@{subdir}/images/inventory/explore_subhead.jpg");
+    }
+  }
+  .crumbs {
+  	padding-left: 150px;
+  	padding-top: 6px;
+  	a, span {
+	  	color: white !important;
+	  	font-size: .8rem;
+	  }
+  }
+
+  .h1, h1 {
+    color: white;
+    font-size: 60px;
+    font-weight: bold;
+    padding: 45px 0 20px 0;
+  }
+
+}
 div#info-page {
   padding-bottom: 20px;
 
