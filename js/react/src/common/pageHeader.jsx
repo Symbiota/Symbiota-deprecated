@@ -4,7 +4,7 @@ import CrumbBuilder from "../common/crumbBuilder.jsx";
 function PageHeader(props) {
   return (
 		<section id="titlebackground" className={ props.bgClass }>
-			<div className="inner-content">
+			<div className="container">
 				<div className="crumbs">
 					{props.crumbs &&
 						<CrumbBuilder crumbs={ props.crumbs }/>
