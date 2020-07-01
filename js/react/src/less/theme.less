@@ -2,8 +2,8 @@
 @import "./search-results.less";
 
 //Variable for project paths since relative paths not allowed
-@subdir: "/portal";
-//@subdir: "";
+//@subdir: "/portal";
+@subdir: "";
 
 
 * {
@@ -358,3 +358,47 @@ div#info-page {
     }
   }
 }
+
+#react-home-app {
+	.wrapper {
+    background-color: darkgreen;
+    background-image: url("@{subdir}/images/home.jpg");
+    background-repeat: no-repeat;
+    background-position: center top;
+    background-size: cover;
+		color: white;
+	
+		.container.home {
+		  .slick-next, 
+			.slick-prev {
+				&:before {
+					color: white !important;
+				}
+			}
+			.slick-slide {
+				height: auto;
+			}
+			ul.slick-dots {
+				li {
+					width: 15px;
+					height: 15px;
+					button {
+						&:before {
+							color: white;
+							opacity: 1;
+							font-size: 10px;
+						}
+					}
+					&.slick-active {
+						button:before {
+							color: lightgreen;
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+
+
