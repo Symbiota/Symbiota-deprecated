@@ -16,6 +16,14 @@ function get_data($params) {
 	if (key_exists("search", $params) && $params["search"] !== "" && $params["search"] !== null) {
 		$search = strtolower(preg_replace("/[;()-]/", '', $params["search"]));
 	}
+	
+/*	
+  $em = SymbosuEntityManager::getEntityManager();
+  $repo = $em->getRepository("Kmcharacters");
+  #$model = $repo->find($id);
+  #$taxaenumtree = Taxaenumtree::fromModel($model);
+var_dump($repo);
+*/
 
 	$identManager = new IdentManager();
 	if (isset($params['cl'])) $identManager->setClid($params['cl']);
