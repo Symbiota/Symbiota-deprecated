@@ -63,7 +63,7 @@ class TaxaManager {
       $this->images = TaxaManager::populateImages($this->getTid());
       $this->characteristics = TaxaManager::populateCharacteristics($this->getTid());
       $this->checklists = TaxaManager::populateChecklists($this->getTid());
-      #$this->descriptions = $this->populateDescriptions($this->getTid());
+      $this->descriptions = $this->populateDescriptions($this->getTid());
       $this->gardenDescription = $this->populateGardenDescription($this->getTid());
       $this->populateTaxalinks($this->getTid());
       $this->spp = $this->populateSpp($this->getTid());
@@ -87,7 +87,7 @@ class TaxaManager {
     $newTaxa->images = TaxaManager::populateImages($model->getTid());
     $newTaxa->characteristics = TaxaManager::populateCharacteristics($model->getTid());
     $newTaxa->checklists = TaxaManager::populateChecklists($model->getTid());
-    #$newTaxa->descriptions = $newTaxa->populateDescriptions($model->getTid());
+    $newTaxa->descriptions = $newTaxa->populateDescriptions($model->getTid());
     $newTaxa->gardenDescription = $newTaxa->populateGardenDescription($model->getTid());
     $newTaxa->spp = $newTaxa->populateSpp($model->getTid());
     return $newTaxa;
@@ -271,7 +271,7 @@ class TaxaManager {
   	if ($tid) {
 			$em = SymbosuEntityManager::getEntityManager();
 			$rsArr = $em->createQueryBuilder()
-				->select(["ts.tid, tdb.tdbid, tdb.caption"])#, tdb.language, tdb.source, tdb.sourceurl, tds.tdsid, tds.heading, tds.statement, tds.displayheader
+				->select(["ts.tid, tdb.tdbid, tdb.caption, tdb.language, tdb.source, tdb.sourceurl, tds.tdsid, tds.heading, tds.statement, tds.displayheader"])#
 				->from("Taxstatus", "ts")
 				->innerJoin("Taxadescrblock", "tdb", "WITH", "ts.tid = tdb.tid")
 				->innerJoin("Taxadescrstmts", "tds", "WITH", "tds.tdbid = tdb.tdbid")
@@ -282,7 +282,7 @@ class TaxaManager {
 				->getQuery()
 				->execute();
 				
-				var_dump($rsArr);exit;
+				#var_dump($rsArr);exit;
 				/* copied from TaxonProfileManager */
         //Get descriptions associated with accepted name only
 				$usedCaptionArr = array();
