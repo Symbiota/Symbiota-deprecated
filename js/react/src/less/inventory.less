@@ -23,6 +23,11 @@
 		margin: 1em 0;
 	}
 
+	.verticalSeparator {
+		border-right: 1px dotted @dark-gray;
+		margin: 0 0.5em;
+	}
+
 	.inventory-chooser { //select from a list of projects
 
 		.project-item {
@@ -113,11 +118,6 @@
 				}
 			}
 
-			.verticalSeparator {
-				border-right: 1px dotted @dark-gray;
-				margin: 0 0.5em;
-			}
-
 			p {
 				display: inline-block;
 				margin-bottom: 0;
@@ -134,20 +134,24 @@
 
 				.table-filter {
 					padding-right: 1em;
-					padding-top: 8px;
-					width: 45%;
+					width: 55%;
 
 					input {
 						color: @med-green;
 						border-color: @med-green;
 						font-size: 1rem;
-						width: 100%;
+						width: 95%;
 						padding: 0 5px;
-
+						border-radius: 6px;
+						line-height: 3em;
 						&::placeholder {
 							color: @med-green;
 							font-size: 1rem;
 						}
+					}
+					.fa-times-circle {
+						color: @med-green;
+						margin-left: 8px;
 					}
 				}
 
@@ -155,16 +159,21 @@
 					display: flex;
 					justify-content: space-between;
 					flex-flow: row nowrap;
-					width: 55%;
-					padding-left: 1em;
+					width: 45%;
 
 					.table-sort {
+						display: flex;
+						flex-flow: row nowrap;
+						justify-content: center;
+						width: 40%;
+						padding-top: .3em;
 						button {
 							color: @med-green;
 							background-color: transparent;
 							padding: 0;
 							vertical-align: top;
-
+							width: 48px;
+							height: 34px;
 							&.sort-asc,
 							&.sort-desc {
 								color: black;
@@ -172,8 +181,6 @@
 							}
 
 							&.nameSort {
-								width: 48px;
-								height: 34px;
 							}
 
 						}
@@ -188,21 +195,31 @@
 					}
 
 					.table-pag-top {
-						text-align: center;
-
+						width: 60%;
+						padding-top: .2em;
+						display: flex;
+						flex-flow: row wrap;
+							text-align: center;
 						button {
 							color: @med-green;
-
+							padding: 0 !important;
+							flex-basis: 33%;
 							&:disabled{
 								color: lightgray;
 							}
 						}
-
-
+						.rows-current {
+							flex-basis: 33%;
+							display: inline-block;
+						}
 						.rows-results {
+							flex-basis: 100%;
 							display: block;
 							text-transform: uppercase;
 							font-size: 0.8rem;
+							.rows-total {
+								font-weight: bold;
+							}
 						}
 					}
 				}
@@ -225,11 +242,6 @@
 					td:nth-child(2) {
 						width: 100px;
 						text-align: right;
-
-						.verticalSeparator {
-							border-right: 1px dotted @dark-gray;
-							margin: 0 0.5em;
-						}
 
 						a {
 							background: @light-green;

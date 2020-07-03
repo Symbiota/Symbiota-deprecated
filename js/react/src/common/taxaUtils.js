@@ -27,7 +27,7 @@ export function getCommonNameStr(item) {
 }
 
 export function getChecklistPage(clientRoot,clid,pid) {
-  return `${clientRoot}/checklists/checklist.php?clid=${clid}&pid=${pid}`;
+  return `${clientRoot}/checklists/checklist.php?cl=${clid}&pid=${pid}`;
 }
 
 export function getIdentifyPage(clientRoot,clid,pid) {

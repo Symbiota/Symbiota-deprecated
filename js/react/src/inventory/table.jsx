@@ -96,6 +96,7 @@ export default function Table({ columns, data, pid }) {
 							: ''	
 					}
 				</div>
+        <span className="verticalSeparator"></span>
   			<div className="table-nav">
   			
   				<div className="table-sort">
@@ -125,14 +126,14 @@ export default function Table({ columns, data, pid }) {
 							}
 							</button>
 					</div>
-					
+          <span className="verticalSeparator"></span>
 					<div className="table-pag-top">
 						{/* full rewind	<button onClick={() => gotoPage(0)} disabled={!canPreviousPage}>{'<<'}</button>{' '} */}
 					  <button className="previous" onClick={() => previousPage()} disabled={!canPreviousPage}>
 							<FontAwesomeIcon icon="chevron-left" />
 						</button>{' '}
 						<span className="rows-current">
-						 {(pageIndex * pageSize) + 1}  thru {
+						 {(pageIndex * pageSize) + 1}  - {
 							(pageIndex + 1) * pageSize > rows.length? rows.length: (pageIndex + 1) * pageSize 
 						 } 
 						</span>

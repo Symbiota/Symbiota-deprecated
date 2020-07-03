@@ -64,7 +64,7 @@ class Taxadescrblock
   private $language;
   
   /**
-   * @var string|null
+   * @var integer|null
    *
    * @ORM\Column(name="displaylevel")
    */
