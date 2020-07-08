@@ -770,6 +770,7 @@ if($clArray["locality"]){
 					}
 					else{
 						$voucherArr = $clManager->getVoucherArr();
+						var_dump($taxaArray);exit;
 						foreach($taxaArray as $tid => $sppArr){
 							if(!$showAlphaTaxa){
 								$family = $sppArr['family'];
