@@ -26,15 +26,28 @@ function managerToJSON($checklistObj) {
 
   if ($checklistObj !== null) {
     $result["clid"] = $checklistObj->getClid();
-    $result['taxa'] = $checklistObj->getTaxa();
-/*    $result["projname"] = $checklistObj->getProjname();  
-    $result["managers"] = $checklistObj->getManagers();
-    $result["briefDescription"] = $checklistObj->getBriefDescription();
-    $result["fullDescription"] = $checklistObj->getFullDescription();
-    $result["isPublic"] = $checklistObj->getIsPublic();
-    $result["checklists"] = $checklistObj->getChecklists();  
-    #$result["parentTid"] = $checklistObj->getParentTid(); 
-    */  
+    $result["authors"] = $checklistObj->getAuthors();
+    $result["abstract"] = $checklistObj->getAbstract();
+    $taxa = $checklistObj->getTaxa(); 
+    if (sizeof($taxa)) {
+			$taxaRepo = SymbosuEntityManager::getEntityManager()->getRepository("Taxa");					
+			$vouchers = $checklistObj->getVouchers();
+			foreach($taxa as $rowArr){
+				$taxaModel = $taxaRepo->find($rowArr['tid']);
+				$taxa = TaxaManager::fromModel($taxaModel);
+				$tjresult = [];
+				$tjresult['tid'] = $taxa->getTid();
+				$tjresult['sciname'] = $taxa->getSciname();
+				$tjresult['family'] = $taxa->getFamily();
+				$tjresult['author'] = $taxa->getAuthor();
+				$tjresult['thumbnail'] = $taxa->getThumbnail();
+				$tjresult['vernacular'] = $taxa->getVernacularNames();
+				$tjresult['synonyms'] = $taxa->getSynonyms();
+				#var_dump($vouchers);
+				$tjresult['vouchers'] = $vouchers[$rowArr['tid']];
+				$result["taxa"][] = $tjresult;
+			}
+		}
   }
   return $result;
 }

@@ -62,11 +62,6 @@ class TaxaManager {
       $this->basename = $this->populateBasename();
       $this->images = TaxaManager::populateImages($this->getTid());
       $this->checklists = TaxaManager::populateChecklists($this->getTid());
-      #$this->characteristics = TaxaManager::populateCharacteristics($this->getTid());
-      #$this->descriptions = $this->populateDescriptions($this->getTid());
-      #$this->gardenDescription = $this->populateGardenDescription($this->getTid());
-      #$this->populateTaxalinks($this->getTid());
-      #$this->spp = $this->populateSpp($this->getTid());
     } else {
       $this->model = null;
       $this->basename = '';
@@ -86,10 +81,6 @@ class TaxaManager {
     $newTaxa->basename = $newTaxa->populateBasename();
     $newTaxa->images = TaxaManager::populateImages($model->getTid());
     $newTaxa->checklists = TaxaManager::populateChecklists($model->getTid());
-    #$newTaxa->characteristics = TaxaManager::populateCharacteristics($model->getTid());
-    #$newTaxa->descriptions = $newTaxa->populateDescriptions($model->getTid());
-    #$newTaxa->gardenDescription = $newTaxa->populateGardenDescription($model->getTid());
-    #$newTaxa->spp = $newTaxa->populateSpp($model->getTid());
     return $newTaxa;
   }
   
@@ -161,7 +152,7 @@ class TaxaManager {
 		return $return;
 	}
   public function getThumbnail() {
-    return $this->images[0]["thumbnailurl"];
+    return isset($this->images[0])? $this->images[0]["thumbnailurl"] : null;
   }
 
   public function getCharacteristics() {
