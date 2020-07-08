@@ -276,10 +276,12 @@ class TaxaTabs extends React.Component {
 						}else{
 							source = value['source'];
 						}
+						source = '[ ' + source + ' ]';
 						let description = '';
 						Object.entries(descriptions).map(([dkey, dvalue]) => {
 							description += dvalue;
 						})
+						var display = source + ' ' + description;
 						return (
 							<TabPanel key={key}>
 								<div className="reference" dangerouslySetInnerHTML={{__html: source}} />	
@@ -305,38 +307,49 @@ class TaxaChooser extends React.Component {
   render() {
 		const res = this.props.res;
   	return (
-			<div className="container my-5 py-2 taxa-chooser" style={{ minHeight: "45em" }}>
+			<div className="container my-5 py-2 taxa-detail" style={{ minHeight: "45em" }}>
 				<div className="row">
-
 					<div className="col">
+
 						<h1 className="text-capitalize">{ res.sciName } { res.author }</h1>
-						<h2 className="text-capitalize font-italic">{ res.family }</h2>
-						{ res.rankId > 140 && 
-							<div className="related">
-								<span className="related-links"> 
-									<a href={ res.related[1] }>
-										<FontAwesomeIcon icon="arrow-circle-up" />
-									</a>
-								</span>
-								<span className="related-label">{res.sciName}</span>
-							</div>
-						}
 					</div>
 					<div className="col-auto">
 						<FontAwesomeIcon icon="edit" />
 					</div>
 				</div>
-				
-				<div className="row dashed-border">
-					<Element className="spp-wrapper" name="spp-wrapper">
-						{
-							res.spp.map((spp,index) => {
-								return (
-									<SppItem item={spp} key={spp.tid} />
-								)
-							})
+				<div className="row mt-2 row-cols-sm-2">
+					<div className="col-sm-8 px-4">
+						<p className="mt-4">
+							{/*
+								Description includes HTML tags & URL-encoded characters in the db.
+								It's dangerous to pull/render arbitrary HTML w/ react, so just render the
+								plain text & remove any HTML in it.
+							*/}
+							{ /*this.state.descriptions.replace(/(<\/?[^>]+>)|(&[^;]+;)/g, "") */}
+						</p>
+						<TaxaTabs descriptions={ res.descriptions } />
+					
+					
+						{res.spp.length > 0 &&
+							<div className="mt-4 dashed-border" id="subspecies">     
+								<h3 className="text-capitalize text-light-green font-weight-bold mt-2">Subspecies and varieties</h3>   
+								<div className="spp-wrapper">
+									{
+										res.spp.map((spp,index) => {
+											return (
+												<SppItem item={spp} key={spp.tid} />
+											)
+										})
+									}
+								</div> 			
+							</div>
 						}
-					</Element>
+										
+					</div>
+					<div className="col-sm-4 sidebar">
+						<SideBarSection title="Context" items={ res.highlights } classes="highlights" />
+						<SideBarSection title="Web links" items={ res.taxalinks} classes="weblinks" />
+					</div>
 				</div>
 			</div>
 		)
@@ -486,7 +499,7 @@ class TaxaDetail extends React.Component {
 					
 					</div>
 					<div className="col-sm-4 sidebar">
-						<SideBarSection title="Highlights" items={ res.highlights } classes="highlights" />
+						<SideBarSection title="Context" items={ res.highlights } classes="highlights" />
 						<SideBarSection title="Web links" items={ res.taxalinks} classes="weblinks" />
 					</div>
 				</div>
@@ -521,7 +534,8 @@ class TaxaApp extends React.Component {
       tid: null,
       rankId: null,
       currImage: 0,
-      related: []
+      related: [],
+      isGenus: true
     };
     this.getTid = this.getTid.bind(this);
   }
@@ -570,6 +584,7 @@ class TaxaApp extends React.Component {
 							</div>
 						)
 					});
+					let isGenus = res.rankId <= 180;
 
           this.setState({
             sciName: res.sciname,
@@ -593,7 +608,8 @@ class TaxaApp extends React.Component {
             },
             spp: res.spp,
             related: relatedArr,
-            family: res.family
+            family: res.family,
+            isGenus: isGenus
           });
           const pageTitle = document.getElementsByTagName("title")[0];
           pageTitle.innerHTML = `${pageTitle.innerHTML} ${res.sciname} ${res.author}`;
@@ -607,7 +623,7 @@ class TaxaApp extends React.Component {
 
 	render() {
 		//choose page
-		if (this.state.rankId <= 180) {
+		if (this.state.isGenus) {
 			return <TaxaChooser res = { this.state } />;
 		}else{
 			return <TaxaDetail res = { this.state } />;
