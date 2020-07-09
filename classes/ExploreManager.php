@@ -34,6 +34,9 @@ class ExploreManager {
   public function getClid() {
     return $this->model->getClid();
   }
+  public function getTitle() {
+    return $this->model->getName();
+  }
   public function getAbstract() {
     return $this->model->getAbstract();
   }

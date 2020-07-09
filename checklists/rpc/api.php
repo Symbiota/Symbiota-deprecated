@@ -10,13 +10,12 @@ $result = [];
 function getEmpty() {
   return [
     "clid" => -1,
-    #"projname" => '',
-    #"managers" => '',
-    #"briefDescription" => '',
+    "title" => '',
+    "authors" => '',
+    "abstract" => '',
     #"fullDescription" => '',
     #"isPublic" => -1,
     "taxa" => [],
-    #"parentTid" => -1,
   ];
 }
 
@@ -26,6 +25,7 @@ function managerToJSON($checklistObj) {
 
   if ($checklistObj !== null) {
     $result["clid"] = $checklistObj->getClid();
+    $result["title"] = $checklistObj->getTitle();
     $result["authors"] = $checklistObj->getAuthors();
     $result["abstract"] = $checklistObj->getAbstract();
     $taxa = $checklistObj->getTaxa(); 
