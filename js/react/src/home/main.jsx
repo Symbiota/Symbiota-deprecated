@@ -21,9 +21,9 @@ class Home extends React.Component {
 		const slides = [1,2,3];//matches slide suffixes in /home/ dir
 		
 		const slickSettings = {
-			autoplay: false,
+			autoplay: true,
 			initialSlide: 0,
-			autoplaySpeed: 5000,
+			autoplaySpeed: 10000,
 			dots: true,
 			infinite: true,
 			slidesToShow: 1,
@@ -32,7 +32,7 @@ class Home extends React.Component {
 		
     return (
     <div className="wrapper">
-      <div className="container home" style={{ minHeight: "45em" }}>
+      <div className="container home">
 
      		<Slider { ...slickSettings } className="mx-auto">
      		{	slides.map((index) => {
