@@ -7,7 +7,7 @@ const CLIENT_ROOT = "..";
 //import SideBar from "./sidebar.jsx";
 import ViewOpts from "./viewOpts.jsx";
 import httpGet from "../common/httpGet.js";
-import {SearchResult, SearchResultContainer} from "../common/searchResults.jsx";
+import {ExploreSearchResult, SearchResultContainer} from "../common/searchResults.jsx";
 import {addUrlQueryParam, getUrlQueryParams} from "../common/queryParams.js";
 import {getCommonNameStr, getTaxaPage} from "../common/taxaUtils";
 
@@ -239,17 +239,22 @@ class ExplorePageApp extends React.Component {
                   />
                   <SearchResultContainer viewType={ this.state.viewType }>
                     {
-                      this.state.searchResults.map((result) =>  {
+                      this.state.taxa.map((result) =>  {
                         let showResult = true;
+                        //console.log(result);
+                        let vouchers = '';
+                        
                         return (
-                          <SearchResult
+                          <ExploreSearchResult
                             key={ result.tid }
                             viewType={ this.state.viewType }
                             display={ showResult }
                             href={ getTaxaPage(CLIENT_ROOT, result.tid) }
-                            src={ result.image }
+                            src={ result.thumbnail }
                             commonName={ getCommonNameStr(result) }
-                            sciName={ result.sciName ? result.sciName : '' }
+                            sciName={ result.sciname ? result.sciname : '' }
+                            author={ result.author ? result.author : '' }
+                            vouchers={  result.vouchers ? result.vouchers : '' }
                           />
                         )
                       })

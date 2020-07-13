@@ -41,7 +41,10 @@ function managerToJSON($checklistObj) {
 				$tjresult['family'] = $taxa->getFamily();
 				$tjresult['author'] = $taxa->getAuthor();
 				$tjresult['thumbnail'] = $taxa->getThumbnail();
-				$tjresult['vernacular'] = $taxa->getVernacularNames();
+				$tjresult["vernacular"] = [
+					"basename" => $taxa->getBasename(),
+					"names" => $taxa->getVernacularNames()
+				];
 				$tjresult['synonyms'] = $taxa->getSynonyms();
 				#var_dump($vouchers);
 				$tjresult['vouchers'] = $vouchers[$rowArr['tid']];
