@@ -78,7 +78,6 @@ function taxaManagerToJSON($taxaObj) {
 		#$result["gardenDescription"] = $taxaObj->getGardenDescription();
 		$result["gardenId"] = $taxaObj->getGardenId();
 		$result["images"] = $taxaObj->getImages();
-		$result["imagesBasis"] = $taxaObj->getImagesByBasisOfRecord();
 		$result["vernacular"] = [
 			"basename" => $taxaObj->getBasename(),
 			"names" => $taxaObj->getVernacularNames()
@@ -97,6 +96,10 @@ function taxaManagerToJSON($taxaObj) {
 			$tj = taxaManagerToJSON($taxa);
 			$result["spp"][] = $tj;
 		}
+		$allImages = $taxaObj->getImagesByBasisOfRecord();
+		$result["imagesBasis"]['HumanObservation'] = (isset($allImages['HumanObservation']) ? $allImages['HumanObservation'] : []);
+		$result["imagesBasis"]['PreservedSpecimen'] = (isset($allImages['PreservedSpecimen']) ? $allImages['PreservedSpecimen'] : []);
+		$result["imagesBasis"]['LivingSpecimen'] = (isset($allImages['LivingSpecimen']) ? $allImages['LivingSpecimen'] : []);
 	}
 	return $result;
 }
