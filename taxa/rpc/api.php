@@ -86,10 +86,10 @@ function taxaManagerToJSON($taxaObj) {
 		$result["synonyms"] = $taxaObj->getSynonyms();
 		$result["origin"] = $taxaObj->getOrigin();
 		$result["family"] = $taxaObj->getFamily();
-		#$result["taxalinks"] = $taxaObj->getTaxalinks();
-		#$result["rarePlantFactSheet"] = $taxaObj->getRarePlantFactSheet();
-		#$result["characteristics"] = $taxaObj->getCharacteristics();
-		#$result["checklists"] = $taxaObj->getChecklists();
+		$result["taxalinks"] = $taxaObj->getTaxalinks();
+		$result["rarePlantFactSheet"] = $taxaObj->getRarePlantFactSheet();
+		$result["characteristics"] = $taxaObj->getCharacteristics();
+		$result["checklists"] = $taxaObj->getChecklists();
 		$spp = $taxaObj->getSpp();  					
 		foreach($spp as $rowArr){
 			$taxaModel = $taxaRepo->find($rowArr['tid']);
