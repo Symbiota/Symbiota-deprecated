@@ -168,10 +168,10 @@ class HeaderApp extends React.Component {
 
   render() {
     return (
+    <div className="header-wrapper" style={{ backgroundImage: `url(${this.props.clientRoot}/images/header/OF-Header_May8.png)` }}>
       <nav
         id="site-header"
-        style={{ backgroundImage: `url(${this.props.clientRoot}/images/header/OF-Header_May8.png)` }}
-        className={ `navbar navbar-expand-lg navbar-dark bg-dark site-header ${this.state.isCollapsed ? "site-header-scroll" : ''}` }>
+        className={ `container navbar navbar-expand-lg navbar-dark site-header ${this.state.isCollapsed ? "site-header-scroll" : ''}` }>
 
         <a className="navbar-brand" href={ `${this.props.clientRoot}/` }>
           <img id="site-header-logo"
@@ -223,6 +223,7 @@ class HeaderApp extends React.Component {
           </div>
         </div>
       </nav>
+    </div>
     );
   }
 }

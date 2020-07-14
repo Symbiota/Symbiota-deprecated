@@ -2,9 +2,8 @@
 @import "./search-results.less";
 
 //Variable for project paths since relative paths not allowed
-//@subdir: "/portal";
-@subdir: "";
-
+@subdir: "/portal";
+//@subdir: "";
 
 * {
   font-family: @font;
@@ -178,7 +177,6 @@ img {
 }
 */
 
-
 .page-header {
 
   #titlebackground {
@@ -220,6 +218,7 @@ img {
   }
 
 }
+
 div#info-page {
   padding-bottom: 20px;
 
@@ -360,44 +359,262 @@ div#info-page {
 }
 
 #react-home-app {
-	.wrapper {
+	.btn-search {
+		width: 3em;
+		height: 3em;
+	}
+  .wrapper {
     background-color: darkgreen;
     background-image: url("@{subdir}/images/home.jpg");
     background-repeat: no-repeat;
     background-position: center top;
     background-size: cover;
-		color: white;
-	
-		.container.home {
-		  .slick-next, 
-			.slick-prev {
-				&:before {
-					color: white !important;
-				}
-			}
-			.slick-slide {
-				height: auto;
-			}
-			ul.slick-dots {
-				li {
-					width: 15px;
-					height: 15px;
-					button {
-						&:before {
-							color: white;
-							opacity: 1;
-							font-size: 10px;
-						}
-					}
-					&.slick-active {
-						button:before {
-							color: lightgreen;
-						}
-					}
-				}
-			}
-		}
-	}
+    color: white;
+
+    .container.home {
+
+      .slick-next,
+      .slick-prev {
+        &:before {
+          color: white !important;
+        }
+      }
+      .slick-slider {
+      }
+
+      .slick-slide {
+        height: auto;
+        margin-bottom: 50px;
+        padding: 0 20px;
+
+        .btn {
+          padding: 10px;
+        }
+
+        .slide-1 {
+          margin: 0;
+
+          .slide-col-1 {
+            padding: 35px 0 0 0;
+
+            h1 {
+              font-size: 2.7rem;
+              font-weight: bold;
+            }
+
+            h3 {
+              margin: 20px 0 10px 0;
+            }
+
+            input {
+              display: inline;
+              width: 65%;
+              max-width: 400px;
+              font-size: 1.8em;
+              border: 3px solid @med-green;
+              color: @med-green;
+              &::placeholder {
+              	color: @med-green;
+              }
+            }
+
+            .search-explain {
+              font-size: 1.1rem;
+              line-height: 1.1rem;
+              margin: 15px 0 35px 0;
+            }
+
+            .btn-search {
+              margin-top: 4px;
+            }
+          }
+
+          .slide-col-2 {
+            padding-top: 10px;
+
+            .link-card {
+              background: #000000A6 0% 0% no-repeat padding-box;
+              border-radius: 8px;
+              opacity: 1;
+              padding: 15px 10px;
+              margin: 10px;
+
+              img {
+                width: 84px;
+                height: 84px;
+                float: left;
+                margin-right: 15px;
+                border: #888 1px solid;
+                border-radius: 4px;
+                padding: 4px;
+              }
+
+              p.link-text {
+                display: inline-block;
+                font-size: 1.3em;
+                line-height: 1.3em;
+                margin-bottom: 5px;
+
+                a {
+                  color: white !important;
+                  text-decoration: underline;
+                }
+              }
+
+              p.link-desc {
+                clear: both;
+                margin-bottom: 0px;
+                line-height: 1rem;
+              }
+            }
+          }
+        }
+
+        .slide-2 {
+          margin: 0;
+
+          .row {
+            margin: 0;
+          }
+
+          .slide-col-1 {
+            padding: 35px 20px 0 0;
+
+            h1 {
+              font-size: 2.7rem;
+              font-weight: bold;
+            }
+
+            p {
+              font-size: 1.1rem;
+            }
+          }
+
+          .slide-col-2 {
+            padding: 35px 0 0 20px;
+          }
+
+          .video-card {
+            background: #000000A6 0% 0% no-repeat padding-box;
+            border-radius: 8px;
+            padding: 5px;
+            margin-bottom: 15px;
+
+            .video-img {
+              padding: 0 5px 0 0;
+              img {
+                width: 150px;
+                height: 90px;
+              }
+            }
+
+            .video-text {
+              border-left: 1px dotted #fff;
+              padding: 0 0 0 1em;
+              h3 {
+                font-size: 1.1em;
+                line-height: 1.1em;
+                font-weight: bold;
+              }
+
+              p {
+                font-size: 0.9em;
+                margin-bottom: 0;
+              }
+            }
+          }
+
+        }
+
+        .slide-3 {
+          margin: 0;
+          padding: 35px 0 0 0;
+
+          h1 {
+            font-size: 2.7rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+          }
+
+          .row {
+            margin: 0;
+          }
+
+          .slide-col-1 {
+            background: #000000A6 0% 0% no-repeat padding-box;
+            border-radius: 8px;
+            opacity: 1;
+            padding: 20px;
+
+            .row {
+              border-top: 1px #fff dotted;
+              padding-top: 1em;
+
+              h2 {
+                font-size: 1.4em;
+                font-weight: bold;
+              }
+
+              a {
+                color: @med-green !important;
+                text-transform: uppercase;
+              }
+            }
+
+            .row:first-child {
+              border-top: none;
+              padding-top: 0;
+            }
+          }
+
+          .slide-col-2 {
+
+            .row{
+              margin-bottom: 15px;
+
+              .event-date {
+                padding: 10px;
+                background-color: #EFFFE3;
+                border-top-left-radius: 8px;
+                border-bottom-left-radius: 8px;
+                color: @dark-gray;
+              }
+              .event-desc {
+                padding: 10px;
+                background: #000000A6 0% 0% no-repeat padding-box;
+                border-top-right-radius: 8px;
+                border-bottom-right-radius: 8px;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    ul.slick-dots {
+      bottom: 25px;
+
+      li {
+        width: 15px;
+        height: 15px;
+
+        button {
+
+          &:before {
+            color: white;
+            opacity: 1;
+            font-size: 10px;
+          }
+        }
+
+        &.slick-active {
+          button:before {
+            color: lightgreen;
+          }
+        }
+      }
+    }
+  }
 }
 
 

@@ -396,11 +396,13 @@ class TaxaDetail extends React.Component {
 				<div className="row mt-2 row-cols-sm-2">
 					<div className="col-sm-8 px-4">
 						<div className="img-main-wrapper">
+							{ res.images.HumanObservation.length > 0 && 
 							<img
 								id="img-main"
-								src={ res.images.HumanObservation.length > 0 ? res.images.HumanObservation[0].url : '' }
+								src={ res.images.HumanObservation[0].url }
 								alt={ res.sciName }
 							/>
+							}
 						</div>
 						<p className="mt-4">
 							{/*
@@ -428,9 +430,11 @@ class TaxaDetail extends React.Component {
 							</div>
 						}
 					
+						{  res.images.HumanObservation.length > 0 && 
 						<div className="mt-4 dashed-border" id="photos">     
 							<h3 className="text-capitalize text-light-green font-weight-bold mt-2">Photo images</h3>
 							<div className="slider-wrapper">
+						
 							<GardenCarousel
 								images={res.images.HumanObservation}>
 								{
@@ -456,7 +460,9 @@ class TaxaDetail extends React.Component {
 							</GardenCarousel>
 							</div>
 						</div>
+					}
 				 
+						{  res.images.PreservedSpecimen.length > 0 && 
 						<div className="mt-4 dashed-border" id="herbarium">     
 							<h3 className="text-capitalize text-light-green font-weight-bold mt-2">Herbarium specimens</h3>
 							<div className="slider-wrapper">
@@ -484,6 +490,8 @@ class TaxaDetail extends React.Component {
 								}
 							</GardenCarousel>
 							</div>
+						</div>    
+						}
 							<ImageModal 
 								show={this.state.isOpen}
 								currImage={this.state.currImage}
@@ -493,8 +501,7 @@ class TaxaDetail extends React.Component {
 								<h3>
 									<span className="text-capitalize">{ res.vernacularNames[0] }</span> images
 								</h3>
-							</ImageModal>
-						</div>            
+							</ImageModal>        
 					
 					
 					</div>

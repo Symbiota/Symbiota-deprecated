@@ -5,10 +5,11 @@
   position: -webkit-sticky; /* Safari */
   top: 0;
   z-index: 10000;
-
-  #site-header {
+	.header-wrapper {
     background-size: 100% 100%;
-    box-shadow: 0 0.5em 1em rgba(100, 100, 100, 0.5);
+    //box-shadow: 0 0.5em 1em rgba(100, 100, 100, 0.5);
+	}
+  #site-header {
 
     height: 8em;
     padding-top: 4em;
@@ -16,7 +17,8 @@
 		.navbar-brand {
 			padding-top: 0;
 			#site-header-logo {
-				margin-left: 4em;
+				//margin-left: 4em;
+				margin-left: -10px;
 				/*border: 0.5em solid rgba(255, 255, 255, 0.2);*/
 				width: 97px;
 				height: auto;
@@ -50,6 +52,9 @@
       .text-uppercase();
       .text-bold();
     }
+  }
+  .search-widget {
+  	padding: .5rem;
   }
 }
 
