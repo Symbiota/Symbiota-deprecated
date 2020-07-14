@@ -2,7 +2,6 @@ import ReactDOM from "react-dom";
 import React from "react";
 import Slider from "react-slick";
 import SearchWidget from "../common/search.jsx";
-const CLIENT_ROOT = "..";
 
 const RANK_FAMILY = 140;
 const RANK_GENUS = 180;
@@ -33,7 +32,7 @@ class Home extends React.Component {
   // "searchObj" is the JSON object returned from ../webservices/autofillsearch.php
   onSearch(searchObj) {
     this.setState({ isLoading: true });
-    let targetUrl = `${CLIENT_ROOT}/taxa/`;
+    let targetUrl = `${this.props.clientRoot}/taxa/`;
     if (searchObj.rankId && searchObj.rankId === RANK_FAMILY) {
       targetUrl += `search.php?family=${searchObj.taxonId}&familyName=${searchObj.text}`;
 
@@ -76,12 +75,12 @@ class Home extends React.Component {
 										<h3>Get started right now:</h3>
 										<SearchWidget
 											placeholder="Type a plant name here"
-											clientRoot={ CLIENT_ROOT }
+											clientRoot={ this.props.clientRoot }
 											isLoading={ this.state.isLoading }
 											textValue={ this.state.searchText }
 											onTextValueChanged={ this.onSearchTextChanged }
 											onSearch={ this.onSearch }
-											suggestionUrl={ `${CLIENT_ROOT}/webservices/autofillsearch.php` }
+											suggestionUrl={ `${this.props.clientRoot}/webservices/autofillsearch.php` }
 											location={"home-main"}
 										/>
 										<p className="search-explain">to access all its information, including <br />distribution maps, images and more...</p>
@@ -130,8 +129,10 @@ class Home extends React.Component {
 }
 
 
+const headerContainer = document.getElementById("react-header");
+const dataProps = JSON.parse(headerContainer.getAttribute("data-props"));
 const domContainer = document.getElementById("react-home-app");
 ReactDOM.render(
-	<Home/>,
+	<Home clientRoot={ dataProps["clientRoot"] } />,
 	domContainer
 );
