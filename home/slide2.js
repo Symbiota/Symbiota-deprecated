@@ -1,4 +1,8 @@
 
+const headerContainer = document.getElementById("react-header");
+const dataProps = JSON.parse(headerContainer.getAttribute("data-props"));
+let clientRoot= dataProps["clientRoot"];
+
 module.exports = `
 <div class="row slide-wrapper slide-2">
 	<div class="col-sm-6 slide-col-1">
@@ -7,7 +11,7 @@ module.exports = `
         <p>Now, all that information is even more accessible through our collaboration with Symbiota and its powerful database! Watch our overview below, explore top areas at right, or browse our full set of tutorials – including text-based – here.</p>
         <div class="row video-card">
             <div class="col-auto video-img">
-                <img src="/images/YouTube-tutorial-Intro.png">
+                <img src="` + clientRoot + `/images/YouTube-tutorial-Intro.png">
             </div>
             <div class="col video-text">
                 <h3>An Introduction to Oregon Flora</h3>
@@ -18,7 +22,7 @@ module.exports = `
 	<div class="col-sm-6 slide-col-2">
         <div class="row video-card">
             <div class="col-auto video-img">
-                <img src="/images/YouTube-tutorial-Taxon.png">
+                <img src="` + clientRoot + `/images/YouTube-tutorial-Taxon.png">
             </div>
             <div class="col video-text">
                 <h3>Taxon profile pages</h3>
@@ -27,7 +31,7 @@ module.exports = `
         </div>
         <div class="row video-card">
             <div class="col-auto video-img">
-                <img src="/images/YouTube-tutorial-Map.png">
+                <img src="` + clientRoot + `/images/YouTube-tutorial-Map.png">
             </div>
             <div class="col video-text">
                 <h3>Mapping</h3>
@@ -36,7 +40,7 @@ module.exports = `
         </div>
         <div class="row video-card">
             <div class="col-auto video-img">
-                <img src="/images/YouTube-tutorial-InterKey.png">
+                <img src="` + clientRoot + `/images/YouTube-tutorial-InterKey.png">
             </div>
             <div class="col video-text">
                 <h3>Interactive Key</h3>
@@ -45,7 +49,7 @@ module.exports = `
         </div>        
         <div class="row video-card">
             <div class="col-auto video-img">
-                <img src="/images/YouTube-tutorial-Inventory.png">
+                <img src="` + clientRoot + `/images/YouTube-tutorial-Inventory.png">
             </div>
             <div class="col video-text">
                 <h3>Plant Inventories</h3>

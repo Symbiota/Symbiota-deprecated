@@ -90,22 +90,22 @@ class Home extends React.Component {
 							<div className="col-sm-6 col-md-5 col-lg-4 slide-col-2">
 	
 								<div className="row link-card">
-												<p className="link-text"><img src="/images/slide-choose.png"/><strong><a href="/garden/index.php">Choose</a></strong> the right plant for your project or garden.</p>
+												<p className="link-text"><img src={ this.props.clientRoot + '/images/slide-choose.png' }/><strong><a href="/garden/index.php">Choose</a></strong> the right plant for your project or garden.</p>
 												<p className="link-desc">In our <strong>Plant Natives</strong> resource.</p>
 								</div>
 		
 								<div className="row link-card">
-												<p className="link-text"><img src="/images/slide-identify.png"/><strong><a href="/checklists/dynamicmap.php?interface=key">Identify</a></strong> a plant you’ve seen in Oregon.</p>
+												<p className="link-text"><img src={ this.props.clientRoot + "/images/slide-identify.png" }/><strong><a href="/checklists/dynamicmap.php?interface=key">Identify</a></strong> a plant you’ve seen in Oregon.</p>
 												<p className="link-desc">With our location-driven <strong>Interactive Key</strong> tool.</p>
 								</div>
 		
 								<div className="row link-card">
-												<p className="link-text"><img src="/images/slide-find.png"/><strong><a href="/spatial/index.php">Find</a></strong> where any vascular plant in Oregon calls home.</p>
+												<p className="link-text"><img src={ this.props.clientRoot + "/images/slide-find.png" }/><strong><a href="/spatial/index.php">Find</a></strong> where any vascular plant in Oregon calls home.</p>
 												<p className="link-desc">With our powerful <strong>Mapping</strong> resource that has two lines like this.</p>
 								</div>
 						
 								<div className="row link-card">
-												<p className="link-text"><img src="/images/slide-explore.png"/><strong><a href="/projects/index.php">Explore</a></strong> the collections of the OSU Herbarium.</p>
+												<p className="link-text"><img src={ this.props.clientRoot + "/images/slide-explore.png" }/><strong><a href="/projects/index.php">Explore</a></strong> the collections of the OSU Herbarium.</p>
 												<p className="link-desc">With our <strong>Searchable Database</strong> and images.</p>
 								</div>	
 							</div>
