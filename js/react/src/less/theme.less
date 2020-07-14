@@ -2,8 +2,8 @@
 @import "./search-results.less";
 
 //Variable for project paths since relative paths not allowed
-@subdir: "/portal";
-//@subdir: "";
+//@subdir: "/portal";
+@subdir: "";
 
 * {
   font-family: @font;
@@ -359,6 +359,10 @@ div#info-page {
 }
 
 #react-home-app {
+	.btn-search {
+		width: 3em;
+		height: 3em;
+	}
   .wrapper {
     background-color: darkgreen;
     background-image: url("@{subdir}/images/home.jpg");
@@ -405,8 +409,13 @@ div#info-page {
             input {
               display: inline;
               width: 65%;
+              max-width: 400px;
               font-size: 1.8em;
               border: 3px solid @med-green;
+              color: @med-green;
+              &::placeholder {
+              	color: @med-green;
+              }
             }
 
             .search-explain {
