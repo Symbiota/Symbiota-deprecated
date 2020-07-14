@@ -74,7 +74,7 @@ function taxaManagerToJSON($taxaObj) {
 		$result["parentTid"] = $taxaObj->getParentTid();   
 		$result["rankId"] = $taxaObj->getRankId();  
 		$result["author"] = $taxaObj->getAuthor();
-		$result["descriptions"] = $taxaObj->getDescriptions();
+		#$result["descriptions"] = $taxaObj->getDescriptions();
 		$result["gardenDescription"] = $taxaObj->getGardenDescription();
 		$result["gardenId"] = $taxaObj->getGardenId();
 		$result["images"] = $taxaObj->getImages();
