@@ -75,28 +75,29 @@ function taxaManagerToJSON($taxaObj) {
 		$result["rankId"] = $taxaObj->getRankId();  
 		$result["author"] = $taxaObj->getAuthor();
 		#$result["descriptions"] = $taxaObj->getDescriptions();
-		$result["gardenDescription"] = $taxaObj->getGardenDescription();
-		$result["gardenId"] = $taxaObj->getGardenId();
-		$result["images"] = $taxaObj->getImages();
-		$result["imagesBasis"] = $taxaObj->getImagesByBasisOfRecord();
+		#$result["gardenDescription"] = $taxaObj->getGardenDescription();
+		#$result["gardenId"] = $taxaObj->getGardenId();
+		#$result["images"] = $taxaObj->getImages();
+		#$result["imagesBasis"] = $taxaObj->getImagesByBasisOfRecord();
 		$result["vernacular"] = [
 			"basename" => $taxaObj->getBasename(),
 			"names" => $taxaObj->getVernacularNames()
 		];
-		$result["synonyms"] = $taxaObj->getSynonyms();
+		#$result["synonyms"] = $taxaObj->getSynonyms();
 		$result["origin"] = $taxaObj->getOrigin();
 		$result["family"] = $taxaObj->getFamily();
-		$result["taxalinks"] = $taxaObj->getTaxalinks();
-		$result["rarePlantFactSheet"] = $taxaObj->getRarePlantFactSheet();
-		$result["characteristics"] = $taxaObj->getCharacteristics();
-		$result["checklists"] = $taxaObj->getChecklists();
+		#$result["taxalinks"] = $taxaObj->getTaxalinks();
+		#$result["rarePlantFactSheet"] = $taxaObj->getRarePlantFactSheet();
+		#$result["characteristics"] = $taxaObj->getCharacteristics();
+		#$result["checklists"] = $taxaObj->getChecklists();
+		/*
 		$spp = $taxaObj->getSpp();  					
 		foreach($spp as $rowArr){
 			$taxaModel = $taxaRepo->find($rowArr['tid']);
 			$taxa = TaxaManager::fromModel($taxaModel);
 			$tj = taxaManagerToJSON($taxa);
 			$result["spp"][] = $tj;
-		}
+		}*/
 	}
 	return $result;
 }
