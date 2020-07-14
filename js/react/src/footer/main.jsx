@@ -6,7 +6,8 @@ class FooterApp extends React.Component {
   render() {
     return (
       <div className="mb-4">
-        <nav className="navbar navbar-expand-lg navbar-dark">
+      	<div className="navbar navbar-expand-lg navbar-dark">
+        <nav className="container">
           <ul className="navbar-nav">
             <li className="nav-item">
               <a href={ `${this.props.clientRoot}/pages/contact.php` } className="nav-link">Contact</a>
@@ -26,8 +27,9 @@ class FooterApp extends React.Component {
           </ul>
           <div className="nav-item ml-auto my-auto">All website content &copy; 2019 OregonFlora unless otherwise noted</div>
         </nav>
-        <div id="footer-content" className="container-fluid">
-          <div className="row px-5 py-4">
+        </div>
+        <div id="footer-content" className="container-fluid container">
+          <div className="row py-4">
             <div className="col">
               <div>
                 <p className="mt-2">

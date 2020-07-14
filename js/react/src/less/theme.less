@@ -2,8 +2,8 @@
 @import "./search-results.less";
 
 //Variable for project paths since relative paths not allowed
-@subdir: "/portal";
-//@subdir: "";
+//@subdir: "/portal";
+@subdir: "";
 
 * {
   font-family: @font;
@@ -381,7 +381,7 @@ div#info-page {
       .slick-slide {
         height: auto;
         margin-bottom: 50px;
-        padding: 0 20px;
+        padding: 0;
 
         .btn {
           padding: 10px;
@@ -404,9 +404,11 @@ div#info-page {
 
             input {
               display: inline;
-              width: 65%;
+              width: 35%;
+              max-width: 400px;
               font-size: 1.8em;
               border: 3px solid @med-green;
+              color: @med-green;
             }
 
             .search-explain {
