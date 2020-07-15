@@ -2,15 +2,13 @@
 
 import React from "react";
 import ReactDOM from "react-dom";
-const CLIENT_ROOT = "..";
 
-//import SideBar from "./sidebar.jsx";
+import SideBar from "./sidebar.jsx";
 import ViewOpts from "./viewOpts.jsx";
 import httpGet from "../common/httpGet.js";
 import {ExploreSearchResult, SearchResultContainer} from "../common/searchResults.jsx";
 import {addUrlQueryParam, getUrlQueryParams} from "../common/queryParams.js";
 import {getCommonNameStr, getTaxaPage} from "../common/taxaUtils";
-
 
 
 function MainContentContainer(props) {
@@ -84,8 +82,6 @@ class ExplorePageApp extends React.Component {
 					authors: res.authors,
 					abstract: res.abstract,
 					taxa: res.taxa,
-					//fullDescription: res.fullDescription,
-					//isPublic: res.isPublic,
 					//googleMapUrl: googleMapUrl
 				});
 				const pageTitle = document.getElementsByTagName("title")[0];
@@ -130,7 +126,7 @@ class ExplorePageApp extends React.Component {
       searchText: searchObj.text,
       filters: Object.assign({}, this.state.filters, { searchText: searchObj.text })
     });
-    httpGet(`${CLIENT_ROOT}/explore/rpc/api.php?search=${searchObj.text}`)
+    httpGet(`${this.props.clientRoot}/explore/rpc/api.php?search=${searchObj.text}`)
       .then((res) => {
         this.onSearchResults(JSON.parse(res));
       })
@@ -209,17 +205,18 @@ class ExplorePageApp extends React.Component {
           <div className="row">
             <div className="col-auto">
             {
-            /*
+            
               <SideBar
                 //ref={ this.sideBarRef }
                 style={{ background: "#DFEFD3" }}
                 isLoading={ this.state.isLoading }
-                //searchText={ this.state.searchText }
-                //searchSuggestionUrl="./rpc/autofillsearch.php"
-                //onSearch={ this.onSearch }
-                //onSearchTextChanged={ this.onSearchTextChanged }
+                clientRoot={this.props.clientRoot}
+                searchText={ this.state.searchText }
+                searchSuggestionUrl="./rpc/autofillsearch.php"
+                onSearch={ this.onSearch }
+                onSearchTextChanged={ this.onSearchTextChanged }
               />
-              */
+              
             }
             </div>
             <div className="col">
@@ -241,15 +238,13 @@ class ExplorePageApp extends React.Component {
                     {
                       this.state.taxa.map((result) =>  {
                         let showResult = true;
-                        //console.log(result);
-                        let vouchers = '';
                         
                         return (
                           <ExploreSearchResult
                             key={ result.tid }
                             viewType={ this.state.viewType }
                             display={ showResult }
-                            href={ getTaxaPage(CLIENT_ROOT, result.tid) }
+                            href={ getTaxaPage(this.props.clientRoot, result.tid) }
                             src={ result.thumbnail }
                             commonName={ getCommonNameStr(result) }
                             sciName={ result.sciname ? result.sciname : '' }
@@ -270,14 +265,13 @@ class ExplorePageApp extends React.Component {
   }
 }
 
-//const domContainer = document.getElementById("react-explore-app");
-//ReactDOM.render(<ExplorePageApp />, domContainer);
-
+const headerContainer = document.getElementById("react-header");
+const dataProps = JSON.parse(headerContainer.getAttribute("data-props"));
 const domContainer = document.getElementById("react-explore-app");
 const queryParams = getUrlQueryParams(window.location.search);
 if (queryParams.cl) {
   ReactDOM.render(
-    <ExplorePageApp clid={queryParams.cl }/>,
+    <ExplorePageApp clid={queryParams.cl } clientRoot={ dataProps["clientRoot"] }/>,
     domContainer
   );
 } else {

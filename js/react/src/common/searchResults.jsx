@@ -67,45 +67,24 @@ function ExploreSearchResult(props) {
                   <span className="author"> ({props.author})</span>
                   {useGrid ? <br/> : <span dangerouslySetInnerHTML={{__html: ' &mdash; '}} /> }
                   <span className="text-lowercase common-name">{props.commonName}</span>
-           		{
-           			props.vouchers.length && 
-           					
-										<div className="vouchers">           		
-										{
-											props.vouchers.map((voucher) =>  {
-												console.log(voucher);
-												let eventDate = '';
-												if (voucher.eventdate) {
-													eventDate = voucher.eventdate.date;
-													//console.log(dateObj.getMonth());
-													//eventDate = ' ' + dateObj;
-												}
-												return (
-													<span key={ voucher.occid } className={ "voucher" } >
-														<span className={ "recorded-by" }>{voucher.recordedby} </span>
-														<span className={ "event-date" }><Moment format="YYYY-MM-DD">{eventDate}</Moment></span>
-														<span className={ "institution-code" }> [{ voucher.institutioncode }]</span>
-													</span>
-												)
-											})
-											.reduce((prev, curr) => [prev, ', ', curr])
-										}
-										</div>
-           /*       
-                  Object.entries(this.getRenderedItems())
-					.map(([key, obj]) => {
-						return (
-							<span key={ key} className={ "synonym-item" } >
-								<span className={ "synonym-sciname" }>{obj.sciname}</span>
-								<span className={ "synonym-author" }> { obj.author }</span>
-							</span>
-						)
-					})
-					.reduce((prev, curr) => [prev, ', ', curr])
-				 }
-           */}       
-                  
-                  
+									{
+										props.vouchers.length && 
+										
+											<div className="vouchers">Vouchers:&nbsp;          		
+											{
+												props.vouchers.map((voucher) =>  {
+													return (
+														<span key={ voucher.occid } className={ "voucher" } >
+															<span className={ "recorded-by" }>{voucher.recordedby} </span>
+															<span className={ "event-date" }>{voucher.eventdate}</span>
+															<span className={ "institution-code" }> [{ voucher.institutioncode }]</span>
+														</span>
+													)
+												})
+												.reduce((prev, curr) => [prev, ', ', curr])
+											}
+											</div>
+									}                         
                 </div>
               </div>
             </div>

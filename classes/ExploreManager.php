@@ -83,6 +83,12 @@ class ExploreManager {
 			->distinct()
       ->getQuery()
       ->execute();
+      
+    foreach ($vouchers as $idx => $voucher) {
+    	if ($voucher['eventdate']) {
+    		$vouchers[$idx]['eventdate'] = $voucher['eventdate']->format('Y-m-d');
+    	}
+    }
     return $vouchers;
   
   }
