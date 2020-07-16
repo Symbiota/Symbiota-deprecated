@@ -243,9 +243,12 @@ div#info-page {
 
   .h1, h1 {
     color: white;
-    font-size: 60px;
+    font-size: 36px;
     font-weight: bold;
     padding: 45px 0 20px 0;
+    @media (min-width: 544px) {
+      font-size: 60px;
+    }
   }
 
   .h2, h2 {
@@ -315,25 +318,27 @@ div#info-page {
       font-size: 25px;
     }
 
-    .store-item-pic{
+    .store-item-pic {
       padding: 20px 25px;
-      img{
+
+      img {
         width: 100%;
         max-width: 350px;
       }
     }
+
     .store-item-purchase {
       background-color: #DFEFD3;
       min-height: 82px;
       padding: 18px 0;
 
-      div, p{
+      div, p {
         margin-bottom: 0;
         display: inline-table;
         vertical-align: center;
       }
 
-      .store-item-price p{
+      .store-item-price p {
         font-size: 28px;
         padding-left: 30px;
       }
@@ -348,10 +353,138 @@ div#info-page {
           font-size: 18px;
         }
 
-        img{
+        img {
           padding-left: 10px;
           background-color: #DFEFD3;
           border-radius: 6px;
+        }
+      }
+    }
+  }
+
+  #tutorials-content {
+    p {
+      font-size: 26px;
+    }
+
+    .tutorial-list {
+      padding: 15px;
+      background-color: @light-green;
+
+      p, li {
+        font-size: 22px;
+        line-height: 22px;
+      }
+    }
+
+    .tutorials-video,
+    .tutorials-text {
+
+      h2 {
+        font-size: 48px;
+        line-height: 48px;
+      }
+
+      p, li {
+        font-size: 22px;
+      }
+    }
+
+    .tutorials-video-card,
+    .tutorials-text-card {
+      border-radius: 8px;
+      border: 1px dashed black;
+      margin: 15px;
+
+      h3 {
+        font-size: 32px;
+        line-height: 32px;
+      }
+
+      .video-image {
+        border-top-right-radius: 8px;
+        border-top-left-radius: 8px;
+        background-color: @light-green;
+        padding: 30px;
+        margin-left: -15px;
+        margin-right: -15px;
+      }
+    }
+
+    .tutorials-text-card {
+      margin: 0;
+      padding: 15px;
+      .figure {
+        float: right;
+        width: 300px;
+      }
+    }
+  }
+
+  .news-events-content{
+    margin-top: -8px;
+    margin-bottom: -1.2rem;
+
+    .news-col{
+      padding-right: 2em;
+
+      p {
+        font-size: 22px;
+      }
+
+      .news-item {
+        margin: 1em 0;
+        padding-bottom: 1em;
+        border-bottom: 1px dashed black;
+
+        &:last-child{
+          border-bottom:none;
+        }
+
+        .news-figure {
+          width: 300px;
+          float: right;
+          margin: 0 0 15px 15px;
+        }
+
+        .news-byline {
+          font-style: italic;
+        }
+      }
+    }
+
+    .events-col{
+      background-color: @light-green;
+      padding: 1em 2em;
+
+      .event-item{
+        border: black 1px dashed;
+        border-radius: 8px;
+        margin: 2em 0;
+
+        h3 {
+          font-size: 22px;
+          line-height: 22px;
+          font-weight: bold;
+          color: @dark-green;
+          margin: 0;
+          padding: 12px;
+        }
+
+        p {
+          font-size: 22px;
+          line-height: 22px;
+        }
+
+        .event-content {
+          border-bottom-left-radius: 8px;
+          border-bottom-right-radius: 8px;
+          background-color: white;
+          margin: 0;
+          padding: 15px;
+          p:last-child {
+            margin: 0;
+          }
         }
       }
     }
