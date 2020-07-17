@@ -12,4 +12,4 @@
 vendor/
 !**/.gitkeep
 temp/proxies/
-*.DS_Store
+*/.DS_Store
