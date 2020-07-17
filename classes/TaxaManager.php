@@ -113,10 +113,12 @@ class TaxaManager {
     return $this->model->getRankid();
   }
   public function getVernacularNames() {
-    return $this->model->getVernacularNames()
+    $vern = $this->model->getVernacularNames()
       ->filter(function($vn) { return strtolower($vn->getLanguage()) === "english"; })
       ->map(function($vn) { return $vn->getVernacularName(); })
       ->toArray();
+    sort($vern);
+    return $vern; 
   }
 
   public function getSynonyms() {
@@ -264,6 +266,7 @@ class TaxaManager {
   }
   private function populateDescriptions($tid = null) {
   	$retArr = array();
+  	$emdash = html_entity_decode('&#x8212;', ENT_COMPAT, 'UTF-8');
   	if ($tid) {
 			$em = SymbosuEntityManager::getEntityManager();
 			$rsArr = $em->createQueryBuilder()
@@ -277,8 +280,13 @@ class TaxaManager {
 				->setParameter("tid", $tid)
 				->getQuery()
 				->execute();
-				
 				#var_dump($rsArr);exit;
+				foreach ($rsArr as $idx => $rs) {
+					#$rs[$idx] = iconv('UTF-8', 'ISO-8859-1//TRANSLIT//IGNORE', $rs['statement']);#htmlentities($rs['statement']);
+					#$rsArr[$idx] =  str_replace($emdash, '(mdash)', $rsArr[$idx]);
+					$rsArr[$idx]['statement'] = mb_convert_encoding($rsArr[$idx]['statement'], "UTF-8", array("Windows-1252"));
+				}
+				
 				/* copied from TaxonProfileManager */
         //Get descriptions associated with accepted name only
 				$usedCaptionArr = array();
@@ -441,15 +449,15 @@ class TaxaManager {
       	->getQuery()
       	->execute();
 		}
-		
+
   	foreach ($links as $idx => $arr) {
   		if (strcasecmp($arr['title'],"Rare Plant Fact Sheet") === 0) {
   			$this->rarePlantFactSheet = $arr['url'];
   			unset($links[$idx]);
   		}
   	}
+  	sort($links);
   	return $links;
-		#$this->taxalinks = $links;
  	}
  	
   private static function populateCharacteristics($tid) {

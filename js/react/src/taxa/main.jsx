@@ -327,7 +327,10 @@ class TaxaChooser extends React.Component {
 							*/}
 							{ /*this.state.descriptions.replace(/(<\/?[^>]+>)|(&[^;]+;)/g, "") */}
 						</p>
-						<TaxaTabs descriptions={ res.descriptions } />
+						{ 
+							res.descriptions.length > 0 &&
+							<TaxaTabs descriptions={ res.descriptions } />
+						}
 					
 					
 						{res.spp.length > 0 &&
@@ -380,6 +383,7 @@ class TaxaDetail extends React.Component {
 	render() {
 		const res = this.props.res;
 		const allImages = res.images.HumanObservation.concat(res.images.PreservedSpecimen);
+		const showDescriptions = res.descriptions? true: false;
 		return (
 	
 			<div className="container my-5 py-2 taxa-detail" style={{ minHeight: "45em" }}>
@@ -404,15 +408,18 @@ class TaxaDetail extends React.Component {
 							/>
 							}
 						</div>
-						<p className="mt-4">
 							{/*
+				
 								Description includes HTML tags & URL-encoded characters in the db.
 								It's dangerous to pull/render arbitrary HTML w/ react, so just render the
-								plain text & remove any HTML in it.
+								plain text & remove any HTML in it.		
+								<p className="mt-4">
+								</p>
 							*/}
 							{ /*this.state.descriptions.replace(/(<\/?[^>]+>)|(&[^;]+;)/g, "") */}
-						</p>
-						<TaxaTabs descriptions={ res.descriptions } />
+						{ showDescriptions &&
+							<TaxaTabs descriptions={ res.descriptions } />
+						}
 					
 					
 						{res.spp.length > 0 &&
