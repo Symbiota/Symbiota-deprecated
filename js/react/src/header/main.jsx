@@ -23,6 +23,7 @@ const dropDownChildren = {
     { title: "Taxonomic Tree", href: "/taxa/admin/taxonomydisplay.php" },
   ],
   "Resources": [
+    { title: "Tutorials and Tips", href: "/pages/tutorials.php" },
     { title: "What's New", href: "/pages/whats-new.php" },
     { title: "Archived Newsletters", href: "/newsletters/index.php" },
     { title: "Links", href: "/pages/links.php" }
