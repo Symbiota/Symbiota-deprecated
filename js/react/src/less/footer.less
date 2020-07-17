@@ -14,10 +14,19 @@
 
   .nav-item {
     color: white;
-    margin-left: 1em;
-    margin-right: 1em;
+    margin-left: .5em;
+    margin-right: .5em;
     .text-uppercase();
     .text-bold();
+    a {
+    	padding: 0;
+    }
+    &:first-child {
+    	margin-left: 0;
+    }
+    &:last-child {
+    	margin-right: 0;
+    }
   }
 
   #footer-content {

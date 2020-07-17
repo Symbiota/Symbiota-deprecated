@@ -61,12 +61,12 @@ class TaxaManager {
       $this->model = $taxaRepo->find($tid);
       $this->basename = $this->populateBasename();
       $this->images = TaxaManager::populateImages($this->getTid());
-      $this->characteristics = TaxaManager::populateCharacteristics($this->getTid());
       $this->checklists = TaxaManager::populateChecklists($this->getTid());
+      #$this->characteristics = TaxaManager::populateCharacteristics($this->getTid());
       #$this->descriptions = $this->populateDescriptions($this->getTid());
-      $this->gardenDescription = $this->populateGardenDescription($this->getTid());
-      $this->populateTaxalinks($this->getTid());
-      $this->spp = $this->populateSpp($this->getTid());
+      #$this->gardenDescription = $this->populateGardenDescription($this->getTid());
+      #$this->populateTaxalinks($this->getTid());
+      #$this->spp = $this->populateSpp($this->getTid());
     } else {
       $this->model = null;
       $this->basename = '';
@@ -85,11 +85,11 @@ class TaxaManager {
     $newTaxa->model = $model;
     $newTaxa->basename = $newTaxa->populateBasename();
     $newTaxa->images = TaxaManager::populateImages($model->getTid());
-    $newTaxa->characteristics = TaxaManager::populateCharacteristics($model->getTid());
     $newTaxa->checklists = TaxaManager::populateChecklists($model->getTid());
+    #$newTaxa->characteristics = TaxaManager::populateCharacteristics($model->getTid());
     #$newTaxa->descriptions = $newTaxa->populateDescriptions($model->getTid());
-    $newTaxa->gardenDescription = $newTaxa->populateGardenDescription($model->getTid());
-    $newTaxa->spp = $newTaxa->populateSpp($model->getTid());
+    #$newTaxa->gardenDescription = $newTaxa->populateGardenDescription($model->getTid());
+    #$newTaxa->spp = $newTaxa->populateSpp($model->getTid());
     return $newTaxa;
   }
   
@@ -113,10 +113,12 @@ class TaxaManager {
     return $this->model->getRankid();
   }
   public function getVernacularNames() {
-    return $this->model->getVernacularNames()
+    $vern = $this->model->getVernacularNames()
       ->filter(function($vn) { return strtolower($vn->getLanguage()) === "english"; })
       ->map(function($vn) { return $vn->getVernacularName(); })
       ->toArray();
+    sort($vern);
+    return $vern; 
   }
 
   public function getSynonyms() {
@@ -140,11 +142,11 @@ class TaxaManager {
 		return $this->gardenId;
 	}
   public function getTaxalinks() {
-    $this->populateTaxalinks($this->getTid());
+    $this->taxalinks = $this->populateTaxalinks($this->getTid());
   	return $this->taxalinks;
   }
   public function getRarePlantFactSheet() {
-    $this->populateTaxalinks($this->getTid());
+    $this->taxalinks = $this->populateTaxalinks($this->getTid());
   	return $this->rarePlantFactSheet;
   }
   public function getBasename() {
@@ -165,6 +167,7 @@ class TaxaManager {
   }
 
   public function getCharacteristics() {
+  	$this->characteristics = self::populateCharacteristics($this->getTid());
     return $this->characteristics;
   }
 
@@ -173,13 +176,16 @@ class TaxaManager {
   }
 
   public function getDescriptions() {
+  	$this->descriptions = $this->populateDescriptions($this->getTid());
     return $this->descriptions;
   }
 
   public function getGardenDescription() {
+  	$this->gardenDescription = $this->populateGardenDescription($this->getTid());
     return $this->gardenDescription;
   }
   public function getSpp() {
+  	$this->spp = $this->populateSpp($this->getTid());
   	return $this->spp;
   }
   
@@ -223,10 +229,9 @@ class TaxaManager {
   		if ($this->getRankId() >= 140) {#less complicated than what's in OSUTaxaManager::setSppData() for now
   	
 				$em = SymbosuEntityManager::getEntityManager();
-  			$taxaRepo = SymbosuEntityManager::getEntityManager()->getRepository("Taxa");
   			#$spp = $taxaRepo->createQueryBuilder("t")
 				$spp = $em->createQueryBuilder()
-					->select(["t.tid, t.sciname, t.securitystatus"])
+					->select(["t.tid"])#, t.sciname, t.securitystatus
 					->from("Taxa", "t")
 					->innerJoin("Taxaenumtree", "te", "WITH", "t.tid = te.tid")
 					->innerJoin("Taxstatus", "ts", "WITH", "t.tid = ts.tidaccepted")
@@ -240,14 +245,7 @@ class TaxaManager {
 					->distinct()
 					->getQuery()
 					->execute();
-									
-				foreach($spp as $n => $rowArr){
-  				$taxaModel = $taxaRepo->find($rowArr['tid']);
-  				$taxa = TaxaManager::fromModel($taxaModel);
-      		$tj = TaxaManager::taxaManagerToJSON($taxa);
-  				$return[] = $tj;
-		
-				}
+					$return = $spp;
 			}
 		}
 		return $return;
@@ -268,10 +266,11 @@ class TaxaManager {
   }
   private function populateDescriptions($tid = null) {
   	$retArr = array();
+  	$emdash = html_entity_decode('&#x8212;', ENT_COMPAT, 'UTF-8');
   	if ($tid) {
 			$em = SymbosuEntityManager::getEntityManager();
 			$rsArr = $em->createQueryBuilder()
-				->select(["ts.tid, tdb.tdbid, tdb.caption"])#, tdb.language, tdb.source, tdb.sourceurl, tds.tdsid, tds.heading, tds.statement, tds.displayheader
+				->select(["ts.tid, tdb.tdbid, tdb.caption, tdb.language, tdb.source, tdb.sourceurl, tds.tdsid, tds.heading, tds.statement, tds.displayheader"])#
 				->from("Taxstatus", "ts")
 				->innerJoin("Taxadescrblock", "tdb", "WITH", "ts.tid = tdb.tid")
 				->innerJoin("Taxadescrstmts", "tds", "WITH", "tds.tdbid = tdb.tdbid")
@@ -281,8 +280,13 @@ class TaxaManager {
 				->setParameter("tid", $tid)
 				->getQuery()
 				->execute();
+				#var_dump($rsArr);exit;
+				foreach ($rsArr as $idx => $rs) {
+					#$rs[$idx] = iconv('UTF-8', 'ISO-8859-1//TRANSLIT//IGNORE', $rs['statement']);#htmlentities($rs['statement']);
+					#$rsArr[$idx] =  str_replace($emdash, '(mdash)', $rsArr[$idx]);
+					$rsArr[$idx]['statement'] = mb_convert_encoding($rsArr[$idx]['statement'], "UTF-8", array("Windows-1252"));
+				}
 				
-				var_dump($rsArr);exit;
 				/* copied from TaxonProfileManager */
         //Get descriptions associated with accepted name only
 				$usedCaptionArr = array();
@@ -445,14 +449,15 @@ class TaxaManager {
       	->getQuery()
       	->execute();
 		}
-		
+
   	foreach ($links as $idx => $arr) {
   		if (strcasecmp($arr['title'],"Rare Plant Fact Sheet") === 0) {
   			$this->rarePlantFactSheet = $arr['url'];
   			unset($links[$idx]);
   		}
   	}
-		$this->taxalinks = $links;
+  	sort($links);
+  	return $links;
  	}
  	
   private static function populateCharacteristics($tid) {
@@ -639,37 +644,7 @@ class TaxaManager {
       TaxaManager::$CID_ECOREGION
     ];
   }
-  
-  public static function taxaManagerToJSON($taxaObj) {
 
-		$result = TaxaManager::getEmptyTaxon();
-
-		if ($taxaObj !== null) {
-			$result["tid"] = $taxaObj->getTid();
-			$result["sciname"] = $taxaObj->getSciname();
-			$result["parentTid"] = $taxaObj->getParentTid();   
-			$result["rankId"] = $taxaObj->getRankId();  
-			$result["author"] = $taxaObj->getAuthor();
-			$result["descriptions"] = $taxaObj->getDescriptions();
-			$result["gardenDescription"] = $taxaObj->getGardenDescription();
-			$result["gardenId"] = $taxaObj->getGardenId();
-			$result["images"] = $taxaObj->getImages();
-			$result["imagesBasis"] = $taxaObj->getImagesByBasisOfRecord();
-			$result["vernacular"] = [
-				"basename" => $taxaObj->getBasename(),
-				"names" => $taxaObj->getVernacularNames()
-			];
-			$result["synonyms"] = $taxaObj->getSynonyms();
-			$result["origin"] = $taxaObj->getOrigin();
-			$result["family"] = $taxaObj->getFamily();
-			$result["taxalinks"] = $taxaObj->getTaxalinks();
-			$result["rarePlantFactSheet"] = $taxaObj->getRarePlantFactSheet();
-			$result["characteristics"] = $taxaObj->getCharacteristics();
-			$result["checklists"] = $taxaObj->getChecklists();
-			$result["spp"] = $taxaObj->getSpp();     
-		}
-		return $result;
-	}
 	public static function getEmptyTaxon() {
 		return [
 			"tid" => -1,

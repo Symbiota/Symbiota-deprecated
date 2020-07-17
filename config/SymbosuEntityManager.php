@@ -37,16 +37,16 @@ class SymbosuEntityManager {
       $cache = new ApcuCache();
       $config->setAutoGenerateProxyClasses(false);
     }
-
-    $config->setMetadataCacheImpl($cache);
-    $config->setQueryCacheImpl($cache);
+$cache = null;
+    #$config->setMetadataCacheImpl($cache);
+    #$config->setQueryCacheImpl($cache);
 
     $driverImpl = $config->newDefaultAnnotationDriver("$SERVER_ROOT/models", false);
     $config->setMetadataDriverImpl($driverImpl);
 
-    $factory = new DefaultCacheFactory(new RegionsConfiguration(), $cache);
-    $config->setSecondLevelCacheEnabled();
-    $config->getSecondLevelCacheConfiguration()->setCacheFactory($factory);
+    #$factory = new DefaultCacheFactory(new RegionsConfiguration(), $cache);
+    #$config->setSecondLevelCacheEnabled();
+    #$config->getSecondLevelCacheConfiguration()->setCacheFactory($factory);
 
     return $config;
   }

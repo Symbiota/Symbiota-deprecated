@@ -15,7 +15,7 @@ function getTaxon($tid) {
   $taxaRepo = $em->getRepository("Taxa");
   $taxaModel = $taxaRepo->find($tid);
   $taxa = TaxaManager::fromModel($taxaModel);
-  return TaxaManager::taxaManagerToJSON($taxa);
+  return taxaManagerToJSON($taxa);
 }
 
 function searchTaxa($searchTerm) {
@@ -33,7 +33,7 @@ function searchTaxa($searchTerm) {
   if ($taxaResults != null) {
     foreach ($taxaResults as $t) {
       $tm = TaxaManager::fromModel($t);
-      $tj = TaxaManager::taxaManagerToJSON($tm);
+      $tj = taxaManagerToJSON($tm);
       array_push($results, $tj);
     }
   }
@@ -55,12 +55,53 @@ function getSubTaxa($parentTid) {
   if ($taxaResults != null) {
     foreach ($taxaResults as $t) {
       $tm = TaxaManager::fromModel($t);
-      $tj = TaxaManager::taxaManagerToJSON($tm);
+      $tj = taxaManagerToJSON($tm);
       array_push($results, $tj);
     }
   }
 
   return $results;
+}
+  
+function taxaManagerToJSON($taxaObj) {
+
+	$result = TaxaManager::getEmptyTaxon();
+  $taxaRepo = SymbosuEntityManager::getEntityManager()->getRepository("Taxa");
+
+	if ($taxaObj !== null) {
+		$result["tid"] = $taxaObj->getTid();
+		$result["sciname"] = $taxaObj->getSciname();
+		$result["parentTid"] = $taxaObj->getParentTid();   
+		$result["rankId"] = $taxaObj->getRankId();  
+		$result["author"] = $taxaObj->getAuthor();
+		$result["descriptions"] = $taxaObj->getDescriptions();
+		$result["gardenDescription"] = $taxaObj->getGardenDescription();
+		$result["gardenId"] = $taxaObj->getGardenId();
+		$result["images"] = $taxaObj->getImages();
+		$result["vernacular"] = [
+			"basename" => $taxaObj->getBasename(),
+			"names" => $taxaObj->getVernacularNames()
+		];
+		$result["synonyms"] = $taxaObj->getSynonyms();
+		$result["origin"] = $taxaObj->getOrigin();
+		$result["family"] = $taxaObj->getFamily();
+		$result["taxalinks"] = $taxaObj->getTaxalinks();
+		$result["rarePlantFactSheet"] = $taxaObj->getRarePlantFactSheet();
+		$result["characteristics"] = $taxaObj->getCharacteristics();
+		$result["checklists"] = $taxaObj->getChecklists();
+		$spp = $taxaObj->getSpp();  					
+		foreach($spp as $rowArr){
+			$taxaModel = $taxaRepo->find($rowArr['tid']);
+			$taxa = TaxaManager::fromModel($taxaModel);
+			$tj = taxaManagerToJSON($taxa);
+			$result["spp"][] = $tj;
+		}
+		$allImages = $taxaObj->getImagesByBasisOfRecord();
+		$result["imagesBasis"]['HumanObservation'] = (isset($allImages['HumanObservation']) ? $allImages['HumanObservation'] : []);
+		$result["imagesBasis"]['PreservedSpecimen'] = (isset($allImages['PreservedSpecimen']) ? $allImages['PreservedSpecimen'] : []);
+		$result["imagesBasis"]['LivingSpecimen'] = (isset($allImages['LivingSpecimen']) ? $allImages['LivingSpecimen'] : []);
+	}
+	return $result;
 }
 
 $result = [];
