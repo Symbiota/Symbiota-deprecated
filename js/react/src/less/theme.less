@@ -749,6 +749,49 @@ div#info-page {
     }
   }
 }
+#react-newsletters-app {
+	
+	.issue-item {
+		clear: both;
+		border-top: 1px dotted @dark-gray;
+		&:last-child {
+			border-bottom: 1px dotted @dark-gray;
+		}
 
+		.issue-header {
+			background-color: @light-green;
+			padding: 0.2em 0.5em 0.5em 0.5em;
+			margin-left: 0;
+			margin-right: 0;
+			display: flex;
+			flex-flow: row;
+			justify-content: space-between;
+			.issue-link {
+				flex-basis: 5%;
+			}
+			.issue-title {
+				text-align: left;
+				flex-basis: 80%;
+				h3 {
+					display: inline-block;
+					font-size: 1.5em;
+					font-weight: 600;
+					padding: 0;
+					margin-bottom: 0;
+				}
+			}			
+			.more-less {
+				flex-basis: 15%;
+				font-size: 14px;
+				color: @med-green;
+				text-transform: uppercase;
+				margin-top: 0.3em;
+				margin-right: 15px;
+				text-align: right;
+				cursor: pointer;
+			}
+		}
+	}
+}
 
 

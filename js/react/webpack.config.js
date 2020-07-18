@@ -27,6 +27,7 @@ const reactConfig = {
     header: path.join(SRC_DIR, "header", "main.jsx"),
     footer: path.join(SRC_DIR, "footer", "main.jsx"),
     home: path.join(SRC_DIR, "home", "main.jsx"),
+    newsletters: path.join(SRC_DIR, "home", "newsletters.jsx"),
     garden: path.join(SRC_DIR, "garden", "main.jsx"),
     inventory: path.join(SRC_DIR, "inventory", "main.jsx"),
     taxa: path.join(SRC_DIR, "taxa", "main.jsx"),

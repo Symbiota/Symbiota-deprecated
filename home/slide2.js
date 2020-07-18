@@ -11,7 +11,7 @@ module.exports = `
         <p>Now, all that information is even more accessible through our collaboration with Symbiota and its powerful database! Watch our overview below, explore top areas at right, or browse our full set of tutorials – including text-based – here.</p>
         <div class="row video-card">
             <div class="col-auto video-img">
-                <img src="` + clientRoot + `/images/YouTube-tutorial-Intro.png">
+                <a href="https://www.youtube.com/watch?v=9ystxXKEOp4" target="_blank"><img src="` + clientRoot + `/images/YouTube-tutorial-Intro.png"></a>
             </div>
             <div class="col video-text">
                 <h3>An Introduction to Oregon Flora</h3>
@@ -22,7 +22,7 @@ module.exports = `
 	<div class="col-sm-6 slide-col-2">
         <div class="row video-card">
             <div class="col-auto video-img">
-                <img src="` + clientRoot + `/images/YouTube-tutorial-Taxon.png">
+                <a href="https://www.youtube.com/watch?v=HwtEXcTO9jA" target="_blank"><img src="` + clientRoot + `/images/YouTube-tutorial-Taxon.png"></a>
             </div>
             <div class="col video-text">
                 <h3>Taxon profile pages</h3>
@@ -31,7 +31,7 @@ module.exports = `
         </div>
         <div class="row video-card">
             <div class="col-auto video-img">
-                <img src="` + clientRoot + `/images/YouTube-tutorial-Map.png">
+                <a href="https://www.youtube.com/watch?v=Y2sdnibf1O8" target="_blank"><img src="` + clientRoot + `/images/YouTube-tutorial-Map.png"></a>
             </div>
             <div class="col video-text">
                 <h3>Mapping</h3>
@@ -40,7 +40,7 @@ module.exports = `
         </div>
         <div class="row video-card">
             <div class="col-auto video-img">
-                <img src="` + clientRoot + `/images/YouTube-tutorial-InterKey.png">
+                <a href="https://www.youtube.com/watch?v=DKxoEEwL3V4" target="_blank"><img src="` + clientRoot + `/images/YouTube-tutorial-InterKey.png"></a>
             </div>
             <div class="col video-text">
                 <h3>Interactive Key</h3>
@@ -49,14 +49,14 @@ module.exports = `
         </div>        
         <div class="row video-card">
             <div class="col-auto video-img">
-                <img src="` + clientRoot + `/images/YouTube-tutorial-Inventory.png">
+                <a href="https://www.youtube.com/watch?v=RB0bdQy4k6k" target="_blank"><img src="` + clientRoot + `/images/YouTube-tutorial-Inventory.png"></a>
             </div>
             <div class="col video-text">
                 <h3>Plant Inventories</h3>
                 <p>Species lists for defined places, presented as a checklist and an interactive key.</p>
             </div>
         </div>                
-        <p><button class="btn btn-primary">See the rest of our tutorials here</button></p>
+        <p><a href="https://www.youtube.com/channel/UCH2UPZv1n4EKcfXUsUP7owA/featured" target="_blank"><button class="btn btn-primary">See the rest of our tutorials here</button></a></p>
 	</div>
 </div>
 `;       
