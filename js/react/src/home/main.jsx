@@ -1,6 +1,7 @@
 import ReactDOM from "react-dom";
 import React from "react";
 import Slider from "react-slick";
+import httpGet from "../common/httpGet.js";
 import SearchWidget from "../common/search.jsx";
 
 const RANK_FAMILY = 140;
@@ -20,6 +21,8 @@ class Home extends React.Component {
     this.state = {
       isLoading: false,
       searchText: '',
+      news: [],
+      events: [],
     };
 		this.onSearchTextChanged = this.onSearchTextChanged.bind(this);
 		this.onSearch = this.onSearch.bind(this);
@@ -49,9 +52,29 @@ class Home extends React.Component {
 
     window.location = targetUrl;
   }  
+  
+  
+  componentDidMount() {
+
+		httpGet(`./home/rpc/api.php`)
+			.then((res) => {
+				res = JSON.parse(res);
+				
+				this.setState({
+					news: res.news.splice(0,3),
+					events: res.events.splice(0,3),
+				});
+				const pageTitle = document.getElementsByTagName("title")[0];
+				pageTitle.innerHTML = `${pageTitle.innerHTML} Home`;
+			})
+			.catch((err) => {
+				console.error(err);
+			});
+  }//componentDidMount
+  
     
   render() {
-		const slides = [2,3];//matches slide suffixes in /home/ dir
+		const slides = [2];//matches slide suffixes in /home/ dir
 		
 		const slickSettings = {
 			autoplay: false,
@@ -62,6 +85,7 @@ class Home extends React.Component {
 			slidesToShow: 1,
 			slidesToScroll: 1
 		};
+			
 		
     return (
     <div className="wrapper">
@@ -127,6 +151,50 @@ class Home extends React.Component {
      				)
      			})
      		}
+     		
+     		 <div key="3">
+						<div className="row slide-wrapper slide-3">
+							<h1>Oregon Flora News and Events</h1>
+								<div className="row">
+										<div className="col-sm-6 slide-col-1">
+											{	this.state.news.map((item,index) => {
+													
+													return (					
+														<div key={index} className="row">
+															<h2 dangerouslySetInnerHTML={{__html: item.title}} ></h2>
+															<p><span dangerouslySetInnerHTML={{__html: item.excerpt}} ></span>... <a href={this.props.clientRoot + '/pages/whats-new.php' } className="read-more">Read more</a></p>
+														</div>
+													)
+												})
+											}
+										</div>
+										<div className="col-sm-6 slide-col-2">
+										
+											{	this.state.events.map((item,index) => {
+													
+													return (					
+														<div key={index} className="row">
+														     
+															<div className="col col-3 event-date">
+																	<p>{ item.date } { item.time }</p>
+															</div>
+															<div className="col event-desc">
+																	<p>
+																		<span className="event-title" dangerouslySetInnerHTML={{__html: item.title}} ></span>
+																		&nbsp;<span className="event-content" dangerouslySetInnerHTML={{__html: item.content}} ></span>
+																	</p>
+																	<p className="event-location" dangerouslySetInnerHTML={{__html: item.location}} ></p>
+															</div></div>
+													)
+												})
+											}
+											<p><button className="btn btn-primary"><a href={this.props.clientRoot + '/pages/whats-new.php' }>See all news and events</a></button></p>
+										</div>    
+								</div>
+						</div>
+					</div>
+     		
+     		
       	</Slider>
         
         
