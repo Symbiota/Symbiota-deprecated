@@ -25,3 +25,11 @@ export function getCommonNameStr(item) {
 
   return cname;
 }
+
+export function getChecklistPage(clientRoot,clid,pid) {
+  return `${clientRoot}/checklists/checklist.php?cl=${clid}&pid=${pid}`;
+}
+
+export function getIdentifyPage(clientRoot,clid,pid) {
+  return `${clientRoot}/ident/key.php?cl=${clid}&proj=${pid}&taxon=All+Species`;
+}

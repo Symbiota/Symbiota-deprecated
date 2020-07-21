@@ -5,13 +5,18 @@ import httpGet from "./httpGet";
  * Sidebar 'plant search' button
  */
 function SearchButton(props) {
+	let imgSrc = `${props.clientRoot}/images/garden/search-green.png`;//header = default
+	if (props.location == 'home-main') {
+		imgSrc = `${props.clientRoot}/images/icons/home-mag-glass-2x.png`;
+	}
+	
   return (
     <button
       className="my-auto btn-search" style={ props.style }
       onClick={ props.isLoading ? () => {} : props.onClick}>
       <img
         style={{display: props.isLoading ? "none" : "block"}}
-        src={`${props.clientRoot}/images/garden/search-green.png`}
+        src={imgSrc}
         alt="search plants"/>
       <div
         className="mx-auto text-success spinner-border spinner-border-sm"
@@ -66,7 +71,7 @@ export class SearchWidget extends React.Component {
 
   render() {
     return (
-      <div className="search-widget dropdown input-group w-100 mb-4 p-2" style={ this.props.style }>
+      <div className="search-widget dropdown input-group w-100 mb-4" style={ this.props.style }>
         <input
           name="search"
           type="text"
@@ -98,6 +103,7 @@ export class SearchWidget extends React.Component {
           onClick={ () => this.props.onSearch({ text: this.props.textValue }) }
           isLoading={this.props.isLoading}
           style={ this.props.buttonStyle }
+          location={ this.props.location }
           clientRoot={ this.props.clientRoot }
         />
       </div>
@@ -108,6 +114,7 @@ export class SearchWidget extends React.Component {
 SearchWidget.defaultProps = {
   onSearch: () => {},
   buttonStyle: {},
+  location: {},
   clientRoot: '',
   suggestionUrl: ''
 };

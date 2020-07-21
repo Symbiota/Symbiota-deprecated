@@ -162,6 +162,7 @@ class Taxa
  */
   private $vernacularNames;
 
+
 /**
  * @var ArrayCollection
  * @ORM\Cache("READ_ONLY")

@@ -1,4 +1,6 @@
 @import "./mixins.less";
+@import '../../node_modules/react-tabs/style/react-tabs.less';
+
 
 #react-taxa-garden-app {
   .text-drk-grn();
@@ -11,29 +13,6 @@
     max-width: 100%;
     height: auto;
   }
-  .slick-next, 
-  .slick-prev {
-  	color: @med-green;
-  	font-weight: 700;		
-  	&:before {
-  		color: @med-green;
-  		font-weight: 700;		
-  	}
-  	&:hover {
-  		color: @med-green;
-  	}
-  }  
-  /*
-  .slick-prev {
-  	&:before {
-  		content: '<';
-  	}
-  }
-  .slick-next {
-  	&:before {
-  		content: '>';
-  	}
-  }*/
   .card {
   	border: none;
   }
@@ -41,7 +20,239 @@
 		max-height: 150px;
 		overflow: hidden; 
   }
-  
+
+}
+#react-taxa-app {
+
+	h1{
+		font-weight: 700;
+	}
+	h2{
+		font-weight: 600;
+	}
+	h3{
+		font-size: 1.4rem;
+		color: @med-green;
+	}
+	.description-tabs{
+		margin-top: 1em;
+		.react-tabs__tab-list{
+			margin-bottom: 0px;
+			font-weight: 600;
+			border-bottom: 2px solid @med-green;
+
+			li{
+				margin-bottom: -1px;
+			}
+
+			.react-tabs__tab{
+				background-color: @med-green;
+				color: white;
+				border-top: 2px solid @med-green;
+				border-bottom: 2px solid @med-green;
+				border-left: 2px solid @med-green;
+				border-right: 2px solid @med-green;
+				margin-right: 0.5em;
+				border-top-left-radius: 10px;
+				border-top-right-radius: 10px;
+				&.react-tabs__tab--selected{
+					border-bottom: 2px solid @ivory;
+					background-color: @ivory;
+					color: black;
+
+				}
+			}
+		}
+
+		.react-tabs__tab-panel{
+			background-color: @ivory;
+			padding: 1.8em;
+			border-width: 2px;
+			border-left: @med-green 2px solid;
+			border-right: @med-green 2px solid;
+			border-bottom: @med-green 2px solid;
+
+			.reference{
+				font-style: italic;
+				font-weight: bold;
+			}
+			.description {
+				height: 250px;
+				overflow-y: scroll;
+			}
+		}
+	}
+
+
+	.card {
+		margin-right: 8px;
+	}
+
+	.sidebar-section {
+		font-size: 14px;
+		font-weight: 400;
+
+		h3 {
+			font-size: 1.2rem;
+			margin-bottom: 0.2em !important;
+		}
+
+		.related-sciname {
+			font-size: 18px;
+			line-height: 14px;
+		}
+
+		.related,
+		.related-sciname,
+		.related-nav,
+		.col {
+			padding-left: 0px;
+			padding-right: 0px;
+		}
+
+		.row {
+			margin-left: 0px;
+			margin-right: 0px;
+			padding-top: .2rem !important;
+			padding-bottom: .2rem !important;
+		}
+
+		&.weblinks {
+
+			li {
+				padding-top: .2rem !important;
+				padding-bottom: .2rem !important;
+
+				a {
+					font-weight: bold;
+					text-decoration: underline;
+				}
+			}
+		}
+	}
+
+	.up-down-toggle {
+		color: @med-green;
+		text-align: center;
+		font-size: 1.5em;
+		padding: .3em 0;
+	}
+
+	.img-main-wrapper {
+		max-height: 485px;
+		overflow: hidden;
+		img {
+			/*width: 100%;*/
+		}
+	}
+	ul.single-border-item {
+		width: 100%;
+		li {
+			display: block;
+		}
+	}
+	.related {
+		.related-label {
+			padding-right: 6px;
+			text-transform: uppercase;
+			font-size: .9em;
+		}
+		.related-links {
+			.separator {
+				padding: 0px 2px;
+			}
+		}
+		.related-sciname {
+			font-style: italic;
+			font-weight: bold;
+		}
+		.fa-arrow-circle-up {
+			transform: rotate(315deg);
+			color: @med-green;
+		}
+		.fa-arrow-circle-down {
+			transform: rotate(315deg);
+			color: @med-green;
+		}
+	}
+	.more-info {
+		button img {
+			padding-right: 3px;
+		}
+
+	}
+	.fa-edit {
+		color: @med-green;
+	}
+	.synonym-item {
+		.synonym-sciname {
+			font-style: italic;
+		}
+	}
+	.reference {
+		text-align: right;
+		margin-bottom: 1rem;
+	}
+	.spp-wrapper {
+		display: flex;
+		flex-flow: row wrap;
+		.card {
+			flex-basis: 19%;
+			margin-right: 1%;
+			margin-bottom: 1em;
+			box-shadow: 2px 4px #00000054;
+			a {
+				padding: 8px;
+			}
+			h4 {
+				font-size: .8em;
+				font-style: italic;
+				text-align: center;
+				min-height: 30px;
+			}
+			.img-thumbnail {
+				padding: 0;
+				border: none;
+			}
+		}
+	}
+	.taxa-chooser {
+		.related {
+			margin-bottom: 1em;
+			.related-label {
+				padding: 0px 8px;
+				text-transform: none;
+				font-weight: bold;
+				font-size: 1rem;
+			}
+		}	
+		
+		.spp-wrapper {
+			padding-top: 1em;
+			.card {
+				flex-basis: percentage(162/1140);
+
+			}
+		}
+	}
+}
+
+
+#react-taxa-garden-app,
+#react-taxa-app {
+	//taxa slideshows on main and garden pages
+  .slick-next, 
+  .slick-prev {
+  	&:before {
+  		color: @med-green !important;
+  	}
+  }
+  .slick-slide {
+		height: auto;
+	}
+	.slick-slider {
+		max-width: 90%;
+	}
   .modal-backdrop {
 		position: 'fixed';
 		top: 64;
@@ -52,7 +263,9 @@
     background-color: @dark-gray;
 		padding: 32 50 0;
 	};
-
+	.close-modal {
+		cursor: pointer;
+	}
 	// The modal "window"
 	.modal-content {
 		background-color: transparent;
@@ -79,7 +292,7 @@
 				height: 77%;
 				.slick-list {
 					.slick-track {
-						.slick-slide {		
+						.slick-slide {	
 							div {
 								max-height: 100%;
 							}
@@ -169,6 +382,5 @@
 				padding: .3em;
 			}
 		}
-		
 	}
 }
