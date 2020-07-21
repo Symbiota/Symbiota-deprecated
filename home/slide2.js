@@ -56,7 +56,7 @@ module.exports = `
                 <p>Species lists for defined places, presented as a checklist and an interactive key.</p>
             </div>
         </div>                
-        <p><a href="https://www.youtube.com/channel/UCH2UPZv1n4EKcfXUsUP7owA/featured" target="_blank"><button class="btn btn-primary">See the rest of our tutorials here</button></a></p>
+        <p><a href="` + clientRoot + `/pages/tutorials.php" target="_blank"><button class="btn btn-primary">See the rest of our tutorials here</button></a></p>
 	</div>
 </div>
 `;       

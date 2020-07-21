@@ -114,31 +114,35 @@ class Home extends React.Component {
 							<div className="col-sm-6 col-md-5 col-lg-4 slide-col-2">
 	
 								<div className="row link-card">
-												<p className="link-text"><img src={ this.props.clientRoot + '/images/slide-choose.png' }/><strong>
-													<a href={this.props.clientRoot + '/garden/index.php' }>Choose</a></strong> the right plant for your project or garden.
+												<p className="link-text">
+													<a href={this.props.clientRoot + '/garden/index.php' }><img src={ this.props.clientRoot + '/images/slide-choose.png' }/></a>
+													<a href={this.props.clientRoot + '/garden/index.php' }><strong>Choose</strong></a> the right plant for your project or garden.
 												</p>
-												<p className="link-desc">In our <strong>Plant Natives</strong> resource.</p>
+												<p className="link-desc">In our <a href={this.props.clientRoot + '/garden/index.php' }><strong>Plant Natives</strong></a> resource.</p>
 								</div>
 		
 								<div className="row link-card">
-												<p className="link-text"><img src={ this.props.clientRoot + "/images/slide-identify.png" }/><strong>
-													<a href={this.props.clientRoot + '/checklists/dynamicmap.php?interface=key' }>Identify</a></strong> a plant you’ve seen in Oregon.
+												<p className="link-text">
+													<a href={this.props.clientRoot + '/checklists/dynamicmap.php?interface=key' }><img src={ this.props.clientRoot + "/images/slide-identify.png" }/></a>
+													<a href={this.props.clientRoot + '/checklists/dynamicmap.php?interface=key' }><strong>Identify</strong></a> a plant you’ve seen in Oregon.
 													</p>
-												<p className="link-desc">With our location-driven <strong>Interactive Key</strong> tool.</p>
+												<p className="link-desc">With our location-driven <a href={this.props.clientRoot + '/checklists/dynamicmap.php?interface=key' }><strong>Interactive Key</strong></a> tool.</p>
 								</div>
 		
 								<div className="row link-card">
-												<p className="link-text"><img src={ this.props.clientRoot + "/images/slide-find.png" }/><strong>
-												<a href={this.props.clientRoot + '/spatial/index.php' }>Find</a></strong> where any vascular plant in Oregon calls home.
+												<p className="link-text">
+												<a href={this.props.clientRoot + '/spatial/index.php' }><img src={ this.props.clientRoot + "/images/slide-find.png" }/></a>
+												<a href={this.props.clientRoot + '/spatial/index.php' }><strong>Find</strong></a> where any vascular plant in Oregon calls home.
 												</p>
-												<p className="link-desc">With our powerful <strong>Mapping</strong> resource that has two lines like this.</p>
+												<p className="link-desc">With our powerful <a href={this.props.clientRoot + '/spatial/index.php' }><strong>Mapping</strong></a> resource that has two lines like this.</p>
 								</div>
 						
 								<div className="row link-card">
-												<p className="link-text"><img src={ this.props.clientRoot + "/images/slide-explore.png" }/><strong>
-												<a href={this.props.clientRoot + '/projects/index.php' }>Explore</a></strong> the collections of the OSU Herbarium.
+												<p className="link-text">
+												<a href="https://bpp.oregonstate.edu/herbarium"><img src={ this.props.clientRoot + "/images/slide-explore.png" }/></a>
+												<a href="https://bpp.oregonstate.edu/herbarium"><strong>Explore</strong></a> the collections of the OSU Herbarium.
 												</p>
-												<p className="link-desc">With our <strong>Searchable Database</strong> and images.</p>
+												<p className="link-desc">With our <a href="https://bpp.oregonstate.edu/herbarium"><strong>Searchable Database</strong></a> and images.</p>
 								</div>	
 							</div>
 						</div>
