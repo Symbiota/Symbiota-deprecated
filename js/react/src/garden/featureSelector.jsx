@@ -14,7 +14,7 @@ class FeatureSelector extends React.Component {
   render() {
     return (
       <div>
-        <div className="text-capitalize">
+        <div className="">
           <a
             data-toggle="collapse"
             aria-expanded="false"

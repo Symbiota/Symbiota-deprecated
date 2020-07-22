@@ -17,15 +17,15 @@ function arrayCompare(a1, a2) {
 
 function getPlantAttrText(filter) {
   const attrKeys = Object.keys(filter.val);
-  let itemText = '';
+  let itemText = [];
   for (let i in attrKeys) {
     let attrKey = attrKeys[i];
     if (filter.val[attrKey].length > 0) {
-      itemText += `${attrKey.replace(/_/g, ' ')}: ${filter.val[attrKey].join(', ')}`;
+      itemText.push(`${attrKey.replace(/_/g, ' ')}: ${filter.val[attrKey].join(', ')}`);
     }
   }
-
-  return itemText;
+	
+  return itemText.join("<br />");
 }
 
 class ViewOpts extends React.Component {
@@ -110,19 +110,19 @@ class ViewOpts extends React.Component {
                     break;
                   }
                   case "growthMaintenance": {
-                    // itemText = getPlantAttrText(filter);
-                    // if (itemText === '') {
-                    //   showItem = false;
-                    // }
-                    showItem = false;
+                  	//console.log(filter);
+                    itemText = getPlantAttrText(filter);
+                    if (itemText === '') {
+                    	showItem = false;
+                    }
                     break;
                   }
                   case "beyondGarden": {
-                    // itemText = getPlantAttrText(filter);
-                    // if (itemText === '') {
-                    //   showItem = false;
-                    // }
-                    showItem = false;
+                  	//console.log(filter);
+                    itemText = getPlantAttrText(filter);
+                    if (itemText === '') {
+                      showItem = false;
+                    }
                     break;
                   }
                   default:
@@ -130,8 +130,9 @@ class ViewOpts extends React.Component {
                 }
 
                 if (showItem) {
+                	let button = this.buildButton(filter.key,itemText);
                   return (
-                    this.buildButton(filter.key,itemText)
+                    button
                   );
                 }
               })

@@ -71,25 +71,27 @@ function getAttribMatrixFromArr(attribArray) {
 }
 
 function filterByWidth(item, minMax) {
-  const withinMin = item.width[0] >= minMax[0];
-	/*if (item.tid == 8066) {
-		console.log(item);
-		console.log(minMax[0]);
-		console.log(item.width[0]);
-  	console.log(withinMin);
-	}*/
-  if (minMax[1] === 50) {
-    return withinMin;
-  }
-  return withinMin && item.width[1] <= minMax[1];
+	let ret = false;
+	
+	if (	(item.width[0] <= minMax[0] && minMax[0] <= item.width[1])//user min is between item min and max
+				|| (item.width[0] <= minMax[1] && minMax[1] <= item.width[1])//user max is between item min and max
+				|| minMax[1] === 50 && minMax[1] <= item.width[1]) {//user max == 50 and item max >= 50
+		ret = true;	
+	}
+				
+  return ret;
 }
 
 function filterByHeight(item, minMax) {
-  const withinMin = item.height[0] >= minMax[0];
-  if (minMax[1] === 50) {
-    return withinMin;
-  }
-  return withinMin && item.height[1] <= minMax[1];
+  let ret = false;
+	
+	if (	(item.height[0] <= minMax[0] && minMax[0] <= item.height[1])
+				|| (item.height[0] <= minMax[1] && minMax[1] <= item.height[1])
+				|| minMax[1] === 50 && minMax[1] <= item.height[1]) {
+		ret = true;	
+	}
+				
+  return ret;
 }
 
 function filterBySunlight(item, sunlight) {
@@ -291,6 +293,7 @@ class GardenPageApp extends React.Component {
 
   onFilterRemoved(key) {
     // TODO: This is clunky
+
     switch (key) {
       case "sunlight":
         this.onSunlightChanged({ target: { value: ViewOpts.DEFAULT_SUNLIGHT } });
@@ -333,11 +336,11 @@ class GardenPageApp extends React.Component {
   // On search start
   onSearch(searchObj) {
     const newQueryStr = addUrlQueryParam("search", searchObj.text);
-    window.history.replaceState(
+    /*window.history.replaceState(
       { query: newQueryStr },
       '',
       window.location.pathname + newQueryStr
-    );
+    );*/
 
     this.setState({
       isLoading: true,
@@ -376,13 +379,13 @@ class GardenPageApp extends React.Component {
   onSunlightChanged(event) {
     this.setState({ filters: Object.assign({}, this.state.filters, { sunlight: event.target.value }) });
     let newQueryStr = addUrlQueryParam("sunlight", event.target.value);
-    window.history.replaceState({ query: newQueryStr }, '', window.location.pathname + newQueryStr);
+    /*window.history.replaceState({ query: newQueryStr }, '', window.location.pathname + newQueryStr);*/
   }
 
   onMoistureChanged(event) {
     this.setState({ filters: Object.assign({}, this.state.filters, { moisture: event.target.value }) });
     let newQueryStr = addUrlQueryParam("moisture", event.target.value);
-    window.history.replaceState({ query: newQueryStr }, '', window.location.pathname + newQueryStr);
+    /*window.history.replaceState({ query: newQueryStr }, '', window.location.pathname + newQueryStr);*/
   }
 
   onHeightChanged(event) {
@@ -395,11 +398,11 @@ class GardenPageApp extends React.Component {
       newQueryStr = addUrlQueryParam("height", event.target.value);
     }
 
-    window.history.replaceState(
+    /*window.history.replaceState(
       {query: newQueryStr},
       '',
       window.location.pathname + newQueryStr
-    );
+    );*/
   }
 
   onWidthChanged(event) {
@@ -411,11 +414,11 @@ class GardenPageApp extends React.Component {
     } else {
       newQueryStr = addUrlQueryParam("width", event.target.value);
     }
-    window.history.replaceState(
+    /*window.history.replaceState(
       {query: newQueryStr},
       '',
       window.location.pathname + newQueryStr
-    );
+    );*/
   }
 
   onPlantFeaturesChanged(featureKey, featureVal) {
@@ -455,7 +458,7 @@ class GardenPageApp extends React.Component {
       newType = '';
     }
     let newQueryStr = addUrlQueryParam("sortBy", newType);
-    window.history.replaceState({query: newQueryStr}, '', window.location.pathname + newQueryStr);
+    /*window.history.replaceState({query: newQueryStr}, '', window.location.pathname + newQueryStr);*/
   }
 
   onViewTypeChanged(type) {
@@ -468,7 +471,7 @@ class GardenPageApp extends React.Component {
       newType = '';
     }
     let newQueryStr = addUrlQueryParam("viewType", newType);
-    window.history.replaceState({ query: newQueryStr }, '', window.location.pathname + newQueryStr);
+    /*window.history.replaceState({ query: newQueryStr }, '', window.location.pathname + newQueryStr);*/
   }
 
   onCannedFilter(clid) {
@@ -477,7 +480,7 @@ class GardenPageApp extends React.Component {
       clid = '';
     }
     let newQueryStr = addUrlQueryParam("clid", clid);
-    window.history.replaceState({ query: newQueryStr }, '', window.location.pathname + newQueryStr);
+    /*window.history.replaceState({ query: newQueryStr }, '', window.location.pathname + newQueryStr);*/
   }
 
   render() {
