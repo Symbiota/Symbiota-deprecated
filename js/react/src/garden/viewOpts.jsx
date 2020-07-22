@@ -102,7 +102,7 @@ class ViewOpts extends React.Component {
                     }
                     break;
                   case "plantFeatures": {
-                  	console.log(filter);
+                  	//console.log(filter);
                      itemText = getPlantAttrText(filter);
                      if (itemText === '') {
                        showItem = false;

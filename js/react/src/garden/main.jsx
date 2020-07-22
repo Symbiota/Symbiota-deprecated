@@ -96,9 +96,9 @@ function filterBySunlight(item, sunlight) {
   switch (sunlight) {
     case "sun":
       return item.sunlight.includes("sun");
-    case "partshade":
+    case "part-shade":
       return item.sunlight.includes("part shade");
-    case "fullshade":
+    case "full-shade":
       return item.sunlight.includes("shade");
     default:
       return true;

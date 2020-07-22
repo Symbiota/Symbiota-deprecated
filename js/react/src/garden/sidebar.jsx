@@ -84,8 +84,8 @@ function PlantNeed(props) {
         {
           props.choices.map((opt) =>
             <option
-              key={ opt.toLowerCase().replace(/[^a-z]/g, '') }
-              value={ opt.toLowerCase().replace(/[^a-z]/g, '') }
+              key={ opt.toLowerCase().replace(/[^a-z-]/g, '') }
+              value={ opt.toLowerCase().replace(/[^a-z-]/g, '') }
             >
               { opt }
             </option>
