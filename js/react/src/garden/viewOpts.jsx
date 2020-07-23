@@ -129,12 +129,12 @@ class ViewOpts extends React.Component {
                     break;
                 }
 
-                if (showItem) {
+                /*if (showItem) {
                 	let button = this.buildButton(filter.key,itemText);
                   return (
                     button
                   );
-                }
+                }*/
               })
             }
           </div>
