@@ -13,11 +13,6 @@ class Newsletters extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-			CRUMBS : [
-				{ title: "Home", url: `${this.props.clientRoot}` },
-				{ title: "Resources" },
-				{ title: "Oregon Flora Newsletters" }
-			],
 			issues: []
     };
   }
@@ -64,7 +59,7 @@ class Newsletters extends React.Component {
     return (
     <div className="wrapper">
 			<div className="page-header">
-				<PageHeader crumbs={ this.state.CRUMBS } bgClass="title-blueberry" title={ 'Oregon Flora Newsletters' } />
+				<PageHeader bgClass="title-blueberry" title={ 'Oregon Flora Newsletters' } />
       </div>
       <div className="container newsletters" style={{ minHeight: "45em" }}>
 

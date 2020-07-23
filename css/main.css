@@ -695,7 +695,7 @@ span.h3 {
 --------------------------------------------------------------*/
 .header-wrapper {
 	position: relative;
-	border-bottom: 1px solid #CCC;
+	/*border-bottom: 1px solid #CCC;*/
 }
 .main-header {
 	max-width: 1100px;

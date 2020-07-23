@@ -1,11 +1,7 @@
 import React from "react";
-import CrumbBuilder from "../common/crumbBuilder.jsx";
+//import CrumbBuilder from "../common/crumbBuilder.jsx";
 
 const CLIENT_ROOT = "..";
-const CRUMBS = [
-  { title: "Home", url: `${CLIENT_ROOT}` },
-  { title: "Gardening with Natives", url: `${CLIENT_ROOT}/garden/index.php` }
-];
 
 class InfographicDropdown extends React.Component {
   constructor(props) {
@@ -26,12 +22,6 @@ class InfographicDropdown extends React.Component {
         className="container-fluid p-5 d-print-none"
         style={{ position: "relative", backgroundImage: `url(${CLIENT_ROOT}/images/garden/DIG4082-green@2x.png)` }}
       >
-        <div className="row my-2">
-          <div className="col">
-            <CrumbBuilder crumbs={ CRUMBS }/>
-          </div>
-        </div>
-
         <div className="row">
           <div className="col">
             <h1

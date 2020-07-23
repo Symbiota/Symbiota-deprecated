@@ -401,7 +401,7 @@ class TaxaDetail extends React.Component {
 						<h2 className="text-capitalize font-italic">{ res.vernacularNames[0] }</h2>
 					</div>
 					<div className="col-auto">
-						<button className="d-block my-2 btn-primary">Printable page</button>
+						{/*<button className="d-block my-2 btn-primary">Printable page</button>*/}
 						<button className="d-block my-2 btn-secondary" disabled={ true }>Add to basket</button>
 					</div>
 				</div>
