@@ -5,7 +5,7 @@ import httpGet from "./httpGet";
  * Sidebar 'plant search' button
  */
 function SearchButton(props) {
-	let imgSrc = `${props.clientRoot}/images/garden/search-green.png`;//header = default
+	let imgSrc = `${props.clientRoot}/images/icons/home-mag-glass-2x.png`;//header = default
 	if (props.location == 'home-main') {
 		imgSrc = `${props.clientRoot}/images/icons/home-mag-glass-2x.png`;
 	}

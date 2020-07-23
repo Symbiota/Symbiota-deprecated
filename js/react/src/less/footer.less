@@ -17,7 +17,7 @@
     margin-left: .5em;
     margin-right: .5em;
     .text-uppercase();
-    .text-bold();
+    //.text-bold();
     a {
     	padding: 0;
     }
@@ -27,13 +27,25 @@
     &:last-child {
     	margin-right: 0;
     }
+    &.copyright {
+    	text-transform: none;
+    }
   }
 
   #footer-content {
     color: @type-primary;
-
     p {
       max-width: 25em;
+    }
+    .btn-primary {
+			border: 2px @light-green solid;
+			font-size: 18px;
+			border: none;
+			border-radius: .4em;
+			padding: .3em 1.2em;
+			text-align: center;
+			line-height: 36px;
+		
     }
   }
 }
