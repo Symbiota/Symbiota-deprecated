@@ -430,7 +430,10 @@ class TaxaManager {
 				->setParameter("tid", $tid)
       	->getQuery()
       	->execute();
-			$return = $status[0];
+      	#var_dump($status);
+      if (sizeof($status)) {
+				$return = $status[0];
+			}
 		}
 		return $return;
  	

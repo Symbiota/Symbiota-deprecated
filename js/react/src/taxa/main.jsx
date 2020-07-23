@@ -569,7 +569,8 @@ class TaxaApp extends React.Component {
     if (this.getTid() === -1) {
       window.location = "/";
     } else {
-      httpGet(`./rpc/api.php?taxon=${this.props.tid}`)
+    	let api = `./rpc/api.php?taxon=${this.props.tid}`;
+      httpGet(api)
         .then((res) => {
        		// /taxa/rpc/api.php?taxon=2454
           res = JSON.parse(res); 
