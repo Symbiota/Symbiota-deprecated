@@ -151,6 +151,7 @@ function SingleBorderedItem(props) {
   );
 }
 function RelatedBorderedItem(props) {
+
   let value = '';
 	value = (
 		<div className="col-sm-12 related py-2 row">
@@ -158,10 +159,12 @@ function RelatedBorderedItem(props) {
 			<div className="col-sm-4 related-nav pr-0">
 				<span className="related-label">Related</span>
 				<span className="related-links"> 
+					{ props.isGenus != true &&
 					<a href={ props.value[1] }>
 						<FontAwesomeIcon icon="arrow-circle-up" />
 					</a>
-					{ props.value[2].length > 0 && 
+					}
+					{ props.isGenus != true && props.value[2].length > 0 && 
 						/* two statements here because I don't want to wrap them in one div */
 						<span className="separator">/</span>
 					}
@@ -204,12 +207,12 @@ function SideBarSection(props) {
             if (key == 'webLinks') {
 	            return <SingleBorderedItem key={ val } keyName={ val } value={ val } />
 	          }else if (key == 'Related') {
-	            return <RelatedBorderedItem key={ key } keyName={ key } value={ val } />
+	            return <RelatedBorderedItem key={ key } keyName={ key } value={ val } isGenus={ props.isGenus }/>
 	          }else if (key == "More info") {
 	            return <MoreInfoItem key={ key } keyName={ key } value={ val } />
 	          }else if (key == "Synonyms") {
 	            return <SynonymItem key={ val } keyName={ val } value={ val }  />
-	          }else{
+	          }else if(val){
 	            return <BorderedItem key={ key } keyName={ key } value={ val } />
 	          }
           })
@@ -306,6 +309,9 @@ class TaxaChooser extends React.Component {
   
   render() {
 		const res = this.props.res;
+		console.log(res);
+    const pageTitle = document.getElementsByTagName("title")[0];
+    pageTitle.innerHTML = `${pageTitle.innerHTML} ${res.sciName}`;
   	return (
 			<div className="container my-5 py-2 taxa-detail" style={{ minHeight: "45em" }}>
 				<div className="row">
@@ -350,8 +356,8 @@ class TaxaChooser extends React.Component {
 										
 					</div>
 					<div className="col-sm-4 sidebar">
-						<SideBarSection title="Context" items={ res.highlights } classes="highlights" />
-						<SideBarSection title="Web links" items={ res.taxalinks} classes="weblinks" />
+						<SideBarSection title="Context" items={ res.highlights } classes="highlights" isGenus={ res.isGenus }/>
+						<SideBarSection title="Web links" items={ res.taxalinks} classes="weblinks"  isGenus={ res.isGenus }/>
 					</div>
 				</div>
 			</div>
@@ -372,7 +378,6 @@ class TaxaDetail extends React.Component {
   }
 
 	toggleImageModal = (_currImage) => {
-		//console.log(_currImage);
 		this.setState({
 			currImage: _currImage	
 		});
@@ -381,7 +386,10 @@ class TaxaDetail extends React.Component {
     });
   }
 	render() {
+	
 		const res = this.props.res;
+    const pageTitle = document.getElementsByTagName("title")[0];
+    pageTitle.innerHTML = `${pageTitle.innerHTML} ${res.sciName} ${res.author}`;
 		const allImages = res.images.HumanObservation.concat(res.images.PreservedSpecimen);
 		const showDescriptions = res.descriptions? true: false;
 		return (
@@ -393,7 +401,7 @@ class TaxaDetail extends React.Component {
 						<h2 className="text-capitalize font-italic">{ res.vernacularNames[0] }</h2>
 					</div>
 					<div className="col-auto">
-						<button className="d-block my-2 btn-primary">Printable page</button>
+						{/*<button className="d-block my-2 btn-primary">Printable page</button>*/}
 						<button className="d-block my-2 btn-secondary" disabled={ true }>Add to basket</button>
 					</div>
 				</div>
@@ -549,7 +557,7 @@ class TaxaApp extends React.Component {
       rankId: null,
       currImage: 0,
       related: [],
-      isGenus: true
+      isGenus: false
     };
     this.getTid = this.getTid.bind(this);
   }
@@ -561,7 +569,8 @@ class TaxaApp extends React.Component {
     if (this.getTid() === -1) {
       window.location = "/";
     } else {
-      httpGet(`./rpc/api.php?taxon=${this.props.tid}`)
+    	let api = `./rpc/api.php?taxon=${this.props.tid}`;
+      httpGet(api)
         .then((res) => {
        		// /taxa/rpc/api.php?taxon=2454
           res = JSON.parse(res); 
@@ -598,7 +607,7 @@ class TaxaApp extends React.Component {
 							</div>
 						)
 					});
-					let isGenus = res.rankId <= 180;
+					let isGenus = (res.rankId <= 180 && res.rankId > 140);
 
           this.setState({
             sciName: res.sciname,
@@ -625,8 +634,6 @@ class TaxaApp extends React.Component {
             family: res.family,
             isGenus: isGenus
           });
-          const pageTitle = document.getElementsByTagName("title")[0];
-          pageTitle.innerHTML = `${pageTitle.innerHTML} ${res.sciname} ${res.author}`;
         })
         .catch((err) => {
           // TODO: Something's wrong

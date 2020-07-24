@@ -4,6 +4,9 @@ import ReactDOM from "react-dom";
 class FooterApp extends React.Component {
 
   render() {
+  	let today = new Date();
+  	const year = today.getFullYear();
+
     return (
       <div className="mb-4">
       	<div className="navbar navbar-expand-lg navbar-dark">
@@ -25,7 +28,7 @@ class FooterApp extends React.Component {
               <a href={ `${this.props.clientRoot}/profile/index.php?refurl=${window.location.pathname}` } className="nav-link">Login</a>
             </li>
           </ul>
-          <div className="nav-item ml-auto my-auto">All website content &copy; 2019 OregonFlora unless otherwise noted</div>
+          <div className="nav-item ml-auto my-auto copyright">All website content &copy; { year } OregonFlora unless otherwise noted</div>
         </nav>
         </div>
         <div id="footer-content" className="container-fluid container">
@@ -46,7 +49,7 @@ class FooterApp extends React.Component {
               </div>
             </div>
             <div className="col">
-              <img src={ `${this.props.clientRoot}/images/footer/osu_horizontal_2c_o_over_b.png` } alt="OSU Logo"/>
+              <a href={ "https://bpp.oregonstate.edu/" } target="_blank"><img src={ `${this.props.clientRoot}/images/footer/osu_horizontal_2c_o_over_b.png` } alt="OSU Logo"/></a>
               <p className="my-2">
                 <strong>OregonFlora</strong><br/>
                 Dept. Botany & Plant Pathology<br/>
@@ -55,14 +58,14 @@ class FooterApp extends React.Component {
               </p>
             </div>
             <div className="col">
-              <img
+              <a href={ "http://symbiota.org/docs/" } target="_blank"><img
                 className="d-block mb-2"
                 style={{ width: "10em" }}
                 src={ `${this.props.clientRoot}/images/footer/Symbiota2-logo.png` }
                 alt="Symbiota logo"
-              />
+              /></a>
               <p>
-                OregonFlora is built on <strong>Symbiota</strong>, a collaborative, open source content
+                OregonFlora is built on <a href={ "http://symbiota.org/docs/" } target="_blank"><strong>Symbiota</strong></a>, a collaborative, open source content
                 management system for curating specimen- and observation-based biodiversity data.
               </p>
             </div>

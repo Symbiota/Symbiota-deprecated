@@ -29,7 +29,8 @@
     $em = SymbosuEntityManager::getEntityManager();
     $charStateRepo = $em->getRepository("Kmcs");
     $csQuery = $charStateRepo->findBy([ "cid" => $cid ], ["sortsequence" => "ASC"]);
-    return array_map(function($cs) { return $cs->getCharstatename(); }, $csQuery);
+    $return = array_map(function($cs) { return $cs->getCharstatename(); }, $csQuery);
+    return $return;
   }
 
   /**

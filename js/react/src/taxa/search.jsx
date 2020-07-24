@@ -95,6 +95,7 @@ if (queryParams.search) {
     console.error(err);
   })
 } else if (queryParams.family) {
+	console.log(`./rpc/api.php?family=${queryParams.family}`);
   httpGet(`./rpc/api.php?family=${queryParams.family}`).then((res) => {
     res = JSON.parse(res);
     ReactDOM.render(<TaxaSearchResults results={ res } family={ queryParams.familyName } />, domContainer);

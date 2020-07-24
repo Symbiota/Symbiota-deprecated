@@ -13,7 +13,9 @@ header( "Content-Type: text/html; charset=" . $charset );
     <script type="text/javascript">
         <?php include_once( $serverRoot . '/config/googleanalytics.php' ); ?>
     </script>
-
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script type="text/javascript" src="video_modal.js"></script>
+    <script src="https://kit.fontawesome.com/a01aa82192.js" crossorigin="anonymous"></script>
 </head>
 <body>
 <?php
@@ -33,6 +35,7 @@ include( $serverRoot . "/header.php" );
             <!-- place static page content here. -->
             <h2>Tutorials and tips – in both video and textual form – to help unlock the power of Oregon Flora.</h2>
             <p>OregonFlora makes information about Oregon plants accessible to diverse audiences: scientists, restorationists, gardeners, land managers, and plant enthusiasts of all ages. We focus on the vascular plants of the state—ferns, conifers, grasses, herbs, and trees—that grow in the wild. We communicate data through our website, app, custom data requests, and the Flora of Oregon books.</p>
+            <div id="video-tutorial-top"></div>
             <p>Now, OregonFlora has joined forces with Symbiota to present our website as a Symbiota portal! Here are a series of tutorials and tips to help you get the most out of our site.</p>
             <h2>Tutorial and tip index:</h2>
             <div class="row tutorial-list">
@@ -60,42 +63,79 @@ include( $serverRoot . "/header.php" );
                 </div>
             </div>
             <div class="row tutorials-video">
+
+                <!-- Modal -->
+                <div class="modal fade" id="videoModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+
+                            <div class="modal-body">
+
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                                <!-- 16:9 aspect ratio -->
+                                <div class="embed-responsive embed-responsive-16by9">
+                                    <iframe class="embed-responsive-item" src="" id="video" allowscriptaccess="always" allow="autoplay"></iframe>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
                 <h2>Video Tutorials</h2>
                 <div class="row">
                     <div class="col-sm tutorials-video-card">
-                        <div class="video-image"><a href="#"><img src="/pages/images/YouTube-tutorial-Intro.png" alt="intro video"></a></div>
+                        <div class="video-image"><a href="#" type="button" class="btn video-modal-btn" data-toggle="modal" data-src="https://www.youtube.com/embed/9ystxXKEOp4" data-target="#videoModal"><img src="<?php echo $CLIENT_ROOT; ?>/pages/images/YouTube-tutorial-Intro.png" alt="intro video"></a></div>
                         <h3>An Introduction to Oregon Flora</h3>
                         <p>All databased specimen records of OSU Herbarium’s vascular plants, mosses, lichens, fungi, and algae in a searchable, downloadable format.</p>
                         <p>Text-based tutorial here.</p>
                     </div>
                     <div class="col-sm tutorials-video-card">
-                        <div class="video-image"><a href="#"><img src="/pages/images/YouTube-tutorial-Intro.png" alt="intro video"></a></div>
+                        <div class="video-image"><a href="#" type="button" class="btn video-modal-btn" data-toggle="modal" data-src="https://www.youtube.com/embed/HwtEXcTO9jA" data-target="#videoModal"><img src="<?php echo $CLIENT_ROOT; ?>/pages/images/YouTube-tutorial-Intro.png" alt="intro video"></a></div>
                         <h3>Taxon profile pages</h3>
                         <p>Comprehensive information, gathered in one location—for each of the ~4,700 vascular plants in the state!</p>
                         <p>Text-based tutorial here.</p>
                     </div>
                 </div>
+                <div class="go-top">
+                    <p>
+                        <a href="#video-tutorial-top" class="toptext">
+                            TOP<br />
+                            <i class="fas fa-chevron-up"></i>
+                        </a>
+                    </p>
+                </div>
                 <div class="row">
                     <div class="col-sm tutorials-video-card">
-                        <div class="video-image"><a href="#"><img src="/pages/images/YouTube-tutorial-Intro.png" alt="intro video"></a></div>
+                        <div class="video-image"><a href="#" type="button" class="btn video-modal-btn" data-toggle="modal" data-src="https://www.youtube.com/embed/Y2sdnibf1O8" data-target="#videoModal"><img src="<?php echo $CLIENT_ROOT; ?>/pages/images/YouTube-tutorial-Intro.png" alt="intro video"></a></div>
                         <h3>Mapping</h3>
                         <p>Draw a shape on the interactive map to learn what plant diversity is found there, or enter plant names to view their distribution.</p>
                         <p>Text-based tutorial here.</p>
                     </div>
                     <div class="col-sm tutorials-video-card">
-                        <div class="video-image"><a href="#"><img src="/pages/images/YouTube-tutorial-Intro.png" alt="intro video"></a></div>
+                        <div class="video-image"><a href="#" type="button" class="btn video-modal-btn" data-toggle="modal" data-src="https://www.youtube.com/embed/DKxoEEwL3V4" data-target="#videoModal"><img src="<?php echo $CLIENT_ROOT; ?>/pages/images/YouTube-tutorial-Intro.png" alt="intro video"></a></div>
                         <h3>Interactive Key</h3>
                         <p>An identification tool based on the plant features you recognize! Start with a list of species, then narrow the possibilities.</p>
                         <p>Text-based tutorial here.</p>
                     </div>
                 </div>
             </div>
+            <div class="go-top">
+                <p>
+                    <a href="#video-tutorial-top" class="toptext">
+                        TOP<br />
+                        <i class="fas fa-chevron-up"></i>
+                    </a>
+                </p>
+            </div>
             <div class="row tutorials-text">
                 <h2>Text Tutorials</h2>
                 <div class="tutorials-text-card">
                     <h3>An Introduction to Oregon Flora</h3>
                     <figure class="figure">
-                        <img src="/pages/images/YouTube-tutorial-Intro.png" alt="intro video">
+                        <img src="<?php echo $CLIENT_ROOT; ?>/pages/images/YouTube-tutorial-Intro.png" alt="intro video">
                         <figcaption class="figure-caption">Video version of this tutorial.</figcaption>
                     </figure>
                     <p>At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus, omnis voluptas assumenda est, omnis dolor repellendus. Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur aut perferendis doloribus asperiores repellat.</p>
@@ -106,7 +146,14 @@ include( $serverRoot . "/header.php" );
                         <li>Dolores et quas molestias excepturi sint occaecati cupiditate non provident</li>
                     </ul>
                 </div>
-                </div>
+            </div>
+            <div class="go-top">
+                <p>
+                    <a href="#video-tutorial-top" class="toptext">
+                        TOP<br />
+                        <i class="fas fa-chevron-up"></i>
+                    </a>
+                </p>
             </div>
 
         </div> <!-- .inner-content -->

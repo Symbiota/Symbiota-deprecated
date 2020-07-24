@@ -27,7 +27,7 @@ class IconButton extends React.Component {
         src={ this.props.icon }
         onClick={ this.props.onClickImg ? this.props.onClickImg : this.props.onClick }
       />
-      <span>{ this.props.title }</span>
+      <span dangerouslySetInnerHTML={{__html: this.props.title}} ></span>
     </span>
     );
   }

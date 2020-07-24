@@ -42,6 +42,7 @@ class SideBarHeading extends React.Component {
       <div style={{color: "black"}}>
         <div className="mb-1" style={{color: "inherit"}}>
           <h3 className="font-weight-bold d-inline">Search for plants</h3>
+          {/*
           <HelpButton
             title="Search for plants"
             html={
@@ -55,6 +56,8 @@ class SideBarHeading extends React.Component {
             `
             }
           />
+          */
+          }
         </div>
         <p>
           Start applying characteristics, and the matching plants will appear at
@@ -84,8 +87,8 @@ function PlantNeed(props) {
         {
           props.choices.map((opt) =>
             <option
-              key={ opt.toLowerCase().replace(/[^a-z]/g, '') }
-              value={ opt.toLowerCase().replace(/[^a-z]/g, '') }
+              key={ opt.toLowerCase().replace(/[^a-z-]/g, '') }
+              value={ opt.toLowerCase().replace(/[^a-z-]/g, '') }
             >
               { opt }
             </option>

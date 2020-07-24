@@ -52,7 +52,7 @@ function HeaderButton(props) {
 
 function HeaderButtonBar(props) {
   return (
-    <div className="row mr-3" style={ props.style }>
+    <div className="row mr-3 header-button-bar" style={ props.style }>
       { props.children }
     </div>
   );
@@ -208,7 +208,7 @@ class HeaderApp extends React.Component {
           </ul>
         </div>
 
-        <div className={ "ml-auto mr-4" + (this.state.isCollapsed ? " my-auto" : "") }>
+        <div className={ "search-wrapper ml-auto mr-4" + (this.state.isCollapsed ? " my-auto" : "") }>
           { this.getLoginButtons() }
 
           <div className="row">

@@ -419,6 +419,50 @@ div#info-page {
         width: 300px;
       }
     }
+
+    .go-top{
+      width: 100%;
+
+      p {
+        text-align: right;
+        margin-right: 5px;
+        margin-bottom: 0;
+      }
+
+      a {
+        color: @dark-green;
+        font-size: 11px;
+      }
+
+      svg {
+        margin-right: 5px;
+      }
+    }
+
+    .video-modal-btn {
+      padding: 0;
+    }
+
+    .modal-dialog {
+      max-width: 90%;
+      margin: 20px auto;
+    }
+
+    .modal-body {
+      position:relative;
+      padding:0px;
+    }
+
+    .close {
+      position:absolute;
+      right:-30px;
+      top:0;
+      z-index:999;
+      font-size:2rem;
+      font-weight: normal;
+      color: @dark-green;
+      opacity:1;
+    }
   }
 
   .news-events-content{
@@ -598,6 +642,10 @@ div#info-page {
                 clear: both;
                 margin-bottom: 0px;
                 line-height: 1rem;
+
+                a {
+                  color: white !important;
+                }
               }
             }
           }
@@ -711,12 +759,27 @@ div#info-page {
                 border-top-left-radius: 8px;
                 border-bottom-left-radius: 8px;
                 color: @dark-gray;
+                font-weight: 600;
               }
               .event-desc {
                 padding: 10px;
                 background: #000000A6 0% 0% no-repeat padding-box;
                 border-top-right-radius: 8px;
                 border-bottom-right-radius: 8px;
+              }
+              .event-title {
+              	font-weight: bold;
+              }
+              .event-location {
+              	font-style: italic;
+              }
+            }
+
+            .btn {
+              margin-top: 10px;
+
+              a {
+                color: white !important;
               }
             }
           }
@@ -749,6 +812,94 @@ div#info-page {
     }
   }
 }
+#react-newsletters-app {
 
+  h2{
+    font-size: 36px;
+    font-weight: bold;
+  }
+
+  .instructions {
+    font-size: 26px;
+  }
+
+  .newsletter-list {
+    margin-bottom: 2em;
+
+    .issue-item {
+      clear: both;
+      border-top: 1px dotted @dark-gray;
+
+      &:last-child {
+        border-bottom: 1px dotted @dark-gray;
+      }
+
+      .issue-header {
+        background-color: @light-green;
+        padding: 6px;
+        height: 57px;
+        margin-left: 0;
+        margin-right: 0;
+        display: flex;
+        flex-flow: row;
+        justify-content: space-between;
+
+        .issue-link {
+          flex-basis: 40px;
+
+          img {
+            width: 32px;
+            height: 32px;
+            margin-top: 5px;
+          }
+        }
+
+        .issue-title {
+          text-align: left;
+          flex-grow: 1;
+
+          h3 {
+            display: inline-block;
+            font-size: 24px;
+            font-weight: 600;
+            padding: 8px 0 0 0;
+            margin-bottom: 0;
+          }
+        }
+
+        .more-less {
+          flex-basis: 140px;
+          font-size: 14px;
+          color: @dark-green;
+          text-transform: uppercase;
+          margin-top: 4px;
+          text-align: right;
+          cursor: pointer;
+
+          svg {
+            color: @med-green;
+            padding-top: 10px;
+          }
+        }
+      }
+
+      .issue-expanded {
+        padding: 10px 0;
+
+        .row {
+          margin: 0 20px 10px 45px;
+
+          .issue-title {
+            padding-left: 0;
+          }
+
+          .issue-author {
+            font-style: italic;
+          }
+        }
+      }
+    }
+  }
+}
 
 
