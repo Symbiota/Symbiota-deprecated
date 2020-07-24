@@ -70,12 +70,12 @@ class Newsletters extends React.Component {
         </div>
         <div className="row">
           <div className="col">
-            <p>To download an issue, simply click the PDF icon.  To preview an issue's contents, click the arrow.</p>
+            <p className="instructions">To download an issue, simply click the PDF icon.  To preview an issue's contents, click the arrow.</p>
 					 </div>
         </div>
 
         <div className="row">
-          <div className="col">
+          <div className="col newsletter-list">
             {
 									this.state.issues.map((issue,index) => {
 										return (					
@@ -84,7 +84,7 @@ class Newsletters extends React.Component {
 														<div className="issue-default">
 															<div className="issue-header">
 																<div className="issue-link">
-																		<a href={ 'http://oregonflora.org/ofn/' +  issue[0].pdf + '.pdf' } target="_blank"><img src={ `${this.props.clientRoot}/images/pdf24.png` } /></a>
+																		<a href={ 'http://oregonflora.org/ofn/' +  issue[0].pdf + '.pdf' } target="_blank"><img src={ `${this.props.clientRoot}/images/Adobe_PDF_file_icon_32x32.png` } /></a>
                                 </div>
 																<div className="issue-title">
 																	<h3>
@@ -93,14 +93,13 @@ class Newsletters extends React.Component {
                                 </div>
                                 { issue.display == 'default' &&
 																	<div className="more more-less" onClick={() => this.toggleItemDisplay(index)}>
-																			<span>Issue Contents</span>
-																			<FontAwesomeIcon icon="chevron-down" />
+																			<span>Issue Contents </span>
+																			<FontAwesomeIcon icon="chevron-down" size="2x" />
 																	</div>
 																}
 																{ issue.display == 'expanded' &&
 																	<div className="less more-less" onClick={() => this.toggleItemDisplay(index)}>
-																			<span>Issue Contents</span>
-																			<FontAwesomeIcon icon="chevron-up" />
+																			<FontAwesomeIcon icon="chevron-up" size="2x" />
 																	</div>
 																}
 															</div>
