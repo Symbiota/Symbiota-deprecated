@@ -87,13 +87,13 @@ include( $serverRoot . "/header.php" );
                 <h2>Video Tutorials</h2>
                 <div class="row">
                     <div class="col-sm tutorials-video-card">
-                        <div class="video-image"><a href="#" type="button" class="btn video-modal-btn" data-toggle="modal" data-src="https://www.youtube.com/embed/9ystxXKEOp4" data-target="#videoModal"><img src="/pages/images/YouTube-tutorial-Intro.png" alt="intro video"></a></div>
+                        <div class="video-image"><a href="#" type="button" class="btn video-modal-btn" data-toggle="modal" data-src="https://www.youtube.com/embed/9ystxXKEOp4" data-target="#videoModal"><img src="<?php echo $CLIENT_ROOT; ?>/pages/images/YouTube-tutorial-Intro.png" alt="intro video"></a></div>
                         <h3>An Introduction to Oregon Flora</h3>
                         <p>All databased specimen records of OSU Herbarium’s vascular plants, mosses, lichens, fungi, and algae in a searchable, downloadable format.</p>
                         <p>Text-based tutorial here.</p>
                     </div>
                     <div class="col-sm tutorials-video-card">
-                        <div class="video-image"><a href="#" type="button" class="btn video-modal-btn" data-toggle="modal" data-src="https://www.youtube.com/embed/HwtEXcTO9jA" data-target="#videoModal"><img src="/pages/images/YouTube-tutorial-Intro.png" alt="intro video"></a></div>
+                        <div class="video-image"><a href="#" type="button" class="btn video-modal-btn" data-toggle="modal" data-src="https://www.youtube.com/embed/HwtEXcTO9jA" data-target="#videoModal"><img src="<?php echo $CLIENT_ROOT; ?>/pages/images/YouTube-tutorial-Intro.png" alt="intro video"></a></div>
                         <h3>Taxon profile pages</h3>
                         <p>Comprehensive information, gathered in one location—for each of the ~4,700 vascular plants in the state!</p>
                         <p>Text-based tutorial here.</p>
@@ -109,13 +109,13 @@ include( $serverRoot . "/header.php" );
                 </div>
                 <div class="row">
                     <div class="col-sm tutorials-video-card">
-                        <div class="video-image"><a href="#" type="button" class="btn video-modal-btn" data-toggle="modal" data-src="https://www.youtube.com/embed/Y2sdnibf1O8" data-target="#videoModal"><img src="/pages/images/YouTube-tutorial-Intro.png" alt="intro video"></a></div>
+                        <div class="video-image"><a href="#" type="button" class="btn video-modal-btn" data-toggle="modal" data-src="https://www.youtube.com/embed/Y2sdnibf1O8" data-target="#videoModal"><img src="<?php echo $CLIENT_ROOT; ?>/pages/images/YouTube-tutorial-Intro.png" alt="intro video"></a></div>
                         <h3>Mapping</h3>
                         <p>Draw a shape on the interactive map to learn what plant diversity is found there, or enter plant names to view their distribution.</p>
                         <p>Text-based tutorial here.</p>
                     </div>
                     <div class="col-sm tutorials-video-card">
-                        <div class="video-image"><a href="#" type="button" class="btn video-modal-btn" data-toggle="modal" data-src="https://www.youtube.com/embed/DKxoEEwL3V4" data-target="#videoModal"><img src="/pages/images/YouTube-tutorial-Intro.png" alt="intro video"></a></div>
+                        <div class="video-image"><a href="#" type="button" class="btn video-modal-btn" data-toggle="modal" data-src="https://www.youtube.com/embed/DKxoEEwL3V4" data-target="#videoModal"><img src="<?php echo $CLIENT_ROOT; ?>/pages/images/YouTube-tutorial-Intro.png" alt="intro video"></a></div>
                         <h3>Interactive Key</h3>
                         <p>An identification tool based on the plant features you recognize! Start with a list of species, then narrow the possibilities.</p>
                         <p>Text-based tutorial here.</p>
@@ -135,7 +135,7 @@ include( $serverRoot . "/header.php" );
                 <div class="tutorials-text-card">
                     <h3>An Introduction to Oregon Flora</h3>
                     <figure class="figure">
-                        <img src="/pages/images/YouTube-tutorial-Intro.png" alt="intro video">
+                        <img src="<?php echo $CLIENT_ROOT; ?>/pages/images/YouTube-tutorial-Intro.png" alt="intro video">
                         <figcaption class="figure-caption">Video version of this tutorial.</figcaption>
                     </figure>
                     <p>At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus, omnis voluptas assumenda est, omnis dolor repellendus. Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur aut perferendis doloribus asperiores repellat.</p>
