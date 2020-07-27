@@ -2,43 +2,7 @@ import React from "react";
 
 import HelpButton from "../common/helpButton.jsx";
 import {SearchWidget} from "../common/search.jsx";
-
-const CLIENT_ROOT = "..";
-
-
-/**
- * Sidebar header with title, subtitle, and help
- */
-class SideBarHeading extends React.Component {
-  render() {
-    return (
-      <div style={{color: "black"}}>
-        <div className="mb-1" style={{color: "inherit"}}>
-          <h3 className="font-weight-bold d-inline">Search for plants</h3>
-          <HelpButton
-            title="Search for plants"
-            html={
-                    `
-              <ul>
-                <li>As you make selections, the filtered results are immediately displayed in “Your search results”.</li>
-                <li>Any number of search options may be selected, but too many filters may yield no results because no plant meets all the criteria you selected. If so, try removing filters.</li>
-                <li>To remove a search filter, simply click its close (X) button</li>
-                <li>Clicking on any image in the results will open that plants’ garden profile page; the page can be downloaded and printed.</li>
-              </ul>
-            `
-            }
-          />
-        </div>
-        <p>
-          Start applying characteristics, and the matching plants will appear at
-          right.
-        </p>
-      </div>
-    );
-  }
-}
-
-
+import ViewOpts from "./viewOpts.jsx";
 
 /**
  * Full sidebar
@@ -46,7 +10,6 @@ class SideBarHeading extends React.Component {
 class SideBar extends React.Component {
   constructor(props) {
     super(props);
-
 
     //this.resetWidth = this.resetWidth.bind(this);
     //this.resetHeight = this.resetHeight.bind(this);
@@ -60,27 +23,59 @@ class SideBar extends React.Component {
     this.sliderRefHeight.current.reset();
   }
 */
+
+
   render() {
     return (
       <div
         id="sidebar"
-        className="m-1 p-3 rounded-border"
+        className="m-1 rounded-border"
         style={ this.props.style }>
 
-        {/* Title & Subtitle */}
-        <SideBarHeading />
+				<div className="currently-displayed">
+					<h3>Currently displayed:</h3>
+					<div className="stat">
+						<div className="stat-label">Families:</div><div className="stat-value">50</div>
+					</div>
+					<div className="stat">
+						<div className="stat-label">Genera:</div><div className="stat-value">106</div>
+					</div>
+					<div className="stat">
+						<div className="stat-label">Species:</div><div className="stat-value">121 (species rank)</div>
+					</div>
+					<div className="stat">
+						<div className="stat-label">Total Taxa:</div><div className="stat-value">130 (including subsp. and var.)</div>
+					</div>
+					<div className="stat export">
+						<div className="stat-label">Export:</div><div className="stat-value">W CSV P</div>
+					</div>
+				</div>
 
-        {/* Search */}
-        <SearchWidget
-          placeholder="Search plants by name"
-          clientRoot={ this.props.clientRoot }
-          isLoading={ this.props.isLoading }
-          textValue={ this.props.searchText }
-          onTextValueChanged={ this.props.onSearchTextChanged }
-          onSearch={ this.props.onSearch }
-          suggestionUrl={ this.props.searchSuggestionUrl }
-        />
+					{/* Search 
+					<SearchWidget
+						placeholder="Search plants by name"
+						clientRoot={ this.props.clientRoot }
+						isLoading={ this.props.isLoading }
+						textValue={ this.props.searchText }
+						onTextValueChanged={ this.props.onSearchTextChanged }
+						onSearch={ this.props.onSearch }
+						suggestionUrl={ this.props.searchSuggestionUrl }
+					/>*/}
 
+				<ViewOpts
+					viewType={ this.props.viewType }
+					sortBy={ this.props.sortBy }
+					showTaxaDetail={ this.props.showTaxaDetail }
+					onSortByClicked={ this.onSortByChanged }
+					onViewTypeClicked={ this.props.onViewTypeClicked }
+					onTaxaDetailClicked={ this.props.onTaxaDetailClicked }
+					//onFilterClicked={ this.onFilterRemoved }
+					filters={
+						Object.keys(this.props.filters).map((filterKey) => {
+							return { key: filterKey, val: this.props.filters[filterKey] }
+						})
+					}
+				/>
         {/* Sunlight & Moisture 
         <div style={{ background: "white" }} className="rounded-border p-4">
           <h4>Plant needs</h4>

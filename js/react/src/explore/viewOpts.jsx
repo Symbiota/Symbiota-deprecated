@@ -1,72 +1,22 @@
 import React from "react";
 import IconButton from "../common/iconButton.jsx";
+import CheckboxItem from "../common/checkboxItem.jsx";
 
 const CLIENT_ROOT = "..";
 
-function arrayCompare(a1, a2) {
-  if (a1.length !== a2.length) {
-    return false;
-  }
-  for (let i in a1) {
-    if (a1[i] !== a2[i]) {
-      return false;
-    }
-  }
-  return true;
-}
-
-
-
 class ViewOpts extends React.Component {
+
+  constructor(props) {
+    super(props);
+		this.onViewTypeClicked = this.props.onViewTypeClicked.bind(this);
+		this.onTaxaDetailClicked = this.props.onTaxaDetailClicked.bind(this);
+		this.onSortByClicked = this.props.onSortByClicked.bind(this);
+  }
+
   render() {
     return (
       <div id="view-opts" className="row mx-2 mt-3 px-0 py-2">
-        <div className="col">
-          <h3 className="font-weight-bold">Your search results:</h3>
-          <div className="d-flex flex-row flex-wrap">
-            {
-              this.props.filters.map((filter) => {
-                let showItem = true;
-                let itemText = "";
-                switch (filter.key) {
-                  case "searchText":
-                    if (filter.val === ViewOpts.DEFAULT_SEARCH_TEXT) {
-                      showItem = false;
-                    } else {
-                      itemText = `Search: ${filter.val}`;
-                    }
-                    break;
-                  case "checklistId":
-                    if (filter.val === ViewOpts.DEFAULT_CLID) {
-                      showItem = false;
-                    } else {
-                      itemText = (
-                        filter.val in this.props.checklistNames ?
-                          `Checklist: ${this.props.checklistNames[filter.val]}` :
-                          ''
-                      );
-                    }
-                    break;
-                  default:
-                    break;
-                }
 
-                if (showItem) {
-                  return (
-                    <IconButton
-                      key={ filter.key }
-                      title={ itemText }
-                      icon={ `${CLIENT_ROOT}/images/garden/x-out.png` }
-                      isSelected={ true }
-                      style={{ margin: "0.1em" }}
-                      onClick={ () => { this.props.onFilterClicked(filter.key); } }
-                    />
-                  );
-                }
-              })
-            }
-          </div>
-        </div>
         <div className="col text-right p-0 mx-1 mt-auto">
           <p>View as:</p>
           <p>Sort by name:</p>
@@ -77,7 +27,7 @@ class ViewOpts extends React.Component {
               title="Grid"
               icon={`${CLIENT_ROOT}/images/garden/gridViewIcon.png`}
               onClick={() => {
-                this.props.onViewTypeClicked("grid")
+                this.onViewTypeClicked("grid")
               }}
               isSelected={this.props.viewType === "grid"}
             />
@@ -85,26 +35,36 @@ class ViewOpts extends React.Component {
               title="List"
               icon={`${CLIENT_ROOT}/images/garden/listViewIcon.png`}
               onClick={() => {
-                this.props.onViewTypeClicked("list")
+                this.onViewTypeClicked("list")
               }}
               isSelected={this.props.viewType === "list"}
             />
           </p>
           <p>
-            <IconButton
-              title="Common Name"
-              onClick={() => {
-                this.props.onSortByClicked("vernacularName")
-              }}
-              isSelected={this.props.sortBy === "vernacularName"}
-            />
-            <IconButton
-              title="Scientific Name"
-              onClick={() => {
-                this.props.onSortByClicked("sciName")
-              }}
-              isSelected={this.props.sortBy === "sciName"}
-            />
+						<span>
+							<input 
+								type="checkbox" 
+								name={ "showTaxaDetail" } 
+								value={ this.props.showTaxaDetail == 'on' ? "on" : "off" } 
+								onChange={() => {
+									this.onTaxaDetailClicked(this.props.showTaxaDetail == 'on' ? "off" : "on" )
+								}}
+							/>
+							<label className="ml-2 align-middle" htmlFor={ "showTaxaDetail" }>{ "Vouchers & taxon authors" }</label>
+						</span>
+          </p>
+          <p>
+          	<span>
+							<input 
+								type="checkbox" 
+								name={ "sortBy" } 
+								value={ this.props.sortBy == 'taxon' ? "taxon" : "family" } 
+								onChange={() => {
+									this.onSortByClicked(this.props.sortBy == 'taxon' ? "family" : "taxon" )
+								}}
+							/>
+							<label className="ml-2 align-middle" htmlFor={ "sortBy" }>{ "Alphabetical by taxon" }</label>
+						</span>
           </p>
         </div>
       </div>
@@ -119,6 +79,7 @@ ViewOpts.defaultProps = {
   checklistNames: {},
   onSortByClicked: () => {},
   onViewTypeClicked: () => {},
+  onTaxaDetailClicked: () => {},
   onFilterClicked: () => {}
 };
 

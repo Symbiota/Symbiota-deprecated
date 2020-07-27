@@ -9,17 +9,9 @@ import httpGet from "../common/httpGet.js";
 import {ExploreSearchResult, SearchResultContainer} from "../common/searchResults.jsx";
 import {addUrlQueryParam, getUrlQueryParams} from "../common/queryParams.js";
 import {getCommonNameStr, getTaxaPage} from "../common/taxaUtils";
+import PageHeader from "../common/pageHeader.jsx";
 
-
-function MainContentContainer(props) {
-  return (
-    <div className="container mx-auto p-4" style={{ maxWidth: "1400px" }}>
-      {props.children}
-    </div>
-  );
-}
-
-class ExplorePageApp extends React.Component {
+class ExploreApp extends React.Component {
   constructor(props) {
     super(props);
     const queryParams = getUrlQueryParams(window.location.search);
@@ -39,8 +31,9 @@ class ExplorePageApp extends React.Component {
       },
       searchText: ("search" in queryParams ? queryParams["search"] : ViewOpts.DEFAULT_SEARCH_TEXT),
       searchResults: [],
-      sortBy: ("sortBy" in queryParams ? queryParams["sortBy"] : "vernacularName"),
-      viewType: ("viewType" in queryParams ? queryParams["viewType"] : "grid")
+      sortBy: ("sortBy" in queryParams ? queryParams["sortBy"] : "family"),
+      viewType: ("viewType" in queryParams ? queryParams["viewType"] : "grid"),
+      showTaxaDetail: 'off'
     };
     //this.getPid = this.getPid.bind(this);
     this.getClid = this.getClid.bind(this);
@@ -53,6 +46,7 @@ class ExplorePageApp extends React.Component {
     this.onSearchResults = this.onSearchResults.bind(this);
     this.onSortByChanged = this.onSortByChanged.bind(this);
     this.onViewTypeChanged = this.onViewTypeChanged.bind(this);
+    this.onTaxaDetailChanged = this.onTaxaDetailChanged.bind(this);
     this.onFilterRemoved = this.onFilterRemoved.bind(this);
   }
 
@@ -78,6 +72,7 @@ class ExplorePageApp extends React.Component {
 				}*/
 		
 				this.setState({
+					clid: this.getClid(),
 					title: res.title,
 					authors: res.authors,
 					abstract: res.abstract,
@@ -175,7 +170,7 @@ class ExplorePageApp extends React.Component {
     });
 
     let newType;
-    if (type === "sciName") {
+    if (type === "taxon") {
       newType = type;
     } else {
       newType = '';
@@ -196,14 +191,40 @@ class ExplorePageApp extends React.Component {
     let newQueryStr = addUrlQueryParam("viewType", newType);
     window.history.replaceState({ query: newQueryStr }, '', window.location.pathname + newQueryStr);
   }
+  onTaxaDetailChanged(taxaDetail) {
+  	this.setState({showTaxaDetail: taxaDetail});
+  	
+  	let newVal;
+  	if (taxaDetail === 'on') {
+  		newVal = taxaDetail;
+  	}else{
+  		newVal = 'off';
+  	}
+  	
+  	let newQueryStr = addUrlQueryParam("taxaDetail",newVal);
+    window.history.replaceState({ query: newQueryStr }, '', window.location.pathname + newQueryStr);
+  }
 
   render() {
-
+//console.log(this.state);
     return (
-      <div>
-        <MainContentContainer>
-          <div className="row">
-            <div className="col-auto">
+    <div className="wrapper">
+			<div className="page-header">
+				<PageHeader bgClass="explore" title={ "Exploring Oregon's Botanical Diversity" } />
+      </div>
+      <div className="container explore" style={{ minHeight: "45em" }}>
+ 				<div className="row">
+          <div className="col-9">
+            <h2>{ this.state.title }</h2>
+            <p className="authors"><strong>Authors:</strong> <span className="authors-content" dangerouslySetInnerHTML={{__html: this.state.authors}} /></p>
+						<p className="abstract"><strong>Abstract:</strong> <span className="abstract-content" dangerouslySetInnerHTML={{__html: this.state.abstract}} /></p>
+          </div>
+          <div className="col-3">
+          	map here
+          </div>
+        </div>
+ 					<div className="row">
+            <div className="col-auto sidebar-wrapper">
             {
             
               <SideBar
@@ -215,25 +236,27 @@ class ExplorePageApp extends React.Component {
                 searchSuggestionUrl="./rpc/autofillsearch.php"
                 onSearch={ this.onSearch }
                 onSearchTextChanged={ this.onSearchTextChanged }
+                viewType={ this.state.viewType }
+								sortBy={ this.state.sortBy }
+								showTaxaDetail={ this.state.showTaxaDetail }
+								onSortByClicked={ this.onSortByChanged }
+								onViewTypeClicked={ this.onViewTypeChanged }
+								onTaxaDetailClicked={ this.onTaxaDetailChanged }
+								onFilterClicked={ this.onFilterRemoved }
+								filters={
+									Object.keys(this.state.filters).map((filterKey) => {
+										return { key: filterKey, val: this.state.filters[filterKey] }
+									})
+								}
               />
               
             }
             </div>
-            <div className="col">
+            <div className="col results-wrapper">
               <div className="row">
                 <div className="col">
-                  <ViewOpts
-                    viewType={ this.state.viewType }
-                    sortBy={ this.state.sortBy }
-                    onSortByClicked={ this.onSortByChanged }
-                    onViewTypeClicked={ this.onViewTypeChanged }
-                    onFilterClicked={ this.onFilterRemoved }
-                    filters={
-                      Object.keys(this.state.filters).map((filterKey) => {
-                        return { key: filterKey, val: this.state.filters[filterKey] }
-                      })
-                    }
-                  />
+
+          				<h3 className="font-weight-bold">Your search results:</h3>
                   <SearchResultContainer viewType={ this.state.viewType }>
                     {
                       this.state.taxa.map((result) =>  {
@@ -243,6 +266,7 @@ class ExplorePageApp extends React.Component {
                           <ExploreSearchResult
                             key={ result.tid }
                             viewType={ this.state.viewType }
+														showTaxaDetail={ this.state.showTaxaDetail }
                             display={ showResult }
                             href={ getTaxaPage(this.props.clientRoot, result.tid) }
                             src={ result.thumbnail }
@@ -259,11 +283,14 @@ class ExplorePageApp extends React.Component {
               </div>
             </div>
           </div>
-        </MainContentContainer>
+        </div>
       </div>
     );
   }
 }
+ExploreApp.defaultProps = {
+  clid: -1,
+};
 
 const headerContainer = document.getElementById("react-header");
 const dataProps = JSON.parse(headerContainer.getAttribute("data-props"));
@@ -271,7 +298,7 @@ const domContainer = document.getElementById("react-explore-app");
 const queryParams = getUrlQueryParams(window.location.search);
 if (queryParams.cl) {
   ReactDOM.render(
-    <ExplorePageApp clid={queryParams.cl } clientRoot={ dataProps["clientRoot"] }/>,
+    <ExploreApp clid={queryParams.cl } clientRoot={ dataProps["clientRoot"] }/>,
     domContainer
   );
 } else {
