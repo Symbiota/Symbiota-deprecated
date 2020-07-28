@@ -9,8 +9,11 @@ class ExploreManager {
 
   // ORM Model
   protected $model;  
+
   protected $taxa;
   protected $taxaVouchers;
+  protected $searchName = '';
+  protected $searchSynonyms = false;
 	
 
   public function __construct($clid=-1) {
@@ -53,6 +56,15 @@ class ExploreManager {
   	}
   	return $this->taxaVouchers;
   }
+  public function setSearchName($name = '') {
+  	if (in_array($name,array('sciname','commonname'))) {
+  		$this->searchName = $name;
+  	}
+  }
+  public function setSearchSynonyms($bool) {
+  	$this->searchSynonyms = ($bool === true? true: false);
+  }
+  
   private static function populateTaxa($clid) {
     $em = SymbosuEntityManager::getEntityManager();
     $taxa = $em->createQueryBuilder()
@@ -68,6 +80,25 @@ class ExploreManager {
       ->getQuery()
       ->execute();
     return $taxa;
+    /*
+        ->innerJoin("Taxavernaculars", "v", "WITH", "t.tid = v.tid")
+    #->innerJoin("Fmchklsttaxalink", "tl", "WITH", "t.tid = tl.tid")
+		#->innerJoin("Fmchecklists", "cl", "WITH", "tl.clid = cl.clid")
+   # ->andWhere("cl.parentclid = :clid")
+    #->andWhere("tl.clid = :clid")
+    #->orWhere("t.sciname LIKE :search")
+    ->andWhere("v.vernacularname LIKE :search")
+    #->groupBy("t.tid")
+    ->setParameter("search", $searchTerm . '%')
+    #->setParameter(":clid",$clid)
+    ->getQuery()
+    ->getResult();
+    */
+    
+    
+    
+    
+    
   }
   private function populateVouchers($tid) {
     $em = SymbosuEntityManager::getEntityManager();

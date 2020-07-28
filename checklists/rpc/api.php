@@ -55,24 +55,63 @@ function managerToJSON($checklistObj) {
   return $result;
 }
 
-function getChecklist($clid) {
-  $em = SymbosuEntityManager::getEntityManager();
-  $repo = $em->getRepository("Fmchecklists");
-  $model = $repo->find($clid);
-  $checklist = ExploreManager::fromModel($model);
-  return managerToJSON($checklist);
+
+function searchTaxa($searchTerm,$clid,$name,$synonyms) {
+  $results = [];
+  $taxaRepo = SymbosuEntityManager::getEntityManager()->getRepository("Taxa");
+  $taxaResults = $taxaRepo->createQueryBuilder("t")
+    ->innerJoin("Taxavernaculars", "v", "WITH", "t.tid = v.tid")
+    #->innerJoin("Fmchklsttaxalink", "tl", "WITH", "t.tid = tl.tid")
+		#->innerJoin("Fmchecklists", "cl", "WITH", "tl.clid = cl.clid")
+   # ->andWhere("cl.parentclid = :clid")
+    #->andWhere("tl.clid = :clid")
+    #->orWhere("t.sciname LIKE :search")
+    ->andWhere("v.vernacularname LIKE :search")
+    #->groupBy("t.tid")
+    ->setParameter("search", $searchTerm . '%')
+    #->setParameter(":clid",$clid)
+    ->getQuery()
+    ->getResult();
+
+  if ($taxaResults != null) {
+    foreach ($taxaResults as $t) {
+      $tm = TaxaManager::fromModel($t);
+      $tj = taxaManagerToJSON($tm);
+      array_push($results, $tj);
+    }
+  }
+
+  return $results;
+  /*
+        ->from("Fmchklsttaxalink", "tl")
+      ->innerJoin("Fmchecklists", "cl", "WITH", "tl.clid = cl.clid")
+      ->where("tl.tid = :tid")
+      ->andWhere("cl.parentclid = " . Fmchecklists::$CLID_GARDEN_ALL)
+      ->setParameter("tid", $tid);
+      */
 }
 
 
 $result = [];
-/*if (array_key_exists("search", $_GET)) {
-  $result = searchTaxa($_GET["search"]);
-} else*/ if (array_key_exists("clid", $_GET) && is_numeric($_GET["clid"])) {
-  $result = getChecklist($_GET["clid"]);
+if (array_key_exists("clid", $_GET) && is_numeric($_GET["clid"])) {
+  $em = SymbosuEntityManager::getEntityManager();
+  $repo = $em->getRepository("Fmchecklists");
+  $model = $repo->find($_GET["clid"]);
+  $checklist = ExploreManager::fromModel($model);
+  
+	if ( 	 ( array_key_exists("search", $_GET) && !empty($_GET["search"]) )
+			&& ( array_key_exists("name", $_GET) && in_array($_GET['name'],array('sciname','commonname')) )
+	) {
+		$checklist->setSearchName($_GET['name']);
+		
+		$synonyms = (isset($_GET['synonyms']) && $_GET['synonyms'] == 'on') ? true : false;
+		$checklist->setSynonyms($synonyms);
+	}
+	$result = managerToJSON($checklist);
+	
 }else{
 	#todo: generate error or redirect
 }
-
 // Begin View
 header("Content-Type: application/json; charset=utf-8");
 echo json_encode($result, JSON_NUMERIC_CHECK | JSON_INVALID_UTF8_SUBSTITUTE);

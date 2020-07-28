@@ -23,7 +23,7 @@ class ExploreApp extends React.Component {
       title: '',
       authors: '',
       abstract: '',
-      taxa: [],
+      //taxa: [],
       isLoading: false,
       filters: {
         searchText: ("search" in queryParams ? queryParams["search"] : ViewOpts.DEFAULT_SEARCH_TEXT),
@@ -76,7 +76,8 @@ class ExploreApp extends React.Component {
 					title: res.title,
 					authors: res.authors,
 					abstract: res.abstract,
-					taxa: res.taxa,
+					//taxa: res.taxa,
+					searchResults: res.taxa,
 					//googleMapUrl: googleMapUrl
 				});
 				const pageTitle = document.getElementsByTagName("title")[0];
@@ -121,7 +122,7 @@ class ExploreApp extends React.Component {
       searchText: searchObj.text,
       filters: Object.assign({}, this.state.filters, { searchText: searchObj.text })
     });
-    httpGet(`${this.props.clientRoot}/explore/rpc/api.php?search=${searchObj.text}`)
+    httpGet(`${this.props.clientRoot}/checklists/rpc/api.php?search=${searchObj.text}`)
       .then((res) => {
         this.onSearchResults(JSON.parse(res));
       })
@@ -259,7 +260,7 @@ class ExploreApp extends React.Component {
           				<h3 className="font-weight-bold">Your search results:</h3>
                   <SearchResultContainer viewType={ this.state.viewType }>
                     {
-                      this.state.taxa.map((result) =>  {
+                      this.state.searchResults.map((result) =>  {
                         let showResult = true;
                         
                         return (
