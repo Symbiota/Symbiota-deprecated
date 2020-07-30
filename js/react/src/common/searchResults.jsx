@@ -96,7 +96,8 @@ function ExploreSearchContainer(props) {
 	if (props.searchResults) {
 		if (props.sortBy === 'taxon') {		
 			return (
-				<div>
+				
+      <SearchResultContainer viewType={ props.viewType }>
 				{ props.searchResults.map((result) =>  {
 						return (
 							<ExploreSearchResult
@@ -113,12 +114,11 @@ function ExploreSearchContainer(props) {
 						)
 					})
 				}
-				</div>
+				</SearchResultContainer>
 			)
 		}else{
-		console.log(props.searchResults);
 			return (
-				<div>
+				<SearchResultContainer viewType={ props.viewType }>
 				{
 						Object.entries(props.searchResults).map(([family, results]) => {
 							return (
@@ -144,7 +144,7 @@ function ExploreSearchContainer(props) {
 							)
 						})
 				}
-				</div>
+				</SearchResultContainer>
 			)
 		}
 	}

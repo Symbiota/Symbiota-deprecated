@@ -330,7 +330,6 @@ class ExploreApp extends React.Component {
                 <div className="col">
 
           				<h3 className="font-weight-bold">Your search results:</h3>
-                  <SearchResultContainer viewType={ this.state.viewType }>
                     
 										<ExploreSearchContainer
 											searchResults={ this.state.searchResults }
@@ -340,7 +339,6 @@ class ExploreApp extends React.Component {
 											clientRoot={ this.props.clientRoot }
 										/>
 											
-                  </SearchResultContainer>
                 </div>
               </div>
             </div>
