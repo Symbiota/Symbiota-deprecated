@@ -59,7 +59,14 @@ export class SearchWidget extends React.Component {
 
   onSuggestionsRequested() {
     if (this.props.suggestionUrl !== '') {
-      httpGet(`${this.props.suggestionUrl}?q=${this.props.textValue}`).then((res) => {
+    	let suggestionUrl = `${this.props.suggestionUrl}?q=${this.props.textValue}`; 
+    	if (this.props.clid) {
+    		suggestionUrl += "&clid=" + this.props.clid;
+    	}
+    	if (this.props.searchName) {
+    		suggestionUrl += "&name=" + this.props.searchName;
+    	}
+  		httpGet(suggestionUrl).then((res) => {
         return JSON.parse(res);
       }).catch((err) => {
         console.error(err);
@@ -116,7 +123,9 @@ SearchWidget.defaultProps = {
   buttonStyle: {},
   location: {},
   clientRoot: '',
-  suggestionUrl: ''
+  suggestionUrl: '',
+  clid: -1,
+  searchName: 'sciname'
 };
 
 export default SearchWidget;

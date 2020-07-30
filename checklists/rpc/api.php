@@ -37,7 +37,6 @@ function managerToJSON($checklistObj) {
 				$taxa = TaxaManager::fromModel($taxaModel);
 				$tjresult = [];
 				$tjresult['tid'] = $taxa->getTid();
-				$tjresult['sciname'] = $taxa->getSciname();
 				$tjresult['family'] = $taxa->getFamily();
 				$tjresult['author'] = $taxa->getAuthor();
 				$tjresult['thumbnail'] = $taxa->getThumbnail();
@@ -48,64 +47,67 @@ function managerToJSON($checklistObj) {
 				$tjresult['synonyms'] = $taxa->getSynonyms();
 				#var_dump($vouchers);
 				$tjresult['vouchers'] = $vouchers[$rowArr['tid']];
+				$tjresult['sciname'] = $taxa->getSciname();
+				if (sizeof(explode(" ",$tjresult['sciname'])) == 1) {
+					$tjresult['sciname'] .= " sp.";
+				}
 				$result["taxa"][] = $tjresult;
 			}
+			
+			$result['totals'] = getTaxaCounts($result['taxa']);
+			
 		}
   }
   return $result;
 }
 
-
-function searchTaxa($searchTerm,$clid,$name,$synonyms) {
-  $results = [];
-  $taxaRepo = SymbosuEntityManager::getEntityManager()->getRepository("Taxa");
-  $taxaResults = $taxaRepo->createQueryBuilder("t")
-    ->innerJoin("Taxavernaculars", "v", "WITH", "t.tid = v.tid")
-    #->innerJoin("Fmchklsttaxalink", "tl", "WITH", "t.tid = tl.tid")
-		#->innerJoin("Fmchecklists", "cl", "WITH", "tl.clid = cl.clid")
-   # ->andWhere("cl.parentclid = :clid")
-    #->andWhere("tl.clid = :clid")
-    #->orWhere("t.sciname LIKE :search")
-    ->andWhere("v.vernacularname LIKE :search")
-    #->groupBy("t.tid")
-    ->setParameter("search", $searchTerm . '%')
-    #->setParameter(":clid",$clid)
-    ->getQuery()
-    ->getResult();
-
-  if ($taxaResults != null) {
-    foreach ($taxaResults as $t) {
-      $tm = TaxaManager::fromModel($t);
-      $tj = taxaManagerToJSON($tm);
-      array_push($results, $tj);
-    }
-  }
-
-  return $results;
-  /*
-        ->from("Fmchklsttaxalink", "tl")
-      ->innerJoin("Fmchecklists", "cl", "WITH", "tl.clid = cl.clid")
-      ->where("tl.tid = :tid")
-      ->andWhere("cl.parentclid = " . Fmchecklists::$CLID_GARDEN_ALL)
-      ->setParameter("tid", $tid);
-      */
+function getTaxaCounts($taxa) {
+	$families = array();
+	$genera = array();
+	$species = array();
+	#$taxa = array();
+	
+	foreach ($taxa as $idx => $taxon) {
+		$families[] = $taxon['family'];
+		$sciArr = explode(" ",$taxon['sciname']);
+		if (isset($sciArr[0])) {
+			$genera[] = $sciArr[0];
+		}
+		if (isset($sciArr[1])) {
+			$species[] = $sciArr[0] . " " . $sciArr[1];
+		}
+		
+	
+	}
+	$families = array_unique($families);
+	$genera = array_unique($genera);
+	$species = array_unique($species);
+	return array(
+		"families"	=> sizeof($families),
+		"genera"		=> sizeof($genera),
+		"species"		=> sizeof($species),
+		"taxa"			=> sizeof($taxa)
+	);
 }
 
 
+
 $result = [];
-if (array_key_exists("clid", $_GET) && is_numeric($_GET["clid"])) {
+if (array_key_exists("clid", $_GET) && is_numeric($_GET["clid"])&& array_key_exists("pid", $_GET) && is_numeric($_GET["pid"])) {
   $em = SymbosuEntityManager::getEntityManager();
   $repo = $em->getRepository("Fmchecklists");
   $model = $repo->find($_GET["clid"]);
   $checklist = ExploreManager::fromModel($model);
+  $checklist->setPid($_GET["pid"]);
   
 	if ( 	 ( array_key_exists("search", $_GET) && !empty($_GET["search"]) )
 			&& ( array_key_exists("name", $_GET) && in_array($_GET['name'],array('sciname','commonname')) )
 	) {
+		$checklist->setSearchTerm($_GET["search"]);
 		$checklist->setSearchName($_GET['name']);
 		
 		$synonyms = (isset($_GET['synonyms']) && $_GET['synonyms'] == 'on') ? true : false;
-		$checklist->setSynonyms($synonyms);
+		$checklist->setSearchSynonyms($synonyms);
 	}
 	$result = managerToJSON($checklist);
 	
