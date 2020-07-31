@@ -8,10 +8,11 @@ class TaxaManager {
   # Basic characteristics
   private static $CID_SUNLIGHT = 680;
   private static $CID_MOISTURE = 683;
+  private static $CID_SUMMER_MOISTURE = 682;
   private static $CID_WIDTH = 738;
   private static $CID_HEIGHT = 140;
   private static $CID_SPREADS = 739;
-  private static $CID_OTHER_CULT_PREFS = 767;
+  #private static $CID_OTHER_CULT_PREFS = 767;
   
   # Plant features
   private static $CID_FLOWER_COLOR = 612;
@@ -360,6 +361,7 @@ class TaxaManager {
       "width" => [],
       "sunlight" => [],
       "moisture" => [],
+      "summer_moisture" => [],
       "features" => [
         "flower_color" => [],
         "bloom_months" => [],
@@ -375,7 +377,7 @@ class TaxaManager {
         "propagation" => [],
         "ease_of_growth" => [],
         "spreads_vigorously" => null,
-        "other_cult_prefs" => []
+        //"other_cult_prefs" => []
       ],
       "beyond_garden" => [
         "ecoregion" => [],
@@ -493,6 +495,9 @@ class TaxaManager {
         case TaxaManager::$CID_MOISTURE:
           array_push($attr_array["moisture"], $attr_val);
           break;
+        case TaxaManager::$CID_SUMMER_MOISTURE:
+          array_push($attr_array["summer_moisture"], $attr_val);
+          break;
         case TaxaManager::$CID_FLOWER_COLOR:
           array_push($attr_array["features"]["flower_color"], $attr_val);
           break;
@@ -529,9 +534,9 @@ class TaxaManager {
         case TaxaManager::$CID_SPREADS:
           $attr_array["growth_maintenance"]["spreads_vigorously"] = $attr_val;
           break;
-        case TaxaManager::$CID_OTHER_CULT_PREFS:
-          array_push($attr_array["growth_maintenance"]["other_cult_prefs"], $attr_val);
-          break;
+        #case TaxaManager::$CID_OTHER_CULT_PREFS:
+        #  array_push($attr_array["growth_maintenance"]["other_cult_prefs"], $attr_val);
+        #  break;
         case TaxaManager::$CID_ECOREGION:
           array_push($attr_array["beyond_garden"]["ecoregion"], $attr_val);
           break;
@@ -623,6 +628,7 @@ class TaxaManager {
       # Basic characteristics
       TaxaManager::$CID_SUNLIGHT,
       TaxaManager::$CID_MOISTURE,
+      TaxaManager::$CID_SUMMER_MOISTURE,
       TaxaManager::$CID_WIDTH,
       TaxaManager::$CID_HEIGHT,
   
@@ -641,7 +647,7 @@ class TaxaManager {
       TaxaManager::$CID_PROPAGATION,
       TaxaManager::$CID_EASE_GROWTH,
       TaxaManager::$CID_SPREADS,
-      TaxaManager::$CID_OTHER_CULT_PREFS,
+      #TaxaManager::$CID_OTHER_CULT_PREFS,
   
         # Beyond the garden
       TaxaManager::$CID_HABITAT,

@@ -89,12 +89,16 @@ class TaxaApp extends React.Component {
         .then((res) => {
        		// /taxa/rpc/api.php?taxon=2454
           res = JSON.parse(res);
+          
+          let plantType = '';
           let foliageType = res.characteristics.features.foliage_type;
-          foliageType = foliageType.length > 0 ? foliageType[0] : null;
+          plantType += foliageType.length > 0 ? `${foliageType[0]} `: '';
 
-          let plantType = foliageType !== null ? `${foliageType} ` : "";
+          if (res.characteristics.features.lifespan.length > 0) {
+            plantType += `${res.characteristics.features.lifespan[0]}`.trim() + " ";
+          }
           if (res.characteristics.features.plant_type.length > 0) {
-            plantType += `${res.characteristics.features.plant_type[0]}`.trim();
+            plantType += `${res.characteristics.features.plant_type[0]}`.trim() + " ";
           }
 
           const width = res.characteristics.width;
@@ -116,6 +120,14 @@ class TaxaApp extends React.Component {
           ease_of_growth = ease_of_growth.length > 0 ? ease_of_growth[0] : "";
 
           const spreads_vigorously = res.characteristics.growth_maintenance.spreads_vigorously;
+          
+          let moisture = [];
+          if (res.characteristics.moisture.length > 0) {
+            moisture.push(`${res.characteristics.moisture[0]}`.trim());
+          }
+          if (res.characteristics.summer_moisture.length > 0) {
+            moisture.push(`${res.characteristics.summer_moisture[0]}`.trim() + " summer water");
+          }
 
           this.setState({
             sciName: res.sciname,
@@ -126,29 +138,33 @@ class TaxaApp extends React.Component {
             highlights: {
               "Plant type": plantType,
               "Size at maturity": sizeMaturity,
-              "Cultivation tolerances": res.characteristics.sunlight,
-              "Wildlife support": res.characteristics.features.wildlife_support,
+              "Light tolerance": res.characteristics.sunlight,
               "Ease of growth": ease_of_growth
             },
             plantFacts: {
-              "Plant Type": plantType,
-              "Size at maturity": sizeMaturity,
               "Flower color": res.characteristics.features.flower_color,
               "Bloom time": res.characteristics.features.bloom_months,
-              "Light": res.characteristics.sunlight,
-              "Moisture": res.characteristics.moisture,
+              "Moisture": moisture,
               "Wildlife support": res.characteristics.features.wildlife_support
             },
             growthMaintenance: {
-              "Ease of cultivation": res.characteristics.growth_maintenance.cultivation_preferences,
               "Spreads vigorously": spreads_vigorously === null ? "" : spreads_vigorously,
-              "Other cultivation factors": res.characteristics.growth_maintenance.other_cult_prefs,
+              "Cultivation preferences": res.characteristics.growth_maintenance.cultivation_preferences,
               "Plant behavior": res.characteristics.growth_maintenance.behavior,
-              "Propagation": res.characteristics.growth_maintenance.propagation
+              "Propagation": res.characteristics.growth_maintenance.propagation,
+              "Landscape uses": res.characteristics.growth_maintenance.landscape_uses
             }
           });
           const pageTitle = document.getElementsByTagName("title")[0];
           pageTitle.innerHTML = `${pageTitle.innerHTML} ${res.sciname}`;
+          
+					httpGet(`${CLIENT_ROOT}/garden/rpc/api.php?canned=true`)
+					.then((res) => {
+						let cannedSearches = JSON.parse(res);
+						
+						
+					});
+          
         })
         .catch((err) => {
           // TODO: Something's wrong
