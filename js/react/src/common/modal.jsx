@@ -17,7 +17,7 @@ class ImageModal extends React.Component {//https://daveceddia.com/open-modal-in
     if(!this.props.show) {
       return null;
     }
-
+console.log(this.props.images);
     return (
       <div className="modal-backdrop">
         <div className="modal-content">

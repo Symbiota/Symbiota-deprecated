@@ -121,7 +121,7 @@ class TaxaApp extends React.Component {
             sciName: res.sciname,
             basename: res.vernacular.basename,
             vernacularNames: res.vernacular.names,
-            images: res.images,
+            images: res.imagesBasis.HumanObservation,
             description: res.gardenDescription,
             highlights: {
               "Plant type": plantType,
@@ -165,11 +165,11 @@ class TaxaApp extends React.Component {
       <div className="container my-5 py-2" style={{ minHeight: "45em" }}>
         <div className="row">
           <div className="col">
-            <h1 className="text-capitalize">{ this.state.vernacularNames[0] }</h1>
+            <h1 className="">{ this.state.vernacularNames[0] }</h1>
             <h2 className="font-italic">{ this.state.sciName }</h2>
           </div>
           <div className="col-auto">
-            <button className="d-block my-2 btn-primary">Printable page</button>
+            {/*<button className="d-block my-2 btn-primary">Printable page</button>*/}
             <button className="d-block my-2 btn-secondary" disabled={ true }>Add to basket</button>
           </div>
         </div>

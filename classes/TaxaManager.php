@@ -556,7 +556,7 @@ class TaxaManager {
   private static function populateImages($tid) {
     $em = SymbosuEntityManager::getEntityManager();
     $images = $em->createQueryBuilder()
-      ->select(["i.imgid, i.thumbnailurl", "i.url", "i.photographer", "i.owner", "i.copyright", "i.notes","o.year", "o.month", "o.day","o.country","o.stateprovince","o.county","o.locality","o.recordedby","o.basisofrecord","c.collectionname"])#
+      ->select(["i.imgid, i.thumbnailurl", "i.url", "i.photographer", "i.owner", "i.copyright", "i.notes","o.occid","o.year", "o.month", "o.day","o.country","o.stateprovince","o.county","o.locality","o.recordedby","o.basisofrecord","c.collectionname"])#
       ->from("Images", "i")
       ->innerJoin("omoccurrences","o","WITH","i.occid = o.occid")
       ->innerJoin("omcollections","c","WITH","c.collid = o.collid")
