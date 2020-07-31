@@ -72,22 +72,24 @@ function getAttribMatrixFromArr(attribArray) {
 
 function filterByWidth(item, minMax) {
 	let ret = false;
-	
-	if (	(item.width[0] <= minMax[0] && minMax[0] <= item.width[1])//user min is between item min and max
-				|| (item.width[0] <= minMax[1] && minMax[1] <= item.width[1])//user max is between item min and max
+
+	if (	( 0 == item.width.length)
+				|| ( minMax[0] <= item.width[0] && item.width[0] <= minMax[1] )//item min is between user min and max
+				|| ( minMax[0] <= item.width[1] && item.width[1] <= minMax[1] )//item max is between user min and max
 				|| minMax[1] === 50 && minMax[1] <= item.width[1]) {//user max == 50 and item max >= 50
 		ret = true;	
 	}
-				
+		
   return ret;
 }
 
 function filterByHeight(item, minMax) {
   let ret = false;
 	
-	if (	(item.height[0] <= minMax[0] && minMax[0] <= item.height[1])
-				|| (item.height[0] <= minMax[1] && minMax[1] <= item.height[1])
-				|| minMax[1] === 50 && minMax[1] <= item.height[1]) {
+	if (	( 0 == item.height.length)
+				|| 	( minMax[0] <= item.height[0] && item.height[0] <= minMax[1] )//item min is between user min and max
+				|| ( minMax[0] <= item.height[1] && item.height[1] <= minMax[1] )//item max is between user min and max
+				|| minMax[1] === 50 && minMax[1] <= item.height[1]) {//user max == 50 and item max >= 50
 		ret = true;	
 	}
 				
@@ -565,6 +567,9 @@ class GardenPageApp extends React.Component {
                           filterBeyondGarden &&
                           filterGrowthMaint
                         );
+                        if (filterWidth == false) {
+	                        console.log(result.tid);
+	                      }
                         return (
                           <SearchResult
                             key={ result.tid }
