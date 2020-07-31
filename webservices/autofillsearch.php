@@ -48,7 +48,7 @@ if (array_key_exists("q", $_REQUEST)) {
 	}	
 	foreach ($duplicates as $duplicate) {#re-add one entry for dupe as generic search
 		$results[] = array(
-			"text"	=>	"Lotus",
+			"text"	=>	$duplicate['text'],
 			"taxonId" => null,
 			"rankId" => null
 		);
