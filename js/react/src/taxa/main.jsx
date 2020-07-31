@@ -223,15 +223,20 @@ function SideBarSection(props) {
 }
 
 function SppItem(props) {
+//console.log(props.item);
 	const item = props.item;
-	const image = item.images[0];
+	let image = null;
+	if (item.images.length > 0) {
+		image = item.images[0];
+	}
 	let sppQueryParams = queryParams;
 	sppQueryParams['taxon'] = item.tid;
 	let sppUrl = window.location.pathname + '?taxon=' + encodeURIComponent(sppQueryParams['taxon']);
 	return (
-		<div key={image.imgid} className="card">
+		<div key={item.tid} className="card">
 			<a href={sppUrl}>
 				<h4>{item.sciname}</h4>
+				{ image &&
 				<div className="img-thumbnail" style={{ position: "relative", width: "100%", height: "7em", borderRadius: "0.25em"}}>														
 					<img
 						className="d-block"
@@ -240,6 +245,7 @@ function SppItem(props) {
 						alt={image.thumbnailurl}
 					/>
 				</div>
+				}
 				<div className="map-preview">
 					<img src={ `${CLIENT_ROOT}/images/map-temp.png` }/>
 				</div>
