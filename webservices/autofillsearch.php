@@ -37,7 +37,7 @@ if (array_key_exists("q", $_REQUEST)) {
     
   $duplicates = array_uintersect($sciNameResults, $vernacularResults,'compareTextValues');
   $results = array_merge($sciNameResults, $vernacularResults);
-  
+  #var_dump($vernacularResults);exit;
 	foreach ($results as $idx => $result) {
   	foreach ($duplicates as $duplicate) {
 			if (strcasecmp($result['text'],$duplicate['text']) == 0) {
@@ -53,11 +53,6 @@ if (array_key_exists("q", $_REQUEST)) {
 			"rankId" => null
 		);
 	}
-
-
-
-
-
 
   usort($results, function ($a, $b) {
     return strcmp($a["text"], $b["text"]);
