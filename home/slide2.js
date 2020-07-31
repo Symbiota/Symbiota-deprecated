@@ -8,7 +8,8 @@ module.exports = `
 	<div class="col-sm-6 slide-col-1">
         <h1>How to get the most out of our site</h1>
         <p>OregonFlora makes information about Oregon plants accessible to diverse audiences: scientists, restorationists, gardeners, land managers, and plant enthusiasts of all ages. We focus on the vascular plants of the state—ferns, conifers, grasses, herbs, and trees—that grow in the wild.</p>
-        <p>Now, all that information is even more accessible through our collaboration with Symbiota and its powerful database! Watch our overview below, explore top areas at right, or browse our full set of tutorials – including text-based – here.</p>
+        <p>Now, all that information is even more accessible through our collaboration with Symbiota and its powerful database! 
+        Watch our overview below, explore top areas at right, or <a href="` + clientRoot + `/pages/tutorials.php">browse our full set of tutorials – including text-based – here</a>.</p>
         <div class="row video-card">
             <div class="col-auto video-img">
                 <a href="` + clientRoot + `/pages/tutorials.php"><img src="` + clientRoot + `/images/YouTube-tutorial-Intro.png"></a>

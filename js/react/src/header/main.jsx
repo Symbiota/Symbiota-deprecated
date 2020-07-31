@@ -19,12 +19,12 @@ const dropDownChildren = {
     { title: "Plant Inventories", href: "/projects/index.php" },
     { title: "OSU Herbarium", href: "/collections/harvestparams.php?db[]=5,8,10,7,238,239,240,241" },
     { title: "Grow Natives", href: "/garden/index.php" },
-    { title: "Image Search", href: "/imagelib/search.php" },
+    //{ title: "Image Search", href: "/imagelib/search.php" },
     { title: "Taxonomic Tree", href: "/taxa/admin/taxonomydisplay.php" },
   ],
   "Resources": [
     { title: "Tutorials and Tips", href: "/pages/tutorials.php" },
-    { title: "What's New", href: "/pages/whats-new.php" },
+    { title: "News and Events", href: "/pages/news-events.php" },
     { title: "Archived Newsletters", href: "/newsletters/index.php" },
     { title: "Links", href: "/pages/links.php" }
   ],
@@ -110,6 +110,7 @@ class HeaderApp extends React.Component {
 
   // "searchObj" is the JSON object returned from ../webservices/autofillsearch.php
   onSearch(searchObj) {
+  	console.log(searchObj);
     this.setState({ isLoading: true });
     let targetUrl = `${this.props.clientRoot}/taxa/`;
     if (searchObj.rankId && searchObj.rankId === RANK_FAMILY) {

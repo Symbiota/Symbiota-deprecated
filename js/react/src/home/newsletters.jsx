@@ -65,12 +65,12 @@ class Newsletters extends React.Component {
 
         <div className="row">
           <div className="col">
-            <h2>Our newsletters are an excellent resource for the latest developments in Oregon-focused botany, as well as ground-breaking research.</h2>
+            <h2>Our archives of the Oregon Flora Newsletter continue to be an excellent resource presenting plant taxonomic research that impacts our flora, interviews with Oregon botanical notables, maps, photographs, and stories about the plants in our lives. The Oregon Flora Newsletter was published from 1995 – 2012.</h2>
           </div>
         </div>
         <div className="row">
           <div className="col">
-            <p className="instructions">To download an issue, simply click the PDF icon.  To preview an issue's contents, click the arrow.</p>
+            <p className="instructions">To download an issue, click on the PDF icon. To preview an issue’s contents, click the arrow.</p>
 					 </div>
         </div>
 

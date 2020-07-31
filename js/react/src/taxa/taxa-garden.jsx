@@ -169,7 +169,7 @@ class TaxaApp extends React.Component {
             <h2 className="font-italic">{ this.state.sciName }</h2>
           </div>
           <div className="col-auto">
-            <button className="d-block my-2 btn-primary">Printable page</button>
+            {/*<button className="d-block my-2 btn-primary">Printable page</button>*/
             <button className="d-block my-2 btn-secondary" disabled={ true }>Add to basket</button>
           </div>
         </div>

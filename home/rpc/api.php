@@ -58,7 +58,6 @@ function getNews() {
     		$html = file_get_contents($dir . $entry);  	
 				$dom->loadHTML($html);
 				$xpath = new DOMXPath($dom);	
-    		
 				foreach ($xpath->query ("//div[@class='news-item']") as $news) {
 					// search for sub nodes inside each element
 					foreach ($xpath->query (".//div[@class='title']", $news) as $h2) {
@@ -68,7 +67,9 @@ function getNews() {
 						$tmp['byline'] = $byline->nodeValue;
 					}
 					foreach ($xpath->query ("//div[@class='content']", $news) as $content) {
-						$tmp['content'] = $content->nodeValue;
+						#$tmp['content'] = $content->nodeValue;
+						$tmp['content'] = $dom->saveXML($content);
+						
 					}
 
 					foreach ($xpath->query ("//img", $news) as $image) {
@@ -78,6 +79,8 @@ function getNews() {
 					foreach ($xpath->query ("//div[@class='caption']", $news) as $caption) {
 						$tmp['caption'] = $caption->nodeValue;
 					}
+					
+    			$tmp['ID'] = substr(preg_replace("/[^a-z_-]/","",str_replace(" ","-",strtolower($tmp['title']))),0,20);
 				}
 				$tmp = array_map('cleanMSWord',$tmp);
 				$tmp['excerpt'] = substr($tmp['content'], 0, strrpos(substr($tmp['content'], 0, 200), ' '));
@@ -104,7 +107,6 @@ function getEvents() {
     		$html = file_get_contents($dir . $entry);  	
 				$dom->loadHTML($html);
 				$xpath = new DOMXPath($dom);	
-    		
 				foreach ($xpath->query ("//div[@class='event-item']") as $event) {
 					// search for sub nodes inside each element
 					foreach ($xpath->query (".//div[@class='title']", $event) as $h2) {
@@ -117,11 +119,14 @@ function getEvents() {
 						$tmp['time'] = $time->nodeValue;
 					}
 					foreach ($xpath->query ("//div[@class='content']", $event) as $content) {
-						$tmp['content'] = $content->nodeValue;
+						#$tmp['content'] = $content->nodeValue;
+						$tmp['content'] = $dom->saveXML($content);
 					}
 					foreach ($xpath->query ("//div[@class='location']", $event) as $location) {
-						$tmp['location'] = $location->nodeValue;
+						#$tmp['location'] = $location->nodeValue;
+						$tmp['location'] = $dom->saveXML($location);
 					}
+    			$tmp['ID'] = substr(preg_replace("/[^a-z_-]/","",str_replace(" ","-",strtolower($tmp['title']))),0,20);
 				
 				}
 				$tmp = array_map('cleanMSWord',$tmp);

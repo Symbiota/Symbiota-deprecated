@@ -49,7 +49,7 @@ class WhatsNew extends React.Component {
 														{	this.state.news.map((item,index) => {
 													
 																return (						
-																	<div key={index} className="news-item">
+																	<div key={index} id={ item.ID } className="news-item">
 																			<h2 dangerouslySetInnerHTML={{__html: item.title}} ></h2>
 																			<figure className="figure news-figure">
 																					<img src={ item.image_src } className="figure-img img-fluid z-depth-1" alt={ item.image_alt } style={{width: 400}} />
@@ -65,19 +65,21 @@ class WhatsNew extends React.Component {
 
 												</div>
 												<div id="column-right" className="col-lg-4 events-col">
-														<h2>Upcoming Events</h2>
-														<div className="event-item">
-																<h3>2 JULY 2019, 8am-5pm</h3>
-																<div className="event-content">
-																		<p><strong>Display: BEEvent Pollinator Conference.</strong> Sponsored by Linn Co. Master Gardeners. Linn Co. Fair & Expo Center, Albany, OR.</p>
-																</div>
-														</div>
-														<div className="event-item">
-																<h3>2 JULY 2019, 8am-5pm</h3>
-																<div className="event-content">
-																		<p><strong>Display: BEEvent Pollinator Conference.</strong> Sponsored by Linn Co. Master Gardeners. Linn Co. Fair & Expo Center, Albany, OR.</p>
-																</div>
-														</div>
+												
+														{	this.state.events.map((item,index) => {
+																let date = item.date + ", " + item.time;
+																let content = "<p><strong>" + item.title + "</strong> " + item.content + " " + item.location + "</p>";
+																return (						
+																	<div key={index} className="event-item">
+																			<h3 dangerouslySetInnerHTML={{__html: date}} ></h3>
+																			<div className="event-content" dangerouslySetInnerHTML={{__html: content}} >
+																			</div>
+																	</div>
+																	
+																)
+															})
+														}
+											
 												</div>
 										</div>
 								</div> 
