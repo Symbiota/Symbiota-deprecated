@@ -14,7 +14,7 @@ class FeatureSelector extends React.Component {
   render() {
     return (
       <div>
-        <div className="">
+        <div className="feature-selectors">
           <a
             data-toggle="collapse"
             aria-expanded="false"
@@ -31,6 +31,7 @@ class FeatureSelector extends React.Component {
                 {
                   Object.keys(this.props.items).map((itemKey) => {
                     let itemVal = this.props.items[itemKey];
+                    //console.log(itemKey + ":" + itemVal);
                     return (
                       <li key={ itemKey }>
                         <CheckboxItem

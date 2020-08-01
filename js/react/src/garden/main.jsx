@@ -227,7 +227,6 @@ class GardenPageApp extends React.Component {
         const allGrowthMaintainence = res[1];
         const allBeyondGarden = res[2];
         const newFilters = Object.assign({}, this.state.filters);
-
         for (let i in allPlantFeatures) {
           let featureKey = allPlantFeatures[i];
           newFilters.plantFeatures[featureKey.title] = [];
@@ -293,9 +292,9 @@ class GardenPageApp extends React.Component {
     }
   }
 
-  onFilterRemoved(key) {
+  onFilterRemoved(key,text) {
+  	const characteristics = ["plantFeatures","growthMaintenance","beyondGarden"];
     // TODO: This is clunky
-
     switch (key) {
       case "sunlight":
         this.onSunlightChanged({ target: { value: ViewOpts.DEFAULT_SUNLIGHT } });
@@ -320,13 +319,21 @@ class GardenPageApp extends React.Component {
       case "checklistId":
         this.onCannedFilter(ViewOpts.DEFAULT_CLID);
         break;
-      case "plantFeatures":
-        break;
-      case "growthMaintenance":
-        break;
-      case "beyondGarden":
-        break;
-      default:
+      default://characteristics: plant features, etc.
+      	let keyArr = key.split(":");
+				switch(keyArr[0]) {
+					case "plantFeatures":
+					  this.onPlantFeaturesChanged(keyArr[1], text);
+					  break;
+					case "growthMaintenance":
+					  this.onGrowthMaintenanceChanged(keyArr[1], text);
+					  break;
+					case "beyondGarden":
+					  this.onBeyondGardenChanged(keyArr[1], text);
+					  break;
+					default: 
+						break;
+				}
         break;
     }
   }
@@ -491,7 +498,6 @@ class GardenPageApp extends React.Component {
       let search = this.state.cannedSearches[i];
       checkListMap[search.clid] = search.name;
     }
-
     return (
       <div>
         <InfographicDropdown />
@@ -567,9 +573,6 @@ class GardenPageApp extends React.Component {
                           filterBeyondGarden &&
                           filterGrowthMaint
                         );
-                        if (filterWidth == false) {
-	                        console.log(result.tid);
-	                      }
                         return (
                           <SearchResult
                             key={ result.tid }
