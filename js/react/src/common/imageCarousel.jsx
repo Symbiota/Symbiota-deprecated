@@ -68,8 +68,8 @@ export default class ImageCarousel extends Component {
 					{	this.props.images.map((image,index) => {
 						return (
 							<div key={image.url} data-id={image.imgid}>
-								<h4>From the {image.collectionname}</h4>
 								<div className="slide-wrapper">
+								<h4>From the {image.collectionname}</h4>
 									<div className="image-wrapper">
 									<img
 										className=""
@@ -111,7 +111,7 @@ export default class ImageCarousel extends Component {
 												<a 
 													className="btn" 
 													style={{color: "white"}}
-													href={ getImageDetailPage(CLIENT_ROOT, image.imgid) }
+													href={ getImageDetailPage(CLIENT_ROOT, image.occid) }
 												>See the full record for this image</a>
 											</div>
 										</div>
@@ -132,6 +132,7 @@ export default class ImageCarousel extends Component {
           slidesToShow={6}
           swipeToSlide={true}
           focusOnSelect={true}
+          infinite={false}
 				
 					className="images-nav"  style={{ maxWidth: "100%" }}>
 					{	this.props.images.map((image) => {
