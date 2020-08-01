@@ -20,6 +20,60 @@
 		max-height: 150px;
 		overflow: hidden; 
   }
+	.canned-results {
+		max-width: 100%;
+		display: flex;
+		flex-flow: row wrap;
+		justify-content: space-between;
+		.canned-search-result {
+			flex-basis: 45%;
+			
+			color: #3B631D !important;
+			text-align: center;
+			border-radius: 2%;
+			max-width: 15em;
+			h4 {
+				font-size: 1em;
+			}
+			.card {
+				box-shadow: 0 0.1em 0.5em 0.1em rgba(100, 100, 100, 0.3);
+			}
+
+			.card:hover {
+				//background: #DFEFD3 !important;
+			}
+
+			.card a:hover {
+				//text-decoration: none;
+			}
+
+			.card-text {
+				font-weight: bold;
+				color: #1E352F !important;
+				font-size: initial;
+			}
+
+			.scroll-btn {
+				border-radius: 50%;
+			}
+
+			.scroll-btn:active {
+				background: rgba(0, 100, 0, 0.1) !important;
+			}
+
+		}
+	}
+	.taxa-link {
+		a {
+			.btn-primary {
+				padding: 0.3em 1.2em;
+				line-height: 2em;
+			}
+			&:hover {
+				text-decoration: none;
+			}
+		}
+	}
 
 }
 #react-taxa-app {

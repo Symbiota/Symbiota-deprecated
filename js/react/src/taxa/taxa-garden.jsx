@@ -4,6 +4,7 @@ import httpGet from "../common/httpGet.js";
 import { getUrlQueryParams } from "../common/queryParams.js";
 import GardenCarousel from "../common/gardenCarousel.jsx";
 import ImageModal from "../common/modal.jsx";
+import {getTaxaPage} from "../common/taxaUtils";
 
 function showItem(item) {
   const isArray = Array.isArray(item);
@@ -38,7 +39,7 @@ function SideBarSection(props) {
   });
 
   return (
-      <div className={ "mb-5 " + (itemKeys.length > 0 ? "" : "d-none") }>
+      <div className={ "mb-4 " + (itemKeys.length > 0 ? "" : "d-none") }>
         <h3 className="text-light-green font-weight-bold mb-3">{ props.title }</h3>
         {
           itemKeys.map((key) => {
@@ -65,7 +66,9 @@ class TaxaApp extends React.Component {
       growthMaintenance: {},
       isOpen: false,
       tid: null,
-      currImage: 0
+      currImage: 0,
+      checklists: [],
+      nativeGroups: []
     };
     this.getTid = this.getTid.bind(this);
   }
@@ -135,6 +138,7 @@ class TaxaApp extends React.Component {
             vernacularNames: res.vernacular.names,
             images: res.imagesBasis.HumanObservation,
             description: res.gardenDescription,
+            checklists: res.checklists,
             highlights: {
               "Plant type": plantType,
               "Size at maturity": sizeMaturity,
@@ -158,11 +162,17 @@ class TaxaApp extends React.Component {
           const pageTitle = document.getElementsByTagName("title")[0];
           pageTitle.innerHTML = `${pageTitle.innerHTML} ${res.sciname}`;
           
-					httpGet(`${CLIENT_ROOT}/garden/rpc/api.php?canned=true`)
+          const nativeGroups = [];
+					httpGet(`${this.props.clientRoot}/garden/rpc/api.php?canned=true`)
 					.then((res) => {
-						let cannedSearches = JSON.parse(res);
-						
-						
+						let cannedSearches = JSON.parse(res);//14796, 14797, 14798, 14799, 14800
+						Object.entries(cannedSearches).map(([key, checklist]) => {
+							let match = this.state.checklists.indexOf(checklist.clid);
+							if (match > -1) {
+								nativeGroups.push(checklist);
+							}
+						})
+						this.setState({nativeGroups: nativeGroups	});
 					});
           
         })
@@ -190,7 +200,7 @@ class TaxaApp extends React.Component {
           </div>
         </div>
         <div className="row mt-2">
-          <div className="col">
+          <div className="col-7">
             <img
               id="img-main"
               src={ this.state.images.length > 0 ? this.state.images[0].url : '' }
@@ -244,10 +254,65 @@ class TaxaApp extends React.Component {
 							</ImageModal>
             </div>
           </div>
-          <div className="col-auto mx-4">
+          <div className="col-4 mx-4">
             <SideBarSection title="Highlights" items={ this.state.highlights } />
+            { this.state.nativeGroups.length > 0 &&
+            <div className={ "mb-4 " }>
+								<h3 className="text-light-green font-weight-bold mb-1">Native Plant Groups</h3>
+								<p>Containing <strong>{ this.state.vernacularNames[0] }:</strong></p>
+									<div className="canned-results dashed-border">
+									{
+										this.state.nativeGroups.map((checklist) => {
+																	
+											return (
+												<div key={ checklist.clid } className={"py-2 canned-search-result"}>
+													<h4 className="canned-title">{checklist.name}</h4>
+													<div className="card" style={{padding: "0.5em"}}>
+														<div className="card-body" style={{padding: "0"}}>
+															<div style={{ position: "relative", width: "100%", height: "7em", borderRadius: "0.25em"}}>
+																<img
+																	className="d-block"
+																	style={{width: "100%", height: "100%", objectFit: "cover"}}
+																	src={checklist.iconUrl}
+																	alt={checklist.description}
+																	//onMouseOver={ this.onMouseOver }
+																/>
+																{/*
+																<div
+																	className="text-center text-sentence w-100 h-100 px-2 py-1 align-items-center"
+																	style={{
+																		//display: this.state.hover ? "flex" : "none",
+																		position: "absolute",
+																		top: 0,
+																		left: 0,
+																		zIndex: 1000,
+																		fontSize: "0.75em",
+																		color: "white",
+																		background: "rgba(100, 100, 100, 0.8)",
+																		overflow: "hidden"
+																	}}
+																	onMouseOut={ this.onMouseOut }
+																>
+																</div>
+																*/}
+															</div>
+														</div>
+													</div>
+												</div>
+											)
+										})
+									}
+									
+									</div>
+					        <span className="row mt-2 dashed-border"/>
+								</div>
+							}
+
             <SideBarSection title="Plant Facts" items={ this.state.plantFacts } />
             <SideBarSection title="Growth and Maintenance" items={ this.state.growthMaintenance } />
+            <div className="taxa-link">
+            	<a href={ getTaxaPage(this.props.clientRoot, this.state.tid) }><button className="d-block my-2 btn-primary">Core profile page</button></a>
+            </div>
           </div>
         </div>
       </div>
@@ -259,13 +324,17 @@ TaxaApp.defaultProps = {
   tid: -1,
 };
 
+
+
+const headerContainer = document.getElementById("react-header");
+const dataProps = JSON.parse(headerContainer.getAttribute("data-props"));
 const domContainer = document.getElementById("react-taxa-garden-app");
 const queryParams = getUrlQueryParams(window.location.search);
 if (queryParams.search) {
   window.location = `./search.php?search=${encodeURIComponent(queryParams.search)}`;
 } else if (queryParams.taxon) {
   ReactDOM.render(
-    <TaxaApp tid={queryParams.taxon }/>,
+    <TaxaApp tid={queryParams.taxon } clientRoot={ dataProps["clientRoot"] } />,
     domContainer
   );
 } else {
