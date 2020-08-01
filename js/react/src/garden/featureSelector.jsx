@@ -31,13 +31,13 @@ class FeatureSelector extends React.Component {
                 {
                   Object.keys(this.props.items).map((itemKey) => {
                     let itemVal = this.props.items[itemKey];
-                    //console.log(itemKey + ":" + itemVal);
                     return (
                       <li key={ itemKey }>
                         <CheckboxItem
                           name={ itemKey }
                           value={ itemVal ? "on" : "off" }
                           onChange={ () => this.props.onChange(itemKey) }
+													checked={ itemVal }
                         />
                       </li>
                     )

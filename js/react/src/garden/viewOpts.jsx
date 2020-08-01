@@ -33,7 +33,7 @@ class ViewOpts extends React.Component {
 	buildButton(filterKey,itemText) {
 		return (
 			<IconButton
-				key={ filterKey }
+				key={ filterKey + ":" + itemText }
 				title={ itemText }
 				icon={ `${CLIENT_ROOT}/images/garden/x-out.png` }
 				isSelected={ true }
@@ -157,11 +157,11 @@ class ViewOpts extends React.Component {
 						}
           </div>
         </div>
-        <div className="col text-right p-0 mx-1 mt-auto">
+        <div className="col text-right p-0 mx-1">
           <p>View as:</p>
           <p>Sort by name:</p>
         </div>
-        <div className="col-auto p-0 mx-1 mt-auto">
+        <div className="col-auto p-0 mx-1">
           <p>
             <IconButton
               title="Grid"
@@ -196,6 +196,17 @@ class ViewOpts extends React.Component {
               isSelected={this.props.sortBy === "sciName"}
             />
           </p>
+          <p>
+          	{buttons.length > 0 &&
+						<IconButton
+							key={ "reset" }
+							title={ "Clear all" }
+							isSelected={ true }
+							style={{ margin: "0.1em" }}
+							onClick={ () => { this.props.onReset(); } }
+						/>
+						}
+          </p>
         </div>
       </div>
     );
@@ -209,7 +220,8 @@ ViewOpts.defaultProps = {
   checklistNames: {},
   onSortByClicked: () => {},
   onViewTypeClicked: () => {},
-  onFilterClicked: () => {}
+  onFilterClicked: () => {},
+  onReset: () => {}
 };
 
 ViewOpts.DEFAULT_SUNLIGHT = "";

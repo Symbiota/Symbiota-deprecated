@@ -200,6 +200,7 @@ class GardenPageApp extends React.Component {
     this.onViewTypeChanged = this.onViewTypeChanged.bind(this);
     this.onFilterRemoved = this.onFilterRemoved.bind(this);
     this.onCannedFilter = this.onCannedFilter.bind(this);
+    this.clearFilters = this.clearFilters.bind(this);
     this.toggleFeatureCollectionVal = this.toggleFeatureCollectionVal.bind(this);
     this.onPlantFeaturesChanged = this.onPlantFeaturesChanged.bind(this);
     this.onGrowthMaintenanceChanged = this.onGrowthMaintenanceChanged.bind(this);
@@ -491,7 +492,20 @@ class GardenPageApp extends React.Component {
     let newQueryStr = addUrlQueryParam("clid", clid);
     /*window.history.replaceState({ query: newQueryStr }, '', window.location.pathname + newQueryStr);*/
   }
-
+	clearFilters() {
+		let filters = {
+			sunlight: ViewOpts.DEFAULT_SUNLIGHT,
+			moisture: ViewOpts.DEFAULT_MOISTURE,
+			height: ViewOpts.DEFAULT_HEIGHT,
+			width: ViewOpts.DEFAULT_WIDTH,
+			searchText: ViewOpts.DEFAULT_SEARCH_TEXT,
+			checklistId: ViewOpts.DEFAULT_CLID,
+			plantFeatures: {},
+			growthMaintenance: {},
+			beyondGarden: {}
+		};
+    this.setState({ filters: filters });
+	}
   render() {
     const checkListMap = {};
     for (let i in this.state.cannedSearches) {
@@ -544,6 +558,7 @@ class GardenPageApp extends React.Component {
                     sortBy={ this.state.sortBy }
                     onSortByClicked={ this.onSortByChanged }
                     onViewTypeClicked={ this.onViewTypeChanged }
+                    onReset={ this.clearFilters }
                     onFilterClicked={ this.onFilterRemoved }
                     checklistNames={ checkListMap }
                     filters={
