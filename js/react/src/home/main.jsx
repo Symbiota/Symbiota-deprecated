@@ -7,13 +7,11 @@ import ModalVideo from 'react-modal-video';
 
 const RANK_FAMILY = 140;
 const RANK_GENUS = 180;
-/*
+
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { library } from "@fortawesome/fontawesome-svg-core";
-import { faSearchPlus, faListUl, faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons'
-library.add( faSearchPlus, faListUl, faChevronDown, faChevronDown)
-*/
-
+import { faChevronRight, faChevronLeft } from '@fortawesome/free-solid-svg-icons'
+library.add( faChevronRight, faChevronLeft)
 
 
 class Home extends React.Component {
@@ -90,14 +88,15 @@ class Home extends React.Component {
 			dots: true,
 			infinite: true,
 			slidesToShow: 1,
-			slidesToScroll: 1
+			slidesToScroll: 1,
+			nextArrow: <FontAwesomeIcon icon="chevron-right"/>,
+			prevArrow: <FontAwesomeIcon icon="chevron-left"/>
 		};
 			
 		
     return (
     <div className="wrapper">
       <div className="container home">
-
       	<ModalVideo channel='youtube' isOpen={this.state.isVideoOpen} videoId={ this.state.videoId } onClose={() => this.setState({isVideoOpen: false})} />
       	
      		<Slider { ...slickSettings } className="mx-auto">
@@ -268,10 +267,8 @@ class Home extends React.Component {
 								</div>
 						</div>
 					</div>
-     		
-     		
+
       	</Slider>
-        
         
       </div>
     </div>

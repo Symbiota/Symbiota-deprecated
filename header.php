@@ -1,10 +1,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
 <link
-  rel='stylesheet'
-  href='<?php echo "$CLIENT_ROOT/css/fontawesome/css/all.min.css"?>'
-  type='text/css'>
-<link
   href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700"
   rel="stylesheet"
   type="text/css">

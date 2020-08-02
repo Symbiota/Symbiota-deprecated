@@ -37,12 +37,26 @@ a {
     color: @dark-green !important;
   }
 }
-.slick-next:before {
-    content: "\f138";
-    font-family: "Font Awesome 5 Free";
-    /*left:-5px;
-    position:absolute;
-    top:0;*/
+
+svg.slick-next,
+svg.slick-prev {
+	color: white;
+	font-size: 40px;
+	top: 40%;
+	font-weight: 900;
+  height: 100%;
+  width: 100%;
+	opacity: .85;
+	transition: opacity 250ms;
+	&:hover {
+		opacity: 1;
+		color: inherit;
+	}
+}
+.slick-next {
+		svg {
+		
+		}
  }
 .btn {
   box-shadow: none !important;
