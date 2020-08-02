@@ -131,11 +131,11 @@ class TaxaManager {
   	return $this->origin;
   }
   public function getFamily() {
-  	$this->family = $this->populateStatusFields($this->getTid())['family'];
+  	$this->family = $this->populateFamily($this->getTid());
   	return $this->family;
   }
   public function getParentTid() {
-  	$this->parentTid = $this->populateStatusFields($this->getTid())['parenttid'];
+  	$this->parentTid = $this->populateParentTid($this->getTid());
   	return $this->parentTid;
   }
 	public function getGardenId() {
@@ -421,26 +421,46 @@ class TaxaManager {
 		}
 		return $return;
  	}
- 	private function populateStatusFields($tid = null) {
+ 	private function populateFamily($tid = null) {
   	$return = null;
   	if ($tid) {
 			$em = SymbosuEntityManager::getEntityManager();
 			$status = $em->createQueryBuilder()
-				->select(["ts.family, ts.parenttid"])
+				->select(["ts.family"])
 				->from("Taxstatus", "ts")
 				->where("ts.tidaccepted = :tid")
 				->setParameter("tid", $tid)
       	->getQuery()
-      	->execute();
+      	->getArrayResult();
       	#var_dump($status);
       if (sizeof($status)) {
-				$return = $status[0];
+				$return = $status[0]['family'];
 			}
 		}
 		return $return;
+ 	} 	
  	
+ 	private function populateParentTid($tid = null) {
+  	$return = null;
+  	if ($tid) {
+			$em = SymbosuEntityManager::getEntityManager();
+			$status = $em->createQueryBuilder()
+				->select(["ts.parenttid"])
+				->from("Taxstatus", "ts")
+				->innerJoin("Taxa","t","WITH","ts.tid = t.tid")
+				->leftJoin("Taxa","t2","WITH","ts.tidaccepted = t2.tid")
+				->where("t.tid = :tid")
+				->andWhere("ts.taxauthid = 1")
+				->setParameter("tid", $tid)
+      	->getQuery()
+      	->execute();
+      if (sizeof($status)) {
+				$return = $status[0]['parenttid'];
+			}
+		}
+		return $return;
  	}
-  
+ 	
   private function populateTaxalinks($tid = null){
   	$return = null;
   	$this->rarePlantFactSheet = '';
