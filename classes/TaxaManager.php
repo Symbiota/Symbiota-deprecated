@@ -612,12 +612,12 @@ class TaxaManager {
   				if ($value == '' && !empty($img['notes'])){#Photographed: Aug 9, 2008 or Photographed: date unknown
 						$date = str_replace("Photographed: ",'',$img['notes']);
 						$img['fulldate'] = $date;
-						/*$datestamp = strtotime($date);
-						if (false !== $datestamp) {
-							$img['year'] = date("Y",$datestamp);
-							$img['day'] = date("j",$datestamp);
-							$img['month'] = date("n",$datestamp);
-						}*/
+						#$datestamp = strtotime($date);
+						#if (false !== $datestamp) {
+						#	$img['year'] = date("Y",$datestamp);
+						#	$img['day'] = date("j",$datestamp);
+						#	$img['month'] = date("n",$datestamp);
+						#}
 						
 					}else{
 						if (!empty($img['day']) && !empty($img['month'])) {
