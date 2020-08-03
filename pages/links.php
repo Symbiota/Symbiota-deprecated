@@ -35,7 +35,7 @@ include( $serverRoot . "/header.php" );
             <p><a target="_blank" href="https://bpp.oregonstate.edu/herbarium">Oregon State University Herbarium</a></p>
             <p><a target="_blank" href="https://oregondigital.org/sets/herbarium">OSU Herbarium Type Specimens</a>
                 <span class="link-details">Images of the OSU Herbarium type specimens and their published descriptions</span></p>
-            <p><a target="_blank" href="http://plant-clinic.bpp.oregonstate.edu/plant-weed-identification/">OSU Plant and Weed Identification Service</a></p>
+            <p><a target="_blank" href="https://bpp.oregonstate.edu/herbarium/plantweed-identification">OSU Plant and Weed Identification Service</a></p>
             <p><a target="_blank" href="https://www.oregon.gov/ODA/programs/Weeds/Pages/Default.aspx">Oregon Dept. Agriculture (ODA) Weeds and WeedMapper</a></p>
             <p><a target="_blank" href="https://www.oregon.gov/ODA/programs/PlantConservation/Pages/Default.aspx">ODA Plant Conservation</a></p>
             <p><a target="_blank" href="https://inr.oregonstate.edu/orbic/rare-species/rare-species-oregon-publications">Rare, Threatened & Endangered Species of Oregon</a>
