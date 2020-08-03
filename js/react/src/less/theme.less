@@ -38,26 +38,25 @@ a {
   }
 }
 
-svg.slick-next,
-svg.slick-prev {
+.slick-next,
+.slick-prev {
+  height: 40px;
+  width: 40px;
+  top: 45%;
 	color: white;
 	font-size: 40px;
-	top: 40%;
 	font-weight: 900;
-  height: 100%;
-  width: 100%;
 	opacity: .85;
 	transition: opacity 250ms;
 	&:hover {
 		opacity: 1;
 		color: inherit;
 	}
+	&:before {
+		content: '';
+	}
 }
-.slick-next {
-		svg {
-		
-		}
- }
+
 .btn {
   box-shadow: none !important;
   border: none !important;

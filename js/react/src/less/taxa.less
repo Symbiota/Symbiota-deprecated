@@ -299,9 +299,16 @@
 	//taxa slideshows on main and garden pages
   .slick-next, 
   .slick-prev {
-  	&:before {
-  		color: @med-green !important;
-  	}
+  	color: @med-green !important;
+  	font-size: 28px;
+  	top: 50%;
+  	text-align: center;
+  }
+  .slick-next {
+  	right: -35px;
+  }
+  .slick-prev {
+  	left: -35px;
   }
   .slick-slide {
 		height: auto;
@@ -347,6 +354,11 @@
 			height: calc(100vh - 128px);
 			.images-main {
 				height: 77%;
+				.slick-next, 
+				.slick-prev {
+					color: white !important;
+  				font-size: 38px;
+				}
 				.slick-list {
 					max-height: 100%;
 					.slick-track {
@@ -431,6 +443,8 @@
 				
 				.slick-next,
 				.slick-prev {
+					color: white !important;
+					font-size: 28px;
 					top: 35%;
 				}
 			}		

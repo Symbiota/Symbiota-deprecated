@@ -153,18 +153,19 @@ function SingleBorderedItem(props) {
 function RelatedBorderedItem(props) {
 
   let value = '';
+  //console.log(props);
 	value = (
 		<div className="col-sm-12 related py-2 row">
 			<div className="col-sm-8 related-sciname">{ props.value[0] }</div>
 			<div className="col-sm-4 related-nav pr-0">
 				<span className="related-label">Related</span>
 				<span className="related-links"> 
-					{ 
-					<a href={ props.value[1] }>
-						<FontAwesomeIcon icon="arrow-circle-up" />
-					</a>
+					{ props.rankId > RANK_FAMILY &&
+							<a href={ props.value[1] }>
+								<FontAwesomeIcon icon="arrow-circle-up" />
+							</a>
 					}
-					{ props.value[2].length > 0 && 
+					{ props.rankId > RANK_FAMILY && props.value[2].length > 0 && 
 						/* two statements here because I don't want to wrap them in one div */
 						<span className="separator">/</span>
 					}
@@ -207,7 +208,7 @@ function SideBarSection(props) {
             if (key == 'webLinks') {
 	            return <SingleBorderedItem key={ val } keyName={ val } value={ val } />
 	          }else if (key == 'Related') {
-	            return <RelatedBorderedItem key={ key } keyName={ key } value={ val } isGenus={ props.isGenus }/>
+	            return <RelatedBorderedItem key={ key } keyName={ key } value={ val } isGenus={ props.isGenus } rankId={ props.rankId }/>
 	          }else if (key == "More info") {
 	            return <MoreInfoItem key={ key } keyName={ key } value={ val } />
 	          }else if (key == "Synonyms") {
@@ -360,8 +361,8 @@ class TaxaChooser extends React.Component {
 										
 					</div>
 					<div className="col-sm-4 sidebar">
-						<SideBarSection title="Context" items={ res.highlights } classes="highlights" isGenus={ res.isGenus }/>
-						<SideBarSection title="Web links" items={ res.taxalinks} classes="weblinks"  isGenus={ res.isGenus }/>
+						<SideBarSection title="Context" items={ res.highlights } classes="highlights" isGenus={ res.isGenus } rankId={ res.rankId }/>
+						<SideBarSection title="Web links" items={ res.taxalinks} classes="weblinks"  isGenus={ res.isGenus } rankId={ res.rankId }/>
 					</div>
 				</div>
 			</div>
@@ -525,8 +526,8 @@ class TaxaDetail extends React.Component {
 					
 					</div>
 					<div className="col-sm-4 sidebar">
-						<SideBarSection title="Context" items={ res.highlights } classes="highlights" />
-						<SideBarSection title="Web links" items={ res.taxalinks} classes="weblinks" />
+						<SideBarSection title="Context" items={ res.highlights } classes="highlights" rankId={ res.rankId } />
+						<SideBarSection title="Web links" items={ res.taxalinks} classes="weblinks"  rankId={ res.rankId }/>
 					</div>
 				</div>
 			</div>

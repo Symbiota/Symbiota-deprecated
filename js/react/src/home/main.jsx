@@ -13,6 +13,10 @@ import { library } from "@fortawesome/fontawesome-svg-core";
 import { faChevronRight, faChevronLeft } from '@fortawesome/free-solid-svg-icons'
 library.add( faChevronRight, faChevronLeft)
 
+/* https://github.com/akiran/react-slick/issues/1195 */
+const SlickButtonFix = ({currentSlide, slideCount, children, ...props}) => (
+    <span {...props}>{children}</span>
+);
 
 class Home extends React.Component {
   constructor(props) {
@@ -89,8 +93,8 @@ class Home extends React.Component {
 			infinite: true,
 			slidesToShow: 1,
 			slidesToScroll: 1,
-			nextArrow: <FontAwesomeIcon icon="chevron-right"/>,
-			prevArrow: <FontAwesomeIcon icon="chevron-left"/>
+			nextArrow: <SlickButtonFix><FontAwesomeIcon icon="chevron-right"/></SlickButtonFix>,
+			prevArrow: <SlickButtonFix><FontAwesomeIcon icon="chevron-left"/></SlickButtonFix>
 		};
 			
 		
