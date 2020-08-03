@@ -13,6 +13,12 @@ import {addUrlQueryParam, getUrlQueryParams} from "../common/queryParams.js";
 import {getCommonNameStr, getGardenTaxaPage} from "../common/taxaUtils";
 
 
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { library } from "@fortawesome/fontawesome-svg-core";
+import { faChevronUp } from '@fortawesome/free-solid-svg-icons'
+library.add( faChevronUp)
+
+
 const CLIENT_ROOT = "..";
 
 const CIDS_PLANT_FEATURE = {
@@ -552,7 +558,7 @@ class GardenPageApp extends React.Component {
                 </div>
               </div>
               <div className="row">
-                <div className="col">
+                <div className="col" id="search-top">
                   <ViewOpts
                     viewType={ this.state.viewType }
                     sortBy={ this.state.sortBy }
@@ -597,11 +603,20 @@ class GardenPageApp extends React.Component {
                             src={ result.image }
                             commonName={ getCommonNameStr(result) }
                             sciName={ result.sciName ? result.sciName : '' }
+                    				sortBy={ this.state.sortBy }
                           />
                         )
                       })
                     }
                   </SearchResultContainer>
+                  <div className="go-top">
+                    <p>
+                        <a href="#search-top" className="toptext">
+                            TOP<br />
+                            <FontAwesomeIcon icon="chevron-up"/>
+                        </a>
+                    </p>
+                </div>
                 </div>
               </div>
             </div>
