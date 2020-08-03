@@ -74,16 +74,16 @@ include( $serverRoot . "/header.php" );
         <div class="inner-content">
             <!-- place static page content here. -->
             <div class="row two-col-row">
-                <div class="column-main col-md-8 pr-md-5">
-                    <h2>Be a part of the OregonFlora team!</h2>
-                    <p>Nature lovers, computer geeks, artists, field workers, history buffs… People with widely different backgrounds and interests find satisfaction in helping OregonFlora. Join the nearly 1,000 people of all ages and skills that have volunteered since our program began! There are a variety of ways to participate: data entry, technical editing and writing, program assistance, and event planning can be done at our location or remotely. Field work opportunities of weed control, data gathering, and planting are periodically scheduled; check our <a href="<?php echo $CLIENT_ROOT; ?>news-events.php">News and Events</a> page for details.</p>
-                    <p>If you would like to contribute species lists, photographs, or other information to OregonFlora,  or if you would like to volunteer, contact us at: <?php echo obfuscate("ofpflora@oregonflora.org") ?>.</p>
-                </div>
-                <div class="column-right col-md-4 pt-md-5">
+                <div class="column-right col-md-4 order-1 order-md-2 pt-5">
                     <figure class="figure">
                         <img src="images/volunteer3.png" class="figure-img img-fluid z-depth-1" alt="Volunteer 3"">
                         <figcaption class="figure-caption">Photo of Persona Person by Jane Doe.</figcaption>
                     </figure>
+                </div>
+                <div class="column-main col-md-8 order-2 order-md-1 pr-md-5">
+                    <h2>Be a part of the OregonFlora team!</h2>
+                    <p>Nature lovers, computer geeks, artists, field workers, history buffs… People with widely different backgrounds and interests find satisfaction in helping OregonFlora. Join the nearly 1,000 people of all ages and skills that have volunteered since our program began! There are a variety of ways to participate: data entry, technical editing and writing, program assistance, and event planning can be done at our location or remotely. Field work opportunities of weed control, data gathering, and planting are periodically scheduled; check our <a href="<?php echo $CLIENT_ROOT; ?>news-events.php">News and Events</a> page for details.</p>
+                    <p>If you would like to contribute species lists, photographs, or other information to OregonFlora,  or if you would like to volunteer, contact us at: <?php echo obfuscate("ofpflora@oregonflora.org") ?>.</p>
                 </div>
             </div>
 
