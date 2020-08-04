@@ -1,5 +1,4 @@
 import React from "react";
-import Moment from 'react-moment';
 import {getCommonNameStr, getTaxaPage} from "../common/taxaUtils";
 
 function SearchResult(props) {
@@ -105,7 +104,11 @@ function ExploreSearchContainer(props) {
 		if (props.sortBy === 'taxon') {		
 			return (
 				
-      <SearchResultContainer viewType={ props.viewType }>
+      
+				<div
+					id="search-results"
+					className={ "mt-4 w-100" + (props.viewType === "grid" ? " search-result-grid" : "") }
+				>
 				{ props.searchResults.map((result) =>  {
 						return (
 							<ExploreSearchResult
@@ -122,16 +125,21 @@ function ExploreSearchContainer(props) {
 						)
 					})
 				}
-				</SearchResultContainer>
+				</div>
 			)
 		}else{
 			return (
-				<SearchResultContainer viewType={ props.viewType }>
+				
+				<div
+					id="search-results"
+					className={ "mt-4 w-100" }
+				>
 				{
 						Object.entries(props.searchResults).map(([family, results]) => {
 							return (
-								<div key={ family }>
-									<h4>{ family }</h4>					
+								<div key={ family } className="family-group">
+									<h4>{ family }</h4>	
+									<div className={ (props.viewType === "grid" ? " search-result-grid" : "") } >
 									{ results.map((result) =>  {
 											return (
 												<ExploreSearchResult
@@ -148,11 +156,12 @@ function ExploreSearchContainer(props) {
 											)
 										})
 									}
+									</div>
 								</div>
 							)
 						})
 				}
-				</SearchResultContainer>
+				</div>
 			)
 		}
 	}

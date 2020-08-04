@@ -1,5 +1,4 @@
 "use strict";
-
 import React from "react";
 import ReactDOM from "react-dom";
 
@@ -10,6 +9,11 @@ import {ExploreSearchContainer, SearchResultContainer} from "../common/searchRes
 import {addUrlQueryParam, getUrlQueryParams} from "../common/queryParams.js";
 import {getCommonNameStr, getTaxaPage} from "../common/taxaUtils";
 import PageHeader from "../common/pageHeader.jsx";
+
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { library } from "@fortawesome/fontawesome-svg-core";
+import { faSquare, faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons'
+library.add( faSquare, faChevronDown, faChevronUp);
 
 class ExploreApp extends React.Component {
   constructor(props) {
@@ -23,6 +27,7 @@ class ExploreApp extends React.Component {
       title: '',
       authors: '',
       abstract: '',
+      displayAbstract: 'default',
       //taxa: [],
       isLoading: false,
       filters: {
@@ -37,6 +42,12 @@ class ExploreApp extends React.Component {
       viewType: ("viewType" in queryParams ? queryParams["viewType"] : "list"),
       showTaxaDetail: ("showTaxaDetail" in queryParams ? queryParams["showTaxaDetail"] : 'off'),
       totals: {
+      	families: 0,
+      	genera: 0,
+      	species: 0,
+      	taxa: 0
+      },
+      fixedTotals: {//unchanged by filtering
       	families: 0,
       	genera: 0,
       	species: 0,
@@ -64,6 +75,16 @@ class ExploreApp extends React.Component {
   getPid() {
     return parseInt(this.props.pid);
   }
+  toggleDisplay = () => {
+		let newVal = 'default';
+		if (this.state.displayAbstract == 'default') {
+			newVal = 'expanded';
+		} 
+		this.setState({
+			displayAbstract: newVal
+		});
+
+  }
 
   componentDidMount() {
     // Load search results
@@ -90,6 +111,7 @@ class ExploreApp extends React.Component {
 					//taxa: res.taxa,
 					searchResults: this.sortResults(res.taxa),
 					totals: res.totals,
+					fixedTotals: res.totals,
 					//googleMapUrl: googleMapUrl
 				});
 				const pageTitle = document.getElementsByTagName("title")[0];
@@ -273,7 +295,7 @@ class ExploreApp extends React.Component {
   }
 
   render() {
-//console.log(this.state);
+		let shortAbstract = this.state.abstract.replace(/^(.{330}[^\s]*).*/, "$1") + "...";//wordsafe truncate
     return (
     <div className="wrapper">
 			<div className="page-header">
@@ -284,7 +306,27 @@ class ExploreApp extends React.Component {
           <div className="col-9">
             <h2>{ this.state.title }</h2>
             <p className="authors"><strong>Authors:</strong> <span className="authors-content" dangerouslySetInnerHTML={{__html: this.state.authors}} /></p>
-						<p className="abstract"><strong>Abstract:</strong> <span className="abstract-content" dangerouslySetInnerHTML={{__html: this.state.abstract}} /></p>
+						
+						{this.state.displayAbstract == 'default' &&
+							<div>
+							<p className="abstract"><strong>Abstract:</strong> <span className="abstract-content" dangerouslySetInnerHTML={{__html: shortAbstract}} /></p>
+							<div className="more more-less" onClick={() => this.toggleDisplay()}>
+									<FontAwesomeIcon icon="chevron-down" />Show Abstract
+							</div>
+							</div>
+						}
+						{this.state.displayAbstract == 'expanded' &&
+							<div>
+							<p className="abstract"><strong>Abstract:</strong> <span className="abstract-content" dangerouslySetInnerHTML={{__html: this.state.abstract}} /></p>
+							<div className="less more-less" onClick={() => this.toggleDisplay()}>
+									<FontAwesomeIcon icon="chevron-up" />Hide Abstract
+							</div>
+							</div>
+						
+						}				
+												
+
+						
           </div>
           <div className="col-3">
           	map here
@@ -301,6 +343,7 @@ class ExploreApp extends React.Component {
                 isLoading={ this.state.isLoading }
                 clientRoot={this.props.clientRoot}
                 totals={ this.state.totals }
+                fixedTotals={ this.state.fixedTotals }
                 searchText={ this.state.searchText }
                 searchSuggestionUrl="./rpc/autofillsearch.php"
                 onSearch={ this.onSearch }

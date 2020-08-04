@@ -15,6 +15,11 @@ class SideBar extends React.Component {
   }
 
   render() {
+  
+  	let showFixedTotals = false;
+  	if (this.props.totals['taxa'] < this.props.fixedTotals['taxa']) {
+  		showFixedTotals = true;
+  	}
 
     return (
       <div
@@ -25,20 +30,24 @@ class SideBar extends React.Component {
 				<div className="currently-displayed">
 					<h3>Currently displayed:</h3>
 					<div className="stat">
-						<div className="stat-label">Families:</div><div className="stat-value">{ this.props.totals['families'] }</div>
+						<div className="stat-label">Families:</div>
+						<div className="stat-value">{ this.props.totals['families'] }{ showFixedTotals && <span className="fixed-totals"> (of { this.props.fixedTotals['families']})</span> }</div>
 					</div>
 					<div className="stat">
-						<div className="stat-label">Genera:</div><div className="stat-value">{ this.props.totals['genera'] }</div>
+						<div className="stat-label">Genera:</div>
+						<div className="stat-value">{ this.props.totals['genera'] }{ showFixedTotals && <span className="fixed-totals"> (of { this.props.fixedTotals['genera']})</span> }</div>
 					</div>
 					<div className="stat">
-						<div className="stat-label">Species:</div><div className="stat-value">{ this.props.totals['species'] } (species rank)</div>
+						<div className="stat-label">Species:</div>
+						<div className="stat-value">{ this.props.totals['species'] }{ showFixedTotals && <span className="fixed-totals"> (of { this.props.fixedTotals['species']})</span> } (species rank)</div>
 					</div>
 					<div className="stat">
-						<div className="stat-label">Total Taxa:</div><div className="stat-value">{ this.props.totals['taxa'] } (including subsp. and var.)</div>
+						<div className="stat-label">Total Taxa:</div>
+						<div className="stat-value">{ this.props.totals['taxa'] }{ showFixedTotals && <span className="fixed-totals"> (of { this.props.fixedTotals['taxa']})</span> } (including subsp. and var.)</div>
 					</div>
-					<div className="stat export">
+					{/*<div className="stat export">
 						<div className="stat-label">Export:</div><div className="stat-value">W CSV P</div>
-					</div>
+					</div>*/}
 				</div>
 
 					{
