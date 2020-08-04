@@ -63,7 +63,7 @@ function getSubTaxa($parentTid) {
   return $results;
 }
   
-function taxaManagerToJSON($taxaObj) {
+function taxaManagerToJSON($taxaObj,$recursive = true) {
 
 	$result = TaxaManager::getEmptyTaxon();
   $taxaRepo = SymbosuEntityManager::getEntityManager()->getRepository("Taxa");
@@ -77,7 +77,6 @@ function taxaManagerToJSON($taxaObj) {
 		$result["descriptions"] = $taxaObj->getDescriptions();
 		$result["gardenDescription"] = $taxaObj->getGardenDescription();
 		$result["gardenId"] = $taxaObj->getGardenId();
-		$result["images"] = $taxaObj->getImages();
 		$result["vernacular"] = [
 			"basename" => $taxaObj->getBasename(),
 			"names" => $taxaObj->getVernacularNames()
@@ -89,17 +88,22 @@ function taxaManagerToJSON($taxaObj) {
 		$result["rarePlantFactSheet"] = $taxaObj->getRarePlantFactSheet();
 		$result["characteristics"] = $taxaObj->getCharacteristics();
 		$result["checklists"] = $taxaObj->getChecklists();
-		$spp = $taxaObj->getSpp();  					
-		foreach($spp as $rowArr){
-			$taxaModel = $taxaRepo->find($rowArr['tid']);
-			$taxa = TaxaManager::fromModel($taxaModel);
-			$tj = taxaManagerToJSON($taxa);
-			$result["spp"][] = $tj;
+
+		if ($recursive === true) {
+			$spp = $taxaObj->getSpp();  					
+			foreach($spp as $rowArr){
+				$taxaModel = $taxaRepo->find($rowArr['tid']);
+				$taxa = TaxaManager::fromModel($taxaModel);
+				$tj = taxaManagerToJSON($taxa,false);
+				$result["spp"][] = $tj;
+			}
+			$result["images"] = $taxaObj->getImages();
+			$allImages = $taxaObj->getImagesByBasisOfRecord();
+			$result["imagesBasis"]['HumanObservation'] = (isset($allImages['HumanObservation']) ? $allImages['HumanObservation'] : []);
+			$result["imagesBasis"]['PreservedSpecimen'] = (isset($allImages['PreservedSpecimen']) ? $allImages['PreservedSpecimen'] : []);
+			$result["imagesBasis"]['LivingSpecimen'] = (isset($allImages['LivingSpecimen']) ? $allImages['LivingSpecimen'] : []);
+		
 		}
-		$allImages = $taxaObj->getImagesByBasisOfRecord();
-		$result["imagesBasis"]['HumanObservation'] = (isset($allImages['HumanObservation']) ? $allImages['HumanObservation'] : []);
-		$result["imagesBasis"]['PreservedSpecimen'] = (isset($allImages['PreservedSpecimen']) ? $allImages['PreservedSpecimen'] : []);
-		$result["imagesBasis"]['LivingSpecimen'] = (isset($allImages['LivingSpecimen']) ? $allImages['LivingSpecimen'] : []);
 	}
 	return $result;
 }

@@ -1,5 +1,6 @@
 @import "./mixins.less";
 @import "./search-results.less";
+@import '../../node_modules/react-modal-video/css/modal-video.min.css';
 
 //Variable for project paths since relative paths not allowed
 //@subdir: "/portal";
@@ -35,6 +36,25 @@ a {
   &:active {
     color: @dark-green !important;
   }
+}
+
+.slick-next,
+.slick-prev {
+  height: 40px;
+  width: 40px;
+  top: 45%;
+	color: white;
+	font-size: 40px;
+	font-weight: 900;
+	opacity: .85;
+	transition: opacity 250ms;
+	&:hover {
+		opacity: 1;
+		color: inherit;
+	}
+	&:before {
+		content: '';
+	}
 }
 
 .btn {
@@ -287,6 +307,36 @@ div#info-page {
     line-height: 1.2;
   }
 
+  .figure-inline {
+    max-width: 50%;
+    float: left;
+    margin: 0 30px 20px 0;
+
+    .figure-caption {
+      border-bottom: 1px dashed black;
+      padding-bottom: 10px;
+    }
+
+    img{
+      width: 100%;
+    }
+  }
+
+  .column-right .figure {
+    width: 100%;
+    img{
+      width: 100%;
+    }
+  }
+
+  .two-col-row {
+    padding-bottom: 10px;
+    border-bottom: 1px dashed black;
+  }
+  .two-col-row:last-of-type {
+    border-bottom: none;
+  }
+
   a {
     text-decoration: underline;
   }
@@ -390,11 +440,14 @@ div#info-page {
       }
     }
 
+    .tutorials-text{
+      margin: 10px -15px;
+    }
+
     .tutorials-video-card,
     .tutorials-text-card {
       border-radius: 8px;
       border: 1px dashed black;
-      margin: 15px;
 
       h3 {
         font-size: 32px;
@@ -411,8 +464,11 @@ div#info-page {
       }
     }
 
+    .tutorials-video-card{
+      margin: 15px;
+    }
+
     .tutorials-text-card {
-      margin: 0;
       padding: 15px;
       .figure {
         float: right;
@@ -536,6 +592,9 @@ div#info-page {
 }
 
 #react-home-app {
+	a {
+		color: white !important;
+	}
 	.btn-search {
 		width: 3em;
 		height: 3em;
@@ -549,7 +608,11 @@ div#info-page {
     color: white;
 
     .container.home {
-
+			
+			.modal-video-body {
+				max-width: 1100px;
+			}
+			
       .slick-next,
       .slick-prev {
         &:before {
@@ -791,21 +854,23 @@ div#info-page {
       bottom: 25px;
 
       li {
-        width: 15px;
-        height: 15px;
+        width: 17px;
+        height: 17px;
 
         button {
 
           &:before {
             color: white;
             opacity: 1;
-            font-size: 10px;
+            font-size: 12px;
+	      		text-shadow: 0px 0px 3px black;
           }
         }
 
         &.slick-active {
           button:before {
             color: lightgreen;
+	      		text-shadow: 0px 0px 3px black;
           }
         }
       }

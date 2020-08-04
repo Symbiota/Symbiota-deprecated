@@ -13,8 +13,8 @@ import { Link, DirectLink, Element, Events, animateScroll as scroll, scrollSpy, 
 import { faArrowCircleUp, faArrowCircleDown, faEdit, faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons'
 library.add(faArrowCircleUp, faArrowCircleDown, faEdit, faChevronDown, faChevronUp)
 
-const CLIENT_ROOT = "..";
-
+const RANK_FAMILY = 140;
+const RANK_GENUS = 180;
 
 function stripHtml(str) {
 	/*
@@ -104,7 +104,7 @@ function MoreInfoItem(props) {
 						if (v.url.indexOf('pdf') > 0) {
 							return (
 								<li key={ v.url }>
-									<a href={v.url}><button className="d-block my-2 btn-primary"><img src={ `${CLIENT_ROOT}/images/pdf24.png` } />{v.title}</button></a>
+									<a href={v.url}><button className="d-block my-2 btn-primary"><img src={ `${this.props.clientRoot}/images/pdf24.png` } />{v.title}</button></a>
 								</li>
 							)
 						}else{
@@ -153,18 +153,19 @@ function SingleBorderedItem(props) {
 function RelatedBorderedItem(props) {
 
   let value = '';
+  //console.log(props);
 	value = (
 		<div className="col-sm-12 related py-2 row">
 			<div className="col-sm-8 related-sciname">{ props.value[0] }</div>
 			<div className="col-sm-4 related-nav pr-0">
 				<span className="related-label">Related</span>
 				<span className="related-links"> 
-					{ props.isGenus != true &&
-					<a href={ props.value[1] }>
-						<FontAwesomeIcon icon="arrow-circle-up" />
-					</a>
+					{ props.rankId > RANK_FAMILY &&
+							<a href={ props.value[1] }>
+								<FontAwesomeIcon icon="arrow-circle-up" />
+							</a>
 					}
-					{ props.isGenus != true && props.value[2].length > 0 && 
+					{ props.rankId > RANK_FAMILY && props.value[2].length > 0 && 
 						/* two statements here because I don't want to wrap them in one div */
 						<span className="separator">/</span>
 					}
@@ -207,7 +208,7 @@ function SideBarSection(props) {
             if (key == 'webLinks') {
 	            return <SingleBorderedItem key={ val } keyName={ val } value={ val } />
 	          }else if (key == 'Related') {
-	            return <RelatedBorderedItem key={ key } keyName={ key } value={ val } isGenus={ props.isGenus }/>
+	            return <RelatedBorderedItem key={ key } keyName={ key } value={ val } isGenus={ props.isGenus } rankId={ props.rankId }/>
 	          }else if (key == "More info") {
 	            return <MoreInfoItem key={ key } keyName={ key } value={ val } />
 	          }else if (key == "Synonyms") {
@@ -224,14 +225,18 @@ function SideBarSection(props) {
 
 function SppItem(props) {
 	const item = props.item;
-	const image = item.images[0];
+	let image = null;
+	if (item.images.length > 0) {
+		image = item.images[0];
+	}
 	let sppQueryParams = queryParams;
 	sppQueryParams['taxon'] = item.tid;
 	let sppUrl = window.location.pathname + '?taxon=' + encodeURIComponent(sppQueryParams['taxon']);
 	return (
-		<div key={image.imgid} className="card">
+		<div key={item.tid} className="card">
 			<a href={sppUrl}>
 				<h4>{item.sciname}</h4>
+				{ image &&
 				<div className="img-thumbnail" style={{ position: "relative", width: "100%", height: "7em", borderRadius: "0.25em"}}>														
 					<img
 						className="d-block"
@@ -240,8 +245,9 @@ function SppItem(props) {
 						alt={image.thumbnailurl}
 					/>
 				</div>
+				}
 				<div className="map-preview">
-					<img src={ `${CLIENT_ROOT}/images/map-temp.png` }/>
+					<img src={ `${props.clientRoot}/images/map-temp.png` }/>
 				</div>
 			</a>
 		</div>						
@@ -309,7 +315,6 @@ class TaxaChooser extends React.Component {
   
   render() {
 		const res = this.props.res;
-		console.log(res);
     const pageTitle = document.getElementsByTagName("title")[0];
     pageTitle.innerHTML = `${pageTitle.innerHTML} ${res.sciName}`;
   	return (
@@ -346,7 +351,7 @@ class TaxaChooser extends React.Component {
 									{
 										res.spp.map((spp,index) => {
 											return (
-												<SppItem item={spp} key={spp.tid} />
+												<SppItem item={spp} key={spp.tid} clientRoot={ this.props.clientRoot } />
 											)
 										})
 									}
@@ -356,8 +361,8 @@ class TaxaChooser extends React.Component {
 										
 					</div>
 					<div className="col-sm-4 sidebar">
-						<SideBarSection title="Context" items={ res.highlights } classes="highlights" isGenus={ res.isGenus }/>
-						<SideBarSection title="Web links" items={ res.taxalinks} classes="weblinks"  isGenus={ res.isGenus }/>
+						<SideBarSection title="Context" items={ res.highlights } classes="highlights" isGenus={ res.isGenus } rankId={ res.rankId }/>
+						<SideBarSection title="Web links" items={ res.taxalinks} classes="weblinks"  isGenus={ res.isGenus } rankId={ res.rankId }/>
 					</div>
 				</div>
 			</div>
@@ -437,7 +442,7 @@ class TaxaDetail extends React.Component {
 									{
 										res.spp.map((spp,index) => {
 											return (
-												<SppItem item={spp} key={spp.tid} />
+												<SppItem item={spp} key={spp.tid}  clientRoot={ this.props.clientRoot } />
 											)
 										})
 									}
@@ -521,8 +526,8 @@ class TaxaDetail extends React.Component {
 					
 					</div>
 					<div className="col-sm-4 sidebar">
-						<SideBarSection title="Context" items={ res.highlights } classes="highlights" />
-						<SideBarSection title="Web links" items={ res.taxalinks} classes="weblinks" />
+						<SideBarSection title="Context" items={ res.highlights } classes="highlights" rankId={ res.rankId } />
+						<SideBarSection title="Web links" items={ res.taxalinks} classes="weblinks"  rankId={ res.rankId }/>
 					</div>
 				</div>
 			</div>
@@ -592,7 +597,7 @@ class TaxaApp extends React.Component {
 						moreInfo.push({title: "Rare Plant Fact Sheet", url: res.rarePlantFactSheet});
 					}
 					if (res.gardenId > 0) {
-						let gardenUrl = getGardenTaxaPage(CLIENT_ROOT, res.gardenId);
+						let gardenUrl = getGardenTaxaPage(this.props.clientRoot, res.gardenId);
 						moreInfo.push({title: "Garden Fact Sheet", url: gardenUrl});
 					}
 					
@@ -607,7 +612,7 @@ class TaxaApp extends React.Component {
 							</div>
 						)
 					});
-					let isGenus = (res.rankId <= 180 && res.rankId > 140);
+					let isGenus = (res.rankId <= RANK_GENUS && res.rankId > RANK_FAMILY);
 
           this.setState({
             sciName: res.sciname,
@@ -645,9 +650,9 @@ class TaxaApp extends React.Component {
 	render() {
 		//choose page
 		if (this.state.isGenus) {
-			return <TaxaChooser res = { this.state } />;
+			return <TaxaChooser res = { this.state } clientRoot={ this.props.clientRoot } />;
 		}else{
-			return <TaxaDetail res = { this.state } />;
+			return <TaxaDetail res = { this.state } clientRoot={ this.props.clientRoot } />;
 		}
   }
 }
@@ -656,13 +661,16 @@ TaxaApp.defaultProps = {
   tid: -1,
 };
 
+
+const headerContainer = document.getElementById("react-header");
+const dataProps = JSON.parse(headerContainer.getAttribute("data-props"));
 const domContainer = document.getElementById("react-taxa-app");
 const queryParams = getUrlQueryParams(window.location.search);
 if (queryParams.search) {
   window.location = `./search.php?search=${encodeURIComponent(queryParams.search)}`;
 } else if (queryParams.taxon) {
   ReactDOM.render(
-    <TaxaApp tid={queryParams.taxon }/>,
+    <TaxaApp tid={queryParams.taxon } clientRoot={ dataProps["clientRoot"] }/>,
     domContainer
   );
 } else {

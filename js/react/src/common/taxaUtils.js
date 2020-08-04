@@ -6,8 +6,8 @@ export function getGardenTaxaPage(clientRoot, tid) {
   return `${clientRoot}/taxa/garden.php?taxon=${tid}`;
 }
 
-export function getImageDetailPage(clientRoot, imgid) {
-  return `${clientRoot}/imagelib/imgdetails.php?imgid=${imgid}`;
+export function getImageDetailPage(clientRoot, occid) {
+  return `${clientRoot}/collections/individual/index.php?occid=${occid}`;
 }
 
 export function getCommonNameStr(item) {

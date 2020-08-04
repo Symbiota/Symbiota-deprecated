@@ -13,6 +13,12 @@ import {addUrlQueryParam, getUrlQueryParams} from "../common/queryParams.js";
 import {getCommonNameStr, getGardenTaxaPage} from "../common/taxaUtils";
 
 
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { library } from "@fortawesome/fontawesome-svg-core";
+import { faChevronUp } from '@fortawesome/free-solid-svg-icons'
+library.add( faChevronUp)
+
+
 const CLIENT_ROOT = "..";
 
 const CIDS_PLANT_FEATURE = {
@@ -72,22 +78,24 @@ function getAttribMatrixFromArr(attribArray) {
 
 function filterByWidth(item, minMax) {
 	let ret = false;
-	
-	if (	(item.width[0] <= minMax[0] && minMax[0] <= item.width[1])//user min is between item min and max
-				|| (item.width[0] <= minMax[1] && minMax[1] <= item.width[1])//user max is between item min and max
+
+	if (	( 0 == item.width.length)
+				|| ( minMax[0] <= item.width[0] && item.width[0] <= minMax[1] )//item min is between user min and max
+				|| ( minMax[0] <= item.width[1] && item.width[1] <= minMax[1] )//item max is between user min and max
 				|| minMax[1] === 50 && minMax[1] <= item.width[1]) {//user max == 50 and item max >= 50
 		ret = true;	
 	}
-				
+		
   return ret;
 }
 
 function filterByHeight(item, minMax) {
   let ret = false;
 	
-	if (	(item.height[0] <= minMax[0] && minMax[0] <= item.height[1])
-				|| (item.height[0] <= minMax[1] && minMax[1] <= item.height[1])
-				|| minMax[1] === 50 && minMax[1] <= item.height[1]) {
+	if (	( 0 == item.height.length)
+				|| 	( minMax[0] <= item.height[0] && item.height[0] <= minMax[1] )//item min is between user min and max
+				|| ( minMax[0] <= item.height[1] && item.height[1] <= minMax[1] )//item max is between user min and max
+				|| minMax[1] === 50 && minMax[1] <= item.height[1]) {//user max == 50 and item max >= 50
 		ret = true;	
 	}
 				
@@ -198,6 +206,7 @@ class GardenPageApp extends React.Component {
     this.onViewTypeChanged = this.onViewTypeChanged.bind(this);
     this.onFilterRemoved = this.onFilterRemoved.bind(this);
     this.onCannedFilter = this.onCannedFilter.bind(this);
+    this.clearFilters = this.clearFilters.bind(this);
     this.toggleFeatureCollectionVal = this.toggleFeatureCollectionVal.bind(this);
     this.onPlantFeaturesChanged = this.onPlantFeaturesChanged.bind(this);
     this.onGrowthMaintenanceChanged = this.onGrowthMaintenanceChanged.bind(this);
@@ -225,7 +234,6 @@ class GardenPageApp extends React.Component {
         const allGrowthMaintainence = res[1];
         const allBeyondGarden = res[2];
         const newFilters = Object.assign({}, this.state.filters);
-
         for (let i in allPlantFeatures) {
           let featureKey = allPlantFeatures[i];
           newFilters.plantFeatures[featureKey.title] = [];
@@ -291,9 +299,9 @@ class GardenPageApp extends React.Component {
     }
   }
 
-  onFilterRemoved(key) {
+  onFilterRemoved(key,text) {
+  	const characteristics = ["plantFeatures","growthMaintenance","beyondGarden"];
     // TODO: This is clunky
-
     switch (key) {
       case "sunlight":
         this.onSunlightChanged({ target: { value: ViewOpts.DEFAULT_SUNLIGHT } });
@@ -318,13 +326,21 @@ class GardenPageApp extends React.Component {
       case "checklistId":
         this.onCannedFilter(ViewOpts.DEFAULT_CLID);
         break;
-      case "plantFeatures":
-        break;
-      case "growthMaintenance":
-        break;
-      case "beyondGarden":
-        break;
-      default:
+      default://characteristics: plant features, etc.
+      	let keyArr = key.split(":");
+				switch(keyArr[0]) {
+					case "plantFeatures":
+					  this.onPlantFeaturesChanged(keyArr[1], text);
+					  break;
+					case "growthMaintenance":
+					  this.onGrowthMaintenanceChanged(keyArr[1], text);
+					  break;
+					case "beyondGarden":
+					  this.onBeyondGardenChanged(keyArr[1], text);
+					  break;
+					default: 
+						break;
+				}
         break;
     }
   }
@@ -482,14 +498,26 @@ class GardenPageApp extends React.Component {
     let newQueryStr = addUrlQueryParam("clid", clid);
     /*window.history.replaceState({ query: newQueryStr }, '', window.location.pathname + newQueryStr);*/
   }
-
+	clearFilters() {
+		let filters = {
+			sunlight: ViewOpts.DEFAULT_SUNLIGHT,
+			moisture: ViewOpts.DEFAULT_MOISTURE,
+			height: ViewOpts.DEFAULT_HEIGHT,
+			width: ViewOpts.DEFAULT_WIDTH,
+			searchText: ViewOpts.DEFAULT_SEARCH_TEXT,
+			checklistId: ViewOpts.DEFAULT_CLID,
+			plantFeatures: {},
+			growthMaintenance: {},
+			beyondGarden: {}
+		};
+    this.setState({ filters: filters });
+	}
   render() {
     const checkListMap = {};
     for (let i in this.state.cannedSearches) {
       let search = this.state.cannedSearches[i];
       checkListMap[search.clid] = search.name;
     }
-
     return (
       <div>
         <InfographicDropdown />
@@ -530,12 +558,13 @@ class GardenPageApp extends React.Component {
                 </div>
               </div>
               <div className="row">
-                <div className="col">
+                <div className="col" id="search-top">
                   <ViewOpts
                     viewType={ this.state.viewType }
                     sortBy={ this.state.sortBy }
                     onSortByClicked={ this.onSortByChanged }
                     onViewTypeClicked={ this.onViewTypeChanged }
+                    onReset={ this.clearFilters }
                     onFilterClicked={ this.onFilterRemoved }
                     checklistNames={ checkListMap }
                     filters={
@@ -574,11 +603,20 @@ class GardenPageApp extends React.Component {
                             src={ result.image }
                             commonName={ getCommonNameStr(result) }
                             sciName={ result.sciName ? result.sciName : '' }
+                    				sortBy={ this.state.sortBy }
                           />
                         )
                       })
                     }
                   </SearchResultContainer>
+                  <div className="go-top">
+                    <p>
+                        <a href="#search-top" className="toptext">
+                            TOP<br />
+                            <FontAwesomeIcon icon="chevron-up"/>
+                        </a>
+                    </p>
+                </div>
                 </div>
               </div>
             </div>

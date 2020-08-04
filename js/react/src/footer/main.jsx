@@ -21,9 +21,12 @@ class FooterApp extends React.Component {
             <li className="nav-item">
               <a href={ `${this.props.clientRoot}/sitemap.php` } className="nav-link">Site Map</a>
             </li>
+            {/*
             <li className="nav-item">
               <a href="mailto:info@oregonflora.org" target="_blank" className="nav-link">Site Feedback</a>
             </li>
+            */
+            }
             <li className="nav-item">
               <a href={ `${this.props.clientRoot}/profile/index.php?refurl=${window.location.pathname}` } className="nav-link">Login</a>
             </li>
@@ -49,10 +52,10 @@ class FooterApp extends React.Component {
               </div>
             </div>
             <div className="col">
-              <a href={ "https://bpp.oregonstate.edu/" } target="_blank"><img src={ `${this.props.clientRoot}/images/footer/osu_horizontal_2c_o_over_b.png` } alt="OSU Logo"/></a>
+              <a href={ "https://oregonstate.edu/" } target="_blank"><img src={ `${this.props.clientRoot}/images/footer/osu_horizontal_2c_o_over_b.png` } alt="OSU Logo"/></a>
               <p className="my-2">
                 <strong>OregonFlora</strong><br/>
-                Dept. Botany & Plant Pathology<br/>
+                <a href={ "https://bpp.oregonstate.edu/" } target="_blank">Dept. Botany & Plant Pathology</a><br/>
                 Oregon State University Corvallis, OR 97331-2902<br/>
                 <a href="mailto:info@oregonflora.org" target="_blank">info@oregonflora.org</a>
               </p>
