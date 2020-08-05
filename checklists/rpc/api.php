@@ -76,8 +76,6 @@ function getTaxaCounts($taxa) {
 		if (isset($sciArr[1])) {
 			$species[] = $sciArr[0] . " " . $sciArr[1];
 		}
-		
-	
 	}
 	$families = array_unique($families);
 	$genera = array_unique($genera);

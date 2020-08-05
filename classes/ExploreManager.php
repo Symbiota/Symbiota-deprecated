@@ -99,16 +99,17 @@ class ExploreManager {
   			case 'commonname':
   				$innerJoins[] = array("Taxavernaculars", "v", "WITH", "t.tid = v.tid");
   				$wheres[] = "v.vernacularname LIKE :search";
-  				$params[] = array(":search",$this->searchTerm . '%');
+  				$params[] = array(":search",'%' . $this->searchTerm . '%');
   				break;
   			case 'sciname':
   				$wheres[] = "t.sciname LIKE :search";
-  				$params[] = array(":search",$this->searchTerm . '%');
+  				$params[] = array(":search",'%' . $this->searchTerm . '%');
   				break;
   		}
-  	}
-  	if ($this->searchSynonyms) {
-  	
+			if ($this->searchSynonyms) {
+		
+	
+			}
   	}
   	/*
   	$sqlWhere .= "OR (ts.tidaccepted IN(SELECT ts2.tidaccepted FROM taxa t2 INNER JOIN taxstatus ts2 ON t2.tid = ts2.tid ".
