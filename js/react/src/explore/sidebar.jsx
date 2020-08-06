@@ -64,50 +64,58 @@ class SideBar extends React.Component {
 					/>
 					}
 	
-					<div id="view-opts-search" className="row mx-2 mt-3 px-0 py-2">
-
-						<div className="col text-right p-0 mx-1 mt-auto">
-							<p>Search:</p>
-							<p>Include:</p>
-						</div>
-						<div className="col-auto p-0 mx-1 mt-auto">
-							<p>
-								<input 
-									type="radio"
-									name={ "searchname" }
-									value={ "sciname" }
-									onChange={() => {
-										this.onSearchNameClicked("sciname")
-									}}
-									checked={this.props.searchName === 'sciname'? true: false}
-									
-								/> Scientific Names
-							</p>
-							<p>
-								<input 
-									type="radio"
-									name={ "searchname" }
-									value={ "commonname" }
-									onChange={() => {
-										this.onSearchNameClicked("commonname")
-									}}
-									checked={this.props.searchName === 'commonname'? true: false}
-								/> Common Names
-							</p>
-							<p>
-								<span>
+					<div id="view-opts-search" className="container row">
+						<div className="row">
+							<div className="col text-right">
+								<p>Search:</p>
+							</div>
+							<div className="col-auto">
+								
+								<div className="view-opt-wrapper">
 									<input 
-										type="checkbox" 
-										name={ "searchSynonyms" } 
-										value={ this.props.searchSynonyms == 'on' ? "on" : "off" } 
+										type="radio"
+										name={ "searchname" }
+										value={ "sciname" }
 										onChange={() => {
-											this.onSearchSynonymsClicked(this.props.searchSynonyms == 'on' ? "off" : "on" )
+											this.onSearchNameClicked("sciname")
 										}}
-										checked={this.props.searchSynonyms === 'on'? true: false}
-									/>
-									<label className="ml-2 align-middle" htmlFor={ "searchSynonyms" }>{ "Synonyms" }</label>
-								</span>
-							</p>
+										checked={this.props.searchName === 'sciname'? true: false}
+									
+									/> Scientific Names
+								</div>
+								
+								<div className="view-opt-wrapper">
+									<input 
+										type="radio"
+										name={ "searchname" }
+										value={ "commonname" }
+										onChange={() => {
+											this.onSearchNameClicked("commonname")
+										}}
+										checked={this.props.searchName === 'commonname'? true: false}
+									/> Common Names
+								</div>
+							</div>
+						</div>
+						
+						
+						<div className="row">
+							<div className="col text-right">
+								<p>Include:</p>
+							</div>
+							<div className="col-auto">
+
+										<input 
+											type="checkbox" 
+											name={ "searchSynonyms" } 
+											value={ this.props.searchSynonyms == 'on' ? "on" : "off" } 
+											onChange={() => {
+												this.onSearchSynonymsClicked(this.props.searchSynonyms == 'on' ? "off" : "on" )
+											}}
+											checked={this.props.searchSynonyms === 'on'? true: false}
+										/>
+										<label className="ml-2 align-middle" htmlFor={ "searchSynonyms" }>{ "Synonyms" }</label>
+							</div>
 						</div>
 					</div>
 					
@@ -118,7 +126,7 @@ class SideBar extends React.Component {
 					viewType={ this.props.viewType }
 					sortBy={ this.props.sortBy }
 					showTaxaDetail={ this.props.showTaxaDetail }
-					onSortByClicked={ this.onSortByChanged }
+					onSortByClicked={ this.props.onSortByClicked }
 					onSearchNameClicked={ this.props.onViewTypeClicked }
 					onSearchSynonymsClicked={ this.props.onSearchSynonymsClicked }
 					onViewTypeClicked={ this.props.onViewTypeClicked }

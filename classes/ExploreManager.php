@@ -74,6 +74,11 @@ class ExploreManager {
   }
   
   private function populateTaxa($clid) {
+  
+    $em = SymbosuEntityManager::getEntityManager();
+    $taxa = $em->createQueryBuilder();
+    $qb = $em->createQueryBuilder();
+  
   	$leftJoins = array();
   	$innerJoins = array();
   	$wheres = array(); 
@@ -83,11 +88,11 @@ class ExploreManager {
   	$leftJoins[] = array("Fmchklstprojlink", "cpl", "WITH", "ctl.clid = cpl.clid");
   	
   	$innerJoins[] = array("Fmchklsttaxalink", "ctl", "WITH", "t.tid = ctl.tid");
-  	$innerJoins[] = array("Fmchecklists", "cl", "WITH", "ctl.clid = cl.clid");
+  	#$innerJoins[] = array("Fmchecklists", "cl", "WITH", "ctl.clid = cl.clid");
   	$innerJoins[] = array("Taxstatus", "ts", "WITH", "t.tid = ts.tid");
   	
   	$wheres[] = "ctl.clid = :clid";
-  	$wheres[] = "cl.parentclid = 1";
+  	#$wheres[] = "cl.parentclid = 1";
   	$wheres[] = "cpl.pid = :pid";
   	$wheres[] = "ts.taxauthid = 1";
   	
@@ -98,27 +103,47 @@ class ExploreManager {
   		switch($this->searchName) {
   			case 'commonname':
   				$innerJoins[] = array("Taxavernaculars", "v", "WITH", "t.tid = v.tid");
-  				$wheres[] = "v.vernacularname LIKE :search";
   				$params[] = array(":search",'%' . $this->searchTerm . '%');
+					if ($this->searchSynonyms) {
+						$wheres[] = $qb->expr()->orX(
+								$qb->expr()->like('v.vernacularname',':search'),
+								$qb->expr()->in(
+															"ts.tidaccepted",#array(1,2,3))
+															$em->createQueryBuilder()
+																->select("ts2.tidaccepted")
+																->from("Taxavernaculars","v2")
+																->innerJoin("Taxstatus","ts2","WITH","v2.tid = ts2.tid")
+																->where('v2.vernacularname LIKE :search')
+																->getDQL()
+															)
+						);
+					}else{
+	  				$wheres[] = "v.vernacularname LIKE :search";
+	  			}
   				break;
   			case 'sciname':
-  				$wheres[] = "t.sciname LIKE :search";
   				$params[] = array(":search",'%' . $this->searchTerm . '%');
+  				if ($this->searchSynonyms) {
+						$wheres[] = $qb->expr()->orX(
+								$qb->expr()->like('t.sciname',':search'),
+								$qb->expr()->in(
+															"ts.tidaccepted",#array(1,2,3))
+															$em->createQueryBuilder()
+																->select("ts2.tidaccepted")
+																->from("Taxa","t2")
+																->innerJoin("Taxstatus","ts2","WITH","t2.tid = ts2.tid")
+																->where('t2.sciname LIKE :search')
+																->getDQL()
+															)
+						);
+					}else{
+	  				$wheres[] = "t.sciname LIKE :search";
+	  			}
   				break;
   		}
-			if ($this->searchSynonyms) {
-		
-	
-			}
   	}
-  	/*
-  	$sqlWhere .= "OR (ts.tidaccepted IN(SELECT ts2.tidaccepted FROM taxa t2 INNER JOIN taxstatus ts2 ON t2.tid = ts2.tid ".
-						"WHERE (t2.sciname Like '".$this->taxonFilter."%'))) ";
-  	*/
   
-    $em = SymbosuEntityManager::getEntityManager();
-    $taxa = $em->createQueryBuilder()
-      ->select(["t.tid","COALESCE(ctl.familyoverride,ts.family) AS family"])
+    $taxa->select(["t.tid","COALESCE(ctl.familyoverride,ts.family) AS family"])
       ->from("Taxa", "t"); 
         
 		foreach ($innerJoins as $innerJoin) {
@@ -143,40 +168,7 @@ class ExploreManager {
 		#var_dump($tquery->getSQL());exit;
 		$results = $tquery->execute();
     return $results;
-    /*
-        ->innerJoin("Taxavernaculars", "v", "WITH", "t.tid = v.tid")
-    #->innerJoin("Fmchklsttaxalink", "tl", "WITH", "t.tid = tl.tid")
-		#->innerJoin("Fmchecklists", "cl", "WITH", "tl.clid = cl.clid")
-   # ->andWhere("cl.parentclid = :clid")
-    #->andWhere("tl.clid = :clid")
-    #->orWhere("t.sciname LIKE :search")
-    ->andWhere("v.vernacularname LIKE :search")
-    #->groupBy("t.tid")
-    ->setParameter("search", $searchTerm . '%')
-    #->setParameter(":clid",$clid)
-    ->getQuery()
-    ->getResult();
- /*
- ORIG   
-        $taxa = $em->createQueryBuilder()
-      ->select(["t.tid","COALESCE(ctl.familyoverride,ts.family) AS family"])
-      ->from("Taxa", "t")
-      ->innerJoin("Fmchklsttaxalink", "ctl", "WITH", "t.tid = ctl.tid")
-      ->innerJoin("Taxstatus", "ts", "WITH", "t.tid = ts.tid")
-      ->where("ctl.clid = :clid")
-      ->andWhere("ts.taxauthid = 1")
-			->orderBy("t.sciname")
-      ->setParameter("clid", $clid)
-			->distinct()
-      ->getQuery()
-      ->execute();
-    return $taxa;
-    */
-    
-    
-    
-    
-    
+
   }
   private function populateVouchers($tid) {
     $em = SymbosuEntityManager::getEntityManager();

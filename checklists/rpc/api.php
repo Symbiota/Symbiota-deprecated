@@ -26,8 +26,8 @@ function managerToJSON($checklistObj) {
   if ($checklistObj !== null) {
     $result["clid"] = $checklistObj->getClid();
     $result["title"] = $checklistObj->getTitle();
-    $result["authors"] = $checklistObj->getAuthors();
-    $result["abstract"] = $checklistObj->getAbstract();
+    $result["authors"] = ($checklistObj->getAuthors()? $checklistObj->getAuthors() :'') ;
+    $result["abstract"] = ($checklistObj->getAbstract()? $checklistObj->getAbstract() :'') ;
     $taxa = $checklistObj->getTaxa(); 
     if (sizeof($taxa)) {
 			$taxaRepo = SymbosuEntityManager::getEntityManager()->getRepository("Taxa");					
@@ -54,9 +54,9 @@ function managerToJSON($checklistObj) {
 				$result["taxa"][] = $tjresult;
 			}
 			
-			$result['totals'] = getTaxaCounts($result['taxa']);
 			
 		}
+		$result['totals'] = getTaxaCounts($result['taxa']);
   }
   return $result;
 }

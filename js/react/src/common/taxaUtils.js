@@ -11,6 +11,7 @@ export function getImageDetailPage(clientRoot, occid) {
 }
 
 export function getCommonNameStr(item) {
+//console.log(item);
   const basename = item.vernacular.basename;
   const names = item.vernacular.names;
 

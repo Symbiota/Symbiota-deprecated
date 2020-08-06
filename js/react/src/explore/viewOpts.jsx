@@ -15,46 +15,35 @@ class ViewOpts extends React.Component {
 
   render() {
     return (
-      <div id="view-opts" className="row mx-2 mt-3 px-0 py-2">
+      <div id="view-opts" className="row">
 
-        <div className="col text-right p-0 mx-1 mt-auto">
-          <p>View as:</p>
-          <p>Sort by name:</p>
+        <div className="col text-right">
+          <p>Show results:</p>
         </div>
-        <div className="col-auto p-0 mx-1 mt-auto">
-          <p>
-            <IconButton
-              title="Grid"
-              icon={`${CLIENT_ROOT}/images/garden/gridViewIcon.png`}
-              onClick={() => {
-                this.onViewTypeClicked("grid")
-              }}
-              isSelected={this.props.viewType === "grid"}
-            />
-            <IconButton
-              title="List"
-              icon={`${CLIENT_ROOT}/images/garden/listViewIcon.png`}
-              onClick={() => {
-                this.onViewTypeClicked("list")
-              }}
-              isSelected={this.props.viewType === "list"}
-            />
-          </p>
-          <p>
-						<span>
-							<input 
-								type="checkbox" 
-								name={ "showTaxaDetail" } 
-								value={ this.props.showTaxaDetail == 'on' ? "on" : "off" } 
-								onChange={() => {
-									this.onTaxaDetailClicked(this.props.showTaxaDetail == 'on' ? "off" : "on" )
-								}}
-							/>
-							<label className="ml-2 align-middle" htmlFor={ "showTaxaDetail" }>{ "Vouchers & taxon authors" }</label>
-						</span>
-          </p>
-          <p>
-          	<span>
+        <div className="col-auto ">
+
+					<div className="view-opt-wrapper">
+					<input 
+						type="radio"
+						name="viewType"
+						onChange={() => {
+							this.onViewTypeClicked("grid")
+						}}
+						checked={this.props.viewType === "grid"}
+					/> <label className="" htmlFor={ "viewType" }>As images</label>
+					</div>
+					<div className="view-type-wrapper">
+					<input 
+						type="radio"
+						name="viewType"
+						onChange={() => {
+							this.onViewTypeClicked("list")
+						}}
+						checked={this.props.viewType === "list"}
+					/> <label className="" htmlFor={ "viewType" }>As list</label>
+					</div>
+
+					<div className="view-opt-wrapper">
 							<input 
 								type="checkbox" 
 								name={ "sortBy" } 
@@ -63,9 +52,21 @@ class ViewOpts extends React.Component {
 									this.onSortByClicked(this.props.sortBy == 'taxon' ? "family" : "taxon" )
 								}}
 							/>
-							<label className="ml-2 align-middle" htmlFor={ "sortBy" }>{ "Alphabetical by taxon" }</label>
-						</span>
-          </p>
+							<label className="" htmlFor={ "sortBy" }>{ "Alphabetical by taxon" }</label>
+          </div>
+					<div className="view-opt-wrapper">
+							<input 
+								type="checkbox" 
+								name={ "showTaxaDetail" } 
+								value={ this.props.showTaxaDetail == 'on' ? "on" : "off" } 
+								onChange={() => {
+									this.onTaxaDetailClicked(this.props.showTaxaDetail == 'on' ? "off" : "on" )
+								}}
+								disabled={ this.props.viewType === 'grid'? true : false }
+								checked={ this.props.showTaxaDetail == 'on' }
+							/>
+							<label className="" htmlFor={ "showTaxaDetail" }>{ "Vouchers & taxon authors" }</label>
+          </div>
         </div>
       </div>
     );

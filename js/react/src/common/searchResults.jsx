@@ -1,6 +1,11 @@
 import React from "react";
 import {getCommonNameStr, getTaxaPage} from "../common/taxaUtils";
 
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { library } from "@fortawesome/fontawesome-svg-core";
+import { faSquare } from '@fortawesome/free-solid-svg-icons'
+library.add( faSquare );
+
 function SearchResult(props) {
   const useGrid = props.viewType === "grid";
   let nameFirst = '';
@@ -62,16 +67,24 @@ function ExploreSearchResult(props) {
 		<a href={props.href} className="text-decoration-none" style={{ maxWidth: "185px" }} target="_blank">
 			<div className={ "card search-result " + (useGrid ? "grid-result" : "list-result") }>
 					<div className={useGrid ? "" : "card-body"}>
-						<img
-							className={useGrid ? "card-img-top grid-image" : "d-inline-block mr-1 list-image"}
-							alt={props.title}
-							src={props.src}
-						/>
+						{useGrid &&
+							<img
+								className={useGrid ? "card-img-top grid-image" : "d-inline-block mr-1 list-image"}
+								alt={props.title}
+								src={props.src}
+							/>
+						}
+						{!useGrid && 
+							<FontAwesomeIcon icon="square" />
+						}
 						<div className={(useGrid ? "card-body" : "d-inline py-1") + " px-0"} style={{overflow: "hidden"}}>
 							<div className={"card-text" + (useGrid ? "" : " d-inline")}>
 								<span className="font-italic sci-name">{props.sciName}</span>
-								<span className="author"> ({props.author})</span>
-								{useGrid ? <br/> : <span dangerouslySetInnerHTML={{__html: ' &mdash; '}} /> }
+								{
+									props.showTaxaDetail === 'on' &&
+									<span className="author"> ({props.author})</span>
+								}
+								{ !useGrid && props.commonName.length > 0? <span dangerouslySetInnerHTML={{__html: ' &mdash; '}} /> :''}
 								<span className="text-lowercase common-name">{props.commonName}</span>
 								{
 									props.showTaxaDetail === 'on' && props.vouchers.length && 
@@ -109,7 +122,8 @@ function ExploreSearchContainer(props) {
 					id="search-results"
 					className={ "mt-4 w-100" + (props.viewType === "grid" ? " search-result-grid" : "") }
 				>
-				{ props.searchResults.map((result) =>  {
+				{ props.searchResults.taxonSort.map((result) =>  {
+						//console.log(result);
 						return (
 							<ExploreSearchResult
 								key={ result.tid }
@@ -135,7 +149,7 @@ function ExploreSearchContainer(props) {
 					className={ "mt-4 w-100" }
 				>
 				{
-						Object.entries(props.searchResults).map(([family, results]) => {
+						Object.entries(props.searchResults.familySort).map(([family, results]) => {
 							return (
 								<div key={ family } className="family-group">
 									<h4>{ family }</h4>	

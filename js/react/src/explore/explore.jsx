@@ -7,13 +7,13 @@ import ViewOpts from "./viewOpts.jsx";
 import httpGet from "../common/httpGet.js";
 import {ExploreSearchContainer, SearchResultContainer} from "../common/searchResults.jsx";
 import {addUrlQueryParam, getUrlQueryParams} from "../common/queryParams.js";
-import {getCommonNameStr, getTaxaPage} from "../common/taxaUtils";
+import {getCommonNameStr, getTaxaPage, getIdentifyPage} from "../common/taxaUtils";
 import PageHeader from "../common/pageHeader.jsx";
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { library } from "@fortawesome/fontawesome-svg-core";
-import { faSquare, faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons'
-library.add( faSquare, faChevronDown, faChevronUp);
+import {faChevronDown, faChevronUp, faListUl, faSearchPlus } from '@fortawesome/free-solid-svg-icons'
+library.add( faChevronDown, faChevronUp, faListUl, faSearchPlus );
 
 class ExploreApp extends React.Component {
   constructor(props) {
@@ -35,7 +35,7 @@ class ExploreApp extends React.Component {
         //checklistId: ("clid" in queryParams ? parseInt(queryParams["clid"]) : ViewOpts.DEFAULT_CLID),
       },
       searchText: ("search" in queryParams ? queryParams["search"] : ViewOpts.DEFAULT_SEARCH_TEXT),
-      searchResults: [],
+      searchResults: {"familySort":{},"taxonSort":[]},
       searchName: ("searchName" in queryParams ? queryParams["searchName"] : "sciname"),
       searchSynonyms: ("searchSynonyms" in queryParams ? queryParams["searchSynonyms"] : 'on'),
       sortBy: ("sortBy" in queryParams ? queryParams["sortBy"] : "family"),
@@ -145,11 +145,11 @@ class ExploreApp extends React.Component {
   // On search start
   onSearch(searchObj) {
     const newQueryStr = addUrlQueryParam("search", searchObj.text);
-    window.history.replaceState(
+    /*window.history.replaceState(
       { query: newQueryStr },
       '',
       window.location.pathname + newQueryStr
-    );
+    );*/
 
     this.setState({
       isLoading: true,
@@ -160,6 +160,7 @@ class ExploreApp extends React.Component {
     url += '&name=' + this.state.searchName;
     url += '&clid=' + this.state.clid;
     url += '&pid=' + this.state.pid;
+    url += '&synonyms=' + this.state.searchSynonyms;
     //console.log(url);
     httpGet(url)
       .then((res) => {
@@ -185,64 +186,35 @@ class ExploreApp extends React.Component {
   onSearchResults(results) {
     let newResults;
     newResults = this.sortResults(results);
-    /*
-    if (this.state.sortBy === "sciName") {
-      newResults = results.sort((a, b) => { return a["sciName"] > b["sciName"] ? 1 : -1 });
-    } else {
-      newResults = results.sort((a, b) => {
-        return (
-          getCommonNameStr(a).toLowerCase() >
-          getCommonNameStr(b).toLowerCase() ? 1 : -1
-        );
-      });
-    }
-*/
     this.setState({ searchResults: newResults });
   }
   
-  sortResults(results) {
+  sortResults(results) {//should receive taxa from API
   	let newResults = {};
-    if (this.state.sortBy === 'family') {
+  	//console.log(results);
 
-			Object.entries(results).map(([key, result]) => {
-				if (!newResults[result.family]) {
-					newResults[result.family] = [];
-				}
-				newResults[result.family].push(result);
-			})
-    	//newResults = results;
-    }else{
-    	newResults = results;
-    }
+		let familySort = {};
+		let tmp = {};
+		Object.entries(results).map(([key, result]) => {
+			if (!tmp[result.family]) {
+				tmp[result.family] = [];
+			}
+			tmp[result.family].push(result);
+		})
+		//sort family alpha
+		Object.keys(tmp).sort().forEach(function(key) {
+			familySort[key] = tmp[key];
+		});
+
+		let taxonSort = results;
+    
+    newResults = {"familySort": familySort, "taxonSort": taxonSort};
+    
   	return newResults;
   }
 
-  onSortByChanged(type) {
-    let newResults;
-    if (type === "sciName") {
-      newResults = this.state.searchResults.sort((a, b) => { return a["sciName"] > b["sciName"] ? 1 : -1 });
-    } else {
-      newResults = this.state.searchResults.sort((a, b) => {
-        return (
-          getCommonNameStr(a).toLowerCase() >
-          getCommonNameStr(b).toLowerCase() ? 1 : -1
-        );
-      });
-    }
-
-    this.setState({
-      sortBy: type,
-      searchResults: newResults
-    });
-
-    let newType;
-    if (type === "taxon") {
-      newType = type;
-    } else {
-      newType = '';
-    }
-    let newQueryStr = addUrlQueryParam("sortBy", newType);
-    window.history.replaceState({query: newQueryStr}, '', window.location.pathname + newQueryStr);
+  onSortByChanged(sortBy) {
+    this.setState({ sortBy: sortBy });
   }
   onSearchNameChanged(name) {
     this.setState({ searchName: name });
@@ -254,7 +226,7 @@ class ExploreApp extends React.Component {
       newName = 'sciname';
     }
     let newQueryStr = addUrlQueryParam("searchName", newName);
-    window.history.replaceState({ query: newQueryStr }, '', window.location.pathname + newQueryStr);
+    /*window.history.replaceState({ query: newQueryStr }, '', window.location.pathname + newQueryStr);*/
   }
   onSearchSynonymsChanged(synonyms) {
     this.setState({ searchSynonyms: synonyms });
@@ -266,19 +238,24 @@ class ExploreApp extends React.Component {
       newSynonyms = 'on';
     }
     let newQueryStr = addUrlQueryParam("searchSynonyms", newSynonyms);
-    window.history.replaceState({ query: newQueryStr }, '', window.location.pathname + newQueryStr);
+    /*window.history.replaceState({ query: newQueryStr }, '', window.location.pathname + newQueryStr);*/
   }
   onViewTypeChanged(type) {
     this.setState({ viewType: type });
 
     let newType;
-    if (type === "list") {
+    if (type) {
       newType = type;
     } else {
-      newType = '';
+      newType = 'list';
     }
+    
+    if (newType === 'grid') {
+  		this.setState({showTaxaDetail: "off"});
+	  }
+    
     let newQueryStr = addUrlQueryParam("viewType", newType);
-    window.history.replaceState({ query: newQueryStr }, '', window.location.pathname + newQueryStr);
+    /*window.history.replaceState({ query: newQueryStr }, '', window.location.pathname + newQueryStr);*/
   }
   onTaxaDetailChanged(taxaDetail) {
   	this.setState({showTaxaDetail: taxaDetail});
@@ -291,11 +268,14 @@ class ExploreApp extends React.Component {
   	}
   	
   	let newQueryStr = addUrlQueryParam("taxaDetail",newVal);
-    window.history.replaceState({ query: newQueryStr }, '', window.location.pathname + newQueryStr);
+    /*window.history.replaceState({ query: newQueryStr }, '', window.location.pathname + newQueryStr);*/
   }
 
   render() {
-		let shortAbstract = this.state.abstract.replace(/^(.{330}[^\s]*).*/, "$1") + "...";//wordsafe truncate
+		let shortAbstract = '';
+		if (this.state.abstract.length > 0) {
+			shortAbstract = this.state.abstract.replace(/^(.{330}[^\s]*).*/, "$1") + "...";//wordsafe truncate
+		}
     return (
     <div className="wrapper">
 			<div className="page-header">
@@ -307,7 +287,7 @@ class ExploreApp extends React.Component {
             <h2>{ this.state.title }</h2>
             <p className="authors"><strong>Authors:</strong> <span className="authors-content" dangerouslySetInnerHTML={{__html: this.state.authors}} /></p>
 						
-						{this.state.displayAbstract == 'default' &&
+						{this.state.abstract.length > 0 && this.state.displayAbstract == 'default' &&
 							<div>
 							<p className="abstract"><strong>Abstract:</strong> <span className="abstract-content" dangerouslySetInnerHTML={{__html: shortAbstract}} /></p>
 							<div className="more more-less" onClick={() => this.toggleDisplay()}>
@@ -315,7 +295,7 @@ class ExploreApp extends React.Component {
 							</div>
 							</div>
 						}
-						{this.state.displayAbstract == 'expanded' &&
+						{this.state.abstract.length > 0 && this.state.displayAbstract == 'expanded' &&
 							<div>
 							<p className="abstract"><strong>Abstract:</strong> <span className="abstract-content" dangerouslySetInnerHTML={{__html: this.state.abstract}} /></p>
 							<div className="less more-less" onClick={() => this.toggleDisplay()}>
@@ -332,62 +312,69 @@ class ExploreApp extends React.Component {
           	map here
           </div>
         </div>
- 					<div className="row">
-            <div className="col-auto sidebar-wrapper">
-            {
-            
-              <SideBar
-                //ref={ this.sideBarRef }
-                clid={ this.state.clid }
-                style={{ background: "#DFEFD3" }}
-                isLoading={ this.state.isLoading }
-                clientRoot={this.props.clientRoot}
-                totals={ this.state.totals }
-                fixedTotals={ this.state.fixedTotals }
-                searchText={ this.state.searchText }
-                searchSuggestionUrl="./rpc/autofillsearch.php"
-                onSearch={ this.onSearch }
-                onSearchTextChanged={ this.onSearchTextChanged }
-                searchName={ this.state.searchName }
-                searchSynonyms={ this.state.searchSynonyms }
-                viewType={ this.state.viewType }
-								sortBy={ this.state.sortBy }
-								showTaxaDetail={ this.state.showTaxaDetail }
-                onSearchSynonymsClicked={ this.onSearchSynonymsChanged }
-                onSearchNameClicked={ this.onSearchNameChanged }
-								onSortByClicked={ this.onSortByChanged }
-								onViewTypeClicked={ this.onViewTypeChanged }
-								onTaxaDetailClicked={ this.onTaxaDetailChanged }
-								onFilterClicked={ this.onFilterRemoved }
-								filters={
-									Object.keys(this.state.filters).map((filterKey) => {
-										return { key: filterKey, val: this.state.filters[filterKey] }
-									})
-								}
-              />
-              
-            }
-            </div>
-            <div className="col results-wrapper">
-              <div className="row">
-                <div className="col">
-
-          				<h3 className="font-weight-bold">Your search results:</h3>
-                    
-										<ExploreSearchContainer
-											searchResults={ this.state.searchResults }
-											viewType={ this.state.viewType }
-											sortBy={ this.state.sortBy }
-											showTaxaDetail={ this.state.showTaxaDetail }
-											clientRoot={ this.props.clientRoot }
-										/>
-											
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+				<div className="row explore-main">
+					<hr/>
+					<div className="col-auto sidebar-wrapper">
+					{
+					
+						<SideBar
+							//ref={ this.sideBarRef }
+							clid={ this.state.clid }
+							style={{ background: "#DFEFD3" }}
+							isLoading={ this.state.isLoading }
+							clientRoot={this.props.clientRoot}
+							totals={ this.state.totals }
+							fixedTotals={ this.state.fixedTotals }
+							searchText={ this.state.searchText }
+							searchSuggestionUrl="./rpc/autofillsearch.php"
+							onSearch={ this.onSearch }
+							onSearchTextChanged={ this.onSearchTextChanged }
+							searchName={ this.state.searchName }
+							searchSynonyms={ this.state.searchSynonyms }
+							viewType={ this.state.viewType }
+							sortBy={ this.state.sortBy }
+							showTaxaDetail={ this.state.showTaxaDetail }
+							onSearchSynonymsClicked={ this.onSearchSynonymsChanged }
+							onSearchNameClicked={ this.onSearchNameChanged }
+							onSortByClicked={ this.onSortByChanged }
+							onViewTypeClicked={ this.onViewTypeChanged }
+							onTaxaDetailClicked={ this.onTaxaDetailChanged }
+							onFilterClicked={ this.onFilterRemoved }
+							filters={
+								Object.keys(this.state.filters).map((filterKey) => {
+									return { key: filterKey, val: this.state.filters[filterKey] }
+								})
+							}
+						/>
+						
+					}
+					</div>
+					<div className="col results-wrapper">
+						<div className="row">
+							<div className="col">
+								<div className="explore-header inventory-header">
+									<div className="current-wrapper">
+										<div className="btn btn-primary current-button" role="button"><FontAwesomeIcon icon="list-ul" /> Explore</div>
+									</div>
+									<div className="alt-wrapper">
+										<div>Switch to</div>
+										<a href={getIdentifyPage(this.props.clientRoot,this.getClid(),this.getPid())}><div className="btn btn-primary alt-button" role="button"><FontAwesomeIcon icon="search-plus" /> Identify</div></a>
+									</div>
+								</div>
+									<ExploreSearchContainer
+										searchResults={ this.state.searchResults }
+										viewType={ this.state.viewType }
+										sortBy={ this.state.sortBy }
+										showTaxaDetail={ this.state.showTaxaDetail }
+										clientRoot={ this.props.clientRoot }
+									/>
+										
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
     );
   }
 }
