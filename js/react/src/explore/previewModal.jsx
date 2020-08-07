@@ -12,9 +12,10 @@ import { library } from "@fortawesome/fontawesome-svg-core";
 import {faChevronDown, faChevronUp, faListUl, faSearchPlus } from '@fortawesome/free-solid-svg-icons'
 library.add( faChevronDown, faChevronUp, faListUl, faSearchPlus );
 */
-class ExplorePreviewApp extends React.Component {
+class ExplorePreviewModal extends React.Component {
   constructor(props) {
     super(props);
+    const queryParams = getUrlQueryParams(window.location.search);
 
     // TODO: searchText is both a core state value and a state.filters value; How can we make the filtering system more efficient?
     this.state = {
@@ -147,20 +148,28 @@ class ExplorePreviewApp extends React.Component {
     );
   }
 }
-ExploreApp.defaultProps = {
+ExplorePreviewModal.defaultProps = {
   clid: -1,
   pid: -1,
+  clientRoot: ''
 };
 
+
+//export default ExplorePreviewModal;
+
+/*
 const headerContainer = document.getElementById("react-header");
 const dataProps = JSON.parse(headerContainer.getAttribute("data-props"));
 const domContainer = document.getElementById("react-explore-app");
 const queryParams = getUrlQueryParams(window.location.search);
 if (queryParams.cl) {
   ReactDOM.render(
-    <ExplorePreviewApp clid={queryParams.cl } pid={queryParams.pid } clientRoot={ dataProps["clientRoot"] }/>,
+    <ExplorePreviewModal clid={queryParams.cl } pid={queryParams.pid } clientRoot={ dataProps["clientRoot"] }/>,
     domContainer
   );
 } else {
   window.location = "/projects/";
 }
+*/
+
+
