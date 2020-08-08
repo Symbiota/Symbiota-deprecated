@@ -4,6 +4,7 @@ import httpGet from "../common/httpGet.js";
 import { getUrlQueryParams } from "../common/queryParams.js";
 import GardenCarousel from "../common/gardenCarousel.jsx";
 import ImageModal from "../common/modal.jsx";
+import ExplorePreviewModal from "../explore/previewModal.jsx";
 import {getTaxaPage} from "../common/taxaUtils";
 
 function showItem(item) {
@@ -64,7 +65,10 @@ class TaxaApp extends React.Component {
       highlights: {},
       plantFacts: {},
       growthMaintenance: {},
-      isOpen: false,
+      isOpen: false,//imagemodal
+      isPreviewOpen: false,//explorePreviewModal
+      currClid: -1,//explorePreviewModal
+      currPid: 3,//explorePreviewModal
       tid: null,
       currImage: 0,
       checklists: [],
@@ -82,6 +86,14 @@ class TaxaApp extends React.Component {
 		});
     this.setState({
       isOpen: !this.state.isOpen
+    });
+  }
+	togglePreviewModal = (_currClid) => {
+		this.setState({
+			currClid: _currClid	
+		});
+    this.setState({
+      isPreviewOpen: !this.state.isPreviewOpen
     });
   }
   componentDidMount() {
@@ -275,6 +287,7 @@ class TaxaApp extends React.Component {
 																	style={{width: "100%", height: "100%", objectFit: "cover"}}
 																	src={checklist.iconUrl}
 																	alt={checklist.description}
+																	onClick={() => this.togglePreviewModal(checklist.clid)}
 																	//onMouseOver={ this.onMouseOver }
 																/>
 																{/*
@@ -302,10 +315,18 @@ class TaxaApp extends React.Component {
 											)
 										})
 									}
-									
 									</div>
-					        <span className="row mt-2 dashed-border"/>
+					        <span className="row mt-2 dashed-border"/>						
+									<ExplorePreviewModal 
+										key={this.state.currClid}
+										show={this.state.isPreviewOpen}
+										onTogglePreviewClick={this.togglePreviewModal}
+										clid={this.state.currClid}
+										pid={this.state.currPid}
+										clientRoot={this.props.clientRoot}
+									></ExplorePreviewModal>
 								</div>
+
 							}
 
             <SideBarSection title="Plant Facts" items={ this.state.plantFacts } />

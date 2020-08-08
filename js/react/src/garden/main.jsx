@@ -19,8 +19,6 @@ import { faChevronUp } from '@fortawesome/free-solid-svg-icons'
 library.add( faChevronUp)
 
 
-const CLIENT_ROOT = "..";
-
 const CIDS_PLANT_FEATURE = {
   "flower_color": 612,
   "bloom_months": 165,
@@ -216,7 +214,7 @@ class GardenPageApp extends React.Component {
 
   componentDidMount() {
     // Load canned searches
-    httpGet(`${CLIENT_ROOT}/garden/rpc/api.php?canned=true`)
+    httpGet(`${this.props.clientRoot}/garden/rpc/api.php?canned=true`)
       .then((res) => {
         this.setState({ cannedSearches: JSON.parse(res) });
       });
@@ -363,7 +361,7 @@ class GardenPageApp extends React.Component {
       searchText: searchObj.text,
       filters: Object.assign({}, this.state.filters, { searchText: searchObj.text })
     });
-    httpGet(`${CLIENT_ROOT}/garden/rpc/api.php?search=${searchObj.text}`)
+    httpGet(`${this.props.clientRoot}/garden/rpc/api.php?search=${searchObj.text}`)
       .then((res) => {
         this.onSearchResults(JSON.parse(res));
       })
@@ -554,6 +552,7 @@ class GardenPageApp extends React.Component {
                   <CannedSearchContainer
                     searches={ this.state.cannedSearches }
                     onFilter={ this.onCannedFilter }
+										clientRoot={this.props.clientRoot}
                   />
                 </div>
               </div>
@@ -599,7 +598,7 @@ class GardenPageApp extends React.Component {
                             key={ result.tid }
                             viewType={ this.state.viewType }
                             display={ showResult }
-                            href={ getGardenTaxaPage(CLIENT_ROOT, result.tid) }
+                            href={ getGardenTaxaPage(this.props.clientRoot, result.tid) }
                             src={ result.image }
                             commonName={ getCommonNameStr(result) }
                             sciName={ result.sciName ? result.sciName : '' }
@@ -627,5 +626,7 @@ class GardenPageApp extends React.Component {
   }
 }
 
+const headerContainer = document.getElementById("react-header");
+const dataProps = JSON.parse(headerContainer.getAttribute("data-props"));
 const domContainer = document.getElementById("react-garden");
-ReactDOM.render(<GardenPageApp />, domContainer);
+ReactDOM.render(<GardenPageApp  clientRoot={ dataProps["clientRoot"] }/>, domContainer);

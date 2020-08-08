@@ -39,14 +39,21 @@ class ExploreManager {
   public function getClid() {
     return $this->model->getClid();
   }
+  #these next two seem wrong, but the function names make more sense than the model/DB names
   public function getTitle() {
     return $this->model->getName();
+  }
+  public function getIntro() {
+    return $this->model->getTitle();
   }
   public function getAbstract() {
     return $this->model->getAbstract();
   }
   public function getAuthors() {
     return $this->model->getAuthors();
+  }
+  public function getIconUrl() {
+    return $this->model->getIconurl();
   }
   public function getTaxa() {
   	$this->taxa = $this->populateTaxa($this->getClid());

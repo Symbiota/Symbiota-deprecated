@@ -1,7 +1,7 @@
 import React from "react";
 import GardenCarousel from "../common/gardenCarousel.jsx";
-
 import HelpButton from "../common/helpButton.jsx";
+import ExplorePreviewModal from "../explore/previewModal.jsx";
 
 const CLIENT_ROOT = "..";
 
@@ -71,7 +71,7 @@ class CannedSearchResult extends React.Component {
           <button className="w-100 px-3 my-1 btn btn-primary" onClick={this.props.onFilter}>
             Filter for these
           </button>
-          <button className="w-100 px-3 my-1 btn btn-secondary" onClick={ () => { window.open(this.props.href) } }>
+          <button className="w-100 px-3 my-1 btn btn-secondary" onClick={() => this.props.onTogglePreviewClick(this.props.clid)}>
             Learn more
           </button>
         </div>
@@ -83,8 +83,21 @@ class CannedSearchResult extends React.Component {
 class CannedSearchContainer extends React.Component {
   constructor(props) {
     super(props);
+    this.state = {
+      isPreviewOpen: false,//explorePreviewModal
+      currClid: -1,//explorePreviewModal
+      currPid: 3,//explorePreviewModal
+    };
   }
 
+	togglePreviewModal = (_currClid) => {
+		this.setState({
+			currClid: _currClid	
+		});
+    this.setState({
+      isPreviewOpen: !this.state.isPreviewOpen
+    });
+  }
   render() {
     return (
       <div id="canned-searches" className="row mt-1 p-3 mx-0 rounded-border" style={{ background: "#DFEFD3" }}>
@@ -108,17 +121,27 @@ class CannedSearchContainer extends React.Component {
                       return (
                         <div key={searchResult.clid} className="p-1">
                           <CannedSearchResult
+                          	clid={searchResult.clid } 
                             title={searchResult.name}
                             description={ searchResult.description }
                             src={ `${searchResult.iconUrl}` }
                             href={getChecklistPage(searchResult.clid)}
                             onFilter={() => { this.props.onFilter(searchResult.clid); }}
+														onTogglePreviewClick={this.togglePreviewModal}
                           />
                         </div>
                       );
                     })
                   }
-                </GardenCarousel>
+                </GardenCarousel>					
+								<ExplorePreviewModal 
+									key={this.state.currClid}
+									show={this.state.isPreviewOpen}
+									onTogglePreviewClick={this.togglePreviewModal}
+									clid={this.state.currClid}
+									pid={this.state.currPid}
+									clientRoot={this.props.clientRoot}
+								></ExplorePreviewModal>
               </div>
             </div>
           </div>

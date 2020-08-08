@@ -11,10 +11,10 @@ function getEmpty() {
   return [
     "clid" => -1,
     "title" => '',
+    "intro" => '',
+    "iconUrl" => '',
     "authors" => '',
     "abstract" => '',
-    #"fullDescription" => '',
-    #"isPublic" => -1,
     "taxa" => [],
   ];
 }
@@ -26,6 +26,8 @@ function managerToJSON($checklistObj) {
   if ($checklistObj !== null) {
     $result["clid"] = $checklistObj->getClid();
     $result["title"] = $checklistObj->getTitle();
+    $result["intro"] = ($checklistObj->getIntro()? $checklistObj->getIntro() :'') ;
+    $result["iconUrl"] = ($checklistObj->getIconUrl()? $checklistObj->getIconUrl() :'') ;
     $result["authors"] = ($checklistObj->getAuthors()? $checklistObj->getAuthors() :'') ;
     $result["abstract"] = ($checklistObj->getAbstract()? $checklistObj->getAbstract() :'') ;
     $taxa = $checklistObj->getTaxa(); 
@@ -48,9 +50,9 @@ function managerToJSON($checklistObj) {
 				#var_dump($vouchers);
 				$tjresult['vouchers'] = $vouchers[$rowArr['tid']];
 				$tjresult['sciname'] = $taxa->getSciname();
-				if (sizeof(explode(" ",$tjresult['sciname'])) == 1) {
-					$tjresult['sciname'] .= " sp.";
-				}
+				/*if (sizeof(explode(" ",$tjresult['sciname'])) == 1) {
+					$tjresult['sciname'] .= " sp.";#the old code does this, but Katie says it's unnecessary
+				}*/
 				$result["taxa"][] = $tjresult;
 			}
 			
