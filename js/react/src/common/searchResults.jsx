@@ -146,7 +146,7 @@ function ExploreSearchContainer(props) {
 				
 				<div
 					id="search-results"
-					className={ "mt-4 w-100" }
+					className={ "mt-2 w-100" }
 				>
 				{
 						Object.entries(props.searchResults.familySort).map(([family, results]) => {
