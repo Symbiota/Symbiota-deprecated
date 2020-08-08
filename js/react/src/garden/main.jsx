@@ -13,7 +13,11 @@ import {addUrlQueryParam, getUrlQueryParams} from "../common/queryParams.js";
 import {getCommonNameStr, getGardenTaxaPage} from "../common/taxaUtils";
 
 
-const CLIENT_ROOT = "..";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { library } from "@fortawesome/fontawesome-svg-core";
+import { faChevronUp } from '@fortawesome/free-solid-svg-icons'
+library.add( faChevronUp)
+
 
 const CIDS_PLANT_FEATURE = {
   "flower_color": 612,
@@ -71,28 +75,38 @@ function getAttribMatrixFromArr(attribArray) {
 }
 
 function filterByWidth(item, minMax) {
-  const withinMin = item.width[0] >= minMax[0];
-  if (minMax[1] === 50) {
-    return withinMin;
-  }
-  return withinMin && item.width[1] <= minMax[1];
+	let ret = false;
+
+	if (	( 0 == item.width.length)
+				|| ( minMax[0] <= item.width[0] && item.width[0] <= minMax[1] )//item min is between user min and max
+				|| ( minMax[0] <= item.width[1] && item.width[1] <= minMax[1] )//item max is between user min and max
+				|| minMax[1] === 50 && minMax[1] <= item.width[1]) {//user max == 50 and item max >= 50
+		ret = true;	
+	}
+		
+  return ret;
 }
 
 function filterByHeight(item, minMax) {
-  const withinMin = item.height[0] >= minMax[0];
-  if (minMax[1] === 50) {
-    return withinMin;
-  }
-  return withinMin && item.height[1] <= minMax[1];
+  let ret = false;
+	
+	if (	( 0 == item.height.length)
+				|| 	( minMax[0] <= item.height[0] && item.height[0] <= minMax[1] )//item min is between user min and max
+				|| ( minMax[0] <= item.height[1] && item.height[1] <= minMax[1] )//item max is between user min and max
+				|| minMax[1] === 50 && minMax[1] <= item.height[1]) {//user max == 50 and item max >= 50
+		ret = true;	
+	}
+				
+  return ret;
 }
 
 function filterBySunlight(item, sunlight) {
   switch (sunlight) {
     case "sun":
       return item.sunlight.includes("sun");
-    case "partshade":
+    case "part-shade":
       return item.sunlight.includes("part shade");
-    case "fullshade":
+    case "full-shade":
       return item.sunlight.includes("shade");
     default:
       return true;
@@ -190,6 +204,7 @@ class GardenPageApp extends React.Component {
     this.onViewTypeChanged = this.onViewTypeChanged.bind(this);
     this.onFilterRemoved = this.onFilterRemoved.bind(this);
     this.onCannedFilter = this.onCannedFilter.bind(this);
+    this.clearFilters = this.clearFilters.bind(this);
     this.toggleFeatureCollectionVal = this.toggleFeatureCollectionVal.bind(this);
     this.onPlantFeaturesChanged = this.onPlantFeaturesChanged.bind(this);
     this.onGrowthMaintenanceChanged = this.onGrowthMaintenanceChanged.bind(this);
@@ -199,7 +214,7 @@ class GardenPageApp extends React.Component {
 
   componentDidMount() {
     // Load canned searches
-    httpGet(`${CLIENT_ROOT}/garden/rpc/api.php?canned=true`)
+    httpGet(`${this.props.clientRoot}/garden/rpc/api.php?canned=true`)
       .then((res) => {
         this.setState({ cannedSearches: JSON.parse(res) });
       });
@@ -217,7 +232,6 @@ class GardenPageApp extends React.Component {
         const allGrowthMaintainence = res[1];
         const allBeyondGarden = res[2];
         const newFilters = Object.assign({}, this.state.filters);
-
         for (let i in allPlantFeatures) {
           let featureKey = allPlantFeatures[i];
           newFilters.plantFeatures[featureKey.title] = [];
@@ -236,6 +250,7 @@ class GardenPageApp extends React.Component {
         const newFeatures = Object.assign({}, this.state.plantFeatureState, getAttribMatrixFromArr(allPlantFeatures));
         const newGrowth = Object.assign({}, this.state.growthMaintenanceState, getAttribMatrixFromArr(allGrowthMaintainence));
         const newBeyond = Object.assign({}, this.state.beyondGardenState, getAttribMatrixFromArr(allBeyondGarden));
+        //console.log(newFeatures);
         this.setState({
           plantFeatureState: newFeatures,
           growthMaintenanceState: newGrowth,
@@ -282,7 +297,8 @@ class GardenPageApp extends React.Component {
     }
   }
 
-  onFilterRemoved(key) {
+  onFilterRemoved(key,text) {
+  	const characteristics = ["plantFeatures","growthMaintenance","beyondGarden"];
     // TODO: This is clunky
     switch (key) {
       case "sunlight":
@@ -308,13 +324,21 @@ class GardenPageApp extends React.Component {
       case "checklistId":
         this.onCannedFilter(ViewOpts.DEFAULT_CLID);
         break;
-      case "plantFeatures":
-        break;
-      case "growthMaintenance":
-        break;
-      case "beyondGarden":
-        break;
-      default:
+      default://characteristics: plant features, etc.
+      	let keyArr = key.split(":");
+				switch(keyArr[0]) {
+					case "plantFeatures":
+					  this.onPlantFeaturesChanged(keyArr[1], text);
+					  break;
+					case "growthMaintenance":
+					  this.onGrowthMaintenanceChanged(keyArr[1], text);
+					  break;
+					case "beyondGarden":
+					  this.onBeyondGardenChanged(keyArr[1], text);
+					  break;
+					default: 
+						break;
+				}
         break;
     }
   }
@@ -326,18 +350,18 @@ class GardenPageApp extends React.Component {
   // On search start
   onSearch(searchObj) {
     const newQueryStr = addUrlQueryParam("search", searchObj.text);
-    window.history.replaceState(
+    /*window.history.replaceState(
       { query: newQueryStr },
       '',
       window.location.pathname + newQueryStr
-    );
+    );*/
 
     this.setState({
       isLoading: true,
       searchText: searchObj.text,
       filters: Object.assign({}, this.state.filters, { searchText: searchObj.text })
     });
-    httpGet(`${CLIENT_ROOT}/garden/rpc/api.php?search=${searchObj.text}`)
+    httpGet(`${this.props.clientRoot}/garden/rpc/api.php?search=${searchObj.text}`)
       .then((res) => {
         this.onSearchResults(JSON.parse(res));
       })
@@ -369,13 +393,13 @@ class GardenPageApp extends React.Component {
   onSunlightChanged(event) {
     this.setState({ filters: Object.assign({}, this.state.filters, { sunlight: event.target.value }) });
     let newQueryStr = addUrlQueryParam("sunlight", event.target.value);
-    window.history.replaceState({ query: newQueryStr }, '', window.location.pathname + newQueryStr);
+    /*window.history.replaceState({ query: newQueryStr }, '', window.location.pathname + newQueryStr);*/
   }
 
   onMoistureChanged(event) {
     this.setState({ filters: Object.assign({}, this.state.filters, { moisture: event.target.value }) });
     let newQueryStr = addUrlQueryParam("moisture", event.target.value);
-    window.history.replaceState({ query: newQueryStr }, '', window.location.pathname + newQueryStr);
+    /*window.history.replaceState({ query: newQueryStr }, '', window.location.pathname + newQueryStr);*/
   }
 
   onHeightChanged(event) {
@@ -388,11 +412,11 @@ class GardenPageApp extends React.Component {
       newQueryStr = addUrlQueryParam("height", event.target.value);
     }
 
-    window.history.replaceState(
+    /*window.history.replaceState(
       {query: newQueryStr},
       '',
       window.location.pathname + newQueryStr
-    );
+    );*/
   }
 
   onWidthChanged(event) {
@@ -404,11 +428,11 @@ class GardenPageApp extends React.Component {
     } else {
       newQueryStr = addUrlQueryParam("width", event.target.value);
     }
-    window.history.replaceState(
+    /*window.history.replaceState(
       {query: newQueryStr},
       '',
       window.location.pathname + newQueryStr
-    );
+    );*/
   }
 
   onPlantFeaturesChanged(featureKey, featureVal) {
@@ -448,7 +472,7 @@ class GardenPageApp extends React.Component {
       newType = '';
     }
     let newQueryStr = addUrlQueryParam("sortBy", newType);
-    window.history.replaceState({query: newQueryStr}, '', window.location.pathname + newQueryStr);
+    /*window.history.replaceState({query: newQueryStr}, '', window.location.pathname + newQueryStr);*/
   }
 
   onViewTypeChanged(type) {
@@ -461,7 +485,7 @@ class GardenPageApp extends React.Component {
       newType = '';
     }
     let newQueryStr = addUrlQueryParam("viewType", newType);
-    window.history.replaceState({ query: newQueryStr }, '', window.location.pathname + newQueryStr);
+    /*window.history.replaceState({ query: newQueryStr }, '', window.location.pathname + newQueryStr);*/
   }
 
   onCannedFilter(clid) {
@@ -470,16 +494,28 @@ class GardenPageApp extends React.Component {
       clid = '';
     }
     let newQueryStr = addUrlQueryParam("clid", clid);
-    window.history.replaceState({ query: newQueryStr }, '', window.location.pathname + newQueryStr);
+    /*window.history.replaceState({ query: newQueryStr }, '', window.location.pathname + newQueryStr);*/
   }
-
+	clearFilters() {
+		let filters = {
+			sunlight: ViewOpts.DEFAULT_SUNLIGHT,
+			moisture: ViewOpts.DEFAULT_MOISTURE,
+			height: ViewOpts.DEFAULT_HEIGHT,
+			width: ViewOpts.DEFAULT_WIDTH,
+			searchText: ViewOpts.DEFAULT_SEARCH_TEXT,
+			checklistId: ViewOpts.DEFAULT_CLID,
+			plantFeatures: {},
+			growthMaintenance: {},
+			beyondGarden: {}
+		};
+    this.setState({ filters: filters });
+	}
   render() {
     const checkListMap = {};
     for (let i in this.state.cannedSearches) {
       let search = this.state.cannedSearches[i];
       checkListMap[search.clid] = search.name;
     }
-
     return (
       <div>
         <InfographicDropdown />
@@ -516,16 +552,18 @@ class GardenPageApp extends React.Component {
                   <CannedSearchContainer
                     searches={ this.state.cannedSearches }
                     onFilter={ this.onCannedFilter }
+										clientRoot={this.props.clientRoot}
                   />
                 </div>
               </div>
               <div className="row">
-                <div className="col">
+                <div className="col" id="search-top">
                   <ViewOpts
                     viewType={ this.state.viewType }
                     sortBy={ this.state.sortBy }
                     onSortByClicked={ this.onSortByChanged }
                     onViewTypeClicked={ this.onViewTypeChanged }
+                    onReset={ this.clearFilters }
                     onFilterClicked={ this.onFilterRemoved }
                     checklistNames={ checkListMap }
                     filters={
@@ -560,15 +598,24 @@ class GardenPageApp extends React.Component {
                             key={ result.tid }
                             viewType={ this.state.viewType }
                             display={ showResult }
-                            href={ getGardenTaxaPage(CLIENT_ROOT, result.tid) }
+                            href={ getGardenTaxaPage(this.props.clientRoot, result.tid) }
                             src={ result.image }
                             commonName={ getCommonNameStr(result) }
                             sciName={ result.sciName ? result.sciName : '' }
+                    				sortBy={ this.state.sortBy }
                           />
                         )
                       })
                     }
                   </SearchResultContainer>
+                  <div className="go-top">
+                    <p>
+                        <a href="#search-top" className="toptext">
+                            TOP<br />
+                            <FontAwesomeIcon icon="chevron-up"/>
+                        </a>
+                    </p>
+                </div>
                 </div>
               </div>
             </div>
@@ -579,5 +626,7 @@ class GardenPageApp extends React.Component {
   }
 }
 
+const headerContainer = document.getElementById("react-header");
+const dataProps = JSON.parse(headerContainer.getAttribute("data-props"));
 const domContainer = document.getElementById("react-garden");
-ReactDOM.render(<GardenPageApp />, domContainer);
+ReactDOM.render(<GardenPageApp  clientRoot={ dataProps["clientRoot"] }/>, domContainer);

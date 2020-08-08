@@ -14,7 +14,7 @@ class FeatureSelector extends React.Component {
   render() {
     return (
       <div>
-        <div className="text-capitalize">
+        <div className="feature-selectors">
           <a
             data-toggle="collapse"
             aria-expanded="false"
@@ -37,6 +37,7 @@ class FeatureSelector extends React.Component {
                           name={ itemKey }
                           value={ itemVal ? "on" : "off" }
                           onChange={ () => this.props.onChange(itemKey) }
+													checked={ itemVal }
                         />
                       </li>
                     )

@@ -20,6 +20,60 @@
 		max-height: 150px;
 		overflow: hidden; 
   }
+	.canned-results {
+		max-width: 100%;
+		display: flex;
+		flex-flow: row wrap;
+		justify-content: space-between;
+		.canned-search-result {
+			flex-basis: 45%;
+			
+			color: #3B631D !important;
+			text-align: center;
+			border-radius: 2%;
+			max-width: 15em;
+			h4 {
+				font-size: 1em;
+			}
+			.card {
+				box-shadow: 0 0.1em 0.5em 0.1em rgba(100, 100, 100, 0.3);
+			}
+
+			.card:hover {
+				//background: #DFEFD3 !important;
+			}
+
+			.card a:hover {
+				//text-decoration: none;
+			}
+
+			.card-text {
+				font-weight: bold;
+				color: #1E352F !important;
+				font-size: initial;
+			}
+
+			.scroll-btn {
+				border-radius: 50%;
+			}
+
+			.scroll-btn:active {
+				background: rgba(0, 100, 0, 0.1) !important;
+			}
+
+		}
+	}
+	.taxa-link {
+		a {
+			.btn-primary {
+				padding: 0.3em 1.2em;
+				line-height: 2em;
+			}
+			&:hover {
+				text-decoration: none;
+			}
+		}
+	}
 
 }
 #react-taxa-app {
@@ -109,7 +163,9 @@
 			padding-left: 0px;
 			padding-right: 0px;
 		}
-
+		.related-nav {
+			text-align: right;
+		}
 		.row {
 			margin-left: 0px;
 			margin-right: 0px;
@@ -243,9 +299,16 @@
 	//taxa slideshows on main and garden pages
   .slick-next, 
   .slick-prev {
-  	&:before {
-  		color: @med-green !important;
-  	}
+  	color: @med-green !important;
+  	font-size: 28px;
+  	top: 53%;
+  	text-align: center;
+  }
+  .slick-next {
+  	right: -35px;
+  }
+  .slick-prev {
+  	left: -35px;
   }
   .slick-slide {
 		height: auto;
@@ -253,134 +316,5 @@
 	.slick-slider {
 		max-width: 90%;
 	}
-  .modal-backdrop {
-		position: 'fixed';
-		top: 64;
-		bottom: 0;
-		left: 0;
-		right: 0;
-		/*background-color: rgba(0,0,0,0.3);*/
-    background-color: @dark-gray;
-		padding: 32 50 0;
-	};
-	.close-modal {
-		cursor: pointer;
-	}
-	// The modal "window"
-	.modal-content {
-		background-color: transparent;
-		color: white;
-		max-width: 1000;
-		min-height: 300;
-		margin: 0 auto;
-		padding: 30px;
-		overflow: hidden;
-		h3, h4 {
-			margin-left: 12.5%;
-		}
-		h3 {
-			margin-top: .4rem;
-			margin-bottom: .2rem;
-		}
-		h4 {
-			font-size: .88rem;
-		}
-		
-		.lightbox-wrapper {
-			height: calc(100vh - 128px);
-			.images-main {
-				height: 77%;
-				.slick-list {
-					.slick-track {
-						.slick-slide {	
-							div {
-								max-height: 100%;
-							}
-							.slide-wrapper {
-								background-color: black;
-								width: 75%;
-								margin: 0 auto;
-								padding: 8px;
-							}
-							.image-wrapper {
-								text-align: center;
-								height: 75%;
-								img {
-									margin: 0 auto;
-								}
-							}
-							.image-details {
-								margin: 1em auto;
-								height: 25%;
-								width: 80%;
-								color: @gray-type;
-								font-size: .88rem;
-								line-height: 1em;
-								.row {
-									margin-bottom: .25rem;
-									padding-bottom: .25rem;
-									&.line-item{
-										border-bottom: 1px dotted @gray-type;
-									}
-									.col {
-										padding-left: 0;
-										&.label {
-											flex-basis: 15%;
-											font-weight: 700;
-										}
-										&.value {
-											flex-basis: 85%;
-										}
-									}
-								}
-								.btn {
-									float: right;
-									font-size: .88rem;
-									border: 1px solid @med-green !important;
-									color: @gray-type !important;
-									padding: .2rem .75rem;
-									&:hover {
-										color: white !important;
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-			.images-nav {
-				height: 23%;
-				.slick-list {
-					margin-top: .3rem;
-					position: relative;
-					.slick-track {
-						max-height: 100%;
-					}
-					.card {
-						background-color: transparent;
-						border-radius: 0;
-					}
-					.slick-current {
-						.card {
-							border: 1px solid #2E453F;
-						}
-					}
-				}
-				
-				.slick-next,
-				.slick-prev {
-					top: 35%;
-				}
-			}		
-		}
-		.footer {
-			position: absolute;
-			top: 35px;
-			right: 0px;
-			.fake-button {
-				cursor: pointer;
-				padding: .3em;
-			}
-		}
-	}
+
 }

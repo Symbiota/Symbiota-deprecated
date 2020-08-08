@@ -19,12 +19,12 @@ const dropDownChildren = {
     { title: "Plant Inventories", href: "/projects/index.php" },
     { title: "OSU Herbarium", href: "/collections/harvestparams.php?db[]=5,8,10,7,238,239,240,241" },
     { title: "Grow Natives", href: "/garden/index.php" },
-    { title: "Image Search", href: "/imagelib/search.php" },
+    //{ title: "Image Search", href: "/imagelib/search.php" },
     { title: "Taxonomic Tree", href: "/taxa/admin/taxonomydisplay.php" },
   ],
   "Resources": [
     { title: "Tutorials and Tips", href: "/pages/tutorials.php" },
-    { title: "What's New", href: "/pages/whats-new.php" },
+    { title: "News and Events", href: "/pages/news-events.php" },
     { title: "Archived Newsletters", href: "/newsletters/index.php" },
     { title: "Links", href: "/pages/links.php" }
   ],
@@ -52,7 +52,7 @@ function HeaderButton(props) {
 
 function HeaderButtonBar(props) {
   return (
-    <div className="row mr-3" style={ props.style }>
+    <div className="row mr-3 header-button-bar" style={ props.style }>
       { props.children }
     </div>
   );
@@ -110,21 +110,23 @@ class HeaderApp extends React.Component {
 
   // "searchObj" is the JSON object returned from ../webservices/autofillsearch.php
   onSearch(searchObj) {
+  	console.log(searchObj);
     this.setState({ isLoading: true });
     let targetUrl = `${this.props.clientRoot}/taxa/`;
+    /*
     if (searchObj.rankId && searchObj.rankId === RANK_FAMILY) {
       targetUrl += `search.php?family=${searchObj.taxonId}&familyName=${searchObj.text}`;
 
     } else if (searchObj.rankId && searchObj.rankId === RANK_GENUS) {
       targetUrl += `search.php?genus=${searchObj.taxonId}&genusName=${searchObj.text}`;
 
-    } else {
+    } else {*/
       if (searchObj.taxonId) {
         targetUrl += `index.php?taxon=${searchObj.taxonId}`;
       } else {
         targetUrl += `search.php?search=${ encodeURIComponent(searchObj.text) }`;
       }
-    }
+    /*}*/
 
     window.location = targetUrl;
   }
@@ -208,7 +210,7 @@ class HeaderApp extends React.Component {
           </ul>
         </div>
 
-        <div className={ "ml-auto mr-4" + (this.state.isCollapsed ? " my-auto" : "") }>
+        <div className={ "search-wrapper ml-auto mr-4" + (this.state.isCollapsed ? " my-auto" : "") }>
           { this.getLoginButtons() }
 
           <div className="row">

@@ -57,13 +57,13 @@ $smManager = new SiteMapManager();
 				
 			</ul>
 				
-			<div style="margin-top:10px;"><h2><?php echo $LANG['IMGLIB'];?></h2></div>
-			<ul>
-				<li><a href="imagelib/index.php"><?php echo $LANG['IMGLIB'];?></a></li>
-				<li><a href="imagelib/search.php"><?php echo ($LANG['IMAGE_SEARCH']?$LANG['IMAGE_SEARCH']:'Interactive Search Tool'); ?></a></li>
-				<li><a href="imagelib/contributors.php"><?php echo $LANG['CONTRIB'];?></a></li>
-				<li><a href="misc/usagepolicy.php"><?php echo $LANG['USAGEPOLICY'];?></a></li>
-			</ul>
+<!--			<div style="margin-top:10px;"><h2>--><?php //echo $LANG['IMGLIB'];?><!--</h2></div>-->
+<!--			<ul>-->
+<!--				<li><a href="imagelib/index.php">--><?php //echo $LANG['IMGLIB'];?><!--</a></li>-->
+<!--				<li><a href="imagelib/search.php">--><?php //echo ($LANG['IMAGE_SEARCH']?$LANG['IMAGE_SEARCH']:'Interactive Search Tool'); ?><!--</a></li>-->
+<!--				<li><a href="imagelib/contributors.php">--><?php //echo $LANG['CONTRIB'];?><!--</a></li>-->
+<!--				<li><a href="misc/usagepolicy.php">--><?php //echo $LANG['USAGEPOLICY'];?><!--</a></li>-->
+<!--			</ul>-->
 			
 			<div style="margin-top:10px;"><h2><?php echo $LANG['TAXONOMY'];?></h2></div>
 			<ul>

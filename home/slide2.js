@@ -8,10 +8,11 @@ module.exports = `
 	<div class="col-sm-6 slide-col-1">
         <h1>How to get the most out of our site</h1>
         <p>OregonFlora makes information about Oregon plants accessible to diverse audiences: scientists, restorationists, gardeners, land managers, and plant enthusiasts of all ages. We focus on the vascular plants of the state—ferns, conifers, grasses, herbs, and trees—that grow in the wild.</p>
-        <p>Now, all that information is even more accessible through our collaboration with Symbiota and its powerful database! Watch our overview below, explore top areas at right, or browse our full set of tutorials – including text-based – here.</p>
+        <p>Now, all that information is even more accessible through our collaboration with Symbiota and its powerful database! 
+        Watch our overview below, explore top areas at right, or <a href="` + clientRoot + `/pages/tutorials.php">browse our full set of tutorials – including text-based – here</a>.</p>
         <div class="row video-card">
             <div class="col-auto video-img">
-                <img src="` + clientRoot + `/images/YouTube-tutorial-Intro.png">
+                <a href="` + clientRoot + `/pages/tutorials.php"><img src="` + clientRoot + `/images/YouTube-tutorial-Intro.png"></a>
             </div>
             <div class="col video-text">
                 <h3>An Introduction to Oregon Flora</h3>
@@ -22,7 +23,7 @@ module.exports = `
 	<div class="col-sm-6 slide-col-2">
         <div class="row video-card">
             <div class="col-auto video-img">
-                <img src="` + clientRoot + `/images/YouTube-tutorial-Taxon.png">
+                <a href="` + clientRoot + `/pages/tutorials.php"><img src="` + clientRoot + `/images/YouTube-tutorial-Taxon.png"></a>
             </div>
             <div class="col video-text">
                 <h3>Taxon profile pages</h3>
@@ -31,7 +32,7 @@ module.exports = `
         </div>
         <div class="row video-card">
             <div class="col-auto video-img">
-                <img src="` + clientRoot + `/images/YouTube-tutorial-Map.png">
+                <a href="` + clientRoot + `/pages/tutorials.php"><img src="` + clientRoot + `/images/YouTube-tutorial-Map.png"></a>
             </div>
             <div class="col video-text">
                 <h3>Mapping</h3>
@@ -40,7 +41,7 @@ module.exports = `
         </div>
         <div class="row video-card">
             <div class="col-auto video-img">
-                <img src="` + clientRoot + `/images/YouTube-tutorial-InterKey.png">
+                <a href="` + clientRoot + `/pages/tutorials.php"><img src="` + clientRoot + `/images/YouTube-tutorial-InterKey.png"></a>
             </div>
             <div class="col video-text">
                 <h3>Interactive Key</h3>
@@ -49,14 +50,14 @@ module.exports = `
         </div>        
         <div class="row video-card">
             <div class="col-auto video-img">
-                <img src="` + clientRoot + `/images/YouTube-tutorial-Inventory.png">
+                <a href="` + clientRoot + `/pages/tutorials.php"><img src="` + clientRoot + `/images/YouTube-tutorial-Inventory.png"></a>
             </div>
             <div class="col video-text">
                 <h3>Plant Inventories</h3>
                 <p>Species lists for defined places, presented as a checklist and an interactive key.</p>
             </div>
         </div>                
-        <p><button class="btn btn-primary">See the rest of our tutorials here</button></p>
+        <p><a href="` + clientRoot + `/pages/tutorials.php"><button class="btn btn-primary">See the rest of our tutorials here</button></a></p>
 	</div>
 </div>
 `;       

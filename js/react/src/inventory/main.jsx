@@ -11,10 +11,6 @@ import { faSearchPlus, faListUl, faChevronDown, faChevronUp } from '@fortawesome
 library.add( faSearchPlus, faListUl, faChevronDown, faChevronDown)
 
 const CLIENT_ROOT = "..";
-const CRUMBS = [
-  { title: "Home", url: `${CLIENT_ROOT}` },
-  { title: "Plant Inventories", url: `${CLIENT_ROOT}/projects/index.php` }
-];
 
 function ChecklistTable(props) {
   const columns = useMemo(
@@ -107,7 +103,7 @@ class InventoryDetail extends React.Component {
     return (
     <div className="wrapper">
 			<div className="page-header">
-					<PageHeader crumbs={ CRUMBS } bgClass="explore" title={ this.state.projname } />
+					<PageHeader bgClass="explore" title={ this.state.projname } />
 			</div>
       <div className="container inventory-detail" style={{ minHeight: "45em" }}>
         <div className="row">
@@ -216,7 +212,7 @@ class InventoryChooser extends React.Component {
     return (
     <div className="wrapper">
 			<div className="page-header">
-				<PageHeader crumbs={ CRUMBS } bgClass="explore" title={ 'Inventory Projects' } />
+				<PageHeader bgClass="explore" title={ 'Inventory Projects' } />
       </div>
       <div className="container inventory-chooser" style={{ minHeight: "45em" }}>
 

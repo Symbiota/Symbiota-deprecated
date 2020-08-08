@@ -1,5 +1,6 @@
 @import "./mixins.less";
 @import "./search-results.less";
+@import '../../node_modules/react-modal-video/css/modal-video.min.css';
 
 //Variable for project paths since relative paths not allowed
 @subdir: "/portal";
@@ -35,6 +36,25 @@ a {
   &:active {
     color: @dark-green !important;
   }
+}
+
+.slick-next,
+.slick-prev {
+  height: 40px;
+  width: 40px;
+  top: 45%;
+	color: white;
+	font-size: 40px;
+	font-weight: 900;
+	opacity: .85;
+	transition: opacity 250ms;
+	&:hover {
+		opacity: 1;
+		color: inherit;
+	}
+	&:before {
+		content: '';
+	}
 }
 
 .btn {
@@ -287,6 +307,36 @@ div#info-page {
     line-height: 1.2;
   }
 
+  .figure-inline {
+    max-width: 50%;
+    float: left;
+    margin: 0 30px 20px 0;
+
+    .figure-caption {
+      border-bottom: 1px dashed black;
+      padding-bottom: 10px;
+    }
+
+    img{
+      width: 100%;
+    }
+  }
+
+  .column-right .figure {
+    width: 100%;
+    img{
+      width: 100%;
+    }
+  }
+
+  .two-col-row {
+    padding-bottom: 10px;
+    border-bottom: 1px dashed black;
+  }
+  .two-col-row:last-of-type {
+    border-bottom: none;
+  }
+
   a {
     text-decoration: underline;
   }
@@ -390,11 +440,14 @@ div#info-page {
       }
     }
 
+    .tutorials-text{
+      margin: 10px -15px;
+    }
+
     .tutorials-video-card,
     .tutorials-text-card {
       border-radius: 8px;
       border: 1px dashed black;
-      margin: 15px;
 
       h3 {
         font-size: 32px;
@@ -411,13 +464,60 @@ div#info-page {
       }
     }
 
+    .tutorials-video-card{
+      margin: 15px;
+    }
+
     .tutorials-text-card {
-      margin: 0;
       padding: 15px;
       .figure {
         float: right;
         width: 300px;
       }
+    }
+
+    .go-top{
+      width: 100%;
+
+      p {
+        text-align: right;
+        margin-right: 5px;
+        margin-bottom: 0;
+      }
+
+      a {
+        color: @dark-green;
+        font-size: 11px;
+      }
+
+      svg {
+        margin-right: 5px;
+      }
+    }
+
+    .video-modal-btn {
+      padding: 0;
+    }
+
+    .modal-dialog {
+      max-width: 90%;
+      margin: 20px auto;
+    }
+
+    .modal-body {
+      position:relative;
+      padding:0px;
+    }
+
+    .close {
+      position:absolute;
+      right:-30px;
+      top:0;
+      z-index:999;
+      font-size:2rem;
+      font-weight: normal;
+      color: @dark-green;
+      opacity:1;
     }
   }
 
@@ -492,6 +592,9 @@ div#info-page {
 }
 
 #react-home-app {
+	a {
+		color: white !important;
+	}
 	.btn-search {
 		width: 3em;
 		height: 3em;
@@ -505,7 +608,11 @@ div#info-page {
     color: white;
 
     .container.home {
-
+			
+			.modal-video-body {
+				max-width: 1100px;
+			}
+			
       .slick-next,
       .slick-prev {
         &:before {
@@ -598,6 +705,10 @@ div#info-page {
                 clear: both;
                 margin-bottom: 0px;
                 line-height: 1rem;
+
+                a {
+                  color: white !important;
+                }
               }
             }
           }
@@ -711,12 +822,27 @@ div#info-page {
                 border-top-left-radius: 8px;
                 border-bottom-left-radius: 8px;
                 color: @dark-gray;
+                font-weight: 600;
               }
               .event-desc {
                 padding: 10px;
                 background: #000000A6 0% 0% no-repeat padding-box;
                 border-top-right-radius: 8px;
                 border-bottom-right-radius: 8px;
+              }
+              .event-title {
+              	font-weight: bold;
+              }
+              .event-location {
+              	font-style: italic;
+              }
+            }
+
+            .btn {
+              margin-top: 10px;
+
+              a {
+                color: white !important;
               }
             }
           }
@@ -728,27 +854,274 @@ div#info-page {
       bottom: 25px;
 
       li {
-        width: 15px;
-        height: 15px;
+        width: 17px;
+        height: 17px;
 
         button {
 
           &:before {
             color: white;
             opacity: 1;
-            font-size: 10px;
+            font-size: 12px;
+	      		text-shadow: 0px 0px 3px black;
           }
         }
 
         &.slick-active {
           button:before {
             color: lightgreen;
+	      		text-shadow: 0px 0px 3px black;
           }
         }
       }
     }
   }
 }
+#react-newsletters-app {
 
+  h2{
+    font-size: 36px;
+    font-weight: bold;
+  }
+
+  .instructions {
+    font-size: 26px;
+  }
+
+  .newsletter-list {
+    margin-bottom: 2em;
+
+    .issue-item {
+      clear: both;
+      border-top: 1px dotted @dark-gray;
+
+      &:last-child {
+        border-bottom: 1px dotted @dark-gray;
+      }
+
+      .issue-header {
+        background-color: @light-green;
+        padding: 6px;
+        height: 57px;
+        margin-left: 0;
+        margin-right: 0;
+        display: flex;
+        flex-flow: row;
+        justify-content: space-between;
+
+        .issue-link {
+          flex-basis: 40px;
+
+          img {
+            width: 32px;
+            height: 32px;
+            margin-top: 5px;
+          }
+        }
+
+        .issue-title {
+          text-align: left;
+          flex-grow: 1;
+
+          h3 {
+            display: inline-block;
+            font-size: 24px;
+            font-weight: 600;
+            padding: 8px 0 0 0;
+            margin-bottom: 0;
+          }
+        }
+
+        .more-less {
+          flex-basis: 140px;
+          font-size: 14px;
+          color: @dark-green;
+          text-transform: uppercase;
+          margin-top: 4px;
+          text-align: right;
+          cursor: pointer;
+
+          svg {
+            color: @med-green;
+            padding-top: 10px;
+          }
+        }
+      }
+
+      .issue-expanded {
+        padding: 10px 0;
+
+        .row {
+          margin: 0 20px 10px 45px;
+
+          .issue-title {
+            padding-left: 0;
+          }
+
+          .issue-author {
+            font-style: italic;
+          }
+        }
+      }
+    }
+  }
+}
+/* used by multiple areas */
+.modal-backdrop {
+	position: 'fixed';
+	top: 64;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	/*background-color: rgba(0,0,0,0.3);*/
+	background-color: @dark-gray;
+	padding: 12 50 0;
+};
+.close-modal {
+	cursor: pointer;
+}
+// The modal "window"
+.modal-content {
+	background-color: transparent;
+	color: white;
+	max-width: 1000;
+	min-height: 300;
+	margin: 0 auto;
+	padding: 0 30px 30px;
+	overflow: hidden;
+	h3 {
+		margin-left: 12.5%;
+	}
+	h3 {
+		margin-top: .4rem;
+		margin-bottom: .2rem;
+	}
+	h4 {
+		font-size: .88rem;
+		margin-left: -1%;
+	}
+	
+	.lightbox-wrapper {
+		height: calc(100vh - 128px);
+		.images-main {
+			height: 77%;
+			.slick-next, 
+			.slick-prev {
+				color: white !important;
+				font-size: 38px;
+				top: 45%;
+			}
+			.slick-list {
+				max-height: 100%;
+				.slick-track {
+					.slick-slide {	
+						div {
+							max-height: 100%;
+						}
+						.slide-wrapper {
+							background-color: black;
+							width: 75%;
+							margin: 0 auto;
+							padding: 8px;
+							max-height: 100%;
+						}
+						h4 {
+							height: 3%;
+						}
+						.image-wrapper {
+							text-align: center;
+							height: 75%;
+							img {
+								margin: 0 auto;
+							}
+						}
+						.image-details {
+							margin: 1em auto;
+							height: 25%;
+							width: 80%;
+							color: @gray-type;
+							font-size: .88rem;
+							line-height: 1em;
+							.row {
+								margin-bottom: .25rem;
+								padding-bottom: .25rem;
+								&.line-item{
+									border-bottom: 1px dotted @gray-type;
+								}
+								.col {
+									padding-left: 0;
+									&.label {
+										flex-basis: 15%;
+										font-weight: 700;
+									}
+									&.value {
+										flex-basis: 85%;
+									}
+								}
+							}
+							.btn {
+								float: right;
+								font-size: .88rem;
+								border: 1px solid @med-green !important;
+								color: @gray-type !important;
+								padding: .2rem .75rem;
+								&:hover {
+									color: white !important;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		.images-nav {
+			height: 23%;
+			.slick-list {
+				margin-top: .3rem;
+				position: relative;
+				.slick-track {
+					max-height: 100%;
+				}
+				.card {
+					background-color: transparent;
+					border-radius: 0;
+				}
+				.slick-current {
+					.card {
+						border: 1px solid #2E453F;
+					}
+				}
+			}
+			
+			.slick-next,
+			.slick-prev {
+				color: white !important;
+				font-size: 28px;
+				top: 38%;
+			}
+		}		
+	}
+	.footer {
+		position: absolute;
+		top: 35px;
+		right: 0px;
+		.fake-button {
+			cursor: pointer;
+			padding: .3em;
+		}
+	}
+}
+.explore-preview-modal {
+	margin-top: 3em;
+	h1, h2 {
+		color: white;
+	}
+	.explore-preview-header{
+	}
+	.explore-preview-main {
+		background-color: white;
+		color: black;
+	}
+}
 
 

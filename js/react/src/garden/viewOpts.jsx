@@ -17,124 +17,151 @@ function arrayCompare(a1, a2) {
 
 function getPlantAttrText(filter) {
   const attrKeys = Object.keys(filter.val);
-  let itemText = '';
+  let itemText = [];
   for (let i in attrKeys) {
     let attrKey = attrKeys[i];
     if (filter.val[attrKey].length > 0) {
-      itemText += `${attrKey.replace(/_/g, ' ')}: ${filter.val[attrKey].join(', ')}`;
+      itemText.push(`${attrKey.replace(/_/g, ' ')}: ${filter.val[attrKey].join(', ')}`);
     }
   }
-
-  return itemText;
+	
+  return itemText.join("<br />");
 }
 
 class ViewOpts extends React.Component {
+	
+	buildButton(filterKey,itemText) {
+		return (
+			<IconButton
+				key={ filterKey + ":" + itemText }
+				title={ itemText }
+				icon={ `${CLIENT_ROOT}/images/garden/x-out.png` }
+				isSelected={ true }
+				style={{ margin: "0.1em" }}
+				onClick={ () => { this.props.onFilterClicked(filterKey,itemText); } }
+			/>
+		)
+	}
+
+
   render() {
+  	const buttons = [];
+  	            	
+		this.props.filters.map((filter) => {
+			let showItem = true;
+			let itemText = "";
+			let itemKey = filter.key;//override below as needed
+			switch (filter.key) {
+				case "sunlight":
+					if (filter.val === ViewOpts.DEFAULT_SUNLIGHT) {
+						showItem = false;
+					} else {
+						itemText = `Sunlight: ${filter.val}`;
+						buttons.push({"key":filter.key,"text":itemText});
+					}
+					break;
+				case "moisture":
+					if (filter.val === ViewOpts.DEFAULT_MOISTURE) {
+						showItem = false;
+					} else {
+						itemText = `Moisture: ${filter.val}`;
+						buttons.push({"key":filter.key,"text":itemText});
+					}
+					break;
+				case "width":
+					if (arrayCompare(filter.val, ViewOpts.DEFAULT_WIDTH)) {
+						showItem = false;
+					} else {
+						itemText = `Plant Width: ${filter.val[0]}ft to ${filter.val[1]}ft`;
+						buttons.push({"key":filter.key,"text":itemText});
+					}
+					break;
+				case "height":
+					if (arrayCompare(filter.val, ViewOpts.DEFAULT_HEIGHT)) {
+						showItem = false;
+					} else {
+						itemText = `Plant Height: ${filter.val[0]}ft to ${filter.val[1]}ft`;
+						buttons.push({"key":filter.key,"text":itemText});
+					}
+					break;
+				case "searchText":
+					if (filter.val === ViewOpts.DEFAULT_SEARCH_TEXT) {
+						showItem = false;
+					} else {
+						itemText = `Search: ${filter.val}`;
+						buttons.push({"key":filter.key,"text":itemText});
+					}
+					break;
+				case "checklistId":
+					if (filter.val === ViewOpts.DEFAULT_CLID) {
+						showItem = false;
+					} else {
+						itemText = (
+							filter.val in this.props.checklistNames ?
+								`Checklist: ${this.props.checklistNames[filter.val]}` :
+								''
+						);
+						buttons.push({"key":filter.key,"text":itemText});
+					}
+					break;
+				case "plantFeatures": {
+					Object.entries(filter.val).map((feature) => {
+						if (feature[1].length) {
+							feature[1].map((value) => {
+								let featureKey = filter.key + ":" + feature[0];
+								buttons.push({"key":featureKey,"text":value});
+							})
+						}
+					})
+					break;
+				}
+				case "growthMaintenance": {
+					Object.entries(filter.val).map((feature) => {
+						if (feature[1].length) {
+							feature[1].map((value) => {
+								let featureKey = filter.key + ":" + feature[0];
+								buttons.push({"key":featureKey,"text":value});
+							})
+						}
+					})
+					break;
+				}
+				case "beyondGarden": {
+					Object.entries(filter.val).map((feature) => {
+						if (feature[1].length) {
+							feature[1].map((value) => {
+								let featureKey = filter.key + ":" + feature[0];
+								buttons.push({"key":featureKey,"text":value});
+							})
+						}
+					})
+					break;
+				}
+				default:
+					break;
+			}
+		});
+
     return (
       <div id="view-opts" className="row mx-2 mt-3 px-0 py-2">
         <div className="col">
           <h3 className="font-weight-bold">Your search results:</h3>
           <div className="d-flex flex-row flex-wrap">
-            {
-              this.props.filters.map((filter) => {
-                let showItem = true;
-                let itemText = "";
-                switch (filter.key) {
-                  case "sunlight":
-                    if (filter.val === ViewOpts.DEFAULT_SUNLIGHT) {
-                      showItem = false;
-                    } else {
-                      itemText = `Sunlight: ${filter.val}`;
-                    }
-                    break;
-                  case "moisture":
-                    if (filter.val === ViewOpts.DEFAULT_MOISTURE) {
-                      showItem = false;
-                    } else {
-                      itemText = `Moisture: ${filter.val}`;
-                    }
-                    break;
-                  case "width":
-                    if (arrayCompare(filter.val, ViewOpts.DEFAULT_WIDTH)) {
-                      showItem = false;
-                    } else {
-                      itemText = `Plant Width: ${filter.val[0]}ft to ${filter.val[1]}ft`;
-                    }
-                    break;
-                  case "height":
-                    if (arrayCompare(filter.val, ViewOpts.DEFAULT_HEIGHT)) {
-                      showItem = false;
-                    } else {
-                      itemText = `Plant Height: ${filter.val[0]}ft to ${filter.val[1]}ft`;
-                    }
-                    break;
-                  case "searchText":
-                    if (filter.val === ViewOpts.DEFAULT_SEARCH_TEXT) {
-                      showItem = false;
-                    } else {
-                      itemText = `Search: ${filter.val}`;
-                    }
-                    break;
-                  case "checklistId":
-                    if (filter.val === ViewOpts.DEFAULT_CLID) {
-                      showItem = false;
-                    } else {
-                      itemText = (
-                        filter.val in this.props.checklistNames ?
-                          `Checklist: ${this.props.checklistNames[filter.val]}` :
-                          ''
-                      );
-                    }
-                    break;
-                  case "plantFeatures": {
-                    // itemText = getPlantAttrText(filter);
-                    // if (itemText === '') {
-                    //   showItem = false;
-                    // }
-                    showItem = false;
-                    break;
-                  }
-                  case "growthMaintenance": {
-                    // itemText = getPlantAttrText(filter);
-                    // if (itemText === '') {
-                    //   showItem = false;
-                    // }
-                    showItem = false;
-                    break;
-                  }
-                  case "beyondGarden": {
-                    // itemText = getPlantAttrText(filter);
-                    // if (itemText === '') {
-                    //   showItem = false;
-                    // }
-                    showItem = false;
-                    break;
-                  }
-                  default:
-                    break;
-                }
-
-                if (showItem) {
-                  return (
-                    <IconButton
-                      key={ filter.key }
-                      title={ itemText }
-                      icon={ `${CLIENT_ROOT}/images/garden/x-out.png` }
-                      isSelected={ true }
-                      style={{ margin: "0.1em" }}
-                      onClick={ () => { this.props.onFilterClicked(filter.key); } }
-                    />
-                  );
-                }
-              })
-            }
+						{
+							buttons.map((buttonItem) => {
+								let button = this.buildButton(buttonItem.key,buttonItem.text);
+								return (
+									button
+								)
+							})
+						}
           </div>
         </div>
-        <div className="col text-right p-0 mx-1 mt-auto">
+        <div className="col text-right p-0 mx-1">
           <p>View as:</p>
           <p>Sort by name:</p>
         </div>
-        <div className="col-auto p-0 mx-1 mt-auto">
+        <div className="col-auto p-0 mx-1">
           <p>
             <IconButton
               title="Grid"
@@ -169,6 +196,17 @@ class ViewOpts extends React.Component {
               isSelected={this.props.sortBy === "sciName"}
             />
           </p>
+          <p>
+          	{buttons.length > 0 &&
+						<IconButton
+							key={ "reset" }
+							title={ "Clear all" }
+							isSelected={ true }
+							style={{ margin: "0.1em" }}
+							onClick={ () => { this.props.onReset(); } }
+						/>
+						}
+          </p>
         </div>
       </div>
     );
@@ -182,7 +220,8 @@ ViewOpts.defaultProps = {
   checklistNames: {},
   onSortByClicked: () => {},
   onViewTypeClicked: () => {},
-  onFilterClicked: () => {}
+  onFilterClicked: () => {},
+  onReset: () => {}
 };
 
 ViewOpts.DEFAULT_SUNLIGHT = "";
