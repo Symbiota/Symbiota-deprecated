@@ -96,8 +96,9 @@ class IdentManager extends Manager {
 				->from("Taxa","t")
 			;
 			$leftJoins[] = array("Taxavernaculars","v","WITH","t.tid = v.tid");
-			$wheres[] = "v.sortsequence = 1";
+			#$wheres[] = "v.sortsequence = 1";
 			$innerJoins[] = array("Taxstatus","ts","WITH","t.tid = ts.tid");
+			$wheres[] = "v.language = 'English'";
 			$wheres[] = "ts.taxauthid = 1";
 			$wheres[] = "t.rankid = 220";	
 	
@@ -151,12 +152,30 @@ class IdentManager extends Manager {
 				$taxa->setParameter(...$param);
 			}
 			$taxa->distinct();
-			$taxa->orderBy("ts.family");
+			$taxa->orderBy("ts.family, t.sciname, v.sortsequence");
 			$tquery = $taxa->getQuery();
 			$this->currQuery = $tquery;
-			$results = $tquery->execute();
+			$results = $tquery->getResult();
+
+				
+			$newResults = array();
+			$currSciName = '';
+			$currIdx = null;
+			foreach ($results as $idx => $result) {
+				if ($result['sciname'] == $currSciName) {
+					$newResults[$currIdx]['vernacularnames'][] = $result['vernacularname'];
+				}else{
+					$newResults[$idx] = $result;
+					$newResults[$idx]['vernacularnames'][] = $result['vernacularname'];
+					unset($newResults[$idx]['vernacularname']);
+					$currSciName = $result['sciname'];
+					$currIdx = $idx;
+				}
+			}
+				
+			
 		}
-		$this->taxa = $results;
+		$this->taxa = $newResults;
   }
   
 	public function getCharacteristics() {
@@ -258,7 +277,7 @@ class IdentManager extends Manager {
 				->setParameter(":OM",'OM')
 				->groupBy(join(", ",$groupBy))
 				->having(join(", ",$having))
-				->orderBy("chead.sortsequence, chars.sortsequence, cs.sortsequence")
+				->orderBy("chead.sortsequence, chars.sortsequence, chars.charname, cs.sortsequence, cs.charstatename")
 				->distinct()
 			;
 			$cquery = $chars->getQuery();

@@ -29,6 +29,7 @@ var_dump($repo);
 	if (isset($params['cl'])) $identManager->setClid($params['cl']);
 	if (isset($params['proj'])) $identManager->setPid($params['proj']);
 	if (isset($params['taxon'])) $identManager->setTaxonFilter($params['taxon']);
+	if (isset($params['rv'])) $identManager->setRelevanceValue($params['rv']);
 	if (isset($params['attr'])) {
 		$attrs = array();
 		foreach ($params['attr'] as $attr) {
@@ -44,8 +45,8 @@ var_dump($repo);
 		$identManager->setAttrs($attrs);
 	}
 	$identManager->setTaxa();
-	#$results = $identManager->getTaxa();
-	$results = $identManager->getCharacteristics();
+	$results = $identManager->getTaxa();
+	#$results = $identManager->getCharacteristics();
 
 	#ini_set("memory_limit", $memory_limit);
 	#set_time_limit(30);
