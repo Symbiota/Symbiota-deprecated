@@ -2,7 +2,7 @@ import React from "react";
 
 import HelpButton from "../common/helpButton.jsx";
 import {SearchWidget} from "../common/search.jsx";
-import FeatureSelector from "./featureSelector.jsx";
+import FeatureSelector from "../common/featureSelector.jsx";
 
 const CLIENT_ROOT = "..";
 

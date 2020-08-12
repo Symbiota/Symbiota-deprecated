@@ -92,22 +92,26 @@ class IdentManager extends Manager {
   	if ($this->clid || $this->dynClid) {
 			$em = SymbosuEntityManager::getEntityManager();
 			$taxa = $em->createQueryBuilder()
-				->select(["t.tid, ts.family, t.sciname, ts.parenttid, v.vernacularname"])
+				->select(["t.tid, ts.family, t.sciname, ts.parenttid, v.vernacularname, v.language"])
 				->from("Taxa","t")
 			;
 			$leftJoins[] = array("Taxavernaculars","v","WITH","t.tid = v.tid");
 			#$wheres[] = "v.sortsequence = 1";
 			$innerJoins[] = array("Taxstatus","ts","WITH","t.tid = ts.tid");
-			$wheres[] = "v.language = 'English'";
+			$wheres[] = $taxa->expr()->orX(
+											$taxa->expr()->eq('v.language',"'English'"),
+											$taxa->expr()->eq('v.language',"'Basename'")
+										);
+			
 			$wheres[] = "ts.taxauthid = 1";
 			$wheres[] = "t.rankid = 220";	
 	
-			if ($this->dynClid) {
+			if ($this->dynClid) {#dynClid is not finished
 				$innerJoins[] = array("Fmdyncltaxalink","clk","WITH","t.tid = clk.tid");
 				$wheres[] = "clk.dynclid = :dynclid";
 				$params[] = array("dynclid",$this->dynClid);
 			}else{
-				if ($this->clType == 'dynamic') {
+				if ($this->clType == 'dynamic') {#not finished
 					$innerJoins[] = array("Omoccurrences","o","WITH","t.tid = o.TidInterpreted");
 					#wheres[] = $this->dynamicSQL;
 				}else{
@@ -162,20 +166,30 @@ class IdentManager extends Manager {
 			$currSciName = '';
 			$currIdx = null;
 			foreach ($results as $idx => $result) {
+
 				if ($result['sciname'] == $currSciName) {
-					$newResults[$currIdx]['vernacularnames'][] = $result['vernacularname'];
+					if (strtolower($result['language']) == 'basename') {
+						$newResults[$currIdx]['vernacular']['basename'] = $result['vernacularname'];
+					}elseif(strtolower($result['language']) == 'english') {
+						$newResults[$currIdx]['vernacular']['names'][] = $result['vernacularname'];
+					}
 				}else{
 					$newResults[$idx] = $result;
-					$newResults[$idx]['vernacularnames'][] = $result['vernacularname'];
+					$newResults[$idx]['vernacular']['basename'] = '';
+					$newResults[$idx]['vernacular']['names'] = [];
+					if (strtolower($result['language']) == 'basename') {
+						$newResults[$idx]['vernacular']['basename'] = $result['vernacularname'];
+					}elseif(strtolower($result['language']) == 'english') {
+						$newResults[$idx]['vernacular']['names'][] = $result['vernacularname'];
+					}
 					unset($newResults[$idx]['vernacularname']);
+					unset($newResults[$idx]['language']);
 					$currSciName = $result['sciname'];
 					$currIdx = $idx;
 				}
-			}
-				
-			
+			}		
 		}
-		$this->taxa = $newResults;
+		$this->taxa = array_values($newResults);
   }
   
 	public function getCharacteristics() {
@@ -220,18 +234,18 @@ class IdentManager extends Manager {
 			
 			$selects = [
 				"d.tid",
-				#"cs.cid",
+				"chars.cid",
 				"cs.cs",
 				"cs.charstatename",
 				"cs.description as csdescr",
 				"chars.charname",
 				"chars.description as chardescr",
-				#"chars.hid",
 				"chars.helpurl",
 				"chars.difficultyrank",
 				"chars.display",
 				"chars.defaultlang",
 				"Count(cs.cs) as ct",
+				"chead.hid",
 				"chead.headingname"
 			];
 			$groupBy = [
@@ -282,7 +296,40 @@ class IdentManager extends Manager {
 			;
 			$cquery = $chars->getQuery();
 			#var_dump($cquery->getSQL());
-			$results = $cquery->execute();
+			$cresults = $cquery->execute();
+			$results = [];
+
+			foreach ($cresults as $cres) {
+				if (	($key = array_search($cres['hid'],array_column($results,'hid'))) === false) {
+					$tmp = [
+						'headingname' => $cres['headingname'],
+						'hid' => $cres['hid'],
+						'characters' => []
+					];
+					$results[] = $tmp;
+				}
+				$key = array_search($cres['hid'],array_column($results,'hid'));
+				if (	($skey = array_search($cres['cid'],array_column($results[$key]['characters'],'cid'))) === false) {
+					$tmp = [
+						'charname' => $cres['charname'],
+						'cid' => $cres['cid'],
+						'states' => []
+					];
+					$results[$key]['characters'][] = $tmp;
+				}
+		
+				$skey = array_search($cres['cid'],array_column($results[$key]['characters'],'cid'));				
+
+				$tmp = [
+					'cid' => $cres['cid'],
+					'cs' => $cres['cs'],
+					'charstatename' => $cres['charstatename']
+				];
+				$results[$key]['characters'][$skey]['states'][] = $tmp;
+		
+			}
+			#var_dump($results);
+			#exit;
 			return $results;
 			#IN(4835,5242,5665,6117)
 		}
