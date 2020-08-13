@@ -17,7 +17,7 @@ class ViewOpts extends React.Component {
     return (
       <div id="view-opts" className="row">
 
-        <div className="col text-right">
+        <div className="col col-left">
           <p>Show results:</p>
         </div>
         <div className="col-auto ">

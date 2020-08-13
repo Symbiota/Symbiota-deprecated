@@ -49,6 +49,8 @@ class SideBar extends React.Component {
 						<div className="stat-label">Export:</div><div className="stat-value">W CSV P</div>
 					</div>*/}
 				</div>
+		  		<div className="filter-tools">
+				  <h3>Filter Tools</h3>
 
 					{
 					<SearchWidget
@@ -66,7 +68,7 @@ class SideBar extends React.Component {
 	
 					<div id="view-opts-search" className="container row">
 						<div className="row">
-							<div className="col text-right">
+							<div className="col col-left">
 								<p>Search:</p>
 							</div>
 							<div className="col-auto">
@@ -100,7 +102,7 @@ class SideBar extends React.Component {
 						
 						
 						<div className="row">
-							<div className="col text-right">
+							<div className="col col-left">
 								<p>Include:</p>
 							</div>
 							<div className="col-auto">
@@ -118,9 +120,7 @@ class SideBar extends React.Component {
 							</div>
 						</div>
 					</div>
-					
-					
-					
+				</div>
 
 				<ViewOpts
 					viewType={ this.props.viewType }
