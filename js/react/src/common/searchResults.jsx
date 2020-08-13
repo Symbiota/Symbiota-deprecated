@@ -203,15 +203,11 @@ function IdentifySearchResult(props) {
 								{props.sortBy === 'sciName' &&
 										<div className={"card-text" + (useGrid ? "" : " d-inline")}>
 											<span className="font-italic sci-name">{props.sciName}</span>
-											{ props.commonName.length > 0? <span dangerouslySetInnerHTML={{__html: ' &mdash; '}} /> :''}
-											<span className="text-lowercase common-name">{props.commonName}</span>
 										</div>
 								}
 								{props.sortBy === 'vernacularName' &&
 										<div className={"card-text" + (useGrid ? "" : " d-inline")}>
 											<span className="font-italic sci-name">{props.commonName}</span>
-											{ props.sciName.length > 0? <span dangerouslySetInnerHTML={{__html: ' &mdash; '}} /> :''}
-											<span className="text-lowercase common-name">{props.sciName}</span>
 										</div>
 								}  
 						</div>

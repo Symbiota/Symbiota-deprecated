@@ -1,63 +1,124 @@
 import React from "react";
 import IconButton from "../common/iconButton.jsx";
-import CheckboxItem from "../common/checkboxItem.jsx";
 
 const CLIENT_ROOT = "..";
 
-class ViewOpts extends React.Component {
-
-  constructor(props) {
-    super(props);
-		//this.onViewTypeClicked = this.props.onViewTypeClicked.bind(this);
-		this.onSortByClicked = this.props.onSortByClicked.bind(this);
+function arrayCompare(a1, a2) {
+  if (a1.length !== a2.length) {
+    return false;
   }
+  for (let i in a1) {
+    if (a1[i] !== a2[i]) {
+      return false;
+    }
+  }
+  return true;
+}
+
+function getPlantAttrText(filter) {
+  const attrKeys = Object.keys(filter.val);
+  let itemText = [];
+  for (let i in attrKeys) {
+    let attrKey = attrKeys[i];
+    if (filter.val[attrKey].length > 0) {
+      itemText.push(`${attrKey.replace(/_/g, ' ')}: ${filter.val[attrKey].join(', ')}`);
+    }
+  }
+	
+  return itemText.join("<br />");
+}
+
+class ViewOpts extends React.Component {
+	
+	buildButton(filterKey,itemText) {
+		return (
+			<IconButton
+				key={ filterKey + ":" + itemText }
+				title={ itemText }
+				icon={ `${CLIENT_ROOT}/images/garden/x-out.png` }
+				isSelected={ true }
+				style={{ margin: "0.1em" }}
+				onClick={ () => { this.props.onFilterClicked(filterKey,itemText,'off'); } }
+			/>
+		)
+	}
+
 
   render() {
-    return (
-      <div id="view-opts" className="row">
+  	const buttons = [];
+  	            	
+		Object.keys(this.props.filters).map((filterKey) => {
+			let filter = this.props.filters[filterKey];
+			let showItem = true;
+			let itemText = "";
+			let itemKey = filter.key;//override below as needed
+			switch (filter.key) {
+				case "searchText":
+					if (filter.val === ViewOpts.DEFAULT_SEARCH_TEXT) {
+						showItem = false;
+					} else {
+						itemText = `Search: ${filter.val}`;
+						buttons.push({"key":filter.key,"text":itemText});
+					}
+					break;
 
-        <div className="col text-right">
-          <p>Show results:</p>
-        </div>
-        <div className="col-auto ">
-
-					<div className="view-opt-wrapper">
-					<input 
-						type="radio"
-						name="sortBy"
-						onChange={() => {
-							this.onSortByClicked("vernacularName")
-						}}
-						checked={this.props.sortBy === "vernacularName"}
-					/> <label className="" htmlFor={ "sortBy" }>Common name</label>
+				case "attrs": {
+					Object.entries(filter.val).map((feature) => {
+						if (feature[1].length) {
+							buttons.push({"key":feature[0],"text":feature[1]});
+						}
+					})
+					break;
+				}
+				default:
+					break;
+			}
+		});
+		if (buttons.length > 0) {
+			return (
+				<div id="view-opts" className="row mx-2 mt-3 px-0 py-2">
+					<div className="col">
+						<h3 className="font-weight-bold">Filtered by:</h3>
+						<div className="d-flex flex-row flex-wrap">
+							{
+								buttons.map((buttonItem) => {
+									let button = this.buildButton(buttonItem.key,buttonItem.text);
+									return (
+										button
+									)
+								})
+							}
+						</div>
 					</div>
-					<div className="view-type-wrapper">
-					<input 
-						type="radio"
-						name="sortBy"
-						onChange={() => {
-							this.onSortByClicked("sciName")
-						}}
-						checked={this.props.sortBy === "sciName"}
-					/> <label className="" htmlFor={ "sortBy" }>Scientific name</label>
-					</div>
 
-        </div>
-      </div>
-    );
+					<div className="col-auto p-0 mx-1">
+
+						<p>
+					
+							<IconButton
+								key={ "reset" }
+								title={ "Clear all" }
+								isSelected={ true }
+								style={{ margin: "0.1em" }}
+								onClick={ () => { this.props.onReset(); } }
+							/>
+							
+						</p>
+					</div>
+				</div>
+			);
+		}	
+	  return <span style={{ display: "none" }}/>;
   }
 }
 
 ViewOpts.defaultProps = {
-  sortBy: "vernacularName",
-  //viewType: "grid",
   filters: [],
-  //checklistNames: {},
-  onSortByClicked: () => {},
-  //onViewTypeClicked: () => {},
-  //onTaxaDetailClicked: () => {},
-  onFilterClicked: () => {}
+  onFilterClicked: () => {},
+  onReset: () => {}
 };
 
+ViewOpts.DEFAULT_SEARCH_TEXT = "";
+ViewOpts.DEFAULT_CLID = -1;
 
 export default ViewOpts;

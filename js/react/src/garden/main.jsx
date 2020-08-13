@@ -506,9 +506,34 @@ class GardenPageApp extends React.Component {
 			checklistId: ViewOpts.DEFAULT_CLID,
 			plantFeatures: {},
 			growthMaintenance: {},
-			beyondGarden: {}
+			beyondGarden: {},
 		};
     this.setState({ filters: filters });
+		let plantFeatureState = this.state.plantFeatureState;
+		Object.keys(plantFeatureState).map((key) => {
+			Object.keys(plantFeatureState[key]).map((item) => {
+				plantFeatureState[key][item] = false;
+			});
+		});
+		let growthMaintenanceState = this.state.growthMaintenanceState;
+		Object.keys(growthMaintenanceState).map((key) => {
+			Object.keys(growthMaintenanceState[key]).map((item) => {
+				growthMaintenanceState[key][item] = false;
+			});
+		});
+		let beyondGardenState = this.state.beyondGardenState;
+		Object.keys(beyondGardenState).map((key) => {
+			Object.keys(beyondGardenState[key]).map((item) => {
+				beyondGardenState[key][item] = false;
+			});
+		});
+
+
+    this.setState({
+			plantFeatureState: plantFeatureState,
+			growthMaintenanceState: growthMaintenanceState,
+			beyondGardenState: beyondGardenState,
+		});
 	}
   render() {
     const checkListMap = {};

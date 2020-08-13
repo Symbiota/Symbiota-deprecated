@@ -22,6 +22,9 @@ class IdentManager extends Manager {
   protected $taxa;
   protected $relevanceValue = .9;
   private   $currQuery;
+  protected $searchTerm;
+  protected $searchName = 'sciname';
+  protected $searchSynonyms = false;
   /*
   protected $basename;
   protected $images;
@@ -82,6 +85,14 @@ class IdentManager extends Manager {
   public function setRelevanceValue($rv) {
   	$this->relevanceValue = $rv;
   }
+  public function setSearchTerm($term) {
+  	$this->searchTerm = $term;
+  }
+  public function setSearchName($name = '') {
+  	if (in_array($name,array('sciname','commonname'))) {
+  		$this->searchName = $name;
+  	}
+  }
   public function setTaxa() {
   	$leftJoins = array();
   	$innerJoins = array();
@@ -105,11 +116,56 @@ class IdentManager extends Manager {
 			
 			$wheres[] = "ts.taxauthid = 1";
 			$wheres[] = "t.rankid = 220";	
+			
+			if ($this->searchTerm != '' && $this->searchName != '') {
+				switch($this->searchName) {
+					case 'commonname':
+						$innerJoins[] = array("Taxavernaculars", "v", "WITH", "t.tid = v.tid");
+						$params[] = array(":search",'%' . $this->searchTerm . '%');
+						if ($this->searchSynonyms) {
+							$wheres[] = $qb->expr()->orX(
+									$qb->expr()->like('v.vernacularname',':search'),
+									$qb->expr()->in(
+																"ts.tidaccepted",#array(1,2,3))
+																$em->createQueryBuilder()
+																	->select("ts2.tidaccepted")
+																	->from("Taxavernaculars","v2")
+																	->innerJoin("Taxstatus","ts2","WITH","v2.tid = ts2.tid")
+																	->where('v2.vernacularname LIKE :search')
+																	->getDQL()
+																)
+							);
+						}else{
+							$wheres[] = "v.vernacularname LIKE :search";
+						}
+						break;
+					case 'sciname':
+						$params[] = array(":search",'%' . $this->searchTerm . '%');
+						if ($this->searchSynonyms) {
+							$wheres[] = $qb->expr()->orX(
+									$qb->expr()->like('t.sciname',':search'),
+									$qb->expr()->in(
+																"ts.tidaccepted",#array(1,2,3))
+																$em->createQueryBuilder()
+																	->select("ts2.tidaccepted")
+																	->from("Taxa","t2")
+																	->innerJoin("Taxstatus","ts2","WITH","t2.tid = ts2.tid")
+																	->where('t2.sciname LIKE :search')
+																	->getDQL()
+																)
+							);
+						}else{
+							$wheres[] = "t.sciname LIKE :search";
+						}
+						break;
+				}
+			}
 	
 			if ($this->dynClid) {#dynClid is not finished
 				$innerJoins[] = array("Fmdyncltaxalink","clk","WITH","t.tid = clk.tid");
 				$wheres[] = "clk.dynclid = :dynclid";
 				$params[] = array("dynclid",$this->dynClid);
+
 			}else{
 				if ($this->clType == 'dynamic') {#not finished
 					$innerJoins[] = array("Omoccurrences","o","WITH","t.tid = o.TidInterpreted");
@@ -161,7 +217,6 @@ class IdentManager extends Manager {
 			$this->currQuery = $tquery;
 			$results = $tquery->getResult();
 
-				
 			$newResults = array();
 			$currSciName = '';
 			$currIdx = null;

@@ -8,7 +8,7 @@ import {IdentifySearchContainer, SearchResultContainer} from "../common/searchRe
 import ViewOpts from "./viewOpts.jsx";
 import httpGet from "../common/httpGet.js";
 import {addUrlQueryParam, getUrlQueryParams} from "../common/queryParams.js";
-import {getCommonNameStr, getTaxaPage, getIdentifyPage} from "../common/taxaUtils";
+import {getCommonNameStr, getTaxaPage, getIdentifyPage, getChecklistPage} from "../common/taxaUtils";
 import PageHeader from "../common/pageHeader.jsx";
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -16,91 +16,6 @@ import { library } from "@fortawesome/fontawesome-svg-core";
 import {faChevronDown, faChevronUp, faListUl, faSearchPlus } from '@fortawesome/free-solid-svg-icons'
 library.add( faChevronDown, faChevronUp, faListUl, faSearchPlus );
 
-
-const CIDS_PLANT_FEATURE = {
-  "flower_color": 612,
-  "bloom_months": 165,
-  "wildlife_support": 685,
-  "lifespan": 136,
-  "foliage_type": 100,
-  "plant_type": 137
-};
-
-const CIDS_GROWTH_MAINTENANCE = {
-  "landscape_uses": 679,
-  "cultivation_preferences": 767,
-  "behavior": 688,
-  "propagation": 740,
-  "ease_of_growth": 684
-};
-
-const CIDS_BEYOND_GARDEN = {
-  "ecoregion": 19,
-  "habitat": 163
-};
-
-
-const CIDS_WHOLE_PLANT = {
-  "plant_type": 137,
-  "ecoregion": 19,
-  "habitat": 163,
-  "groups_with_specialized_keys": 784
-};
-const CIDS_LEAF = {
-  "leaf_type": 710,
-  "leaf_arrangement": 640,
-};
-const CIDS_GARDENING = {
-  "sunlight": 680
-};
-
-
-
-
-
-function getAttribMatrixFromArr(attribArray) {
-  const attribMatrix = {};
-  for (let i in attribArray) {
-    let attrObj = attribArray[i];
-    attribMatrix[attrObj.title] = {};
-    for (let j in attrObj.values) {
-      let attrVal = attrObj.values[j];
-      attribMatrix[attrObj.title][attrVal] = false;
-    }
-  }
-  return attribMatrix;
-}
-
-function filterByPlantAttribs(item, itemFilterName, filterMap) {
-  let plantFeatureKeys = Object.keys(filterMap);
-  let success = true;
-  let iterSuccess;
-  let itemFeatures = item[itemFilterName];
-  // For each filter type
-  for (let i in plantFeatureKeys) {
-    iterSuccess = false;
-
-    // flower_color, ecoregion, etc.
-    let featureKey = plantFeatureKeys[i];
-
-    // blue, green, Cascades, etc.
-    let featureVals = filterMap[featureKey].map(item => item.toLowerCase());
-    let itemVals = itemFeatures[featureKey].map(item => item.toLowerCase());
-
-    // Is the intersection length greater than zero?
-    iterSuccess = featureVals.length === 0 || featureVals.filter(item => itemVals.includes(item)).length > 0;
-    success = success && iterSuccess;
-  }
-  return success;
-}
-
-function MainContentContainer(props) {
-  return (
-    <div className="container mx-auto p-4" style={{ maxWidth: "1400px" }}>
-      {props.children}
-    </div>
-  );
-}
 
 class IdentifyApp extends React.Component {
   constructor(props) {
@@ -118,18 +33,19 @@ class IdentifyApp extends React.Component {
       displayAbstract: 'default',
       filters: {
         searchText: ("search" in queryParams ? queryParams["search"] : ViewOpts.DEFAULT_SEARCH_TEXT),
-        wholePlant: {},
-        leaf: {},
-        gardening: {}
+        //wholePlant: {},
+        //leaf: {},
+        //gardening: {},
+        attrs: {}
       },
       searchText: ("search" in queryParams ? queryParams["search"] : ViewOpts.DEFAULT_SEARCH_TEXT),
       searchResults: {"familySort":{},"taxonSort":[]},
       characteristics: {},
       sortBy: ("sortBy" in queryParams ? queryParams["sortBy"] : "sciName"),
       //viewType: ("viewType" in queryParams ? queryParams["viewType"] : "list"),
-      wholePlantState: {},
-      leafState: {},
-      gardeningState: {},
+      //wholePlantState: {},
+      //leafState: {},
+      //gardeningState: {},
       totals: {
       	families: 0,
       	genera: 0,
@@ -154,11 +70,12 @@ class IdentifyApp extends React.Component {
     //this.onViewTypeChanged = this.onViewTypeChanged.bind(this);
     this.onFilterRemoved = this.onFilterRemoved.bind(this);
     this.clearFilters = this.clearFilters.bind(this);
-    this.toggleFeatureCollectionVal = this.toggleFeatureCollectionVal.bind(this);
-    this.onWholePlantChanged = this.onWholePlantChanged.bind(this);
-    this.onLeafChanged = this.onLeafChanged.bind(this);
-    this.onGardeningChanged = this.onGardeningChanged.bind(this);
-    this.updateFeatureCollectionFilters = this.updateFeatureCollectionFilters.bind(this);
+    //this.toggleFeatureCollectionVal = this.toggleFeatureCollectionVal.bind(this);
+    //this.onWholePlantChanged = this.onWholePlantChanged.bind(this);
+    //this.onLeafChanged = this.onLeafChanged.bind(this);
+    //this.onGardeningChanged = this.onGardeningChanged.bind(this);
+    this.onAttrChanged = this.onAttrChanged.bind(this);
+    //this.updateFeatureCollectionFilters = this.updateFeatureCollectionFilters.bind(this);
     this.sortResults = this.sortResults.bind(this);
   }
 
@@ -178,25 +95,7 @@ class IdentifyApp extends React.Component {
 		});
 
   }  
-	getAttributeArr(keymap) {
-		return new Promise((resolve, reject) => {
-			let pArr = [];
-			let keys = Object.keys(keymap);
-			for (let i in keys) {
-				let attrib_key = keys[i];
-				pArr.push(
-					httpGet(`${this.props.clientRoot}/ident/rpc/api.php?attr=${keymap[attrib_key]}`)
-						.then((res) => {
-							return {
-								"title": attrib_key,
-								"values": JSON.parse(res)
-							};
-						})
-				);
-			}
-			Promise.all(pArr).then((vals) => { resolve(vals); }).catch((err) => { reject(err); });
-		});
-	}
+
   componentDidMount() {
     // Load search results
     let url = `${this.props.clientRoot}/ident/rpc/api.php?clid=${this.props.clid}&pid=${this.props.pid}`;
@@ -224,82 +123,11 @@ class IdentifyApp extends React.Component {
 				//window.location = "/";
 				console.error(err);
 			});
-    // Load sidebar options
-    Promise.all([
-      this.getAttributeArr(CIDS_WHOLE_PLANT),
-      this.getAttributeArr(CIDS_LEAF),
-      this.getAttributeArr(CIDS_GARDENING)
-    ]).then((res) => {
-        const allWholePlant = res[0];
-        const allLeaf = res[1];
-        const allGardening = res[2];
-        const newFilters = Object.assign({}, this.state.filters);
-        for (let i in allWholePlant) {
-          let featureKey = allWholePlant[i];
-          newFilters.wholePlant[featureKey.title] = [];
-        }
-
-        for (let i in allLeaf) {
-          let featureKey = allLeaf[i];
-          newFilters.leaf[featureKey.title] = [];
-        }
-
-        for (let i in allGardening) {
-          let featureKey = allGardening[i];
-          newFilters.gardening[featureKey.title] = [];
-        }
-
-        const newWholePlant = Object.assign({}, this.state.wholePlantState, getAttribMatrixFromArr(allWholePlant));
-        const newLeaf = Object.assign({}, this.state.leafState, getAttribMatrixFromArr(allLeaf));
-        const newGardening = Object.assign({}, this.state.gardeningState, getAttribMatrixFromArr(allGardening));
-        //console.log(newFeatures);
-        this.setState({
-          wholePlantState: newWholePlant,
-          leafState: newLeaf,
-          gardeningState: newGardening,
-          filters: newFilters
-        });
-      }
-    )
-    .catch((err) => {
-      console.error(err);
-    });
-  }
-
-  toggleFeatureCollectionVal(featureCollection, featureCollectionFilterName, featureKey, featureVal) {
-    const changeObj = {};
-    const newCollection = Object.assign({}, this.state[featureCollection]);
-    changeObj[featureVal] = !this.state[featureCollection][featureKey][featureVal];
-    newCollection[featureKey] = Object.assign({}, newCollection[featureKey], changeObj);
-    const stateObj = {};
-    stateObj[featureCollection] = newCollection;
-    this.setState(stateObj, () => {
-      this.updateFeatureCollectionFilters(featureCollectionFilterName, featureCollection, featureKey, featureVal);
-    });
-  }
-
-  updateFeatureCollectionFilters(featureCollectionFilter, featureCollectionStateName, featureKey, featureVal) {
-    const isInFilters = this.state.filters[featureCollectionFilter][featureKey].includes(featureVal);
-    const stateVal = this.state[featureCollectionStateName][featureKey][featureVal];
-    let changed = false;
-    let newFilters;
-    if (stateVal && !isInFilters) {
-      newFilters = Object.assign({}, this.state.filters);
-      newFilters[featureCollectionFilter][featureKey].push(featureVal);
-      changed = true;
-    } else if (isInFilters) {
-      newFilters = Object.assign({}, this.state.filters);
-      newFilters[featureCollectionFilter][featureKey] = newFilters[featureCollectionFilter][featureKey].filter(
-        (item) => item !== featureVal
-      );
-      changed = true;
-    }
-    if (changed) {
-      this.setState({ filters: newFilters });
-    }
+ 
   }
 
   onFilterRemoved(key,text) {
+
   	const characteristics = ["wholePlant","leaf","gardening"];
     // TODO: This is clunky
     switch (key) {
@@ -309,21 +137,9 @@ class IdentifyApp extends React.Component {
           () => this.onSearch({ text: ViewOpts.DEFAULT_SEARCH_TEXT, value: -1 })
         );
         break;
-      default://characteristics: plant features, etc.
-      	let keyArr = key.split(":");
-				switch(keyArr[0]) {
-					case "wholePlant":
-					  this.onWholePlantChanged(keyArr[1], text);
-					  break;
-					case "leaf":
-					  this.onLeafChanged(keyArr[1], text);
-					  break;
-					case "gardening":
-					  this.onGardeningChanged(keyArr[1], text);
-					  break;
-					default: 
-						break;
-				}
+
+      default://characteristics/attr numbers
+      	this.onAttrChanged(key,text,'off');
         break;
     }
   }
@@ -334,27 +150,36 @@ class IdentifyApp extends React.Component {
 
   // On search start
   onSearch(searchObj) {
-    const newQueryStr = addUrlQueryParam("search", searchObj.text);
-    /*window.history.replaceState(
-      { query: newQueryStr },
-      '',
-      window.location.pathname + newQueryStr
-    );*/
-
     this.setState({
-      isLoading: true,
       searchText: searchObj.text,
       filters: Object.assign({}, this.state.filters, { searchText: searchObj.text })
+    },function() {
+			this.doQuery();
     });
-    let url = `${this.props.clientRoot}/checklists/rpc/api.php?search=${searchObj.text}`;
-    url += '&name=sciname';
-    url += '&clid=' + this.state.clid;
-    url += '&pid=' + this.state.pid;
-    url += '&synonyms=off';
+  }
+  doQuery() {
+    this.setState({
+      isLoading: true
+    });
+    let url = `${this.props.clientRoot}/ident/rpc/api.php`;
+    let identParams = new URLSearchParams();
+    identParams.append("clid",this.getClid());
+    identParams.append("pid",this.getPid());
+    if (this.state.searchText) {
+    	identParams.append("search",this.state.searchText);
+	    identParams.append("name",'sciname');
+    	//url += '&synonyms=off';
+  	}
+  	Object.keys(this.state.filters.attrs).map((idx) => {
+	    identParams.append("attr[]",idx);
+		});
+  	url = url + '?' + identParams.toString();
+    //console.log(url);
     httpGet(url)
       .then((res) => {
       	let jres = JSON.parse(res);
         this.onSearchResults(jres.taxa);
+        this.onAttrResults(jres.characteristics);
         this.updateTotals(jres.totals);
       })
       .catch((err) => {
@@ -363,7 +188,9 @@ class IdentifyApp extends React.Component {
       .finally(() => {
         this.setState({ isLoading: false });
       });
+  
   }
+  
 	updateTotals(totals) {
 	  this.setState({
       totals: totals,
@@ -374,6 +201,9 @@ class IdentifyApp extends React.Component {
     let newResults;
     newResults = this.sortResults(results);
     this.setState({ searchResults: newResults });
+  }
+  onAttrResults(chars) {
+    this.setState({ characteristics: chars });
   }
   sortResults(results) {//should receive taxa from API
   	let newResults = {};
@@ -413,18 +243,23 @@ class IdentifyApp extends React.Component {
     return newResults;
   }
 
-  onWholePlantChanged(featureKey, featureVal) {
-    this.toggleFeatureCollectionVal("wholePlantState", "wholePlant", featureKey, featureVal);
-  }
+  onAttrChanged(featureKey, featureName, featureVal) {
 
-  onLeafChanged(featureKey, featureVal) {
-    this.toggleFeatureCollectionVal("leafState", "leaf", featureKey, featureVal);
-  }
+  	let filters = this.state.filters;
 
-  onGardeningChanged(featureKey, featureVal) {
-    this.toggleFeatureCollectionVal("gardeningState", "gardening", featureKey, featureVal);
-  }
+  	if (featureVal == 'off') {
+  		delete filters.attrs[featureKey];
+  	}else{
+  		filters.attrs[featureKey] = featureName;
+  	}
 
+    this.setState({
+      filters: Object.assign({}, this.state.filters, { attrs: filters.attrs })
+    },function() {
+    	this.doQuery();
+    });
+    
+  }
   onSortByChanged(type) {
     this.setState({ sortBy: type },function() {
     	this.setState({ searchResults: this.sortByName(this.state.searchResults) });
@@ -434,11 +269,11 @@ class IdentifyApp extends React.Component {
 	clearFilters() {
 		let filters = {
 			searchText: ViewOpts.DEFAULT_SEARCH_TEXT,
-			wholePlant: {},
-			leaf: {},
-			gardening: {}
+			attrs: {},
 		};
-    this.setState({ filters: filters });
+    this.setState({ filters: filters },function() {
+    	this.doQuery();
+    });
 	}
     render() {
 		let shortAbstract = '';
@@ -500,22 +335,19 @@ class IdentifyApp extends React.Component {
 							searchName={ this.state.searchName }
 							viewType={ this.state.viewType }
 							sortBy={ this.state.sortBy }
-							onSearchNameClicked={ this.onSearchNameChanged }
+							//onSearchNameClicked={ this.onSearchNameChanged }
 							onSortByClicked={ this.onSortByChanged }
-							onViewTypeClicked={ this.onViewTypeChanged }
+							onAttrClicked={ this.onAttrChanged }
+							//onViewTypeClicked={ this.onViewTypeChanged }
 							onFilterClicked={ this.onFilterRemoved }
 							
-							wholePlant={ this.state.wholePlantState }
-							leaf={ this.state.leafState }
-							gardening={ this.state.gardeningState }
-							onWholePlantChanged={ this.onWholePlantChanged }
-							onLeafChanged={ this.onLeafChanged }
-							onGardeningChanged={ this.onGardeningChanged }
-							filters={
-								Object.keys(this.state.filters).map((filterKey) => {
-									return { key: filterKey, val: this.state.filters[filterKey] }
-								})
-							}
+							//wholePlant={ this.state.wholePlantState }
+							//leaf={ this.state.leafState }
+							//gardening={ this.state.gardeningState }
+							//onWholePlantChanged={ this.onWholePlantChanged }
+							//onLeafChanged={ this.onLeafChanged }
+							//onGardeningChanged={ this.onGardeningChanged }
+							filters={ this.state.filters }
 						/>
 						
 					}
@@ -525,12 +357,26 @@ class IdentifyApp extends React.Component {
 							<div className="col">
 								<div className="explore-header inventory-header">
 									<div className="current-wrapper">
-										<div className="btn btn-primary current-button" role="button"><FontAwesomeIcon icon="list-ul" /> Identify</div>
+										<div className="btn btn-primary current-button" role="button"><FontAwesomeIcon icon="search-plus" /> Identify</div>
+										
+										<ViewOpts
+											onReset={ this.clearFilters }
+											onFilterClicked={ this.onFilterRemoved }
+											filters={
+												Object.keys(this.state.filters).map((filterKey) => {
+													return { key: filterKey, val: this.state.filters[filterKey] }
+												})
+											}
+										/>
+															
 									</div>
 									<div className="alt-wrapper">
 										<div>Switch to</div>
-										<a href={getIdentifyPage(this.props.clientRoot,this.getClid(),this.getPid())}><div className="btn btn-primary alt-button" role="button"><FontAwesomeIcon icon="search-plus" /> Identify</div></a>
+										<a href={getChecklistPage(this.props.clientRoot,this.getClid(),this.getPid())}><div className="btn btn-primary alt-button" role="button">
+										<FontAwesomeIcon icon="list-ul" /> Explore</div>
+										</a>
 									</div>
+									
 								</div>
 									<IdentifySearchContainer
 										searchResults={ this.state.searchResults }

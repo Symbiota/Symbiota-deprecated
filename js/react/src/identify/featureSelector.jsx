@@ -5,10 +5,11 @@ class FeatureSelector extends React.Component {
   constructor(props) {
     super(props);
     this.getDropdownId = this.getDropdownId.bind(this);
+    this.onAttrClicked = this.props.onAttrClicked.bind(this);
   }
 
   getDropdownId() {
-    return `feature-selector-${this.props.title.replace(' ', '_')}`;
+    return `feature-selector-${this.props.cid}`;
   }
 
   render() {
@@ -33,14 +34,23 @@ class FeatureSelector extends React.Component {
                     let itemVal = this.props.items[itemKey];
                     //console.log(itemVal);
                     let attr = itemVal.cid + '-' + itemVal.cs;
+                    //console.log(this.props.attrs);
+                    let checked = (this.props.attrs[attr] ? true: false );
                     return (
                       <li key={ attr }>
-                        <CheckboxItem
-                          name={ attr }
-                          value={ attr ? "on" : "off" }
-                          onChange={ () => this.props.onChange(attr) }
-													checked={ attr }
-                        /> 
+                        <span>
+													<input 
+														type="checkbox" 
+														name={ attr } 
+														value={ 'on' } 
+														checked={ checked? 'checked' : '' }
+														onChange={() => {
+															this.onAttrClicked(attr,itemVal.charstatename,(checked? 'off':'on'))
+														}}
+													/>
+													<label className="ml-2 align-middle" htmlFor={ attr }>{ itemVal.charstatename }</label>
+												</span>
+                        
                       </li>
                     )
                   })
@@ -56,7 +66,7 @@ class FeatureSelector extends React.Component {
 
 FeatureSelector.defaultProps = {
   items: [],
-  onChanged: () => {}
+  onAttrClicked: () => {}
 };
 
 export default FeatureSelector;

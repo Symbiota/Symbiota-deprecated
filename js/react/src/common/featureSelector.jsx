@@ -31,8 +31,6 @@ class FeatureSelector extends React.Component {
                 {
                   Object.keys(this.props.items).map((itemKey) => {
                     let itemVal = this.props.items[itemKey];
-                    console.log(itemKey);
-                    console.log(itemVal);
                     return (
                       <li key={ itemKey }>
                         <CheckboxItem

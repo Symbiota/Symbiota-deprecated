@@ -109,6 +109,7 @@ class SideBar extends React.Component {
   constructor(props) {
     super(props);
 
+    this.onSortByClicked = this.props.onSortByClicked.bind(this);
   }
   render() {  
   	let showFixedTotals = false;
@@ -158,19 +159,36 @@ class SideBar extends React.Component {
         />
         
         
-				<ViewOpts
-					viewType={ this.props.viewType }
-					sortBy={ this.props.sortBy }
-					onSortByClicked={ this.props.onSortByClicked }
-					onSearchNameClicked={ this.props.onViewTypeClicked }
-					onViewTypeClicked={ this.props.onViewTypeClicked }
-					//onFilterClicked={ this.onFilterRemoved }
-					filters={
-						Object.keys(this.props.filters).map((filterKey) => {
-							return { key: filterKey, val: this.props.filters[filterKey] }
-						})
-					}
-				/>
+ 				<div id="view-opts" className="row">
+
+					<div className="col text-right">
+						<p>Show results:</p>
+					</div>
+					<div className="col-auto ">
+
+						<div className="view-opt-wrapper">
+						<input 
+							type="radio"
+							name="sortBy"
+							onChange={() => {
+								this.onSortByClicked("vernacularName")
+							}}
+							checked={this.props.sortBy === "vernacularName"}
+						/> <label className="" htmlFor={ "sortBy" }>Common name</label>
+						</div>
+						<div className="view-type-wrapper">
+						<input 
+							type="radio"
+							name="sortBy"
+							onChange={() => {
+								this.onSortByClicked("sciName")
+							}}
+							checked={this.props.sortBy === "sciName"}
+						/> <label className="" htmlFor={ "sortBy" }>Scientific name</label>
+						</div>
+
+					</div>
+				</div>
 				
 				{
 					Object.keys(this.props.characteristics).map((idx) => {
@@ -180,15 +198,18 @@ class SideBar extends React.Component {
 							{
 								Object.keys(firstLevel.characters).map((idx2) => {
 									let secondLevel = firstLevel.characters[idx2];
-									console.log(secondLevel);
+									//console.log(secondLevel);
 									return (
 										<FeatureSelector
 											key={ secondLevel.cid }
+											cid={ secondLevel.cid }
 											title={ secondLevel.charname }
 											items={ secondLevel.states }
+											attrs={ this.props.filters.attrs }
 											/*onChange={ (featureKey) => {
 												this.props.onWholePlantChanged(plantFeature, featureKey)
 											}}*/
+											onAttrClicked={ this.props.onAttrClicked } 
 										/>
 									)
 								})
@@ -198,63 +219,6 @@ class SideBar extends React.Component {
 						)
 					})
 				}
-
-{/*
-        <div>
-          <SideBarDropdown title="Whole Plant">
-            {
-              Object.keys(this.props.wholePlant).map((plantFeature) => {
-                return (
-                  <FeatureSelector
-                    key={ plantFeature }
-                    title={ plantFeature }
-                    items={ this.props.wholePlant[plantFeature] }
-                    onChange={ (featureKey) => {
-                      this.props.onWholePlantChanged(plantFeature, featureKey)
-                    }}
-                  />
-                )
-              })
-            }
-          </SideBarDropdown>
-
-          <SideBarDropdown title="Leaf">
-            {
-              Object.keys(this.props.leaf).map((plantFeature) => {
-                return (
-                  <FeatureSelector
-                    key={ plantFeature }
-                    title={ plantFeature }
-                    items={ this.props.leaf[plantFeature] }
-                    onChange={ (featureKey) => {
-                      this.props.onLeafChanged(plantFeature, featureKey)
-                    }}
-                  />
-                )
-              })
-            }
-          </SideBarDropdown>
-
-          <SideBarDropdown title="Gardening">
-            {
-              Object.keys(this.props.gardening).map((plantFeature) => {
-                return (
-                  <FeatureSelector
-                    key={ plantFeature }
-                    title={ plantFeature }
-                    items={ this.props.gardening[plantFeature] }
-                    onChange={ (featureKey) => {
-                      this.props.onGardeningChanged(plantFeature, featureKey)
-                    }}
-                  />
-                )
-              })
-            }
-          </SideBarDropdown>
-
-          <SideBarDropdown title="Commercial Availability (Coming soon)" disabled={ true } />
-
-        </div>          */}
       </div>
     );
   }

@@ -126,6 +126,7 @@ class ExploreApp extends React.Component {
 
   onFilterRemoved(key) {
     // TODO: This is clunky
+    console.log(key);
     switch (key) {
       case "searchText":
         this.setState({
@@ -144,13 +145,13 @@ class ExploreApp extends React.Component {
 
   // On search start
   onSearch(searchObj) {
-    const newQueryStr = addUrlQueryParam("search", searchObj.text);
+    //const newQueryStr = addUrlQueryParam("search", searchObj.text);
+    
     /*window.history.replaceState(
       { query: newQueryStr },
       '',
       window.location.pathname + newQueryStr
     );*/
-
     this.setState({
       isLoading: true,
       searchText: searchObj.text,
@@ -225,7 +226,7 @@ class ExploreApp extends React.Component {
     } else {
       newName = 'sciname';
     }
-    let newQueryStr = addUrlQueryParam("searchName", newName);
+    //let newQueryStr = addUrlQueryParam("searchName", newName);
     /*window.history.replaceState({ query: newQueryStr }, '', window.location.pathname + newQueryStr);*/
   }
   onSearchSynonymsChanged(synonyms) {
@@ -237,7 +238,7 @@ class ExploreApp extends React.Component {
     } else {
       newSynonyms = 'on';
     }
-    let newQueryStr = addUrlQueryParam("searchSynonyms", newSynonyms);
+    //let newQueryStr = addUrlQueryParam("searchSynonyms", newSynonyms);
     /*window.history.replaceState({ query: newQueryStr }, '', window.location.pathname + newQueryStr);*/
   }
   onViewTypeChanged(type) {
@@ -254,7 +255,7 @@ class ExploreApp extends React.Component {
   		this.setState({showTaxaDetail: "off"});
 	  }
     
-    let newQueryStr = addUrlQueryParam("viewType", newType);
+    //let newQueryStr = addUrlQueryParam("viewType", newType);
     /*window.history.replaceState({ query: newQueryStr }, '', window.location.pathname + newQueryStr);*/
   }
   onTaxaDetailChanged(taxaDetail) {
@@ -267,7 +268,7 @@ class ExploreApp extends React.Component {
   		newVal = 'off';
   	}
   	
-  	let newQueryStr = addUrlQueryParam("taxaDetail",newVal);
+  	//let newQueryStr = addUrlQueryParam("taxaDetail",newVal);
     /*window.history.replaceState({ query: newQueryStr }, '', window.location.pathname + newQueryStr);*/
   }
 
