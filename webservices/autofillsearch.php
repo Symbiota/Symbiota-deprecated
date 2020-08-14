@@ -37,23 +37,35 @@ if (array_key_exists("q", $_REQUEST)) {
     
   $duplicates = array_uintersect($sciNameResults, $vernacularResults,'compareTextValues');
   $results = array_merge($sciNameResults, $vernacularResults);
-  #var_dump($vernacularResults);exit;
-	foreach ($results as $idx => $result) {
-  	foreach ($duplicates as $duplicate) {
-			if (strcasecmp($result['text'],$duplicate['text']) == 0) {
-				#remove all dupes
-				unset($results[$idx]);
+	if ($duplicates) {#overlap between sciname and common name 
+		foreach ($results as $idx => $result) {
+			foreach ($duplicates as $duplicate) {
+				if (strcasecmp($result['text'],$duplicate['text']) == 0) {
+					#remove all dupes
+					unset($results[$idx]);
+				}
+			}
+		}	
+		#var_dump($results);exit;
+		foreach ($duplicates as $duplicate) {#re-add one entry for dupe as generic search
+			$results[] = array(
+				"text"	=>	$duplicate['text'],
+				"taxonId" => null,
+				"rankId" => null
+			);
+		}
+	}elseif (sizeof($vernacularResults) > 1) {#check for overlap within common
+		#find the shortest value and remove its taxonId value, so that home/main.jsx treats it as generic text search
+		$text_lengths = array_map("strlen",array_column($vernacularResults,"text"));
+		$target_length = min($text_lengths);
+		foreach ($results as $idx => $result) {
+			if (strlen($result['text']) === $target_length ) {
+				$results[$idx]['taxonId'] = null;
+				$results[$idx]['rankId'] = null;
 			}
 		}
-	}	
-	foreach ($duplicates as $duplicate) {#re-add one entry for dupe as generic search
-		$results[] = array(
-			"text"	=>	$duplicate['text'],
-			"taxonId" => null,
-			"rankId" => null
-		);
 	}
-
+	
   usort($results, function ($a, $b) {
     return strcmp($a["text"], $b["text"]);
   });

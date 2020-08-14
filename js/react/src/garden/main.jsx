@@ -180,6 +180,24 @@ class GardenPageApp extends React.Component {
         growthMaintenance: {},
         beyondGarden: {}
       },
+      defaultFilters: {
+        sunlight: ViewOpts.DEFAULT_SUNLIGHT,
+        moisture: ViewOpts.DEFAULT_MOISTURE,
+        height: ViewOpts.DEFAULT_HEIGHT,
+        width: ViewOpts.DEFAULT_WIDTH,
+        searchText: ViewOpts.DEFAULT_SEARCH_TEXT,
+        checklistId: ViewOpts.DEFAULT_CLID,
+        plantFeatures: {
+        	"bloom_months": [],
+        	"flower_color": [],
+        	"foliage_type": [],
+        	"lifespan": [],
+        	"plant_type": [],
+        	"wildlife_support": []
+        },
+        growthMaintenance: {},
+        beyondGarden: {}
+      },
       searchText: ("search" in queryParams ? queryParams["search"] : ViewOpts.DEFAULT_SEARCH_TEXT),
       searchResults: [],
       cannedSearches: [],
@@ -246,11 +264,9 @@ class GardenPageApp extends React.Component {
           let featureKey = allBeyondGarden[i];
           newFilters.beyondGarden[featureKey.title] = [];
         }
-
         const newFeatures = Object.assign({}, this.state.plantFeatureState, getAttribMatrixFromArr(allPlantFeatures));
         const newGrowth = Object.assign({}, this.state.growthMaintenanceState, getAttribMatrixFromArr(allGrowthMaintainence));
         const newBeyond = Object.assign({}, this.state.beyondGardenState, getAttribMatrixFromArr(allBeyondGarden));
-        //console.log(newFeatures);
         this.setState({
           plantFeatureState: newFeatures,
           growthMaintenanceState: newGrowth,
@@ -277,12 +293,19 @@ class GardenPageApp extends React.Component {
   }
 
   updateFeatureCollectionFilters(featureCollectionFilter, featureCollectionStateName, featureKey, featureVal) {
-    const isInFilters = this.state.filters[featureCollectionFilter][featureKey].includes(featureVal);
+
+    const isInFilters = ( Object.keys(this.state.filters[featureCollectionFilter]).length > 0 && Object.keys(this.state.filters[featureCollectionFilter][featureKey]).length > 0 && this.state.filters[featureCollectionFilter][featureKey].includes(featureVal));
     const stateVal = this.state[featureCollectionStateName][featureKey][featureVal];
     let changed = false;
     let newFilters;
     if (stateVal && !isInFilters) {
       newFilters = Object.assign({}, this.state.filters);
+      if (Object.keys(this.state.filters[featureCollectionFilter]).length == 0) {
+      	newFilters[featureCollectionFilter] = {};
+      }
+      if (Object.keys(this.state.filters[featureCollectionFilter][featureKey]).length == 0) {
+      	newFilters[featureCollectionFilter][featureKey] = [];
+      }
       newFilters[featureCollectionFilter][featureKey].push(featureVal);
       changed = true;
     } else if (isInFilters) {
@@ -497,18 +520,10 @@ class GardenPageApp extends React.Component {
     /*window.history.replaceState({ query: newQueryStr }, '', window.location.pathname + newQueryStr);*/
   }
 	clearFilters() {
-		let filters = {
-			sunlight: ViewOpts.DEFAULT_SUNLIGHT,
-			moisture: ViewOpts.DEFAULT_MOISTURE,
-			height: ViewOpts.DEFAULT_HEIGHT,
-			width: ViewOpts.DEFAULT_WIDTH,
-			searchText: ViewOpts.DEFAULT_SEARCH_TEXT,
-			checklistId: ViewOpts.DEFAULT_CLID,
-			plantFeatures: {},
-			growthMaintenance: {},
-			beyondGarden: {},
-		};
-    this.setState({ filters: filters });
+		//let filters = this.state.defaultFilters;
+
+    this.setState({ filters: this.state.defaultFilters });
+    console.log(this.state.defaultFilters);
 		let plantFeatureState = this.state.plantFeatureState;
 		Object.keys(plantFeatureState).map((key) => {
 			Object.keys(plantFeatureState[key]).map((item) => {
