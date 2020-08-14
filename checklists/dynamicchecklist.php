@@ -22,7 +22,9 @@ else{
 }
 
 if($interface == "key"){
-	header("Location: ".$clientRoot."/ident/key.php?dynclid=".$dynClid."&taxon=All Species");
+	$url = $clientRoot."/ident/key.php?dynclid=".$dynClid."&taxon=All Species";
+	#echo $url;exit;
+	header("Location: ". $url);
 }
 else{
 	header("Location: ".$clientRoot."/checklists/checklist.php?dynclid=".$dynClid);

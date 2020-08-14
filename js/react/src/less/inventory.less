@@ -288,7 +288,7 @@
 		}
 	}
 }
-#react-explore-app {
+#react-explore-app, #react-identify-app {
 	.sidebar-wrapper {
 		flex-basis: 350px;
 		.stat {
@@ -298,7 +298,11 @@
 		input:disabled+label {
 			color: @gray-type;
 		}
-		
+		.view-opt-wrapper {
+			label {
+				margin-bottom: 0;
+			}
+		}
 	}
 	.results-wrapper {
 		flex-basis: 710px;
@@ -306,16 +310,21 @@
 	.family-group {
 		clear: both;
 	}
-	.explore-main hr{
+	.inventory-main hr{
 		border-top: 3px solid @med-green;
 		width: 100%;
 		margin: 0px 15px;
 	}
-	.explore-header {
+	.inventory-header {
 		display: flex;
 		flex-flow: row nowrap;
 		justify-content: space-between;
 		border-bottom: 3px solid @light-green;
+		.current-wrapper {
+			.current-button.btn-primary {
+				background-color: black !important;
+			}
+		}
 	}
 	#search-results {
 		.family-group {

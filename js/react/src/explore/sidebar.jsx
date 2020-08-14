@@ -66,12 +66,12 @@ class SideBar extends React.Component {
 					/>
 					}
 	
-					<div id="view-opts-search" className="container row">
+					<div className="view-opts" className="container row">
 						<div className="row">
-							<div className="col col-left">
+							<div className="opt-labels">
 								<p>Search:</p>
 							</div>
-							<div className="col-auto">
+							<div className="opt-settings">
 								
 								<div className="view-opt-wrapper">
 									<input 
@@ -83,7 +83,7 @@ class SideBar extends React.Component {
 										}}
 										checked={this.props.searchName === 'sciname'? true: false}
 									
-									/> Scientific Names
+									/> <label className="" htmlFor={ "searchname" }>Scientific Names</label>
 								</div>
 								
 								<div className="view-opt-wrapper">
@@ -95,17 +95,17 @@ class SideBar extends React.Component {
 											this.onSearchNameClicked("commonname")
 										}}
 										checked={this.props.searchName === 'commonname'? true: false}
-									/> Common Names
+									/> <label className="" htmlFor={ "searchname" }>Common Names</label>
 								</div>
 							</div>
 						</div>
 						
-						
+					
 						<div className="row">
-							<div className="col col-left">
+							<div className="opt-labels">
 								<p>Include:</p>
 							</div>
-							<div className="col-auto">
+							<div className="opt-settings">
 
 										<input 
 											type="checkbox" 
@@ -120,7 +120,6 @@ class SideBar extends React.Component {
 							</div>
 						</div>
 					</div>
-				</div>
 
 				<ViewOpts
 					viewType={ this.props.viewType }
@@ -138,7 +137,8 @@ class SideBar extends React.Component {
 						})
 					}
 				/>
-      </div>
+			</div>
+		</div>
     );
   }
 }

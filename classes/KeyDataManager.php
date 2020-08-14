@@ -216,7 +216,7 @@ class KeyDataManager extends Manager{
 				"(SELECT DISTINCT tList.TID, d.CID FROM ($this->sql) AS tList INNER JOIN kmdescr d ON tList.TID = d.TID WHERE (d.CS <> '-')) AS tc ".
 				"GROUP BY tc.CID HAVING ((Count(tc.TID)) > $countMin)";
 			$rs = $this->conn->query($sqlRev);
-			//echo $sqlRev.'<br/>';
+			#echo $sqlRev.'<br/>';
 			while($row = $rs->fetch_object()){
 				$charList[] = $row->CID;
 			}
@@ -492,7 +492,7 @@ class KeyDataManager extends Manager{
             //if($this->commonDisplay) $sqlWhere .= "ORDER BY t.tid, v.SortSequence ";
             $sqlFrom = "FROM ".str_repeat("(",$count)."(taxa t ".$sqlFromBase;
             $this->sql = $sqlBase.$sqlFrom.$sqlWhere;
-            //echo $this->sql;
+            #echo $this->sql;
         }
     }
 

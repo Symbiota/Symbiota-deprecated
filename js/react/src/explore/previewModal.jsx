@@ -73,15 +73,15 @@ export default class ExplorePreviewModal extends Component {
 					<div className="row">
 						<div className="col-12 container" style={{ minHeight: "15em", backgroundSize: "cover", backgroundImage:`url('`+ this.state.iconUrl + `')` }}>
 							
-							<div className="row explore-preview-header">
+							<div className="explore-preview-header">
 								<h1 className="col-10">{ this.state.title }</h1>
 								<div className="col-2 text-md-right close-modal" onClick={() => { this.onTogglePreviewClick() }}>
-									<FontAwesomeIcon icon="times-circle" />
+									<FontAwesomeIcon icon="times-circle" size="2x"/>
 								</div>
 							</div>
 				
 							
-							<div className="row">
+							<div className="col-12">
 								<h2 dangerouslySetInnerHTML={{__html: this.state.intro}}/>
 							</div>
 							
@@ -91,36 +91,38 @@ export default class ExplorePreviewModal extends Component {
 					<div className="row explore-preview-main">
 	
 
-						<div className="col main-wrapper">
+						<div className="container main-wrapper">
 							<div className="row">
-								<div className="col">
+								<div className="col-12">
 										<p dangerouslySetInnerHTML={{__html: this.state.abstract}} />
 								</div>
 							</div>
 						</div>
 						
 						
-						<div className="col-auto sidebar-wrapper">
-							<h3>{ this.state.title } Data</h3>
-								<div className={ "row dashed-border py-2" }>
-						      <div className="col font-weight-bold">Families:</div>
-						      <div className="col text-capitalize">{ this.state.totals.families }</div>
+						<div className="container sidebar-wrapper">
+							<div>
+								<h3>{ this.state.title } Data</h3>
+								<div className={ "dashed-border py-2 data-item" }>
+						      <div className="data-label font-weight-bold">Families:</div>
+						      <div className=" text-capitalize">{ this.state.totals.families }</div>
 						    </div>
-								<div className={ "row dashed-border py-2" }>
-						      <div className="col font-weight-bold">Genera:</div>
-						      <div className="col text-capitalize">{ this.state.totals.genera }</div>
+								<div className={ "dashed-border py-2 data-item" }>
+						      <div className="data-label font-weight-bold">Genera:</div>
+						      <div className=" text-capitalize">{ this.state.totals.genera }</div>
 						    </div>
-								<div className={ "row dashed-border py-2" }>
-						      <div className="col font-weight-bold">Species:</div>
-						      <div className="col text-capitalize">{ this.state.totals.species } (species rank)</div>
+								<div className={ "dashed-border py-2 data-item" }>
+						      <div className="data-label font-weight-bold">Species:</div>
+						      <div className=" text-capitalize">{ this.state.totals.species } (species rank)</div>
 						    </div>
-								<div className={ "row dashed-border py-2" }>
-						      <div className="col font-weight-bold">Total Taxa:</div>
-						      <div className="col text-capitalize">{ this.state.totals.taxa } (including subsp. and var.)</div>
+								<div className={ "dashed-border py-2 data-item" }>
+						      <div className="data-label font-weight-bold">Total Taxa:</div>
+						      <div className=" text-capitalize">{ this.state.totals.taxa } (including subsp. and var.)</div>
 						    </div>
 	           	 	<div className="taxa-link">
             			<a href={ getChecklistPage(this.props.clientRoot, this.props.clid, this.props.pid) }><button className="d-block my-2 btn-primary">See the plants</button></a>
             		</div>
+            	</div>
 						</div>
 						
 						

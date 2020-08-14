@@ -1,13 +1,14 @@
 "use strict";
+
 import React from "react";
 import ReactDOM from "react-dom";
 
 import SideBar from "./sidebar.jsx";
+import {IdentifySearchContainer, SearchResultContainer} from "../common/searchResults.jsx";
 import ViewOpts from "./viewOpts.jsx";
 import httpGet from "../common/httpGet.js";
-import {ExploreSearchContainer, SearchResultContainer} from "../common/searchResults.jsx";
 import {addUrlQueryParam, getUrlQueryParams} from "../common/queryParams.js";
-import {getCommonNameStr, getTaxaPage, getIdentifyPage} from "../common/taxaUtils";
+import {getCommonNameStr, getTaxaPage, getIdentifyPage, getChecklistPage} from "../common/taxaUtils";
 import PageHeader from "../common/pageHeader.jsx";
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -15,32 +16,30 @@ import { library } from "@fortawesome/fontawesome-svg-core";
 import {faChevronDown, faChevronUp, faListUl, faSearchPlus } from '@fortawesome/free-solid-svg-icons'
 library.add( faChevronDown, faChevronUp, faListUl, faSearchPlus );
 
-class ExploreApp extends React.Component {
+
+class IdentifyApp extends React.Component {
   constructor(props) {
     super(props);
     const queryParams = getUrlQueryParams(window.location.search);
 
     // TODO: searchText is both a core state value and a state.filters value; How can we make the filtering system more efficient?
     this.state = {
-      clid: null,
-      pid: null,
+      isLoading: true,
+      clid: -1,
+      pid: -1,
+      dynclid: -1,
       title: '',
       authors: '',
       abstract: '',
       displayAbstract: 'default',
-      //taxa: [],
-      isLoading: true,
       filters: {
         searchText: ("search" in queryParams ? queryParams["search"] : ViewOpts.DEFAULT_SEARCH_TEXT),
-        //checklistId: ("clid" in queryParams ? parseInt(queryParams["clid"]) : ViewOpts.DEFAULT_CLID),
+        attrs: {}
       },
       searchText: ("search" in queryParams ? queryParams["search"] : ViewOpts.DEFAULT_SEARCH_TEXT),
       searchResults: {"familySort":{},"taxonSort":[]},
-      searchName: ("searchName" in queryParams ? queryParams["searchName"] : "sciname"),
-      searchSynonyms: ("searchSynonyms" in queryParams ? queryParams["searchSynonyms"] : 'on'),
-      sortBy: ("sortBy" in queryParams ? queryParams["sortBy"] : "family"),
-      viewType: ("viewType" in queryParams ? queryParams["viewType"] : "list"),
-      showTaxaDetail: ("showTaxaDetail" in queryParams ? queryParams["showTaxaDetail"] : 'off'),
+      characteristics: {},
+      sortBy: ("sortBy" in queryParams ? queryParams["sortBy"] : "sciName"),
       totals: {
       	families: 0,
       	genera: 0,
@@ -54,18 +53,24 @@ class ExploreApp extends React.Component {
       	taxa: 0
       }
     };
+
     this.getPid = this.getPid.bind(this);
     this.getClid = this.getClid.bind(this);
+    this.getDynclid = this.getDynclid.bind(this);
 
     this.onSearchTextChanged = this.onSearchTextChanged.bind(this);
     this.onSearch = this.onSearch.bind(this);
     this.onSearchResults = this.onSearchResults.bind(this);
-    this.onSearchNameChanged = this.onSearchNameChanged.bind(this);
-    this.onSearchSynonymsChanged = this.onSearchSynonymsChanged.bind(this);
     this.onSortByChanged = this.onSortByChanged.bind(this);
-    this.onViewTypeChanged = this.onViewTypeChanged.bind(this);
-    this.onTaxaDetailChanged = this.onTaxaDetailChanged.bind(this);
+    //this.onViewTypeChanged = this.onViewTypeChanged.bind(this);
     this.onFilterRemoved = this.onFilterRemoved.bind(this);
+    this.clearFilters = this.clearFilters.bind(this);
+    //this.toggleFeatureCollectionVal = this.toggleFeatureCollectionVal.bind(this);
+    //this.onWholePlantChanged = this.onWholePlantChanged.bind(this);
+    //this.onLeafChanged = this.onLeafChanged.bind(this);
+    //this.onGardeningChanged = this.onGardeningChanged.bind(this);
+    this.onAttrChanged = this.onAttrChanged.bind(this);
+    //this.updateFeatureCollectionFilters = this.updateFeatureCollectionFilters.bind(this);
     this.sortResults = this.sortResults.bind(this);
   }
 
@@ -74,6 +79,9 @@ class ExploreApp extends React.Component {
   }
   getPid() {
     return parseInt(this.props.pid);
+  }
+  getDynclid() {
+    return parseInt(this.props.dynclid);
   }
   toggleDisplay = () => {
 		let newVal = 'default';
@@ -84,32 +92,41 @@ class ExploreApp extends React.Component {
 			displayAbstract: newVal
 		});
 
-  }
+  }  
 
   componentDidMount() {
     // Load search results
-    //this.onSearch({ text: this.state.searchText });
-    
-    httpGet(`./rpc/api.php?clid=${this.props.clid}&pid=${this.props.pid}`)
+    let url = `${this.props.clientRoot}/ident/rpc/api.php`;
+    let identParams = new URLSearchParams();
+    if (this.getClid() > -1) {
+	    identParams.append("clid",this.getClid());
+	  }
+	  if (this.getPid() > -1) {
+	    identParams.append("pid",this.getPid());
+	  }
+    if (this.getDynclid() > -1) {
+	    identParams.append("dynclid",this.getDynclid());
+	  }
+  	url = url + '?' + identParams.toString();
+		//console.log(url);
+
+    httpGet(url)
 			.then((res) => {
-				// /checklists/rpc/api.php?clid=3
 				res = JSON.parse(res);
 				
-				/*let googleMapUrl = '';				
-				if (res.checklists.length > 0) {
-					googleMapUrl = 'https://maps.google.com/maps/api/staticmap?maptype=terrain&key=AIzaSyBmcl6Y-gu3bGdmp7LIQaDCa43TKLrP7qY';
-					googleMapUrl += '&size=640x400&zoom=6';
-					let latLng = res.checklists.map((checklist) => checklist.latcentroid + ',' + checklist.longcentroid);
-					googleMapUrl += '&markers=size:tiny%7C' + latLng.join("%7C");					
-				}*/
+				let taxa = '';
+				if (res && res.taxa) {
+					taxa = this.sortResults(res.taxa);
+				}
 				this.setState({
 					clid: this.getClid(),
 					pid: this.getPid(),
+					dynclid: this.getDynclid(),
 					title: res.title,
 					authors: res.authors,
 					abstract: res.abstract,
-					//taxa: res.taxa,
-					searchResults: this.sortResults(res.taxa),
+					characteristics: res.characteristics,
+					searchResults: taxa,
 					totals: res.totals,
 					fixedTotals: res.totals,
 					//googleMapUrl: googleMapUrl
@@ -118,18 +135,19 @@ class ExploreApp extends React.Component {
 				pageTitle.innerHTML = `${pageTitle.innerHTML} ${res.title}`;
 			})
 			.catch((err) => {
-				window.location = "/";
-				//console.error(err);
+				//window.location = "/";
+				console.error(err);
 			})
       .finally(() => {
         this.setState({ isLoading: false });
       });
+ 
   }
 
+  onFilterRemoved(key,text) {
 
-  onFilterRemoved(key) {
+  	const characteristics = ["wholePlant","leaf","gardening"];
     // TODO: This is clunky
-    console.log(key);
     switch (key) {
       case "searchText":
         this.setState({
@@ -137,7 +155,9 @@ class ExploreApp extends React.Component {
           () => this.onSearch({ text: ViewOpts.DEFAULT_SEARCH_TEXT, value: -1 })
         );
         break;
-      default:
+
+      default://characteristics/attr numbers
+      	this.onAttrChanged(key,text,'off');
         break;
     }
   }
@@ -148,28 +168,43 @@ class ExploreApp extends React.Component {
 
   // On search start
   onSearch(searchObj) {
-    //const newQueryStr = addUrlQueryParam("search", searchObj.text);
-    
-    /*window.history.replaceState(
-      { query: newQueryStr },
-      '',
-      window.location.pathname + newQueryStr
-    );*/
     this.setState({
-      isLoading: true,
       searchText: searchObj.text,
       filters: Object.assign({}, this.state.filters, { searchText: searchObj.text })
+    },function() {
+			this.doQuery();
     });
-    let url = `${this.props.clientRoot}/checklists/rpc/api.php?search=${searchObj.text}`;
-    url += '&name=' + this.state.searchName;
-    url += '&clid=' + this.state.clid;
-    url += '&pid=' + this.state.pid;
-    url += '&synonyms=' + this.state.searchSynonyms;
+  }
+  doQuery() {
+    this.setState({
+      isLoading: true
+    });
+    let url = `${this.props.clientRoot}/ident/rpc/api.php`;
+    let identParams = new URLSearchParams();
+    if (this.getClid() > -1) {
+	    identParams.append("clid",this.getClid());
+	  }
+	  if (this.getPid() > -1) {
+	    identParams.append("pid",this.getPid());
+	  }
+    if (this.getDynclid() > -1) {
+	    identParams.append("dynclid",this.getDynclid());
+	  }
+    if (this.state.searchText) {
+    	identParams.append("search",this.state.searchText);
+	    identParams.append("name",'sciname');
+    	//url += '&synonyms=off';
+  	}
+  	Object.keys(this.state.filters.attrs).map((idx) => {
+	    identParams.append("attr[]",idx);
+		});
+  	url = url + '?' + identParams.toString();
     //console.log(url);
     httpGet(url)
       .then((res) => {
       	let jres = JSON.parse(res);
         this.onSearchResults(jres.taxa);
+        this.onAttrResults(jres.characteristics);
         this.updateTotals(jres.totals);
       })
       .catch((err) => {
@@ -178,119 +213,113 @@ class ExploreApp extends React.Component {
       .finally(() => {
         this.setState({ isLoading: false });
       });
-      
+  
   }
+  
 	updateTotals(totals) {
 	  this.setState({
       totals: totals,
     });
 	}
-
   // On search end
   onSearchResults(results) {
     let newResults;
     newResults = this.sortResults(results);
     this.setState({ searchResults: newResults });
   }
-  
+  onAttrResults(chars) {
+    this.setState({ characteristics: chars });
+  }
   sortResults(results) {//should receive taxa from API
   	let newResults = {};
-  	//console.log(results);
-
-		let familySort = {};
-		let tmp = {};
-		Object.entries(results).map(([key, result]) => {
-			if (!tmp[result.family]) {
-				tmp[result.family] = [];
-			}
-			tmp[result.family].push(result);
-		})
-		//sort family alpha
-		Object.keys(tmp).sort().forEach(function(key) {
-			familySort[key] = tmp[key];
-		});
-
 		let taxonSort = results;
-    
+		let familySort = {};
+		
+		Object.entries(results).map(([key, result]) => {
+			if (!familySort[result.family]) {
+				familySort[result.family] = [];
+			}
+			familySort[result.family].push(result);
+		})
+		
+
     newResults = {"familySort": familySort, "taxonSort": taxonSort};
-    
+    newResults = this.sortByName(newResults);
   	return newResults;
   }
-
-  onSortByChanged(sortBy) {
-    this.setState({ sortBy: sortBy });
+  sortByName(searchResults) {
+  	//uses state.searchResults, which are already duplicated into taxonSort and familySort
+  	//taxonSort not implemented on this page, but left intact just in case
+  	let familySort = searchResults.familySort;
+  	Object.entries(familySort).map(([key, result]) => {
+			if (this.state.sortBy === "sciName") {
+				familySort[key] = result.sort((a, b) => { return a["sciname"] > b["sciname"] ? 1 : -1 });
+			} else {
+				familySort[key] = result.sort((a, b) => {
+					return (
+						getCommonNameStr(a).toLowerCase() >
+						getCommonNameStr(b).toLowerCase() ? 1 : -1
+						
+					);
+				});
+			}
+		})
+    let newResults = {"familySort": familySort, "taxonSort": searchResults.taxonSort};
+    return newResults;
   }
-  onSearchNameChanged(name) {
-    this.setState({ searchName: name });
 
-    let newName;
-    if (name === "commonname") {
-      newName = name;
-    } else {
-      newName = 'sciname';
-    }
-    //let newQueryStr = addUrlQueryParam("searchName", newName);
-    /*window.history.replaceState({ query: newQueryStr }, '', window.location.pathname + newQueryStr);*/
-  }
-  onSearchSynonymsChanged(synonyms) {
-    this.setState({ searchSynonyms: synonyms });
+  onAttrChanged(featureKey, featureName, featureVal) {
 
-    let newSynonyms;
-    if (synonyms === 'off') {
-      newSynonyms = synonyms;
-    } else {
-      newSynonyms = 'on';
-    }
-    //let newQueryStr = addUrlQueryParam("searchSynonyms", newSynonyms);
-    /*window.history.replaceState({ query: newQueryStr }, '', window.location.pathname + newQueryStr);*/
-  }
-  onViewTypeChanged(type) {
-    this.setState({ viewType: type });
+  	let filters = this.state.filters;
 
-    let newType;
-    if (type) {
-      newType = type;
-    } else {
-      newType = 'list';
-    }
-    
-    if (newType === 'grid') {
-  		this.setState({showTaxaDetail: "off"});
-	  }
-    
-    //let newQueryStr = addUrlQueryParam("viewType", newType);
-    /*window.history.replaceState({ query: newQueryStr }, '', window.location.pathname + newQueryStr);*/
-  }
-  onTaxaDetailChanged(taxaDetail) {
-  	this.setState({showTaxaDetail: taxaDetail});
-  	
-  	let newVal;
-  	if (taxaDetail === 'on') {
-  		newVal = taxaDetail;
+  	if (featureVal == 'off') {
+  		delete filters.attrs[featureKey];
   	}else{
-  		newVal = 'off';
+  		filters.attrs[featureKey] = featureName;
   	}
-  	
-  	//let newQueryStr = addUrlQueryParam("taxaDetail",newVal);
-    /*window.history.replaceState({ query: newQueryStr }, '', window.location.pathname + newQueryStr);*/
+
+    this.setState({
+      filters: Object.assign({}, this.state.filters, { attrs: filters.attrs })
+    },function() {
+    	this.doQuery();
+    });
+    
+  }
+  onSortByChanged(type) {
+    this.setState({ sortBy: type },function() {
+    	this.setState({ searchResults: this.sortByName(this.state.searchResults) });
+    });
   }
 
-  render() {
+	clearFilters() {
+		let filters = {
+			searchText: ViewOpts.DEFAULT_SEARCH_TEXT,
+			attrs: {},
+		};
+    this.setState({ filters: filters },function() {
+    	this.doQuery();
+    });
+	}
+    render() {
 		let shortAbstract = '';
 		if (this.state.abstract.length > 0) {
 			shortAbstract = this.state.abstract.replace(/^(.{240}[^\s]*).*/, "$1") + "...";//wordsafe truncate
 		}
+		let suggestionUrl = `${this.props.clientRoot}/checklists/rpc/autofillsearch.php`;
+		
     return (
     <div className="wrapper">
 			<div className="page-header">
 				<PageHeader bgClass="explore" title={ "Exploring Oregon's Botanical Diversity" } />
       </div>
-      <div className="container explore" style={{ minHeight: "45em" }}>
+      <div className="container identify" style={{ minHeight: "45em" }}>
  				<div className="row">
           <div className="col-9">
             <h2>{ this.state.title }</h2>
+
+            { this.state.authors.length > 0 &&
             <p className="authors"><strong>Authors:</strong> <span className="authors-content" dangerouslySetInnerHTML={{__html: this.state.authors}} /></p>
-						
+						}
 						{this.state.abstract.length > 0 && this.state.displayAbstract == 'default' &&
 							<div>
 							<p className="abstract"><strong>Abstract:</strong> <span className="abstract-content" dangerouslySetInnerHTML={{__html: shortAbstract}} /></p>
@@ -305,50 +334,39 @@ class ExploreApp extends React.Component {
 							<div className="less more-less" onClick={() => this.toggleDisplay()}>
 									<FontAwesomeIcon icon="chevron-up" />Hide Abstract
 							</div>
-							</div>
-						
+							</div>					
 						}				
-												
 
-						
           </div>
           <div className="col-3">
           	map here
           </div>
         </div>
-				<div className="row explore-main inventory-main">
+				<div className="row identify-main inventory-main">
 					<hr/>
 					<div className="col-auto sidebar-wrapper">
-					{
-					
+					{	(this.getDynclid() > 0 || this.getClid() > 0) &&
 						<SideBar
 							//ref={ this.sideBarRef }
 							clid={ this.state.clid }
+							dynclid={ this.state.dynclid }
 							style={{ background: "#DFEFD3" }}
 							isLoading={ this.state.isLoading }
 							clientRoot={this.props.clientRoot}
 							totals={ this.state.totals }
 							fixedTotals={ this.state.fixedTotals }
+							characteristics={ this.state.characteristics }
 							searchText={ this.state.searchText }
-							searchSuggestionUrl="./rpc/autofillsearch.php"
+							searchSuggestionUrl={ suggestionUrl }
 							onSearch={ this.onSearch }
 							onSearchTextChanged={ this.onSearchTextChanged }
 							searchName={ this.state.searchName }
-							searchSynonyms={ this.state.searchSynonyms }
 							viewType={ this.state.viewType }
 							sortBy={ this.state.sortBy }
-							showTaxaDetail={ this.state.showTaxaDetail }
-							onSearchSynonymsClicked={ this.onSearchSynonymsChanged }
-							onSearchNameClicked={ this.onSearchNameChanged }
 							onSortByClicked={ this.onSortByChanged }
-							onViewTypeClicked={ this.onViewTypeChanged }
-							onTaxaDetailClicked={ this.onTaxaDetailChanged }
+							onAttrClicked={ this.onAttrChanged }
 							onFilterClicked={ this.onFilterRemoved }
-							filters={
-								Object.keys(this.state.filters).map((filterKey) => {
-									return { key: filterKey, val: this.state.filters[filterKey] }
-								})
-							}
+							filters={ this.state.filters }
 						/>
 						
 					}
@@ -356,21 +374,39 @@ class ExploreApp extends React.Component {
 					<div className="col results-wrapper">
 						<div className="row">
 							<div className="col">
-								<div className="explore-header inventory-header">
+								<div className="identify-header inventory-header">
 									<div className="current-wrapper">
-										<div className="btn btn-primary current-button" role="button"><FontAwesomeIcon icon="list-ul" /> Explore</div>
+										<div className="btn btn-primary current-button" role="button"><FontAwesomeIcon icon="search-plus" /> Identify</div>
+										
+										<ViewOpts
+											onReset={ this.clearFilters }
+											onFilterClicked={ this.onFilterRemoved }
+											filters={
+												Object.keys(this.state.filters).map((filterKey) => {
+													return { key: filterKey, val: this.state.filters[filterKey] }
+												})
+											}
+										/>
+															
 									</div>
+									{ this.getClid() > -1 &&
 									<div className="alt-wrapper">
 										<div>Switch to</div>
-										<a href={getIdentifyPage(this.props.clientRoot,this.getClid(),this.getPid())}><div className="btn btn-primary alt-button" role="button"><FontAwesomeIcon icon="search-plus" /> Identify</div></a>
+										<a href={getChecklistPage(this.props.clientRoot,this.getClid(),this.getPid())}><div className="btn btn-primary alt-button" role="button">
+										<FontAwesomeIcon icon="list-ul" /> Explore</div>
+										</a>
 									</div>
+									}
 								</div>
-									<ExploreSearchContainer
+								  { this.getDynclid() > 0 && this.state.searchResults.taxonSort.length == 0 && this.state.isLoading == false &&
+										<p><strong>No results found:</strong> Your dynamic checklist may have expired.  <a href={ this.props.clientRoot + "/checklists/dynamicmap.php?interface=key"}>Try again?</a></p>
+									}
+            
+									<IdentifySearchContainer
 										searchResults={ this.state.searchResults }
 										viewType={ this.state.viewType }
 										sortBy={ this.state.sortBy }
-										showTaxaDetail={ this.state.showTaxaDetail }
-										clientRoot={this.props.clientRoot}
+										clientRoot={ this.props.clientRoot }
 									/>
 										
 							</div>
@@ -382,20 +418,28 @@ class ExploreApp extends React.Component {
     );
   }
 }
-ExploreApp.defaultProps = {
-  clid: -1,
-  pid: -1,
-};
 
 const headerContainer = document.getElementById("react-header");
 const dataProps = JSON.parse(headerContainer.getAttribute("data-props"));
-const domContainer = document.getElementById("react-explore-app");
+const domContainer = document.getElementById("react-identify-app");
 const queryParams = getUrlQueryParams(window.location.search);
-if (queryParams.cl) {
+
+if (queryParams.cl || queryParams.dynclid) {
   ReactDOM.render(
-    <ExploreApp clid={queryParams.cl } pid={queryParams.pid } clientRoot={ dataProps["clientRoot"] }/>,
+    <IdentifyApp 
+    	clid={queryParams.cl ? queryParams.cl : -1 } 
+    	pid={queryParams.proj ? queryParams.proj : -1 } 
+    	dynclid={queryParams.dynclid ? queryParams.dynclid : -1 } 
+    	clientRoot={ dataProps["clientRoot"] }
+    />,
     domContainer
   );
 } else {
   window.location = "/projects/";
 }
+
+
+
+
+
+

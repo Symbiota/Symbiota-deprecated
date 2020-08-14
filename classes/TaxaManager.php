@@ -589,7 +589,6 @@ class TaxaManager {
     	list($width, $height) = getimagesize($image['url']);
     	echo $width;
     }*/
-    
     $return = $images;
     return $return;
   }
@@ -690,6 +689,32 @@ class TaxaManager {
 			"characteristics" => [],
 			"spp" => [],
 		];
+	}
+	public static function getTaxaCounts($taxa) {
+		$families = array();
+		$genera = array();
+		$species = array();
+		#$taxa = array();
+	
+		foreach ($taxa as $idx => $taxon) {
+			$families[] = $taxon['family'];
+			$sciArr = explode(" ",$taxon['sciname']);
+			if (isset($sciArr[0])) {
+				$genera[] = $sciArr[0];
+			}
+			if (isset($sciArr[1])) {
+				$species[] = $sciArr[0] . " " . $sciArr[1];
+			}
+		}
+		$families = array_unique($families);
+		$genera = array_unique($genera);
+		$species = array_unique($species);
+		return array(
+			"families"	=> sizeof($families),
+			"genera"		=> sizeof($genera),
+			"species"		=> sizeof($species),
+			"taxa"			=> sizeof($taxa)
+		);
 	}
 
   
