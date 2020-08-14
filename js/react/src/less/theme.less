@@ -968,7 +968,7 @@ div#info-page {
 }
 /* used by multiple areas */
 .modal-backdrop {
-	position: 'fixed';
+	position: fixed;
 	top: 64;
 	bottom: 0;
 	left: 0;
@@ -1110,18 +1110,70 @@ div#info-page {
 			padding: .3em;
 		}
 	}
-}
-.explore-preview-modal {
-	margin-top: 3em;
-	h1, h2 {
-		color: white;
+	
+	.explore-preview-modal {//used in taxa and garden, so needs to be here
+		margin-top: 3em;
+		overflow-y: scroll;
+		max-height: 80vh;
+		h1, h2 {
+			color: white;
+		}
+		.explore-preview-header{
+			display: flex;
+			flex-flow: row nowrap;
+			justify-content: space-between;
+			margin-top: 1.5em;
+			h1 {
+				font-size: 60px;
+				margin-bottom: 0;
+			}
+			.close-modal {
+			}
+		}
+
+		h2 {
+			font-size: 28px;
+		}
+		.explore-preview-main {
+			background-color: white;
+			color: black;
+			.main-wrapper {
+				padding: 1em 30px;
+				font-size: 22px;
+				line-height: 1.4em;
+				flex-basis: 66%;
+			}
+			.sidebar-wrapper {
+				margin-top: 1em;
+				padding: 0 15px 0 0;
+				border-left: 1px dotted @dark-gray;
+				flex-basis: 33%;
+				font-size: 14px;
+				> div {
+					margin-left: 15px;
+				}
+				h3 {
+					margin: 0 0 1em;
+					color: @med-green;
+					font-size: 18px;
+					font-weight: bold;
+				}
+				.data-item {
+					display: flex;
+					flex-flow: row nowrap;
+					.data-label {
+						flex-basis: 35%;
+					}
+				}
+				.btn-primary {
+					font-size: 16px;
+					padding: .5em .7em;
+				}
+			}
+		}
 	}
-	.explore-preview-header{
-	}
-	.explore-preview-main {
-		background-color: white;
-		color: black;
-	}
+
+	
 }
 
 .explore, .identify {

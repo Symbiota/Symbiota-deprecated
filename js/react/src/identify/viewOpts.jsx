@@ -76,7 +76,7 @@ class ViewOpts extends React.Component {
 		});
 		if (buttons.length > 0) {
 			return (
-				<div className="view-opts" className="row ">
+				<div className="view-opts row ">
 					<div className="button-wrapper">
 						<h3 className="font-weight-bold">Filtered by:</h3>
 						<div className="d-flex flex-row flex-wrap">
