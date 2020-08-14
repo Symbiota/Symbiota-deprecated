@@ -27,7 +27,7 @@ function obfuscate($email) {
 <?php
 include( $serverRoot . "/header.php" );
 ?>
-<div id="info-page">
+<div class="info-page">
     <section id="titlebackground" class="title-leaf">
         <!-- if you need a full width column, just put it outside of .inner-content -->
         <!-- .inner-content makes a column max width 1100px, centered in the viewport -->
@@ -48,7 +48,7 @@ include( $serverRoot . "/header.php" );
             <p><a href="mailto:ofpflora@oregonflora.org">ofpflora@oregonflora.org</a></p>
         </div> <!-- .inner-content -->
     </section>
-</div> <!-- #info-page -->
+</div> <!-- .info-page -->
 <?php
 include( $serverRoot . "/footer.php" );
 ?>

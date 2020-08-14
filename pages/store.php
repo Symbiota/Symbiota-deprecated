@@ -20,7 +20,7 @@ header("Content-Type: text/html; charset=" . $charset);
 include($serverRoot . "/header.php");
 ?>
 
-<div id="info-page">
+<div class="info-page">
     <section id="titlebackground" class="title-redberry">
         <div class="inner-content">
             <h1>Oregon Flora Store</h1>

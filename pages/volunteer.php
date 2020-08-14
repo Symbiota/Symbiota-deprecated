@@ -62,7 +62,7 @@ function obfuscate($email) {
 <?php
 include( $serverRoot . "/header.php" );
 ?>
-<div id="info-page">
+<div class="info-page">
     <section id="titlebackground" class="title-redberry">
         <div class="inner-content">
             <h1>Volunteer</h1>

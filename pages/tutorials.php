@@ -22,7 +22,7 @@ header( "Content-Type: text/html; charset=" . $charset );
 include( $serverRoot . "/header.php" );
 ?>
 
-<div id="info-page">
+<div class="info-page">
     <section id="titlebackground" class="title-blueberry">
         <div class="inner-content">
             <h1>How to get the most our of our site</h1>

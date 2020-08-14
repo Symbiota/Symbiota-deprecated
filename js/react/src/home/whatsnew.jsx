@@ -34,7 +34,7 @@ class WhatsNew extends React.Component {
 
 		
     return (
-				<div id="info-page">
+				<div className="info-page">
 						<section id="titlebackground" className="title-blueberry">
 								<div className="inner-content">
 										<h1>News and Events</h1>

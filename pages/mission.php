@@ -19,7 +19,7 @@ header( "Content-Type: text/html; charset=" . $charset );
 <?php
 include( $serverRoot . "/header.php" );
 ?>
-<div id="info-page">
+<div class="info-page">
     <section id="titlebackground" class="title-leaf">
         <div class="inner-content">
             <h1>Mission and History</h1>
@@ -110,7 +110,7 @@ include( $serverRoot . "/header.php" );
             </div>
         </div> <!-- .inner-content -->
     </section>
-</div> <!-- #info-page -->
+</div> <!-- .info-page -->
 
 <?php
 include( $serverRoot . "/footer.php" );
