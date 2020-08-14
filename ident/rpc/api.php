@@ -6,6 +6,22 @@ include_once("$SERVER_ROOT/classes/IdentManager.php");
 include_once("$SERVER_ROOT/classes/ExploreManager.php");
 include_once("$SERVER_ROOT/classes/TaxaManager.php");
 
+
+
+function getEmpty() {
+  return [
+    "clid" => -1,
+    "title" => '',
+    "intro" => '',
+    "iconUrl" => '',
+    "authors" => '',
+    "abstract" => '',
+    "taxa" => [],
+    "characteristics" => [],
+  ];
+}
+
+
 /**
  * Returns all unique taxa 
  * @params $_GET
@@ -13,7 +29,7 @@ include_once("$SERVER_ROOT/classes/TaxaManager.php");
 function get_data($params) {
 
 	$search = null;
-	$results = [];
+	$results = getEmpty();
 	
 	if (isset($params["clid"])) {
 		$em = SymbosuEntityManager::getEntityManager();
@@ -28,13 +44,14 @@ function get_data($params) {
 		$results["authors"] = ($checklist->getAuthors()? $checklist->getAuthors() :'') ;
 		$results["abstract"] = ($checklist->getAbstract()? $checklist->getAbstract() :'') ;
 	}elseif(isset($params['dynclid'])) {
-		$results["clid"] = '';
-		$results["title"] = '';
-		$results["intro"] = '';
-		$results["iconUrl"] = '' ;
-		$results["authors"] = '' ;
-		$results["abstract"] = '';
-	
+
+		$em = SymbosuEntityManager::getEntityManager();
+		$repo = $em->getRepository("Fmdynamicchecklists");
+		$model = $repo->find($params["dynclid"]);
+		if ($model) {
+			$dynamic_checklist = ExploreManager::fromModel($model);
+			$results["title"] = $dynamic_checklist->getTitle();
+		}
 	
 	}
 

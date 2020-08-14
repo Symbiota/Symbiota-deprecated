@@ -23,7 +23,7 @@ else{
 
 if($interface == "key"){
 	$url = $clientRoot."/ident/key.php?dynclid=".$dynClid."&taxon=All Species";
-	echo $url;exit;
+	#echo $url;exit;
 	header("Location: ". $url);
 }
 else{

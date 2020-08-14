@@ -24,28 +24,22 @@ class IdentifyApp extends React.Component {
 
     // TODO: searchText is both a core state value and a state.filters value; How can we make the filtering system more efficient?
     this.state = {
-      isLoading: false,
-      clid: null,
-      pid: null,
+      isLoading: true,
+      clid: -1,
+      pid: -1,
+      dynclid: -1,
       title: '',
       authors: '',
       abstract: '',
       displayAbstract: 'default',
       filters: {
         searchText: ("search" in queryParams ? queryParams["search"] : ViewOpts.DEFAULT_SEARCH_TEXT),
-        //wholePlant: {},
-        //leaf: {},
-        //gardening: {},
         attrs: {}
       },
       searchText: ("search" in queryParams ? queryParams["search"] : ViewOpts.DEFAULT_SEARCH_TEXT),
       searchResults: {"familySort":{},"taxonSort":[]},
       characteristics: {},
       sortBy: ("sortBy" in queryParams ? queryParams["sortBy"] : "sciName"),
-      //viewType: ("viewType" in queryParams ? queryParams["viewType"] : "list"),
-      //wholePlantState: {},
-      //leafState: {},
-      //gardeningState: {},
       totals: {
       	families: 0,
       	genera: 0,
@@ -62,6 +56,7 @@ class IdentifyApp extends React.Component {
 
     this.getPid = this.getPid.bind(this);
     this.getClid = this.getClid.bind(this);
+    this.getDynclid = this.getDynclid.bind(this);
 
     this.onSearchTextChanged = this.onSearchTextChanged.bind(this);
     this.onSearch = this.onSearch.bind(this);
@@ -85,6 +80,9 @@ class IdentifyApp extends React.Component {
   getPid() {
     return parseInt(this.props.pid);
   }
+  getDynclid() {
+    return parseInt(this.props.dynclid);
+  }
   toggleDisplay = () => {
 		let newVal = 'default';
 		if (this.state.displayAbstract == 'default') {
@@ -98,20 +96,37 @@ class IdentifyApp extends React.Component {
 
   componentDidMount() {
     // Load search results
-    let url = `${this.props.clientRoot}/ident/rpc/api.php?clid=${this.props.clid}&pid=${this.props.pid}`;
+    let url = `${this.props.clientRoot}/ident/rpc/api.php`;
+    let identParams = new URLSearchParams();
+    if (this.getClid() > -1) {
+	    identParams.append("clid",this.getClid());
+	  }
+	  if (this.getPid() > -1) {
+	    identParams.append("pid",this.getPid());
+	  }
+    if (this.getDynclid() > -1) {
+	    identParams.append("dynclid",this.getDynclid());
+	  }
+  	url = url + '?' + identParams.toString();
+		//console.log(url);
+
     httpGet(url)
 			.then((res) => {
-				// /ident/rpc/api.php?clid=3&pid=1
 				res = JSON.parse(res);
-			
+				
+				let taxa = '';
+				if (res && res.taxa) {
+					taxa = this.sortResults(res.taxa);
+				}
 				this.setState({
 					clid: this.getClid(),
 					pid: this.getPid(),
+					dynclid: this.getDynclid(),
 					title: res.title,
 					authors: res.authors,
 					abstract: res.abstract,
 					characteristics: res.characteristics,
-					searchResults: this.sortResults(res.taxa),
+					searchResults: taxa,
 					totals: res.totals,
 					fixedTotals: res.totals,
 					//googleMapUrl: googleMapUrl
@@ -122,7 +137,10 @@ class IdentifyApp extends React.Component {
 			.catch((err) => {
 				//window.location = "/";
 				console.error(err);
-			});
+			})
+      .finally(() => {
+        this.setState({ isLoading: false });
+      });
  
   }
 
@@ -163,8 +181,15 @@ class IdentifyApp extends React.Component {
     });
     let url = `${this.props.clientRoot}/ident/rpc/api.php`;
     let identParams = new URLSearchParams();
-    identParams.append("clid",this.getClid());
-    identParams.append("pid",this.getPid());
+    if (this.getClid() > -1) {
+	    identParams.append("clid",this.getClid());
+	  }
+	  if (this.getPid() > -1) {
+	    identParams.append("pid",this.getPid());
+	  }
+    if (this.getDynclid() > -1) {
+	    identParams.append("dynclid",this.getDynclid());
+	  }
     if (this.state.searchText) {
     	identParams.append("search",this.state.searchText);
 	    identParams.append("name",'sciname');
@@ -278,20 +303,23 @@ class IdentifyApp extends React.Component {
     render() {
 		let shortAbstract = '';
 		if (this.state.abstract.length > 0) {
-			shortAbstract = this.state.abstract.replace(/^(.{330}[^\s]*).*/, "$1") + "...";//wordsafe truncate
+			shortAbstract = this.state.abstract.replace(/^(.{240}[^\s]*).*/, "$1") + "...";//wordsafe truncate
 		}
 		let suggestionUrl = `${this.props.clientRoot}/checklists/rpc/autofillsearch.php`;
+		
     return (
     <div className="wrapper">
 			<div className="page-header">
 				<PageHeader bgClass="explore" title={ "Exploring Oregon's Botanical Diversity" } />
       </div>
-      <div className="container explore" style={{ minHeight: "45em" }}>
+      <div className="container identify" style={{ minHeight: "45em" }}>
  				<div className="row">
           <div className="col-9">
             <h2>{ this.state.title }</h2>
+
+            { this.state.authors.length > 0 &&
             <p className="authors"><strong>Authors:</strong> <span className="authors-content" dangerouslySetInnerHTML={{__html: this.state.authors}} /></p>
-						
+						}
 						{this.state.abstract.length > 0 && this.state.displayAbstract == 'default' &&
 							<div>
 							<p className="abstract"><strong>Abstract:</strong> <span className="abstract-content" dangerouslySetInnerHTML={{__html: shortAbstract}} /></p>
@@ -314,14 +342,14 @@ class IdentifyApp extends React.Component {
           	map here
           </div>
         </div>
-				<div className="row explore-main">
+				<div className="row identify-main inventory-main">
 					<hr/>
 					<div className="col-auto sidebar-wrapper">
-					{
-					
+					{	(this.getDynclid() > 0 || this.getClid() > 0) &&
 						<SideBar
 							//ref={ this.sideBarRef }
 							clid={ this.state.clid }
+							dynclid={ this.state.dynclid }
 							style={{ background: "#DFEFD3" }}
 							isLoading={ this.state.isLoading }
 							clientRoot={this.props.clientRoot}
@@ -335,18 +363,9 @@ class IdentifyApp extends React.Component {
 							searchName={ this.state.searchName }
 							viewType={ this.state.viewType }
 							sortBy={ this.state.sortBy }
-							//onSearchNameClicked={ this.onSearchNameChanged }
 							onSortByClicked={ this.onSortByChanged }
 							onAttrClicked={ this.onAttrChanged }
-							//onViewTypeClicked={ this.onViewTypeChanged }
 							onFilterClicked={ this.onFilterRemoved }
-							
-							//wholePlant={ this.state.wholePlantState }
-							//leaf={ this.state.leafState }
-							//gardening={ this.state.gardeningState }
-							//onWholePlantChanged={ this.onWholePlantChanged }
-							//onLeafChanged={ this.onLeafChanged }
-							//onGardeningChanged={ this.onGardeningChanged }
 							filters={ this.state.filters }
 						/>
 						
@@ -355,7 +374,7 @@ class IdentifyApp extends React.Component {
 					<div className="col results-wrapper">
 						<div className="row">
 							<div className="col">
-								<div className="explore-header inventory-header">
+								<div className="identify-header inventory-header">
 									<div className="current-wrapper">
 										<div className="btn btn-primary current-button" role="button"><FontAwesomeIcon icon="search-plus" /> Identify</div>
 										
@@ -370,14 +389,19 @@ class IdentifyApp extends React.Component {
 										/>
 															
 									</div>
+									{ this.getClid() > -1 &&
 									<div className="alt-wrapper">
 										<div>Switch to</div>
 										<a href={getChecklistPage(this.props.clientRoot,this.getClid(),this.getPid())}><div className="btn btn-primary alt-button" role="button">
 										<FontAwesomeIcon icon="list-ul" /> Explore</div>
 										</a>
 									</div>
-									
+									}
 								</div>
+								  { this.getDynclid() > 0 && this.state.searchResults.taxonSort.length == 0 && this.state.isLoading == false &&
+										<p><strong>No results found:</strong> Your dynamic checklist may have expired.  <a href={ this.props.clientRoot + "/checklists/dynamicmap.php?interface=key"}>Try again?</a></p>
+									}
+            
 									<IdentifySearchContainer
 										searchResults={ this.state.searchResults }
 										viewType={ this.state.viewType }
@@ -400,9 +424,14 @@ const dataProps = JSON.parse(headerContainer.getAttribute("data-props"));
 const domContainer = document.getElementById("react-identify-app");
 const queryParams = getUrlQueryParams(window.location.search);
 
-if (queryParams.cl) {
+if (queryParams.cl || queryParams.dynclid) {
   ReactDOM.render(
-    <IdentifyApp clid={queryParams.cl } pid={queryParams.proj } clientRoot={ dataProps["clientRoot"] }/>,
+    <IdentifyApp 
+    	clid={queryParams.cl ? queryParams.cl : -1 } 
+    	pid={queryParams.proj ? queryParams.proj : -1 } 
+    	dynclid={queryParams.dynclid ? queryParams.dynclid : -1 } 
+    	clientRoot={ dataProps["clientRoot"] }
+    />,
     domContainer
   );
 } else {

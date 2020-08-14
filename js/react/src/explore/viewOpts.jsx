@@ -15,12 +15,12 @@ class ViewOpts extends React.Component {
 
   render() {
     return (
-      <div id="view-opts" className="row">
-
-        <div className="col col-left">
-          <p>Show results:</p>
-        </div>
-        <div className="col-auto ">
+      <div className="container row">
+				<div className="row">
+					<div className="opt-labels">
+						<p>Show results:</p>
+					</div>
+        <div className="opt-settings ">
 
 					<div className="view-opt-wrapper">
 					<input 
@@ -32,7 +32,7 @@ class ViewOpts extends React.Component {
 						checked={this.props.viewType === "grid"}
 					/> <label className="" htmlFor={ "viewType" }>As images</label>
 					</div>
-					<div className="view-type-wrapper">
+					<div className="view-opt-wrapper">
 					<input 
 						type="radio"
 						name="viewType"
@@ -69,6 +69,7 @@ class ViewOpts extends React.Component {
           </div>
         </div>
       </div>
+    </div>
     );
   }
 }

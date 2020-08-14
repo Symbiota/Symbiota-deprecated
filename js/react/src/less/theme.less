@@ -3,8 +3,8 @@
 @import '../../node_modules/react-modal-video/css/modal-video.min.css';
 
 //Variable for project paths since relative paths not allowed
-@subdir: "/portal";
-//@subdir: "";
+//@subdir: "/portal";
+@subdir: "";
 
 * {
   font-family: @font;
@@ -1124,7 +1124,7 @@ div#info-page {
 	}
 }
 
-.explore {
+.explore, .identify {
 
   h2 {
     font-weight: bold;
@@ -1150,7 +1150,7 @@ div#info-page {
   }
 
   #sidebar {
-
+		padding-bottom: 1em;
     h3 {
       font-size: 22px;
       font-weight: bold;
@@ -1160,7 +1160,7 @@ div#info-page {
       border-radius: 8px 8px 0 0;
       border: 5px solid @light-green;
       background-color: white;
-      padding: 15px;
+      padding: 15px 10px;
 
       h3 {
         color: @med-green;
@@ -1184,19 +1184,80 @@ div#info-page {
     }
 
     .filter-tools {
-      padding: 5px 0;
+      padding: 5px 0 2em;
 
       h3 {
-        margin-left: 20px;
+        margin-left: 15px;
       }
 
       .row {
         margin: 0;
       }
+      .top-level {
+        margin: 1em 15px;
+        h4 {
+        	padding: 0;
+        	text-transform: uppercase;
+        	color: @med-green;
+        	font-weight: bold;
+        	font-size: 1.3em;
+        }
+        .second-level {
+        	background-color: white;
+        	margin-bottom: 1em;
+        	border-radius: 8px;
+        	.feature-selectors {
+        		padding: .4em 8px;
+        		span {
+        			font-size: 1.1em;
+        			font-weight: bold;
+        		}
+						.will-v-flip {
+							transition: transform 0.5s, background-color 0.5s;
+						}
+						img {
+							float: right;
+							margin-top: 2px;
+							background-color: @med-green;
+							border-radius: 50%;
+							height: 1.5em;
+							width: 1.5em;
+						}
+						a[aria-expanded="true"] .will-v-flip {
+							transform: rotate(-180deg);
+								background-color: black;
+						}
+						ul {
+							border-top: 1px dotted @dark-gray;
+							margin: .4em 0 0;
+							padding-top: .5em;
+							li {
+								line-height: 1em;
+								padding-bottom: .6em;
+								font-weight: normal;
+								font-size: 1em;
+								vertical-align: top;
+								input {
+									vertical-align: top;
+									margin-top: 2px;
+								}
+								label {
+									max-width: 90%;
+									margin: 0 0 0 6px;
+									white-space: initial;
+									vertical-align: top;
+								}
+							
+							}
+						}
+
+        	}
+        }
+      }
     }
 
     .search-widget,
-    #view-opts-search {
+    .view-opts-search {
       padding: 0 15px !important;
     }
 
@@ -1206,9 +1267,9 @@ div#info-page {
       border: 3px solid @med-green;
     }
 
-    .col-left {
+    .opt-labels {
       padding-left: 0;
-      width: 70px;
+      width: 80px;
       font-size: 16px;
 
       p {
@@ -1216,10 +1277,13 @@ div#info-page {
         text-align: left !important;
         line-height: 16px;
         padding-top: 2px;
-        font-size: 16px;
+        font-size: 14px;
       }
     }
-
+		.opt-settings {
+			width: auto;
+			max-width: 200px;
+		}
     .view-type-wrapper {
       display: inline-block;
     }
@@ -1231,19 +1295,21 @@ div#info-page {
       }
     }
 
-    #view-opts {
+    .view-opts {
       border-top: 1px dashed black;
       margin: 0 15px 10px 15px !important;
       padding: 5px 0 0 0;
+      max-width: 100%;
     }
   }
 
-  .explore-header {
+  .inventory-header {
 
     .current-wrapper {
 
       .current-button.btn-primary {
         width: 178px;
+        min-width: 178px;
         height: 50px;
         font-size: 27px;
         text-transform: uppercase;
@@ -1282,16 +1348,52 @@ div#info-page {
         }
       }
     }
+    &.identify-header {
+    	.current-wrapper {
+    		flex-basis: 85%;
+    		display: flex;
+    		flex-flow: row nowrap;
+    		
+    		.view-opts {
+    			padding-left: 10px;
+    			margin: 0;
+    			display: flex;
+    			flex-flow: row nowrap;
+    			justify-content: space-between;
+	    		flex-basis: 80%;
+	    		.fake-button {
+						cursor: pointer;
+						border-radius: 10%;
+						padding: 0.2em;
+					}
+    			h3 {
+    				text-transform: uppercase;
+    				font-weight: normal !important;
+    				font-size: 1em;
+    				margin-top: .3em;
+    			}
+    			.button-wrapper {
+    				flex-basis: 80%;
+    			}
+    			.reset-wrapper {
+    				flex-basis: 20%;
+    				text-align: right;
+    			}
+    		}
+    	}
+    } 
   }
 
-  .explore-main {
+  .inventory-main {
     hr {
       border-top: 4px solid @med-green!important;
       margin-bottom: 10px!important;
     }
 
     #search-results {
-
+			.search-result-grid {
+				grid-auto-rows: 14em;
+			}
       h4 {
         text-transform: uppercase;
         color: @dark-green;
@@ -1300,8 +1402,10 @@ div#info-page {
       }
 
       .search-result {
-        box-shadow: none;
-        border: none;
+      	&.list-result {
+	        box-shadow: none;
+  	      border: none;
+  	    }
 
         .card-body {
           padding: 4px 0;
@@ -1322,6 +1426,15 @@ div#info-page {
             font-weight: normal;
             margin-left: 40px;
           }
+        }
+        &.grid-result {
+        	.card-body {
+        		.card-text {
+        			font-size: 13px !important;
+            	margin-left: 0px;
+        			text-align: center;
+        		}
+        	}
         }
       }
     }

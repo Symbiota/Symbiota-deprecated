@@ -62,9 +62,7 @@ class SearchResultContainer extends React.Component {
 
 function ExploreSearchResult(props) {
   const useGrid = props.viewType === "grid";
-
 	return (
-		<a href={props.href} className="text-decoration-none" style={{ maxWidth: "185px" }} target="_blank">
 			<div className={ "card search-result " + (useGrid ? "grid-result" : "list-result") }>
 					<div className={useGrid ? "" : "card-body"}>
 						{useGrid &&
@@ -79,13 +77,15 @@ function ExploreSearchResult(props) {
 						}
 						<div className={(useGrid ? "card-body" : "d-inline py-1") + " px-0"} style={{overflow: "hidden"}}>
 							<div className={"card-text" + (useGrid ? "" : " d-inline")}>
-								<span className="font-italic sci-name">{props.sciName}</span>
-								{
-									props.showTaxaDetail === 'on' &&
-									<span className="author"> ({props.author})</span>
-								}
-								{ !useGrid && props.commonName.length > 0? <span dangerouslySetInnerHTML={{__html: ' &mdash; '}} /> :''}
-								<span className="text-lowercase common-name">{props.commonName}</span>
+								<a href={props.href} className="text-decoration-none" style={{ maxWidth: "185px" }} target="_blank">
+									<span className="font-italic sci-name">{props.sciName}</span>
+									{
+										props.showTaxaDetail === 'on' &&
+										<span className="author"> ({props.author})</span>
+									}
+									{ !useGrid && props.commonName.length > 0? <span dangerouslySetInnerHTML={{__html: ' &mdash; '}} /> :''}
+									<span className="text-lowercase common-name">{props.commonName}</span>
+								</a>
 								{
 									props.showTaxaDetail === 'on' && props.vouchers.length && 
 								
@@ -93,11 +93,11 @@ function ExploreSearchResult(props) {
 										{
 											props.vouchers.map((voucher) =>  {
 												return (
-													<span key={ voucher.occid } className={ "voucher" } >
+													<a href={ props.clientRoot + "/collections/individual/index.php?occid=" + voucher.occid } target="_blank" key={ voucher.occid } className={ "voucher" } >
 														<span className={ "recorded-by" }>{voucher.recordedby} </span>
 														<span className={ "event-date" }>{voucher.eventdate}</span>
 														<span className={ "institution-code" }> [{ voucher.institutioncode }]</span>
-													</span>
+													</a>
 												)
 											})
 											.reduce((prev, curr) => [prev, ', ', curr])
@@ -108,13 +108,12 @@ function ExploreSearchResult(props) {
 						</div>
 					</div>
 			</div>
-		</a>
 	)
 }
 function ExploreSearchContainer(props) {
   const useGrid = props.viewType === "grid";
 	if (props.searchResults) {
-		if (props.sortBy !== 'taxon') {		
+		if (props.sortBy === 'taxon') {		
 			return (
 				<div
 					id="search-results"
@@ -133,6 +132,7 @@ function ExploreSearchContainer(props) {
 								sciName={ result.sciname ? result.sciname : '' }
 								author={ result.author ? result.author : '' }
 								vouchers={  result.vouchers ? result.vouchers : '' }
+								clientRoot={ props.clientRoot }
 							/>
 						)
 					})
@@ -164,6 +164,7 @@ function ExploreSearchContainer(props) {
 													sciName={ result.sciname ? result.sciname : '' }
 													author={ result.author ? result.author : '' }
 													vouchers={  result.vouchers ? result.vouchers : '' }
+													clientRoot={ props.clientRoot }
 												/>
 											)
 										})

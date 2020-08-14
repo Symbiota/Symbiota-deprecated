@@ -63,9 +63,13 @@ export class SearchWidget extends React.Component {
     	if (this.props.clid) {
     		suggestionUrl += "&clid=" + this.props.clid;
     	}
+    	if (this.props.dynclid) {
+    		suggestionUrl += "&dynclid=" + this.props.dynclid;
+    	}
     	if (this.props.searchName) {
     		suggestionUrl += "&name=" + this.props.searchName;
     	}
+    	console.log(suggestionUrl);
   		httpGet(suggestionUrl).then((res) => {
         return JSON.parse(res);
       }).catch((err) => {
@@ -125,6 +129,7 @@ SearchWidget.defaultProps = {
   clientRoot: '',
   suggestionUrl: '',
   clid: -1,
+  dynclid: -1,
   searchName: 'sciname'
 };
 

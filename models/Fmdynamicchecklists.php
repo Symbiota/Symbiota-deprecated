@@ -68,5 +68,64 @@ class Fmdynamicchecklists
      * @ORM\Column(name="initialTimeStamp", type="datetime", nullable=false, options={"default"="CURRENT_TIMESTAMP"})
      */
     private $initialtimestamp = 'CURRENT_TIMESTAMP';
+    
+  /**
+     * Get clid.
+     *
+     * @return int
+     */
+    public function getDynclid()
+    {
+        return $this->dynclid;
+    }
+
+    /**
+     * Set name.
+     *
+     * @param string $name
+     *
+     * @return Fmdynamicchecklists
+     */
+    public function setName($name)
+    {
+        $this->name = $name;
+
+        return $this;
+    }
+
+    /**
+     * Get name.
+     *
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    /**
+     * Set details.
+     *
+     * @param string|null $details
+     *
+     * @return Fmdynamicchecklists
+     */
+    public function setDetails($details = null)
+    {
+        $this->details = $details;
+
+        return $this;
+    }
+
+    /**
+     * Get details.
+     *
+     * @return string|null
+     */
+    public function getDetails()
+    {
+        return $this->details;
+    }
+
 
 }

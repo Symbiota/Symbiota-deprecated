@@ -29,7 +29,7 @@ class ExploreApp extends React.Component {
       abstract: '',
       displayAbstract: 'default',
       //taxa: [],
-      isLoading: false,
+      isLoading: true,
       filters: {
         searchText: ("search" in queryParams ? queryParams["search"] : ViewOpts.DEFAULT_SEARCH_TEXT),
         //checklistId: ("clid" in queryParams ? parseInt(queryParams["clid"]) : ViewOpts.DEFAULT_CLID),
@@ -120,7 +120,10 @@ class ExploreApp extends React.Component {
 			.catch((err) => {
 				window.location = "/";
 				//console.error(err);
-			});
+			})
+      .finally(() => {
+        this.setState({ isLoading: false });
+      });
   }
 
 
@@ -275,7 +278,7 @@ class ExploreApp extends React.Component {
   render() {
 		let shortAbstract = '';
 		if (this.state.abstract.length > 0) {
-			shortAbstract = this.state.abstract.replace(/^(.{330}[^\s]*).*/, "$1") + "...";//wordsafe truncate
+			shortAbstract = this.state.abstract.replace(/^(.{240}[^\s]*).*/, "$1") + "...";//wordsafe truncate
 		}
     return (
     <div className="wrapper">
@@ -313,7 +316,7 @@ class ExploreApp extends React.Component {
           	map here
           </div>
         </div>
-				<div className="row explore-main">
+				<div className="row explore-main inventory-main">
 					<hr/>
 					<div className="col-auto sidebar-wrapper">
 					{
@@ -367,7 +370,7 @@ class ExploreApp extends React.Component {
 										viewType={ this.state.viewType }
 										sortBy={ this.state.sortBy }
 										showTaxaDetail={ this.state.showTaxaDetail }
-										clientRoot={ this.props.clientRoot }
+										clientRoot={this.props.clientRoot}
 									/>
 										
 							</div>

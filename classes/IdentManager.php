@@ -161,13 +161,13 @@ class IdentManager extends Manager {
 				}
 			}
 	
-			if ($this->dynClid) {#dynClid is not finished
+			if ($this->dynClid) {
 				$innerJoins[] = array("Fmdyncltaxalink","clk","WITH","t.tid = clk.tid");
 				$wheres[] = "clk.dynclid = :dynclid";
 				$params[] = array("dynclid",$this->dynClid);
 
 			}else{
-				if ($this->clType == 'dynamic') {#not finished
+				if ($this->clType == 'dynamic') {#not finished/not in use?
 					$innerJoins[] = array("Omoccurrences","o","WITH","t.tid = o.TidInterpreted");
 					#wheres[] = $this->dynamicSQL;
 				}else{

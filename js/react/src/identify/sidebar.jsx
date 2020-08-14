@@ -63,32 +63,15 @@ class SideBarDropdown extends React.Component {
 
     return (
       <div
-        className={ "my-3 py-auto" + (this.props.disabled === true ? " dropdown-disabled" : "") }
-        style={ this.props.style } >
+        className={ "top-level" + (this.props.disabled === true ? " dropdown-disabled" : "") }
+         >
         <div className="row">
-          <h4 className="mx-0 my-auto col" style={{ cursor: "default", fontSize: this.props.style.fontSize }}>
+          <h4 className="col" style={{ cursor: "default" }}>
             {this.props.title}
           </h4>
-          <button
-            className="d-block col-sm-auto"
-            data-toggle="collapse"
-            data-target={ "#" + dropDownId }
-            type="button"
-            aria-expanded={ this.state.isExpanded.toString() }
-            aria-controls={ dropDownId }
-            onClick={ this.onButtonClicked }
-            disabled={ this.props.disabled }
-          >
-            <img
-              className={ "ml-auto will-v-flip" + (this.state.isExpanded ? " v-flip" : "") }
-              style={{ background: "black", borderRadius: "50%", height: "2em", width: "2em" }}
-              src={ `${CLIENT_ROOT}/images/garden/expand-arrow.png` }
-              alt="collapse"
-            />
-          </button>
         </div>
-        <div id={dropDownId} className="collapse">
-          <div className="card card-body mt-2">
+        <div id={dropDownId} className="">
+          <div className="">
             { this.props.children }
           </div>
         </div>
@@ -120,7 +103,7 @@ class SideBar extends React.Component {
     return (
       <div
         id="sidebar"
-        className="m-1 p-3 rounded-border"
+        className="m-1 rounded-border"
         style={ this.props.style }>
 
 				<div className="currently-displayed">
@@ -147,97 +130,97 @@ class SideBar extends React.Component {
 				</div>
 
         {/* Search */}
-        <SearchWidget
-          placeholder="Search plants by name"
-          clientRoot={ CLIENT_ROOT }
-          isLoading={ this.props.isLoading }
-          textValue={ this.props.searchText }
-          onTextValueChanged={ this.props.onSearchTextChanged }
-          onSearch={ this.props.onSearch }
-          suggestionUrl={ this.props.searchSuggestionUrl }
-					clid={ this.props.clid }
-        />
+        
+				<div className="filter-tools">
+					<h3>Filter Tools</h3>
+					<SearchWidget
+						placeholder="Search plants by name"
+						clientRoot={ CLIENT_ROOT }
+						isLoading={ this.props.isLoading }
+						textValue={ this.props.searchText }
+						onTextValueChanged={ this.props.onSearchTextChanged }
+						onSearch={ this.props.onSearch }
+						suggestionUrl={ this.props.searchSuggestionUrl }
+						clid={ this.props.clid }
+						dynclid={ this.props.dynclid }
+					/>
         
         
- 				<div id="view-opts" className="row">
+					<div className="view-opts" className="container row">
+						<div className="row">
+							<div className="opt-labels">
+								<p>Display as:</p>
+							</div>
+							<div className="opt-settings">
 
-					<div className="col text-right">
-						<p>Show results:</p>
-					</div>
-					<div className="col-auto ">
+								<div className="view-opt-wrapper">
+									<input 
+										type="radio"
+										name="sortBy"
+										onChange={() => {
+											this.onSortByClicked("vernacularName")
+										}}
+										checked={this.props.sortBy === "vernacularName"}
+									/> <label className="" htmlFor={ "sortBy" }>Common name</label>
+								</div>
+								<div className="view-opt-wrapper">
+									<input 
+										type="radio"
+										name="sortBy"
+										onChange={() => {
+											this.onSortByClicked("sciName")
+										}}
+										checked={this.props.sortBy === "sciName"}
+									/> <label className="" htmlFor={ "sortBy" }>Scientific name</label>
+								</div>
 
-						<div className="view-opt-wrapper">
-						<input 
-							type="radio"
-							name="sortBy"
-							onChange={() => {
-								this.onSortByClicked("vernacularName")
-							}}
-							checked={this.props.sortBy === "vernacularName"}
-						/> <label className="" htmlFor={ "sortBy" }>Common name</label>
+							</div>
 						</div>
-						<div className="view-type-wrapper">
-						<input 
-							type="radio"
-							name="sortBy"
-							onChange={() => {
-								this.onSortByClicked("sciName")
-							}}
-							checked={this.props.sortBy === "sciName"}
-						/> <label className="" htmlFor={ "sortBy" }>Scientific name</label>
-						</div>
-
 					</div>
-				</div>
-				
-				{
-					Object.keys(this.props.characteristics).map((idx) => {
-					let firstLevel = this.props.characteristics[idx];
-						return (					
-		          <SideBarDropdown key={ firstLevel.hid } title={ firstLevel.headingname }>
-							{
-								Object.keys(firstLevel.characters).map((idx2) => {
-									let secondLevel = firstLevel.characters[idx2];
-									//console.log(secondLevel);
-									return (
-										<FeatureSelector
-											key={ secondLevel.cid }
-											cid={ secondLevel.cid }
-											title={ secondLevel.charname }
-											items={ secondLevel.states }
-											attrs={ this.props.filters.attrs }
-											/*onChange={ (featureKey) => {
-												this.props.onWholePlantChanged(plantFeature, featureKey)
-											}}*/
-											onAttrClicked={ this.props.onAttrClicked } 
-										/>
+      	</div>
+      	
+				<div className="filter-tools">
+					<h3>Filter by characteristic</h3>
+							{	this.props.characteristics &&
+								Object.keys(this.props.characteristics).map((idx) => {
+								let firstLevel = this.props.characteristics[idx];
+									return (					
+										<SideBarDropdown key={ firstLevel.hid } title={ firstLevel.headingname }>
+										{
+											Object.keys(firstLevel.characters).map((idx2) => {
+												let secondLevel = firstLevel.characters[idx2];
+												//console.log(secondLevel);
+												return (
+													<FeatureSelector
+														key={ secondLevel.cid }
+														cid={ secondLevel.cid }
+														title={ secondLevel.charname }
+														items={ secondLevel.states }
+														attrs={ this.props.filters.attrs }
+														clientRoot={this.props.clientRoot}
+														/*onChange={ (featureKey) => {
+															this.props.onWholePlantChanged(plantFeature, featureKey)
+														}}*/
+														onAttrClicked={ this.props.onAttrClicked } 
+													/>
+												)
+											})
+										}
+						
+										</SideBarDropdown>
 									)
 								})
 							}
-						
-          		</SideBarDropdown>
-						)
-					})
-				}
+      	</div>
       </div>
     );
   }
 }
 
 SideBar.defaultProps = {
-  sunlight: '',
-  moisture: '',
-  width: [0, 50],
-  height: [0, 50],
-  plantFeatures: {},
-  growthMaintenance: {},
-  beyondGarden: {},
   searchText: '',
   searchSugestionUrl: '',
   characteristics: {"hid":'',"headingname":'',"characters":{}},
-  onPlantFeaturesChanged: () => {},
-  onGrowthMaintenanceChanged: () => {},
-  onBeyondGardenChanged: () => {}
 };
 
 export default SideBar;
