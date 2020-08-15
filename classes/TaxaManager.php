@@ -379,7 +379,7 @@ class TaxaManager {
   private function populateSynonyms($tid) {
     $em = SymbosuEntityManager::getEntityManager();
     $synonyms = $em->createQueryBuilder()
-      ->select(["t.sciname", "t.author"])
+      ->select(["t.sciname", "t.author", "t.tid"])
       ->from("taxstatus", "ts")
       ->innerJoin("taxa", "t", "WITH", "ts.tid = t.tid")
       ->where("ts.tidaccepted = :tid")

@@ -9,27 +9,30 @@ $RANK_GENUS = 180;
 $results = [];
 
 if (array_key_exists("q", $_REQUEST)) {
+	$query = trim($_REQUEST["q"]);
   $em = SymbosuEntityManager::getEntityManager();
 
   $sciNameResults = $em->createQueryBuilder()
-    ->select("t.sciname as text", "t.tid as taxonId", "t.rankid as rankId")
+    ->select("t.sciname as text", "t.tid as taxonId", "t.rankid as rankId", "ts.tidaccepted")
     ->from("Taxa", "t")
+    ->innerJoin("Taxstatus", "ts", "WITH", "t.tid = ts.tid")
     ->where("t.sciname LIKE :search")
     ->andWhere("t.rankid >= $RANK_FAMILY")
     ->groupBy("t.tid")
-    ->setParameter("search", $_REQUEST["q"] . '%')
+    ->setParameter("search", $query . '%')
     ->setMaxResults(15)
     ->getQuery()
     ->getArrayResult();
 
   $vernacularResults = $em->createQueryBuilder()
-    ->select("v.vernacularname as text", "t.tid as taxonId", "t.rankid as rankId")
+    ->select("v.vernacularname as text", "t.tid as taxonId", "t.rankid as rankId", "ts.tidaccepted")
     ->from("Taxa", "t")
     ->innerJoin("Taxavernaculars", "v", "WITH", "t.tid = v.tid")
+    ->innerJoin("Taxstatus", "ts", "WITH", "t.tid = ts.tid")
     ->where("v.vernacularname LIKE :search")
     ->andWhere("t.rankid >= $RANK_FAMILY")
     ->groupBy("v.vernacularname")
-    ->setParameter("search", $_REQUEST["q"] . '%')
+    ->setParameter("search", $query . '%')
     ->orderBy("v.sortsequence")
     ->setMaxResults(15)
     ->getQuery()

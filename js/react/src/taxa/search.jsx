@@ -83,19 +83,20 @@ const domContainer = document.getElementById("react-taxa-search-app");
 const queryParams = getUrlQueryParams(window.location.search);
 
 if (queryParams.search) {
-  httpGet(`./rpc/api.php?search=${queryParams.search}`).then((res) => {
+	let query = queryParams.search.trim();
+  httpGet(`./rpc/api.php?search=${query}`).then((res) => {
     res = JSON.parse(res);
     if (res.length === 1) {
       window.location = `./index.php?taxon=${res[0].tid}`
 
     } else {
-      ReactDOM.render(<TaxaSearchResults results={ res } searchText={ decodeURIComponent(queryParams.search) } />, domContainer);
+      ReactDOM.render(<TaxaSearchResults results={ res } searchText={ decodeURIComponent(query) } />, domContainer);
     }
   }).catch((err) => {
     console.error(err);
   })
 } else if (queryParams.family) {
-	console.log(`./rpc/api.php?family=${queryParams.family}`);
+	//console.log(`./rpc/api.php?family=${queryParams.family}`);
   httpGet(`./rpc/api.php?family=${queryParams.family}`).then((res) => {
     res = JSON.parse(res);
     ReactDOM.render(<TaxaSearchResults results={ res } family={ queryParams.familyName } />, domContainer);

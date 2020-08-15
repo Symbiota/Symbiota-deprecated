@@ -74,20 +74,6 @@ function taxaManagerToJSON($taxaObj,$recursive = true) {
 		$result["parentTid"] = $taxaObj->getParentTid();   
 		$result["rankId"] = $taxaObj->getRankId();  
 		$result["author"] = $taxaObj->getAuthor();
-		$result["descriptions"] = $taxaObj->getDescriptions();
-		$result["gardenDescription"] = $taxaObj->getGardenDescription();
-		$result["gardenId"] = $taxaObj->getGardenId();
-		$result["vernacular"] = [
-			"basename" => $taxaObj->getBasename(),
-			"names" => $taxaObj->getVernacularNames()
-		];
-		$result["synonyms"] = $taxaObj->getSynonyms();
-		$result["origin"] = $taxaObj->getOrigin();
-		$result["family"] = $taxaObj->getFamily();
-		$result["taxalinks"] = $taxaObj->getTaxalinks();
-		$result["rarePlantFactSheet"] = $taxaObj->getRarePlantFactSheet();
-		$result["characteristics"] = $taxaObj->getCharacteristics();
-		$result["checklists"] = $taxaObj->getChecklists();
 
 		if ($recursive === true) {
 			$spp = $taxaObj->getSpp();  					
@@ -102,6 +88,20 @@ function taxaManagerToJSON($taxaObj,$recursive = true) {
 			$result["imagesBasis"]['HumanObservation'] = (isset($allImages['HumanObservation']) ? $allImages['HumanObservation'] : []);
 			$result["imagesBasis"]['PreservedSpecimen'] = (isset($allImages['PreservedSpecimen']) ? $allImages['PreservedSpecimen'] : []);
 			$result["imagesBasis"]['LivingSpecimen'] = (isset($allImages['LivingSpecimen']) ? $allImages['LivingSpecimen'] : []);
+			$result["synonyms"] = $taxaObj->getSynonyms();
+			$result["origin"] = $taxaObj->getOrigin();
+			$result["family"] = $taxaObj->getFamily();
+			$result["taxalinks"] = $taxaObj->getTaxalinks();
+			$result["rarePlantFactSheet"] = $taxaObj->getRarePlantFactSheet();
+			$result["characteristics"] = $taxaObj->getCharacteristics();
+			$result["checklists"] = $taxaObj->getChecklists();
+			$result["descriptions"] = $taxaObj->getDescriptions();
+			$result["gardenDescription"] = $taxaObj->getGardenDescription();
+			$result["gardenId"] = $taxaObj->getGardenId();
+			$result["vernacular"] = [
+				"basename" => $taxaObj->getBasename(),
+				"names" => $taxaObj->getVernacularNames()
+			];
 		
 		}
 	}
@@ -110,9 +110,8 @@ function taxaManagerToJSON($taxaObj,$recursive = true) {
 
 $result = [];
 if (array_key_exists("search", $_GET)) {
-  $result = searchTaxa($_GET["search"]);
-}
-else if (array_key_exists("taxon", $_GET) && is_numeric($_GET["taxon"])) {
+  $result = searchTaxa(trim($_GET["search"]));
+}else if (array_key_exists("taxon", $_GET) && is_numeric($_GET["taxon"])) {
   $result = getTaxon($_GET["taxon"]);
 } else if (array_key_exists("family", $_GET) && is_numeric($_GET["family"])) {
   $result = getSubTaxa($_GET["family"]);

@@ -20,7 +20,7 @@ class InfographicDropdown extends React.Component {
       <div
         id="infographic-dropdown"
         className="container-fluid p-5 d-print-none"
-        style={{ position: "relative", backgroundImage: `url(${CLIENT_ROOT}/images/garden/DIG4082-green@2x.png)` }}
+        style={{ position: "relative", backgroundImage: `url(${CLIENT_ROOT}/images/garden/natives-bg.jpg)` }}
       >
         <div className="row">
           <div className="col">

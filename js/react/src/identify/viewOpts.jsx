@@ -1,5 +1,11 @@
 import React from "react";
-import IconButton from "../common/iconButton.jsx";
+import {IconButton, CancelButton} from "../common/iconButton.jsx";
+
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { library } from "@fortawesome/fontawesome-svg-core";
+import { faTimesCircle } from '@fortawesome/free-solid-svg-icons'
+library.add(faTimesCircle)
+
 
 const CLIENT_ROOT = "..";
 
@@ -32,10 +38,9 @@ class ViewOpts extends React.Component {
 	
 	buildButton(filterKey,itemText) {
 		return (
-			<IconButton
+			<CancelButton
 				key={ filterKey + ":" + itemText }
 				title={ itemText }
-				icon={ `${CLIENT_ROOT}/images/garden/x-out.png` }
 				isSelected={ true }
 				style={{ margin: "0.1em" }}
 				onClick={ () => { this.props.onFilterClicked(filterKey,itemText,'off'); } }
@@ -95,7 +100,7 @@ class ViewOpts extends React.Component {
 
 						<p>
 					
-							<IconButton
+							<CancelButton
 								key={ "reset" }
 								title={ "Clear all" }
 								isSelected={ true }

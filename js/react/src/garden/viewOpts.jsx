@@ -1,5 +1,5 @@
 import React from "react";
-import IconButton from "../common/iconButton.jsx";
+import {IconButton, CancelButton} from "../common/iconButton.jsx";
 
 const CLIENT_ROOT = "..";
 
@@ -32,10 +32,9 @@ class ViewOpts extends React.Component {
 	
 	buildButton(filterKey,itemText) {
 		return (
-			<IconButton
+			<CancelButton
 				key={ filterKey + ":" + itemText }
 				title={ itemText }
-				icon={ `${CLIENT_ROOT}/images/garden/x-out.png` }
 				isSelected={ true }
 				style={{ margin: "0.1em" }}
 				onClick={ () => { this.props.onFilterClicked(filterKey,itemText); } }
@@ -198,7 +197,7 @@ class ViewOpts extends React.Component {
           </p>
           <p>
           	{buttons.length > 0 &&
-						<IconButton
+						<CancelButton
 							key={ "reset" }
 							title={ "Clear all" }
 							isSelected={ true }

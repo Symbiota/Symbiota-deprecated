@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 //import httpGet from "../common/httpGet.js";
 const CLIENT_ROOT = "..";
 import ImageCarousel from "../common/imageCarousel.jsx";
-//import IconButton from "../common/iconButton.jsx";
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { library } from "@fortawesome/fontawesome-svg-core";

@@ -1,5 +1,4 @@
 import React from "react";
-import IconButton from "../common/iconButton.jsx";
 import CheckboxItem from "../common/checkboxItem.jsx";
 
 const CLIENT_ROOT = "..";

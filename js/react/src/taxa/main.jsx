@@ -378,16 +378,18 @@ class TaxaDetail extends React.Component {
 		
 		this.state = {
 			isOpen: false,
-			currImage: 0
+			currImage: 0,
+			currImageBasis: this.props.res.images.HumanObservation
 		};
   }
 
-	toggleImageModal = (_currImage) => {
+	toggleImageModal = (_currImage, _imageBasis) => {
+		let basis = (_imageBasis === "PreservedSpecimen"? this.props.res.images.PreservedSpecimen: this.props.res.images.HumanObservation )	
+	
 		this.setState({
-			currImage: _currImage	
-		});
-    this.setState({
-      isOpen: !this.state.isOpen
+			currImage: _currImage,	
+      isOpen: !this.state.isOpen,
+      currImageBasis: basis,
     });
   }
 	render() {
@@ -397,12 +399,16 @@ class TaxaDetail extends React.Component {
     pageTitle.innerHTML = `${pageTitle.innerHTML} ${res.sciName} ${res.author}`;
 		const allImages = res.images.HumanObservation.concat(res.images.PreservedSpecimen);
 		const showDescriptions = res.descriptions? true: false;
+
 		return (
 	
 			<div className="container my-5 py-2 taxa-detail" style={{ minHeight: "45em" }}>
 				<div className="row">
 					<div className="col">
 						<h1 className="text-capitalize">{ res.sciName } { res.author }</h1>
+						{ res.synonym &&
+							<h2>synonym: <span className="text-capitalize font-italic">{ res.synonym }</span></h2>
+						}
 						<h2 className="text-capitalize font-italic">{ res.vernacularNames[0] }</h2>
 					</div>
 					<div className="col-auto">
@@ -469,7 +475,7 @@ class TaxaDetail extends React.Component {
 															style={{width: "100%", height: "100%", objectFit: "cover"}}
 															src={image.thumbnailurl}
 															alt={image.thumbnailurl}
-															onClick={() => this.toggleImageModal(index)}
+															onClick={() => this.toggleImageModal(index,"HumanObservation")}
 														/>
 													</div>
 												</div>
@@ -500,7 +506,7 @@ class TaxaDetail extends React.Component {
 															style={{width: "100%", height: "100%", objectFit: "cover"}}
 															src={image.thumbnailurl}
 															alt={image.thumbnailurl}
-															onClick={() => this.toggleImageModal(index + res.images.HumanObservation.length)}
+															onClick={() => this.toggleImageModal(index,"PreservedSpecimen")}
 														/>
 													</div>
 												</div>
@@ -515,7 +521,7 @@ class TaxaDetail extends React.Component {
 							<ImageModal 
 								show={this.state.isOpen}
 								currImage={this.state.currImage}
-								images={allImages}
+								images={this.state.currImageBasis}
 								onClose={this.toggleImageModal}
 							>
 								<h3>
@@ -551,6 +557,7 @@ class TaxaApp extends React.Component {
       	'LivingSpecimen': []
       },
       descriptions:[],
+      synonym: '',
       synonyms: [],
       origin: '',
       taxalinks: [],
@@ -575,6 +582,7 @@ class TaxaApp extends React.Component {
       window.location = "/";
     } else {
     	let api = `./rpc/api.php?taxon=${this.props.tid}`;
+    	console.log(api);
       httpGet(api)
         .then((res) => {
        		// /taxa/rpc/api.php?taxon=2454
@@ -613,7 +621,15 @@ class TaxaApp extends React.Component {
 						)
 					});
 					let isGenus = (res.rankId <= RANK_GENUS && res.rankId > RANK_FAMILY);
-
+					
+					let synonym = '';
+					if (this.props.synonym) {
+						Object.keys(res.synonyms).map((key) => {
+							if (this.props.synonym === res.synonyms[key].tid) {
+								synonym = res.synonyms[key].sciname;
+							}
+						});
+					}
           this.setState({
             sciName: res.sciname,
             author: res.author,
@@ -637,7 +653,8 @@ class TaxaApp extends React.Component {
             spp: res.spp,
             related: relatedArr,
             family: res.family,
-            isGenus: isGenus
+            isGenus: isGenus,
+            synonym: synonym
           });
         })
         .catch((err) => {
@@ -670,7 +687,7 @@ if (queryParams.search) {
   window.location = `./search.php?search=${encodeURIComponent(queryParams.search)}`;
 } else if (queryParams.taxon) {
   ReactDOM.render(
-    <TaxaApp tid={queryParams.taxon } clientRoot={ dataProps["clientRoot"] }/>,
+    <TaxaApp tid={queryParams.taxon } clientRoot={ dataProps["clientRoot"] } synonym={ queryParams.synonym - 0 } />,
     domContainer
   );
 } else {

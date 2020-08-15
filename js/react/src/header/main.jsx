@@ -109,8 +109,9 @@ class HeaderApp extends React.Component {
   }
 
   // "searchObj" is the JSON object returned from ../webservices/autofillsearch.php
+  // WARNING - this code is copied exactly on home/main.jsx
   onSearch(searchObj) {
-  	console.log(searchObj);
+  	//console.log(searchObj);
     this.setState({ isLoading: true });
     let targetUrl = `${this.props.clientRoot}/taxa/`;
     /*
@@ -122,7 +123,11 @@ class HeaderApp extends React.Component {
 
     } else {*/
       if (searchObj.taxonId) {
-        targetUrl += `index.php?taxon=${searchObj.taxonId}`;
+        if (searchObj.taxonId === searchObj.tidaccepted) {
+	        targetUrl += `index.php?taxon=${searchObj.taxonId}`;
+	      }else{
+	        targetUrl += `index.php?taxon=${searchObj.tidaccepted}&synonym=${searchObj.taxonId}`;
+	      }
       } else {
         targetUrl += `search.php?search=${ encodeURIComponent(searchObj.text) }`;
       }

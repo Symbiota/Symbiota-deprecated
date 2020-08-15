@@ -43,26 +43,32 @@ class Home extends React.Component {
   }
 
   // "searchObj" is the JSON object returned from ../webservices/autofillsearch.php
+  // WARNING - this code is copied exactly on header/main.jsx
   onSearch(searchObj) {
+  	//console.log(searchObj);
     this.setState({ isLoading: true });
     let targetUrl = `${this.props.clientRoot}/taxa/`;
+    /*
     if (searchObj.rankId && searchObj.rankId === RANK_FAMILY) {
       targetUrl += `search.php?family=${searchObj.taxonId}&familyName=${searchObj.text}`;
 
     } else if (searchObj.rankId && searchObj.rankId === RANK_GENUS) {
       targetUrl += `search.php?genus=${searchObj.taxonId}&genusName=${searchObj.text}`;
 
-    } else {
+    } else {*/
       if (searchObj.taxonId) {
-        targetUrl += `index.php?taxon=${searchObj.taxonId}`;
+        if (searchObj.taxonId === searchObj.tidaccepted) {
+	        targetUrl += `index.php?taxon=${searchObj.taxonId}`;
+	      }else{
+	        targetUrl += `index.php?taxon=${searchObj.tidaccepted}&synonym=${searchObj.taxonId}`;
+	      }
       } else {
         targetUrl += `search.php?search=${ encodeURIComponent(searchObj.text) }`;
       }
-    }
+    /*}*/
 
     window.location = targetUrl;
-  }  
-  
+  }
   
   componentDidMount() {
 

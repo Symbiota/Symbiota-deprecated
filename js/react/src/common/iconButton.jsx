@@ -1,5 +1,10 @@
 import React from "react";
 
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { library } from "@fortawesome/fontawesome-svg-core";
+import { faTimesCircle } from '@fortawesome/free-solid-svg-icons'
+library.add(faTimesCircle)
+
 class IconButton extends React.Component {
   render()
   {
@@ -41,4 +46,39 @@ IconButton.defaultProps = {
   onClickImg: null
 };
 
-export default IconButton;
+class CancelButton extends React.Component {
+  render()
+  {
+    const selectedStyle = {
+      background: "#DFEFD3",
+      color: "#3B631D"
+    };
+
+    const unselectedStyle = {
+      color: "#9FD07A"
+    };
+
+    return (
+      <span
+        className="fake-button align-middle justify-content-center"
+        style={ Object.assign({}, this.props.isSelected ? selectedStyle : unselectedStyle, this.props.style) }
+        onClick={ this.props.onClick }
+      >
+			<FontAwesomeIcon icon="times-circle"/>
+      <span dangerouslySetInnerHTML={{__html: this.props.title}} ></span>
+    </span>
+    );
+  }
+}
+
+CancelButton.defaultProps = {
+  title: "",
+  icon: "",
+  style: {},
+  onClick: null,
+  onClickImg: null
+};
+
+export { IconButton, CancelButton };
+
+
