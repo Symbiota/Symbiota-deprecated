@@ -16,6 +16,8 @@ class ExploreManager {
   protected $searchTerm;
   protected $searchName = '';
   protected $searchSynonyms = false;
+  protected $lat = '';
+  protected $lng = '';
 	
 
   public function __construct($clid=-1) {
@@ -54,6 +56,12 @@ class ExploreManager {
   }
   public function getIconUrl() {
     return $this->model->getIconurl();
+  }
+  public function getLat() {
+    return $this->model->getLatcentroid();
+  }
+  public function getLng() {
+    return $this->model->getLongcentroid();
   }
   public function getTaxa() {
   	$this->taxa = $this->populateTaxa($this->getClid());

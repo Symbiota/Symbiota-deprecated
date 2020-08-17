@@ -28,6 +28,7 @@ class ExploreApp extends React.Component {
       authors: '',
       abstract: '',
       displayAbstract: 'default',
+      googleMapUrl: '',
       //taxa: [],
       isLoading: true,
       filters: {
@@ -95,13 +96,20 @@ class ExploreApp extends React.Component {
 				// /checklists/rpc/api.php?clid=3
 				res = JSON.parse(res);
 				
-				/*let googleMapUrl = '';				
-				if (res.checklists.length > 0) {
-					googleMapUrl = 'https://maps.google.com/maps/api/staticmap?maptype=terrain&key=AIzaSyBmcl6Y-gu3bGdmp7LIQaDCa43TKLrP7qY';
-					googleMapUrl += '&size=640x400&zoom=6';
-					let latLng = res.checklists.map((checklist) => checklist.latcentroid + ',' + checklist.longcentroid);
-					googleMapUrl += '&markers=size:tiny%7C' + latLng.join("%7C");					
-				}*/
+				let googleMapUrl = '';				
+				if (res.lat !== 0 && res.lng !== 0) {
+
+					googleMapUrl += 'https://maps.google.com/maps/api/staticmap';
+					let mapParams = new URLSearchParams();
+					mapParams.append("key",this.props.googleMapKey);
+					mapParams.append("maptype",'terrain');
+					mapParams.append("size",'220x220');
+					mapParams.append("zoom",6);
+					mapParams.append("markers",'size:med|' + res.lat + ',' + res.lng + '');
+		
+					googleMapUrl += '?' + mapParams.toString();
+
+				}
 				this.setState({
 					clid: this.getClid(),
 					pid: this.getPid(),
@@ -112,14 +120,14 @@ class ExploreApp extends React.Component {
 					searchResults: this.sortResults(res.taxa),
 					totals: res.totals,
 					fixedTotals: res.totals,
-					//googleMapUrl: googleMapUrl
+					googleMapUrl: googleMapUrl
 				});
 				const pageTitle = document.getElementsByTagName("title")[0];
 				pageTitle.innerHTML = `${pageTitle.innerHTML} ${res.title}`;
 			})
 			.catch((err) => {
-				window.location = "/";
-				//console.error(err);
+				//window.location = "/";
+				console.error(err);
 			})
       .finally(() => {
         this.setState({ isLoading: false });
@@ -289,8 +297,9 @@ class ExploreApp extends React.Component {
  				<div className="row">
           <div className="col-9">
             <h2>{ this.state.title }</h2>
+            {this.state.authors.length > 0 &&
             <p className="authors"><strong>Authors:</strong> <span className="authors-content" dangerouslySetInnerHTML={{__html: this.state.authors}} /></p>
-						
+						}
 						{this.state.abstract.length > 0 && this.state.displayAbstract == 'default' &&
 							<div>
 							<p className="abstract"><strong>Abstract:</strong> <span className="abstract-content" dangerouslySetInnerHTML={{__html: shortAbstract}} /></p>
@@ -306,14 +315,13 @@ class ExploreApp extends React.Component {
 									<FontAwesomeIcon icon="chevron-up" />Hide Abstract
 							</div>
 							</div>
-						
 						}				
-												
-
-						
+				
           </div>
-          <div className="col-3">
-          	map here
+          <div className="col-3 text-right mt-3">
+          		{ this.state.googleMapUrl.length > 0 &&
+              	<img  className="img-fluid" src={this.state.googleMapUrl} title="Project map" alt="Map representation of checklists" />
+              }
           </div>
         </div>
 				<div className="row explore-main inventory-main">
@@ -393,7 +401,7 @@ const domContainer = document.getElementById("react-explore-app");
 const queryParams = getUrlQueryParams(window.location.search);
 if (queryParams.cl) {
   ReactDOM.render(
-    <ExploreApp clid={queryParams.cl } pid={queryParams.pid } clientRoot={ dataProps["clientRoot"] }/>,
+    <ExploreApp clid={queryParams.cl } pid={queryParams.pid } clientRoot={ dataProps["clientRoot"] } googleMapKey={ dataProps["googleMapKey"] }/>,
     domContainer
   );
 } else {
