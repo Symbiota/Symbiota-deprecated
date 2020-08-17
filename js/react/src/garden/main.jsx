@@ -12,13 +12,12 @@ import httpGet from "../common/httpGet.js";
 import {addUrlQueryParam, getUrlQueryParams} from "../common/queryParams.js";
 import {getCommonNameStr, getGardenTaxaPage} from "../common/taxaUtils";
 
-
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { library } from "@fortawesome/fontawesome-svg-core";
 import { faChevronUp } from '@fortawesome/free-solid-svg-icons'
 library.add( faChevronUp)
 
-
+//TODO  - this should all be made dynamic
 const CIDS_PLANT_FEATURE = {
   "flower_color": 612,
   "bloom_months": 165,
@@ -40,6 +39,35 @@ const CIDS_BEYOND_GARDEN = {
   "ecoregion": 19,
   "habitat": 163
 };
+
+const defaultFilters = () => ({
+	sunlight: ViewOpts.DEFAULT_SUNLIGHT,
+	moisture: ViewOpts.DEFAULT_MOISTURE,
+	height: ViewOpts.DEFAULT_HEIGHT,
+	width: ViewOpts.DEFAULT_WIDTH,
+	searchText: ViewOpts.DEFAULT_SEARCH_TEXT,
+	checklistId: ViewOpts.DEFAULT_CLID,
+	plantFeatures: {
+		"bloom_months": [],
+		"flower_color": [],
+		"foliage_type": [],
+		"lifespan": [],
+		"plant_type": [],
+		"wildlife_support": []
+	},
+	growthMaintenance: {
+		"behavior": [],
+		"cultivation_preferences": [],
+		"ease_of_growth": [],
+		"landscape_uses": [],
+		"propagation": []
+	},
+	beyondGarden: {
+		"ecoregion": [],
+		"habitat": []
+	}
+});
+
 
 function getAttributeArr(keymap) {
   return new Promise((resolve, reject) => {
@@ -166,6 +194,7 @@ class GardenPageApp extends React.Component {
     super(props);
     const queryParams = getUrlQueryParams(window.location.search);
 
+
     // TODO: searchText is both a core state value and a state.filters value; How can we make the filtering system more efficient?
     this.state = {
       isLoading: false,
@@ -177,24 +206,6 @@ class GardenPageApp extends React.Component {
         searchText: ("search" in queryParams ? queryParams["search"] : ViewOpts.DEFAULT_SEARCH_TEXT),
         checklistId: ("clid" in queryParams ? parseInt(queryParams["clid"]) : ViewOpts.DEFAULT_CLID),
         plantFeatures: {},
-        growthMaintenance: {},
-        beyondGarden: {}
-      },
-      defaultFilters: {
-        sunlight: ViewOpts.DEFAULT_SUNLIGHT,
-        moisture: ViewOpts.DEFAULT_MOISTURE,
-        height: ViewOpts.DEFAULT_HEIGHT,
-        width: ViewOpts.DEFAULT_WIDTH,
-        searchText: ViewOpts.DEFAULT_SEARCH_TEXT,
-        checklistId: ViewOpts.DEFAULT_CLID,
-        plantFeatures: {
-        	"bloom_months": [],
-        	"flower_color": [],
-        	"foliage_type": [],
-        	"lifespan": [],
-        	"plant_type": [],
-        	"wildlife_support": []
-        },
         growthMaintenance: {},
         beyondGarden: {}
       },
@@ -520,10 +531,8 @@ class GardenPageApp extends React.Component {
     /*window.history.replaceState({ query: newQueryStr }, '', window.location.pathname + newQueryStr);*/
   }
 	clearFilters() {
-		//let filters = this.state.defaultFilters;
+    this.setState({ filters: defaultFilters() });
 
-    this.setState({ filters: this.state.defaultFilters });
-    console.log(this.state.defaultFilters);
 		let plantFeatureState = this.state.plantFeatureState;
 		Object.keys(plantFeatureState).map((key) => {
 			Object.keys(plantFeatureState[key]).map((item) => {
