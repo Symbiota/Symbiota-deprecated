@@ -56,7 +56,7 @@ $dbArr = Array();
     <script src="<?php echo $CLIENT_ROOT; ?>/js/dbf.js" type="text/javascript"></script>
     <script src="<?php echo $CLIENT_ROOT; ?>/js/FileSaver.min.js" type="text/javascript"></script>
     <script src="<?php echo $CLIENT_ROOT; ?>/js/html2canvas.min.js" type="text/javascript"></script>
-    <script src="<?php echo $CLIENT_ROOT; ?>/js/symb/spatial.module.js?ver=259" type="text/javascript"></script>
+    <script src="<?php echo $CLIENT_ROOT; ?>/js/symb/spatial.module.js?ver=256" type="text/javascript"></script>
     <script type="text/javascript">
         $(function() {
             var winHeight = $(window).height();
@@ -529,15 +529,14 @@ $dbArr = Array();
 
 <div id="maptoolcontainer">
     <div id="maptoolbox">
-    		<h3>Define an area</h3>
         <div id="drawcontrol">
             <span class="maptext">Draw</span>
             <select id="drawselect">
                 <option value="None">None</option>
                 <option value="Polygon">Polygon</option>
                 <option value="Circle">Circle</option>
-                <!--<option value="LineString">Line</option>
-                <option value="Point">Point</option>-->
+                <option value="LineString">Line</option>
+                <option value="Point">Point</option>
             </select>
         </div>
         <div id="basecontrol">

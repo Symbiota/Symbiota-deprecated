@@ -1150,6 +1150,10 @@ button.menu-toggle {
 #searchGeneticCheckbox {
 	display: none;
 }
+#maptoolbox h3 {
+	color: white;
+}
+
 
 
 /*--------------------------------------------------------------
