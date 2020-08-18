@@ -266,6 +266,7 @@ img {
     font-size: 36px;
     font-weight: bold;
     padding: 45px 0 20px 0;
+
     @media (min-width: 544px) {
       font-size: 60px;
     }
@@ -587,6 +588,84 @@ img {
           }
         }
       }
+    }
+  }
+}
+
+.info-page.donate-page{
+
+  .title-donate {
+    height: 800px;
+    background-image: url("@{subdir}/images/header/Tire-Mtn_Cascades_Tanya-Harvey.jpg");
+
+    h1 {
+      font-size: 30px;
+      margin-bottom: 20px;
+      padding: 60px 0 20px 0;
+
+      @media (min-width: 544px) {
+        padding: 45px 0 20px 0;
+      }
+    }
+
+    h2 {
+      color: white;
+      font-size: 40px;
+
+      @media (min-width: 544px) {
+        font-size: 60px;
+        max-width: 800px;
+      }
+    }
+
+    .button-donate {
+      margin-top: 50px;
+      font-size: 28px;
+      padding: 15px;
+      border-radius: 6px;
+      border: 1px solid white !important;
+    }
+  }
+
+  .link-donate {
+    display: inline;
+
+    button {
+      color: black!important;
+      padding: 0!important;
+      text-decoration: underline;
+    }
+  }
+
+  .col-left {
+
+    .button-donate {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 36px;
+      line-height: 36px;
+      padding: 15px;
+      width: 100%;
+      border-radius: 6px;
+    }
+  }
+
+  .col-right {
+    padding-top: 30px;
+    padding-left: 30px;
+
+    img {
+      width: 100%;
+    }
+
+    .button-donate {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 28px;
+      line-height: 28px;
+      padding: 15px;
+      width: 100%;
+      border-radius: 6px;
     }
   }
 }
