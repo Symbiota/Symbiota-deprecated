@@ -73,7 +73,7 @@ export default class ImageCarousel extends Component {
 						return (
 							<div key={image.url} data-id={image.imgid}>
 								<div className="slide-wrapper">
-								<h4>From the {image.collectionname}</h4>
+								{/*<h4>From the {image.collectionname}</h4>*/}
 									<div className="image-wrapper">
 									<img
 										className=""
