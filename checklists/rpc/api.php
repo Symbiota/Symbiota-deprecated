@@ -16,6 +16,8 @@ function getEmpty() {
     "iconUrl" => '',
     "authors" => '',
     "abstract" => '',
+    "lat" => 0,
+    "lng" => 0,
     "taxa" => [],
   ];
 }
@@ -31,6 +33,8 @@ function managerToJSON($checklistObj) {
     $result["iconUrl"] = ($checklistObj->getIconUrl()? $checklistObj->getIconUrl() :'') ;
     $result["authors"] = ($checklistObj->getAuthors()? $checklistObj->getAuthors() :'') ;
     $result["abstract"] = ($checklistObj->getAbstract()? $checklistObj->getAbstract() :'') ;
+    $result["lat"] = ($checklistObj->getLat()? $checklistObj->getLat() :'') ;
+    $result["lng"] = ($checklistObj->getLng()? $checklistObj->getLng() :'') ;
     $taxa = $checklistObj->getTaxa(); 
     if (sizeof($taxa)) {
 			$taxaRepo = SymbosuEntityManager::getEntityManager()->getRepository("Taxa");					

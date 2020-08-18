@@ -4,13 +4,14 @@ import httpGet from "../common/httpGet.js";
 import { getUrlQueryParams } from "../common/queryParams.js";
 import Table from "./table.jsx";
 import PageHeader from "../common/pageHeader.jsx";
+import {getChecklistPage} from "../common/taxaUtils";
+import { GoogleMap, LoadScript, Marker, MarkerClusterer } from '@react-google-maps/api';
+//const ScriptLoaded = require("../../docs/ScriptLoaded").default;
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { library } from "@fortawesome/fontawesome-svg-core";
 import { faSearchPlus, faListUl, faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons'
 library.add( faSearchPlus, faListUl, faChevronDown, faChevronDown)
-
-const CLIENT_ROOT = "..";
 
 function ChecklistTable(props) {
   const columns = useMemo(
@@ -39,11 +40,21 @@ function ChecklistTable(props) {
   );
 }
 function ProjectMap(props) {
-
 	return (
-      <GoogleMap data={props.checklists} pid={ props.pid }/>
+      <LoadScript
+      	googleMapsApiKey={ props.googleMapKey } 
+      >
+        <GoogleMap
+          mapContainerStyle={{width: '1100px', height: '555px'}}
+          center={{"lat":44.156944, "lng":-120.490556}}
+          zoom={7}
+        >
+        	{ props.children } 
+        </GoogleMap>
+      </LoadScript>
 	)
 }
+
 
 class InventoryDetail extends React.Component {
   constructor(props) {
@@ -70,15 +81,6 @@ class InventoryDetail extends React.Component {
 			.then((res) => {
 				// /projects/rpc/api.php?pid=2454
 				res = JSON.parse(res);
-				
-				let googleMapUrl = '';				
-				if (res.checklists.length > 0) {
-					googleMapUrl = 'https://maps.google.com/maps/api/staticmap?maptype=terrain&key=AIzaSyBmcl6Y-gu3bGdmp7LIQaDCa43TKLrP7qY';
-					googleMapUrl += '&size=640x400&zoom=6';
-					let latLng = res.checklists.map((checklist) => checklist.latcentroid + ',' + checklist.longcentroid);
-					googleMapUrl += '&markers=size:tiny%7C' + latLng.join("%7C");					
-				}
-			
 				this.setState({
 					projname: res.projname,
 					managers: res.managers,
@@ -86,20 +88,27 @@ class InventoryDetail extends React.Component {
 					fullDescription: res.fullDescription,
 					isPublic: res.isPublic,
 					checklists: res.checklists,
-					googleMapUrl: googleMapUrl
+					//googleMapUrl: googleMapUrl
 				});
 				const pageTitle = document.getElementsByTagName("title")[0];
 				pageTitle.innerHTML = `${pageTitle.innerHTML} ${res.projname}`;
 			})
 			.catch((err) => {
-      	window.location = "/";
-				//console.error(err);
+      	//window.location = "/";
+				console.error(err);
 			});
     
   }//componentDidMount
 
   render() {
 		let pid = this.getPid();
+		
+		const clusterOptions = {
+			imagePath:
+				'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m', // so you must have m1.png, m2.png, m3.png, m4.png, m5.png and m6.png in that folder
+			minimumClusterSize:
+				7
+		}
     return (
     <div className="wrapper">
 			<div className="page-header">
@@ -124,7 +133,37 @@ class InventoryDetail extends React.Component {
         </div>
         <div className="row map">
           <div className="col">
-              <img  className="img-fluid" src={this.state.googleMapUrl} title="Project map" alt="Map representation of checklists" />
+              <ProjectMap
+              	googleMapKey={this.props.googleMapKey}
+              >
+              {
+              	
+              	(pid == 1 || pid == 2) &&
+								<MarkerClusterer options={clusterOptions}>
+          				{(clusterer) =>
+										this.state.checklists.map((checklist,index) => {
+											let position = {
+												lat: checklist.latcentroid,
+												lng: checklist.longcentroid
+											}
+											let href = getChecklistPage(this.props.clientRoot, checklist.clid, pid)
+											return (
+												<Marker
+													key={checklist.clid}
+													title={ checklist.name }
+													position={position}
+													clusterer={clusterer}
+													onClick={()=>
+														location.href = href
+													}
+												/>
+										
+											)
+										})
+									}
+								</MarkerClusterer>
+              }
+              </ProjectMap>
           </div>
         </div>
         <div className="row mt-4 project-header ">
@@ -242,7 +281,7 @@ class InventoryChooser extends React.Component {
                                                                     <FontAwesomeIcon icon="chevron-down" />
                                                                 </div>
                                                                 <div className="">
-                                                                    <a className="btn btn-primary" role="button" href={ CLIENT_ROOT + '/projects/index.php?pid=' + project.pid } >Explore</a>
+                                                                    <a className="btn btn-primary" role="button" href={ this.props.clientRoot + '/projects/index.php?pid=' + project.pid } >Explore</a>
 																	<h3>{project.projname}</h3>
                                                                 </div>
 															</div>
@@ -255,14 +294,14 @@ class InventoryChooser extends React.Component {
 														<div className="project-expanded">
                                                             <div className="row">
                                                                 <div className="project-image col-sm-8 pr-0">
-                                                                    <img className="img-fluid" src={ CLIENT_ROOT + '/images/inventory/flora_oregon_lg.png' } />
+                                                                    <img className="img-fluid" src={ this.props.clientRoot + '/images/inventory/flora_oregon_lg.png' } />
                                                                 </div>
                                                                 <div className="col-sm pl-0">
                                                                     <div className="project-map-image">
-                                                                    <img className="img-fluid" src={ CLIENT_ROOT + '/images/inventory/flora_or_map_lg.png' } />
+                                                                    <img className="img-fluid" src={ this.props.clientRoot + '/images/inventory/flora_or_map_lg.png' } />
                                                                     </div>
                                                                     <div className="project-description" dangerouslySetInnerHTML={{__html: project.fulldescription}} />
-                                                                    <a className="btn btn-primary project-explore" role="button" href={ CLIENT_ROOT + '/projects/index.php?pid=' + project.pid } >Explore</a>
+                                                                    <a className="btn btn-primary project-explore" role="button" href={ this.props.clientRoot + '/projects/index.php?pid=' + project.pid } >Explore</a>
                                                                 </div>
                                                             </div>
                                                             <div className="less more-less" onClick={() => this.toggleProjectDisplay(index)}>
@@ -285,13 +324,15 @@ class InventoryChooser extends React.Component {
 }
 
 
+const headerContainer = document.getElementById("react-header");
+const dataProps = JSON.parse(headerContainer.getAttribute("data-props"));
 const domContainer = document.getElementById("react-inventory-app");
 const queryParams = getUrlQueryParams(window.location.search);
 if (queryParams.search) {
   window.location = `./search.php?search=${encodeURIComponent(queryParams.search)}`;
 } else if (queryParams.pid) {
   ReactDOM.render(
-    <InventoryDetail pid={queryParams.pid }/>,
+    <InventoryDetail pid={queryParams.pid } googleMapKey={ dataProps["googleMapKey"] } clientRoot={ dataProps["clientRoot"] }/>,
     domContainer
   );
 } else {
