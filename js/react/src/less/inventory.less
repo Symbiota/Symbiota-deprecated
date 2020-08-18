@@ -32,9 +32,10 @@
 
 		.project-item {
 			clear: both;
-			margin-bottom: 1em;
+			margin-bottom: 1.7em;
 			border: 1px dotted @dark-gray;
 			border-radius: 0.5em;
+			border-top-left-radius: 0;
 
 			.project-header {
 				border-top-left-radius: 0.5em;
@@ -57,20 +58,43 @@
 					margin-bottom: 0;
 				}
 			}
-
+			.project-other {
+				background-color: @light-green;
+			}
 			.project-content {
 				padding: 1em 6em;
 			}
-
+			.project-expanded {
+				display: flex;
+				flex-flow: row nowrap;
+				max-height: 560px;
+				
+				.project-image {
+					overflow: hidden;
+					h2 {
+						position: absolute;
+						color: white;
+						margin: .5em 35% 1em 5%;
+						font-size: 48px;
+						text-shadow: 1px 3px 3px rgba(0,0,0, 0.3); 
+						letter-spacing: -0.3px;
+					}
+					img {
+						max-height: 100%;
+						max-width: auto;
+					}
+				}
+			}
 			.project-description {
-				padding: 1.5em 2em;
+				padding: 2.5em 2em;
 			}
-
-			.project-explore {
-				float: right;
-				margin-right: 1em;
+			.btn.project-explore {
+				position: absolute;
+				bottom: 15px;
+				right: 20px;
+				padding: .6em .9em;
+				border: 2px solid @light-green;
 			}
-
 			.more-less {
 				float: right;
 				font-size: 14px;
@@ -78,15 +102,17 @@
 				text-transform: uppercase;
 				margin-top: 0.3em;
 				margin-right: 15px;
+				cursor: pointer;
 
 				svg {
 					margin-left: 0.5em;
 				}
 			}
-
 			.less{
-				margin-right: 23px;
-				margin-bottom: 2em;
+				position: absolute;
+				right: 10px;
+				top: 10px;
+				color: black;
 			}
 		}
 	}
