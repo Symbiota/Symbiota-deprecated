@@ -4,6 +4,11 @@ import HelpButton from "../common/helpButton.jsx";
 import {SearchWidget} from "../common/search.jsx";
 import ViewOpts from "./viewOpts.jsx";
 
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { library } from "@fortawesome/fontawesome-svg-core";
+import {faFileCsv, faFileWord, faPrint } from '@fortawesome/free-solid-svg-icons'
+library.add( faFileCsv, faFileWord, faPrint );
+
 /**
  * Full sidebar
  */
@@ -20,7 +25,6 @@ class SideBar extends React.Component {
   	if (this.props.totals['taxa'] < this.props.fixedTotals['taxa']) {
   		showFixedTotals = true;
   	}
-
     return (
       <div
         id="sidebar"
@@ -45,8 +49,26 @@ class SideBar extends React.Component {
 						<div className="stat-label">Total Taxa:</div>
 						<div className="stat-value">{ this.props.totals['taxa'] }{ showFixedTotals && <span className="fixed-totals"> (of { this.props.fixedTotals['taxa']})</span> } (including subsp. and var.)</div>
 					</div>
-					{/*<div className="stat export">
-						<div className="stat-label">Export:</div><div className="stat-value">W CSV P</div>
+					{/*
+					<div className="stat export">
+						<div className="stat-label">Export:</div>
+						<div className="stat-value"> 
+							<a className={ "export-word" + (this.props.totals['taxa'] === 0 ? " disabled" : '') } 
+									href={ this.props.exportUrl + '&format=word'} 
+									title="Download Word .doc"
+							>
+								<FontAwesomeIcon icon="file-word" size="2x"/> 
+							</a>
+							<a className={ "export-csv" + (this.props.totals['taxa'] === 0 ? " disabled" : '') } 
+									href={ this.props.exportUrl + '&format=csv'} 
+									title="Download CSV"
+							>
+								<FontAwesomeIcon icon="file-csv" size="2x"/>
+							</a>
+							<a className="export-print">
+								<FontAwesomeIcon icon="print" size="2x"/>
+							</a>
+						</div>
 					</div>*/}
 				</div>
 		  		<div className="filter-tools">

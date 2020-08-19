@@ -1310,8 +1310,26 @@ img {
         .stat-label {
           font-weight: bold;
           width: 80px;
-        }
+        }      
       }
+      .export {
+				.stat-label {
+					text-transform: uppercase;
+					font-weight: normal;
+					font-size: 16px;
+					padding-top: .3em;
+				}
+				.stat-value {
+					a {
+						padding-right: 20px;
+						font-size: .8em;
+						&.disabled {
+   						pointer-events: none;
+   						opacity: .5;
+						}
+					}
+				}
+			}
     }
 
     .filter-tools {

@@ -52,20 +52,32 @@ function buildResult($checklistObj) {
 					"names" => $taxa->getVernacularNames()
 				];
 				$tjresult['synonyms'] = $taxa->getSynonyms();
-				#var_dump($vouchers);
 				$tjresult['vouchers'] = $vouchers[$rowArr['tid']];
 				$tjresult['sciname'] = $taxa->getSciname();
-				/*if (sizeof(explode(" ",$tjresult['sciname'])) == 1) {
-					$tjresult['sciname'] .= " sp.";#the old code does this, but Katie says it's unnecessary
-				}*/
 				$result["taxa"][] = $tjresult;
-			}
-			
-			
+			}			
 		}
 		$result['totals'] = TaxaManager::getTaxaCounts($result['taxa']);
   }
   return $result;
+}
+
+function buildCSV($checklist) {
+	$return = array();
+	$return[] = array(
+		"Family",
+		"Scientific name",
+		"Common name"
+	);
+	foreach ($checklist['taxa'] as $taxa) {
+		$tmp = array(
+			$taxa['family'],
+			$taxa['sciname'],
+			$taxa['vernacular']['basename'],
+		);
+		$return[] = $tmp;
+	}
+	return $return;
 }
 
 
@@ -73,32 +85,40 @@ $result = [];
 if (array_key_exists("clid", $_GET) && is_numeric($_GET["clid"])&& array_key_exists("pid", $_GET) && is_numeric($_GET["pid"])) {
   $em = SymbosuEntityManager::getEntityManager();
   $repo = $em->getRepository("Fmchecklists");
-  $model = $repo->find($_GET["clid"]);
-  $checklist = ExploreManager::fromModel($model);
-  $checklist->setPid($_GET["pid"]);
-  
-	if ( 	 ( array_key_exists("search", $_GET) && !empty($_GET["search"]) )
-			&& ( array_key_exists("name", $_GET) && in_array($_GET['name'],array('sciname','commonname')) )
-	) {
-		$checklist->setSearchTerm($_GET["search"]);
-		$checklist->setSearchName($_GET['name']);
-		
-		$synonyms = (isset($_GET['synonyms']) && $_GET['synonyms'] == 'on') ? true : false;
-		$checklist->setSearchSynonyms($synonyms);
-	}
+  $model = $repo->find(intval($_GET["clid"]));
+  if ($model) {
+	  $checklist = ExploreManager::fromModel($model);
+	  if ($checklist) {
+			$checklist->setPid(intval($_GET["pid"]));
 	
-	$result = buildResult($checklist);
-
-}else{
-	#todo: generate error or redirect
+			if ( 	 ( array_key_exists("search", $_GET) && !empty($_GET["search"]) )
+					&& ( array_key_exists("name", $_GET) && in_array($_GET['name'],array('sciname','commonname')) )
+			) {
+				$checklist->setSearchTerm($_GET["search"]);
+				$checklist->setSearchName($_GET['name']);
+		
+				$synonyms = (isset($_GET['synonyms']) && $_GET['synonyms'] == 'on') ? true : false;
+				$checklist->setSearchSynonyms($synonyms);
+			}
+	
+			$result = buildResult($checklist);
+		}
+	}
 }
 // Begin View
-
-
-header("Content-Type: application/json; charset=utf-8");
-echo json_encode($result, JSON_NUMERIC_CHECK | JSON_INVALID_UTF8_SUBSTITUTE);
-
-
+if ($result) {
+	if (isset($_GET['format']) && $_GET['format'] === 'csv') {
+		$taxa = buildCSV($result);
+		header('Content-Description: File Transfer');
+		header('Content-Type: application/octet-stream');
+		header("Content-Disposition: attachment; filename=explore_results.csv");
+		$out = fopen('php://output', 'w');
+		foreach ($taxa as $taxon) {
+			fputcsv($out, $taxon, ",","\"");
+		}
+		fclose($out);
+	}
+}
 
 
 
