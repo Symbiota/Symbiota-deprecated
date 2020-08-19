@@ -29,6 +29,7 @@ class ExploreApp extends React.Component {
       abstract: '',
       displayAbstract: 'default',
       googleMapUrl: '',
+      exportUrl: '',
       //taxa: [],
       isLoading: true,
       filters: {
@@ -110,6 +111,7 @@ class ExploreApp extends React.Component {
 					googleMapUrl += '?' + mapParams.toString();
 
 				}
+							
 				this.setState({
 					clid: this.getClid(),
 					pid: this.getPid(),
@@ -120,7 +122,8 @@ class ExploreApp extends React.Component {
 					searchResults: this.sortResults(res.taxa),
 					totals: res.totals,
 					fixedTotals: res.totals,
-					googleMapUrl: googleMapUrl
+					googleMapUrl: googleMapUrl,
+					exportUrl: `${this.props.clientRoot}/checklists/rpc/export.php?clid=` + this.getClid() + `&pid=` + this.getPid()
 				});
 				const pageTitle = document.getElementsByTagName("title")[0];
 				pageTitle.innerHTML = `${pageTitle.innerHTML} ${res.title}`;
@@ -133,7 +136,27 @@ class ExploreApp extends React.Component {
         this.setState({ isLoading: false });
       });
   }
-
+  updateExportUrl() {
+  	let url = `${this.props.clientRoot}/checklists/rpc/api.php`;
+  	let exportParams = new URLSearchParams();
+  	
+		exportParams.append("clid",this.getClid());
+		exportParams.append("pid",this.getPid());
+		if (this.state.searchName) {
+			exportParams.append("name",this.state.searchName);
+		}
+		if (this.state.searchSynonyms) {
+			exportParams.append("synonyms",this.state.searchSynonyms);
+		}
+		if (this.state.filters.searchText) {
+			exportParams.append("search",this.state.filters.searchText);
+		}
+  	url += '?' + exportParams.toString();
+  	
+	  this.setState({
+      exportUrl: url,
+    });
+  }
 
   onFilterRemoved(key) {
     // TODO: This is clunky
@@ -179,6 +202,7 @@ class ExploreApp extends React.Component {
       	let jres = JSON.parse(res);
         this.onSearchResults(jres.taxa);
         this.updateTotals(jres.totals);
+        this.updateExportUrl();
       })
       .catch((err) => {
         console.error(err);
@@ -357,6 +381,7 @@ class ExploreApp extends React.Component {
 									return { key: filterKey, val: this.state.filters[filterKey] }
 								})
 							}
+							exportUrl={ this.state.exportUrl }
 						/>
 						
 					}
