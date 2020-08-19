@@ -1153,7 +1153,11 @@ button.menu-toggle {
 #maptoolbox h3 {
 	color: white;
 }
-
+.help-icon {
+	position: absolute;
+	top: 1px; 
+	right: 10px;
+}
 
 
 /*--------------------------------------------------------------

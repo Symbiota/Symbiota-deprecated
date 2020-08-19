@@ -533,6 +533,9 @@ $dbArr = Array();
 <div id="maptoolcontainer">
     <div id="maptoolbox">
     		<h3>Define an area</h3>
+    		<a href="<?php echo $CLIENT_ROOT . "/pages/tutorials.php#text-card-mapping"; ?>" target="_blank" class="help-icon">
+    			<img alt="help" src="<?php echo $CLIENT_ROOT . "/images/garden/help.png"; ?>"/>
+    		</a>
         <div id="drawcontrol">
             <span class="maptext">Draw</span>
             <select id="drawselect">
