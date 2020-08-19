@@ -1,22 +1,17 @@
 <?php
 include_once('../config/symbini.php');
 include_once($serverRoot.'/classes/ChecklistManager.php');
-/*
-using composer because need newer version (PHP7-compatible?); 
-this required a path fix to /vendor/phpoffice/phpword/bootstrap.php
-*/
-#require_once $serverRoot.'/classes/PhpWord/Autoloader.php';
-require_once $serverRoot.'/vendor/phpoffice/phpword/bootstrap.php';
+require_once $serverRoot.'/classes/PhpWord/Autoloader.php';
 header("Content-Type: text/html; charset=".$charset);
 ini_set('max_execution_time', 240); //240 seconds = 4 minutes
 
 $ses_id = session_id();
 
 $clManager = new ChecklistManager();
-#use PhpOffice\PhpWord\Autoloader;
-#use PhpOffice\PhpWord\Settings;
-#Autoloader::register();
-#Settings::loadConfig();
+use PhpOffice\PhpWord\Autoloader;
+use PhpOffice\PhpWord\Settings;
+Autoloader::register();
+Settings::loadConfig();
 
 $clValue = array_key_exists("cl",$_REQUEST)?$_REQUEST["cl"]:0; 
 $dynClid = array_key_exists("dynclid",$_REQUEST)?$_REQUEST["dynclid"]:0;

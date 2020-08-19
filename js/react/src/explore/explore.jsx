@@ -29,7 +29,8 @@ class ExploreApp extends React.Component {
       abstract: '',
       displayAbstract: 'default',
       googleMapUrl: '',
-      exportUrl: '',
+      exportUrlCsv: '',
+      exportUrlWord: '',
       //taxa: [],
       isLoading: true,
       filters: {
@@ -123,7 +124,9 @@ class ExploreApp extends React.Component {
 					totals: res.totals,
 					fixedTotals: res.totals,
 					googleMapUrl: googleMapUrl,
-					exportUrl: `${this.props.clientRoot}/checklists/rpc/export.php?clid=` + this.getClid() + `&pid=` + this.getPid()
+					//exportUrlCsv: `${this.props.clientRoot}/checklists/rpc/export.php?clid=` + this.getClid() + `&pid=` + this.getPid(),
+					exportUrlCsv: `${this.props.clientRoot}/checklists/reports/voucherreporthandler.php?clid=` + this.getClid(),
+					exportUrlWord: `${this.props.clientRoot}/checklists/defaultchecklistexport.php?cl=` + this.getClid() + `&pid=` + this.getPid()
 				});
 				const pageTitle = document.getElementsByTagName("title")[0];
 				pageTitle.innerHTML = `${pageTitle.innerHTML} ${res.title}`;
@@ -136,8 +139,15 @@ class ExploreApp extends React.Component {
         this.setState({ isLoading: false });
       });
   }
-  updateExportUrl() {
-  	let url = `${this.props.clientRoot}/checklists/rpc/api.php`;
+  updateExportUrls() {
+  	this.updateExportUrlCsv();
+    this.updateExportUrlWord();
+  }
+  updateExportUrlCsv() {
+  
+  /*
+  	//test this
+  	let url = `${this.props.clientRoot}/checklists/rpc/export.php`;
   	let exportParams = new URLSearchParams();
   	
 		exportParams.append("clid",this.getClid());
@@ -152,9 +162,53 @@ class ExploreApp extends React.Component {
 			exportParams.append("search",this.state.filters.searchText);
 		}
   	url += '?' + exportParams.toString();
+  	*/
+  	let url = `${this.props.clientRoot}/checklists/reports/voucherreporthandler.php`;
+  	let exportParams = new URLSearchParams();
+  	//params here match /checklists/reports/voucherreporthandler.php
+		exportParams.append("clid",this.getClid());
+		if (this.state.showTaxaDetail === 'on') {
+			exportParams.append("rtype",'fullvoucherscsv');
+		} else {
+			exportParams.append("rtype",'fullcsv');
+		}
+  	url += '?' + exportParams.toString();
+  	console.log(url);
   	
 	  this.setState({
-      exportUrl: url,
+      exportUrlCsv: url,
+    });
+  }
+  updateExportUrlWord() {
+  	let url = `${this.props.clientRoot}/checklists/defaultchecklistexport.php`;
+  	let exportParams = new URLSearchParams();
+  	//params here match /checklists/defaultchecklistexport.php
+		exportParams.append("cl",this.getClid());
+		exportParams.append("pid",this.getPid());
+		exportParams.append("showcommon",1);
+		if (this.state.filters.searchText) {
+			exportParams.append("taxonfilter",this.state.filters.searchText);
+		}
+		if (this.state.searchName === 'commonname') {
+			exportParams.append("searchcommon",1);
+		}
+		if (this.state.searchSynonyms) {
+			exportParams.append("searchsynonyms",this.state.searchSynonyms);
+		}
+		if (this.state.sortBy === 'taxon') {
+			exportParams.append("showalphataxa",1);
+		}
+		if (this.state.viewType === 'grid') {
+			exportParams.append("showimages",1);
+		}
+		if (this.state.showTaxaDetail === 'on') {
+			exportParams.append("showauthors",1);
+			exportParams.append("showvouchers",1);
+		}
+		
+  	url += '?' + exportParams.toString();
+	  this.setState({
+      exportUrlWord: url,
     });
   }
 
@@ -167,6 +221,7 @@ class ExploreApp extends React.Component {
           searchText: ViewOpts.DEFAULT_SEARCH_TEXT },
           () => this.onSearch({ text: ViewOpts.DEFAULT_SEARCH_TEXT, value: -1 })
         );
+        this.updateExportUrls();
         break;
       default:
         break;
@@ -202,7 +257,7 @@ class ExploreApp extends React.Component {
       	let jres = JSON.parse(res);
         this.onSearchResults(jres.taxa);
         this.updateTotals(jres.totals);
-        this.updateExportUrl();
+        this.updateExportUrls();
       })
       .catch((err) => {
         console.error(err);
@@ -222,7 +277,9 @@ class ExploreApp extends React.Component {
   onSearchResults(results) {
     let newResults;
     newResults = this.sortResults(results);
-    this.setState({ searchResults: newResults });
+    this.setState({ searchResults: newResults },function() {
+			this.updateExportUrls();
+		});
   }
   
   sortResults(results) {//should receive taxa from API
@@ -250,59 +307,71 @@ class ExploreApp extends React.Component {
   }
 
   onSortByChanged(sortBy) {
-    this.setState({ sortBy: sortBy });
+    this.setState({ sortBy: sortBy },function() {
+    	this.updateExportUrls();
+    });
   }
   onSearchNameChanged(name) {
-    this.setState({ searchName: name });
-
+    this.setState({ searchName: name },function() {
+    	this.updateExportUrls();
+    });
+/*
     let newName;
     if (name === "commonname") {
       newName = name;
     } else {
       newName = 'sciname';
-    }
+    }*/
     //let newQueryStr = addUrlQueryParam("searchName", newName);
     /*window.history.replaceState({ query: newQueryStr }, '', window.location.pathname + newQueryStr);*/
   }
   onSearchSynonymsChanged(synonyms) {
-    this.setState({ searchSynonyms: synonyms });
+    this.setState({ searchSynonyms: synonyms },function() {
+    	this.updateExportUrls();
+    });
 
-    let newSynonyms;
+/*    let newSynonyms;
     if (synonyms === 'off') {
       newSynonyms = synonyms;
     } else {
       newSynonyms = 'on';
-    }
+    }*/
     //let newQueryStr = addUrlQueryParam("searchSynonyms", newSynonyms);
     /*window.history.replaceState({ query: newQueryStr }, '', window.location.pathname + newQueryStr);*/
   }
   onViewTypeChanged(type) {
-    this.setState({ viewType: type });
-
+/*
     let newType;
     if (type) {
       newType = type;
     } else {
       newType = 'list';
     }
-    
-    if (newType === 'grid') {
-  		this.setState({showTaxaDetail: "off"});
-	  }
-    
+  */  
+    this.setState({ viewType: type },function() {
+			if (type === 'grid') {
+				this.setState({showTaxaDetail: "off"},function() {
+   			 	this.updateExportUrls();
+		    });
+			}else{
+   			 this.updateExportUrls();
+			}
+    });
     //let newQueryStr = addUrlQueryParam("viewType", newType);
     /*window.history.replaceState({ query: newQueryStr }, '', window.location.pathname + newQueryStr);*/
   }
   onTaxaDetailChanged(taxaDetail) {
-  	this.setState({showTaxaDetail: taxaDetail});
-  	
+  	this.setState({showTaxaDetail: taxaDetail},function() {
+    	this.updateExportUrls();
+    });
+ /* 	
   	let newVal;
   	if (taxaDetail === 'on') {
   		newVal = taxaDetail;
   	}else{
   		newVal = 'off';
   	}
-  	
+  */	
   	//let newQueryStr = addUrlQueryParam("taxaDetail",newVal);
     /*window.history.replaceState({ query: newQueryStr }, '', window.location.pathname + newQueryStr);*/
   }
@@ -381,7 +450,8 @@ class ExploreApp extends React.Component {
 									return { key: filterKey, val: this.state.filters[filterKey] }
 								})
 							}
-							exportUrl={ this.state.exportUrl }
+							exportUrlCsv={ this.state.exportUrlCsv }
+							exportUrlWord={ this.state.exportUrlWord }
 						/>
 						
 					}

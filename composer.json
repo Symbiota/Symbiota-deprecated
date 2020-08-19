@@ -2,9 +2,9 @@
     "require": {
         "doctrine/orm": "^2.6.4",
         "pclzip/pclzip": "2.8.2",
-        "phpoffice/common": "0.2.7",
+        "phpoffice/common": "0.2.9",
         "phpoffice/phpspreadsheet": "1.2.0",
-        "phpoffice/phpword": "v0.14.0",
+        "phpoffice/phpword": "^0.17.0",
         "psr/simple-cache": "1.0.1",
         "zendframework/zend-escaper": "2.5.2",
         "zendframework/zend-stdlib": "3.1.0"
