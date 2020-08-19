@@ -10,8 +10,8 @@ import { GoogleMap, LoadScript, Marker, MarkerClusterer } from '@react-google-ma
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { library } from "@fortawesome/fontawesome-svg-core";
-import { faSearchPlus, faListUl, faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons'
-library.add( faSearchPlus, faListUl, faChevronDown, faChevronDown)
+import { faSearchPlus, faListUl, faChevronDown, faChevronUp, faTimesCircle } from '@fortawesome/free-solid-svg-icons'
+library.add( faSearchPlus, faListUl, faChevronDown, faChevronDown, faTimesCircle)
 
 function ChecklistTable(props) {
   const columns = useMemo(
@@ -246,8 +246,13 @@ class InventoryChooser extends React.Component {
 			});
     
   }//componentDidMount
-
   render() {
+  	let inventoryImages = {
+  		1 : 'botanical_diversity.jpg',
+  		2 : 'species_list.jpg',
+  		3 : 'garden_with_natives.jpg',
+  	};
+  
     return (
     <div className="wrapper">
 			<div className="page-header">
@@ -276,14 +281,14 @@ class InventoryChooser extends React.Component {
 										
 														<div className="project-default">
 															<div className="project-header">
-                                                                <div className="more more-less" onClick={() => this.toggleProjectDisplay(index)}>
-                                                                    More
-                                                                    <FontAwesomeIcon icon="chevron-down" />
-                                                                </div>
-                                                                <div className="">
-                                                                    <a className="btn btn-primary" role="button" href={ this.props.clientRoot + '/projects/index.php?pid=' + project.pid } >Explore</a>
-																	<h3>{project.projname}</h3>
-                                                                </div>
+																	<div className="more more-less" onClick={() => this.toggleProjectDisplay(index)}>
+																			More
+																			<FontAwesomeIcon icon="chevron-down" />
+																	</div>
+																	<div className="">
+																			<a className="btn btn-primary" role="button" href={ this.props.clientRoot + '/projects/index.php?pid=' + project.pid } >Explore</a>
+																			<h3>{project.projname}</h3>
+																	</div>
 															</div>
 															<div className="project-content" dangerouslySetInnerHTML={{__html: project.fulldescription}} />
 														</div>
@@ -292,22 +297,22 @@ class InventoryChooser extends React.Component {
 												{project.display == 'expanded' && 
 												
 														<div className="project-expanded">
-                                                            <div className="row">
-                                                                <div className="project-image col-sm-8 pr-0">
-                                                                    <img className="img-fluid" src={ this.props.clientRoot + '/images/inventory/flora_oregon_lg.png' } />
-                                                                </div>
-                                                                <div className="col-sm pl-0">
-                                                                    <div className="project-map-image">
-                                                                    <img className="img-fluid" src={ this.props.clientRoot + '/images/inventory/flora_or_map_lg.png' } />
-                                                                    </div>
-                                                                    <div className="project-description" dangerouslySetInnerHTML={{__html: project.fulldescription}} />
-                                                                    <a className="btn btn-primary project-explore" role="button" href={ this.props.clientRoot + '/projects/index.php?pid=' + project.pid } >Explore</a>
-                                                                </div>
-                                                            </div>
-                                                            <div className="less more-less" onClick={() => this.toggleProjectDisplay(index)}>
-                                                                Less
-                                                                <FontAwesomeIcon icon="chevron-up" />
-                                                            </div>
+																		<div className="project-image col-sm-8 p-0">
+																				<h2>{project.projname}</h2>
+																				<img className="img-fluid" src={ this.props.clientRoot + '/images/inventory/' + inventoryImages[project.pid] } />
+																		</div>
+																		<div className="col-sm p-0 project-other">
+																				<div className="less more-less" onClick={() => this.toggleProjectDisplay(index)}>
+																						<FontAwesomeIcon icon="times-circle" size="2x"/>
+																				</div>
+																				{project.pid === 1 &&
+																				<div className="project-map-image">
+																					<img className="img-fluid" src={ this.props.clientRoot + '/images/inventory/flora_or_map_lg.png' } />
+																				</div>
+																				}
+																				<div className="project-description" dangerouslySetInnerHTML={{__html: project.fulldescription}} />
+																				<a className="btn btn-primary project-explore" role="button" href={ this.props.clientRoot + '/projects/index.php?pid=' + project.pid } >Explore</a>
+																		</div>
 														</div>
 													
 												}
@@ -337,7 +342,7 @@ if (queryParams.search) {
   );
 } else {
   ReactDOM.render(
-    <InventoryChooser/>,
+    <InventoryChooser clientRoot={ dataProps["clientRoot"] }/>,
     domContainer
   );
 }
