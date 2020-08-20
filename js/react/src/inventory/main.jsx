@@ -103,11 +103,53 @@ class InventoryDetail extends React.Component {
   render() {
 		let pid = this.getPid();
 		
+		const clusterIconStyles = [
+			{
+				height: 34,
+				textColor: '#3c6430',
+				url: this.props.clientRoot + '/images/inventory/map_clusters/m1.png',
+				width: 34
+			},
+			{
+				height: 34,
+				textColor: '#3c6430',
+				url: this.props.clientRoot + '/images/inventory/map_clusters/m2.png',
+				width: 34
+			},
+			{
+				height: 40,
+				textColor: '#3f3b79',
+				url: this.props.clientRoot + '/images/inventory/map_clusters/m3.png',
+				width: 40
+			},
+			{
+				height: 46,
+				textColor: '#7f1416',
+				url: this.props.clientRoot + '/images/inventory/map_clusters/m4.png',
+				width: 46
+			},
+			{
+				height: 46,
+				textColor: '#7f1416',
+				url: this.props.clientRoot + '/images/inventory/map_clusters/m5.png',
+				width: 46
+			},
+			{
+				height: 46,
+				textColor: '#7f1416',
+				url: this.props.clientRoot + '/images/inventory/map_clusters/m6.png',
+				width: 46
+			}
+		];
+		
 		const clusterOptions = {
-			imagePath:
-				'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m', // so you must have m1.png, m2.png, m3.png, m4.png, m5.png and m6.png in that folder
-			minimumClusterSize:
-				7
+			//imagePath:
+				//'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m', // so you must have m1.png, m2.png, m3.png, m4.png, m5.png and m6.png in that folder
+				//this.props.clientRoot + '/images/inventory/map_clusters/m', // so you must have m1.png, m2.png, m3.png, m4.png, m5.png and m6.png in that folder
+			minimumClusterSize: 6,
+			averageCenter: true,
+			imageSizes: [34,34,40,46,46,46],
+			styles: clusterIconStyles
 		}
     return (
     <div className="wrapper">
@@ -275,6 +317,10 @@ class InventoryChooser extends React.Component {
           <div className="col">
  								{
 									this.state.projects.map((project,index) => {
+										let projectUrl = '';
+										//direct grow natives to garden page, otherwise project page
+										projectUrl = ( project.pid == 3? this.props.clientRoot + '/garden/index.php' : this.props.clientRoot + '/projects/index.php?pid=' + project.pid );
+									
 										return (					
 											<div key={index} className="project-item">
 												{project.display == 'default' && 
@@ -286,7 +332,7 @@ class InventoryChooser extends React.Component {
 																			<FontAwesomeIcon icon="chevron-down" />
 																	</div>
 																	<div className="">
-																			<a className="btn btn-primary" role="button" href={ this.props.clientRoot + '/projects/index.php?pid=' + project.pid } >Explore</a>
+																			<a className="btn btn-primary" role="button" href={ projectUrl } >Explore</a>
 																			<h3>{project.projname}</h3>
 																	</div>
 															</div>
@@ -311,7 +357,7 @@ class InventoryChooser extends React.Component {
 																				</div>
 																				}
 																				<div className="project-description" dangerouslySetInnerHTML={{__html: project.fulldescription}} />
-																				<a className="btn btn-primary project-explore" role="button" href={ this.props.clientRoot + '/projects/index.php?pid=' + project.pid } >Explore</a>
+																				<a className="btn btn-primary project-explore" role="button" href={ projectUrl } >Explore</a>
 																		</div>
 														</div>
 													
