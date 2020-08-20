@@ -3461,16 +3461,17 @@ function toggleHeatMap(){
 }
 
 function toggleLayerTable(layerID){
-    var tableRows = document.getElementById("layercontroltable").rows.length;
-    if(tableRows > 0){
-        document.getElementById("nolayermessage").style.display = "none";
-        document.getElementById("layercontroltable").style.display = "block";
-    }
-    else{
+    //hiding these per Linda
+    //var tableRows = document.getElementById("layercontroltable").rows.length;
+    //if(tableRows > 0){
+    //    document.getElementById("nolayermessage").style.display = "none";
+    //    document.getElementById("layercontroltable").style.display = "block";
+    //}
+    //else{
         $('#addLayers').popup('hide');
         document.getElementById("nolayermessage").style.display = "block";
         document.getElementById("layercontroltable").style.display = "none";
-    }
+    //}
 }
 
 function toggleUploadLayer(c,title){

@@ -56,7 +56,7 @@ $dbArr = Array();
     <script src="<?php echo $CLIENT_ROOT; ?>/js/dbf.js" type="text/javascript"></script>
     <script src="<?php echo $CLIENT_ROOT; ?>/js/FileSaver.min.js" type="text/javascript"></script>
     <script src="<?php echo $CLIENT_ROOT; ?>/js/html2canvas.min.js" type="text/javascript"></script>
-    <script src="<?php echo $CLIENT_ROOT; ?>/js/symb/spatial.module.js?ver=259" type="text/javascript"></script>
+    <script src="<?php echo $CLIENT_ROOT; ?>/js/symb/spatial.module.js?ver=256" type="text/javascript"></script>
     <script type="text/javascript">
         $(function() {
             var winHeight = $(window).height();
@@ -137,9 +137,6 @@ $dbArr = Array();
 </head>
 <body class="mapbody">
 <!--<a class="back-button" rel="external" href="../">Back</a>-->
-<?php
-#include( $serverRoot . "/header.php" );
-?>
 <div data-role="page" id="page1">
     <div role="main" class="ui-content">
         <a href="#defaultpanel" id="panelopenbutton" data-role="button" data-inline="true" data-icon="bars">Open</a>
@@ -532,18 +529,14 @@ $dbArr = Array();
 
 <div id="maptoolcontainer">
     <div id="maptoolbox">
-    		<h3>Define an area</h3>
-    		<a href="<?php echo $CLIENT_ROOT . "/pages/tutorials.php#text-card-mapping"; ?>" target="_blank" class="help-icon">
-    			<img alt="help" src="<?php echo $CLIENT_ROOT . "/images/garden/help.png"; ?>"/>
-    		</a>
         <div id="drawcontrol">
             <span class="maptext">Draw</span>
             <select id="drawselect">
                 <option value="None">None</option>
                 <option value="Polygon">Polygon</option>
                 <option value="Circle">Circle</option>
-                <!--<option value="LineString">Line</option>
-                <option value="Point">Point</option>-->
+                <option value="LineString">Line</option>
+                <option value="Point">Point</option>
             </select>
         </div>
         <div id="basecontrol">
@@ -1757,8 +1750,5 @@ $dbArr = Array();
 <div id="loadingOverlay" data-role="popup" style="width:100%;position:relative;">
     <div id="loader"></div>
 </div>
-<?php
-#include( $serverRoot . "/footer.php" );
-?>
 </body>
 </html>
