@@ -60,14 +60,14 @@ class SideBar extends React.Component {
 								<FontAwesomeIcon icon="file-word" size="2x"/> 
 							</a>
 							<a className={ "export-csv" + (this.props.totals['taxa'] === 0 ? " disabled" : '') } 
-									href={ this.props.exportUrlCsv + '&format=csv'} 
+									href={ this.props.exportUrlCsv + "&format=csv"} 
 									title="Download CSV"
 							>
 								<FontAwesomeIcon icon="file-csv" size="2x"/>
 							</a>
-							<a className="export-print">
+							{/*<a className="export-print">
 								<FontAwesomeIcon icon="print" size="2x"/>
-							</a>
+							</a>*/}
 						</div>
 					</div>
 				</div>

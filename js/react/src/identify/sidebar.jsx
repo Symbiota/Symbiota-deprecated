@@ -5,7 +5,10 @@ import {SearchWidget} from "../common/search.jsx";
 import FeatureSelector from "./featureSelector.jsx";
 import ViewOpts from "./viewOpts.jsx";
 
-const CLIENT_ROOT = "..";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { library } from "@fortawesome/fontawesome-svg-core";
+import {faFileCsv, faFileWord, faPrint } from '@fortawesome/free-solid-svg-icons'
+library.add( faFileCsv, faFileWord, faPrint );
 
 
 /**
@@ -124,9 +127,26 @@ class SideBar extends React.Component {
 						<div className="stat-label">Total Taxa:</div>
 						<div className="stat-value">{ this.props.totals['taxa'] }{ showFixedTotals && <span className="fixed-totals"> (of { this.props.fixedTotals['taxa']})</span> } (including subsp. and var.)</div>
 					</div>
-					{/*<div className="stat export">
-						<div className="stat-label">Export:</div><div className="stat-value">W CSV P</div>
-					</div>*/}
+					<div className="stat export">
+						<div className="stat-label">Export:</div>
+						<div className="stat-value"> 
+							<a className={ "export-word" + (this.props.totals['taxa'] === 0 ? " disabled" : '') } 
+									href={ this.props.exportUrlWord} 
+									title="Download Word .doc"
+							>
+								<FontAwesomeIcon icon="file-word" size="2x"/> 
+							</a>
+							<a className={ "export-csv" + (this.props.totals['taxa'] === 0 ? " disabled" : '') } 
+									href={ this.props.exportUrlCsv + "&format=csv"} 
+									title="Download CSV"
+							>
+								<FontAwesomeIcon icon="file-csv" size="2x"/>
+							</a>
+							{/*<a className="export-print">
+								<FontAwesomeIcon icon="print" size="2x"/>
+							</a>*/}
+						</div>
+					</div>
 				</div>
 
         {/* Search */}
@@ -135,7 +155,7 @@ class SideBar extends React.Component {
 					<h3>Filter Tools</h3>
 					<SearchWidget
 						placeholder="Search plants by name"
-						clientRoot={ CLIENT_ROOT }
+						clientRoot={this.props.clientRoot}
 						isLoading={ this.props.isLoading }
 						textValue={ this.props.searchText }
 						onTextValueChanged={ this.props.onSearchTextChanged }

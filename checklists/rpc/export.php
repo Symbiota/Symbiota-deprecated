@@ -64,19 +64,25 @@ function buildResult($checklistObj) {
 
 function buildCSV($checklist) {
 	$return = array();
-	$return[] = array(
+	$header = array(
 		"Family",
-		"Scientific name",
-		"Common name"
+		"ScientificName",
+		"ScientificNameAuthorship",
+		"CommonName",
+		"TaxonId"
 	);
 	foreach ($checklist['taxa'] as $taxa) {
 		$tmp = array(
 			$taxa['family'],
 			$taxa['sciname'],
+			$taxa['author'],
 			$taxa['vernacular']['basename'],
+			$taxa['tid'],
 		);
 		$return[] = $tmp;
 	}
+	sort($return);
+	array_unshift($return,$header);
 	return $return;
 }
 
@@ -108,10 +114,11 @@ if (array_key_exists("clid", $_GET) && is_numeric($_GET["clid"])&& array_key_exi
 // Begin View
 if ($result) {
 	if (isset($_GET['format']) && $_GET['format'] === 'csv') {
+		$title = str_replace(" ","_",$result['title']) . "_" . time();
 		$taxa = buildCSV($result);
 		header('Content-Description: File Transfer');
 		header('Content-Type: application/octet-stream');
-		header("Content-Disposition: attachment; filename=explore_results.csv");
+		header("Content-Disposition: attachment; filename={$title}.csv");
 		$out = fopen('php://output', 'w');
 		foreach ($taxa as $taxon) {
 			fputcsv($out, $taxon, ",","\"");

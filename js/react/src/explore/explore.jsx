@@ -124,8 +124,8 @@ class ExploreApp extends React.Component {
 					totals: res.totals,
 					fixedTotals: res.totals,
 					googleMapUrl: googleMapUrl,
-					//exportUrlCsv: `${this.props.clientRoot}/checklists/rpc/export.php?clid=` + this.getClid() + `&pid=` + this.getPid(),
-					exportUrlCsv: `${this.props.clientRoot}/checklists/reports/voucherreporthandler.php?clid=` + this.getClid(),
+					exportUrlCsv: `${this.props.clientRoot}/checklists/rpc/export.php?clid=` + this.getClid() + `&pid=` + this.getPid(),
+					//exportUrlCsv: `${this.props.clientRoot}/checklists/reports/voucherreporthandler.php?clid=` + this.getClid(),
 					exportUrlWord: `${this.props.clientRoot}/checklists/defaultchecklistexport.php?cl=` + this.getClid() + `&pid=` + this.getPid()
 				});
 				const pageTitle = document.getElementsByTagName("title")[0];
@@ -145,7 +145,6 @@ class ExploreApp extends React.Component {
   }
   updateExportUrlCsv() {
   
-  /*
   	//test this
   	let url = `${this.props.clientRoot}/checklists/rpc/export.php`;
   	let exportParams = new URLSearchParams();
@@ -162,7 +161,8 @@ class ExploreApp extends React.Component {
 			exportParams.append("search",this.state.filters.searchText);
 		}
   	url += '?' + exportParams.toString();
-  	*/
+  	
+  	/*
   	let url = `${this.props.clientRoot}/checklists/reports/voucherreporthandler.php`;
   	let exportParams = new URLSearchParams();
   	//params here match /checklists/reports/voucherreporthandler.php
@@ -174,7 +174,7 @@ class ExploreApp extends React.Component {
 		}
   	url += '?' + exportParams.toString();
   	console.log(url);
-  	
+  	*/
 	  this.setState({
       exportUrlCsv: url,
     });
@@ -381,6 +381,7 @@ class ExploreApp extends React.Component {
 		if (this.state.abstract.length > 0) {
 			shortAbstract = this.state.abstract.replace(/^(.{240}[^\s]*).*/, "$1") + "...";//wordsafe truncate
 		}
+
     return (
     <div className="wrapper">
 			<div className="page-header">

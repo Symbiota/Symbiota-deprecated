@@ -51,7 +51,9 @@ class IdentifyApp extends React.Component {
       	genera: 0,
       	species: 0,
       	taxa: 0
-      }
+      },
+      exportUrlCsv: '',
+      exportUrlWord: '',
     };
 
     this.getPid = this.getPid.bind(this);
@@ -129,7 +131,8 @@ class IdentifyApp extends React.Component {
 					searchResults: taxa,
 					totals: res.totals,
 					fixedTotals: res.totals,
-					//googleMapUrl: googleMapUrl
+					exportUrlCsv: `${this.props.clientRoot}/checklists/rpc/export.php?clid=` + this.getClid() + `&pid=` + this.getPid(),
+					exportUrlWord: `${this.props.clientRoot}/checklists/defaultchecklistexport.php?cl=` + this.getClid() + `&pid=` + this.getPid()
 				});
 				const pageTitle = document.getElementsByTagName("title")[0];
 				pageTitle.innerHTML = `${pageTitle.innerHTML} ${res.title}`;
@@ -143,7 +146,42 @@ class IdentifyApp extends React.Component {
       });
  
   }
+	updateExportUrls() {
+  	this.updateExportUrlCsv();
+    this.updateExportUrlWord();
+  }
+  updateExportUrlCsv() {
 
+  	let url = `${this.props.clientRoot}/checklists/rpc/export.php`;
+  	let exportParams = new URLSearchParams();
+  	
+		exportParams.append("clid",this.getClid());
+		exportParams.append("pid",this.getPid());
+
+		if (this.state.filters.searchText) {
+			exportParams.append("search",this.state.filters.searchText);
+		}
+  	url += '?' + exportParams.toString();
+
+	  this.setState({
+      exportUrlCsv: url,
+    });
+  }
+  updateExportUrlWord() {
+  	let url = `${this.props.clientRoot}/checklists/defaultchecklistexport.php`;
+  	let exportParams = new URLSearchParams();
+  	//params here match /checklists/defaultchecklistexport.php
+		exportParams.append("cl",this.getClid());
+		exportParams.append("pid",this.getPid());
+		exportParams.append("showcommon",1);
+		if (this.state.filters.searchText) {
+			exportParams.append("taxonfilter",this.state.filters.searchText);
+		}
+  	url += '?' + exportParams.toString();
+	  this.setState({
+      exportUrlWord: url,
+    });
+  }
   onFilterRemoved(key,text) {
 
   	const characteristics = ["wholePlant","leaf","gardening"];
@@ -154,6 +192,7 @@ class IdentifyApp extends React.Component {
           searchText: ViewOpts.DEFAULT_SEARCH_TEXT },
           () => this.onSearch({ text: ViewOpts.DEFAULT_SEARCH_TEXT, value: -1 })
         );
+        this.updateExportUrls();
         break;
 
       default://characteristics/attr numbers
@@ -206,6 +245,7 @@ class IdentifyApp extends React.Component {
         this.onSearchResults(jres.taxa);
         this.onAttrResults(jres.characteristics);
         this.updateTotals(jres.totals);
+        this.updateExportUrls();
       })
       .catch((err) => {
         console.error(err);
@@ -225,7 +265,9 @@ class IdentifyApp extends React.Component {
   onSearchResults(results) {
     let newResults;
     newResults = this.sortResults(results);
-    this.setState({ searchResults: newResults });
+    this.setState({ searchResults: newResults },function() {
+			this.updateExportUrls();
+		});
   }
   onAttrResults(chars) {
     this.setState({ characteristics: chars });
@@ -287,7 +329,9 @@ class IdentifyApp extends React.Component {
   }
   onSortByChanged(type) {
     this.setState({ sortBy: type },function() {
-    	this.setState({ searchResults: this.sortByName(this.state.searchResults) });
+    	this.setState({ searchResults: this.sortByName(this.state.searchResults) },function() {
+    		this.updateExportUrls();
+    	});
     });
   }
 
@@ -367,6 +411,8 @@ class IdentifyApp extends React.Component {
 							onAttrClicked={ this.onAttrChanged }
 							onFilterClicked={ this.onFilterRemoved }
 							filters={ this.state.filters }
+							exportUrlCsv={ this.state.exportUrlCsv }
+							exportUrlWord={ this.state.exportUrlWord }
 						/>
 						
 					}

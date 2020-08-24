@@ -53,7 +53,8 @@ const reactConfig = {
         }
       }
     ]
-  }
+  },
+  stats: 'errors-warnings'
 };
 
 const lessConfig = {
