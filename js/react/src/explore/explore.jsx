@@ -414,7 +414,9 @@ class ExploreApp extends React.Component {
           </div>
           <div className="col-3 text-right mt-3">
           		{ this.state.googleMapUrl.length > 0 &&
-              	<img  className="img-fluid" src={this.state.googleMapUrl} title="Project map" alt="Map representation of checklists" />
+          			<a href={ this.props.clientRoot + "/checklists/checklistmap.php?clid=" + this.getClid() }>
+              		<img className="img-fluid" src={this.state.googleMapUrl} title="Project map" alt="Map representation of checklists" />
+              	</a>
               }
           </div>
         </div>
