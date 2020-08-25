@@ -105,19 +105,19 @@ export default class ExplorePreviewModal extends Component {
 								<h3>{ this.state.title } Data</h3>
 								<div className={ "dashed-border py-2 data-item" }>
 						      <div className="data-label font-weight-bold">Families:</div>
-						      <div className=" text-capitalize">{ this.state.totals.families }</div>
+						      <div>{ this.state.totals.families }</div>
 						    </div>
 								<div className={ "dashed-border py-2 data-item" }>
 						      <div className="data-label font-weight-bold">Genera:</div>
-						      <div className=" text-capitalize">{ this.state.totals.genera }</div>
+						      <div>{ this.state.totals.genera }</div>
 						    </div>
 								<div className={ "dashed-border py-2 data-item" }>
 						      <div className="data-label font-weight-bold">Species:</div>
-						      <div className=" text-capitalize">{ this.state.totals.species } (species rank)</div>
+						      <div>{ this.state.totals.species } (species rank)</div>
 						    </div>
 								<div className={ "dashed-border py-2 data-item" }>
 						      <div className="data-label font-weight-bold">Total Taxa:</div>
-						      <div className=" text-capitalize">{ this.state.totals.taxa } (including subsp. and var.)</div>
+						      <div>{ this.state.totals.taxa } (including subsp. and var.)</div>
 						    </div>
 	           	 	<div className="taxa-link">
             			<a href={ getChecklistPage(this.props.clientRoot, this.props.clid, this.props.pid) }><button className="d-block my-2 btn-primary">See the plants</button></a>

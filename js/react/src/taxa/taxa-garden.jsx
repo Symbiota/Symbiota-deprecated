@@ -27,7 +27,7 @@ function BorderedItem(props) {
   return (
     <div className={ "row dashed-border py-2" }>
       <div className="col font-weight-bold">{ props.keyName }</div>
-      <div className="col text-capitalize">{ value }</div>
+      <div className="col">{ value }</div>
     </div>
   );
 }
@@ -228,7 +228,7 @@ class TaxaApp extends React.Component {
             </p>
             <div className="mt-4 dashed-border">
             
-            	<h3 className="text-capitalize text-light-green font-weight-bold mt-2">{ this.state.vernacularNames[0] } images</h3>
+            	<h3 className="text-light-green font-weight-bold mt-2">{ this.state.vernacularNames[0] } images</h3>
 							<div className="slider-wrapper">
   						<GardenCarousel
   							images={this.state.images}>
@@ -261,7 +261,7 @@ class TaxaApp extends React.Component {
 								onClose={this.toggleImageModal}
 							>
 								<h3>
-									<span className="text-capitalize">{ this.state.vernacularNames[0] }</span> images
+									<span>{ this.state.vernacularNames[0] }</span> images
 								</h3>
 							</ImageModal>
             </div>

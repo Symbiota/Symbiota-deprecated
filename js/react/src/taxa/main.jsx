@@ -40,7 +40,7 @@ function BorderedItem(props) {
   return (
     <div className={ "row dashed-border py-2" }>
       <div className="col font-weight-bold">{ props.keyName }</div>
-      <div className="col text-capitalize">{ value }</div>
+      <div className="col">{ value }</div>
     </div>
   );
 }
@@ -67,7 +67,7 @@ class SynonymItem extends React.Component {
 		return (
 			<div className={ "synonym-item row dashed-border py-1" }>
 				<div className="col font-weight-bold">Synonyms</div>
-				<div className="col text-capitalize">{ 
+				<div className="col">{ 
 					Object.entries(this.getRenderedItems())
 					.map(([key, obj]) => {
 						return (
@@ -123,7 +123,7 @@ function MoreInfoItem(props) {
   return (
     <div className={ "more-info row dashed-border py-2" }>
       <div className="col font-weight-bold">{ props.keyName }</div>
-      <div className="col text-capitalize">{ value }</div>
+      <div className="col">{ value }</div>
     </div>
   );
 }
@@ -208,7 +208,7 @@ function SideBarSection(props) {
             if (key == 'webLinks') {
 	            return <SingleBorderedItem key={ val } keyName={ val } value={ val } />
 	          }else if (key == 'Related') {
-	            return <RelatedBorderedItem key={ key } keyName={ key } value={ val } isGenus={ props.isGenus } rankId={ props.rankId }/>
+	            return <RelatedBorderedItem key={ key } keyName={ key } value={ val } rankId={ props.rankId }/>
 	          }else if (key == "More info") {
 	            return <MoreInfoItem key={ key } keyName={ key } value={ val } />
 	          }else if (key == "Synonyms") {
@@ -316,13 +316,14 @@ class TaxaChooser extends React.Component {
   render() {
 		const res = this.props.res;
     const pageTitle = document.getElementsByTagName("title")[0];
-    pageTitle.innerHTML = `${pageTitle.innerHTML} ${res.sciName}`;
+    let titleVal = (res.sciName? res.sciName : res.family);
+    pageTitle.innerHTML = `${pageTitle.innerHTML} ${titleVal}`;
   	return (
 			<div className="container my-5 py-2 taxa-detail" style={{ minHeight: "45em" }}>
 				<div className="row">
 					<div className="col">
 
-						<h1 className="text-capitalize">{ res.sciName } { res.author }</h1>
+						<h1>{ res.sciName } { res.author }</h1>
 					</div>
 					<div className="col-auto">
 						<FontAwesomeIcon icon="edit" />
@@ -346,7 +347,7 @@ class TaxaChooser extends React.Component {
 					
 						{res.spp.length > 0 &&
 							<div className="mt-4 dashed-border" id="subspecies">     
-								<h3 className="text-capitalize text-light-green font-weight-bold mt-2">Subspecies and varieties</h3>   
+								<h3 className="text-light-green font-weight-bold mt-2">Subspecies and varieties</h3>   
 								<div className="spp-wrapper">
 									{
 										res.spp.map((spp,index) => {
@@ -361,8 +362,8 @@ class TaxaChooser extends React.Component {
 										
 					</div>
 					<div className="col-sm-4 sidebar">
-						<SideBarSection title="Context" items={ res.highlights } classes="highlights" isGenus={ res.isGenus } rankId={ res.rankId }/>
-						<SideBarSection title="Web links" items={ res.taxalinks} classes="weblinks"  isGenus={ res.isGenus } rankId={ res.rankId }/>
+						<SideBarSection title="Context" items={ res.highlights } classes="highlights" rankId={ res.rankId }/>
+						<SideBarSection title="Web links" items={ res.taxalinks} classes="weblinks" rankId={ res.rankId }/>
 					</div>
 				</div>
 			</div>
@@ -405,11 +406,11 @@ class TaxaDetail extends React.Component {
 			<div className="container my-5 py-2 taxa-detail" style={{ minHeight: "45em" }}>
 				<div className="row">
 					<div className="col">
-						<h1 className="text-capitalize">{ res.sciName } { res.author }</h1>
+						<h1>{ res.sciName } { res.author }</h1>
 						{ res.synonym &&
-							<h2>synonym: <span className="text-capitalize font-italic">{ res.synonym }</span></h2>
+							<h2>synonym: <span className="font-italic">{ res.synonym }</span></h2>
 						}
-						<h2 className="text-capitalize font-italic">{ res.vernacularNames[0] }</h2>
+						<h2 className="font-italic">{ res.vernacularNames[0] }</h2>
 					</div>
 					<div className="col-auto">
 						{/*<button className="d-block my-2 btn-primary">Printable page</button>*/}
@@ -419,10 +420,10 @@ class TaxaDetail extends React.Component {
 				<div className="row mt-2 row-cols-sm-2">
 					<div className="col-sm-8 px-4">
 						<div className="img-main-wrapper">
-							{ res.images.HumanObservation.length > 0 && 
+							{ allImages.length > 0 && 
 							<img
 								id="img-main"
-								src={ res.images.HumanObservation[0].url }
+								src={ allImages[0].url }
 								alt={ res.sciName }
 							/>
 							}
@@ -443,7 +444,7 @@ class TaxaDetail extends React.Component {
 					
 						{res.spp.length > 0 &&
 							<div className="mt-4 dashed-border" id="subspecies">     
-								<h3 className="text-capitalize text-light-green font-weight-bold mt-2">Subspecies and varieties</h3>   
+								<h3 className="text-light-green font-weight-bold mt-2">Subspecies and varieties</h3>   
 								<div className="spp-wrapper">
 									{
 										res.spp.map((spp,index) => {
@@ -458,7 +459,7 @@ class TaxaDetail extends React.Component {
 					
 						{  res.images.HumanObservation.length > 0 && 
 						<div className="mt-4 dashed-border" id="photos">     
-							<h3 className="text-capitalize text-light-green font-weight-bold mt-2">Photo images</h3>
+							<h3 className="text-light-green font-weight-bold mt-2">Photo images</h3>
 							<div className="slider-wrapper">
 						
 							<GardenCarousel
@@ -490,7 +491,7 @@ class TaxaDetail extends React.Component {
 				 
 						{  res.images.PreservedSpecimen.length > 0 && 
 						<div className="mt-4 dashed-border" id="herbarium">     
-							<h3 className="text-capitalize text-light-green font-weight-bold mt-2">Herbarium specimens</h3>
+							<h3 className="text-light-green font-weight-bold mt-2">Herbarium specimens</h3>
 							<div className="slider-wrapper">
 							<GardenCarousel
 								images={res.images.PreservedSpecimen}>
@@ -525,7 +526,7 @@ class TaxaDetail extends React.Component {
 								onClose={this.toggleImageModal}
 							>
 								<h3>
-									<span className="text-capitalize">{ res.vernacularNames[0] }</span> images
+									<span>{ res.vernacularNames[0] }</span> images
 								</h3>
 							</ImageModal>        
 					
@@ -568,8 +569,7 @@ class TaxaApp extends React.Component {
       tid: null,
       rankId: null,
       currImage: 0,
-      related: [],
-      isGenus: false
+      related: []
     };
     this.getTid = this.getTid.bind(this);
   }
@@ -582,7 +582,7 @@ class TaxaApp extends React.Component {
       window.location = "/";
     } else {
     	let api = `./rpc/api.php?taxon=${this.props.tid}`;
-    	console.log(api);
+    	//console.log(api);
       httpGet(api)
         .then((res) => {
        		// /taxa/rpc/api.php?taxon=2454
@@ -620,7 +620,6 @@ class TaxaApp extends React.Component {
 							</div>
 						)
 					});
-					let isGenus = (res.rankId <= RANK_GENUS && res.rankId > RANK_FAMILY);
 					
 					let synonym = '';
 					if (this.props.synonym) {
@@ -653,7 +652,6 @@ class TaxaApp extends React.Component {
             spp: res.spp,
             related: relatedArr,
             family: res.family,
-            isGenus: isGenus,
             synonym: synonym
           });
         })
@@ -666,10 +664,10 @@ class TaxaApp extends React.Component {
 
 	render() {
 		//choose page
-		if (this.state.isGenus) {
-			return <TaxaChooser res = { this.state } clientRoot={ this.props.clientRoot } />;
+		if (this.state.rankId <= RANK_GENUS) {
+			return <TaxaChooser res = { this.state } clientRoot={ this.props.clientRoot } />;//Genus or Family
 		}else{
-			return <TaxaDetail res = { this.state } clientRoot={ this.props.clientRoot } />;
+			return <TaxaDetail res = { this.state } clientRoot={ this.props.clientRoot } />;//Species
 		}
   }
 }

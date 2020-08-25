@@ -12,7 +12,7 @@ function PageHeader(props) {
 				</div>
 				*/}
 				<div>
-					<h1 className="text-capitalize">{ props.title }</h1>
+					<h1>{ props.title }</h1>
 				</div>
 			</div>
 		</section>

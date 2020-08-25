@@ -295,10 +295,11 @@ class TaxaManager {
 						$retArr = $this->loadDescriptionArr($rowArr, $retArr);
 					}
 				}
-        ksort($retArr);
+        $ret = array_values($retArr[0]);#I don't know what situation would require the whole array, so this for now
 		}
-		if (sizeof($retArr)) {
-    	return $retArr[0];#I don't know what situation would require the whole array, so this for now
+		#var_dump($retArr);
+		if (sizeof($ret)) {
+    	return $ret;
 		}else{
 			return [];
 		}
@@ -457,11 +458,24 @@ class TaxaManager {
   	$this->rarePlantFactSheet = '';
   	if ($tid) {
 			$em = SymbosuEntityManager::getEntityManager();
+			$expr = $em->getExpressionBuilder();
 			$links = $em->createQueryBuilder()
 				->select(["tl.url","tl.title"])
 				->from("Taxalinks", "tl")
-				->where("tl.tid = :tid")
+				->where(
+					$expr->in(
+						'tl.tid',
+						$em->createQueryBuilder()
+							->select("te.parenttid")
+							->from("Taxaenumtree","te")
+							->where("te.tid = :tid")
+							->andWhere("te.taxauthid = :taxauthid")
+							->getDQL()
+					)
+				)
 				->setParameter("tid", $tid)
+				->setParameter("taxauthid", 1)
+      	->orderBy("tl.sortsequence,tl.title")
       	->getQuery()
       	->execute();
 		}
@@ -472,7 +486,6 @@ class TaxaManager {
   			unset($links[$idx]);
   		}
   	}
-  	sort($links);
   	return $links;
  	}
  	
