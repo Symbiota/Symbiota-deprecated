@@ -2272,6 +2272,7 @@ function loadPoints(){
         pointvectorsource = new ol.source.Vector({wrapX: false});
         layersArr['pointv'].setSource(pointvectorsource);
         getSOLRRecCnt(false,function(res) {
+        console.log(solrRecCnt);
             if(solrRecCnt){
                 loadPointsEvent = true;
                 setLoadingTimer();
