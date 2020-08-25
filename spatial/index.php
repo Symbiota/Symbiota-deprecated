@@ -210,22 +210,22 @@ $dbArr = Array();
                                             </select>
                                         </div>
                                         <div style="margin-top:5px;">
-                                            <?php echo $SEARCHTEXT['TAXON_INPUT']; ?> <input data-role="none" id="taxa" type="text" style="width:275px;" name="taxa" value="" onKeyUp="buildQueryStrings();" title="<?php echo $SEARCHTEXT['TITLE_TEXT_1']; ?>" />
+                                            <?php echo $SEARCHTEXT['TAXON_INPUT']; ?> <input data-role="none" id="taxa" type="text" style="width:275px;" name="taxa" value="" class="query-trigger-field" class="query-trigger-field" title="<?php echo $SEARCHTEXT['TITLE_TEXT_1']; ?>" />
                                         </div>
                                     </div>
                                 </div>
                                 <div style="margin:5 0 5 0;"><hr /></div>
                                 <div>
-                                    <?php echo $SEARCHTEXT['COUNTRY_INPUT']; ?> <input data-role="none" type="text" id="country" style="width:225px;" name="country" value="" onKeyUp="buildQueryStrings();" title="<?php echo $SEARCHTEXT['TITLE_TEXT_1']; ?>" />
+                                    <?php echo $SEARCHTEXT['COUNTRY_INPUT']; ?> <input data-role="none" type="text" id="country" style="width:225px;" name="country" value="" class="query-trigger-field" title="<?php echo $SEARCHTEXT['TITLE_TEXT_1']; ?>" />
                                 </div>
                                 <div style="margin-top:5px;">
-                                    <?php echo $SEARCHTEXT['STATE_INPUT']; ?> <input data-role="none" type="text" id="state" style="width:150px;" name="state" value="" onKeyUp="buildQueryStrings();" title="<?php echo $SEARCHTEXT['TITLE_TEXT_1']; ?>" />
+                                    <?php echo $SEARCHTEXT['STATE_INPUT']; ?> <input data-role="none" type="text" id="state" style="width:150px;" name="state" value="" class="query-trigger-field" title="<?php echo $SEARCHTEXT['TITLE_TEXT_1']; ?>" />
                                 </div>
                                 <div style="margin-top:5px;">
-                                    <?php echo $SEARCHTEXT['COUNTY_INPUT']; ?> <input data-role="none" type="text" id="county" style="width:225px;"  name="county" value="" onKeyUp="buildQueryStrings();" title="<?php echo $SEARCHTEXT['TITLE_TEXT_1']; ?>" />
+                                    <?php echo $SEARCHTEXT['COUNTY_INPUT']; ?> <input data-role="none" type="text" id="county" style="width:225px;"  name="county" value="" class="query-trigger-field" title="<?php echo $SEARCHTEXT['TITLE_TEXT_1']; ?>" />
                                 </div>
                                 <div style="margin-top:5px;">
-                                    <?php echo $SEARCHTEXT['LOCALITY_INPUT']; ?> <input data-role="none" type="text" id="locality" style="width:225px;" name="local" onKeyUp="buildQueryStrings();" value="" />
+                                    <?php echo $SEARCHTEXT['LOCALITY_INPUT']; ?> <input data-role="none" type="text" id="locality" style="width:225px;" name="local" class="query-trigger-field" value="" />
                                 </div>
                                 <div style="margin:5 0 5 0;"><hr /></div>
                                 <div id="shapecriteriabox">
@@ -239,25 +239,25 @@ $dbArr = Array();
                                 <div style="margin:5 0 5 0;"><hr /></div>
                                 <div>
                                     <?php echo $SEARCHTEXT['COLLECTOR_LASTNAME']; ?>
-                                    <input data-role="none" type="text" id="collector" style="width:125px;" name="collector" value="" onKeyUp="buildQueryStrings();" title="" />
+                                    <input data-role="none" type="text" id="collector" style="width:125px;" name="collector" value="" class="query-trigger-field" title="" />
                                 </div>
                                 <div style="margin-top:5px;">
                                     <?php echo $SEARCHTEXT['COLLECTOR_NUMBER']; ?>
-                                    <input data-role="none" type="text" id="collnum" style="width:125px;" name="collnum" value="" onKeyUp="buildQueryStrings();" title="<?php echo $SEARCHTEXT['TITLE_TEXT_2']; ?>" />
+                                    <input data-role="none" type="text" id="collnum" style="width:125px;" name="collnum" value="" class="query-trigger-field" title="<?php echo $SEARCHTEXT['TITLE_TEXT_2']; ?>" />
                                 </div>
                                 <div style="margin-top:5px;">
                                     <?php echo $SEARCHTEXT['COLLECTOR_DATE']; ?>
-                                    <input data-role="none" type="text" id="eventdate1" style="width:100px;" name="eventdate1" value="" onKeyUp="buildQueryStrings();" title="<?php echo $SEARCHTEXT['TITLE_TEXT_3']; ?>" /> -
-                                    <input data-role="none" type="text" id="eventdate2" style="width:100px;" name="eventdate2" value="" onKeyUp="buildQueryStrings();" title="<?php echo $SEARCHTEXT['TITLE_TEXT_4']; ?>" />
+                                    <input data-role="none" type="text" id="eventdate1" style="width:100px;" name="eventdate1" value="" class="query-trigger-field" title="<?php echo $SEARCHTEXT['TITLE_TEXT_3']; ?>" /> -
+                                    <input data-role="none" type="text" id="eventdate2" style="width:100px;" name="eventdate2" value="" class="query-trigger-field" title="<?php echo $SEARCHTEXT['TITLE_TEXT_4']; ?>" />
                                 </div>
                                 <div style="margin:10 0 10 0;"><hr></div>
                                 <div>
                                     <?php echo $SEARCHTEXT['CATALOG_NUMBER']; ?>
-                                    <input data-role="none" type="text" id="catnum" style="width:150px;" name="catnum" value="" onKeyUp="buildQueryStrings();" title="" />
+                                    <input data-role="none" type="text" id="catnum" style="width:150px;" name="catnum" value="" class="query-trigger-field" title="" />
                                 </div>
                                 <div style="margin-top:5px;">
                                     <?php echo $SEARCHTEXT['OTHER_CATNUM']; ?>
-                                    <input data-role="none" type="text" id="othercatnum" style="width:150px;" name="othercatnum" value="" onKeyUp="buildQueryStrings();" title="" />
+                                    <input data-role="none" type="text" id="othercatnum" style="width:150px;" name="othercatnum" value="" class="query-trigger-field" title="" />
                                 </div>
                                 <div style="margin-top:5px;">
                                     <input data-role="none" type='checkbox' name='typestatus' id='typestatus' value='1' onchange="buildQueryStrings();"> <?php echo $SEARCHTEXT['TYPE']; ?>

@@ -19,6 +19,10 @@ $(document).ready(function() {
         return split( term ).pop();
     }
 
+		$( ".query-trigger-field" )
+				.bind( "keyup", "change", function( event ) {
+					buildQueryStrings();
+				});
     $( "#taxa" )
         .bind( "keydown", function( event ) {
             if ( event.keyCode === $.ui.keyCode.TAB &&
@@ -321,6 +325,7 @@ function buildLayerTableRow(lArr,removable){
 }
 
 function buildQueryStrings(){
+console.log("buildQueryStrings");
     cqlArr = [];
     solrqArr = [];
     solrgeoqArr = [];
@@ -2256,6 +2261,7 @@ function lazyLoadPoints(index,callback){
 }
 
 function loadPoints(){
+console.log("loadPooints");
     cqlString = '';
     solrqString = '';
     taxaCnt = 0;
