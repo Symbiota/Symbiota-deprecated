@@ -276,7 +276,6 @@ function buildCQLString(){
     else{
         newcqlString = newcqlString.substr(5,newcqlString.length);
     }
-    console.log("buildCQLString:" + cqlString);
 }
 
 function buildLayerTableRow(lArr,removable){
@@ -1819,7 +1818,7 @@ function getSOLROccArr(callback){
             var http = new XMLHttpRequest();
             var url = "rpc/SOLRConnector.php";
             var params = solroccqString+'&rows='+solrRecCnt+'&start=0&fl=occid&wt=json';
-            console.log(url+'?'+params);
+            //console.log(url+'?'+params);
             http.open("POST", url, true);
             http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
             http.onreadystatechange = function() {
