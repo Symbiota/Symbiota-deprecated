@@ -32,17 +32,12 @@ class Taxaenumtree
     private $tid;
 
     /**
-     * @var \Taxa
+     * @var int
      *
      * @ORM\Id
-     * @ORM\GeneratedValue(strategy="NONE")
-     * @ORM\ManyToOne(targetEntity="Taxa")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="parenttid", referencedColumnName="TID")
-     * })
+     * @ORM\Column(name="parenttid", type="integer", nullable=false)
      */
     private $parenttid;
-
 
     /**
      * @var \Taxauthority
