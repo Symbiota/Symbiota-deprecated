@@ -81,7 +81,6 @@ $(document).ready(function() {
                 terms.pop();
                 terms.push( ui.item.value );
                 this.value = terms.join( ", " );
-								buildQueryStrings();
                 return false;
             }
         },{});
@@ -276,6 +275,7 @@ function buildCQLString(){
     else{
         newcqlString = newcqlString.substr(5,newcqlString.length);
     }
+    //console.log(cqlString);
 }
 
 function buildLayerTableRow(lArr,removable){
@@ -325,7 +325,7 @@ function buildLayerTableRow(lArr,removable){
 }
 
 function buildQueryStrings(){
-console.log("buildQueryStrings");
+//console.log("buildQueryStrings");
     cqlArr = [];
     solrqArr = [];
     solrgeoqArr = [];
@@ -396,7 +396,6 @@ function buildSOLRQString(){
         document.getElementById("dh-fq").value = tempfqStr;
         newsolrqString += '&fq='+tempfqStr;
     }
-    console.log("buildSOLRQString:" + newsolrqString);
 }
 
 function buildTaxaKey(){
@@ -2262,7 +2261,7 @@ function lazyLoadPoints(index,callback){
 }
 
 function loadPoints(){
-console.log("loadPooints");
+//console.log("loadPoints");
     cqlString = '';
     solrqString = '';
     taxaCnt = 0;
@@ -2279,7 +2278,7 @@ console.log("loadPooints");
         pointvectorsource = new ol.source.Vector({wrapX: false});
         layersArr['pointv'].setSource(pointvectorsource);
         getSOLRRecCnt(false,function(res) {
-        console.log(solrRecCnt);
+        //console.log(solrRecCnt);
             if(solrRecCnt){
                 loadPointsEvent = true;
                 setLoadingTimer();
