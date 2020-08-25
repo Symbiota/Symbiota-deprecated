@@ -24,7 +24,7 @@ $(document).ready(function() {
 					buildQueryStrings();
 				});
     $( "#taxa" )
-        .bind( "keydown", function( event ) {
+        .bind( "keydown", "change", function( event ) {
             if ( event.keyCode === $.ui.keyCode.TAB &&
                 $( this ).data( "autocomplete" ).menu.active ) {
                 event.preventDefault();
@@ -275,7 +275,7 @@ function buildCQLString(){
     else{
         newcqlString = newcqlString.substr(5,newcqlString.length);
     }
-    //console.log(cqlString);
+    console.log("buildCQLString:" + cqlString);
 }
 
 function buildLayerTableRow(lArr,removable){
@@ -396,6 +396,7 @@ function buildSOLRQString(){
         document.getElementById("dh-fq").value = tempfqStr;
         newsolrqString += '&fq='+tempfqStr;
     }
+    console.log("buildSOLRQString:" + newsolrqString);
 }
 
 function buildTaxaKey(){

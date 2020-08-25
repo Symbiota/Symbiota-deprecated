@@ -210,7 +210,7 @@ $dbArr = Array();
                                             </select>
                                         </div>
                                         <div style="margin-top:5px;">
-                                            <?php echo $SEARCHTEXT['TAXON_INPUT']; ?> <input data-role="none" id="taxa" type="text" style="width:275px;" name="taxa" value="" class="query-trigger-field" class="query-trigger-field" title="<?php echo $SEARCHTEXT['TITLE_TEXT_1']; ?>" />
+                                            <?php echo $SEARCHTEXT['TAXON_INPUT']; ?> <input data-role="none" id="taxa" type="text" style="width:275px;" name="taxa" value="" class="query-trigger-field" title="<?php echo $SEARCHTEXT['TITLE_TEXT_1']; ?>" />
                                         </div>
                                     </div>
                                 </div>
