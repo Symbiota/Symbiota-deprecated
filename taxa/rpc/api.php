@@ -91,7 +91,6 @@ function taxaManagerToJSON($taxaObj,$recursive = true) {
 			$result["synonyms"] = $taxaObj->getSynonyms();
 			$result["origin"] = $taxaObj->getOrigin();
 			$result["family"] = $taxaObj->getFamily();
-			$result["taxalinks"] = $taxaObj->getTaxalinks();
 			$result["rarePlantFactSheet"] = $taxaObj->getRarePlantFactSheet();
 			$result["characteristics"] = $taxaObj->getCharacteristics();
 			$result["checklists"] = $taxaObj->getChecklists();
@@ -102,6 +101,10 @@ function taxaManagerToJSON($taxaObj,$recursive = true) {
 				"basename" => $taxaObj->getBasename(),
 				"names" => $taxaObj->getVernacularNames()
 			];
+			$result["taxalinks"] = $taxaObj->getTaxalinks();
+			foreach ($result["taxalinks"] as $idx => $taxalink) {
+				$result["taxalinks"][$idx]['url'] = str_replace("--SCINAME--",$result["sciname"],$taxalink['url']);
+			}
 		
 		}
 	}
