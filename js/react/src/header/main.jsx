@@ -2,6 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 import SearchWidget from "../common/search.jsx";
 
+
 const RANK_FAMILY = 140;
 const RANK_GENUS = 180;
 
@@ -52,7 +53,7 @@ function HeaderButton(props) {
 
 function HeaderButtonBar(props) {
   return (
-    <div className="row mr-3 header-button-bar" style={ props.style }>
+    <div className="row header-button-bar" style={ props.style }>
       { props.children }
     </div>
   );
@@ -158,7 +159,12 @@ class HeaderApp extends React.Component {
     if (this.props.userName !== "") {
       return (
         <HeaderButtonBar style={{ display: this.state.isCollapsed ? 'none' : 'flex' }}>
-          <div className="col header-button mx-auto my-auto">Hello, { this.props.userName }!</div>
+        	
+    			<a href="" className={ "disabled" }>
+						<button className={ "col header-button" }>
+							{ "Hello, " +  this.props.userName  + "!"}
+						</button>
+					</a>
           <HeaderButton title="My Profile" href={ `${this.props.clientRoot}/profile/viewprofile.php` } />
           <HeaderButton title="Logout" href={ `${this.props.clientRoot}/profile/index.php?submit=logout` } />
         </HeaderButtonBar>
@@ -215,7 +221,7 @@ class HeaderApp extends React.Component {
           </ul>
         </div>
 
-        <div className={ "search-wrapper ml-auto mr-4" + (this.state.isCollapsed ? " my-auto" : "") }>
+        <div className={ "search-wrapper ml-auto" + (this.state.isCollapsed ? " my-auto" : "") }>
           { this.getLoginButtons() }
 
           <div className="row">
