@@ -70,6 +70,7 @@ export default class ImageCarousel extends Component {
 					>
 				
 					{	this.props.images.map((image,index) => {
+					console.log(image);
 						return (
 							<div key={image.url} data-id={image.imgid}>
 								<div className="slide-wrapper">
@@ -78,7 +79,7 @@ export default class ImageCarousel extends Component {
 									<img
 										className=""
 										src={image.url}
-										alt={image.thumbnailurl}
+										alt={image.collectionname}
 										style={{height: "100%"}}
 										/*onLoad={this.onImgLoad}
 										data-key={index}*/
