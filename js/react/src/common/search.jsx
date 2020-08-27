@@ -14,7 +14,7 @@ function SearchButton(props) {
     <button
       className="my-auto btn-search" style={ props.style }
       onClick={ props.isLoading ? () => {} : props.onClick}>
-      <img
+      {/*<img
         style={{display: props.isLoading ? "none" : "block"}}
         src={imgSrc}
         alt="search plants"/>
@@ -22,7 +22,7 @@ function SearchButton(props) {
         className="mx-auto text-success spinner-border spinner-border-sm"
         style={{display: props.isLoading ? "block" : "none"}}
         role="status"
-        aria-hidden="true"/>
+        aria-hidden="true"/>*/}
     </button>
   );
 }

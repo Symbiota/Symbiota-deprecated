@@ -3,8 +3,8 @@
 @import '../../node_modules/react-modal-video/css/modal-video.min.css';
 
 //Variable for project paths since relative paths not allowed
-@subdir: "/portal";
-//@subdir: "";
+//@subdir: "/portal";
+@subdir: "";
 
 * {
   font-family: @font;
@@ -116,17 +116,17 @@ a {
 }
 
 .btn-search {
-  width: 2em;
-  height: 2em;
-  padding: 0.3em;
-  margin-left: 0.5em;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.75) !important;
-
-  &:active {
-    background: @med-green !important;
-    opacity: 90%;
-  }
+	margin-left: 0;
+	margin-right: -10px;
+	width: 27px;
+	height: 27px;
+	background-image: url('@{subdir}/images/icons/search-icon.png') !important;
+	background-size: 100% 200% !important;
+	background-position: 0 0 !important;
+	opacity: .8;
+	&:hover{
+		background-position: 0 -100% !important;
+	}
 }
 
 img {
