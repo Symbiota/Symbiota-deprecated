@@ -12,7 +12,7 @@
 vendor/
 !**/.gitkeep
 temp/proxies/
-*.DS_Store
+.DS_Store
 */.DS_Store
 /webservices/dwc/rss.xml
 /temp/data/solr.json
