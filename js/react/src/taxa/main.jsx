@@ -406,11 +406,13 @@ class TaxaDetail extends React.Component {
 			<div className="container my-5 py-2 taxa-detail" style={{ minHeight: "45em" }}>
 				<div className="row">
 					<div className="col">
-						<h1>{ res.sciName } { res.author }</h1>
+						<h1><span className="font-italic">{ res.sciName }</span> { res.author }</h1>
+
+						<h2 className=""><span className="font-italic">{ res.vernacularNames[0] }</span>					
 						{ res.synonym &&
-							<h2>synonym: <span className="font-italic">{ res.synonym }</span></h2>
+							<span className="synonym"> (synonym: <span className="font-italic">{ res.synonym }</span>)</span>
 						}
-						<h2 className="font-italic">{ res.vernacularNames[0] }</h2>
+						</h2>
 					</div>
 					<div className="col-auto">
 						{/*<button className="d-block my-2 btn-primary">Printable page</button>*/}
