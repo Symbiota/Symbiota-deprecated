@@ -139,9 +139,10 @@ img {
   background-color: @med-green;
 }
 
-.dropdown-toggle {
+.dropdown-toggle.nav-link {
   .border-rounded-sm();
-
+  border-radius: 0.4em !important;
+  padding: .4rem 1rem;
   &::after {
     display: none;
   }
@@ -156,6 +157,22 @@ img {
   &:hover, &:active, &.active {
     .dropdown-hover();
   }
+}
+.dropdown-menu {
+	margin: .595rem 0 0;
+	border-top: none;
+	border-radius: 0 0 .4em .4em;
+	padding: 0;
+	a {
+		color: @ivory !important;
+		font-size: 16px;
+		line-height: 30px;
+		padding: 0 1.5rem;
+		&:last-child {
+			padding-bottom: .4em;
+			border-radius: 0 0 .4em .4em;
+		}
+	}
 }
 
 .nav-link {
