@@ -5,7 +5,7 @@ function CheckboxItem(props) {
   return (
     <span>
       <input type="checkbox" name={ props.name } value={ props.value } onChange={ props.onChange } checked={ checked }/>
-      <label className="ml-2 align-middle" htmlFor={ props.name }>{ props.name }</label>
+      <label htmlFor={ props.name }>{ props.name }</label>
     </span>
   )
 }

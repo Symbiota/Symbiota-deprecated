@@ -2,9 +2,8 @@ import React from "react";
 
 import HelpButton from "../common/helpButton.jsx";
 import {SearchWidget} from "../common/search.jsx";
-import FeatureSelector from "../common/featureSelector.jsx";
+import FeatureSelector from "./featureSelector.jsx";
 
-const CLIENT_ROOT = "..";
 
 /**
  * @param valueArray {number[]} An array in the form [min, max]
@@ -40,7 +39,7 @@ class SideBarHeading extends React.Component {
   render() {
     return (
       <div style={{color: "black"}}>
-        <div className="mb-1" style={{color: "inherit"}}>
+        <div className="mb-1 mt-1" style={{color: "inherit"}}>
           <h3 className="font-weight-bold d-inline">Search for plants</h3>
           {/*
           <HelpButton
@@ -59,7 +58,7 @@ class SideBarHeading extends React.Component {
           */
           }
         </div>
-        <p>
+        <p className="container" style={{ fontSize: ".9em"}}>
           Start applying characteristics, and the matching plants will appear at
           right.
         </p>
@@ -73,7 +72,7 @@ class SideBarHeading extends React.Component {
  */
 function PlantNeed(props) {
   return (
-    <div className = "input-group pt-3 mt-3 dashed-border">
+    <div className = "input-group pt-1 mt-1 dashed-border">
       <label className="font-weight-bold" htmlFor={ props.label.toLowerCase() }>
         { props.label }
       </label>
@@ -191,32 +190,15 @@ class SideBarDropdown extends React.Component {
 
     return (
       <div
-        className={ "my-3 py-auto" + (this.props.disabled === true ? " dropdown-disabled" : "") }
-        style={ this.props.style } >
+        className={ "top-level" + (this.props.disabled === true ? " dropdown-disabled" : "") }
+         >
         <div className="row">
-          <h4 className="mx-0 my-auto col" style={{ cursor: "default", fontSize: this.props.style.fontSize }}>
+          <h4 className="col" style={{ cursor: "default" }}>
             {this.props.title}
           </h4>
-          <button
-            className="d-block col-sm-auto"
-            data-toggle="collapse"
-            data-target={ "#" + dropDownId }
-            type="button"
-            aria-expanded={ this.state.isExpanded.toString() }
-            aria-controls={ dropDownId }
-            onClick={ this.onButtonClicked }
-            disabled={ this.props.disabled }
-          >
-            <img
-              className={ "ml-auto will-v-flip" + (this.state.isExpanded ? " v-flip" : "") }
-              style={{ background: "black", borderRadius: "50%", height: "2em", width: "2em" }}
-              src={ `${CLIENT_ROOT}/images/garden/expand-arrow.png` }
-              alt="collapse"
-            />
-          </button>
         </div>
-        <div id={dropDownId} className="collapse">
-          <div className="card card-body mt-2">
+        <div id={dropDownId} className="">
+          <div className="">
             { this.props.children }
           </div>
         </div>
@@ -255,119 +237,124 @@ class SideBar extends React.Component {
     return (
       <div
         id="sidebar"
-        className="m-1 p-3 rounded-border"
+        className="m-1 rounded-border "
         style={ this.props.style }>
 
+				<div className="filter-tools">
         {/* Title & Subtitle */}
         <SideBarHeading />
 
-        {/* Search */}
-        <SearchWidget
-          placeholder="Search plants by name"
-          clientRoot={ CLIENT_ROOT }
-          isLoading={ this.props.isLoading }
-          textValue={ this.props.searchText }
-          onTextValueChanged={ this.props.onSearchTextChanged }
-          onSearch={ this.props.onSearch }
-          suggestionUrl={ this.props.searchSuggestionUrl }
-        />
+					{/* Search */}
+					<SearchWidget
+						placeholder="Search plants by name"
+						clientRoot={ this.props.clientRoot }
+						isLoading={ this.props.isLoading }
+						textValue={ this.props.searchText }
+						onTextValueChanged={ this.props.onSearchTextChanged }
+						onSearch={ this.props.onSearch }
+						suggestionUrl={ this.props.searchSuggestionUrl }
+					/>
 
-        {/* Sunlight & Moisture */}
-        <div style={{ background: "white" }} className="rounded-border p-4">
-          <h4>Plant needs</h4>
-          <PlantNeed
-            label="Sunlight"
-            choices={ ["Sun", "Part-Shade", "Full-Shade"] }
-            value={ this.props.sunlight }
-            onChange={ this.props.onSunlightChanged } />
-          <PlantNeed
-            label="Moisture"
-            choices={ ["Dry", "Moderate", "Wet"] }
-            value={ this.props.moisture }
-            onChange={ this.props.onMoistureChanged } />
-        </div>
+					{/* Sunlight & Moisture */}
+					<div style={{ background: "white" }} className="rounded-border p-3 top-level plant-needs">
+						<h4>Plant needs</h4>
+						<PlantNeed
+							label="Sunlight"
+							choices={ ["Sun", "Part-Shade", "Full-Shade"] }
+							value={ this.props.sunlight }
+							onChange={ this.props.onSunlightChanged } />
+						<PlantNeed
+							label="Moisture"
+							choices={ ["Dry", "Moderate", "Wet"] }
+							value={ this.props.moisture }
+							onChange={ this.props.onMoistureChanged } />
+					</div>
 
-        {/* Sliders */}
-        <div className="my-5">
-          <h4 className="mr-2 mb-2 d-inline">Mature Size</h4>
-          <span>(Just grab the slider dots)</span><br />
-          <div className="mt-2 row d-flex justify-content-center">
-            <div className="col-sm-5 mr-2">
-              <PlantSlider
-                ref={ this.sliderRefHeight }
-                label="Height (ft)"
-                name="height"
-                value={ this.props.height }
-                onChange={ this.props.onHeightChanged } />
-            </div>
-            <div
-              style={{ width: "1px", borderRight: "1px dashed grey", marginLeft: "-0.5px" }}
-            />
-            <div className="col-sm-5 ml-2">
-              <PlantSlider
-                ref={ this.sliderRefWidth }
-                label="Width (ft)"
-                name="width"
-                value={ this.props.width }
-                onChange={ this.props.onWidthChanged } />
-            </div>
-          </div>
-        </div>
+					{/* Sliders */}
+					<div className="my-2 plant-needs p-3 sliders">
+						<h4 className="mr-2 mb-2 d-inline">Mature Size</h4>
+						<span>(Just grab the slider dots)</span><br />
+						<div className="mt-2 row d-flex justify-content-center">
+							<div className="col-sm-6" style={{ borderRight: "1px dashed grey" }}>
+								<PlantSlider
+									ref={ this.sliderRefHeight }
+									label="Height (ft)"
+									name="height"
+									value={ this.props.height }
+									onChange={ this.props.onHeightChanged } />
+							</div>
+							{/*<div
+								style={{ width: "1px", borderRight: "1px dashed grey", marginLeft: "-0.5px" }}
+							/>*/}
+							<div className="col-sm-6">
+								<PlantSlider
+									ref={ this.sliderRefWidth }
+									label="Width (ft)"
+									name="width"
+									value={ this.props.width }
+									onChange={ this.props.onWidthChanged } />
+							</div>
+						</div>
+					</div>
 
-        {/* Dropdowns */}
-        <div>
-          <SideBarDropdown title="Plant features">
-            {
-              Object.keys(this.props.plantFeatures).map((plantFeature) => {
-                return (
-                  <FeatureSelector
-                    key={ plantFeature }
-                    title={ plantFeature }
-                    items={ this.props.plantFeatures[plantFeature] }
-                    onChange={ (featureKey) => {
-                      this.props.onPlantFeaturesChanged(plantFeature, featureKey)
-                    }}
-                  />
-                )
-              })
-            }
-          </SideBarDropdown>
+					{/* Dropdowns */}
+					<div>
+						<SideBarDropdown title="Plant features">
+							{
+								Object.keys(this.props.plantFeatures).map((plantFeature) => {
+									return (
+										<FeatureSelector
+											key={ plantFeature }
+											title={ plantFeature }
+											items={ this.props.plantFeatures[plantFeature] }
+											clientRoot={ this.props.clientRoot }
+											onChange={ (featureKey) => {
+												this.props.onPlantFeaturesChanged(plantFeature, featureKey)
+											}}
+										/>
+									)
+								})
+							}
+						</SideBarDropdown>
 
-          <SideBarDropdown title="Growth & maintenance">
-            {
-              Object.keys(this.props.growthMaintenance).map((plantFeature) => {
-                return (
-                  <FeatureSelector
-                    key={ plantFeature }
-                    title={ plantFeature }
-                    items={ this.props.growthMaintenance[plantFeature] }
-                    onChange={ (featureKey) => {
-                      this.props.onGrowthMaintenanceChanged(plantFeature, featureKey)
-                    }}
-                  />
-                )
-              })
-            }
-          </SideBarDropdown>
+						<SideBarDropdown title="Growth & maintenance">
+							{
+								Object.keys(this.props.growthMaintenance).map((plantFeature) => {
+									return (
+										<FeatureSelector
+											key={ plantFeature }
+											title={ plantFeature }
+											items={ this.props.growthMaintenance[plantFeature] }
+											clientRoot={ this.props.clientRoot }
+											onChange={ (featureKey) => {
+												this.props.onGrowthMaintenanceChanged(plantFeature, featureKey)
+											}}
+										/>
+									)
+								})
+							}
+						</SideBarDropdown>
 
-          <SideBarDropdown title="Beyond the garden">
-            {
-              Object.keys(this.props.beyondGarden).map((plantFeature) => {
-                return (
-                  <FeatureSelector
-                    key={ plantFeature }
-                    title={ plantFeature }
-                    items={ this.props.beyondGarden[plantFeature] }
-                    onChange={ (featureKey) => {
-                      this.props.onBeyondGardenChanged(plantFeature, featureKey)
-                    }}
-                  />
-                )
-              })
-            }
-          </SideBarDropdown>
+						<SideBarDropdown title="Beyond the garden">
+							{
+								Object.keys(this.props.beyondGarden).map((plantFeature) => {
+									return (
+										<FeatureSelector
+											key={ plantFeature }
+											title={ plantFeature }
+											items={ this.props.beyondGarden[plantFeature] }
+											clientRoot={ this.props.clientRoot }
+											onChange={ (featureKey) => {
+												this.props.onBeyondGardenChanged(plantFeature, featureKey)
+											}}
+										/>
+									)
+								})
+							}
+						</SideBarDropdown>
 
-          <SideBarDropdown title="Commercial Availability (Coming soon)" disabled={ true } />
+						<SideBarDropdown title="Commercial Availability (Coming soon)" disabled={ true } />
+      		</div>
         </div>
       </div>
     );

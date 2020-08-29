@@ -3,11 +3,14 @@ import GardenCarousel from "../common/gardenCarousel.jsx";
 import HelpButton from "../common/helpButton.jsx";
 import ExplorePreviewModal from "../explore/previewModal.jsx";
 
-const CLIENT_ROOT = "..";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { library } from "@fortawesome/fontawesome-svg-core";
+import { faChevronDown } from '@fortawesome/free-solid-svg-icons'
+library.add( faChevronDown)
 
-function getChecklistPage(clid) {
+function getChecklistPage(clientRoot,clid) {
   const gardenPid = 3;
-  return `${CLIENT_ROOT}/checklists/checklist.php?cl=${clid}&pid=${gardenPid}`;
+  return `${clientRoot}/checklists/checklist.php?cl=${clid}&pid=${gardenPid}`;
 }
 
 const helpHtml = `
@@ -34,8 +37,13 @@ class CannedSearchResult extends React.Component {
   }
 
   render() {
+  	//console.log(this.props);
+  	let containerClasses = "py-2 canned-search-result";
+  	if (this.props.checklistId == this.props.clid) {
+  		containerClasses += " selected";
+  	}
     return (
-      <div className={"py-2 canned-search-result"}>
+      <div className={containerClasses}>
         <h4 className="canned-title">{this.props.title}</h4>
         <div className="card" style={{padding: "0.5em"}}>
           <div className="card-body" style={{padding: "0"}}>
@@ -75,6 +83,9 @@ class CannedSearchResult extends React.Component {
             Learn more
           </button>
         </div>
+        <div className="selected-indicator">
+	        <FontAwesomeIcon icon="chevron-down" size="2x"/>
+	      </div>
       </div>
     );
   }
@@ -121,11 +132,12 @@ class CannedSearchContainer extends React.Component {
                       return (
                         <div key={searchResult.clid} className="p-1">
                           <CannedSearchResult
-                          	clid={searchResult.clid } 
+                          	clid={searchResult.clid }
+                          	checklistId={this.props.checklistId} 
                             title={searchResult.name}
                             description={ searchResult.description }
                             src={ `${searchResult.iconUrl}` }
-                            href={getChecklistPage(searchResult.clid)}
+                            href={getChecklistPage(this.props.clientRoot,searchResult.clid)}
                             onFilter={() => { this.props.onFilter(searchResult.clid); }}
 														onTogglePreviewClick={this.togglePreviewModal}
                           />

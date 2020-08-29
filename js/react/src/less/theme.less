@@ -3,8 +3,8 @@
 @import '../../node_modules/react-modal-video/css/modal-video.min.css';
 
 //Variable for project paths since relative paths not allowed
-@subdir: "/portal";
-//@subdir: "";
+//@subdir: "/portal";
+@subdir: "";
 
 * {
   font-family: @font;
@@ -1297,177 +1297,6 @@ img {
     }
   }
 
-  #sidebar {
-		padding-bottom: 1em;
-    h3 {
-      font-size: 22px;
-      font-weight: bold;
-    }
-
-    .currently-displayed {
-      border-radius: 8px 8px 0 0;
-      border: 5px solid @light-green;
-      background-color: white;
-      padding: 15px 10px;
-
-      h3 {
-        color: @med-green;
-      }
-
-      .stat {
-        border-bottom: 1px dashed @dark-gray;
-        font-size: 15px;
-        line-height: 17px;
-        padding: 8px 0;
-
-        &:first-child {
-          border-top: 1px dashed @dark-gray;
-        }
-
-        .stat-label {
-          font-weight: bold;
-          width: 80px;
-        }      
-      }
-      .export {
-				.stat-label {
-					text-transform: uppercase;
-					font-weight: normal;
-					font-size: 16px;
-					padding-top: .3em;
-				}
-				.stat-value {
-					a {
-						padding-right: 20px;
-						font-size: .8em;
-						&.disabled {
-   						pointer-events: none;
-   						opacity: .5;
-						}
-					}
-				}
-			}
-    }
-
-    .filter-tools {
-      padding: 5px 0 2em;
-
-      h3 {
-        margin-left: 15px;
-      }
-
-      .row {
-        margin: 0;
-      }
-      .top-level {
-        margin: 1em 15px;
-        h4 {
-        	padding: 0;
-        	text-transform: uppercase;
-        	color: @med-green;
-        	font-weight: bold;
-        	font-size: 1.3em;
-        }
-        .second-level {
-        	background-color: white;
-        	margin-bottom: 1em;
-        	border-radius: 8px;
-        	.feature-selectors {
-        		padding: .4em 8px;
-        		span {
-        			font-size: 1.1em;
-        			font-weight: bold;
-        		}
-						.will-v-flip {
-							transition: transform 0.5s, background-color 0.5s;
-						}
-						img {
-							float: right;
-							margin-top: 2px;
-							background-color: @med-green;
-							border-radius: 50%;
-							height: 1.5em;
-							width: 1.5em;
-						}
-						a[aria-expanded="true"] .will-v-flip {
-							transform: rotate(-180deg);
-								background-color: black;
-						}
-						ul {
-							border-top: 1px dotted @dark-gray;
-							margin: .4em 0 0;
-							padding-top: .5em;
-							li {
-								line-height: 1em;
-								padding-bottom: .6em;
-								font-weight: normal;
-								font-size: 1em;
-								vertical-align: top;
-								input {
-									vertical-align: top;
-									margin-top: 2px;
-								}
-								label {
-									max-width: 90%;
-									margin: 0 0 0 6px;
-									white-space: initial;
-									vertical-align: top;
-								}
-							
-							}
-						}
-
-        	}
-        }
-      }
-    }
-
-    .search-widget,
-    .view-opts-search {
-      padding: 0 15px !important;
-    }
-
-    .search-widget input {
-      font-size: 20px;
-      color: @med-green;
-      border: 3px solid @med-green;
-    }
-
-    .opt-labels {
-      padding-left: 0;
-      width: 80px;
-      font-size: 16px;
-
-      p {
-        text-transform: uppercase;
-        text-align: left !important;
-        line-height: 16px;
-        padding-top: 2px;
-        font-size: 14px;
-      }
-    }
-		.opt-settings {
-			width: auto;
-			max-width: 200px;
-		}
-    .view-type-wrapper {
-      display: inline-block;
-    }
-
-    .view-type-wrapper,
-    .view-opt-wrapper {
-      input {
-        margin-right: 5px;
-      }
-    }
-
-    .view-opts {
-      border-top: 1px dashed black;
-      margin: 0 15px 10px 15px !important;
-      padding: 5px 0 0 0;
-      max-width: 100%;
-    }
-  }
 
   .inventory-header {
 
@@ -1610,5 +1439,184 @@ img {
   }
 }
 
+.explore, .identify, #react-garden {
 
+  #sidebar {
+		padding-bottom: 1em;
+    h3 {
+      font-size: 22px;
+      font-weight: bold;
+    }
 
+    .currently-displayed {
+      border-radius: 8px 8px 0 0;
+      border: 5px solid @light-green;
+      background-color: white;
+      padding: 15px 10px;
+
+      h3 {
+        color: @med-green;
+      }
+
+      .stat {
+        border-bottom: 1px dashed @dark-gray;
+        font-size: 15px;
+        line-height: 17px;
+        padding: 8px 0;
+
+        &:first-child {
+          border-top: 1px dashed @dark-gray;
+        }
+
+        .stat-label {
+          font-weight: bold;
+          width: 80px;
+        }      
+      }
+      .export {
+				.stat-label {
+					text-transform: uppercase;
+					font-weight: normal;
+					font-size: 16px;
+					padding-top: .3em;
+				}
+				.stat-value {
+					a {
+						padding-right: 20px;
+						font-size: .8em;
+						&.disabled {
+   						pointer-events: none;
+   						opacity: .5;
+						}
+					}
+				}
+			}
+    }
+
+    .search-widget,
+    .view-opts-search {
+      padding: 0 15px !important;
+    }
+
+    .search-widget input {
+      font-size: 20px;
+      color: @med-green;
+      border: 3px solid @med-green;
+    }
+
+    .opt-labels {
+      padding-left: 0;
+      width: 80px;
+      font-size: 16px;
+
+      p {
+        text-transform: uppercase;
+        text-align: left !important;
+        line-height: 16px;
+        padding-top: 2px;
+        font-size: 14px;
+      }
+    }
+		.opt-settings {
+			width: auto;
+			max-width: 200px;
+		}
+    .view-type-wrapper {
+      display: inline-block;
+    }
+
+    .view-type-wrapper,
+    .view-opt-wrapper {
+      input {
+        margin-right: 5px;
+      }
+    }
+
+    .view-opts {
+      border-top: 1px dashed black;
+      margin: 0 15px 10px 15px !important;
+      padding: 5px 0 0 0;
+      max-width: 100%;
+    }
+  }
+	.filter-tools {
+		padding: 5px 0 2em;
+
+		h3 {
+			margin-left: 15px;
+		}
+
+		.row {
+			margin: 0;
+		}
+		.top-level {
+			margin: 1em 15px;
+			h4 {
+				padding: 0;
+				text-transform: uppercase;
+				color: @med-green;
+				font-weight: bold;
+				font-size: 1.3em;
+			}
+			.second-level {
+				background-color: white;
+				margin-bottom: 1em;
+				border-radius: 8px;
+				.feature-selectors {
+					padding: .4em 8px;
+					span {
+						font-size: 1.1em;
+						/*font-weight: bold;*/
+					}
+					.will-v-flip {
+						transition: transform 0.5s, background-color 0.5s;
+					}
+					img {
+						float: right;
+						margin-top: 2px;
+						background-color: @med-green;
+						border-radius: 50%;
+						height: 1.5em;
+						width: 1.5em;
+					}
+					a[aria-expanded="true"] .will-v-flip {
+						transform: rotate(-180deg);
+							background-color: black;
+					}
+					ul {
+						border-top: 1px dotted @dark-gray;
+						margin: .4em 0 0;
+						padding-top: .5em;
+						li {
+							line-height: 1em;
+							padding-bottom: .6em;
+							font-weight: normal;
+							font-size: 1em;
+							vertical-align: top;
+							input {
+								vertical-align: top;
+								margin-top: 2px;
+							}
+							label {
+								max-width: 90%;
+								margin: 0 0 0 6px;
+								white-space: initial;
+								vertical-align: top;
+							}
+						}
+					}
+				}
+			}
+		}
+		.sliders {
+			font-size: .9em;
+		}
+	}
+	#view-opts {
+		.cancel {
+			background-color: @med-green;
+			color: white;
+			text-transform: uppercase;
+		}
+	}
+}

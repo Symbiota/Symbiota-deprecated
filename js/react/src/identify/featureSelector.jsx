@@ -38,9 +38,7 @@ class FeatureSelector extends React.Component {
                 {
                   Object.keys(this.props.items).map((itemKey) => {
                     let itemVal = this.props.items[itemKey];
-                    //console.log(itemVal);
                     let attr = itemVal.cid + '-' + itemVal.cs;
-                    //console.log(this.props.attrs);
                     let checked = (this.props.attrs[attr] ? true: false );
                     return (
                       <li key={ attr }>

@@ -181,14 +181,6 @@ function filterByPlantAttribs(item, itemFilterName, filterMap) {
   return success;
 }
 
-function MainContentContainer(props) {
-  return (
-    <div className="container mx-auto p-4" style={{ maxWidth: "1400px" }}>
-      {props.children}
-    </div>
-  );
-}
-
 class GardenPageApp extends React.Component {
   constructor(props) {
     super(props);
@@ -567,10 +559,12 @@ class GardenPageApp extends React.Component {
     }
     return (
       <div>
-        <InfographicDropdown />
-        <MainContentContainer>
+        <InfographicDropdown 
+        	clientRoot={this.props.clientRoot}
+				/>
+   			<div className="container mx-auto p-4">
           <div className="row">
-            <div className="col-auto">
+            <div className="col-4">
               <SideBar
                 ref={ this.sideBarRef }
                 style={{ background: "#DFEFD3" }}
@@ -593,21 +587,24 @@ class GardenPageApp extends React.Component {
                 onPlantFeaturesChanged={ this.onPlantFeaturesChanged }
                 onGrowthMaintenanceChanged={ this.onGrowthMaintenanceChanged }
                 onBeyondGardenChanged={ this.onBeyondGardenChanged }
+								clientRoot={this.props.clientRoot}
               />
             </div>
-            <div className="col">
+            <div className="col-8">
               <div className="row">
                 <div className="col">
                   <CannedSearchContainer
                     searches={ this.state.cannedSearches }
                     onFilter={ this.onCannedFilter }
 										clientRoot={this.props.clientRoot}
+										checklistId={this.state.filters.checklistId}
                   />
                 </div>
               </div>
               <div className="row">
                 <div className="col" id="search-top">
                   <ViewOpts
+										clientRoot={this.props.clientRoot}
                     viewType={ this.state.viewType }
                     sortBy={ this.state.sortBy }
                     onSortByClicked={ this.onSortByChanged }
@@ -669,7 +666,7 @@ class GardenPageApp extends React.Component {
               </div>
             </div>
           </div>
-        </MainContentContainer>
+        </div>
       </div>
     );
   }

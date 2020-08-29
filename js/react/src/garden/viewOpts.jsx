@@ -1,8 +1,6 @@
 import React from "react";
 import {IconButton, CancelButton} from "../common/iconButton.jsx";
 
-const CLIENT_ROOT = "..";
-
 function arrayCompare(a1, a2) {
   if (a1.length !== a2.length) {
     return false;
@@ -142,70 +140,89 @@ class ViewOpts extends React.Component {
 		});
 
     return (
-      <div id="view-opts" className="row mx-2 mt-3 px-0 py-2">
-        <div className="col">
+      <div id="view-opts" className="row">
+        <div className="col-8">
           <h3 className="font-weight-bold">Your search results:</h3>
           <div className="d-flex flex-row flex-wrap">
 						{
-							buttons.map((buttonItem) => {
-								let button = this.buildButton(buttonItem.key,buttonItem.text);
-								return (
-									button
-								)
-							})
+							buttons.length == 0 &&
+							<p className="no-results">No filters applied yet, so showing all native plants</p>
 						}
+						{
+							buttons.length > 0 &&
+								buttons.map((buttonItem) => {
+									let button = this.buildButton(buttonItem.key,buttonItem.text);
+									return (
+										button
+									)
+								})
+						}
+						{
+							buttons.length > 0 &&
+							
+								<CancelButton
+									key={ "reset" }
+									title={ "Clear all" }
+									isSelected={ true }
+									style={{ margin: "0.1em", textTransform: "uppercase", backgroundColor: "#5FB021", color: "white", border: "1px solid #999999" }}
+									onClick={ () => { this.props.onReset(); } }
+								/>
+						}
+			
           </div>
         </div>
-        <div className="col text-right p-0 mx-1">
-          <p>View as:</p>
-          <p>Sort by name:</p>
-        </div>
-        <div className="col-auto p-0 mx-1">
-          <p>
-            <IconButton
-              title="Grid"
-              icon={`${CLIENT_ROOT}/images/garden/gridViewIcon.png`}
-              onClick={() => {
-                this.props.onViewTypeClicked("grid")
-              }}
-              isSelected={this.props.viewType === "grid"}
-            />
-            <IconButton
-              title="List"
-              icon={`${CLIENT_ROOT}/images/garden/listViewIcon.png`}
-              onClick={() => {
-                this.props.onViewTypeClicked("list")
-              }}
-              isSelected={this.props.viewType === "list"}
-            />
-          </p>
-          <p>
-            <IconButton
-              title="Common Name"
-              onClick={() => {
-                this.props.onSortByClicked("vernacularName")
-              }}
-              isSelected={this.props.sortBy === "vernacularName"}
-            />
-            <IconButton
-              title="Scientific Name"
-              onClick={() => {
-                this.props.onSortByClicked("sciName")
-              }}
-              isSelected={this.props.sortBy === "sciName"}
-            />
-          </p>
-          <p>
-          	{buttons.length > 0 &&
-						<CancelButton
-							key={ "reset" }
-							title={ "Clear all" }
-							isSelected={ true }
-							style={{ margin: "0.1em" }}
-							onClick={ () => { this.props.onReset(); } }
-						/>
-						}
-          </p>
+        <div className="col-4 pt-2 container settings">
+       		<div className="row mb-2">
+       			<div className="col-5 text-right p-0 pr-2 pt-1">
+          		View as:
+          	</div>
+       			<div className="col-7 p-0">
+      
+								<IconButton
+									title="Grid"
+									icon={`${this.props.clientRoot}/images/garden/gridViewIcon.png`}
+									onClick={() => {
+										this.props.onViewTypeClicked("grid")
+									}}
+									isSelected={this.props.viewType === "grid"}
+								/>
+								<IconButton
+									title="List"
+									icon={`${this.props.clientRoot}/images/garden/listViewIcon.png`}
+									onClick={() => {
+										this.props.onViewTypeClicked("list")
+									}}
+									isSelected={this.props.viewType === "list"}
+								/>
+	
+						
+          	</div>
+          	
+          </div>
+          
+       		<div className="row mb-2">
+       			<div className="col-5 text-right p-0 pr-2 pt-1">
+          		Sort by name:  
+          	</div>
+       			<div className="col-7 p-0">      	
+		
+								<IconButton
+									title="Common"
+									onClick={() => {
+										this.props.onSortByClicked("vernacularName")
+									}}
+									isSelected={this.props.sortBy === "vernacularName"}
+								/>
+								<IconButton
+									title="Scientific"
+									onClick={() => {
+										this.props.onSortByClicked("sciName")
+									}}
+									isSelected={this.props.sortBy === "sciName"}
+								/>
+						
+						</div>
+					</div>
         </div>
       </div>
     );
