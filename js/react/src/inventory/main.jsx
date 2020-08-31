@@ -172,14 +172,14 @@ class InventoryDetail extends React.Component {
             <p dangerouslySetInnerHTML={{__html: this.state.fullDescription}}></p>
           </div>
         </div>
-        { pid == 1 || pid == 2 &&
+        { (pid == 1 || pid == 2 ) &&
         <div className="row mt-2 project-header">
           <div className="col">
           	<h3>Interactive map</h3><span className="explain">(or explore areas from list below)</span>
           </div>
         </div>
         }
-        { pid == 1 || pid == 2 &&
+        { (pid == 1 || pid == 2) &&
         <div className="row map">
           <div className="col">
               <ProjectMap
