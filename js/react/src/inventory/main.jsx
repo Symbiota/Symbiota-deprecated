@@ -334,8 +334,9 @@ class InventoryChooser extends React.Component {
  								{
 									this.state.projects.map((project,index) => {
 										let projectUrl = '';
-										//direct grow natives to garden page, otherwise project page
 										projectUrl =  this.props.clientRoot + '/projects/index.php?pid=' + project.pid;
+										let shortClass = '';
+										shortClass = (project.pid === 1? '' : ' no-map');
 									
 										return (					
 											<div key={index} className="project-item">
@@ -358,7 +359,7 @@ class InventoryChooser extends React.Component {
 												}
 												{project.display == 'expanded' && 
 												
-														<div className="project-expanded">
+														<div className={ "project-expanded" + shortClass }>
 																		<div className="project-image col-sm-8 p-0">
 																				<h2>{project.projname}</h2>
 																				<img className="img-fluid" src={ this.props.clientRoot + '/images/inventory/' + inventoryImages[project.pid] } />

@@ -2,8 +2,20 @@
 
 
 #react-inventory-app {
+	/* p and h2 defaults - we're trying to standardize to these as much as possible - ap */
+	p,
+	li {
+		font-size: 1.4rem;
+		line-height: 1.875rem;
+		margin-bottom: .7rem;
+	}
+	h2 {
+		font-size: 2.25rem;
+		line-height: 2.5rem;
+		margin-top: 1.4rem;
+		margin-bottom: 3rem;
+	}
 
-	font-size: 1.1rem;
 
 	.inventory-header {//common to both chooser and detail view
 		width: 100%;
@@ -69,12 +81,15 @@
 				flex-flow: row nowrap;
 				max-height: 560px;
 				
+				&.no-map {
+					max-height: 350px;
+				}
 				.project-image {
 					overflow: hidden;
 					h2 {
 						position: absolute;
 						color: white;
-						margin: inherit 35% inherit 5%;
+						margin: .5em 35% 1em 5%;
 						text-shadow: 1px 3px 3px rgba(0,0,0, 0.3); 
 						letter-spacing: -0.3px;
 					}
