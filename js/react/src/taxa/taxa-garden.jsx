@@ -2,7 +2,7 @@ import ReactDOM from "react-dom";
 import React from "react";
 import httpGet from "../common/httpGet.js";
 import { getUrlQueryParams } from "../common/queryParams.js";
-import GardenCarousel from "../common/gardenCarousel.jsx";
+import ImageCarousel from "../common/imageCarousel.jsx";
 import ImageModal from "../common/modal.jsx";
 import ExplorePreviewModal from "../explore/previewModal.jsx";
 import {getTaxaPage} from "../common/taxaUtils";
@@ -230,7 +230,7 @@ class TaxaApp extends React.Component {
             
             	<h3 className="text-light-green font-weight-bold mt-2">{ this.state.vernacularNames[0] } images</h3>
 							<div className="slider-wrapper">
-  						<GardenCarousel
+  						<ImageCarousel
   							images={this.state.images}>
 								{
 									this.state.images.map((image,index) => {
@@ -252,7 +252,7 @@ class TaxaApp extends React.Component {
 										);
 									})
 								}
-							</GardenCarousel>
+							</ImageCarousel>
 							</div>
 							<ImageModal 
 								show={this.state.isOpen}

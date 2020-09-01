@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from 'prop-types';
 //import httpGet from "../common/httpGet.js";
 const CLIENT_ROOT = "..";
-import ImageCarousel from "../common/imageCarousel.jsx";
+import ImageModalCarousel from "../common/imageModalCarousel.jsx";
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { library } from "@fortawesome/fontawesome-svg-core";
@@ -22,10 +22,10 @@ class ImageModal extends React.Component {//https://daveceddia.com/open-modal-in
         <div className="modal-content">
           {this.props.children}
 
-					<ImageCarousel
+					<ImageModalCarousel
 						images={this.props.images}
 						currImage={this.props.currImage}
-					></ImageCarousel>
+					></ImageModalCarousel>
 
 
 

@@ -1,167 +1,35 @@
-import React, { Component }  from "react";
+import React from "react";
 import Slider from "react-slick";
-import {getImageDetailPage} from "../common/taxaUtils";
-const CLIENT_ROOT = "..";
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { library } from "@fortawesome/fontawesome-svg-core";
 import { faChevronRight, faChevronLeft } from '@fortawesome/free-solid-svg-icons'
 library.add( faChevronRight, faChevronLeft)
 
-
 /* https://github.com/akiran/react-slick/issues/1195 */
 const SlickButtonFix = ({currentSlide, slideCount, children, ...props}) => (
     <span {...props}>{children}</span>
 );
 
-
-export default class ImageCarousel extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      nav1: null,
-      nav2: null
-    };
-  }
-
-  componentDidMount() {
-    this.setState({
-      nav1: this.slider1,
-      nav2: this.slider2,
-    });
-  }
-
+const slickSettings = {
+  autoplay: true,
+  autoplaySpeed: 5000,
+  dots: false,
+  infinite: false,
+  slidesToShow: 5,
+  slidesToScroll: 1,
+	nextArrow: <SlickButtonFix><FontAwesomeIcon icon="chevron-right"/></SlickButtonFix>,
+	prevArrow: <SlickButtonFix><FontAwesomeIcon icon="chevron-left"/></SlickButtonFix>
+};
 /*
-	const mainSettings = {
-		autoplay: true,
-		autoplaySpeed: 5000,
-		dots: false,
-		arrows: false,
-		infinite: true,
-		slidesToShow: 1,
-		slidesToScroll: 1
-	};
-	const navSettings = {
-		slidesToShow: 4,
-		slidesToScroll: 1,
-		asNavFor: '.images-main',
-		dots: false,
-		arrow: true,
-		centerMode: true,
-		focusOnSelect: true
-	};
-	
-	https://react-slick.neostack.com/docs/example/as-nav-for
+	moving the slideshow loop into this page will mean making the toggle accessible to both this and taxa/main.jsx - I've tried twice
 */
-	render() {
-			return (
-				<div className="lightbox-wrapper">
-				<Slider 
-					asNavFor={this.state.nav2}
-					ref={slider => (this.slider1 = slider)}
-					infinite={true}
-					slidesToShow={1}
-					adaptiveHeight={true}
-					initialSlide={this.props.currImage}
-					/*beforeChange= { (current,next) => this.updateDetails(next) }*/
-					className="images-main" id="main-lightbox" style={{ maxWidth: "100%" }}
-					nextArrow={<SlickButtonFix><FontAwesomeIcon icon="chevron-right"/></SlickButtonFix>}
-					prevArrow={<SlickButtonFix><FontAwesomeIcon icon="chevron-left"/></SlickButtonFix>}
-					>
-				
-					{	this.props.images.map((image,index) => {
-						return (
-							<div key={image.url} data-id={image.imgid}>
-								<div className="slide-wrapper">
-								{/*<h4>From the {image.collectionname}</h4>*/}
-									<div className="image-wrapper">
-									<img
-										className=""
-										src={image.url}
-										alt={image.collectionname}
-										style={{height: "100%"}}
-										/*onLoad={this.onImgLoad}
-										data-key={index}*/
-									/>
-									</div>
-									
-									<div className="container image-details">
-										<div className="row line-item">
-											<div className="col label">
-												Collector: 
-											</div>
-											<div className="col value">
-												 {image.photographer}
-											</div>
-										</div>
-										<div className="row line-item">
-											<div className="col label">
-												Locality: 
-											</div>
-											<div className="col value">
-												 {image.country}, {image.stateprovince}, {image.county}
-											</div>
-										</div>
-										<div className="row">
-											<div className="col label">
-												Date: 
-											</div>
-											<div className="col value">
-												 {image.fulldate}
-											</div>
-										</div>
-										<div className="row image-link">
-											<div className="col">
-												<a 
-													className="btn" 
-													style={{color: "white"}}
-													href={ getImageDetailPage(CLIENT_ROOT, image.occid) }
-												>See the full record for this image</a>
-											</div>
-										</div>
-									</div>									
-									
-								</div>
-								
-								
-							</div>
-						);
-					})}
-					
-				</Slider>
-
-				<Slider
-          asNavFor={this.state.nav1}
-          ref={slider => (this.slider2 = slider)}
-          slidesToShow={6}
-          swipeToSlide={true}
-          focusOnSelect={true}
-          infinite={false}
-					nextArrow={<SlickButtonFix><FontAwesomeIcon icon="chevron-right"/></SlickButtonFix>}
-					prevArrow={<SlickButtonFix><FontAwesomeIcon icon="chevron-left"/></SlickButtonFix>}
-				
-					className="images-nav"  style={{ maxWidth: "100%" }}>
-					{	this.props.images.map((image) => {
-							return (
-								<div key={image.url} className={""}>
-									<div className="card" style={{padding: "0.3em"}}>
-										<div style={{ position: "relative", width: "100%", height: "7em"}}>
-										
-											<img
-												className="d-block"
-												style={{width: "100%", height: "100%", objectFit: "cover"}}
-												src={image.thumbnailurl}
-												alt={image.thumbnailurl}
-											/>
-										</div>
-									</div>
-								</div>
-							);
-						})
-					}
-				</Slider>
-				</div>
-			);
-	}
+function ImageCarousel(props) {
+    return (
+      <Slider { ...slickSettings } className="mx-auto"  style={{ maxWidth: "90%" }}>
+        { props.children }
+      </Slider>
+    );
 }
 
+export default ImageCarousel;

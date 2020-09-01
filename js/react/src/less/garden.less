@@ -60,10 +60,6 @@
   cursor: not-allowed;
 }
 
-.canned-title {
-  font-size: 0.8em;
-}
-
 #infographic-dropdown {
  	* {
   	color: white !important;
@@ -80,8 +76,14 @@
 
 #canned-searches {
 	height: 330px;
+	h3 {
+		font-size: 22px;
+		font-weight: bold;
+	}
 	.card {
   	box-shadow: 0 0.1em 0.5em 0.1em rgba(100, 100, 100, 0.3);
+  	width: 92%;
+  	margin: 0 auto;
 	}
 	.card:hover {
   	background: #DFEFD3 !important;
@@ -89,6 +91,13 @@
 
 	.card a:hover {
   	text-decoration: none;
+	}
+
+	.canned-title {
+		font-size: 0.9em;
+		color: @dark-green;
+		font-weight: 700;
+		line-height: 1rem;
 	}
 
 	.card-text {
@@ -104,6 +113,9 @@
 	.scroll-btn:active {
   	background: rgba(0, 100, 0, 0.1) !important;
 	}
+	.canned-wrapper {
+		padding: 0 8px;
+	}
 
 	.canned-search-result {
 		color: #3B631D !important;
@@ -116,7 +128,9 @@
 			color: @med-green;
 		}
 		.btn {
-			font-size: 12px;
+			font-size: .9rem;
+			font-weight: 600;
+			text-align: center;
 		}
 		&.selected {
 			background-color: white;
@@ -128,10 +142,24 @@
 				border-color: @med-green !important;
 			}  
 			.selected-indicator {
+				margin-top: -8px;
 				display: block;
+				font-size: 1.3rem;
 			}
 		}
 	}
+	.slick-next, 
+	.slick-prev {
+		top: 40%;
+		font-size: 30px;
+	}
+	.slick-prev {
+		left: -20px;
+	}
+	.slick-next {
+		right: -42px;
+	}
+	
 }
 
 #sidebar *, h1, h2, h3, h4, h5 {
@@ -145,7 +173,9 @@
   .no-results {
   	color: @gray-type;
   }
- 
+ 	h3 {
+ 		font-size: 22px;
+ 	}
  .fake-button {
  	 cursor: pointer;
  	 border-radius: 3px;

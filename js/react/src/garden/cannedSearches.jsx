@@ -1,5 +1,5 @@
 import React from "react";
-import GardenCarousel from "../common/gardenCarousel.jsx";
+import GardenCarousel from "./gardenCarousel.jsx";
 import HelpButton from "../common/helpButton.jsx";
 import ExplorePreviewModal from "../explore/previewModal.jsx";
 
@@ -97,7 +97,8 @@ class CannedSearchContainer extends React.Component {
     this.state = {
       isPreviewOpen: false,//explorePreviewModal
       currClid: -1,//explorePreviewModal
-      currPid: 3,//explorePreviewModal
+      currPid: 3,//explorePreviewModal,
+      carouselPaused: false
     };
   }
 
@@ -109,14 +110,19 @@ class CannedSearchContainer extends React.Component {
       isPreviewOpen: !this.state.isPreviewOpen
     });
   }
+  pauseCarousel = () => {
+    this.setState({
+      carouselPaused: true
+    });
+  }
   render() {
     return (
       <div id="canned-searches" className="row mt-1 p-3 mx-0 rounded-border" style={{ background: "#DFEFD3" }}>
         <div className="col">
           <div className="row">
-            <h1 className="col" style={{ fontWeight: "bold", fontSize: "1.75em"}}>
+            <h3 className="col">
               Or start with these plant combinations:
-            </h1>
+            </h3>
             {/* TODO: Re-enable once we have help verbiage */}
             <div className="col-auto d-none">
               <HelpButton title="Garden collections" html={ helpHtml } />
@@ -124,9 +130,11 @@ class CannedSearchContainer extends React.Component {
           </div>
 
           <div className="row">
-            <div className="col">
+            <div className="col canned-wrapper">
               <div>
-                <GardenCarousel>
+                <GardenCarousel
+                	carouselPaused={ this.state.carouselPaused } 
+                >
                   {
                     this.props.searches.map((searchResult) => {
                       return (
@@ -140,6 +148,7 @@ class CannedSearchContainer extends React.Component {
                             href={getChecklistPage(this.props.clientRoot,searchResult.clid)}
                             onFilter={() => { this.props.onFilter(searchResult.clid); }}
 														onTogglePreviewClick={this.togglePreviewModal}
+														pauseCarousel={ this.pauseCarousel }
                           />
                         </div>
                       );

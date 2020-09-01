@@ -3,7 +3,7 @@ import React from "react";
 import httpGet from "../common/httpGet.js";
 import { getUrlQueryParams } from "../common/queryParams.js";
 import {getGardenTaxaPage} from "../common/taxaUtils";
-import GardenCarousel from "../common/gardenCarousel.jsx";
+import ImageCarousel from "../common/imageCarousel.jsx";
 import ImageModal from "../common/modal.jsx";
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 //import 'react-tabs/style/react-tabs.css';
@@ -464,7 +464,7 @@ class TaxaDetail extends React.Component {
 							<h3 className="text-light-green font-weight-bold mt-2">Photo images</h3>
 							<div className="slider-wrapper">
 						
-							<GardenCarousel
+							<ImageCarousel
 								images={res.images.HumanObservation}>
 								{
 									res.images.HumanObservation.map((image,index) => {
@@ -486,7 +486,7 @@ class TaxaDetail extends React.Component {
 										);
 									})
 								}
-							</GardenCarousel>
+							</ImageCarousel>
 							</div>
 						</div>
 					}
@@ -495,7 +495,7 @@ class TaxaDetail extends React.Component {
 						<div className="mt-4 dashed-border" id="herbarium">     
 							<h3 className="text-light-green font-weight-bold mt-2">Herbarium specimens</h3>
 							<div className="slider-wrapper">
-							<GardenCarousel
+							<ImageCarousel
 								images={res.images.PreservedSpecimen}>
 								{
 									res.images.PreservedSpecimen.map((image,index) => {
@@ -517,7 +517,7 @@ class TaxaDetail extends React.Component {
 										);
 									})
 								}
-							</GardenCarousel>
+							</ImageCarousel>
 							</div>
 						</div>    
 						}

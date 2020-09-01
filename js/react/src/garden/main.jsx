@@ -557,6 +557,10 @@ class GardenPageApp extends React.Component {
       let search = this.state.cannedSearches[i];
       checkListMap[search.clid] = search.name;
     }
+    
+    /*const pageTitle = document.getElementsByTagName("title")[0];
+    pageTitle.innerHTML = `${pageTitle.innerHTML} Gardening with Natives`;
+    */
     return (
       <div>
         <InfographicDropdown 
