@@ -212,7 +212,7 @@ class TaxaApp extends React.Component {
           </div>
         </div>
         <div className="row mt-2">
-          <div className="col-7">
+          <div className="col-8 mr-2">
             <img
               id="img-main"
               src={ this.state.images.length > 0 ? this.state.images[0].url : '' }
@@ -226,7 +226,7 @@ class TaxaApp extends React.Component {
               */}
               { this.state.description.replace(/(<\/?[^>]+>)|(&[^;]+;)/g, "") }
             </p>
-            <div className="mt-4 dashed-border">
+            <div className="mt-4 dashed-border taxa-slideshows">
             
             	<h3 className="text-light-green font-weight-bold mt-2">{ this.state.vernacularNames[0] } images</h3>
 							<div className="slider-wrapper">
@@ -236,7 +236,7 @@ class TaxaApp extends React.Component {
 									this.state.images.map((image,index) => {
 										return (					
 											<div key={image.url}>
-												<div className="card" style={{padding: "0.5em"}}>
+												<div className="card" style={{padding: "0.6em"}}>
 													<div style={{ position: "relative", width: "100%", height: "7em", borderRadius: "0.25em"}}>
 														
 														<img
@@ -254,19 +254,20 @@ class TaxaApp extends React.Component {
 								}
 							</ImageCarousel>
 							</div>
-							<ImageModal 
-								show={this.state.isOpen}
-								currImage={this.state.currImage}
-								images={this.state.images}
-								onClose={this.toggleImageModal}
-							>
-								<h3>
-									<span>{ this.state.vernacularNames[0] }</span> images
-								</h3>
-							</ImageModal>
+
             </div>
           </div>
-          <div className="col-4 mx-4">
+					<ImageModal 
+						show={this.state.isOpen}
+						currImage={this.state.currImage}
+						images={this.state.images}
+						onClose={this.toggleImageModal}
+					>
+						<h3>
+							<span>{ this.state.vernacularNames[0] }</span> images
+						</h3>
+					</ImageModal>
+          <div className="col-3 ml-2">
             <SideBarSection title="Highlights" items={ this.state.highlights } />
             { this.state.nativeGroups.length > 0 &&
             <div className={ "mb-4 " }>

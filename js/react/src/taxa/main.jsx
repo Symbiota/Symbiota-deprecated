@@ -460,7 +460,7 @@ class TaxaDetail extends React.Component {
 						}
 					
 						{  res.images.HumanObservation.length > 0 && 
-						<div className="mt-4 dashed-border" id="photos">     
+						<div className="mt-4 dashed-border taxa-slideshows" id="photos">     
 							<h3 className="text-light-green font-weight-bold mt-2">Photo images</h3>
 							<div className="slider-wrapper">
 						
@@ -492,7 +492,7 @@ class TaxaDetail extends React.Component {
 					}
 				 
 						{  res.images.PreservedSpecimen.length > 0 && 
-						<div className="mt-4 dashed-border" id="herbarium">     
+						<div className="mt-4 dashed-border taxa-slideshows" id="herbarium">     
 							<h3 className="text-light-green font-weight-bold mt-2">Herbarium specimens</h3>
 							<div className="slider-wrapper">
 							<ImageCarousel
@@ -520,17 +520,7 @@ class TaxaDetail extends React.Component {
 							</ImageCarousel>
 							</div>
 						</div>    
-						}
-							<ImageModal 
-								show={this.state.isOpen}
-								currImage={this.state.currImage}
-								images={this.state.currImageBasis}
-								onClose={this.toggleImageModal}
-							>
-								<h3>
-									<span>{ res.vernacularNames[0] }</span> images
-								</h3>
-							</ImageModal>        
+						}       
 					
 					
 					</div>
@@ -539,6 +529,16 @@ class TaxaDetail extends React.Component {
 						<SideBarSection title="Web links" items={ res.taxalinks} classes="weblinks"  rankId={ res.rankId }/>
 					</div>
 				</div>
+				<ImageModal 
+					show={this.state.isOpen}
+					currImage={this.state.currImage}
+					images={this.state.currImageBasis}
+					onClose={this.toggleImageModal}
+				>
+					<h3>
+						<span>{ res.vernacularNames[0] }</span> images
+					</h3>
+				</ImageModal> 
 			</div>
 		);
 	}

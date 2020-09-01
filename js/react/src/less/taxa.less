@@ -143,9 +143,9 @@
 		}
 	}
 
-
 	.card {
-		margin-right: 8px;
+		margin-right: 0px;
+  	border: none;
 	}
 
 	.sidebar-section {
@@ -303,24 +303,25 @@
 #react-taxa-garden-app,
 #react-taxa-app {
 	//taxa slideshows on main and garden pages
-  .slick-next, 
-  .slick-prev {
-  	color: @med-green !important;
-  	font-size: 28px;
-  	top: 53%;
-  	text-align: center;
-  }
-  .slick-next {
-  	right: -35px;
-  }
-  .slick-prev {
-  	left: -35px;
-  }
-  .slick-slide {
-		height: auto;
+	.taxa-slideshows {
+		.slick-next, 
+		.slick-prev {
+			color: @med-green !important;
+			font-size: 28px;
+			top: 53%;
+			text-align: center;
+		}
+		.slick-next {
+			right: -35px;
+		}
+		.slick-prev {
+			left: -35px;
+		}
+		.slick-slide {
+			height: auto;
+		}
+		.slick-slider {
+			max-width: 90%;
+		}
 	}
-	.slick-slider {
-		max-width: 90%;
-	}
-
 }

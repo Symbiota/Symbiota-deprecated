@@ -85,30 +85,12 @@ export default class ImageModalCarousel extends Component {
 									/>
 									</div>
 									
-									<div className="container image-details">
-										<div className="row line-item">
-											<div className="col label">
-												Collector: 
-											</div>
-											<div className="col value">
-												 {image.photographer}
-											</div>
+									<div className="image-details">
+										<div className="line-item">
+												 {image.fulldate} &copy; {image.photographer}, Courtesy of OregonFlora
 										</div>
-										<div className="row line-item">
-											<div className="col label">
-												Locality: 
-											</div>
-											<div className="col value">
-												 {image.country}, {image.stateprovince}, {image.county}
-											</div>
-										</div>
-										<div className="row">
-											<div className="col label">
-												Date: 
-											</div>
-											<div className="col value">
-												 {image.fulldate}
-											</div>
+										<div className="line-item">
+												  {image.county} County, {image.stateprovince}, {image.country} 
 										</div>
 										<div className="row image-link">
 											<div className="col">
@@ -133,10 +115,11 @@ export default class ImageModalCarousel extends Component {
 				<Slider
           asNavFor={this.state.nav1}
           ref={slider => (this.slider2 = slider)}
-          slidesToShow={6}
+          slidesToShow={5}
           swipeToSlide={true}
           focusOnSelect={true}
-          infinite={false}
+          infinite={true}
+					initialSlide={this.props.currImage}
 					nextArrow={<SlickButtonFix><FontAwesomeIcon icon="chevron-right"/></SlickButtonFix>}
 					prevArrow={<SlickButtonFix><FontAwesomeIcon icon="chevron-left"/></SlickButtonFix>}
 				
@@ -144,7 +127,7 @@ export default class ImageModalCarousel extends Component {
 					{	this.props.images.map((image) => {
 							return (
 								<div key={image.url} className={""}>
-									<div className="card" style={{padding: "0.3em"}}>
+									<div className="card">
 										<div style={{ position: "relative", width: "100%", height: "7em"}}>
 										
 											<img

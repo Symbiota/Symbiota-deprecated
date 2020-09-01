@@ -15,7 +15,7 @@ const slickSettings = {
   autoplay: true,
   autoplaySpeed: 8000,
   dots: false,
-  infinite: false,
+  infinite: true,
   slidesToShow: 4,
   slidesToScroll: 1,
   pauseOnFocus: true,

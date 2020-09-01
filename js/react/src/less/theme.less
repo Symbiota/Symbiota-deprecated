@@ -1082,7 +1082,7 @@ img {
 	color: white;
 	max-width: 1000;
 	min-height: 300;
-	margin: 0 auto;
+	margin: 1.8em auto 0;
 	padding: 0 30px 30px;
 	overflow: hidden;
 	h3 {
@@ -1126,34 +1126,21 @@ img {
 						}
 						.image-wrapper {
 							text-align: center;
-							height: 75%;
+							height: 80%;
 							img {
 								margin: 0 auto;
 							}
 						}
 						.image-details {
 							margin: 1em auto;
-							height: 25%;
+							height: 20%;
 							width: 80%;
 							color: @gray-type;
-							font-size: .88rem;
-							line-height: 1em;
-							.row {
-								margin-bottom: .25rem;
-								padding-bottom: .25rem;
-								&.line-item{
-									border-bottom: 1px dotted @gray-type;
-								}
-								.col {
-									padding-left: 0;
-									&.label {
-										flex-basis: 15%;
-										font-weight: 700;
-									}
-									&.value {
-										flex-basis: 85%;
-									}
-								}
+							font-size: .875rem;
+							line-height: 1rem;
+							.line-item {
+								margin-bottom: .60rem;
+								
 							}
 							.btn {
 								float: right;
@@ -1173,18 +1160,24 @@ img {
 		.images-nav {
 			height: 23%;
 			.slick-list {
-				margin-top: .3rem;
+				margin: .3rem auto 0;
 				position: relative;
+				width: 74%;
 				.slick-track {
 					max-height: 100%;
 				}
 				.card {
 					background-color: transparent;
 					border-radius: 0;
+					padding: 4px;
+					border: 1px solid transparent !important;
+					&:hover {
+						border: 1px solid @dark-green !important;
+					}
 				}
 				.slick-current {
 					.card {
-						border: 1px solid #2E453F;
+						border: 1px solid @light-green !important;
 					}
 				}
 			}
@@ -1193,7 +1186,16 @@ img {
 			.slick-prev {
 				color: white !important;
 				font-size: 28px;
-				top: 38%;
+				top: 38% !important;
+				&:hover {
+					color: @light-green !important;
+				}
+			}
+			.slick-next {
+				right: 62px !important;
+			}
+			.slick-prev {
+				left: 80px !important;
 			}
 		}		
 	}

@@ -12,12 +12,12 @@ const SlickButtonFix = ({currentSlide, slideCount, children, ...props}) => (
 );
 
 const slickSettings = {
-  autoplay: true,
-  autoplaySpeed: 5000,
+  autoplay: false,
+  autoplaySpeed: 8000,
   dots: false,
-  infinite: false,
+  infinite: true,
   slidesToShow: 5,
-  slidesToScroll: 1,
+  slidesToScroll: 5,
 	nextArrow: <SlickButtonFix><FontAwesomeIcon icon="chevron-right"/></SlickButtonFix>,
 	prevArrow: <SlickButtonFix><FontAwesomeIcon icon="chevron-left"/></SlickButtonFix>
 };
