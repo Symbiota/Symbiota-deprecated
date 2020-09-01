@@ -69,7 +69,7 @@ function buildCSV($checklist) {
 		"ScientificName",
 		"ScientificNameAuthorship",
 		"CommonName",
-		"TaxonId"
+		#"TaxonId"
 	);
 	foreach ($checklist['taxa'] as $taxa) {
 		$tmp = array(
@@ -77,7 +77,7 @@ function buildCSV($checklist) {
 			$taxa['sciname'],
 			$taxa['author'],
 			$taxa['vernacular']['basename'],
-			$taxa['tid'],
+			#$taxa['tid'],
 		);
 		$return[] = $tmp;
 	}
