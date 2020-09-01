@@ -31,11 +31,11 @@ const slickSettings = {
 class GardenCarousel extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
+    /*this.state = {
     	paused: false
     };
-    //this.play = this.play.bind(this);
-    this.pause = this.pause.bind(this);
+    this.play = this.play.bind(this);
+    this.pause = this.pause.bind(this);*/
 	}    
   /*  
   play() {
