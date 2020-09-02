@@ -76,6 +76,9 @@ class ExploreManager {
   public function setPid($pid) {
   	$this->pid = $pid;
   }
+  public function getPid() {
+  	return $this->pid;
+  }
   public function setSearchTerm($term) {
   	$this->searchTerm = $term;
   }

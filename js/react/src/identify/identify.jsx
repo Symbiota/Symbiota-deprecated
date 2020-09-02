@@ -27,6 +27,7 @@ class IdentifyApp extends React.Component {
       isLoading: true,
       clid: -1,
       pid: -1,
+      projName: '',
       dynclid: -1,
       title: '',
       authors: '',
@@ -54,6 +55,7 @@ class IdentifyApp extends React.Component {
       },
       exportUrlCsv: '',
       exportUrlWord: '',
+      googleMapUrl: '',
     };
 
     this.getPid = this.getPid.bind(this);
@@ -111,7 +113,7 @@ class IdentifyApp extends React.Component {
 	  }
   	url = url + '?' + identParams.toString();
 		//console.log(url);
-
+		
     httpGet(url)
 			.then((res) => {
 				res = JSON.parse(res);
@@ -120,10 +122,25 @@ class IdentifyApp extends React.Component {
 				if (res && res.taxa) {
 					taxa = this.sortResults(res.taxa);
 				}
+				
+				let googleMapUrl = '';				
+				if (res.lat !== '' && res.lng !== '') {
+					googleMapUrl += 'https://maps.google.com/maps/api/staticmap';
+					let mapParams = new URLSearchParams();
+					mapParams.append("key",this.props.googleMapKey);
+					mapParams.append("maptype",'terrain');
+					mapParams.append("size",'220x220');
+					mapParams.append("zoom",6);
+					mapParams.append("markers",'size:med|' + res.lat + ',' + res.lng + '');
+
+					googleMapUrl += '?' + mapParams.toString();
+				}
+				
 				this.setState({
 					clid: this.getClid(),
 					pid: this.getPid(),
 					dynclid: this.getDynclid(),
+					projName: res.projName,
 					title: res.title,
 					authors: res.authors,
 					abstract: res.abstract,
@@ -131,6 +148,7 @@ class IdentifyApp extends React.Component {
 					searchResults: taxa,
 					totals: res.totals,
 					fixedTotals: res.totals,
+					googleMapUrl: googleMapUrl,
 					exportUrlCsv: `${this.props.clientRoot}/checklists/rpc/export.php?clid=` + this.getClid() + `&pid=` + this.getPid(),
 					exportUrlWord: `${this.props.clientRoot}/checklists/defaultchecklistexport.php?cl=` + this.getClid() + `&pid=` + this.getPid()
 				});
@@ -354,7 +372,7 @@ class IdentifyApp extends React.Component {
     return (
     <div className="wrapper">
 			<div className="page-header">
-				<PageHeader bgClass="explore" title={ "Exploring Oregon's Botanical Diversity" } />
+				<PageHeader bgClass="explore" title={ this.state.projName } />
       </div>
       <div className="container identify" style={{ minHeight: "45em" }}>
  				<div className="row">
@@ -382,8 +400,12 @@ class IdentifyApp extends React.Component {
 						}				
 
           </div>
-          <div className="col-3">
-          	map here
+          <div className="col-3 text-right mt-3">
+          		{ this.state.googleMapUrl.length > 0 &&
+          			<a href={ this.props.clientRoot + "/checklists/checklistmap.php?clid=" + this.getClid() } target="_blank">
+              		<img className="img-fluid" src={this.state.googleMapUrl} title="Project map" alt="Map representation of checklists" />
+              	</a>
+              }
           </div>
         </div>
 				<div className="row identify-main inventory-main">
@@ -477,6 +499,7 @@ if (queryParams.cl || queryParams.dynclid) {
     	pid={queryParams.proj ? queryParams.proj : -1 } 
     	dynclid={queryParams.dynclid ? queryParams.dynclid : -1 } 
     	clientRoot={ dataProps["clientRoot"] }
+    	googleMapKey={ dataProps["googleMapKey"] }
     />,
     domContainer
   );
