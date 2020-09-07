@@ -401,7 +401,6 @@ function buildSOLRQString(){
 function buildTaxaKey(){
     document.getElementById("taxaCountNum").innerHTML = taxaCnt;
     for(i in taxaSymbology){
-    console.log(taxaSymbology[i]);
         var family = taxaSymbology[i]['family'];
         var tidinterpreted = taxaSymbology[i]['tidinterpreted'];
         var sciname = taxaSymbology[i]['sciname'];
@@ -450,7 +449,8 @@ function buildTaxaKeyPiece(key,family,tidinterpreted,sciname){
         keyHTML += "<div style='display:table-cell;vertical-align:middle;padding-left:8px;'><i>"+sciname+"</i></div>";
     }
     else{
-        keyHTML += "<div style='display:table-cell;vertical-align:middle;padding-left:8px;'><i><a target='_blank' href='../taxa/index.php?taxon="+sciname+"'>"+sciname+"</a></i></div>";
+        //keyHTML += "<div style='display:table-cell;vertical-align:middle;padding-left:8px;'><i><a target='_blank' href='../taxa/index.php?taxon="+sciname+"'>"+sciname+"</a></i></div>";
+        keyHTML += "<div style='display:table-cell;vertical-align:middle;padding-left:8px;'><i><a target='_blank' href='../taxa/index.php?tid="+tidinterpreted+"'>"+sciname+"</a></i></div>";
     }
     keyHTML += '</div></div>';
     if(!taxaKeyArr[family]){
