@@ -331,7 +331,7 @@ function buildLayerTableRow(lArr,removable){
 }
 
 function buildQueryStrings(){
-//console.log("buildQueryStrings");
+console.log("buildQueryStrings");
     cqlArr = [];
     solrqArr = [];
     solrgeoqArr = [];
