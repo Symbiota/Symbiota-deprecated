@@ -83,11 +83,12 @@ $(document).ready(function() {
             },
             select: function( event, ui ) {
                 //buildQueryStrings(); 
-                console.log(this.value);
                 var terms = split( this.value );
                 terms.pop();
                 terms.push( ui.item.value );
                 this.value = terms.join( ", " );
+                
+    	console.log(document.getElementById("taxa").value.trim());
                 return false;
             }
         },{});
