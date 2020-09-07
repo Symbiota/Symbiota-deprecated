@@ -35,6 +35,7 @@ $headers = array(
 );
 
 $ch = curl_init();
+
 $options = array(
     CURLOPT_URL => $SOLR_URL.'/select',
     CURLOPT_POST => true,

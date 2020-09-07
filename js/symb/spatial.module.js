@@ -1847,6 +1847,8 @@ function getSOLRRecCnt(occ,callback){
     var http = new XMLHttpRequest();
     var url = "rpc/SOLRConnector.php";
     var params = qStr+'&rows=0&start=0&wt=json';
+    //console.log(url);
+    //console.log(params);
     http.open("POST", url, true);
     http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     http.onreadystatechange = function() {
@@ -2274,6 +2276,7 @@ function loadPoints(){
     cqlString = newcqlString;
     solrqString = newsolrqString;
     if(newsolrqString){
+    
         showWorking();
         pointvectorsource = new ol.source.Vector({wrapX: false});
         layersArr['pointv'].setSource(pointvectorsource);
@@ -2312,7 +2315,8 @@ function loadPoints(){
                     pointActive = false;
                 }
                 loadPointsEvent = false;
-                hideWorking();
+                hideWorking();                
+                //ORIG alert('There were no records matching your query.');
                 alert('You have selected a rare plant. Please login to view precise locality information.');
             }
         });
