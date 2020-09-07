@@ -24,7 +24,7 @@ $(document).ready(function() {
 					buildQueryStrings();
 				});
     $( "#taxa" )
-        .bind( "keydown", function( event ) {
+        .bind( "keydown", "click", function( event ) {
             if ( event.keyCode === $.ui.keyCode.TAB &&
             		$( this ).data( "autocomplete" ) !== undefined &&
             		$( this ).data( "autocomplete" ).menu !== undefined &&
@@ -81,7 +81,6 @@ $(document).ready(function() {
                 return false;
             },
             select: function( event, ui ) {
-            	console.log("selecting " + this.value);
                 var terms = split( this.value );
                 terms.pop();
                 terms.push( ui.item.value );
