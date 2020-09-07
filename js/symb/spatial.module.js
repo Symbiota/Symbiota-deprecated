@@ -82,7 +82,7 @@ $(document).ready(function() {
                 return false;
             },
             select: function( event, ui ) {
-                buildQueryStrings();
+                console.log(solrqArr);
                 var terms = split( this.value );
                 terms.pop();
                 terms.push( ui.item.value );
@@ -376,8 +376,6 @@ function buildReclassifyDropDown(){
 }
 
 function buildSOLRQString(){
-console.log("buildSOLRQString");
-console.log(solrqArr);
     newsolrqString = 'q=';
     var tempqStr = '';
     var tempfqStr = '';
