@@ -82,7 +82,6 @@ $(document).ready(function() {
                 return false;
             },
             select: function( event, ui ) {
-                console.log(solrqArr);
                 var terms = split( this.value );
                 terms.pop();
                 terms.push( ui.item.value );
@@ -376,6 +375,7 @@ function buildReclassifyDropDown(){
 }
 
 function buildSOLRQString(){
+console.log(solrqArr);
     newsolrqString = 'q=';
     var tempqStr = '';
     var tempfqStr = '';
@@ -2509,6 +2509,7 @@ function prepareTaxaParams(callback){
                 cqlArr.push(cqlfrag);
                 solrqfrag = '('+taxaSolrqString+')';
                 solrqArr.push(solrqfrag);
+                console.log(solrqArr);
             }
             callback(1);
         });
