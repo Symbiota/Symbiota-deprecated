@@ -81,6 +81,7 @@ $(document).ready(function() {
                 return false;
             },
             select: function( event, ui ) {
+            	console.log("selecting " + this.value);
                 var terms = split( this.value );
                 terms.pop();
                 terms.push( ui.item.value );
