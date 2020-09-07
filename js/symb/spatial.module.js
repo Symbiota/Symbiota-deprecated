@@ -30,9 +30,9 @@ $(document).ready(function() {
             		$( this ).data( "autocomplete" ).menu !== undefined &&
                 $( this ).data( "autocomplete" ).menu.active ) {
                 event.preventDefault();
-            }else{
+            }/*else{
 							buildQueryStrings();
-						}
+						}*/
         })
         .autocomplete({
             source: function( request, response ) {
@@ -1852,8 +1852,7 @@ function getSOLRRecCnt(occ,callback){
     var http = new XMLHttpRequest();
     var url = "rpc/SOLRConnector.php";
     var params = qStr+'&rows=0&start=0&wt=json';
-    //console.log(url);
-    //console.log(params);
+    console.log(url + params);
     http.open("POST", url, true);
     http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     http.onreadystatechange = function() {
