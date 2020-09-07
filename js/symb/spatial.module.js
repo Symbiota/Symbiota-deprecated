@@ -2432,7 +2432,7 @@ function prepareTaxaData(callback){
 function prepareTaxaParams(callback){
     var taxaval = document.getElementById("taxa").value.trim();
     
-    	console.log(taxaval);
+    	console.log("prepareTaxaParams" + taxaval);
     if(taxaval){
         var taxavals = taxaval.split(',');
         var taxaCqlString = '';
