@@ -80,7 +80,7 @@ $(document).ready(function() {
             },
             focus: function() {
                 return false;
-            },
+            }/*,
             select: function( event, ui ) {
             console.log(event);
             console.log(ui);
@@ -89,7 +89,7 @@ $(document).ready(function() {
                 terms.push( ui.item.value );
                 this.value = terms.join( ", " );
                 return false;
-            }
+            }*/
         },{});
 });
 
