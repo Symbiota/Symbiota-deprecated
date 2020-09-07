@@ -2268,7 +2268,7 @@ function lazyLoadPoints(index,callback){
 }
 
 function loadPoints(){
-console.log("loadPoints");
+	//console.log("loadPoints");
     cqlString = '';
     solrqString = '';
     taxaCnt = 0;
@@ -2286,7 +2286,7 @@ console.log("loadPoints");
         pointvectorsource = new ol.source.Vector({wrapX: false});
         layersArr['pointv'].setSource(pointvectorsource);
         getSOLRRecCnt(false,function(res) {
-        console.log(solrRecCnt);
+        	//console.log(solrRecCnt);
             if(solrRecCnt){
                 loadPointsEvent = true;
                 setLoadingTimer();
@@ -2322,7 +2322,7 @@ console.log("loadPoints");
                 loadPointsEvent = false;
                 hideWorking();                
                 //ORIG alert('There were no records matching your query.');
-                alert('You have selected a rare plant. Please login to view precise locality information.');
+                alert('There were no records matching your query.');
             }
         });
     }
