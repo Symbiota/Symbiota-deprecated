@@ -30,7 +30,9 @@ $(document).ready(function() {
             		$( this ).data( "autocomplete" ).menu !== undefined &&
                 $( this ).data( "autocomplete" ).menu.active ) {
                 event.preventDefault();
-            }
+            }else{
+							buildQueryStrings();
+						}
         })
         .autocomplete({
             source: function( request, response ) {
