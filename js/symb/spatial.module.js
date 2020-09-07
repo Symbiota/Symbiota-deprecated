@@ -80,16 +80,15 @@ $(document).ready(function() {
             },
             focus: function() {
                 return false;
-            }/*,
+            },
             select: function( event, ui ) {
-            console.log(event);
-            console.log(ui);
+                buildQueryStrings();
                 var terms = split( this.value );
                 terms.pop();
                 terms.push( ui.item.value );
                 this.value = terms.join( ", " );
                 return false;
-            }*/
+            }
         },{});
 });
 
