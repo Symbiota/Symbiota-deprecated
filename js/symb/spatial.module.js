@@ -401,6 +401,7 @@ function buildSOLRQString(){
 function buildTaxaKey(){
     document.getElementById("taxaCountNum").innerHTML = taxaCnt;
     for(i in taxaSymbology){
+    console.log(taxaSymbology[i]);
         var family = taxaSymbology[i]['family'];
         var tidinterpreted = taxaSymbology[i]['tidinterpreted'];
         var sciname = taxaSymbology[i]['sciname'];
