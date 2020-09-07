@@ -331,7 +331,6 @@ function buildLayerTableRow(lArr,removable){
 }
 
 function buildQueryStrings(){
-console.log("buildQueryStrings");
     cqlArr = [];
     solrqArr = [];
     solrgeoqArr = [];
@@ -377,6 +376,7 @@ function buildReclassifyDropDown(){
 }
 
 function buildSOLRQString(){
+console.log("buildSOLRQString");
     newsolrqString = 'q=';
     var tempqStr = '';
     var tempfqStr = '';
