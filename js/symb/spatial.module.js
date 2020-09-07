@@ -25,9 +25,9 @@ $(document).ready(function() {
 				});
     $( "#taxa" )
         .bind( "keydown", function( event ) {
-        		console.log(event);
-        		console.log($(this));
             if ( event.keyCode === $.ui.keyCode.TAB &&
+            		$( this ).data( "autocomplete" ) !== undefined &&
+            		$( this ).data( "autocomplete" ).menu !== undefined &&
                 $( this ).data( "autocomplete" ).menu.active ) {
                 event.preventDefault();
             }
