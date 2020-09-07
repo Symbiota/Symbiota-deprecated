@@ -450,7 +450,7 @@ function buildTaxaKeyPiece(key,family,tidinterpreted,sciname){
     }
     else{
         //keyHTML += "<div style='display:table-cell;vertical-align:middle;padding-left:8px;'><i><a target='_blank' href='../taxa/index.php?taxon="+sciname+"'>"+sciname+"</a></i></div>";
-        keyHTML += "<div style='display:table-cell;vertical-align:middle;padding-left:8px;'><i><a target='_blank' href='../taxa/index.php?tid="+tidinterpreted+"'>"+sciname+"</a></i></div>";
+        keyHTML += "<div style='display:table-cell;vertical-align:middle;padding-left:8px;'><i><a target='_blank' href='../taxa/index.php?taxon="+tidinterpreted+"'>"+sciname+"</a></i></div>";
     }
     keyHTML += '</div></div>';
     if(!taxaKeyArr[family]){
