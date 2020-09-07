@@ -82,13 +82,11 @@ $(document).ready(function() {
                 return false;
             },
             select: function( event, ui ) {
-                //buildQueryStrings(); 
                 var terms = split( this.value );
                 terms.pop();
                 terms.push( ui.item.value );
                 this.value = terms.join( ", " );
                 
-    	console.log(document.getElementById("taxa").value.trim());
                 return false;
             }
         },{});
@@ -1855,7 +1853,7 @@ function getSOLRRecCnt(occ,callback){
     var http = new XMLHttpRequest();
     var url = "rpc/SOLRConnector.php";
     var params = qStr+'&rows=0&start=0&wt=json';
-    console.log(url + params);
+    //console.log(url + "?" +  params);
     http.open("POST", url, true);
     http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     http.onreadystatechange = function() {
@@ -2431,8 +2429,6 @@ function prepareTaxaData(callback){
 
 function prepareTaxaParams(callback){
     var taxaval = document.getElementById("taxa").value.trim();
-    
-    	console.log("prepareTaxaParams" + taxaval);
     if(taxaval){
         var taxavals = taxaval.split(',');
         var taxaCqlString = '';
