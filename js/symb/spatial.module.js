@@ -377,6 +377,7 @@ function buildReclassifyDropDown(){
 
 function buildSOLRQString(){
 console.log("buildSOLRQString");
+console.log(solrqArr);
     newsolrqString = 'q=';
     var tempqStr = '';
     var tempfqStr = '';
