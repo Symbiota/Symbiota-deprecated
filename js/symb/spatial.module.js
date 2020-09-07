@@ -2266,7 +2266,7 @@ function lazyLoadPoints(index,callback){
 }
 
 function loadPoints(){
-//console.log("loadPoints");
+console.log("loadPoints");
     cqlString = '';
     solrqString = '';
     taxaCnt = 0;
@@ -2284,7 +2284,7 @@ function loadPoints(){
         pointvectorsource = new ol.source.Vector({wrapX: false});
         layersArr['pointv'].setSource(pointvectorsource);
         getSOLRRecCnt(false,function(res) {
-        //console.log(solrRecCnt);
+        console.log(solrRecCnt);
             if(solrRecCnt){
                 loadPointsEvent = true;
                 setLoadingTimer();
