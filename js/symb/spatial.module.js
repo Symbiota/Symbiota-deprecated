@@ -2246,14 +2246,12 @@ function imagePostFunction(image, src) {
 }
 
 function lazyLoadPoints(index,callback){
-console.log(SOLRFields);
     var startindex = 0;
     loadingComplete = true;
     if(index > 1) startindex = (index - 1)*lazyLoadCnt;
     var http = new XMLHttpRequest();
     var url = "rpc/SOLRConnector.php";
     var params = solrqString+'&rows='+lazyLoadCnt+'&start='+startindex+'&fl='+SOLRFields+'&wt=geojson';
-    console.log(url+'?'+params);
     http.open("POST", url, true);
     http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     http.onreadystatechange = function() {
