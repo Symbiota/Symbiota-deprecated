@@ -295,7 +295,7 @@ class TaxaManager {
 						$retArr = $this->loadDescriptionArr($rowArr, $retArr);
 					}
 				}
-        $ret = array_values($retArr[0]);#I don't know what situation would require the whole array, so this for now
+        $ret = sizeof($retArr)? array_values($retArr[0]) : [];#I don't know what situation would require the whole array, so this for now
 		}
 		#var_dump($retArr);
 		if (sizeof($ret)) {
