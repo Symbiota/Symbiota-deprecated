@@ -151,6 +151,11 @@ class InventoryDetail extends React.Component {
 			imageSizes: [34,34,40,46,46,46],
 			styles: clusterIconStyles
 		}
+		let checklistTxt = '(referenced in the map above)';
+		if (pid === 3) {
+			checklistTxt = '(see also the <a href="' +  this.props.clientRoot + '/garden/index.php">Grow Natives</a> page)'
+		}
+		
     return (
     <div className="wrapper">
 			<div className="page-header">
@@ -159,28 +164,28 @@ class InventoryDetail extends React.Component {
       <div className="container inventory-detail" style={{ minHeight: "45em" }}>
         <div className="row">
           <div className="col">
-            <h2 dangerouslySetInnerHTML={{__html: this.state.fullDescription}} />   
+            <h2 dangerouslySetInnerHTML={{__html: this.state.briefDescription}} />   
           </div>
         </div>
         <div className="row">
           <div className="col">
-            <p>That makes this inventory both a great companion to that printed resource, and a powerful online tool on its own. Research checklists are pre-compiled by biologists. This is a very controlled method for building a species list, which allows for specific specimens to be linked to the species names within the checklist and thus serve as vouchers. Specimen vouchers are proof that the species actually occurs in the given area. If there is any doubt, one can inspect these specimens for verification or annotate the identification when necessary. </p>
-            <p>Use the map to navigate to a specific area (or explore it), or select an area from the lists below to really dive in.</p>  
+            <p dangerouslySetInnerHTML={{__html: this.state.fullDescription}}></p>
           </div>
         </div>
+        { (pid == 1 || pid == 2 ) &&
         <div className="row mt-2 project-header">
           <div className="col">
           	<h3>Interactive map</h3><span className="explain">(or explore areas from list below)</span>
           </div>
         </div>
+        }
+        { (pid == 1 || pid == 2) &&
         <div className="row map">
           <div className="col">
               <ProjectMap
               	googleMapKey={this.props.googleMapKey}
               >
-              {
-              	
-              	(pid == 1 || pid == 2) &&
+              
 								<MarkerClusterer options={clusterOptions}>
           				{(clusterer) =>
 										this.state.checklists.map((checklist,index) => {
@@ -204,13 +209,14 @@ class InventoryDetail extends React.Component {
 										})
 									}
 								</MarkerClusterer>
-              }
               </ProjectMap>
           </div>
         </div>
+        }
         <div className="row mt-4 project-header ">
           <div className="col research-checklists">
-          	<h3>Research checklists</h3><span className="explain">(referenced in the map above)</span>
+          	<h3>Checklists</h3><span className="explain" dangerouslySetInnerHTML={{__html: checklistTxt}}>
+          	</span>
           </div>
         </div>
         <div className="row mt-2 project-key project-checklists">
@@ -298,19 +304,29 @@ class InventoryChooser extends React.Component {
     return (
     <div className="wrapper">
 			<div className="page-header">
-				<PageHeader bgClass="explore" title={ 'Inventory Projects' } />
+				<PageHeader bgClass="explore" title={ 'Inventories—Places and their Plants' } />
       </div>
       <div className="container inventory-chooser" style={{ minHeight: "45em" }}>
 
         <div className="row">
           <div className="col">
-            <h2>Inventories are curated species lists from a defined area. In short, it’s a great way to explore Oregon flora through the lens of where a plant actually calls home. </h2>
+            <h2>Inventories are curated species lists of a defined area. 
+            		They are a great way to explore all that we know about the plant diversity of a place. 
+            </h2>
           </div>
         </div>
         <div className="row">
           <div className="col">
-            <p>Inventories are species lists from a defined area. Frequently, a species checklist has been compiled by one or more researchers visiting a study area over a period of several years. In all instances, inventories represent a curated list of the flora of the area. Records associated with an inventory can include herbarium specimens, unvouchered observations and field photographs. OregonFloraalso has compiled over 7,980 species lists derived from observations; these are referenced by List #.</p>
-						<p>Explore the flora of an inventoried area by selecting a site name to open its checklist. The list can be sorted by family, genus, species, or common name; it can also be displayed as a list of thumbnail images. Clicking on the key symbol opens the checklist as an interactive key.</p>
+            <p>Inventories give you an in-depth look at exceptional places throughout Oregon. 
+		            They are based on plant observations gathered by one or more researchers visiting a site, frequently over several years. 
+    		        Records making an inventory include herbarium specimens, unvouchered observations, and photographs. 
+        		    OregonFlora has also compiled and presents here 5,198 species lists (checklists) derived from observations made by researchers, agencies, and the public. 
+            </p>
+						<p>Each inventory project has a theme and contains numerous species lists from places reflecting that theme. 
+								Open any list to <strong>Explore</strong> the plants discovered there; sort the list by scientific or common name, or view as thumbnail images.  
+								Want to identify a plant you have found at a listed site?  
+								Select the <strong>Identify</strong> icon to open the checklist as an interactive key.
+						</p>
           </div>
         </div>
         <div className="row">
@@ -318,8 +334,9 @@ class InventoryChooser extends React.Component {
  								{
 									this.state.projects.map((project,index) => {
 										let projectUrl = '';
-										//direct grow natives to garden page, otherwise project page
-										projectUrl = ( project.pid == 3? this.props.clientRoot + '/garden/index.php' : this.props.clientRoot + '/projects/index.php?pid=' + project.pid );
+										projectUrl =  this.props.clientRoot + '/projects/index.php?pid=' + project.pid;
+										let shortClass = '';
+										shortClass = (project.pid === 1? '' : ' no-map');
 									
 										return (					
 											<div key={index} className="project-item">
@@ -342,7 +359,7 @@ class InventoryChooser extends React.Component {
 												}
 												{project.display == 'expanded' && 
 												
-														<div className="project-expanded">
+														<div className={ "project-expanded" + shortClass }>
 																		<div className="project-image col-sm-8 p-0">
 																				<h2>{project.projname}</h2>
 																				<img className="img-fluid" src={ this.props.clientRoot + '/images/inventory/' + inventoryImages[project.pid] } />

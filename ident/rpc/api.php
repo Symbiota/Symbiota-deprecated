@@ -5,12 +5,14 @@ include_once("$SERVER_ROOT/config/SymbosuEntityManager.php");
 include_once("$SERVER_ROOT/classes/IdentManager.php");
 include_once("$SERVER_ROOT/classes/ExploreManager.php");
 include_once("$SERVER_ROOT/classes/TaxaManager.php");
+include_once("$SERVER_ROOT/classes/InventoryManager.php");
 
 
 
 function getEmpty() {
   return [
     "clid" => -1,
+    "projName" => '',
     "title" => '',
     "intro" => '',
     "iconUrl" => '',
@@ -18,6 +20,8 @@ function getEmpty() {
     "abstract" => '',
     "taxa" => [],
     "characteristics" => [],
+    "lat" => 0,
+    "lng" => 0,
   ];
 }
 
@@ -43,6 +47,13 @@ function get_data($params) {
 		$results["iconUrl"] = ($checklist->getIconUrl()? $checklist->getIconUrl() :'') ;
 		$results["authors"] = ($checklist->getAuthors()? $checklist->getAuthors() :'') ;
 		$results["abstract"] = ($checklist->getAbstract()? $checklist->getAbstract() :'') ;
+    $results["lat"] = ($checklist->getLat()? $checklist->getLat() :'') ;
+    $results["lng"] = ($checklist->getLng()? $checklist->getLng() :'') ;
+
+		$projRepo = SymbosuEntityManager::getEntityManager()->getRepository("Fmprojects");					
+		$model = $projRepo->find($params["pid"]);
+		$project = InventoryManager::fromModel($model);
+		$results["projName"] = $project->getProjname();
 	}elseif(isset($params['dynclid'])) {
 
 		$em = SymbosuEntityManager::getEntityManager();
@@ -54,8 +65,7 @@ function get_data($params) {
 		}
 	
 	}
-
-
+  	
 	$identManager = new IdentManager();
 	if (isset($params['clid'])) $identManager->setClid($params['clid']);
 	if (isset($params['dynclid'])) $identManager->setDynClid($params['dynclid']);

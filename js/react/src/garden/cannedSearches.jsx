@@ -1,13 +1,16 @@
 import React from "react";
-import GardenCarousel from "../common/gardenCarousel.jsx";
+import GardenCarousel from "./gardenCarousel.jsx";
 import HelpButton from "../common/helpButton.jsx";
 import ExplorePreviewModal from "../explore/previewModal.jsx";
 
-const CLIENT_ROOT = "..";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { library } from "@fortawesome/fontawesome-svg-core";
+import { faChevronDown } from '@fortawesome/free-solid-svg-icons'
+library.add( faChevronDown)
 
-function getChecklistPage(clid) {
+function getChecklistPage(clientRoot,clid) {
   const gardenPid = 3;
-  return `${CLIENT_ROOT}/checklists/checklist.php?cl=${clid}&pid=${gardenPid}`;
+  return `${clientRoot}/checklists/checklist.php?cl=${clid}&pid=${gardenPid}`;
 }
 
 const helpHtml = `
@@ -34,8 +37,13 @@ class CannedSearchResult extends React.Component {
   }
 
   render() {
+  	//console.log(this.props);
+  	let containerClasses = "py-2 canned-search-result";
+  	if (this.props.checklistId == this.props.clid) {
+  		containerClasses += " selected";
+  	}
     return (
-      <div className={"py-2 canned-search-result"}>
+      <div className={containerClasses}>
         <h4 className="canned-title">{this.props.title}</h4>
         <div className="card" style={{padding: "0.5em"}}>
           <div className="card-body" style={{padding: "0"}}>
@@ -75,6 +83,9 @@ class CannedSearchResult extends React.Component {
             Learn more
           </button>
         </div>
+        <div className="selected-indicator">
+	        <FontAwesomeIcon icon="chevron-down" size="2x"/>
+	      </div>
       </div>
     );
   }
@@ -86,7 +97,8 @@ class CannedSearchContainer extends React.Component {
     this.state = {
       isPreviewOpen: false,//explorePreviewModal
       currClid: -1,//explorePreviewModal
-      currPid: 3,//explorePreviewModal
+      currPid: 3,//explorePreviewModal,
+      carouselPaused: false
     };
   }
 
@@ -98,14 +110,19 @@ class CannedSearchContainer extends React.Component {
       isPreviewOpen: !this.state.isPreviewOpen
     });
   }
+  pauseCarousel = () => {
+    this.setState({
+      carouselPaused: true
+    });
+  }
   render() {
     return (
       <div id="canned-searches" className="row mt-1 p-3 mx-0 rounded-border" style={{ background: "#DFEFD3" }}>
         <div className="col">
           <div className="row">
-            <h1 className="col" style={{ fontWeight: "bold", fontSize: "1.75em"}}>
+            <h3 className="col">
               Or start with these plant combinations:
-            </h1>
+            </h3>
             {/* TODO: Re-enable once we have help verbiage */}
             <div className="col-auto d-none">
               <HelpButton title="Garden collections" html={ helpHtml } />
@@ -113,21 +130,25 @@ class CannedSearchContainer extends React.Component {
           </div>
 
           <div className="row">
-            <div className="col">
+            <div className="col canned-wrapper">
               <div>
-                <GardenCarousel>
+                <GardenCarousel
+                	carouselPaused={ this.state.carouselPaused } 
+                >
                   {
                     this.props.searches.map((searchResult) => {
                       return (
                         <div key={searchResult.clid} className="p-1">
                           <CannedSearchResult
-                          	clid={searchResult.clid } 
+                          	clid={searchResult.clid }
+                          	checklistId={this.props.checklistId} 
                             title={searchResult.name}
                             description={ searchResult.description }
                             src={ `${searchResult.iconUrl}` }
-                            href={getChecklistPage(searchResult.clid)}
+                            href={getChecklistPage(this.props.clientRoot,searchResult.clid)}
                             onFilter={() => { this.props.onFilter(searchResult.clid); }}
 														onTogglePreviewClick={this.togglePreviewModal}
+														pauseCarousel={ this.pauseCarousel }
                           />
                         </div>
                       );

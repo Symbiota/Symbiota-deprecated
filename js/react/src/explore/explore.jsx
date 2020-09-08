@@ -24,6 +24,7 @@ class ExploreApp extends React.Component {
     this.state = {
       clid: null,
       pid: null,
+      projName: null,
       title: '',
       authors: '',
       abstract: '',
@@ -99,7 +100,7 @@ class ExploreApp extends React.Component {
 				res = JSON.parse(res);
 				
 				let googleMapUrl = '';				
-				if (res.lat !== 0 && res.lng !== 0) {
+				if (res.lat !== '' && res.lng !== '') {
 
 					googleMapUrl += 'https://maps.google.com/maps/api/staticmap';
 					let mapParams = new URLSearchParams();
@@ -116,6 +117,7 @@ class ExploreApp extends React.Component {
 				this.setState({
 					clid: this.getClid(),
 					pid: this.getPid(),
+					projName: res.projName,
 					title: res.title,
 					authors: res.authors,
 					abstract: res.abstract,
@@ -214,7 +216,7 @@ class ExploreApp extends React.Component {
 
   onFilterRemoved(key) {
     // TODO: This is clunky
-    console.log(key);
+    //console.log(key);
     switch (key) {
       case "searchText":
         this.setState({
@@ -385,7 +387,7 @@ class ExploreApp extends React.Component {
     return (
     <div className="wrapper">
 			<div className="page-header">
-				<PageHeader bgClass="explore" title={ "Exploring Oregon's Botanical Diversity" } />
+				<PageHeader bgClass="explore" title={ this.state.projName } />
       </div>
       <div className="container explore" style={{ minHeight: "45em" }}>
  				<div className="row">
@@ -414,7 +416,7 @@ class ExploreApp extends React.Component {
           </div>
           <div className="col-3 text-right mt-3">
           		{ this.state.googleMapUrl.length > 0 &&
-          			<a href={ this.props.clientRoot + "/checklists/checklistmap.php?clid=" + this.getClid() }>
+          			<a href={ this.props.clientRoot + "/checklists/checklistmap.php?clid=" + this.getClid() } target="_blank">
               		<img className="img-fluid" src={this.state.googleMapUrl} title="Project map" alt="Map representation of checklists" />
               	</a>
               }
@@ -465,6 +467,9 @@ class ExploreApp extends React.Component {
 								<div className="explore-header inventory-header">
 									<div className="current-wrapper">
 										<div className="btn btn-primary current-button" role="button"><FontAwesomeIcon icon="list-ul" /> Explore</div>
+										{ this.state.searchText.length > 0 &&
+											<div className="filter-status">(Filtered)</div>
+										}
 									</div>
 									<div className="alt-wrapper">
 										<div>Switch to</div>

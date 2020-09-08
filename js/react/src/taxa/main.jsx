@@ -3,7 +3,7 @@ import React from "react";
 import httpGet from "../common/httpGet.js";
 import { getUrlQueryParams } from "../common/queryParams.js";
 import {getGardenTaxaPage} from "../common/taxaUtils";
-import GardenCarousel from "../common/gardenCarousel.jsx";
+import ImageCarousel from "../common/imageCarousel.jsx";
 import ImageModal from "../common/modal.jsx";
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 //import 'react-tabs/style/react-tabs.css';
@@ -406,11 +406,13 @@ class TaxaDetail extends React.Component {
 			<div className="container my-5 py-2 taxa-detail" style={{ minHeight: "45em" }}>
 				<div className="row">
 					<div className="col">
-						<h1>{ res.sciName } { res.author }</h1>
+						<h1><span className="font-italic">{ res.sciName }</span> { res.author }</h1>
+
+						<h2 className=""><span className="font-italic">{ res.vernacularNames[0] }</span>					
 						{ res.synonym &&
-							<h2>synonym: <span className="font-italic">{ res.synonym }</span></h2>
+							<span className="synonym"> (synonym: <span className="font-italic">{ res.synonym }</span>)</span>
 						}
-						<h2 className="font-italic">{ res.vernacularNames[0] }</h2>
+						</h2>
 					</div>
 					<div className="col-auto">
 						{/*<button className="d-block my-2 btn-primary">Printable page</button>*/}
@@ -458,11 +460,11 @@ class TaxaDetail extends React.Component {
 						}
 					
 						{  res.images.HumanObservation.length > 0 && 
-						<div className="mt-4 dashed-border" id="photos">     
+						<div className="mt-4 dashed-border taxa-slideshows" id="photos">     
 							<h3 className="text-light-green font-weight-bold mt-2">Photo images</h3>
 							<div className="slider-wrapper">
 						
-							<GardenCarousel
+							<ImageCarousel
 								images={res.images.HumanObservation}>
 								{
 									res.images.HumanObservation.map((image,index) => {
@@ -484,16 +486,16 @@ class TaxaDetail extends React.Component {
 										);
 									})
 								}
-							</GardenCarousel>
+							</ImageCarousel>
 							</div>
 						</div>
 					}
 				 
 						{  res.images.PreservedSpecimen.length > 0 && 
-						<div className="mt-4 dashed-border" id="herbarium">     
+						<div className="mt-4 dashed-border taxa-slideshows" id="herbarium">     
 							<h3 className="text-light-green font-weight-bold mt-2">Herbarium specimens</h3>
 							<div className="slider-wrapper">
-							<GardenCarousel
+							<ImageCarousel
 								images={res.images.PreservedSpecimen}>
 								{
 									res.images.PreservedSpecimen.map((image,index) => {
@@ -515,20 +517,10 @@ class TaxaDetail extends React.Component {
 										);
 									})
 								}
-							</GardenCarousel>
+							</ImageCarousel>
 							</div>
 						</div>    
-						}
-							<ImageModal 
-								show={this.state.isOpen}
-								currImage={this.state.currImage}
-								images={this.state.currImageBasis}
-								onClose={this.toggleImageModal}
-							>
-								<h3>
-									<span>{ res.vernacularNames[0] }</span> images
-								</h3>
-							</ImageModal>        
+						}       
 					
 					
 					</div>
@@ -537,6 +529,16 @@ class TaxaDetail extends React.Component {
 						<SideBarSection title="Web links" items={ res.taxalinks} classes="weblinks"  rankId={ res.rankId }/>
 					</div>
 				</div>
+				<ImageModal 
+					show={this.state.isOpen}
+					currImage={this.state.currImage}
+					images={this.state.currImageBasis}
+					onClose={this.toggleImageModal}
+				>
+					<h3>
+						<span>{ res.vernacularNames[0] }</span> images
+					</h3>
+				</ImageModal> 
 			</div>
 		);
 	}

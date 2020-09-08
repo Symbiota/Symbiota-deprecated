@@ -295,7 +295,7 @@ class TaxaManager {
 						$retArr = $this->loadDescriptionArr($rowArr, $retArr);
 					}
 				}
-        $ret = array_values($retArr[0]);#I don't know what situation would require the whole array, so this for now
+        $ret = sizeof($retArr)? array_values($retArr[0]) : [];#I don't know what situation would require the whole array, so this for now
 		}
 		#var_dump($retArr);
 		if (sizeof($ret)) {
@@ -612,20 +612,17 @@ class TaxaManager {
   				$img[$field] = resolve_img_path($value);
   			}elseif( $field == 'year') {
   				$img['fulldate'] = '';
+  				$datestamp = null;
   				if ($value == '' && !empty($img['notes'])){#Photographed: Aug 9, 2008 or Photographed: date unknown
 						$date = str_replace("Photographed: ",'',$img['notes']);
-						$img['fulldate'] = $date;
-						#$datestamp = strtotime($date);
-						#if (false !== $datestamp) {
-						#	$img['year'] = date("Y",$datestamp);
-						#	$img['day'] = date("j",$datestamp);
-						#	$img['month'] = date("n",$datestamp);
-						#}
-						
+						$datestamp = strtotime($date);
 					}else{
 						if (!empty($img['day']) && !empty($img['month'])) {
-							$img['fulldate'] = $img['year'] . '-' . $img['month'] . '-' . $img['day'];
+							$datestamp = strtotime($img['year'] . '-' . $img['month'] . '-' . $img['day']);
 						}
+					}
+					if ($datestamp) {
+							$img['fulldate'] = date("F j, Y",$datestamp);#displayed in modal slideshow
 					}
   			}
   		}

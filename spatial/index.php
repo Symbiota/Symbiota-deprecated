@@ -1502,6 +1502,7 @@ $dbArr = Array();
                 var processed = 0;
                 do{
                     lazyLoadPoints(index,function(res){
+                    		console.log(res);
                         var format = new ol.format.GeoJSON();
                         var features = format.readFeatures(res, {
                             featureProjection: 'EPSG:3857'

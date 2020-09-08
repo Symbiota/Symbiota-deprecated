@@ -13,7 +13,7 @@ class FeatureSelector extends React.Component {
 
   render() {
     return (
-      <div>
+      <div className="second-level">
         <div className="feature-selectors">
           <a
             data-toggle="collapse"
@@ -21,10 +21,15 @@ class FeatureSelector extends React.Component {
             aria-controls={ this.getDropdownId() }
             href={ `#${this.getDropdownId()}` }
           >
-            <p style={{ fontSize: "1.1em" }}>{ this.props.title.replace(/_/g, ' ') }</p>
+            <span>{ this.props.title.replace(/_/g, ' ') }</span>
+            
+            <img
+              className={ "will-v-flip" }
+              src={ `${this.props.clientRoot}/images/garden/expand-arrow.png` }
+              alt="collapse"
+            />
           </a>
           <div id={ this.getDropdownId() } className="collapse">
-            <div className="card card-body">
               <ul
                 className="list-unstyled"
                 style={{ overflow: "hidden", whiteSpace: "nowrap" }}>
@@ -44,7 +49,6 @@ class FeatureSelector extends React.Component {
                   })
                 }
               </ul>
-            </div>
           </div>
         </div>
       </div>

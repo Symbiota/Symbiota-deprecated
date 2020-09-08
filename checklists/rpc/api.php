@@ -4,6 +4,7 @@ include_once("../../config/symbini.php");
 include_once("$SERVER_ROOT/config/SymbosuEntityManager.php");
 include_once("$SERVER_ROOT/classes/Functional.php");
 include_once("$SERVER_ROOT/classes/ExploreManager.php");
+include_once("$SERVER_ROOT/classes/InventoryManager.php");
 include_once("$SERVER_ROOT/classes/TaxaManager.php");
 
 $result = [];
@@ -11,6 +12,7 @@ $result = [];
 function getEmpty() {
   return [
     "clid" => -1,
+    "projName" => '',
     "title" => '',
     "intro" => '',
     "iconUrl" => '',
@@ -27,6 +29,11 @@ function buildResult($checklistObj) {
   $result = getEmpty();
 
   if ($checklistObj !== null) {
+		$projRepo = SymbosuEntityManager::getEntityManager()->getRepository("Fmprojects");					
+  	$model = $projRepo->find($checklistObj->getPid());
+  	$project = InventoryManager::fromModel($model);
+  	$result["projName"] = $project->getProjname();
+  
     $result["clid"] = $checklistObj->getClid();
     $result["title"] = $checklistObj->getTitle();
     $result["intro"] = ($checklistObj->getIntro()? $checklistObj->getIntro() :'') ;

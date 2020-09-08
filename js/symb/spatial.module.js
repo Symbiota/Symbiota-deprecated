@@ -20,12 +20,15 @@ $(document).ready(function() {
     }
 
 		$( ".query-trigger-field" )
-				.bind( "keyup", "change", function( event ) {
+				.bind( "change", function( event ) {
 					buildQueryStrings();
 				});
     $( "#taxa" )
+				// don't navigate away from the field on tab when selecting an item
         .bind( "keydown", function( event ) {
             if ( event.keyCode === $.ui.keyCode.TAB &&
+            		$( this ).data( "autocomplete" ) !== undefined &&
+            		$( this ).data( "autocomplete" ).menu !== undefined &&
                 $( this ).data( "autocomplete" ).menu.active ) {
                 event.preventDefault();
             }
@@ -81,6 +84,7 @@ $(document).ready(function() {
                 terms.pop();
                 terms.push( ui.item.value );
                 this.value = terms.join( ", " );
+                
                 return false;
             }
         },{});
@@ -325,7 +329,6 @@ function buildLayerTableRow(lArr,removable){
 }
 
 function buildQueryStrings(){
-//console.log("buildQueryStrings");
     cqlArr = [];
     solrqArr = [];
     solrgeoqArr = [];
@@ -449,7 +452,8 @@ function buildTaxaKeyPiece(key,family,tidinterpreted,sciname){
         keyHTML += "<div style='display:table-cell;vertical-align:middle;padding-left:8px;'><i>"+sciname+"</i></div>";
     }
     else{
-        keyHTML += "<div style='display:table-cell;vertical-align:middle;padding-left:8px;'><i><a target='_blank' href='../taxa/index.php?taxon="+sciname+"'>"+sciname+"</a></i></div>";
+        //keyHTML += "<div style='display:table-cell;vertical-align:middle;padding-left:8px;'><i><a target='_blank' href='../taxa/index.php?taxon="+sciname+"'>"+sciname+"</a></i></div>";
+        keyHTML += "<div style='display:table-cell;vertical-align:middle;padding-left:8px;'><i><a target='_blank' href='../taxa/index.php?taxon="+tidinterpreted+"'>"+sciname+"</a></i></div>";
     }
     keyHTML += '</div></div>';
     if(!taxaKeyArr[family]){
@@ -1847,6 +1851,7 @@ function getSOLRRecCnt(occ,callback){
     var http = new XMLHttpRequest();
     var url = "rpc/SOLRConnector.php";
     var params = qStr+'&rows=0&start=0&wt=json';
+    //console.log(url + "?" +  params);
     http.open("POST", url, true);
     http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     http.onreadystatechange = function() {
@@ -2247,7 +2252,6 @@ function lazyLoadPoints(index,callback){
     var http = new XMLHttpRequest();
     var url = "rpc/SOLRConnector.php";
     var params = solrqString+'&rows='+lazyLoadCnt+'&start='+startindex+'&fl='+SOLRFields+'&wt=geojson';
-    //console.log(url+'?'+params);
     http.open("POST", url, true);
     http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     http.onreadystatechange = function() {
@@ -2261,7 +2265,7 @@ function lazyLoadPoints(index,callback){
 }
 
 function loadPoints(){
-//console.log("loadPoints");
+	//console.log("loadPoints");
     cqlString = '';
     solrqString = '';
     taxaCnt = 0;
@@ -2274,11 +2278,12 @@ function loadPoints(){
     cqlString = newcqlString;
     solrqString = newsolrqString;
     if(newsolrqString){
+    
         showWorking();
         pointvectorsource = new ol.source.Vector({wrapX: false});
         layersArr['pointv'].setSource(pointvectorsource);
         getSOLRRecCnt(false,function(res) {
-        //console.log(solrRecCnt);
+        	//console.log(solrRecCnt);
             if(solrRecCnt){
                 loadPointsEvent = true;
                 setLoadingTimer();
@@ -2312,8 +2317,9 @@ function loadPoints(){
                     pointActive = false;
                 }
                 loadPointsEvent = false;
-                hideWorking();
-                alert('You have selected a rare plant. Please login to view precise locality information.');
+                hideWorking();                
+                //ORIG alert('There were no records matching your query.');
+                alert('There were no records matching your query.');
             }
         });
     }
@@ -2406,7 +2412,6 @@ function prepareTaxaData(callback){
     var url = "rpc/gettaxalinks.php";
     var taxaArrStr = JSON.stringify(taxaArr);
     var params = 'taxajson='+taxaArrStr+'&type='+taxontype+'&thes='+thes;
-    //console.log(url+'?'+params);
     http.open("POST", url, true);
     http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     http.onreadystatechange = function() {

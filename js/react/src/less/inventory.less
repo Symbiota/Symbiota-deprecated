@@ -2,8 +2,20 @@
 
 
 #react-inventory-app {
+	/* p and h2 defaults - we're trying to standardize to these as much as possible - ap */
+	p,
+	li {
+		font-size: 1.4rem;
+		line-height: 1.875rem;
+		margin-bottom: .7rem;
+	}
+	h2 {
+		font-size: 2.25rem;
+		line-height: 2.5rem;
+		margin-top: 1.4rem;
+		margin-bottom: 3rem;
+	}
 
-	font-size: 1.1rem;
 
 	.inventory-header {//common to both chooser and detail view
 		width: 100%;
@@ -19,8 +31,6 @@
 
 	h2 {
 		font-weight: 600;
-		font-size: 1.5rem;
-		margin: 1em 0;
 	}
 
 	.verticalSeparator {
@@ -29,7 +39,9 @@
 	}
 
 	.inventory-chooser { //select from a list of projects
-
+		strong {
+			text-transform: uppercase;
+		}
 		.project-item {
 			clear: both;
 			margin-bottom: 1.7em;
@@ -69,13 +81,15 @@
 				flex-flow: row nowrap;
 				max-height: 560px;
 				
+				&.no-map {
+					max-height: 350px;
+				}
 				.project-image {
 					overflow: hidden;
 					h2 {
 						position: absolute;
 						color: white;
 						margin: .5em 35% 1em 5%;
-						font-size: 48px;
 						text-shadow: 1px 3px 3px rgba(0,0,0, 0.3); 
 						letter-spacing: -0.3px;
 					}
@@ -332,7 +346,6 @@
 				margin-bottom: 0;
 			}
 		}
-
 	}
 	.results-wrapper {
 		flex-basis: 710px;
@@ -351,8 +364,19 @@
 		justify-content: space-between;
 		border-bottom: 3px solid @light-green;
 		.current-wrapper {
+			height: auto;
+			margin: 3px 0 18px 0;
 			.current-button.btn-primary {
 				background-color: black !important;
+				margin: 0;
+			}
+			.filter-status {
+				text-transform: uppercase;
+				display: inline-block;
+				font-size: 18px;
+				color: @dark-grn-type;
+				margin: 0 0 0 12px;
+				vertical-align: center;
 			}
 		}
 	}
