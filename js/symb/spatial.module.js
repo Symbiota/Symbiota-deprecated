@@ -20,7 +20,7 @@ $(document).ready(function() {
     }
 
 		$( ".query-trigger-field" )
-				.bind( "keyup", "change", function( event ) {
+				.bind( "change", function( event ) {
 					buildQueryStrings();
 				});
     $( "#taxa" )
@@ -2415,7 +2415,7 @@ function prepareTaxaData(callback){
     var url = "rpc/gettaxalinks.php";
     var taxaArrStr = JSON.stringify(taxaArr);
     var params = 'taxajson='+taxaArrStr+'&type='+taxontype+'&thes='+thes;
-    //console.log(url+'?'+params);
+    console.log(url+'?'+params);
     http.open("POST", url, true);
     http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     http.onreadystatechange = function() {
@@ -2429,6 +2429,7 @@ function prepareTaxaData(callback){
 
 function prepareTaxaParams(callback){
     var taxaval = document.getElementById("taxa").value.trim();
+    console.log(taxaval);
     if(taxaval){
         var taxavals = taxaval.split(',');
         var taxaCqlString = '';
