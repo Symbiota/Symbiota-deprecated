@@ -19,21 +19,12 @@ $(document).ready(function() {
         return split( term ).pop();
     }
 
-		$( ".query-trigger-field" )
-				.bind( "change", function( event ) {
-					buildQueryStrings();
-				});
     $( "#taxa" )
-				// don't navigate away from the field on tab when selecting an item
         .bind( "keydown", function( event ) {
             if ( event.keyCode === $.ui.keyCode.TAB &&
-            		$( this ).data( "autocomplete" ) !== undefined &&
-            		$( this ).data( "autocomplete" ).menu !== undefined &&
                 $( this ).data( "autocomplete" ).menu.active ) {
                 event.preventDefault();
-            }/*else{
-							buildQueryStrings();
-						}*/
+            }
         })
         .autocomplete({
             source: function( request, response ) {
@@ -86,7 +77,6 @@ $(document).ready(function() {
                 terms.pop();
                 terms.push( ui.item.value );
                 this.value = terms.join( ", " );
-                
                 return false;
             }
         },{});
@@ -454,8 +444,7 @@ function buildTaxaKeyPiece(key,family,tidinterpreted,sciname){
         keyHTML += "<div style='display:table-cell;vertical-align:middle;padding-left:8px;'><i>"+sciname+"</i></div>";
     }
     else{
-        //keyHTML += "<div style='display:table-cell;vertical-align:middle;padding-left:8px;'><i><a target='_blank' href='../taxa/index.php?taxon="+sciname+"'>"+sciname+"</a></i></div>";
-        keyHTML += "<div style='display:table-cell;vertical-align:middle;padding-left:8px;'><i><a target='_blank' href='../taxa/index.php?taxon="+tidinterpreted+"'>"+sciname+"</a></i></div>";
+        keyHTML += "<div style='display:table-cell;vertical-align:middle;padding-left:8px;'><i><a target='_blank' href='../taxa/index.php?taxon="+sciname+"'>"+sciname+"</a></i></div>";
     }
     keyHTML += '</div></div>';
     if(!taxaKeyArr[family]){
@@ -1853,7 +1842,7 @@ function getSOLRRecCnt(occ,callback){
     var http = new XMLHttpRequest();
     var url = "rpc/SOLRConnector.php";
     var params = qStr+'&rows=0&start=0&wt=json';
-    //console.log(url + "?" +  params);
+    //console.log(url+'?'+params);
     http.open("POST", url, true);
     http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     http.onreadystatechange = function() {
@@ -1885,6 +1874,20 @@ function getTextParams(){
     var hasgenetic = document.getElementById("hasgenetic").checked;
 
     if(countryval){
+        if(countryval.indexOf('USA') !== -1 || countryval.indexOf('United States') !== -1 || countryval.indexOf('U.S.A.') !== -1 || countryval.indexOf('United States of America') !== -1){
+            if(countryval.indexOf('USA') === -1){
+                countryval += ',USA';
+            }
+            if(countryval.indexOf('United States') === -1){
+                countryval += ',United States';
+            }
+            if(countryval.indexOf('U.S.A.') === -1){
+                countryval += ',U.S.A.';
+            }
+            if(countryval.indexOf('United States of America') === -1){
+                countryval += ',United States of America';
+            }
+        }
         var countryvals = countryval.split(',');
         var countryCqlString = '';
         var countrySolrqString = '';
@@ -2268,7 +2271,6 @@ function lazyLoadPoints(index,callback){
 }
 
 function loadPoints(){
-	//console.log("loadPoints");
     cqlString = '';
     solrqString = '';
     taxaCnt = 0;
@@ -2281,12 +2283,10 @@ function loadPoints(){
     cqlString = newcqlString;
     solrqString = newsolrqString;
     if(newsolrqString){
-    
         showWorking();
         pointvectorsource = new ol.source.Vector({wrapX: false});
         layersArr['pointv'].setSource(pointvectorsource);
         getSOLRRecCnt(false,function(res) {
-        	//console.log(solrRecCnt);
             if(solrRecCnt){
                 loadPointsEvent = true;
                 setLoadingTimer();
@@ -2320,8 +2320,7 @@ function loadPoints(){
                     pointActive = false;
                 }
                 loadPointsEvent = false;
-                hideWorking();                
-                //ORIG alert('There were no records matching your query.');
+                hideWorking();
                 alert('There were no records matching your query.');
             }
         });
@@ -2415,7 +2414,7 @@ function prepareTaxaData(callback){
     var url = "rpc/gettaxalinks.php";
     var taxaArrStr = JSON.stringify(taxaArr);
     var params = 'taxajson='+taxaArrStr+'&type='+taxontype+'&thes='+thes;
-    console.log(url+'?'+params);
+    //console.log(url+'?'+params);
     http.open("POST", url, true);
     http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     http.onreadystatechange = function() {
@@ -2429,7 +2428,6 @@ function prepareTaxaData(callback){
 
 function prepareTaxaParams(callback){
     var taxaval = document.getElementById("taxa").value.trim();
-    console.log(taxaval);
     if(taxaval){
         var taxavals = taxaval.split(',');
         var taxaCqlString = '';
@@ -3477,17 +3475,16 @@ function toggleHeatMap(){
 }
 
 function toggleLayerTable(layerID){
-    //hiding these per Linda
-    //var tableRows = document.getElementById("layercontroltable").rows.length;
-    //if(tableRows > 0){
-    //    document.getElementById("nolayermessage").style.display = "none";
-    //    document.getElementById("layercontroltable").style.display = "block";
-    //}
-    //else{
+    var tableRows = document.getElementById("layercontroltable").rows.length;
+    if(tableRows > 0){
+        document.getElementById("nolayermessage").style.display = "none";
+        document.getElementById("layercontroltable").style.display = "block";
+    }
+    else{
         $('#addLayers').popup('hide');
         document.getElementById("nolayermessage").style.display = "block";
         document.getElementById("layercontroltable").style.display = "none";
-    //}
+    }
 }
 
 function toggleUploadLayer(c,title){
