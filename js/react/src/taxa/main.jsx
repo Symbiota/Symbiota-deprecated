@@ -5,6 +5,7 @@ import { getUrlQueryParams } from "../common/queryParams.js";
 import {getGardenTaxaPage} from "../common/taxaUtils";
 import ImageCarousel from "../common/imageCarousel.jsx";
 import ImageModal from "../common/modal.jsx";
+import Loading from "../common/loading.jsx";
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 //import 'react-tabs/style/react-tabs.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -331,6 +332,10 @@ class TaxaChooser extends React.Component {
 				</div>
 				<div className="row mt-2 row-cols-sm-2">
 					<div className="col-sm-8 px-4">
+					<Loading 
+					clientRoot={ this.props.clientRoot }
+					isLoading={ res.isLoading }
+				/>
 						<p className="mt-4">
 							{/*
 								Description includes HTML tags & URL-encoded characters in the db.
@@ -549,6 +554,7 @@ class TaxaApp extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      isLoading: true,
       sciName: '',
       author: '',
       basename: '',
@@ -660,7 +666,10 @@ class TaxaApp extends React.Component {
         .catch((err) => {
           // TODO: Something's wrong
           console.error(err);
-        });
+        })
+				.finally(() => {
+					this.setState({ isLoading: false });
+				});
     }
   }//componentDidMount
 

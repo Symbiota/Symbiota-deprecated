@@ -11,7 +11,7 @@ import ViewOpts from "./viewOpts.jsx";
 import httpGet from "../common/httpGet.js";
 import {addUrlQueryParam, getUrlQueryParams} from "../common/queryParams.js";
 import {getCommonNameStr, getGardenTaxaPage} from "../common/taxaUtils";
-//import {Loading} from "../common/loading.jsx";
+//import Loading from "../common/loading.jsx";
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { library } from "@fortawesome/fontawesome-svg-core";
@@ -190,7 +190,7 @@ class GardenPageApp extends React.Component {
 
     // TODO: searchText is both a core state value and a state.filters value; How can we make the filtering system more efficient?
     this.state = {
-      isLoading: false,
+      isLoading: true,
       filters: {
         sunlight: ("sunlight" in queryParams ? queryParams["sunlight"] : ViewOpts.DEFAULT_SUNLIGHT),
         moisture: ("moisture" in queryParams ? queryParams["moisture"] : ViewOpts.DEFAULT_MOISTURE),
@@ -564,6 +564,10 @@ class GardenPageApp extends React.Component {
     */
     return (
       <div>
+				{/*<Loading 
+					clientRoot={ this.props.clientRoot }
+					isLoading={ this.state.isLoading }
+				/>*/}
         <InfographicDropdown 
         	clientRoot={this.props.clientRoot}
 				/>

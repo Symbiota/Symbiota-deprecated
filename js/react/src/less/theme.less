@@ -231,37 +231,21 @@ img {
 */
 
 /*loading animation */
-@keyframes float {
-  to {
-    transform: translateY(0.75em);
-  }
-}
-/*
-body {
-  padding-top: 1em;
-  background: currentcolor;
-  color: #ccc;
-  text-align: center;
-}*/
-.dot {
-  background: tomato;
-}
-.dot, .dot:after {
-  display: inline-block;
-  width: 2em;
-  height: 2em;
-  border-radius: 50%;
-  animation: loading 1.5s calc(((var(--i) + var(--o, 0))/var(--n) - 1)*1.5s) infinite;
-}
-.dot:after {
-  --o: 1;
-  background: currentcolor;
-  content: "";
-}
-@keyframes loading {
-  0%, 50% {
-    transform: scale(0);
-  }
+.loading-overlay {
+	display: none; 
+	/*position: absolute;
+	height: 100%;
+	width: 100%;
+	background-color: white;
+	opacity: .9;
+	z-index: 1000;
+	img {
+		display: block;
+		margin: 20% auto;
+	}*/
+	&.loading {
+		display: block;
+	}
 }
 /* end loading */
 
