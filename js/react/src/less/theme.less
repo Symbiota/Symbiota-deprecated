@@ -3,8 +3,8 @@
 @import '../../node_modules/react-modal-video/css/modal-video.min.css';
 
 //Variable for project paths since relative paths not allowed
-@subdir: "/portal";
-//@subdir: "";
+//@subdir: "/portal";
+@subdir: "";
 
 * {
   font-family: @font;
@@ -170,7 +170,7 @@ img {
 }
 
 .dropdown-toggle, .header-button, .dropdown-item {
-  &:hover, &:active, &.active {
+  &:hover, &:active, &.active, &:focus {
     .dropdown-hover();
   }
 }

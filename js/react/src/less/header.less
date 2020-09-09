@@ -16,22 +16,29 @@
   #site-header {
 		max-width: 1100px;
     height: 100%;
-    padding: 2.7em 0 0 0;
+    padding: 0;
     transition: height 0.5s, padding-top 0.5s;
 		.navbar-brand {
-			padding-top: 0;
-			margin: 0 0 0 -7px;
+			padding: 0;
+			margin: 34px 0 0 0;
 			#site-header-logo {
 				//margin-left: 4em;
 				//margin-left: -22px;
 				/*border: 0.5em solid rgba(255, 255, 255, 0.2);*/
-				width: 79px;
+				width: 87px;
 				height: auto;
 			}
 		}
 		&.site-header-scroll {
 			.navbar-brand {
-				padding-top: .3rem;
+				margin-top: 0px;
+			}
+			#site-header-dropdowns {
+				margin-top: 0;
+			}
+			.search-wrapper {
+				padding-top: 0;
+				margin-top: 0;
 			}
 		}
 		.navbar-expand-lg .navbar-collapse {
@@ -60,6 +67,9 @@
       }
 
     }
+    #site-header-dropdowns {
+    	margin-top: 3rem;
+    }
 
     .header-button {
       font-size: 0.9em;
@@ -69,11 +79,14 @@
       /*.border-rounded-sm();
       .text-uppercase();
       .text-bold();*/
+      &:hover {
+      	text-shadow: none;
+      }
     }
     
   }
   .search-wrapper {
-  	flex-basis: 600px;
+  	flex-basis: 500px;
   	margin-right: -41px;
 		padding: 0px 20px 0 20px;
 		text-align: right;
@@ -92,23 +105,28 @@
     .widget-wrapper {
     	justify-content: flex-end;
 			.search-widget {
-				padding: .5rem;
+				padding: .5rem 0 0 0 ;
+				width: 400px;
+				position: relative;
+				vertical-align: middle;
 				input {
-					margin-right: 10px;
-					max-width: 207px !important;
+					margin-right: 14px;
+					max-width: 328px !important;
 					height: 36px;
 					border: 2px solid @med-green;
+					display: inline;
 					&::placeholder {
 						color: @gray-type;
 					}
 				}
+				.dropdown-menu {
+					margin-top: 0px;
+					margin-left: 36px;
+				}
+				.btn-search {
+					margin-right: 0;
+				}
 			}
-		}
-	}
-	
-	#site-header.site-header-scroll {
-		.search-wrapper {
-			padding-top: .3rem;
 		}
 	}
 }
