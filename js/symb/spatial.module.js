@@ -334,7 +334,7 @@ function buildLayerTableRow(lArr,removable){
 }
 
 function buildQueryStrings(){
-console.log(document.getElementById("taxa").value.trim());
+		//console.log(document.getElementById("taxa").value.trim());
     cqlArr = [];
     solrqArr = [];
     solrgeoqArr = [];
@@ -423,6 +423,7 @@ function buildTaxaKey(){
         taxaKeyArr.splice(undIndex,1);
     }
     var fsortedKeys = arrayIndexSort(taxaKeyArr).sort();
+    console.log(fsortedKeys);
     for(f in fsortedKeys){
         var scinameArr = [];
         scinameArr = taxaKeyArr[fsortedKeys[f]];
@@ -436,6 +437,7 @@ function buildTaxaKey(){
     }
     if(famUndefinedArr.length > 0){
         var usortedKeys = arrayIndexSort(famUndefinedArr).sort();
+    console.log(usortedKeys);
         keyHTML += "<div style='margin-left:5px;'><h3 style='margin-top:8px;margin-bottom:5px;'>Family Not Defined</h3></div>";
         keyHTML += "<div style='display:table;'>";
         for(u in usortedKeys){
