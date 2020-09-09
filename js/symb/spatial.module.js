@@ -23,6 +23,10 @@ $(document).ready(function() {
 				.bind( "change", function( event ) {
 					buildQueryStrings();
 				});
+		$( "#taxa_autocomplete").on("click",'.ui-autocomplete li a', function(event) {//for Safari, Firefox PC, etc.
+				event.preventDefault();
+				buildQueryStrings();
+		});
     $( "#taxa" )
 				// don't navigate away from the field on tab when selecting an item
         .bind( "keydown", function( event ) {
@@ -85,6 +89,7 @@ $(document).ready(function() {
                 terms.push( ui.item.value );
                 this.value = terms.join( ", " );
                 
+								buildQueryStrings();
                 return false;
             }
         },{});
@@ -329,6 +334,7 @@ function buildLayerTableRow(lArr,removable){
 }
 
 function buildQueryStrings(){
+console.log(document.getElementById("taxa").value.trim());
     cqlArr = [];
     solrqArr = [];
     solrgeoqArr = [];
