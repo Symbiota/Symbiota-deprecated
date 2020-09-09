@@ -1861,10 +1861,13 @@ function getSOLRRecCnt(occ,callback){
     http.onreadystatechange = function() {
         if(http.readyState == 4 && http.status == 200) {
             var resArr = JSON.parse(http.responseText);
-            solrRecCnt = resArr['response']['numFound'];
-            //console.log(resArr);
+            var callbackValue = 1;
+	            solrRecCnt = resArr['response']['numFound'];
+            if (resArr['response']['hiddenFound'] > 0) {
+            	callbackValue = 2;
+            }
             document.getElementById("dh-rows").value = solrRecCnt;
-            callback(1);
+            callback(callbackValue);
         }
     };
     http.send(params);

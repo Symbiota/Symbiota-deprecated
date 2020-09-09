@@ -64,6 +64,10 @@ $options = array(
 curl_setopt_array($ch, $options);
 $secureJSON = curl_exec($ch);
 curl_close($ch);
+
+$secure = json_decode($secureJSON);
+$secure->response->hiddenFound = 0;
+$secureJSON = json_encode($secure);#re-encode 
 $JSON = $secureJSON;
 
 if (!$canReadRareSpp) {#get results filtered by security
@@ -97,7 +101,6 @@ if (!$canReadRareSpp) {#get results filtered by security
 	$partialJSON = curl_exec($ch);
 	curl_close($ch);
 	
-	$secure = json_decode($secureJSON);
 	$partial = json_decode($partialJSON);
 	if ($secure->response->numFound < $partial->response->numFound) {#some results have been suppressed
 		$partial->response->hiddenFound = ($partial->response->numFound - $secure->response->numFound);#add hiddenFound
