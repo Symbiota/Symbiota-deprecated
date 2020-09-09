@@ -1828,7 +1828,6 @@ function getSOLROccArr(callback){
             var http = new XMLHttpRequest();
             var url = "rpc/SOLRConnector.php";
             var params = solroccqString+'&rows='+solrRecCnt+'&start=0&fl=occid&wt=json';
-            console.log("1getSOLROccArr: " + url+'?'+params);
             http.open("POST", url, true);
             http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
             http.onreadystatechange = function() {
@@ -1858,13 +1857,14 @@ function getSOLRRecCnt(occ,callback){
     var http = new XMLHttpRequest();
     var url = "rpc/SOLRConnector.php";
     var params = qStr+'&rows=0&start=0&wt=json';
-    console.log("2getSOLRRecCnt: " + url+'?'+params);
+    console.log("getSOLRRecCnt: " + url+'?'+params);
     http.open("POST", url, true);
     http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     http.onreadystatechange = function() {
         if(http.readyState == 4 && http.status == 200) {
             var resArr = JSON.parse(http.responseText);
             solrRecCnt = resArr['response']['numFound'];
+            console.log(resArr);
             document.getElementById("dh-rows").value = solrRecCnt;
             callback(1);
         }
