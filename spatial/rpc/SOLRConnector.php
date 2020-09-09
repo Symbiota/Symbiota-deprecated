@@ -54,7 +54,6 @@ $secureJSON = curl_exec($ch);
 curl_close($ch);
 $JSON = $secureJSON;
 
-var_dump(json_decode($secureJSON));
 
 if (!$canReadRareSpp) {
 	$pArr["q"] = $origQ;
@@ -89,9 +88,8 @@ if (!$canReadRareSpp) {
 	
 	$secure = json_decode($secureJSON);
 	$partial = json_decode($partialJSON);
-	var_dump($partial);
 	if ($secure->response->numFound < $partial->response->numFound) {#some results have been suppressed
-		$partial->response->hiddenFound = ($secure->response->numFound - $partial->response->numFound);
+		$partial->response->hiddenFound = ($partial->response->numFound - $secure->response->numFound);
 	}
 	$partialJSON = json_encode($partial);
 	$JSON = $partialJSON;
