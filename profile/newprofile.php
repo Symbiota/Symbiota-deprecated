@@ -30,9 +30,9 @@ if($emailAddr){
 if($action && !preg_match('/^[a-zA-Z0-9\s_]+$/',$action)) $action = '';
 
 $useRecaptcha = false;
-#if(isset($RECAPTCHA_PUBLIC_KEY) && $RECAPTCHA_PUBLIC_KEY && isset($RECAPTCHA_PRIVATE_KEY) && $RECAPTCHA_PRIVATE_KEY){
-#	$useRecaptcha = true;
-#}
+if(isset($RECAPTCHA_PUBLIC_KEY) && $RECAPTCHA_PUBLIC_KEY && isset($RECAPTCHA_PRIVATE_KEY) && $RECAPTCHA_PRIVATE_KEY){
+	$useRecaptcha = true;
+}
 
 if($action == "Create Login"){
 	$okToCreateLogin = true;
