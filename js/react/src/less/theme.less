@@ -1522,12 +1522,20 @@ img {
       padding: 0 15px !important;
     }
 
-    .search-widget input {
-      font-size: 20px;
-      color: @med-green;
-      border: 3px solid @med-green;
-    }
-
+    .search-widget {
+    	margin-bottom: 1rem;
+			input {
+				font-size: 20px;
+				color: @med-green;
+				border: 3px solid @med-green;
+				display: inline;
+				width: 90%;
+				margin-right: 10px;
+			}
+			.dropdown-menu {
+				margin-top: 0;
+			}
+		}
     .opt-labels {
       padding-left: 0;
       width: 80px;
