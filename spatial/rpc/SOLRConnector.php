@@ -48,4 +48,43 @@ curl_setopt_array($ch, $options);
 $result = curl_exec($ch);
 curl_close($ch);
 echo $result;
+
+
+$pArr["q"] = $solrManager->checkQuerySecurity($pArr["q"]);
+
+if($pArr["wt"] == 'geojson'){
+    $pArr["geojson.field"] = 'geo';
+    $pArr["omitHeader"] = 'true';
+}
+
+/*$testURL = $SOLR_URL.'/select?';
+foreach($pArr as $key => $value){
+    $testURL .= $key.'='.$value.'&';
+}
+echo substr($testURL, 0, -1);*/
+
+$headers = array(
+    'Content-Type: application/x-www-form-urlencoded',
+    'Accept: application/json',
+    'Cache-Control: no-cache',
+    'Pragma: no-cache',
+    'Content-Length: '.strlen(http_build_query($pArr))
+);
+
+$ch = curl_init();
+
+$options = array(
+    CURLOPT_URL => $SOLR_URL.'/select',
+    CURLOPT_POST => true,
+    CURLOPT_HTTPHEADER => $headers,
+    CURLOPT_TIMEOUT => 90,
+    CURLOPT_POSTFIELDS => http_build_query($pArr),
+    CURLOPT_RETURNTRANSFER => true
+);
+curl_setopt_array($ch, $options);
+$result = curl_exec($ch);
+curl_close($ch);
+echo $result;
+
+
 ?>
