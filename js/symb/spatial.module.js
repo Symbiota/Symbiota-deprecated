@@ -284,7 +284,6 @@ function buildCQLString(){
     else{
         newcqlString = newcqlString.substr(5,newcqlString.length);
     }
-    //console.log(cqlString);
 }
 
 function buildLayerTableRow(lArr,removable){
@@ -646,7 +645,6 @@ function changeRecordPage(page){
     var http = new XMLHttpRequest();
     var url = "rpc/changemaprecordpage.php";
     var params = solrqString+'&rows='+solrRecCnt+'&page='+page+'&selected='+selJson;
-    //console.log(url+'?'+params);
     http.open("POST", url, true);
     http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     http.onreadystatechange = function() {
@@ -1857,14 +1855,14 @@ function getSOLRRecCnt(occ,callback){
     var http = new XMLHttpRequest();
     var url = "rpc/SOLRConnector.php";
     var params = qStr+'&rows=0&start=0&wt=json';
-    console.log("getSOLRRecCnt: " + url+'?'+params);
+    //console.log("getSOLRRecCnt: " + url+'?'+params);
     http.open("POST", url, true);
     http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     http.onreadystatechange = function() {
         if(http.readyState == 4 && http.status == 200) {
             var resArr = JSON.parse(http.responseText);
             solrRecCnt = resArr['response']['numFound'];
-            console.log(resArr);
+            //console.log(resArr);
             document.getElementById("dh-rows").value = solrRecCnt;
             callback(1);
         }
@@ -2290,7 +2288,7 @@ function loadPoints(){
         pointvectorsource = new ol.source.Vector({wrapX: false});
         layersArr['pointv'].setSource(pointvectorsource);
         getSOLRRecCnt(false,function(res) {
-        	//console.log(solrRecCnt);
+        	console.log(res);
             if(solrRecCnt){
                 loadPointsEvent = true;
                 setLoadingTimer();
