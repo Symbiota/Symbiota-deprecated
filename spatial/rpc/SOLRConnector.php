@@ -90,7 +90,7 @@ if (!$canReadRareSpp) {
 	$secure = json_decode($secureJSON);
 	$partial = json_decode($partialJSON);
 	var_dump($partial);
-	if ($secure->response->numFound > $partial->response->numFound) {#some results have been suppressed
+	if ($secure->response->numFound < $partial->response->numFound) {#some results have been suppressed
 		$partial->response->hiddenFound = ($secure->response->numFound - $partial->response->numFound);
 	}
 	$partialJSON = json_encode($partial);
