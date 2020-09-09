@@ -13,7 +13,7 @@ if(isset($_REQUEST["fl"])) $pArr["fl"] = $_REQUEST["fl"];
 if(isset($_REQUEST["wt"])) $pArr["wt"] = $_REQUEST["wt"];
 
 $solrManager = new SOLRManager();
-$pArr["q"] = $solrManager->checkQuerySecurity($pArr["q"]);
+#$pArr["q"] = $solrManager->checkQuerySecurity($pArr["q"]);
 
 if($pArr["wt"] == 'geojson'){
     $pArr["geojson.field"] = 'geo';
