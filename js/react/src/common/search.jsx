@@ -81,7 +81,7 @@ export class SearchWidget extends React.Component {
 
   render() {
     return (
-      <div className="search-widget dropdown input-group w-100 mb-4" style={ this.props.style }>
+      <div className="search-widget dropdown mb-4" style={ this.props.style }>
         <input
           name="search"
           type="text"

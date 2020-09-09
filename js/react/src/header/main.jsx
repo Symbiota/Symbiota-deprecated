@@ -224,7 +224,7 @@ class HeaderApp extends React.Component {
         <div className={ "search-wrapper ml-auto" + (this.state.isCollapsed ? " my-auto" : "") }>
           { this.getLoginButtons() }
 
-          <div className="row">
+          <div className="row widget-wrapper">
             <SearchWidget
               placeholder="Search all plants"
               clientRoot={ this.props.clientRoot }

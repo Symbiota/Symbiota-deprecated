@@ -73,7 +73,7 @@
     
   }
   .search-wrapper {
-  	flex-basis: 400px;
+  	flex-basis: 600px;
   	margin-right: -41px;
 		padding: 0px 20px 0 20px;
 		text-align: right;
@@ -89,15 +89,18 @@
       pointer-events: none;
       flex-basis: 40%;
     }
-		.search-widget {
-			padding: .5rem;
-			input {
-				margin-right: 10px;
-				width: 207px;
-				height: 36px;
-				border: 2px solid @med-green;
-				&::placeholder {
-					color: @gray-type;
+    .widget-wrapper {
+    	justify-content: flex-end;
+			.search-widget {
+				padding: .5rem;
+				input {
+					margin-right: 10px;
+					max-width: 207px !important;
+					height: 36px;
+					border: 2px solid @med-green;
+					&::placeholder {
+						color: @gray-type;
+					}
 				}
 			}
 		}
