@@ -2291,44 +2291,53 @@ function loadPoints(){
         pointvectorsource = new ol.source.Vector({wrapX: false});
         layersArr['pointv'].setSource(pointvectorsource);
         getSOLRRecCnt(false,function(res) {
-        	console.log(res);
-            if(solrRecCnt){
-                loadPointsEvent = true;
-                setLoadingTimer();
-                if(loadVectorPoints){
-                    loadPointWFSLayer(0);
-                }
-                else{
-                    loadPointWMSLayer();
-                }
-                //cleanSelectionsLayer();
-                setRecordsTab();
-                changeRecordPage(1);
-                $('#recordstab').tabs({active: 1});
-                $("#accordion").accordion("option","active",1);
-                selectInteraction.getFeatures().clear();
-                if(!pointActive){
-                    var infoArr = [];
-                    infoArr['Name'] = 'pointv';
-                    infoArr['layerType'] = 'vector';
-                    infoArr['Title'] = 'Points';
-                    infoArr['Abstract'] = '';
-                    infoArr['DefaultCRS'] = '';
-                    buildLayerTableRow(infoArr,true);
-                    pointActive = true;
-                }
-            }
-            else{
-                setRecordsTab();
-                if(pointActive){
-                    removeLayerToSelList('pointv');
-                    pointActive = false;
-                }
-                loadPointsEvent = false;
-                hideWorking();                
-                //ORIG alert('There were no records matching your query.');
-                alert('There were no records matching your query.');
-            }
+        	if (res == 2) {
+						setRecordsTab();
+						if(pointActive){
+								removeLayerToSelList('pointv');
+								pointActive = false;
+						}
+						loadPointsEvent = false;
+						hideWorking();                
+						//ORIG alert('There were no records matching your query.');
+						alert('You need to be logged in with rare species privileges to view the full distribution.');
+        	}else if(solrRecCnt){
+						loadPointsEvent = true;
+						setLoadingTimer();
+						if(loadVectorPoints){
+								loadPointWFSLayer(0);
+						}
+						else{
+								loadPointWMSLayer();
+						}
+						//cleanSelectionsLayer();
+						setRecordsTab();
+						changeRecordPage(1);
+						$('#recordstab').tabs({active: 1});
+						$("#accordion").accordion("option","active",1);
+						selectInteraction.getFeatures().clear();
+						if(!pointActive){
+								var infoArr = [];
+								infoArr['Name'] = 'pointv';
+								infoArr['layerType'] = 'vector';
+								infoArr['Title'] = 'Points';
+								infoArr['Abstract'] = '';
+								infoArr['DefaultCRS'] = '';
+								buildLayerTableRow(infoArr,true);
+								pointActive = true;
+						}
+					}
+					else{
+						setRecordsTab();
+						if(pointActive){
+								removeLayerToSelList('pointv');
+								pointActive = false;
+						}
+						loadPointsEvent = false;
+						hideWorking();                
+						//ORIG alert('There were no records matching your query.');
+						alert('There were no records matching your query.');
+					}
         });
     }
     else{
