@@ -20,10 +20,22 @@ if($GLOBALS['USER_RIGHTS']){
 }
 
 $solrManager = new SOLRManager();
+
+/*
+SOLRManager.php handles filtering results by security level, while giving no indication that it's doing so.
+Thus numFound == 0 whether it's because 1) the user doesn't have permission to see those results, or 2) there are genuinely no results.
+This is unacceptable.
+Therefore, the following terrible hack:
+We do the query once as if the user has permission, in order to get the real total.
+If they don't have permission, we do it again with security turned on.  
+We then compare and add "hiddenFound" to the response so that spatial.module.js can deal with it.
+
+*/
+
 $origQ = $pArr["q"];
 $secureQ = $solrManager->checkQuerySecurity($pArr["q"]);
 
-#get protected results
+#get secure (i.e. "real") results
 $pArr["q"] = $secureQ;
 
 if($pArr["wt"] == 'geojson'){
@@ -54,8 +66,7 @@ $secureJSON = curl_exec($ch);
 curl_close($ch);
 $JSON = $secureJSON;
 
-
-if (!$canReadRareSpp) {
+if (!$canReadRareSpp) {#get results filtered by security
 	$pArr["q"] = $origQ;
 
 	if($pArr["wt"] == 'geojson'){
@@ -89,9 +100,9 @@ if (!$canReadRareSpp) {
 	$secure = json_decode($secureJSON);
 	$partial = json_decode($partialJSON);
 	if ($secure->response->numFound < $partial->response->numFound) {#some results have been suppressed
-		$partial->response->hiddenFound = ($partial->response->numFound - $secure->response->numFound);
+		$partial->response->hiddenFound = ($partial->response->numFound - $secure->response->numFound);#add hiddenFound
+		$partialJSON = json_encode($partial);#re-encode 
 	}
-	$partialJSON = json_encode($partial);
 	$JSON = $partialJSON;
 }
 
