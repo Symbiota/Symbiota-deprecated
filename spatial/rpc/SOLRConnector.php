@@ -55,7 +55,7 @@ curl_close($ch);
 $JSON = $secureJSON;
 
 
-if (!$canReadRareSpp)
+if (!$canReadRareSpp) {
 	$pArr["q"] = $origQ;
 
 	if($pArr["wt"] == 'geojson'){
