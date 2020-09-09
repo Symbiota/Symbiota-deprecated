@@ -50,13 +50,11 @@ $options = array(
 		CURLOPT_RETURNTRANSFER => true
 );
 curl_setopt_array($ch, $options);
-$secureResult = curl_exec($ch);
+$secureJSON = curl_exec($ch);
 curl_close($ch);
-$result = $secureResult;
+$JSON = $secureJSON;
 
-$res = json_decode($result);
-var_dump($res);
-/*
+
 if (!$canReadRareSpp)
 	$pArr["q"] = $origQ;
 
@@ -85,16 +83,50 @@ if (!$canReadRareSpp)
 			CURLOPT_RETURNTRANSFER => true
 	);
 	curl_setopt_array($ch, $options);
-	$partialResult = curl_exec($ch);
+	$partialJSON = curl_exec($ch);
 	curl_close($ch);
 	
-	
-	
+	$secure = json_decode($secureJSON);
+	$partial = json_decode($partialJSON);
+	if ($secure->response->numFound > $partial->response->numFound) {#some results have been suppressed
+		$partial->response->hiddenFound = ($secure->response->numFound - $partial->response->numFound);
+	}
+	$partialJSON = json_encode($partial);
+	$JSON = $partialJSON;
+}
+
+echo $JSON;
+
+/*
+object(stdClass)#5 (2) {
+  ["responseHeader"]=>
+  object(stdClass)#3 (3) {
+    ["status"]=>
+    int(0)
+    ["QTime"]=>
+    int(1)
+    ["params"]=>
+    object(stdClass)#4 (4) {
+      ["q"]=>
+      string(203) "(((sciname:Howellia\ aquatilis) OR (sciname:Howellia\ aquatilis\ *)) OR (tidinterpreted:(5665))) AND (decimalLatitude:[* TO *] AND decimalLongitude:[* TO *] AND sciname:[* TO *]) AND (localitySecurity:0)"
+      ["start"]=>
+      string(1) "0"
+      ["rows"]=>
+      string(1) "0"
+      ["wt"]=>
+      string(4) "json"
+    }
+  }
+  ["response"]=>
+  object(stdClass)#6 (3) {
+    ["numFound"]=>
+    int(13)
+    ["start"]=>
+    int(0)
+    ["docs"]=>
+    array(0) {
+    }
+  }
 }
 */
-
-
-#echo $result;
-
-
 ?>
