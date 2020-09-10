@@ -60,6 +60,7 @@ export default class ImageModalCarousel extends Component {
 					asNavFor={this.state.nav2}
 					ref={slider => (this.slider1 = slider)}
 					infinite={true}
+					lazyLoad={true}
 					slidesToShow={1}
 					adaptiveHeight={true}
 					initialSlide={this.props.currImage}
