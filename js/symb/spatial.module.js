@@ -2582,7 +2582,7 @@ function primeSymbologyData(features){
                 }
             }
         }
-        var color = 'e69e67';
+        var color = 'FF2022';//'e69e67';
         var collName = features[f].get('CollectionName');
         var collid = features[f].get('collid');
         var tidinterpreted = features[f].get('tidinterpreted');
@@ -2833,10 +2833,10 @@ function removeUserLayer(layerID){
 
 function resetMainSymbology(){
     for(i in collSymbology){
-        collSymbology[i]['color'] = "E69E67";
+        collSymbology[i]['color'] = "FF2022";//"E69E67"
         var keyName = 'keyColor'+i;
         if(document.getElementById(keyName)){
-            document.getElementById(keyName).color.fromString("E69E67");
+            document.getElementById(keyName).color.fromString("FF2022");//"E69E67"
         }
     }
 }

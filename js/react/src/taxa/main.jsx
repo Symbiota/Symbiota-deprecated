@@ -230,6 +230,8 @@ function SppItem(props) {
 	if (item.images.length > 0) {
 		image = item.images[0];
 	}
+	let mapImage = null;
+	mapImage = `${props.clientRoot}/images/maps/${item.tid}_sm.jpg`;
 	let sppQueryParams = queryParams;
 	sppQueryParams['taxon'] = item.tid;
 	let sppUrl = window.location.pathname + '?taxon=' + encodeURIComponent(sppQueryParams['taxon']);
@@ -248,7 +250,7 @@ function SppItem(props) {
 				</div>
 				}
 				<div className="map-preview">
-					<img src={ `${props.clientRoot}/images/map-temp.png` }/>
+					<img src={ mapImage }/>
 				</div>
 			</a>
 		</div>						
