@@ -9,6 +9,7 @@ import {ExploreSearchContainer, SearchResultContainer} from "../common/searchRes
 import {addUrlQueryParam, getUrlQueryParams} from "../common/queryParams.js";
 import {getCommonNameStr, getTaxaPage, getIdentifyPage} from "../common/taxaUtils";
 import PageHeader from "../common/pageHeader.jsx";
+import Loading from "../common/loading.jsx";
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { library } from "@fortawesome/fontawesome-svg-core";
@@ -22,6 +23,7 @@ class ExploreApp extends React.Component {
 
     // TODO: searchText is both a core state value and a state.filters value; How can we make the filtering system more efficient?
     this.state = {
+      isLoading: true,
       clid: null,
       pid: null,
       projName: null,
@@ -386,6 +388,10 @@ class ExploreApp extends React.Component {
 
     return (
     <div className="wrapper">
+			<Loading 
+				clientRoot={ this.props.clientRoot }
+				isLoading={ this.state.isLoading }
+			/>
 			<div className="page-header">
 				<PageHeader bgClass="explore" title={ this.state.projName } />
       </div>

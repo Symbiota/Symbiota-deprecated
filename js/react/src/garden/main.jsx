@@ -11,7 +11,7 @@ import ViewOpts from "./viewOpts.jsx";
 import httpGet from "../common/httpGet.js";
 import {addUrlQueryParam, getUrlQueryParams} from "../common/queryParams.js";
 import {getCommonNameStr, getGardenTaxaPage} from "../common/taxaUtils";
-//import Loading from "../common/loading.jsx";
+import Loading from "../common/loading.jsx";
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { library } from "@fortawesome/fontawesome-svg-core";
@@ -105,15 +105,16 @@ function getAttribMatrixFromArr(attribArray) {
 
 function filterByWidth(item, minMax) {
 	let ret = false;
-
-	if (	( 0 == item.width.length)
-				|| ( minMax[0] <= item.width[0] && item.width[0] <= minMax[1] )//item min is between user min and max
-				|| ( minMax[0] <= item.width[1] && item.width[1] <= minMax[1] )//item max is between user min and max
-				|| minMax[1] === 50 && minMax[1] <= item.width[1]) {//user max == 50 and item max >= 50
-		ret = true;	
-	}
+	if (minMax) {
+		if (	( 0 == item.width.length)
+					|| ( minMax[0] <= item.width[0] && item.width[0] <= minMax[1] )//item min is between user min and max
+					|| ( minMax[0] <= item.width[1] && item.width[1] <= minMax[1] )//item max is between user min and max
+					|| minMax[1] === 50 && minMax[1] <= item.width[1]) {//user max == 50 and item max >= 50
+			ret = true;	
+		}
 		
-  return ret;
+		return ret;
+	}
 }
 
 function filterByHeight(item, minMax) {
@@ -191,6 +192,7 @@ class GardenPageApp extends React.Component {
     // TODO: searchText is both a core state value and a state.filters value; How can we make the filtering system more efficient?
     this.state = {
       isLoading: true,
+      isSearching: false,
       filters: {
         sunlight: ("sunlight" in queryParams ? queryParams["sunlight"] : ViewOpts.DEFAULT_SUNLIGHT),
         moisture: ("moisture" in queryParams ? queryParams["moisture"] : ViewOpts.DEFAULT_MOISTURE),
@@ -281,6 +283,9 @@ class GardenPageApp extends React.Component {
     )
     .catch((err) => {
       console.error(err);
+    })
+    .finally(() => {
+      this.setState({ isLoading: false });
     });
   }
 
@@ -384,7 +389,7 @@ class GardenPageApp extends React.Component {
     );*/
 
     this.setState({
-      isLoading: true,
+      isSearching: true,
       searchText: searchObj.text,
       filters: Object.assign({}, this.state.filters, { searchText: searchObj.text })
     });
@@ -396,7 +401,7 @@ class GardenPageApp extends React.Component {
         console.error(err);
       })
       .finally(() => {
-        this.setState({ isLoading: false });
+        this.setState({ isSearching: false });
       });
   }
 
@@ -524,8 +529,10 @@ class GardenPageApp extends React.Component {
     /*window.history.replaceState({ query: newQueryStr }, '', window.location.pathname + newQueryStr);*/
   }
 	clearFilters() {
-    this.setState({ filters: defaultFilters() });
 
+    this.setState({ filters: defaultFilters },function() {
+    	this.onFilterRemoved("searchText","");
+    });
 		let plantFeatureState = this.state.plantFeatureState;
 		Object.keys(plantFeatureState).map((key) => {
 			Object.keys(plantFeatureState[key]).map((item) => {
@@ -544,8 +551,6 @@ class GardenPageApp extends React.Component {
 				beyondGardenState[key][item] = false;
 			});
 		});
-
-
     this.setState({
 			plantFeatureState: plantFeatureState,
 			growthMaintenanceState: growthMaintenanceState,
@@ -563,11 +568,11 @@ class GardenPageApp extends React.Component {
     pageTitle.innerHTML = `${pageTitle.innerHTML} Gardening with Natives`;
     */
     return (
-      <div>
-				{/*<Loading 
+      <div className="garden-wrapper">
+				<Loading 
 					clientRoot={ this.props.clientRoot }
 					isLoading={ this.state.isLoading }
-				/>*/}
+				/>
         <InfographicDropdown 
         	clientRoot={this.props.clientRoot}
 				/>
@@ -621,6 +626,8 @@ class GardenPageApp extends React.Component {
                     onReset={ this.clearFilters }
                     onFilterClicked={ this.onFilterRemoved }
                     checklistNames={ checkListMap }
+                    isSearching={ this.state.isSearching }
+                    isLoading={ this.state.isLoading }
                     filters={
                       Object.keys(this.state.filters).map((filterKey) => {
                         return { key: filterKey, val: this.state.filters[filterKey] }

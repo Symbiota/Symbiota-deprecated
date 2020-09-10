@@ -6,6 +6,7 @@ import Table from "./table.jsx";
 import PageHeader from "../common/pageHeader.jsx";
 import {getChecklistPage} from "../common/taxaUtils";
 import { GoogleMap, LoadScript, Marker, MarkerClusterer } from '@react-google-maps/api';
+import Loading from "../common/loading.jsx";
 //const ScriptLoaded = require("../../docs/ScriptLoaded").default;
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -60,6 +61,7 @@ class InventoryDetail extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      isLoading: true,
       pid: null,
       projName: '',
       managers: '',
@@ -96,6 +98,9 @@ class InventoryDetail extends React.Component {
 			.catch((err) => {
       	//window.location = "/";
 				console.error(err);
+			})
+			.finally(() => {
+				this.setState({ isLoading: false });
 			});
     
   }//componentDidMount
@@ -158,6 +163,10 @@ class InventoryDetail extends React.Component {
 		
     return (
     <div className="wrapper">
+			<Loading 
+				clientRoot={ this.props.clientRoot }
+				isLoading={ this.state.isLoading }
+			/>
 			<div className="page-header">
 					<PageHeader bgClass="explore" title={ this.state.projname } />
 			</div>
@@ -256,6 +265,7 @@ class InventoryChooser extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      isLoading: true,
     	projects: [],
 
     };
@@ -291,6 +301,9 @@ class InventoryChooser extends React.Component {
 			.catch((err) => {
 				// TODO: Something's wrong
 				console.error(err);
+			})
+			.finally(() => {
+				this.setState({ isLoading: false });
 			});
     
   }//componentDidMount
@@ -303,6 +316,10 @@ class InventoryChooser extends React.Component {
   
     return (
     <div className="wrapper">
+				<Loading 
+					clientRoot={ this.props.clientRoot }
+					isLoading={ this.state.isLoading }
+				/>
 			<div className="page-header">
 				<PageHeader bgClass="explore" title={ 'Inventories—Places and their Plants' } />
       </div>

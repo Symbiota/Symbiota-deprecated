@@ -10,6 +10,7 @@ import httpGet from "../common/httpGet.js";
 import {addUrlQueryParam, getUrlQueryParams} from "../common/queryParams.js";
 import {getCommonNameStr, getTaxaPage, getIdentifyPage, getChecklistPage} from "../common/taxaUtils";
 import PageHeader from "../common/pageHeader.jsx";
+import Loading from "../common/loading.jsx";
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { library } from "@fortawesome/fontawesome-svg-core";
@@ -371,6 +372,10 @@ class IdentifyApp extends React.Component {
 		
     return (
     <div className="wrapper">
+			<Loading 
+				clientRoot={ this.props.clientRoot }
+				isLoading={ this.state.isLoading }
+			/>
 			<div className="page-header">
 				<PageHeader bgClass="explore" title={ this.state.projName } />
       </div>

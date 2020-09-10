@@ -321,6 +321,10 @@ class TaxaChooser extends React.Component {
     pageTitle.innerHTML = `${pageTitle.innerHTML} ${titleVal}`;
   	return (
 			<div className="container my-5 py-2 taxa-detail" style={{ minHeight: "45em" }}>
+				<Loading 
+					clientRoot={ this.props.clientRoot }
+					isLoading={ res.isLoading }
+				/>
 				<div className="row">
 					<div className="col">
 
@@ -332,10 +336,6 @@ class TaxaChooser extends React.Component {
 				</div>
 				<div className="row mt-2 row-cols-sm-2">
 					<div className="col-sm-8 px-4">
-					<Loading 
-					clientRoot={ this.props.clientRoot }
-					isLoading={ res.isLoading }
-				/>
 						<p className="mt-4">
 							{/*
 								Description includes HTML tags & URL-encoded characters in the db.
@@ -409,6 +409,10 @@ class TaxaDetail extends React.Component {
 		return (
 	
 			<div className="container my-5 py-2 taxa-detail" style={{ minHeight: "45em" }}>
+				<Loading 
+					clientRoot={ this.props.clientRoot }
+					isLoading={ res.isLoading }
+				/>
 				<div className="row">
 					<div className="col">
 						<h1><span className="font-italic">{ res.sciName }</span> { res.author }</h1>
