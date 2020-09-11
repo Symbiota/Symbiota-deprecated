@@ -208,11 +208,12 @@ class InventoryDetail extends React.Component {
 												lat: checklist.latcentroid,
 												lng: checklist.longcentroid
 											}
-											let href = getChecklistPage(this.props.clientRoot, checklist.clid, pid)
+											let href = getChecklistPage(this.props.clientRoot, checklist.clid, pid);
+											
 											return (
 												<Marker
 													key={checklist.clid}
-          								icon={ this.props.clientRoot + '/images/icons/map_markers/single.png' }
+          								icon={{ url: this.props.clientRoot + '/images/icons/map_markers/single.png', anchor: new google.maps.Point(6,6) }}
 													title={ checklist.name }
 													position={position}
 													clusterer={clusterer}
