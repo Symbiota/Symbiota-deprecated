@@ -125,7 +125,7 @@ class SideBar extends React.Component {
 					
 						<div className="row">
 							<div className="opt-labels">
-								<p>Include:</p>
+								Include:
 							</div>
 							<div className="opt-settings">
 

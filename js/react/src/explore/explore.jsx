@@ -35,7 +35,6 @@ class ExploreApp extends React.Component {
       exportUrlCsv: '',
       exportUrlWord: '',
       //taxa: [],
-      isLoading: true,
       filters: {
         searchText: ("search" in queryParams ? queryParams["search"] : ViewOpts.DEFAULT_SEARCH_TEXT),
         //checklistId: ("clid" in queryParams ? parseInt(queryParams["clid"]) : ViewOpts.DEFAULT_CLID),
@@ -106,14 +105,14 @@ class ExploreApp extends React.Component {
 
 					googleMapUrl += 'https://maps.google.com/maps/api/staticmap';
 					let mapParams = new URLSearchParams();
+					let markerUrl = 'https://symbiota.oregonflora.org' + this.props.clientRoot + '/images/icons/map_markers/single.png'; 
 					mapParams.append("key",this.props.googleMapKey);
 					mapParams.append("maptype",'terrain');
 					mapParams.append("size",'220x220');
 					mapParams.append("zoom",6);
-					mapParams.append("markers",'size:med|' + res.lat + ',' + res.lng + '');
+					mapParams.append("markers",'icon:' + markerUrl + '|anchor:center|' + res.lat + ',' + res.lng);
 		
 					googleMapUrl += '?' + mapParams.toString();
-
 				}
 							
 				this.setState({
@@ -246,7 +245,7 @@ class ExploreApp extends React.Component {
       window.location.pathname + newQueryStr
     );*/
     this.setState({
-      isLoading: true,
+      //isLoading: true,
       searchText: searchObj.text,
       filters: Object.assign({}, this.state.filters, { searchText: searchObj.text })
     });
@@ -266,9 +265,9 @@ class ExploreApp extends React.Component {
       .catch((err) => {
         console.error(err);
       })
-      .finally(() => {
+      /*.finally(() => {
         this.setState({ isLoading: false });
-      });
+      })*/;
       
   }
 	updateTotals(totals) {
@@ -396,7 +395,7 @@ class ExploreApp extends React.Component {
 				<PageHeader bgClass="explore" title={ this.state.projName } />
       </div>
       <div className="container explore" style={{ minHeight: "45em" }}>
- 				<div className="row">
+ 				<div className="row pb-2">
           <div className="col-9">
             <h2>{ this.state.title }</h2>
             {this.state.authors.length > 0 &&
@@ -473,7 +472,7 @@ class ExploreApp extends React.Component {
 								<div className="explore-header inventory-header">
 									<div className="current-wrapper">
 										<div className="btn btn-primary current-button" role="button"><FontAwesomeIcon icon="list-ul" /> Explore</div>
-										{ this.state.searchText.length > 0 &&
+										{ this.state.totals.taxa < this.state.fixedTotals.taxa &&
 											<div className="filter-status">(Filtered)</div>
 										}
 									</div>
@@ -489,10 +488,21 @@ class ExploreApp extends React.Component {
 										showTaxaDetail={ this.state.showTaxaDetail }
 										clientRoot={this.props.clientRoot}
 									/>
-										
+											
 							</div>
-						</div>
+							
+						</div>											
+
 					</div>
+				</div>
+					
+				<div className="row ">
+					<a className="back-to-top mx-auto"
+						onClick={() => window.scrollTo(0,0)}
+					>
+						<span className="back-to-top-label">Top</span>
+						<FontAwesomeIcon icon="chevron-up" size="2x"/>
+					</a>	
 				</div>
 			</div>
 		</div>

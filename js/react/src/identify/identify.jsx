@@ -125,7 +125,7 @@ class IdentifyApp extends React.Component {
 				}
 				
 				let googleMapUrl = '';				
-				if (res.lat !== '' && res.lng !== '') {
+				if (res.lat !== '' && res.lng !== '' && res.lat > 0 && res.lng != 0) {
 					googleMapUrl += 'https://maps.google.com/maps/api/staticmap';
 					let mapParams = new URLSearchParams();
 					mapParams.append("key",this.props.googleMapKey);
@@ -380,7 +380,7 @@ class IdentifyApp extends React.Component {
 				<PageHeader bgClass="explore" title={ this.state.projName } />
       </div>
       <div className="container identify" style={{ minHeight: "45em" }}>
- 				<div className="row">
+ 				<div className="row pb-2">
           <div className="col-9">
             <h2>{ this.state.title }</h2>
 

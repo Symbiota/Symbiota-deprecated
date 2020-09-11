@@ -110,50 +110,56 @@ class InventoryDetail extends React.Component {
 		
 		const clusterIconStyles = [
 			{
-				height: 34,
-				textColor: '#3c6430',
-				url: this.props.clientRoot + '/images/inventory/map_clusters/m1.png',
-				width: 34
+				height: 23,
+				width: 23,
+				textColor: '#ffffff',
+				textSize: 13,
+				url: this.props.clientRoot + '/images/icons/map_markers/2-9.png'
 			},
 			{
-				height: 34,
-				textColor: '#3c6430',
-				url: this.props.clientRoot + '/images/inventory/map_clusters/m2.png',
-				width: 34
+				height: 23,
+				width: 23,
+				textSize: 13,
+				textColor: '#ffffff',
+				url: this.props.clientRoot + '/images/icons/map_markers/2-9.png'
 			},
 			{
-				height: 40,
-				textColor: '#3f3b79',
-				url: this.props.clientRoot + '/images/inventory/map_clusters/m3.png',
-				width: 40
-			},
-			{
-				height: 46,
-				textColor: '#7f1416',
-				url: this.props.clientRoot + '/images/inventory/map_clusters/m4.png',
-				width: 46
+				height: 31,
+				width: 31,
+				textSize: 15,
+				textColor: '#ffffff',
+				url: this.props.clientRoot + '/images/icons/map_markers/10-100.png'
 			},
 			{
 				height: 46,
-				textColor: '#7f1416',
-				url: this.props.clientRoot + '/images/inventory/map_clusters/m5.png',
-				width: 46
+				width: 46,
+				textSize: 17,
+				textColor: '#ffffff',
+				url: this.props.clientRoot + '/images/icons/map_markers/101+.png'
 			},
 			{
 				height: 46,
-				textColor: '#7f1416',
-				url: this.props.clientRoot + '/images/inventory/map_clusters/m6.png',
-				width: 46
+				width: 46,
+				textSize: 17,
+				textColor: '#ffffff',
+				url: this.props.clientRoot + '/images/icons/map_markers/101+.png'
+			},
+			{
+				height: 46,
+				width: 46,
+				textSize: 17,
+				textColor: '#ffffff',
+				url: this.props.clientRoot + '/images/icons/map_markers/101+.png'
 			}
 		];
 		
 		const clusterOptions = {
 			//imagePath:
 				//'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m', // so you must have m1.png, m2.png, m3.png, m4.png, m5.png and m6.png in that folder
-				//this.props.clientRoot + '/images/inventory/map_clusters/m', // so you must have m1.png, m2.png, m3.png, m4.png, m5.png and m6.png in that folder
+				//this.props.clientRoot + '/images/icons/map_markers/m', // so you must have m1.png, m2.png, m3.png, m4.png, m5.png and m6.png in that folder
 			minimumClusterSize: 6,
 			averageCenter: true,
-			imageSizes: [34,34,40,46,46,46],
+			imageSizes: [23,23,31,46,46,46],
 			styles: clusterIconStyles
 		}
 		let checklistTxt = '(referenced in the map above)';
@@ -206,6 +212,7 @@ class InventoryDetail extends React.Component {
 											return (
 												<Marker
 													key={checklist.clid}
+          								icon={ this.props.clientRoot + '/images/icons/map_markers/single.png' }
 													title={ checklist.name }
 													position={position}
 													clusterer={clusterer}

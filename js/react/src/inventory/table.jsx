@@ -171,7 +171,11 @@ export default function Table({ columns, data, pid }) {
 						let identifyUrl = getIdentifyPage(CLIENT_ROOT, row.cells[1].value, pid);
 						return (
 							<tr {...row.getRowProps()}>
-									<td {...row.cells[0].getCellProps()}>{row.cells[0].render("Cell")}</td>
+									<td {...row.cells[0].getCellProps()}>
+										<a href={ exploreUrl }>
+											{row.cells[0].render("Cell")}
+										</a>
+									</td>
 									<td {...row.cells[1].getCellProps()}>
 										<a href={ exploreUrl }>
 											<FontAwesomeIcon icon="list-ul" />
@@ -191,20 +195,20 @@ export default function Table({ columns, data, pid }) {
 				<div className="table-pag-bottom">
 				
 					<button className="previous" onClick={() => previousPage()} disabled={!canPreviousPage}>
-						<FontAwesomeIcon icon="chevron-left" />
-						Previous { pageSize } 
+						<FontAwesomeIcon icon="chevron-left" size="2x" />
+						<span>Previous { pageSize }</span>
 					</button>{' '}
 					
 					<a className="back-to-top"
 							onClick={() => window.scrollTo(0,0)}
 					>
 						<span className="back-to-top-label">Top</span>
-						<FontAwesomeIcon icon="chevron-up" />
+						<FontAwesomeIcon icon="chevron-up" size="2x"/>
 					</a>
 					
 					<button className="next" onClick={() => nextPage()} disabled={!canNextPage}>
-						Next { pageSize }
-						<FontAwesomeIcon icon="chevron-right" />
+						<span>Next { pageSize }</span>
+						<FontAwesomeIcon icon="chevron-right"  size="2x"/>
 					</button>{' '}
 				
 				</div>
