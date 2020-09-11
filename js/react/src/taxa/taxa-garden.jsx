@@ -6,6 +6,7 @@ import ImageCarousel from "../common/imageCarousel.jsx";
 import ImageModal from "../common/modal.jsx";
 import ExplorePreviewModal from "../explore/previewModal.jsx";
 import {getTaxaPage} from "../common/taxaUtils";
+import Loading from "../common/loading.jsx";
 
 function showItem(item) {
   const isArray = Array.isArray(item);
@@ -57,6 +58,7 @@ class TaxaApp extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      isLoading: true,
       sciName: '',
       basename: '',
       vernacularNames: [],
@@ -191,16 +193,21 @@ class TaxaApp extends React.Component {
         .catch((err) => {
           // TODO: Something's wrong
           console.error(err);
-        });
+        })
+				.finally(() => {
+					this.setState({ isLoading: false });
+				});
     }
   }//componentDidMount
-  
-
 
   render() {
     return (
     
       <div className="container my-5 py-2" style={{ minHeight: "45em" }}>
+				<Loading 
+					clientRoot={ this.props.clientRoot }
+					isLoading={ this.state.isLoading }
+				/>      
         <div className="row">
           <div className="col">
             <h1 className="">{ this.state.vernacularNames[0] }</h1>
