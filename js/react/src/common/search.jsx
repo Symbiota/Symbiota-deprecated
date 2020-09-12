@@ -1,6 +1,10 @@
 import React from "react";
 import httpGet from "./httpGet";
 
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { library } from "@fortawesome/fontawesome-svg-core";
+import { faTimesCircle } from '@fortawesome/free-solid-svg-icons'
+library.add(faTimesCircle)
 /**
  * Sidebar 'plant search' button
  */
@@ -109,6 +113,13 @@ export class SearchWidget extends React.Component {
             })
           }
         </div>
+        { this.props.textValue.length > 0 &&
+        <div className="clear-text">
+        		<FontAwesomeIcon icon="times-circle" size="2x"
+							onClick={ this.props.onClearSearch }
+						/>
+        </div>
+        }
         <SearchButton
           onClick={ () => this.props.onSearch({ text: this.props.textValue }) }
           isLoading={this.props.isLoading}

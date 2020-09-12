@@ -81,9 +81,9 @@ class ViewOpts extends React.Component {
 		});
 		if (buttons.length > 0) {
 			return (
-				<div className="view-opts row ">
+				<div className="view-opts">
 					<div className="button-wrapper">
-						<h3 className="font-weight-bold">Filtered by:</h3>
+						<div className="filter-status">Filtered by:</div>
 						<div className="d-flex flex-row flex-wrap">
 							{
 								buttons.map((buttonItem) => {
@@ -93,22 +93,16 @@ class ViewOpts extends React.Component {
 									)
 								})
 							}
-						</div>
-					</div>
-
-					<div className="reset-wrapper">
-
-						<p>
-					
 							<CancelButton
 								key={ "reset" }
 								title={ "Clear all" }
 								isSelected={ true }
-								style={{ margin: "0.1em" }}
+								style={{ margin: "0.1em", textTransform: "uppercase", backgroundColor: "#5FB021", color: "white", border: "1px solid #999999" }}
 								onClick={ () => { this.props.onReset(); } }
 							/>
 							
-						</p>
+						</div>
+
 					</div>
 				</div>
 			);

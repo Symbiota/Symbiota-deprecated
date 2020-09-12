@@ -96,6 +96,7 @@ class SideBar extends React.Component {
     super(props);
 
     this.onSortByClicked = this.props.onSortByClicked.bind(this);
+		this.onFilterClicked = this.props.onFilterClicked.bind(this);
   }
   render() {  
   	let showFixedTotals = false;
@@ -163,6 +164,8 @@ class SideBar extends React.Component {
 						suggestionUrl={ this.props.searchSuggestionUrl }
 						clid={ this.props.clid }
 						dynclid={ this.props.dynclid }
+						onFilterClicked={ this.onFilterClicked }
+						onClearSearch={ this.props.onClearSearch }
 					/>
         
         

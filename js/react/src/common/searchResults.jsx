@@ -1,5 +1,6 @@
 import React from "react";
 import {getCommonNameStr, getTaxaPage} from "../common/taxaUtils";
+import Searching from "../common/searching.jsx";
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { library } from "@fortawesome/fontawesome-svg-core";
@@ -119,7 +120,11 @@ function ExploreSearchContainer(props) {
 					id="search-results"
 					className={ "mt-4 w-100" + (props.viewType === "grid" ? " search-result-grid" : "") }
 				>
-				{ props.searchResults.taxonSort.map((result) =>  {
+				<Searching 
+					clientRoot={ props.clientRoot }
+					isSearching={ props.isSearching }
+				/>
+				{	props.searchResults.taxonSort.map((result) =>  {
 						//console.log(result);
 						return (
 							<ExploreSearchResult
@@ -146,6 +151,10 @@ function ExploreSearchContainer(props) {
 					id="search-results"
 					className={ "mt-2 w-100" }
 				>
+				<Searching 
+					clientRoot={ props.clientRoot }
+					isSearching={ props.isSearching }
+				/>
 				{
 						Object.entries(props.searchResults.familySort).map(([family, results]) => {
 							return (
@@ -226,7 +235,11 @@ function IdentifySearchContainer(props) {
 			<div
 				id="search-results"
 				className={ "mt-2 w-100" }
-			>
+			>				
+			<Searching 
+				clientRoot={ props.clientRoot }
+				isSearching={ props.isSearching }
+			/>
 			{
 					Object.entries(props.searchResults.familySort).map(([family, results]) => {
 						return (

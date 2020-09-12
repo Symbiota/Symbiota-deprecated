@@ -85,6 +85,7 @@ class SideBar extends React.Component {
 						suggestionUrl={ this.props.searchSuggestionUrl }
 						clid={ this.props.clid }
 						searchName={ this.props.searchName }
+						onClearSearch={ this.props.onClearSearch }
 					/>
 					}
 	
@@ -152,7 +153,6 @@ class SideBar extends React.Component {
 					onSearchSynonymsClicked={ this.props.onSearchSynonymsClicked }
 					onViewTypeClicked={ this.props.onViewTypeClicked }
 					onTaxaDetailClicked={ this.props.onTaxaDetailClicked }
-					//onFilterClicked={ this.onFilterRemoved }
 					filters={
 						Object.keys(this.props.filters).map((filterKey) => {
 							return { key: filterKey, val: this.props.filters[filterKey] }

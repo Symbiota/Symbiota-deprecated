@@ -24,6 +24,7 @@ class ExploreApp extends React.Component {
     // TODO: searchText is both a core state value and a state.filters value; How can we make the filtering system more efficient?
     this.state = {
       isLoading: true,
+      isSearching: false,
       clid: null,
       pid: null,
       projName: null,
@@ -72,6 +73,8 @@ class ExploreApp extends React.Component {
     this.onTaxaDetailChanged = this.onTaxaDetailChanged.bind(this);
     this.onFilterRemoved = this.onFilterRemoved.bind(this);
     this.sortResults = this.sortResults.bind(this);
+    this.clearTextSearch = this.clearTextSearch.bind(this);
+    
   }
 
   getClid() {
@@ -105,7 +108,7 @@ class ExploreApp extends React.Component {
 
 					googleMapUrl += 'https://maps.google.com/maps/api/staticmap';
 					let mapParams = new URLSearchParams();
-					let markerUrl = 'http://symbiota.oregonflora.org' + this.props.clientRoot + '/images/icons/map_markers/single.png'; 
+					let markerUrl = 'https://symbiota.oregonflora.org' + this.props.clientRoot + '/images/icons/map_markers/single.png'; 
 					mapParams.append("key",this.props.googleMapKey);
 					mapParams.append("maptype",'terrain');
 					mapParams.append("size",'220x220');
@@ -214,7 +217,10 @@ class ExploreApp extends React.Component {
       exportUrlWord: url,
     });
   }
-
+	clearTextSearch() {
+		this.onFilterRemoved("searchText");
+	}
+	
   onFilterRemoved(key) {
     // TODO: This is clunky
     //console.log(key);
@@ -245,7 +251,7 @@ class ExploreApp extends React.Component {
       window.location.pathname + newQueryStr
     );*/
     this.setState({
-      //isLoading: true,
+      isSearching: true,
       searchText: searchObj.text,
       filters: Object.assign({}, this.state.filters, { searchText: searchObj.text })
     });
@@ -265,9 +271,9 @@ class ExploreApp extends React.Component {
       .catch((err) => {
         console.error(err);
       })
-      /*.finally(() => {
-        this.setState({ isLoading: false });
-      })*/;
+      .finally(() => {
+        this.setState({ isSearching: false });
+      });
       
   }
 	updateTotals(totals) {
@@ -455,6 +461,7 @@ class ExploreApp extends React.Component {
 							onViewTypeClicked={ this.onViewTypeChanged }
 							onTaxaDetailClicked={ this.onTaxaDetailChanged }
 							onFilterClicked={ this.onFilterRemoved }
+							onClearSearch={ this.clearTextSearch }
 							filters={
 								Object.keys(this.state.filters).map((filterKey) => {
 									return { key: filterKey, val: this.state.filters[filterKey] }
@@ -478,7 +485,11 @@ class ExploreApp extends React.Component {
 									</div>
 									<div className="alt-wrapper">
 										<div>Switch to</div>
-										<a href={getIdentifyPage(this.props.clientRoot,this.getClid(),this.getPid())}><div className="btn btn-primary alt-button" role="button"><FontAwesomeIcon icon="search-plus" /> Identify</div></a>
+										<a href={getIdentifyPage(this.props.clientRoot,this.getClid(),this.getPid())}>
+											<div className="btn btn-primary alt-button" role="button">
+												<FontAwesomeIcon icon="search-plus" /> Identify
+											</div>
+										</a>
 									</div>
 								</div>
 									<ExploreSearchContainer
@@ -487,6 +498,7 @@ class ExploreApp extends React.Component {
 										sortBy={ this.state.sortBy }
 										showTaxaDetail={ this.state.showTaxaDetail }
 										clientRoot={this.props.clientRoot}
+										isSearching={this.state.isSearching}
 									/>
 											
 							</div>

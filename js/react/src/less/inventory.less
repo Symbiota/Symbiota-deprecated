@@ -72,7 +72,6 @@
 		}
 		&.identify-header {
 			.current-wrapper {
-				flex-basis: 85%;
 				display: flex;
 				flex-flow: row nowrap;
 
@@ -475,10 +474,27 @@
 				margin-bottom: 0;
 			}
 		}
-		.btn-search {
-			margin-left: 10px;
-			width: 35px;
-			height: 35px;
+		.search-widget {
+			position: relative;
+			.clear-text {
+				position: absolute;
+				top: 12px;
+				left: 67%;
+				color: @gray-type;
+				transition: color 100ms;
+				padding: 0 0 0 3px;
+				background-color: white;
+				&:hover{
+					color: black;
+				}
+				svg {
+					font-size: 1.5rem;
+				}
+			}
+			.btn-search {
+				width: 35px;
+				height: 35px;
+			}
 		}
 	}
 	.results-wrapper {
@@ -495,6 +511,7 @@
 		}
 
 		#search-results {
+			position: relative;
 			.search-result-grid {
 				grid-auto-rows: 14em;
 			}
@@ -551,23 +568,41 @@
 		border-bottom: 3px solid @light-green;
 		.btn-primary {
 			background-image: none!important;
-			background-color: @med-green!important;
 			padding: 8px 10px;
 			font-size: 16px;
-			&.alt-button:hover{
-				background: @dark-green !important;
-			}
+			max-height: 35px;
 		}
 		.current-wrapper {
 			height: auto;
 			margin: 3px 0 18px 0;
+			flex-basis: 80%;
+			display: flex;
+			flex-flow: row nowrap;
 			.filter-status {
 				text-transform: uppercase;
 				display: inline-block;
 				font-size: 18px;
 				color: @dark-grn-type;
-				margin: 0 0 0 12px;
 				vertical-align: center;
+			}
+			.view-opts {
+				border-bottom: none !important;
+				margin-top: 0px;
+			}
+			.button-wrapper, .reset-wrapper {
+				margin: 0 0 0 12px;
+			}
+			.btn-primary {
+				background-color: @dark-green!important;
+			}
+		}
+		.alt-wrapper {
+			text-align: right;
+			.btn-primary {
+				background-color: @med-green!important;
+				&.alt-button:hover{
+					background: @dark-green !important;
+				}
 			}
 		}
 
@@ -604,6 +639,31 @@
 	}
 }
 
+
+.explore, .identify {
+
+  h2 {
+    font-weight: bold;
+  }
+
+  .authors {
+    font-size: 18px;
+  }
+
+  .abstract {
+    font-size: 22px;
+  }
+
+  .more-less {
+    text-transform: uppercase;
+    color: @med-green;
+    margin-bottom: 20px;
+
+    svg {
+      margin-right: 10px;
+    }
+  }
+}
 
 
 

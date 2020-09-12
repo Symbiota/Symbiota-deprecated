@@ -3,8 +3,8 @@
 @import '../../node_modules/react-modal-video/css/modal-video.min.css';
 
 //Variable for project paths since relative paths not allowed
-@subdir: "/portal";
-//@subdir: "";
+//@subdir: "/portal";
+@subdir: "";
 
 * {
   font-family: @font;
@@ -230,7 +230,7 @@ img {
 }
 */
 
-/*loading animation */
+/*loading/searching animation */
 .loading-overlay {
 	display: none;
 	position: fixed;
@@ -248,7 +248,26 @@ img {
 		display: block;
 	}
 }
-/* end loading */
+.searching-overlay {
+	display: none;
+	position: absolute;
+	top: 0;
+	height: 100%;
+	width: 100%;
+	background-color: white;
+	opacity: .9;
+	z-index: 1000;
+	img {
+		display: block;
+		margin: 5% auto 0;
+	}
+	&.searching {
+		display: block;
+	}
+}
+
+
+/* end loading/searching */
 
 
 .back-to-top {
@@ -1309,31 +1328,6 @@ img {
 	
 }
 
-.explore, .identify {
-
-  h2 {
-    font-weight: bold;
-  }
-
-  .authors {
-    font-size: 18px;
-  }
-
-  .abstract {
-    font-size: 22px;
-  }
-
-  .more-less {
-    text-transform: uppercase;
-    color: @med-green;
-    margin-bottom: 20px;
-
-    svg {
-      margin-right: 10px;
-    }
-  }
-}
-
 .explore, .identify, #react-garden {
 
   #sidebar {
@@ -1400,7 +1394,7 @@ img {
 				color: @med-green;
 				border: 3px solid @med-green;
 				display: inline;
-				width: 90%;
+				width: 80%;
 				margin-right: 10px;
 			}
 			.dropdown-menu {
@@ -1521,6 +1515,32 @@ img {
 			background-color: @med-green;
 			color: white;
 			text-transform: uppercase;
+		}
+	}
+	#view-opts, .view-opts {
+		border-bottom: 1px dotted darkgreen;
+		font-size: 0.8em;
+		margin-top: 1em;
+		.no-results {
+			color: @gray-type;
+		}
+		h3 {
+			font-size: 22px;
+		}
+	 .fake-button {
+		 cursor: pointer;
+		 border-radius: 3px;
+		 padding: 0.2em 0.5em;
+			span {
+				padding-left: 3px;
+			}
+		}
+		.settings {
+			.fake-button {
+				padding: 0.3em;
+				display: inline-block;
+				width: 70px;
+			}
 		}
 	}
 }

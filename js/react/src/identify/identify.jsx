@@ -26,6 +26,7 @@ class IdentifyApp extends React.Component {
     // TODO: searchText is both a core state value and a state.filters value; How can we make the filtering system more efficient?
     this.state = {
       isLoading: true,
+      isSearching: false,
       clid: -1,
       pid: -1,
       projName: '',
@@ -67,16 +68,11 @@ class IdentifyApp extends React.Component {
     this.onSearch = this.onSearch.bind(this);
     this.onSearchResults = this.onSearchResults.bind(this);
     this.onSortByChanged = this.onSortByChanged.bind(this);
-    //this.onViewTypeChanged = this.onViewTypeChanged.bind(this);
     this.onFilterRemoved = this.onFilterRemoved.bind(this);
     this.clearFilters = this.clearFilters.bind(this);
-    //this.toggleFeatureCollectionVal = this.toggleFeatureCollectionVal.bind(this);
-    //this.onWholePlantChanged = this.onWholePlantChanged.bind(this);
-    //this.onLeafChanged = this.onLeafChanged.bind(this);
-    //this.onGardeningChanged = this.onGardeningChanged.bind(this);
     this.onAttrChanged = this.onAttrChanged.bind(this);
-    //this.updateFeatureCollectionFilters = this.updateFeatureCollectionFilters.bind(this);
     this.sortResults = this.sortResults.bind(this);
+    this.clearTextSearch = this.clearTextSearch.bind(this);
   }
 
   getClid() {
@@ -202,6 +198,10 @@ class IdentifyApp extends React.Component {
       exportUrlWord: url,
     });
   }
+
+	clearTextSearch() {
+		this.onFilterRemoved("searchText",'');
+	}  
   onFilterRemoved(key,text) {
 
   	const characteristics = ["wholePlant","leaf","gardening"];
@@ -236,7 +236,8 @@ class IdentifyApp extends React.Component {
   }
   doQuery() {
     this.setState({
-      isLoading: true
+      //isLoading: true,
+      isSearching: true,
     });
     let url = `${this.props.clientRoot}/ident/rpc/api.php`;
     let identParams = new URLSearchParams();
@@ -271,7 +272,8 @@ class IdentifyApp extends React.Component {
         console.error(err);
       })
       .finally(() => {
-        this.setState({ isLoading: false });
+        //this.setState({ isLoading: false });
+        this.setState({ isSearching: false });
       });
   
   }
@@ -438,6 +440,7 @@ class IdentifyApp extends React.Component {
 							onSortByClicked={ this.onSortByChanged }
 							onAttrClicked={ this.onAttrChanged }
 							onFilterClicked={ this.onFilterRemoved }
+							onClearSearch={ this.clearTextSearch }
 							filters={ this.state.filters }
 							exportUrlCsv={ this.state.exportUrlCsv }
 							exportUrlWord={ this.state.exportUrlWord }
@@ -466,8 +469,10 @@ class IdentifyApp extends React.Component {
 									{ this.getClid() > -1 &&
 									<div className="alt-wrapper">
 										<div>Switch to</div>
-										<a href={getChecklistPage(this.props.clientRoot,this.getClid(),this.getPid())}><div className="btn btn-primary alt-button" role="button">
-										<FontAwesomeIcon icon="list-ul" /> Explore</div>
+										<a href={getChecklistPage(this.props.clientRoot,this.getClid(),this.getPid())}>
+											<div className="btn btn-primary alt-button" role="button">
+												<FontAwesomeIcon icon="list-ul" /> Explore
+											</div>
 										</a>
 									</div>
 									}
@@ -481,6 +486,7 @@ class IdentifyApp extends React.Component {
 										viewType={ this.state.viewType }
 										sortBy={ this.state.sortBy }
 										clientRoot={ this.props.clientRoot }
+										isSearching={this.state.isSearching}
 									/>
 										
 							</div>
