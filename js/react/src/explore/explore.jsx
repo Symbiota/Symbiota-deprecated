@@ -479,9 +479,12 @@ class ExploreApp extends React.Component {
 								<div className="explore-header inventory-header">
 									<div className="current-wrapper">
 										<div className="btn btn-primary current-button" role="button"><FontAwesomeIcon icon="list-ul" /> Explore</div>
+										
+										<div className="button-wrapper">
 										{ this.state.totals.taxa < this.state.fixedTotals.taxa &&
 											<div className="filter-status">(Filtered)</div>
 										}
+										</div>
 									</div>
 									<div className="alt-wrapper">
 										<div>Switch to</div>
