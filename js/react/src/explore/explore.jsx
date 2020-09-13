@@ -117,6 +117,11 @@ class ExploreApp extends React.Component {
 		
 					googleMapUrl += '?' + mapParams.toString();
 				}
+				
+				let viewType = 'list';
+				if (this.getPid() == 3) {
+					viewType = 'grid';
+				}
 							
 				this.setState({
 					clid: this.getClid(),
@@ -125,6 +130,7 @@ class ExploreApp extends React.Component {
 					title: res.title,
 					authors: res.authors,
 					abstract: res.abstract,
+					viewType: viewType,
 					//taxa: res.taxa,
 					searchResults: this.sortResults(res.taxa),
 					totals: res.totals,
