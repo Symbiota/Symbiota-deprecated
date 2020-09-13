@@ -204,15 +204,34 @@ img {
 }
 
 .search-widget {
+	position: relative;
   input[type=text] {
     .border-rounded-med();
     border-color: transparent;
     box-shadow: none !important;
-
     &:focus, &:active {
       border-color: @med-green;
     }
   }
+	.clear-text {
+		position: absolute;
+		top: 12px;
+		left: 67%;
+		color: @gray-type !important;
+		transition: color 100ms;
+		padding: 0 0 0 3px;
+		background-color: white;
+		&:hover{
+			color: black;
+		}
+		svg {
+			font-size: 1.5rem;
+			color: @gray-type !important;
+			* {
+				color: @gray-type !important;
+			}
+		}
+	}
 }
 
 .dashed-border {

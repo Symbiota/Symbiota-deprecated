@@ -254,6 +254,7 @@ class SideBar extends React.Component {
 						onTextValueChanged={ this.props.onSearchTextChanged }
 						onSearch={ this.props.onSearch }
 						suggestionUrl={ this.props.searchSuggestionUrl }
+						onClearSearch={ this.props.onClearSearch }
 					/>
 
 					{/* Sunlight & Moisture */}

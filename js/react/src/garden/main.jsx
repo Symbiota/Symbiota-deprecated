@@ -105,7 +105,7 @@ function getAttribMatrixFromArr(attribArray) {
 
 function filterByWidth(item, minMax) {
 	let ret = false;
-	if (minMax) {
+
 		if (	( 0 == item.width.length)
 					|| ( minMax[0] <= item.width[0] && item.width[0] <= minMax[1] )//item min is between user min and max
 					|| ( minMax[0] <= item.width[1] && item.width[1] <= minMax[1] )//item max is between user min and max
@@ -115,20 +115,19 @@ function filterByWidth(item, minMax) {
 		
 		return ret;
 	}
-}
 
 function filterByHeight(item, minMax) {
   let ret = false;
 	
-	if (	( 0 == item.height.length)
-				|| 	( minMax[0] <= item.height[0] && item.height[0] <= minMax[1] )//item min is between user min and max
-				|| ( minMax[0] <= item.height[1] && item.height[1] <= minMax[1] )//item max is between user min and max
-				|| minMax[1] === 50 && minMax[1] <= item.height[1]) {//user max == 50 and item max >= 50
-		ret = true;	
-	}
+		if (	( 0 == item.height.length)
+					|| 	( minMax[0] <= item.height[0] && item.height[0] <= minMax[1] )//item min is between user min and max
+					|| ( minMax[0] <= item.height[1] && item.height[1] <= minMax[1] )//item max is between user min and max
+					|| minMax[1] === 50 && minMax[1] <= item.height[1]) {//user max == 50 and item max >= 50
+			ret = true;	
+		}
 				
-  return ret;
-}
+		return ret;
+	}
 
 function filterBySunlight(item, sunlight) {
   switch (sunlight) {
@@ -161,27 +160,27 @@ function filterByChecklist(item, clid) {
 }
 
 function filterByPlantAttribs(item, itemFilterName, filterMap) {
-  let plantFeatureKeys = Object.keys(filterMap);
-  let success = true;
-  let iterSuccess;
-  let itemFeatures = item[itemFilterName];
-  // For each filter type
-  for (let i in plantFeatureKeys) {
-    iterSuccess = false;
+		let plantFeatureKeys = Object.keys(filterMap);
+		let success = true;
+		let iterSuccess;
+		let itemFeatures = item[itemFilterName];
+		// For each filter type
+		for (let i in plantFeatureKeys) {
+			iterSuccess = false;
 
-    // flower_color, ecoregion, etc.
-    let featureKey = plantFeatureKeys[i];
+			// flower_color, ecoregion, etc.
+			let featureKey = plantFeatureKeys[i];
 
-    // blue, green, Cascades, etc.
-    let featureVals = filterMap[featureKey].map(item => item.toLowerCase());
-    let itemVals = itemFeatures[featureKey].map(item => item.toLowerCase());
+			// blue, green, Cascades, etc.
+			let featureVals = filterMap[featureKey].map(item => item.toLowerCase());
+			let itemVals = itemFeatures[featureKey].map(item => item.toLowerCase());
 
-    // Is the intersection length greater than zero?
-    iterSuccess = featureVals.length === 0 || featureVals.filter(item => itemVals.includes(item)).length > 0;
-    success = success && iterSuccess;
-  }
-  return success;
-}
+			// Is the intersection length greater than zero?
+			iterSuccess = featureVals.length === 0 || featureVals.filter(item => itemVals.includes(item)).length > 0;
+			success = success && iterSuccess;
+		}
+		return success;
+	}
 
 class GardenPageApp extends React.Component {
   constructor(props) {
@@ -393,7 +392,8 @@ class GardenPageApp extends React.Component {
       searchText: searchObj.text,
       filters: Object.assign({}, this.state.filters, { searchText: searchObj.text })
     });
-    httpGet(`${this.props.clientRoot}/garden/rpc/api.php?search=${searchObj.text}`)
+    let query = `${this.props.clientRoot}/garden/rpc/api.php?search=${searchObj.text}`;
+    httpGet(query)
       .then((res) => {
         this.onSearchResults(JSON.parse(res));
       })
@@ -529,10 +529,9 @@ class GardenPageApp extends React.Component {
     /*window.history.replaceState({ query: newQueryStr }, '', window.location.pathname + newQueryStr);*/
   }
 	clearFilters() {
-
-    this.setState({ filters: defaultFilters },function() {
-    	this.onFilterRemoved("searchText","");
-    });
+		this.setState({ filters: defaultFilters() });
+    this.onSearch({ text: '' });
+    
 		let plantFeatureState = this.state.plantFeatureState;
 		Object.keys(plantFeatureState).map((key) => {
 			Object.keys(plantFeatureState[key]).map((item) => {
@@ -602,6 +601,7 @@ class GardenPageApp extends React.Component {
                 onGrowthMaintenanceChanged={ this.onGrowthMaintenanceChanged }
                 onBeyondGardenChanged={ this.onBeyondGardenChanged }
 								clientRoot={this.props.clientRoot}
+                onClearSearch={ this.clearFilters }
               />
             </div>
             <div className="col-8">
