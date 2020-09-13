@@ -43,6 +43,7 @@ class SideBarHeading extends React.Component {
           <h3 className="font-weight-bold d-inline">Search for plants</h3>
           {/*
           <HelpButton
+          	clientRoot={ this.props.clientRoot }
             title="Search for plants"
             html={
                     `

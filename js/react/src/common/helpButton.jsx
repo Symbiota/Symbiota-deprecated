@@ -1,7 +1,5 @@
 import React from "react";
 
-const CLIENT_ROOT = "..";
-
 class HelpButton extends React.Component {
   constructor(props) {
     super(props);
@@ -29,7 +27,7 @@ class HelpButton extends React.Component {
         <img
           style={{ width: "1.25em" }}
           alt="help"
-          src={ `${CLIENT_ROOT}/images/garden/help.png` }
+          src={ `${this.props.clientRoot}/images/garden/help.png` }
         />
       </button>
     );

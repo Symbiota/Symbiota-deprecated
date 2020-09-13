@@ -12,11 +12,8 @@ import { library } from "@fortawesome/fontawesome-svg-core";
 import { faChevronRight,faChevronLeft,faChevronUp, faSearchPlus, faListUl, faSortAlphaDown, faSortAlphaUp, faTimesCircle } from '@fortawesome/free-solid-svg-icons'
 library.add(faChevronRight,faChevronLeft,faChevronUp, faSearchPlus, faListUl, faSortAlphaDown, faSortAlphaUp, faTimesCircle)
 
-const CLIENT_ROOT = "..";
 
-
-
-export default function Table({ columns, data, pid }) {
+export default function Table({ columns, data, pid, clientRoot }) {
 
 	const [filterInput, setFilterInput] = useState("");
 	
@@ -107,10 +104,10 @@ export default function Table({ columns, data, pid }) {
 						{
 							headerGroups[0].headers[2].isSorted ?
 							(headerGroups[0].headers[2].isSortedDesc ?
-							<img src={ CLIENT_ROOT + '/images/inventory/WEactive2x.png' } /> :
-							<img src={ CLIENT_ROOT + '/images/inventory/EWactive2x.png' } />
+							<img src={ clientRoot + '/images/inventory/WEactive2x.png' } /> :
+							<img src={ clientRoot + '/images/inventory/EWactive2x.png' } />
 							) :
-								<img src={ CLIENT_ROOT + '/images/inventory/EW2x.png' } />
+								<img src={ clientRoot + '/images/inventory/EW2x.png' } />
 							}
 						</button>
 						<button
@@ -167,8 +164,8 @@ export default function Table({ columns, data, pid }) {
 				<tbody {...getTableBodyProps()}>
 					{page.map((row, i) => {
 						prepareRow(row);
-						let exploreUrl = getChecklistPage(CLIENT_ROOT, row.cells[1].value, pid);
-						let identifyUrl = getIdentifyPage(CLIENT_ROOT, row.cells[1].value, pid);
+						let exploreUrl = getChecklistPage(clientRoot, row.cells[1].value, pid);
+						let identifyUrl = getIdentifyPage(clientRoot, row.cells[1].value, pid);
 						return (
 							<tr {...row.getRowProps()}>
 									<td {...row.cells[0].getCellProps()}>

@@ -1,7 +1,6 @@
 import React, { Component }  from "react";
 import Slider from "react-slick";
 import {getImageDetailPage} from "../common/taxaUtils";
-const CLIENT_ROOT = "..";
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { library } from "@fortawesome/fontawesome-svg-core";
@@ -98,7 +97,7 @@ export default class ImageModalCarousel extends Component {
 												<a 
 													className="btn" 
 													style={{color: "white"}}
-													href={ getImageDetailPage(CLIENT_ROOT, image.occid) }
+													href={ getImageDetailPage(this.props.clientRoot, image.occid) }
 												>See the full record for this image</a>
 											</div>
 										</div>

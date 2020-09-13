@@ -36,7 +36,7 @@ function ChecklistTable(props) {
   );
   return (
     <div className="App">
-      <Table columns={columns} data={props.checklists} pid={ props.pid }/>
+      <Table columns={columns} data={props.checklists} pid={ props.pid } clientRoot={ props.clientRoot }/>
     </div>
   );
 }
@@ -256,7 +256,7 @@ class InventoryDetail extends React.Component {
         </div>
         <div className="row mt-4 mb-4 checklists-table">
           <div className="col">
-              <ChecklistTable checklists={ this.state.checklists } pid={ pid }/>
+              <ChecklistTable checklists={ this.state.checklists } pid={ pid } clientRoot={ this.props.clientRoot }/>
           </div>
         </div>
       </div>

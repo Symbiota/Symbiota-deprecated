@@ -5,7 +5,6 @@ import httpGet from "../common/httpGet.js";
 import { getUrlQueryParams } from "../common/queryParams.js";
 import { getTaxaPage, getCommonNameStr } from "../common/taxaUtils";
 
-const CLIENT_ROOT = "..";
 
 class TaxaSearchResults extends React.Component {
   constructor(props) {
@@ -56,7 +55,7 @@ class TaxaSearchResults extends React.Component {
                       key={result.tid}
                       viewType="grid"
                       display={true}
-                      href={ getTaxaPage(CLIENT_ROOT, result.tid) }
+                      href={ getTaxaPage(this.props.clientRoot, result.tid) }
                       src={ result.images[0].thumbnailurl }
                       commonName={ getCommonNameStr(result) }
                       sciName={ result.sciname ? result.sciname : '' }
@@ -79,6 +78,9 @@ TaxaSearchResults.defaultProps = {
   searchText: ""
 };
 
+const headerContainer = document.getElementById("react-header");
+const dataProps = JSON.parse(headerContainer.getAttribute("data-props"));
+
 const domContainer = document.getElementById("react-taxa-search-app");
 const queryParams = getUrlQueryParams(window.location.search);
 
@@ -90,7 +92,7 @@ if (queryParams.search) {
       window.location = `./index.php?taxon=${res[0].tid}`
 
     } else {
-      ReactDOM.render(<TaxaSearchResults results={ res } searchText={ decodeURIComponent(query) } />, domContainer);
+      ReactDOM.render(<TaxaSearchResults clientRoot={ dataProps["clientRoot"] } results={ res } searchText={ decodeURIComponent(query) } />, domContainer);
     }
   }).catch((err) => {
     console.error(err);
@@ -99,7 +101,7 @@ if (queryParams.search) {
 	//console.log(`./rpc/api.php?family=${queryParams.family}`);
   httpGet(`./rpc/api.php?family=${queryParams.family}`).then((res) => {
     res = JSON.parse(res);
-    ReactDOM.render(<TaxaSearchResults results={ res } family={ queryParams.familyName } />, domContainer);
+    ReactDOM.render(<TaxaSearchResults clientRoot={ dataProps["clientRoot"] } results={ res } family={ queryParams.familyName } />, domContainer);
 
   }).catch((err) => {
     console.error(err);
@@ -108,7 +110,7 @@ if (queryParams.search) {
 } else if (queryParams.genus) {
   httpGet(`./rpc/api.php?genus=${queryParams.genus}`).then((res) => {
     res = JSON.parse(res);
-    ReactDOM.render(<TaxaSearchResults results={ res } genus={ queryParams.genusName } />, domContainer);
+    ReactDOM.render(<TaxaSearchResults clientRoot={ dataProps["clientRoot"] } results={ res } genus={ queryParams.genusName } />, domContainer);
 
   }).catch((err) => {
     console.error(err);

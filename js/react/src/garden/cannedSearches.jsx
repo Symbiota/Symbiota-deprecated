@@ -125,7 +125,11 @@ class CannedSearchContainer extends React.Component {
             </h3>
             {/* TODO: Re-enable once we have help verbiage */}
             <div className="col-auto d-none">
-              <HelpButton title="Garden collections" html={ helpHtml } />
+              <HelpButton 
+              	title="Garden collections" 
+              	html={ helpHtml } 
+              	clientRoot={ this.props.clientRoot }
+              />
             </div>
           </div>
 

@@ -7,8 +7,6 @@ import { faTimesCircle } from '@fortawesome/free-solid-svg-icons'
 library.add(faTimesCircle)
 
 
-const CLIENT_ROOT = "..";
-
 function arrayCompare(a1, a2) {
   if (a1.length !== a2.length) {
     return false;

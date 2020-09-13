@@ -1,8 +1,6 @@
 import React from "react";
 import CheckboxItem from "../common/checkboxItem.jsx";
 
-const CLIENT_ROOT = "..";
-
 class ViewOpts extends React.Component {
 
   constructor(props) {
