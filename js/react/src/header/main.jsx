@@ -7,17 +7,17 @@ const RANK_FAMILY = 140;
 const RANK_GENUS = 180;
 
 const dropDowns = [
-  { title: "Explore Our Site" },
+  { title: "Tools" },
   { title: "Resources" },
   { title: "About" },
   { title: "Contribute" },
 ];
 
 const dropDownChildren = {
-  "Explore Our Site": [
+  "Tools": [
     { title: "Mapping", href: "/spatial/index.php" },
-    { title: "Interactive Key", href: "/checklists/dynamicmap.php?interface=key" },
-    { title: "Plant Inventories", href: "/projects/index.php" },
+    { title: "Identify Plants", href: "/checklists/dynamicmap.php?interface=key" },
+    { title: "Inventories", href: "/projects/index.php" },
     { title: "OSU Herbarium", href: "/collections/harvestparams.php?db[]=5,8,10,7,238,239,240,241" },
     { title: "Grow Natives", href: "/garden/index.php" },
     //{ title: "Image Search", href: "/imagelib/search.php" },
@@ -32,12 +32,12 @@ const dropDownChildren = {
   "About": [
     { title: "Mission and History", href: "/pages/mission.php" },
     { title: "Contact Info", href: "/pages/contact.php" },
-    { title: "Project Participants", href: "/pages/project-participants.php" },
+    { title: "Partners", href: "/pages/project-participants.php" },
   ],
   "Contribute": [
     { title: "Donate", href: "/pages/donate.php" },
     { title: "Volunteer", href: "/pages/volunteer.php" },
-    { title: "Oregon Flora Store", href: "/pages/store.php" },
+    { title: "OregonFlora Store", href: "/pages/store.php" },
   ]
 };
 
@@ -274,7 +274,7 @@ ReactDOM.render(<HeaderApp clientRoot={ dataProps["clientRoot"] } userName={ dat
               <a className="dropdown-item" href="<?php echo $clientRoot; ?>/spatial/index.php">Mapping</a>
               <a className="dropdown-item" href="<?php echo $clientRoot; ?>/checklists/dynamicmap.php?interface=key">Interactive
                 Key</a>
-              <a className="dropdown-item" href="<?php echo $clientRoot; ?>/projects/index.php">Plant Inventories</a>
+              <a className="dropdown-item" href="<?php echo $clientRoot; ?>/projects/index.php">Inventories</a>
               <a className="dropdown-item"
                  href="<?php echo $clientRoot; ?>/collections/harvestparams.php?db[]=5,8,10,7,238,239,240,241">OSU
                 Herbarium</a>

@@ -224,7 +224,7 @@ $displayLeftMenu = false;
             <div class="col2">
                 <div class="garden-facts">
                     <div class="garden-photo">
-                        <img style="display: block;width: 86px;margin: 0 auto;margin-bottom: 20px;" src="<?php echo $clientRoot; ?>/images/layout/new-logo.png" alt="Oregon Flora">
+                        <img style="display: block;width: 86px;margin: 0 auto;margin-bottom: 20px;" src="<?php echo $clientRoot; ?>/images/layout/new-logo.png" alt="OregonFlora">
                         <img src="<?php echo $garden_image['url'] ?>" title="<?php echo $spDisplay; ?> image" alt="<?php echo $vernaculars; ?> image" />
                         <div class="photographer"><?php echo $garden_image['photographer'] ?>&nbsp;&nbsp;<?php //echo $garden_image['image_type'] ?></div>
                     </div>

@@ -39,11 +39,11 @@ include( $serverRoot . "/header.php" );
         <div class="inner-content">
             <!-- place static page content here. -->
             <h2>Location:</h2>
-            <p>1048 Cordley Hall<br />Oregon State University<br />Corvallis, OR 97331</p>
+            <p>Room 1162<br />4575 SW Research Way<br />Corvallis, OR 97333</p>
             <h2>Mailing Address:</h2>
-            <p>OregonFlora<br />Dept. Botany &amp; Plant Pathology<br />Oregon State University<br />Corvallis, OR 97331-2902</p>
+            <p>OregonFlora<br />OSU Dept. Botany &amp; Plant Pathology<br />4575 SW Research Way<br />Corvallis, OR 97333</p>
             <h2>Correspondence:</h2>
-            <p>OregonFlora<br/>Dr. Linda K. Hardison, Director<br/>Dept. Botany &amp; Plant Pathology<br/>Oregon State University<br/>Corvallis, OR 97331-2902<br/>541-737-4338</p>
+            <p>OregonFlora<br/>Dr. Linda K. Hardison, Director<br/>OSU Dept. Botany &amp; Plant Pathology<br/>4575 SW Research Way<br/>Corvallis, OR 97333<br/>541-737-4338</p>
             <h2>Send contributions of species lists, digital images, and other data to:</h2>
             <p><a href="mailto:ofpflora@oregonflora.org">ofpflora@oregonflora.org</a></p>
         </div> <!-- .inner-content -->

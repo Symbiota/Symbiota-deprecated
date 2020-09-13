@@ -5,7 +5,7 @@ header("Content-Type: text/html; charset=" . $charset);
 ?>
 <html>
 <head>
-    <title><?php echo $defaultTitle ?>Oregon Flora Store</title>
+    <title><?php echo $defaultTitle ?>OregonFlora Store</title>
     <meta charset="UTF-8">
     <link href="../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet"/>
     <link href="../css/main.css?<?php echo $CSS_VERSION_LOCAL; ?>" type="text/css" rel="stylesheet"/>
@@ -23,7 +23,7 @@ include($serverRoot . "/header.php");
 <div class="info-page">
     <section id="titlebackground" class="title-redberry">
         <div class="inner-content">
-            <h1>Oregon Flora Store</h1>
+            <h1>OregonFlora Store</h1>
         </div>
     </section>
     <section>
@@ -92,10 +92,12 @@ include($serverRoot . "/header.php");
                 </div>
                 <div class="store-item-purchase">
                     <div class="store-item-price">
-                        <p>Preorders available in early 2020.</p>
+                        <p>Preorder your copy now!</p>
                     </div>
                     <div class="store-item-link">
-
+                        <p><a href="https://shop.brit.org/Flora-of-Oregon" target="_blank"
+                              class="btn btn-primary btn-lg active" role="button" aria-pressed="true">Learn more or
+                                purchase online</a></p>
                     </div>
                 </div>
             </div><!-- .store-item -->

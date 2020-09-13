@@ -90,8 +90,8 @@ include( $serverRoot . "/header.php" );
         <li><em>Additional help</em> In addition to the <a data-fancybox href="https://youtu.be/Y2sdnibf1O8">OregonFlora video tutorial</a>,  Symbiota webinars covering <a href="http://idigbio.adobeconnect.com/pbkdmqf66sgk" target="_blank">basic</a> and <a href="http://idigbio.adobeconnect.com/pgpptu7v6y4d" target="_blank">advanced</a> (including vector tools)  features are also available.</li>
     </ul>
     <p>&nbsp;</p>
-    <h3>Interactive Key &nbsp;<a data-fancybox href="https://youtu.be/DKxoEEwL3V4" class="btn light-purple-btn"><i class="fa fa-film"></i></a></h3>
-    <p>The interactive key is an easy-to-use plant identification tool based on the features you recognize in your unknown plant.</p>
+    <h3>Identify Plants &nbsp;<a data-fancybox href="https://youtu.be/DKxoEEwL3V4" class="btn light-purple-btn"><i class="fa fa-film"></i></a></h3>
+    <p>Identify Plants is an easy-to-use plant identification tool based on the features you recognize in your unknown plant.</p>
     <ul>
         <li>Click on the map to indicate the approximate location of your unknown. If a radius is defined, species lists are generated using occurrence data from the defined area. If no radius is entered, the program determines the radius that best represents the local species diversity. In other words, poorly collected areas will have a larger radius sampled. Setting the Taxon Filter will limit results to the plant family selected.</li>
         <li>Click on the green &ldquo;Build Checklist&rdquo; to view the plants of the selected location and the characters.</li>
@@ -104,8 +104,8 @@ include( $serverRoot . "/header.php" );
         <li>Clicking on the latitude/longitude location at the top of the page opens the checklist view, with search, filter, and download options available.</li>
     </ul>
     <p>&nbsp;</p>
-    <h3>Plant Inventories&nbsp; <a data-fancybox href="https://youtu.be/RB0bdQy4k6k" class="btn light-purple-btn"><i class="fa fa-film"></i></a></h3>
-    <p>Plant inventories are checklists of all the species, based on the specimen and observations records of the OregonFlora database, found at a defined place. There are several collections, or projects, each with a theme; every collection contains a number of checklists.</p>
+    <h3>Inventories&nbsp; <a data-fancybox href="https://youtu.be/RB0bdQy4k6k" class="btn light-purple-btn"><i class="fa fa-film"></i></a></h3>
+    <p>Inventories are checklists of all the species, based on the specimen and observations records of the OregonFlora database, found at a defined place. There are several collections, or projects, each with a theme; every collection contains a number of checklists.</p>
     <p>The OregonFlora Species List Collection contains 5,200 lists of plant observations contributed to OregonFlora by botanical societies, individuals, government agencies, and scholarly research projects over 25 years. Click on the interactive map to enlarge it, pan and zoom to your area of interest, and click on a pin to open species lists from that region.</p>
     <p><em>Things to note:</em></p>
     <ul>

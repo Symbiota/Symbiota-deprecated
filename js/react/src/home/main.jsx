@@ -92,7 +92,7 @@ class Home extends React.Component {
   render() {
 		
 		const slickSettings = {
-			autoplay: false,
+			autoplay: true,
 			initialSlide: 0,
 			autoplaySpeed: 10000,
 			dots: true,
@@ -125,7 +125,7 @@ class Home extends React.Component {
 											suggestionUrl={ `${this.props.clientRoot}/webservices/autofillsearch.php` }
 											location={"home-main"}
 										/>
-										<p className="search-explain">to access all its information, including <br />distribution maps, images and more...</p>
+										<p className="search-explain text-center">to access all its information, <br />including maps, images and more...</p>
 										<p><a href={this.props.clientRoot + '/pages/tutorials.php' }><button className="btn btn-primary">Or take an introductory tour of our site</button></a></p>
 							</div>
 	
@@ -144,13 +144,13 @@ class Home extends React.Component {
 													<a href={this.props.clientRoot + '/checklists/dynamicmap.php?interface=key' }><img src={ this.props.clientRoot + "/images/slide-identify.png" }/></a>
 													<a href={this.props.clientRoot + '/checklists/dynamicmap.php?interface=key' }><strong>Identify</strong></a> a plant you’ve seen in Oregon.
 													</p>
-												<p className="link-desc">With our location-driven <a href={this.props.clientRoot + '/checklists/dynamicmap.php?interface=key' }><strong>Interactive Key</strong></a> tool.</p>
+												<p className="link-desc">With our location-driven <a href={this.props.clientRoot + '/checklists/dynamicmap.php?interface=key' }><strong>Identify Plants</strong></a> tool.</p>
 								</div>
 		
 								<div className="row link-card">
 												<p className="link-text">
 												<a href={this.props.clientRoot + '/spatial/index.php' }><img src={ this.props.clientRoot + "/images/slide-find.png" }/></a>
-												<a href={this.props.clientRoot + '/spatial/index.php' }><strong>Find</strong></a> where any vascular plant in Oregon calls home.
+												<a href={this.props.clientRoot + '/spatial/index.php' }><strong>Find</strong></a> where any Oregon vascular plant calls home.
 												</p>
 												<p className="link-desc">With our powerful <a href={this.props.clientRoot + '/spatial/index.php' }><strong>Mapping</strong></a> resource.</p>
 								</div>
@@ -160,7 +160,7 @@ class Home extends React.Component {
 												<a href={this.props.clientRoot + '/collections/harvestparams.php?db[]=5,8,10,7,238,239,240,241' }><img src={ this.props.clientRoot + "/images/slide-explore.png" }/></a>
 												<a href={this.props.clientRoot + '/collections/harvestparams.php?db[]=5,8,10,7,238,239,240,241' }><strong>Explore</strong></a> the collections of the OSU Herbarium.
 												</p>
-												<p className="link-desc">Explore <a href="https://bpp.oregonstate.edu/herbarium"><strong>OSU Herbarium</strong></a> plants, mosses, lichens, algae, and fungi.</p>
+												<p className="link-desc">Explore <a href={this.props.clientRoot + '/collections/harvestparams.php?db[]=5,8,10,7,238,239,240,241' }><strong>OSU Herbarium</strong></a> plants, mosses, lichens, algae, and fungi.</p>
 								</div>	
 							</div>
 						</div>
@@ -191,7 +191,7 @@ class Home extends React.Component {
 													<a onClick={() => this.openVideoModal('HwtEXcTO9jA')}><img src={ this.props.clientRoot + "/images/YouTube-tutorial-Taxon.png" }/></a>
 											</div>
 											<div className="col video-text">
-													<h3><a onClick={() => this.openVideoModal('HwtEXcTO9jA')}>Taxon profile pages</a></h3>
+													<h3><a onClick={() => this.openVideoModal('HwtEXcTO9jA')}>Plant profile pages</a></h3>
 													<p>Comprehensive information—gathered in one location—for each of the ~4,700 vascular plant in the state! </p>
 											</div>
 									</div>
@@ -209,8 +209,8 @@ class Home extends React.Component {
 													<a onClick={() => this.openVideoModal('DKxoEEwL3V4')}><img src={ this.props.clientRoot + "/images/YouTube-tutorial-InterKey.png" }/></a>
 											</div>
 											<div className="col video-text">
-													<h3><a onClick={() => this.openVideoModal('DKxoEEwL3V4')}>Interactive Key</a></h3>
-													<p>An identification tool based on the plant features you recognize! Mark your location on a map to get a list of species found there, then narrow the possibilities.</p>
+													<h3><a onClick={() => this.openVideoModal('DKxoEEwL3V4')}>Identify Plants</a></h3>
+													<p>Use the plant features you recognize! Mark your location on a map to get a list of species found there, then narrow the possibilities.</p>
 											</div>
 									</div>        
 									<div className="row video-card">
@@ -218,7 +218,7 @@ class Home extends React.Component {
 													<a onClick={() => this.openVideoModal('9ystxXKEOp4')}><img src={ this.props.clientRoot + "/images/YouTube-tutorial-Inventory.png" }/></a>
 											</div>
 											<div className="col video-text">
-													<h3><a onClick={() => this.openVideoModal('9ystxXKEOp4')}>Plant Inventories</a></h3>
+													<h3><a onClick={() => this.openVideoModal('9ystxXKEOp4')}>Inventories</a></h3>
 													<p>In-depth information about the plants of a defined place. Choose from thousands of lists.</p>
 											</div>
 									</div>          

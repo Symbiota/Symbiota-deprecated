@@ -74,7 +74,7 @@ include( $serverRoot . "/header.php" );
                 </div>
                 <div class="row">
                     <div class="col-8 pl-sm-5">
-                        <p>Interactive key</p>
+                        <p>Identify Plants</p>
                     </div>
                     <div class="col">
                         <p><a href="#video-card-key">video</a></p>
@@ -85,7 +85,7 @@ include( $serverRoot . "/header.php" );
                 </div>
                 <div class="row">
                     <div class="col-8 pl-sm-5">
-                        <p>Plant Inventories</p>
+                        <p>Inventories</p>
                     </div>
                     <div class="col">
                         <p><a href="#video-card-inventory">video</a></p>
@@ -183,7 +183,7 @@ include( $serverRoot . "/header.php" );
                     </div>
                     <div class="col-sm tutorials-video-card" id="video-card-key">
                         <div class="video-image"><a href="#" type="button" class="btn video-modal-btn" data-toggle="modal" data-src="https://www.youtube.com/embed/DKxoEEwL3V4" data-target="#videoModal"><img src="<?php echo $CLIENT_ROOT; ?>/pages/images/YouTube-tutorial-Intro.png" alt="intro video"></a></div>
-                        <h3>Interactive Key</h3>
+                        <h3>Identify Plants</h3>
                         <p>An identification tool based on the plant features you recognize! Mark your location on a map to get a list of species found there, then narrow the possibilities.</p>
                         <p>Text-based tutorial <a href="#text-card-key">here</a>.</p>
                     </div>
@@ -199,7 +199,7 @@ include( $serverRoot . "/header.php" );
                 <div class="row">
                     <div class="col-sm tutorials-video-card" id="video-card-inventory">
                         <div class="video-image"><a href="#" type="button" class="btn video-modal-btn" data-toggle="modal" data-src="https://www.youtube.com/embed/Y2sdnibf1O8" data-target="#videoModal"><img src="<?php echo $CLIENT_ROOT; ?>/pages/images/YouTube-tutorial-Intro.png" alt="intro video"></a></div>
-                        <h3>Plant inventories</h3>
+                        <h3>Inventories</h3>
                         <p>In-depth information about the plants of a defined place. Choose from thousands of lists.</p>
                         <p>Text-based tutorial <a href="#text-card-inventory">here</a>.</p>
                     </div>

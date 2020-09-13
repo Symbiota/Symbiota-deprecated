@@ -30,7 +30,14 @@ include( $serverRoot . "/header.php" );
         <!-- .inner-content makes a column max width 1100px, centered in the viewport -->
         <div class="inner-content">
         <!-- place static page content here. -->
-            <h2 class="subhead">Our mission is to present comprehensive information about the vascular plants and the biodiversity of Oregon to meet the needs of diverse audiences.</h2>
+            <h2 class="subhead">Our mission is to increase awareness and knowledge of the plants of Oregon through publication of technically sound, accessible information for diverse audiences.</h2>
+            <p>
+            OregonFlora has assembled a comprehensive guide to the ~4,700 vascular plants of Oregon that is shared through this website, the Flora of Oregon books,
+             and our wildflower identification app. 
+             Our foundational research supports diverse audiences &mdash; citizen scientists, students and gardeners, ecologists and land managers, 
+             policy makers, university researchers and leaders &mdash; in the critical work of protecting biodiversity, managing natural resources, promoting sustainability, 
+             and furthering understanding of our botanical treasures .
+            </p>
             <div class="row two-col-row">
                 <div class="column-right col-md-4 order-1 order-md-2 pt-5">
                     <figure class="figure">
@@ -53,7 +60,22 @@ include( $serverRoot . "/header.php" );
                         <li>infrequently collected exotic taxa (e.g., ballast plants and current waifs)</li>
                         <li>unnamed taxa in process of being described</li>
                     </ul>
-                    <p>We define “native” as a plant taxon which has established in the landscape independently from direct or indirect human intervention. Native species include those found in Oregon that are new to science and recently described, are disjunct in Oregon if it is considered native in a nearby state, and/or are—to the best of our knowledge—considered an element of Oregon plant life prior to European settlement.</p>
+                    <p>We define <strong>“native”</strong> as a plant taxon which has established in the landscape independently from direct or indirect human intervention. Native species include those found in Oregon that are new to science and recently described, are disjunct in Oregon if it is considered native in a nearby state, and/or are—to the best of our knowledge—considered an element of Oregon plant life prior to European settlement.</p>
+                    
+                    <p>A non-native, or exotic plant is one from distant parts of North America or from other 
+                    continents that established in Oregon post-European settlement. 
+                    Examples include weeds, naturalized escapes, waifs, and ballast plants.
+                    </p>
+                    <p>Two categories of non-native plants fall within the scope of the project:</p>
+                    	<ul>
+                    		<li>Escaped cultivated plants: agricultural and garden taxa that have persisted in the wild for at 
+                    		least 3-5 years and have spread beyond the area where they were originally cultivated.</li>
+                    		<li>Noncultivated exotic plants: weeds (nuisance non-native taxa), waifs (solitary or small groups of 
+                    		non-native plants persisting for only one season), ballast plants (waifs growing on ship ballast).</li>
+                    	</ul>
+
+                    
+                    
                 </div>
             </div>
             <div class="row two-col-row">

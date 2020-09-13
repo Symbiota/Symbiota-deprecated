@@ -39,7 +39,7 @@ class FooterApp extends React.Component {
             <div className="col">
               <div>
                 <p className="mt-2">
-                  OregonFlora is based at the OSU Herbarium at Oregon State University.
+                  OregonFlora is based at the <a href="https://bpp.oregonstate.edu/herbarium" target="_blank">OSU Herbarium</a> at Oregon State University.
                   Our program is wholly funded through grants and contributions. We welcome your support!
                 </p>
                 <div>

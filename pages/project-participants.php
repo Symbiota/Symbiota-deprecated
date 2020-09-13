@@ -13,7 +13,7 @@ function obfuscate($email) {
 ?>
 <html>
 <head>
-    <title><?php echo $defaultTitle ?> Project Participants</title>
+    <title><?php echo $defaultTitle ?> Partners</title>
     <meta charset="UTF-8">
     <link href="../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet"/>
     <link href="../css/main.css?<?php echo $CSS_VERSION_LOCAL; ?>" type="text/css" rel="stylesheet"/>
@@ -65,7 +65,7 @@ include( $serverRoot . "/header.php" );
 <div class="info-page">
     <section id="titlebackground" class="title-leaf">
         <div class="inner-content">
-            <h1>Project Participants</h1>
+            <h1>Partners</h1>
         </div>
     </section>
     <section>
@@ -78,6 +78,7 @@ include( $serverRoot . "/header.php" );
             <p>Stephen Meyers, Taxonomic Director<br /><?php echo obfuscate("meyersst@science.oregonstate.edu") ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 541-737-4338</p>
             <p>Thea Jaster, Database manager, botanist<br /><?php echo obfuscate("jastert@science.oregonstate.edu") ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 541-737-2445</p>
             <p>Katie Mitchell, Database manager, botanist<br /><?php echo obfuscate("mitchelk@science.oregonstate.edu") ?></p>
+            <p>John Myers, <em>Flora of Oregon</em> principal illustrator<br /><?php echo obfuscate(" myersj8@oregonstate.edu") ?></p>
             <p>Tanya Harvey, <em>Flora of Oregon</em> graphic designer<br /><?php echo obfuscate("tanya@westerncascades.com") ?></p>
             <h2>Affiliates</h2>
             <p>Dennis Albert</p>

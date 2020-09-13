@@ -145,39 +145,40 @@ elseif($coordRange > 40){
 				</p>
                 <ul>
                     <li>Begin by marking on the map the approximate location of your unknown plant.</li>
-                    <li>Click &ldquo;Build Checklist&rdquo; to create a list of plants that occur in the region of your unknown.</li>
+                    <li>Click &ldquo;Search&rdquo; to create a list of plants that occur in the region of your unknown.</li>
                     <li>Select any of the recognizable characters to narrow the possibilities.</li>
                     <li>Open the profile pages of plants in the list and compare to your unknown.</li>
                 </ul>
             </div>
 			<div style="margin-top:5px;">
 				<form name="mapForm" action="dynamicchecklist.php" method="post" onsubmit="return checkForm();">
-					<div style="float:left;width:300px;">
-						<div>
-							<input type="submit" name="buildchecklistbutton" value="Build Checklist" disabled />
-							<input type="hidden" name="interface" value="<?php echo $interface; ?>" />
-							<input type="hidden" id="latbox" name="lat" value="" />
-							<input type="hidden" id="lngbox" name="lng" value="" />
-						</div>
-						<div>
-							<b>Point (Lat, Long):</b>
-							<span id="latlngspan"> &lt; Click on map &gt; </span>
-						</div>
-					</div>
 					<div style="float:left;">
 						<div style="margin-right:35px;">
-							<b>Plant Family Filter:</b> <input id="taxa" name="taxa" type="text" value="<?php echo $taxa; ?>" />
+							<b>Plant Family Filter:</b> <input id="taxa" name="taxa" type="text" placeholder="(optional)" value="<?php echo $taxa; ?>" />
 							<input id="tid" name="tid" type="hidden" value="<?php echo $tid; ?>" />
 						</div>
 						<div>
 							<b>Radius:</b>
-							<input name="radius" value="(optional)" type="text" style="width:140px;" onfocus="this.value = ''" />
+							<input name="radius" placeholder="(optional)" type="text" style="width:140px;" onfocus="this.value = ''" />
 							<select name="radiusunits">
 								<option value="km">Kilometers</option>
 								<option value="mi">Miles</option>
 							</select>
 						</div>
 					</div>
+					<div style="float:left;width:300px;">
+						<div>
+							<b>Point (Lat, Long):</b>
+							<span id="latlngspan"> &lt; Click on map &gt; </span>
+						</div>
+						<div>
+							<input type="submit" name="buildchecklistbutton" value="Search" disabled class="btn-primary"/>
+							<input type="hidden" name="interface" value="<?php echo $interface; ?>" />
+							<input type="hidden" id="latbox" name="lat" value="" />
+							<input type="hidden" id="lngbox" name="lng" value="" />
+						</div>
+					</div>
+
 				</form>
 			</div>
 			<div id='map_canvas' style='width:95%; height:650px; clear:both;'></div>
