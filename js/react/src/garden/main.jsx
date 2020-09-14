@@ -529,8 +529,13 @@ class GardenPageApp extends React.Component {
     /*window.history.replaceState({ query: newQueryStr }, '', window.location.pathname + newQueryStr);*/
   }
 	clearFilters() {
-		this.setState({ filters: defaultFilters() });
-    this.onSearch({ text: '' });
+		this.setState({ filters: defaultFilters() },
+			function() {
+				if (this.state.searchText.length > 0) {
+					this.onSearch({ text: '' });
+				}
+			}
+		);
     
 		let plantFeatureState = this.state.plantFeatureState;
 		Object.keys(plantFeatureState).map((key) => {
