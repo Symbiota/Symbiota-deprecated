@@ -304,7 +304,7 @@ class InventoryChooser extends React.Component {
 					projects: res
 				});
 				const pageTitle = document.getElementsByTagName("title")[0];
-				pageTitle.innerHTML = `${pageTitle.innerHTML} Inventory Projects`;
+				pageTitle.innerHTML = `${pageTitle.innerHTML} Inventories`;
 			})
 			.catch((err) => {
 				// TODO: Something's wrong

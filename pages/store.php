@@ -5,7 +5,7 @@ header("Content-Type: text/html; charset=" . $charset);
 ?>
 <html>
 <head>
-    <title><?php echo $defaultTitle ?>OregonFlora Store</title>
+    <title><?php echo $defaultTitle ?> OregonFlora Store</title>
     <meta charset="UTF-8">
     <link href="../css/base.css?<?php echo $CSS_VERSION; ?>" type="text/css" rel="stylesheet"/>
     <link href="../css/main.css?<?php echo $CSS_VERSION_LOCAL; ?>" type="text/css" rel="stylesheet"/>

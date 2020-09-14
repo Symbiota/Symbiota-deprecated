@@ -108,8 +108,6 @@ include( $serverRoot . "/header.php" );
                     </figure>
                     <p>Collaboration with the Northwest Alliance for Computational Science and Engineering at OSU resulted in the award of a grant (2001-2004) from the National Science Foundation to design and develop software for presenting Oregon Flora Project data online. A Photo Gallery was also added featuring field photos contributed by plant enthusiasts; the plant identification for each was confirmed by OFP staff prior to posting online. Digitized images of herbarium specimens were added as a component of the Photo Gallery.</p>
                     <p>The Oregon State University Herbarium and the Oregon Flora Project collaborated on a National Science Foundation proposal (2003-2006) to database and georeference label data from all Oregon herbarium specimens not yet included in the Oregon Plant Atlas. OregonFlora maintains this dataset and serves as the public face to the OSU Herbarium by providing images of herbarium specimens, searchable label data, and the ability to map plant occurrences through the OregonFlora website.</p>
-                    <p>Collaboration with the Northwest Alliance for Computational Science and Engineering at OSU resulted in the award of a grant (2001-2004) from the National Science Foundation to design and develop software for presenting Oregon Flora Project data online. A Photo Gallery was also added featuring field photos contributed by plant enthusiasts; the Collaboration with the Northwest Alliance for Computational Science and Engineering at OSU resulted in the award of a grant (2001-2004) from the National Science Foundation to design and develop software for presenting Oregon Flora Project data online. A Photo Gallery was also added featuring field photos contributed by plant enthusiasts; the plant identification for each was confirmed by OFP staff prior to posting online. Digitized images of herbarium specimens were added as a component of the Photo Gallery.</p>
-                    <p>The Oregon State University Herbarium and the Oregon Flora Project collaborated on a National Science Foundation proposal (2003-2006) to database and georeference label data from all Oregon herbarium specimens not yet included in the Oregon Plant Atlas. OregonFlora maintains this dataset and serves as the public face to the OSU Herbarium by providing images of herbarium specimens, searchable label data, and the ability to map plant occurrences through the OregonFlora website.</p>
                 </div>
             </div>
             <div class="row two-col-row">
@@ -125,10 +123,33 @@ include( $serverRoot . "/header.php" );
                 </div>
                 <div class="column-main col-md-8 order-2 order-md-1 pr-md-5">
                     <h3>2004-2010</h3>
-                    <p>2004-2010 In December 2004, the Oregon Flora Project suffered a great loss with the death of its director and founder, Scott Sundberg. The program continued, however, following a path to its completion that was Scott’s vision. Linda Hardison assumed the position of director, and existing staff members maintained their essential roles.</p>
+                    <p>In December 2004, the Oregon Flora Project suffered a great loss with the death of its director and founder, Scott Sundberg. The program continued, however, following a path to its completion that was Scott’s vision. Linda Hardison assumed the position of director, and existing staff members maintained their essential roles.</p>
                     <p>In early 2008 the Project was halted indefinitely due to a lack of funds. Through the timely and generous support of the John and Betty Soreng Environmental Fund of the Oregon Community Foundation, all staff members were rehired, and the operations of the Project resumed in Autumn 2008. The sustained support of this fund has allowed OFP to bring to fruition public access to every facet of the Project through its “digital flora” website: the Photo Gallery (2009), version 2.0 of the Oregon Plant Atlas (2010), and the Vascular Plant Checklist (2011). It has also enabled the production of the Flora volumes.</p>
                 </div>
 
+            </div>
+            <div class="row two-col-row">
+                <div class="column-main col-md-8 order-2 order-md-1 pr-md-5">
+                    <h3>2010-present</h3>
+                    <p>With the Checklist serving as a robust foundation, OFP efforts focused on the production of the printed Flora of Oregon. Stephen Meyers was hired in 2010 as the taxonomic director to oversee the writing of the floristic treatments and identification keys. In 2012 artist John Myers joined the staff to contribute artwork for the first ever illustrated flora for the state of Oregon. That same year, an eleven-member advisory board was established, with members representing the diversity of stakeholders that are informed by the work of the OFP. BRIT Press was selected to publish the flora, and with the design and layout expertise of Tanya Harvey, Volume 1 of the Flora of Oregon was published in September 2015. </p>
+										<p>As the body of knowledge for the nearly 4,700 plant taxa grew, so did the capacity to apply it. An OFP strategic plan, first drafted in 2015, identified three strategic initiatives:  using native species in gardens and planted environments, increasing biodiversity in working agricultural lands, and science education. </p>
+										<p>Through a partnership with Metro (Portland) and the Adult Conservation Educators Northwest, OFP assumed oversight of their dataset of native plants used for gardening and landscaping in western Oregon. Funding from the Oregon Dept. of Agriculture’s Specialty Crop Block Grant program (2014-2016) helped OFP develop information promoting use of natives in gardening and, with Metro, design an interactive portal to share the data on the OFP’s redesigned website.</p>
+										<p>In 2016, the OFP initiated a redesign of its website using the Symbiota software platform. This has allowed adoption of more versatile ways to analyze and communicate information, and the linking of OFP plant data to other datasets. The program also changed its name to OregonFlora. </p>
+										<p>As part of Oregon State University, the state’s land grant institution, OregonFlora is researching effective ways to return plant diversity and natural habitats to working agricultural lands. Grants from the Oregon Watershed Enhancement Board (2017) and the Oregon Natural Resources Conservation Service (2018) have helped to launch studies on OSU lands to restore native habitat in wet pastures and oak woodlands using grazers, fire, and beaver. </p>
+										<p>Publication of Volumes 2 and 3 of the Flora of Oregon remain the priority for OregonFlora. The knowledge gained from this floristic project will drive far-reaching research initiatives, land management practices and activities by people and organizations nationwide.</p>
+                </div>
+
+              
+            </div>
+            <div class="row two-col-row"> 
+                <div class="column-main col-md-8 order-2 order-md-1 pr-md-5">
+                    <h2>Project Organization</h2>
+                    <p>OregonFlora is based in the <a href="https://bpp.oregonstate.edu/herbarium" target="_blank">Department of Botany & Plant Pathology</a> (BPP) at Oregon State University. We work closely with the <a href="https://bpp.oregonstate.edu/herbarium" target="_blank">OSU Herbarium</a>.  
+                    BPP supports our program by providing indirect costs and office space. 
+                    Grants and charitable donations fund 100% of the OregonFlora salaries, employee benefits, and direct operating expenses. 
+                    The <a href="npsoregon.org/" target="_blank">Native Plant Society of Oregon</a> has been a sponsor of OregonFlora since its inception in 1994. 
+                    The <a href="https://agresearchfoundation.oregonstate.edu/" target="_blank">Agricultural Research Foundation</a>, a nonprofit 501(c)3 affiliated with OSU, serves as our fiscal agent. </p>
+                </div>                
             </div>
         </div> <!-- .inner-content -->
     </section>

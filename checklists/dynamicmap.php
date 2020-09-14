@@ -31,7 +31,7 @@ elseif($coordRange > 40){
 ?>
 <html>
 <head>
-	<title><?php echo $DEFAULT_TITLE; ?> - Dynamic Checklist Generator</title>
+	<title><?php echo $DEFAULT_TITLE; ?> - Identify Plants</title>
 	<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
 </head>
 <body style="background-color:#ffffff;" onload="initialize()">

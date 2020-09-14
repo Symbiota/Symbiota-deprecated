@@ -92,7 +92,7 @@ class Home extends React.Component {
   render() {
 		
 		const slickSettings = {
-			autoplay: true,
+			autoplay: false,
 			initialSlide: 0,
 			autoplaySpeed: 10000,
 			dots: true,
@@ -125,7 +125,7 @@ class Home extends React.Component {
 											suggestionUrl={ `${this.props.clientRoot}/webservices/autofillsearch.php` }
 											location={"home-main"}
 										/>
-										<p className="search-explain text-center">to access all its information, <br />including maps, images and more...</p>
+										<p className="search-explain">to access all its information, <br />including maps, images and more...</p>
 										<p><a href={this.props.clientRoot + '/pages/tutorials.php' }><button className="btn btn-primary">Or take an introductory tour of our site</button></a></p>
 							</div>
 	
