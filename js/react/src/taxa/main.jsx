@@ -194,6 +194,39 @@ function RelatedBorderedItem(props) {
   );
 }
 
+function MapItem(props) {
+
+	let mapImage = null;
+	mapImage = `${props.clientRoot}/images/maps/${props.tid}.jpg`;
+	// /map/googlemap.php?maptype=taxa&taxon=6076&clid=0
+	let mapLink = `${props.clientRoot}/map/googlemap.php?maptype=taxa&clid=0&taxon=${props.tid}`;
+	
+  return (
+  	<div className={ "sidebar-section mb-5" }>
+    	<h3 className="text-light-green font-weight-bold mb-3">Distribution</h3>
+    	<div className={ "dashed-border pt-0" }>
+    		<a 
+    			className="map-link"
+    			onClick={ () => window.open(mapLink,'gmap','toolbar=0,scrollbars=1,width=950,height=700,left=20,top=20') }
+    		>
+      		<img
+						src={mapImage}
+						alt={props.title}
+					/>
+				</a>
+			</div>
+    	<div className={ "map-label text-right" }>
+    		<a 
+    			className="map-link"
+    			onClick={ () => window.open(mapLink,'gmap','toolbar=0,scrollbars=1,width=950,height=700,left=20,top=20') }
+    		>				
+      		Click/tap to launch
+				</a>
+			</div>
+    </div>
+  );
+}
+
 function SideBarSection(props) {
   let itemKeys = Object.keys(props.items);
   itemKeys = itemKeys.filter((k) => {
@@ -407,7 +440,7 @@ class TaxaDetail extends React.Component {
     pageTitle.innerHTML = `${pageTitle.innerHTML} ${res.sciName} ${res.author}`;
 		const allImages = res.images.HumanObservation.concat(res.images.PreservedSpecimen);
 		const showDescriptions = res.descriptions? true: false;
-
+//console.log(res);
 		return (
 	
 			<div className="container my-5 py-2 taxa-detail" style={{ minHeight: "45em" }}>
@@ -537,6 +570,7 @@ class TaxaDetail extends React.Component {
 					</div>
 					<div className="col-sm-4 sidebar">
 						<SideBarSection title="Context" items={ res.highlights } classes="highlights" rankId={ res.rankId } />
+						<MapItem title={ res.sciName } tid={ res.tid } clientRoot={ this.props.clientRoot } />
 						<SideBarSection title="Web links" items={ res.taxalinks} classes="weblinks"  rankId={ res.rankId }/>
 					</div>
 				</div>
@@ -561,6 +595,7 @@ class TaxaApp extends React.Component {
     super(props);
     this.state = {
       isLoading: true,
+      tid: null,
       sciName: '',
       author: '',
       basename: '',
@@ -644,6 +679,7 @@ class TaxaApp extends React.Component {
 						});
 					}
           this.setState({
+      			tid: this.getTid(),
             sciName: res.sciname,
             author: res.author,
             basename: res.vernacular.basename,

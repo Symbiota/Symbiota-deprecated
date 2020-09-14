@@ -180,7 +180,14 @@
 			padding-top: .2rem !important;
 			padding-bottom: .2rem !important;
 		}
-
+		.map-label {
+			border-bottom: 1px dashed black;
+			color: @gray-type;
+			font-style: italic;
+		}
+		.map-link {
+			cursor: pointer;
+		}
 		&.weblinks {
 
 			li {
@@ -261,10 +268,10 @@
 		display: flex;
 		flex-flow: row wrap;
 		.card {
-			flex-basis: 19%;
-			margin-right: 1%;
+			flex-basis: 18%;
+			margin-right: 2%;
 			margin-bottom: 1em;
-			box-shadow: 2px 4px #00000054;
+			box-shadow: 0px 2px 6px #00000054;
 			a {
 				padding: 8px;
 			}
@@ -275,7 +282,7 @@
 				min-height: 30px;
 			}
 			.img-thumbnail {
-				padding: 0;
+				padding: 0 0 4px 0;
 				border: none;
 			}
 		}

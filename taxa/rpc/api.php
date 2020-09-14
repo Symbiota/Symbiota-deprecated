@@ -74,6 +74,7 @@ function taxaManagerToJSON($taxaObj,$recursive = true) {
 		$result["parentTid"] = $taxaObj->getParentTid();   
 		$result["rankId"] = $taxaObj->getRankId();  
 		$result["author"] = $taxaObj->getAuthor();
+		$result["images"] = $taxaObj->getImages();
 
 		if ($recursive === true) {
 			$spp = $taxaObj->getSpp();  					
@@ -83,7 +84,6 @@ function taxaManagerToJSON($taxaObj,$recursive = true) {
 				$tj = taxaManagerToJSON($taxa,false);
 				$result["spp"][] = $tj;
 			}
-			$result["images"] = $taxaObj->getImages();
 			$allImages = $taxaObj->getImagesByBasisOfRecord();
 			$result["imagesBasis"]['HumanObservation'] = (isset($allImages['HumanObservation']) ? $allImages['HumanObservation'] : []);
 			$result["imagesBasis"]['PreservedSpecimen'] = (isset($allImages['PreservedSpecimen']) ? $allImages['PreservedSpecimen'] : []);
