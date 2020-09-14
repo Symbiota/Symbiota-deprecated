@@ -86,12 +86,16 @@ export default class ImageModalCarousel extends Component {
 									</div>
 									
 									<div className="image-details">
-										<div className="line-item">
-												 {image.fulldate} &copy; {image.photographer}, Courtesy of OregonFlora
+										{ image.basisofrecord != 'PreservedSpecimen' &&
+										<div>
+											<div className="line-item">
+													 {image.fulldate} &copy; {image.photographer}, Courtesy of OregonFlora
+											</div>
+											<div className="line-item">
+														{image.county} County, {image.stateprovince}, {image.country} 
+											</div>
 										</div>
-										<div className="line-item">
-												  {image.county} County, {image.stateprovince}, {image.country} 
-										</div>
+										}
 										<div className="row image-link">
 											<div className="col">
 												<a 

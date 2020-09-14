@@ -354,7 +354,7 @@ class TaxaChooser extends React.Component {
 					
 						{res.spp.length > 0 &&
 							<div className="mt-4 dashed-border" id="subspecies">     
-								<h3 className="text-light-green font-weight-bold mt-2">Subspecies and varieties</h3>   
+								<h3 className="text-light-green font-weight-bold mt-2">Species, subspecies and varieties</h3>   
 								<div className="spp-wrapper">
 									{
 										res.spp.map((spp,index) => {
