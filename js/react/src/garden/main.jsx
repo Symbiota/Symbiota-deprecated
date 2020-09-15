@@ -580,8 +580,8 @@ class GardenPageApp extends React.Component {
         <InfographicDropdown 
         	clientRoot={this.props.clientRoot}
 				/>
-   			<div className="container mx-auto p-4">
-          <div className="row">
+   			<div className="container mx-auto py-4 pl-3 pr-4">
+          <div className="row pr-3">
             <div className="col-4">
               <SideBar
                 ref={ this.sideBarRef }
@@ -620,8 +620,8 @@ class GardenPageApp extends React.Component {
                   />
                 </div>
               </div>
-              <div className="row">
-                <div className="col" id="search-top">
+              <div className="">
+                <div className="" id="search-top">
                   <ViewOpts
 										clientRoot={this.props.clientRoot}
                     viewType={ this.state.viewType }
@@ -676,12 +676,10 @@ class GardenPageApp extends React.Component {
                     }
                   </SearchResultContainer>
                   <div className="go-top">
-                    <p>
                         <a href="#search-top" className="toptext">
                             TOP<br />
-                            <FontAwesomeIcon icon="chevron-up"/>
+                            <FontAwesomeIcon icon="chevron-up" size="2x"/>
                         </a>
-                    </p>
                 </div>
                 </div>
               </div>

@@ -39,7 +39,7 @@ class SideBarHeading extends React.Component {
   render() {
     return (
       <div style={{color: "black"}}>
-        <div className="mb-1 mt-1" style={{color: "inherit"}}>
+        <div className="mb-1 pt-2" style={{color: "inherit"}}>
           <h3 className="font-weight-bold d-inline">Search for plants</h3>
           {/*
           <HelpButton
@@ -59,7 +59,7 @@ class SideBarHeading extends React.Component {
           */
           }
         </div>
-        <p className="container" style={{ fontSize: ".9em"}}>
+        <p className="container">
           Start applying characteristics, and the matching plants will appear at
           right.
         </p>
@@ -73,8 +73,8 @@ class SideBarHeading extends React.Component {
  */
 function PlantNeed(props) {
   return (
-    <div className = "input-group pt-1 mt-1 dashed-border">
-      <label className="font-weight-bold" htmlFor={ props.label.toLowerCase() }>
+    <div className = "input-group pt-1 mt-1 dashed-border plant-need">
+      <label className="" htmlFor={ props.label.toLowerCase() }>
         { props.label }
       </label>
       <select
@@ -159,8 +159,7 @@ class PlantSlider extends React.Component {
           name={ this.props.name }
           onChange={ (e) => this.props.onChange(e) }
         />
-        <br/>
-        <label className="d-block text-center" htmlFor={ this.props.name }>
+        <label className="d-block text-center any-size" htmlFor={ this.props.name }>
           { this.state.description }
         </label>
       </div>
@@ -273,9 +272,9 @@ class SideBar extends React.Component {
 					</div>
 
 					{/* Sliders */}
-					<div className="my-2 plant-needs p-3 sliders">
+					<div className="mt-2 plant-needs p-3 sliders">
 						<h4 className="mr-2 mb-2 d-inline">Mature Size</h4>
-						<span>(Just grab the slider dots)</span><br />
+						<span>(Just grab the slider dots)</span>
 						<div className="mt-2 row d-flex justify-content-center">
 							<div className="col-sm-6" style={{ borderRight: "1px dashed grey" }}>
 								<PlantSlider
@@ -356,6 +355,17 @@ class SideBar extends React.Component {
 						</SideBarDropdown>
 
 						<SideBarDropdown title="Commercial Availability (Coming soon)" disabled={ true } />
+						
+						<div className="p-3 metro">
+							<p><a href="https://www.oregonmetro.gov/" target="_blank"><img 
+										src={ this.props.clientRoot + "/images/metro_logo_t.png"} 
+									/></a>Support for the Grow Natives section of the site provided by <a href="https://www.oregonmetro.gov/" target="_blank">Metro</a>
+							 &mdash; protecting clean air, water and habitat in greater Portland.</p>
+
+							<p>See contributing partners to OregonFlora <a href={ this.props.clientRoot + "/pages/project-participants.php"}>here</a>.</p>
+						</div>
+						
+						
       		</div>
         </div>
       </div>

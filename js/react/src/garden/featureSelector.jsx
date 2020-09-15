@@ -13,7 +13,7 @@ class FeatureSelector extends React.Component {
 
   render() {
     return (
-      <div className="second-level">
+      <div className="second-level rounded-borders">
         <div className="feature-selectors">
           <a
             data-toggle="collapse"

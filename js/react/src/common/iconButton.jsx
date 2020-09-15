@@ -60,12 +60,12 @@ class CancelButton extends React.Component {
 
     return (
       <span
-        className="fake-button align-middle justify-content-center"
+        className={"fake-button align-middle justify-content-center " + this.props.classes} 
         style={ Object.assign({}, this.props.isSelected ? selectedStyle : unselectedStyle, this.props.style) }
         onClick={ this.props.onClick }
       >
-			<FontAwesomeIcon icon="times-circle"/>
       <span dangerouslySetInnerHTML={{__html: this.props.title}} ></span>
+			<FontAwesomeIcon icon="times-circle"/>
     </span>
     );
   }

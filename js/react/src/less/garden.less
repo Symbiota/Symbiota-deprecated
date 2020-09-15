@@ -27,9 +27,6 @@
   max-height: 0;
 }
 
-.rounded-border {
-  border-radius: 1em;
-}
 
 .slider {
   width: 100% !important;
@@ -67,8 +64,10 @@
   	color: white !important;
   }
   h4 {
-  	font-weight: 400; 
-  	font-size: 1.15rem;
+		font-weight: 600;
+		letter-spacing: .5px; 
+		font-size:1.2rem; 
+		text-transform: capitalize;
   }
 }
 
@@ -146,7 +145,10 @@
 			.selected-indicator {
 				margin-top: -8px;
 				display: block;
-				font-size: 1.3rem;
+				.fa-2x {
+					font-size: 2.3rem;
+					padding-top: 13px;
+				}
 			}
 		}
 	}
@@ -170,7 +172,77 @@
 
 
 .go-top {
-	margin-top: 1em;
+	text-align: right;
+	a {
+		text-align: center;
+		display: inline-block;
+		margin-right: -50px;
+		.fa-2x {
+			font-size: 2.3rem;
+			padding-bottom: 13px;
+			color: @med-green;
+		}
+	}
 }
 
+.metro {
+	color: rgba(0, 0, 0, 0.76);
+	font-weight: 400;
+	font-size: .875rem;
+	line-height: 1.125rem;
+	img {
+		width: 100px;
+		padding: 10px 20px 10px 0;
+		float: left;
+	}
+	a {
+		text-decoration: underline;
+	}
+}
+
+#view-opts.row {
+	padding-left: 0px !important;
+	padding-right: 15px !important;
+}
+
+.plant-need {
+	font-weight: .9rem;
+	label {
+		padding-top: .4em;
+		margin-bottom: 0;
+	}
+	select {
+		padding: 0 0 0 0;
+	}
+}
+.slider {
+	&.slider-horizontal {
+		position: relative;
+		.slider-track {
+			background-color: @med-green;
+			height: 6px !important;
+			margin-top: -3px !important;
+			background-image: none !important;
+			box-shadow: none !important;
+			z-index: 100;
+		}
+		.slider-selection.tick-slider-selection,
+		.slider-handle,
+		.slider-tick {
+			background-color: @med-green;
+			background-image: none !important;
+			box-shadow: none !important;
+		}
+		.slider-handle {
+			z-index: 110;
+		}
+		.slider-tick {
+			background-color: black;
+			width: 1px !important;
+			height: 12px !important;
+			margin-top: 4px !important;
+			z-index: 90;
+		}
+	}
+}
 

@@ -24,7 +24,7 @@ function SearchResult(props) {
         <div className={ "card search-result " + (useGrid ? "grid-result" : "list-result") }>
             <div className={useGrid ? "" : "card-body"}>
               <img
-                className={useGrid ? "card-img-top grid-image" : "d-inline-block mr-1 list-image"}
+                className={useGrid ? "card-img-top grid-image" : "d-inline-block mr-2 list-image"}
                 alt={props.title}
                 src={props.src}
               />
@@ -201,7 +201,7 @@ function IdentifySearchResult(props) {
 					<div className={useGrid ? "" : "card-body"}>
 						{useGrid &&
 							<img
-								className={useGrid ? "card-img-top grid-image" : "d-inline-block mr-1 list-image"}
+								className={useGrid ? "card-img-top grid-image" : "d-inline-block mr-2 list-image"}
 								alt={props.title}
 								src={props.src}
 							/>

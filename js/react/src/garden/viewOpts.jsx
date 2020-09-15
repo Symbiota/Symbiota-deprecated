@@ -167,6 +167,7 @@ class ViewOpts extends React.Component {
 									key={ "reset" }
 									title={ "Clear all" }
 									isSelected={ true }
+									classes="reset"
 									style={{ margin: "0.1em", textTransform: "uppercase", backgroundColor: "#5FB021", color: "white", border: "1px solid #999999" }}
 									onClick={ () => { this.props.onReset(); } }
 								/>

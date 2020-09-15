@@ -2,9 +2,8 @@ import React, { Component } from "react";
 import ReactDOM from "react-dom";
 
 import httpGet from "../common/httpGet.js";
-//import {addUrlQueryParam, getUrlQueryParams} from "../common/queryParams.js";
 import {getChecklistPage} from "../common/taxaUtils";
-//import PageHeader from "../common/pageHeader.jsx";
+import Loading from "../common/loading.jsx";
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { library } from "@fortawesome/fontawesome-svg-core";
@@ -22,7 +21,7 @@ export default class ExplorePreviewModal extends Component {
       authors: '',
       abstract: '',
       //taxa: [],
-      isLoading: false,
+      isLoading: true,
       totals: {
       	families: 0,
       	genera: 0,
@@ -52,6 +51,9 @@ export default class ExplorePreviewModal extends Component {
 				.catch((err) => {
 					//window.location = "/";
 					console.error(err);
+				})
+				.finally(() => {
+					this.setState({ isLoading: false });
 				});
 			}
   }
@@ -67,8 +69,12 @@ export default class ExplorePreviewModal extends Component {
     <div className="modal-backdrop">
       <div className="modal-content">
 			<div className="wrapper explore-preview-modal">
+				<div className="" style={{ position: "relative", maxWidth: "100%", minHeight: "45em" }}>
 							
-				<div className="container" style={{ minHeight: "45em" }}>
+				<Loading 
+					clientRoot={ this.props.clientRoot }
+					isLoading={ this.state.isLoading }
+				/>
 				
 					<div className="row">
 						<div className="col-12 container" style={{ minHeight: "15em", backgroundSize: "cover", backgroundImage:`url('`+ this.state.iconUrl + `')` }}>
@@ -79,8 +85,7 @@ export default class ExplorePreviewModal extends Component {
 									<FontAwesomeIcon icon="times-circle" size="2x"/>
 								</div>
 							</div>
-				
-							
+						
 							<div className="col-12">
 								<h2 dangerouslySetInnerHTML={{__html: this.state.intro}}/>
 							</div>
@@ -89,7 +94,6 @@ export default class ExplorePreviewModal extends Component {
 					</div>
 					
 					<div className="row explore-preview-main">
-	
 
 						<div className="container main-wrapper">
 							<div className="row">
@@ -98,7 +102,6 @@ export default class ExplorePreviewModal extends Component {
 								</div>
 							</div>
 						</div>
-						
 						
 						<div className="container sidebar-wrapper">
 							<div>
@@ -124,8 +127,6 @@ export default class ExplorePreviewModal extends Component {
             		</div>
             	</div>
 						</div>
-						
-						
 						
 					</div>
 				</div>
