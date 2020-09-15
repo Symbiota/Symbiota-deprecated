@@ -2,6 +2,51 @@
 @import '../../node_modules/react-tabs/style/react-tabs.less';
 
 
+h2 {
+	margin-top: .6rem !important;
+}
+
+
+#react-taxa-garden-app,
+#react-taxa-app {
+	//taxa slideshows on main and garden pages
+	.taxa-slideshows {
+		.slick-next, 
+		.slick-prev {
+			color: @med-green !important;
+			font-size: 28px;
+			top: 53%;
+			text-align: center;
+		}
+		.slick-next {
+			right: -35px;
+		}
+		.slick-prev {
+			left: -35px;
+		}
+		.slick-slide {
+			height: auto;
+		}
+		.slick-slider {
+			max-width: 90%;
+		}
+	}
+	
+	figure {
+		.img-main-wrapper {
+			overflow: hidden;
+
+			#img-main {
+				max-width: 100%;
+				height: auto;
+			}
+		}
+		figcaption {
+			text-align: right;
+			font-size: .875rem;
+		}
+	}
+}
 #react-taxa-garden-app {
   .text-drk-grn();
 
@@ -9,10 +54,6 @@
     color: @med-green !important;
   }
 
-  #img-main {
-    max-width: 100%;
-    height: auto;
-  }
   .card {
   	border: none;
   }
@@ -33,7 +74,11 @@
 			border-radius: 2%;
 			max-width: 15em;
 			h4 {
-				font-size: 1em;
+				 color: @dark-green;
+				 font-size: .9rem;
+				 font-weight: 700;
+				 line-height: 1rem;
+				 cursor: pointer;
 			}
 			.card {
 				box-shadow: 0 0.1em 0.5em 0.1em rgba(100, 100, 100, 0.3);
@@ -85,7 +130,7 @@
 		margin-bottom: .2rem;
 	}
 	h2{
-		font-weight: 600;
+		font-weight: 400;
 	}
 	h3{
 		font-size: 1.4rem;
@@ -95,32 +140,37 @@
 		font-size: 1.35rem;
 		color: @gray-type;
 		padding-left: 2px;
+	}	
+	figure {
+		.img-main-wrapper {
+			max-height: 485px;
+			overflow: hidden;
+		}
 	}
 	.description-tabs{
 		margin-top: 1em;
+		//box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.2);
 		.react-tabs__tab-list{
 			margin-bottom: 0px;
 			font-weight: 600;
-			border-bottom: 2px solid @med-green;
+			border-bottom: 1px solid @gray-type;
 
 			li{
 				margin-bottom: -1px;
 			}
 
 			.react-tabs__tab{
-				background-color: @med-green;
-				color: white;
-				border-top: 2px solid @med-green;
-				border-bottom: 2px solid @med-green;
-				border-left: 2px solid @med-green;
-				border-right: 2px solid @med-green;
+				background-color: @dark-green;
+				color: @light-green;
+				border: 1px solid @gray-type;
 				margin-right: 0.5em;
 				border-top-left-radius: 10px;
 				border-top-right-radius: 10px;
+				text-transform: uppercase;
 				&.react-tabs__tab--selected{
 					border-bottom: 2px solid @ivory;
 					background-color: @ivory;
-					color: black;
+					color: @dark-green;
 
 				}
 			}
@@ -129,10 +179,10 @@
 		.react-tabs__tab-panel{
 			background-color: @ivory;
 			padding: 1.8em;
-			border-width: 2px;
-			border-left: @med-green 2px solid;
-			border-right: @med-green 2px solid;
-			border-bottom: @med-green 2px solid;
+			border-width: 1px;
+			border-left: @gray-type 1px solid;
+			border-right: @gray-type 1px solid;
+			border-bottom: @gray-type 1px solid;
 
 			.reference{
 				font-style: italic;
@@ -141,6 +191,14 @@
 			.description {
 				height: 250px;
 				overflow-y: scroll;
+				background-color: white;
+				border-top: 2px solid #CFCAC2;
+				border-left: 2px solid #CFCAC2;
+				padding: 1em;
+				--scrollbarBG: @med-green;
+				--thumbBG: white;
+				scrollbar-color: @med-green white;
+				line-height: 1.4em;
 			}
 		}
 	}
@@ -208,14 +266,6 @@
 		font-size: 1.5em;
 		padding: .3em 0;
 	}
-
-	.img-main-wrapper {
-		max-height: 485px;
-		overflow: hidden;
-		img {
-			/*width: 100%;*/
-		}
-	}
 	ul.single-border-item {
 		width: 100%;
 		li {
@@ -271,7 +321,7 @@
 			flex-basis: 18%;
 			margin-right: 2%;
 			margin-bottom: 1em;
-			box-shadow: 0px 2px 6px #00000054;
+			//box-shadow: 0px 2px 6px #00000054;
 			a {
 				padding: 8px;
 			}
@@ -304,33 +354,6 @@
 				flex-basis: percentage(162/1140);
 
 			}
-		}
-	}
-}
-
-
-#react-taxa-garden-app,
-#react-taxa-app {
-	//taxa slideshows on main and garden pages
-	.taxa-slideshows {
-		.slick-next, 
-		.slick-prev {
-			color: @med-green !important;
-			font-size: 28px;
-			top: 53%;
-			text-align: center;
-		}
-		.slick-next {
-			right: -35px;
-		}
-		.slick-prev {
-			left: -35px;
-		}
-		.slick-slide {
-			height: auto;
-		}
-		.slick-slider {
-			max-width: 90%;
 		}
 	}
 }

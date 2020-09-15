@@ -203,7 +203,7 @@ class TaxaApp extends React.Component {
   render() {
     return (
     
-      <div className="container my-5 py-2" style={{ minHeight: "45em" }}>
+      <div className="container mx-auto pl-4 pr-4 pt-5" style={{ minHeight: "45em" }}>
 				<Loading 
 					clientRoot={ this.props.clientRoot }
 					isLoading={ this.state.isLoading }
@@ -220,11 +220,21 @@ class TaxaApp extends React.Component {
         </div>
         <div className="row mt-2">
           <div className="col-8 mr-2">
-            <img
-              id="img-main"
-              src={ this.state.images.length > 0 ? this.state.images[0].url : '' }
-              alt={ this.state.sciName }
-            />
+            
+            { this.state.images.length > 0 && 
+							<figure>
+								<div className="img-main-wrapper">
+									<img
+										id="img-main"
+										src={ this.state.images[0].url }
+										alt={ this.state.sciName }
+									/>
+								</div>
+							<figcaption>{ this.state.images[0].photographer}</figcaption>
+							</figure>
+						}
+            
+            
             <p className="mt-4">
               {/*
                 Description includes HTML tags & URL-encoded characters in the db.
@@ -278,7 +288,7 @@ class TaxaApp extends React.Component {
             <SideBarSection title="Highlights" items={ this.state.highlights } />
             { this.state.nativeGroups.length > 0 &&
             <div className={ "mb-4 " }>
-								<h3 className="text-light-green font-weight-bold mb-1">Native Plant Groups</h3>
+								<h3 className="text-light-green font-weight-bold mb-1">Native plant groups</h3>
 								<p>Containing <strong>{ this.state.vernacularNames[0] }:</strong></p>
 									<div className="canned-results dashed-border">
 									{
@@ -286,7 +296,7 @@ class TaxaApp extends React.Component {
 																	
 											return (
 												<div key={ checklist.clid } className={"py-2 canned-search-result"}>
-													<h4 className="canned-title">{checklist.name}</h4>
+													<h4 className="canned-title" onClick={() => this.togglePreviewModal(checklist.clid)}>{checklist.name}</h4>
 													<div className="card" style={{padding: "0.5em"}}>
 														<div className="card-body" style={{padding: "0"}}>
 															<div style={{ position: "relative", width: "100%", height: "7em", borderRadius: "0.25em"}}>

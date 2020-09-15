@@ -269,11 +269,11 @@ function SppItem(props) {
 	sppQueryParams['taxon'] = item.tid;
 	let sppUrl = window.location.pathname + '?taxon=' + encodeURIComponent(sppQueryParams['taxon']);
 	return (
-		<div key={item.tid} className="card">
+		<div key={item.tid} className="card search-result">
 			<a href={sppUrl}>
 				<h4>{item.sciname}</h4>
 				{ image &&
-				<div className="img-thumbnail" style={{ position: "relative", width: "100%", height: "7em", borderRadius: "0.25em"}}>														
+				<div className="img-thumbnail" style={{ position: "relative", width: "100%", height: "5.7em", borderRadius: "0.25em"}}>														
 					<img
 						className="d-block"
 						style={{width: "100%", height: "100%", objectFit: "cover"}}
@@ -355,7 +355,7 @@ class TaxaChooser extends React.Component {
     let titleVal = (res.sciName? res.sciName : res.family);
     pageTitle.innerHTML = `${pageTitle.innerHTML} ${titleVal}`;
   	return (
-			<div className="container my-5 py-2 taxa-detail" style={{ minHeight: "45em" }}>
+			<div className="container mx-auto pl-4 pr-4 pt-5 taxa-detail" style={{ minHeight: "45em" }}>
 				<Loading 
 					clientRoot={ this.props.clientRoot }
 					isLoading={ res.isLoading }
@@ -440,10 +440,10 @@ class TaxaDetail extends React.Component {
     pageTitle.innerHTML = `${pageTitle.innerHTML} ${res.sciName} ${res.author}`;
 		const allImages = res.images.HumanObservation.concat(res.images.PreservedSpecimen);
 		const showDescriptions = res.descriptions? true: false;
-//console.log(res);
+
 		return (
 	
-			<div className="container my-5 py-2 taxa-detail" style={{ minHeight: "45em" }}>
+			<div className="container mx-auto pl-4 pr-4 pt-5 taxa-detail" style={{ minHeight: "45em" }}>
 				<Loading 
 					clientRoot={ this.props.clientRoot }
 					isLoading={ res.isLoading }
@@ -465,15 +465,19 @@ class TaxaDetail extends React.Component {
 				</div>
 				<div className="row mt-2 row-cols-sm-2">
 					<div className="col-sm-8 px-4">
-						<div className="img-main-wrapper">
+
 							{ allImages.length > 0 && 
-							<img
-								id="img-main"
-								src={ allImages[0].url }
-								alt={ res.sciName }
-							/>
+							<figure>
+								<div className="img-main-wrapper">
+									<img
+										id="img-main"
+										src={ allImages[0].url }
+										alt={ res.sciName }
+									/>
+								</div>
+							<figcaption>{ allImages[0].photographer}</figcaption>
+							</figure>
 							}
-						</div>
 							{/*
 				
 								Description includes HTML tags & URL-encoded characters in the db.
@@ -579,6 +583,7 @@ class TaxaDetail extends React.Component {
 					currImage={this.state.currImage}
 					images={this.state.currImageBasis}
 					onClose={this.toggleImageModal}
+					clientRoot={ this.props.clientRoot }
 				>
 					<h3>
 						<span>{ res.vernacularNames[0] }</span> images
