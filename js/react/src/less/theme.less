@@ -54,9 +54,6 @@ h2 {
 	margin-bottom: 3rem;
 }
 
-.rounded-border {
-  border-radius: .5em;
-}
 .slick-next,
 .slick-prev {
   height: 40px;
@@ -139,10 +136,10 @@ h2 {
 }
 
 .btn-search {
-	margin-left: 8px; 
-	margin-right: 0px; 
-	width: 35px; 
-	height: 35px;
+	margin-left: 0;
+	margin-right: -10px;
+	width: 27px;
+	height: 27px;
 	background-image: url('@{subdir}/images/icons/search-icon.png') !important;
 	background-size: 100% 200% !important;
 	background-position: 0 0 !important;
@@ -263,7 +260,6 @@ img {
 	top: 0;
 	height: 100%;
 	width: 100%;
-	max-width: 100%;
 	background-color: white;
 	opacity: .9;
 	z-index: 1000;
@@ -844,8 +840,6 @@ img {
               font-size: 1.1rem;
               line-height: 1.1rem;
               margin: 15px 0 35px 0;
-              width: 400px;
-              text-align: center;
             }
 
             .btn-search {
@@ -1299,13 +1293,9 @@ img {
 		margin-top: 3em;
 		overflow-y: scroll;
 		max-height: 80vh;
-		.loading-overlay {
-			max-width: 950px;
-		}
 		h1, h2 {
 			color: white;
 		}
-		
 		.explore-preview-header{
 			display: flex;
 			flex-flow: row nowrap;
@@ -1425,7 +1415,7 @@ img {
 			input {
 				font-size: 20px;
 				color: @med-green;
-				border: 2px solid @med-green;
+				border: 3px solid @med-green;
 				display: inline;
 				width: 80%;
 				margin-right: 10px;
@@ -1472,32 +1462,29 @@ img {
   }
 	.filter-tools {
 		padding: 5px 0 2em;
-		p {
-			font-size: 0.9em;
-			line-height: 1.2rem;
-		}
+
 		h3 {
 			margin-left: 15px;
 		}
 
-		h4 {
-			padding: 0;
-			font-weight: 600;
-			letter-spacing: .5px; 
-			font-size:1.2rem; 
-			text-transform: capitalize;
-		}
 		.row {
 			margin: 0;
 		}
 		.top-level {
 			margin: 1em 15px;
+			h4 {
+				padding: 0;
+				text-transform: uppercase;
+				color: @med-green;
+				font-weight: bold;
+				font-size: 1.3em;
+			}
 			.second-level {
 				background-color: white;
 				margin-bottom: 1em;
+				border-radius: 8px;
 				.feature-selectors {
 					padding: .4em 8px;
-					font-weight:600;
 					span {
 						font-size: 1.1em;
 						/*font-weight: bold;*/
@@ -1522,10 +1509,10 @@ img {
 						margin: .4em 0 0;
 						padding-top: .5em;
 						li {
-							line-height: .9em; 
-							padding-bottom: .6em; 
-							font-weight: 400; 
-							font-size: .9em;
+							line-height: 1em;
+							padding-bottom: .6em;
+							font-weight: normal;
+							font-size: 1em;
 							vertical-align: top;
 							input {
 								vertical-align: top;
@@ -1544,13 +1531,6 @@ img {
 		}
 		.sliders {
 			font-size: .9em;
-			span {
-				font-size: 0.9em;
-				line-height: 1.2rem;
-			}
-			.any-size {
-				margin-top: -21px;
-			}
 		}
 	}
 	#view-opts {
@@ -1573,18 +1553,9 @@ img {
 	 .fake-button {
 		 cursor: pointer;
 		 border-radius: 3px;
-		 padding: 0.2em 0.5em 0.18em;
+		 padding: 0.2em 0.5em;
 			span {
-				padding-right: 5px;
-				color: black;
-			}
-			svg {
-				color: @med-green;
-			}
-			&.reset {
-				svg {
-					color: black;
-				}
+				padding-left: 3px;
 			}
 		}
 		.settings {

@@ -1,7 +1,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
 <link
-  href="https://use.typekit.net/zab8iej.css"
+  href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700"
   rel="stylesheet"
   type="text/css">
 <link
