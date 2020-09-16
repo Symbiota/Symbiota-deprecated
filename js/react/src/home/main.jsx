@@ -92,7 +92,7 @@ class Home extends React.Component {
   render() {
 		
 		const slickSettings = {
-			autoplay: true,
+			autoplay: false,
 			initialSlide: 0,
 			autoplaySpeed: 10000,
 			dots: true,
@@ -106,7 +106,7 @@ class Home extends React.Component {
 		
     return (
     <div className="wrapper">
-      <div className="container home">
+      <div className="container home mx-auto pl-4 pr-4">
       	<ModalVideo channel='youtube' isOpen={this.state.isVideoOpen} videoId={ this.state.videoId } onClose={() => this.setState({isVideoOpen: false})} />
       	
      		<Slider { ...slickSettings } className="mx-auto">
@@ -260,7 +260,7 @@ class Home extends React.Component {
 														<div key={index} className="row">
 														     
 															<div className="col col-3 event-date">
-																	<p>{ item.date } { item.time }</p>
+																	<p>{ item.date } <span className="event-time">{ item.time }</span></p>
 															</div>
 															<div className="col event-desc">
 																	<p>

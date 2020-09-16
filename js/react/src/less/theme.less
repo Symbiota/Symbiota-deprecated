@@ -138,8 +138,8 @@ h2 {
 .btn-search {
 	margin-left: 0;
 	margin-right: -10px;
-	width: 27px;
-	height: 27px;
+	width: 32px;
+	height: 32px;
 	background-image: url('@{subdir}/images/icons/search-icon.png') !important;
 	background-size: 100% 200% !important;
 	background-position: 0 0 !important;
@@ -798,28 +798,36 @@ img {
           color: white !important;
         }
       }
+      .slick-prev {
+      	left: -60px;
+      }
+      .slick-next {
+      	right: -60px;
+      }
       .slick-slider {
       }
 
       .slick-slide {
         height: auto;
         margin-bottom: 50px;
-        padding: 0 20px;
+        padding: 0 5px;
 
         .btn {
-          padding: 10px;
+          padding: 14px; 
+          font-size:18px;
         }
-
+				h1 {
+					font-size: 3.5rem; 
+					font-weight: 700; 
+					line-height: 3.6rem;
+          font-weight: bold;
+				}
         .slide-1 {
           margin: 0;
 
           .slide-col-1 {
             padding: 35px 0 0 0;
 
-            h1 {
-              font-size: 2.7rem;
-              font-weight: bold;
-            }
 
             h3 {
               margin: 20px 0 10px 0;
@@ -838,8 +846,10 @@ img {
             }
 
             .search-explain {
-              font-size: 1.1rem;
-              line-height: 1.1rem;
+	            font-size: 1.5rem;
+	            line-height: 1.7rem;
+	            width: 400px;
+	            text-align: center;
               margin: 15px 0 35px 0;
             }
 
@@ -849,8 +859,8 @@ img {
           }
 
           .slide-col-2 {
-            padding-top: 10px;
-
+            padding: 10px 2px 0 13px;
+						
             .link-card {
               background: #000000A6 0% 0% no-repeat padding-box;
               border-radius: 8px;
@@ -903,18 +913,14 @@ img {
           .slide-col-1 {
             padding: 35px 20px 0 0;
 
-            h1 {
-              font-size: 2.7rem;
-              font-weight: bold;
-            }
-
             p {
-              font-size: 1.1rem;
+              font-size: 22px;
+              line-height: 1.3em;
             }
           }
 
           .slide-col-2 {
-            padding: 35px 0 0 20px;
+            padding: 35px 14px 0 42px;
           }
 
           .video-card {
@@ -925,6 +931,7 @@ img {
 
             .video-img {
               padding: 0 5px 0 0;
+              cursor: pointer;
               img {
                 width: 150px;
                 height: 90px;
@@ -938,10 +945,15 @@ img {
                 font-size: 1.1em;
                 line-height: 1.1em;
                 font-weight: bold;
+                a {
+                	color: @light-green !important;
+                	cursor: pointer;
+                }
               }
 
               p {
-                font-size: 0.9em;
+                font-size: 16px;
+                line-height: 1.2em;
                 margin-bottom: 0;
               }
             }
@@ -954,8 +966,6 @@ img {
           padding: 35px 0 0 0;
 
           h1 {
-            font-size: 2.7rem;
-            font-weight: bold;
             margin-bottom: 15px;
           }
 
@@ -975,6 +985,19 @@ img {
 
               h2 {
                 font-weight: bold;
+                font-size: 23px;
+                line-height: 1.1em;
+                margin-bottom: 1rem;
+              }
+              p {
+	              font-size: 1.125rem; 
+	              font-weight: 400;
+	              line-height: 1.35;
+	              span {
+	              	* {
+	              		display: inline;
+	              	}
+	              }
               }
 
               a {
@@ -1001,12 +1024,21 @@ img {
                 border-bottom-left-radius: 8px;
                 color: @dark-gray;
                 font-weight: 600;
+                font-size: 1.1rem;
+                text-transform: uppercase;
+                text-align: right;
+                .event-time {
+                	text-transform: none;
+                }
               }
               .event-desc {
                 padding: 10px;
                 background: #000000A6 0% 0% no-repeat padding-box;
                 border-top-right-radius: 8px;
                 border-bottom-right-radius: 8px;
+                font-size: 1.125rem; 
+                font-weight: 400;
+                line-height: 1.35;
               }
               .event-title {
               	font-weight: bold;

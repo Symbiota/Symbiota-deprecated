@@ -83,7 +83,7 @@ function getNews() {
     			$tmp['ID'] = substr(preg_replace("/[^a-z_-]/","",str_replace(" ","-",strtolower($tmp['title']))),0,20);
 				}
 				$tmp = array_map('cleanMSWord',$tmp);
-				$tmp['excerpt'] = substr($tmp['content'], 0, strrpos(substr($tmp['content'], 0, 200), ' '));
+				$tmp['excerpt'] = substr($tmp['content'], 0, strrpos(substr($tmp['content'], 0, 170), ' '));
 				$return[] = $tmp;  		
     	}
     }
