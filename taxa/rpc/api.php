@@ -10,7 +10,7 @@ $result = [];
 $CLID_GARDEN_ALL = 54;
 
 
-
+/*
 include_once($SERVER_ROOT.'/classes/TaxonProfileManager.php');
 $taxonManager = new TaxonProfileManager();
 	$taxonManager->setTaxon($_GET["taxon"]);
@@ -19,7 +19,7 @@ $syn = $taxonManager->getSynonyms();
 var_dump($syn);
 
 var_dump($taxonManager->getAuthor());
-
+*/
 
 
 function getTaxon($tid) {
@@ -86,7 +86,7 @@ function taxaManagerToJSON($taxaObj,$recursive = true) {
 		$result["parentTid"] = $taxaObj->getParentTid();   
 		$result["rankId"] = $taxaObj->getRankId();  
 		$result["author"] = $taxaObj->getAuthor();
-		var_dump($result["author"]);
+		#var_dump($result["author"]);
 		$result["images"] = $taxaObj->getImages();
 
 		if ($recursive === true) {
