@@ -49,7 +49,7 @@ class ExploreManager {
     return $this->model->getTitle();
   }
   public function getAbstract() {
-    return $this->model->getAbstract();
+    return cleanWindows($this->model->getAbstract());
   }
   public function getAuthors() {
     return $this->model->getAuthors();
