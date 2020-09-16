@@ -69,4 +69,11 @@ function get_select_statement($table, $fields) {
     $sql .= "FROM $table ";
     return $sql;
 }
+
+function cleanWindows($str) {
+	return mb_convert_encoding($str, "UTF-8", array("Windows-1252"));
+}
+
+
+
 ?>

@@ -99,7 +99,7 @@ class TaxaManager {
     return $this->model->getSciname();
   }
   public function getAuthor() {
-    return $this->model->getAuthor();
+    return cleanWindows($this->model->getAuthor());
   }
   public function getRankId() {
     return $this->model->getRankid();
@@ -276,7 +276,7 @@ class TaxaManager {
 				foreach ($rsArr as $idx => $rs) {
 					#$rsArr[$idx]['statement'] = iconv('UTF-8', 'ISO-8859-1//TRANSLIT//IGNORE', $rsArr[$idx]['statement']);#htmlentities($rs[$idx]['statement']);
 					##$rsArr[$idx] =  str_replace($emdash, '(mdash)', $rsArr[$idx]);
-					$rsArr[$idx]['statement'] = mb_convert_encoding($rsArr[$idx]['statement'], "UTF-8", array("Windows-1252"));
+					$rsArr[$idx]['statement'] = cleanWindows($rsArr[$idx]['statement']);
 					
 				}
 				
