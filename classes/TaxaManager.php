@@ -274,9 +274,9 @@ class TaxaManager {
 				->execute();
 				#var_dump($rsArr);exit;
 				#foreach ($rsArr as $idx => $rs) {
-					#$rs[$idx] = iconv('UTF-8', 'ISO-8859-1//TRANSLIT//IGNORE', $rs['statement']);#htmlentities($rs['statement']);
-					#$rsArr[$idx] =  str_replace($emdash, '(mdash)', $rsArr[$idx]);
-				#	$rsArr[$idx]['statement'] = mb_convert_encoding($rsArr[$idx]['statement'], "UTF-8", array("Windows-1252"));
+					##$rs[$idx] = iconv('UTF-8', 'ISO-8859-1//TRANSLIT//IGNORE', $rs['statement']);#htmlentities($rs['statement']);
+					##$rsArr[$idx] =  str_replace($emdash, '(mdash)', $rsArr[$idx]);
+					#$rsArr[$idx]['statement'] = mb_convert_encoding($rsArr[$idx]['statement'], "UTF-8", array("Windows-1252"));
 				#}
 				
 				/* copied from TaxonProfileManager */
