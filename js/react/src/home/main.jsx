@@ -92,7 +92,7 @@ class Home extends React.Component {
   render() {
 		
 		const slickSettings = {
-			autoplay: false,
+			autoplay: true,
 			initialSlide: 0,
 			autoplaySpeed: 10000,
 			dots: true,
