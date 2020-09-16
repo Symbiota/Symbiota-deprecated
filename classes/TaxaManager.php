@@ -99,7 +99,6 @@ class TaxaManager {
     return $this->model->getSciname();
   }
   public function getAuthor() {
-  var_dump($this->model->getAuthor());exit;
     return $this->model->getAuthor();
   }
   public function getRankId() {
