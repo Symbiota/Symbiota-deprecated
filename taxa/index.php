@@ -30,6 +30,7 @@ $taxonRank = $taxonManager->getRankId();
 $links = $taxonManager->getTaxaLinks();
 $vernStr = $taxonManager->getVernacularStr();
 $synStr = $taxonManager->getSynonymStr();
+var_dump($synStr);
 if($links){
 	foreach($links as $linkKey => $linkUrl){
 		if($linkUrl['title'] == 'REDIRECT'){

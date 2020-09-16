@@ -46,6 +46,7 @@ else{
     <?php
 }
 $scinameHeaderDiv = ob_get_clean();
+var_dump($taxonManager->getAuthor());
 
 ob_start();
 if($ambiguous){
