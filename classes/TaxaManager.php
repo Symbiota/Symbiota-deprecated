@@ -394,6 +394,7 @@ class TaxaManager {
       function ($sy) { return $sy["sciname"] . " " . $sy["author"]; },
       $synonyms->getQuery()->execute()
     );*/
+    	$synonyms = array_map("cleanWindows",$synonyms);
     return $synonyms;
   }
   private function populateOrigin($tid = null){
