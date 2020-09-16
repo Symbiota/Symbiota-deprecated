@@ -10,15 +10,18 @@ $result = [];
 $CLID_GARDEN_ALL = 54;
 
 
-/*
+
 include_once($SERVER_ROOT.'/classes/TaxonProfileManager.php');
 $taxonManager = new TaxonProfileManager();
 	$taxonManager->setTaxon($_GET["taxon"]);
 $taxonManager->setSynonyms();
 $syn = $taxonManager->getSynonyms();
-
 var_dump($syn);
-*/
+
+var_dump($taxonManager->getAuthor());
+
+
+
 function getTaxon($tid) {
   $em = SymbosuEntityManager::getEntityManager();
   $taxaRepo = $em->getRepository("Taxa");
