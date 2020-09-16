@@ -11,7 +11,7 @@ $CLID_GARDEN_ALL = 54;
 
 $tid = $_GET["taxon"];
 
-
+/*
 include_once($SERVER_ROOT.'/classes/TaxonProfileManager.php');
 $taxonManager = new TaxonProfileManager();
 	$taxonManager->setTaxon($tid);
@@ -26,6 +26,13 @@ $taxaRepo = $em->getRepository("Taxa");
 $taxaModel = $taxaRepo->find($tid);
 $taxa = TaxaManager::fromModel($taxaModel);
 var_dump($taxa->getAuthor());
+*/
+
+
+include_once("$SERVER_ROOT/config/dbconnection.php");
+
+
+
 /*
 function getTaxon($tid) {
   $em = SymbosuEntityManager::getEntityManager();

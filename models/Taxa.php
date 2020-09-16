@@ -7,7 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * Taxa
  * @ORM\Cache("READ_ONLY")
- * @ORM\Table(options={"collate"="utf8_general_ci"}, name="taxa", uniqueConstraints={@ORM\UniqueConstraint(name="sciname_unique", columns={"SciName", "RankId", "Author"})}, indexes={@ORM\Index(name="unitname1_index", columns={"UnitName1", "UnitName2"}), @ORM\Index(name="sciname_index", columns={"SciName"}), @ORM\Index(name="idx_taxacreated", columns={"InitialTimeStamp"}), @ORM\Index(name="rankid_index", columns={"RankId"}), @ORM\Index(name="FK_taxa_uid_idx", columns={"modifiedUid"})})
+ * @ORM\Table(name="taxa", uniqueConstraints={@ORM\UniqueConstraint(name="sciname_unique", columns={"SciName", "RankId", "Author"})}, indexes={@ORM\Index(name="unitname1_index", columns={"UnitName1", "UnitName2"}), @ORM\Index(name="sciname_index", columns={"SciName"}), @ORM\Index(name="idx_taxacreated", columns={"InitialTimeStamp"}), @ORM\Index(name="rankid_index", columns={"RankId"}), @ORM\Index(name="FK_taxa_uid_idx", columns={"modifiedUid"})})
  * @ORM\Entity
  */
 class Taxa
