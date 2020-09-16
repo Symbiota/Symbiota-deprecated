@@ -1157,6 +1157,7 @@ img {
 .close-modal {
 	cursor: pointer;
 }
+
 // The modal "window"
 .modal-content {
 	background-color: transparent;
@@ -1289,69 +1290,6 @@ img {
 			padding: .3em;
 		}
 	}
-	
-	.explore-preview-modal {//used in taxa and garden, so needs to be here
-		margin-top: 3em;
-		overflow-y: scroll;
-		max-height: 80vh;
-		h1, h2 {
-			color: white;
-		}
-		.loading-overlay {
-			position: absolute;
-		}
-		.explore-preview-header{
-			display: flex;
-			flex-flow: row nowrap;
-			justify-content: space-between;
-			margin-top: 1.5em;
-			h1 {
-				font-size: 60px;
-				margin-bottom: 0;
-			}
-			.close-modal {
-			}
-		}
-
-		.explore-preview-main {
-			background-color: white;
-			color: black;
-			.main-wrapper {
-				padding: 1em 30px;
-				font-size: 22px;
-				line-height: 1.4em;
-				flex-basis: 66%;
-			}
-			.sidebar-wrapper {
-				margin-top: 1em;
-				padding: 0 15px 0 0;
-				border-left: 1px dotted @dark-gray;
-				flex-basis: 33%;
-				font-size: 14px;
-				> div {
-					margin-left: 15px;
-				}
-				h3 {
-					margin: 0 0 1em;
-					color: @med-green;
-					font-size: 18px;
-					font-weight: bold;
-				}
-				.data-item {
-					display: flex;
-					flex-flow: row nowrap;
-					.data-label {
-						flex-basis: 35%;
-					}
-				}
-				.btn-primary {
-					font-size: 16px;
-					padding: .5em .7em;
-				}
-			}
-		}
-	}
-
 	
 }
 
@@ -1571,6 +1509,92 @@ img {
 		}
 	}
 }
-.test {
-	font-size: 1em;
+
+.modal-backdrop.explore-preview-modal {//used in taxa and garden, so needs to be here
+	padding: 12 0 0 0;
+	.modal-content {
+		max-width: 1146px;
+		padding: 0;
+		.explore-preview-wrapper {
+			margin-top: 3em;
+			overflow-y: scroll;
+			max-height: 80vh;
+			h1, h2 {
+				color: white;
+			}
+			.loading-overlay {
+				position: absolute;
+			}
+			.mask {
+				position: absolute;
+				width: 100%;
+				height: 100%; 
+				background: linear-gradient(to right, #000000 0%, #00000000 100%); 
+				opacity: .52;
+				box-sizing: border-box;
+			}
+			.explore-preview-header{
+				display: flex;
+				flex-flow: row nowrap;
+				justify-content: space-between;
+				margin-top: 1.5em;
+				h1 {
+					font-size: 60px;
+					font-weight: 700;
+					margin-bottom: 0;
+				}
+				.close-modal {
+				}
+			}
+			h2 {
+				font-size: 1.75rem; 
+				margin: 0 !important;
+			}
+			.explore-preview-main {
+				background-color: white;
+				color: black;
+				.main-wrapper {
+					padding: 1em 30px;
+					font-size: 22px;
+					line-height: 1.4em;
+					flex-basis: 66%;
+				}
+				.sidebar-wrapper {
+					margin-top: 1em;
+					padding: 0 15px 0 0;
+					border-left: 1px dotted @dark-gray;
+					flex-basis: 33%;
+					font-size: 14px;
+					> div {
+						margin-left: 15px;
+					}
+					h3 {
+						margin: 0 0 1em;
+						color: @med-green;
+						font-size: 1.125rem;
+						font-weight: bold;
+						
+					}
+					.data-item {
+						display: flex;
+						flex-flow: row nowrap;
+						padding: .25rem 0;
+						.data-label {
+							flex-basis: 35%;
+						}
+					}
+					.taxa-link {
+						margin-top: 20px;
+					}
+					.btn-primary {
+						font-size: 16px;
+						padding: .5em .7em;
+					}
+				}
+			}
+		}
+
+	}
+	
+	
 }

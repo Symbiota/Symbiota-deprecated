@@ -66,19 +66,19 @@ export default class ExplorePreviewModal extends Component {
  //   console.log(this.state);
     return (
     
-    <div className="modal-backdrop">
-      <div className="modal-content">
-			<div className="wrapper explore-preview-modal">
-				<div className="" style={{ position: "relative", maxWidth: "100%", minHeight: "45em" }}>
+    <div className="modal-backdrop explore-preview-modal">
+      <div className="modal-content container mx-auto">
+			<div className="wrapper explore-preview-wrapper">
+				<div className="" style={{ position: "relative", minHeight: "45em", maxWidth: "100%", overflowX: "hidden" }}>
 							
 				<Loading 
 					clientRoot={ this.props.clientRoot }
 					isLoading={ this.state.isLoading }
 				/>
 				
-					<div className="row">
-						<div className="col-12 container" style={{ minHeight: "15em", backgroundSize: "cover", backgroundImage:`url('`+ this.state.iconUrl + `')` }}>
-							
+					<div className="row" style={{ maxWidth: "100%", overflowX: "hidden"}}>
+						<div className="col-12" style={{  minHeight: "15em", backgroundSize: "cover", backgroundImage:`url('`+ this.state.iconUrl + `')` }}>
+							<div className="mask">&nbsp;</div>
 							<div className="explore-preview-header">
 								<h1 className="col-10">{ this.state.title }</h1>
 								<div className="col-2 text-md-right close-modal" onClick={() => { this.onTogglePreviewClick() }}>
@@ -93,7 +93,7 @@ export default class ExplorePreviewModal extends Component {
 						</div>
 					</div>
 					
-					<div className="row explore-preview-main">
+					<div className="row explore-preview-main" style={{ maxWidth: "100%", overflowX: "hidden"}}>
 
 						<div className="container main-wrapper">
 							<div className="row">
@@ -106,19 +106,19 @@ export default class ExplorePreviewModal extends Component {
 						<div className="container sidebar-wrapper">
 							<div>
 								<h3>{ this.state.title } Data</h3>
-								<div className={ "dashed-border py-2 data-item" }>
+								<div className={ "dashed-border data-item" }>
 						      <div className="data-label font-weight-bold">Families:</div>
 						      <div>{ this.state.totals.families }</div>
 						    </div>
-								<div className={ "dashed-border py-2 data-item" }>
+								<div className={ "dashed-border data-item" }>
 						      <div className="data-label font-weight-bold">Genera:</div>
 						      <div>{ this.state.totals.genera }</div>
 						    </div>
-								<div className={ "dashed-border py-2 data-item" }>
+								<div className={ "dashed-border data-item" }>
 						      <div className="data-label font-weight-bold">Species:</div>
 						      <div>{ this.state.totals.species } (species rank)</div>
 						    </div>
-								<div className={ "dashed-border py-2 data-item" }>
+								<div className={ "dashed-border data-item" }>
 						      <div className="data-label font-weight-bold">Total Taxa:</div>
 						      <div>{ this.state.totals.taxa } (including subsp. and var.)</div>
 						    </div>
