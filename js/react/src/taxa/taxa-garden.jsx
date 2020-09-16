@@ -248,7 +248,9 @@ class TaxaApp extends React.Component {
             	<h3 className="text-light-green font-weight-bold mt-2">{ this.state.vernacularNames[0] } images</h3>
 							<div className="slider-wrapper">
   						<ImageCarousel
-  							images={this.state.images}>
+  							images={this.state.images}
+								imageCount={ this.state.length } 
+							>
 								{
 									this.state.images.map((image,index) => {
 										return (					

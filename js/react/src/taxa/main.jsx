@@ -355,7 +355,7 @@ class TaxaChooser extends React.Component {
     let titleVal = (res.sciName? res.sciName : res.family);
     pageTitle.innerHTML = `${pageTitle.innerHTML} ${titleVal}`;
   	return (
-			<div className="container mx-auto pl-4 pr-4 pt-5 taxa-detail" style={{ minHeight: "45em" }}>
+			<div className="container mx-auto pl-4 pr-4 py-5 taxa-detail" style={{ minHeight: "45em" }}>
 				<Loading 
 					clientRoot={ this.props.clientRoot }
 					isLoading={ res.isLoading }
@@ -443,7 +443,7 @@ class TaxaDetail extends React.Component {
 
 		return (
 	
-			<div className="container mx-auto pl-4 pr-4 pt-5 taxa-detail" style={{ minHeight: "45em" }}>
+			<div className="container mx-auto pl-4 pr-4 py-5 taxa-detail" style={{ minHeight: "45em" }}>
 				<Loading 
 					clientRoot={ this.props.clientRoot }
 					isLoading={ res.isLoading }
@@ -513,7 +513,9 @@ class TaxaDetail extends React.Component {
 							<div className="slider-wrapper">
 						
 							<ImageCarousel
-								images={res.images.HumanObservation}>
+								images={res.images.HumanObservation}
+								imageCount={ res.images.HumanObservation.length } 
+							>
 								{
 									res.images.HumanObservation.map((image,index) => {
 										return (					
@@ -544,7 +546,9 @@ class TaxaDetail extends React.Component {
 							<h3 className="text-light-green font-weight-bold mt-2">Herbarium specimens</h3>
 							<div className="slider-wrapper">
 							<ImageCarousel
-								images={res.images.PreservedSpecimen}>
+								images={res.images.PreservedSpecimen}
+								imageCount={ res.images.PreservedSpecimen.length } 
+							>
 								{
 									res.images.PreservedSpecimen.map((image,index) => {
 										return (					

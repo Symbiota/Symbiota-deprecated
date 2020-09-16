@@ -55,7 +55,10 @@ include($serverRoot . "/header.php");
                         </div>
                     </div>
                     <div class="store-item-pic col-lg-4">
+                    		<figure>
                         <img src="./images/flora_vol1.png" alt="Flora of Oregon Vol 1">
+                        <figcaption>"There is now a new standard of excellence for a state flora."<br><cite>— Neil Harriman, Plant Science Bulletin 61(4) 2015</cite></figcaption>
+                        </figure>
                     </div>
                 </div>
                 <div class="store-item-purchase">
