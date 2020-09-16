@@ -99,6 +99,7 @@ class TaxaManager {
     return $this->model->getSciname();
   }
   public function getAuthor() {
+  var_dump($this->model->getAuthor());exit;
     return $this->model->getAuthor();
   }
   public function getRankId() {
@@ -273,11 +274,12 @@ class TaxaManager {
 				->getQuery()
 				->execute();
 				#var_dump($rsArr);exit;
-				#foreach ($rsArr as $idx => $rs) {
-					##$rs[$idx] = iconv('UTF-8', 'ISO-8859-1//TRANSLIT//IGNORE', $rs['statement']);#htmlentities($rs['statement']);
+				foreach ($rsArr as $idx => $rs) {
+					#$rsArr[$idx]['statement'] = iconv('UTF-8', 'ISO-8859-1//TRANSLIT//IGNORE', $rsArr[$idx]['statement']);#htmlentities($rs[$idx]['statement']);
 					##$rsArr[$idx] =  str_replace($emdash, '(mdash)', $rsArr[$idx]);
 					#$rsArr[$idx]['statement'] = mb_convert_encoding($rsArr[$idx]['statement'], "UTF-8", array("Windows-1252"));
-				#}
+					
+				}
 				
 				/* copied from TaxonProfileManager */
         //Get descriptions associated with accepted name only

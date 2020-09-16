@@ -110,7 +110,6 @@ function taxaManagerToJSON($taxaObj,$recursive = true) {
 	}
 	return $result;
 }
-
 $result = [];
 if (array_key_exists("search", $_GET)) {
   $result = searchTaxa(trim($_GET["search"]));
