@@ -3,8 +3,8 @@
 @import '../../node_modules/react-modal-video/css/modal-video.min.css';
 
 //Variable for project paths since relative paths not allowed
-@subdir: "/portal";
-//@subdir: "";
+//@subdir: "/portal";
+@subdir: "";
 
 * {
   font-family: @font;
@@ -179,7 +179,7 @@ img {
   }
 }
 .dropdown-menu {
-	margin: .595rem 0 0;
+	margin: .5rem 0 0;
 	border-top: none;
 	border-radius: 0 0 .4em .4em;
 	padding: 0;
@@ -306,12 +306,12 @@ img {
 }
 
 .page-header {
-
   #titlebackground {
     background-color: darkgreen;
     background-repeat: no-repeat;
     background-position: center top;
     background-size: cover;
+		height: 154px;
 
     &.title-leaf {
       background-image: url("@{subdir}/images/header/h1leaf.png");
@@ -342,7 +342,7 @@ img {
     color: white;
     font-size: 60px;
     font-weight: bold;
-    padding: 45px 0 20px 0;
+    padding: 65px 0 20px; 0;
   }
 
 }

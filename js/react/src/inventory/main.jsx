@@ -395,7 +395,7 @@ class InventoryChooser extends React.Component {
 																				</div>
 																				{project.pid === 1 &&
 																				<div className="project-map-image">
-																					<img className="img-fluid" src={ this.props.clientRoot + '/images/inventory/flora_or_map_lg.png' } />
+																					<img className="img-fluid" src={ this.props.clientRoot + '/images/inventory/project1_map.png' } />
 																				</div>
 																				}
 																				<div className="project-description" dangerouslySetInnerHTML={{__html: project.fulldescription}} />
