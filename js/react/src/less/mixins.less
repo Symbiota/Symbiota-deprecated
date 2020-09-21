@@ -9,6 +9,13 @@
 
 @font: 'Source Sans Pro', sans-serif !important;
 
+/* breakpoints  */
+@xlarge: 1200px;
+@large: 992px; //default bootstrap setting
+@medium: 720px;
+@small: 540px; 
+//@xsmall: 374px;
+
 .text-capitalize() {
   text-transform: capitalize;
 }
@@ -53,3 +60,11 @@
   .text-drk-grn();
   text-shadow: none !important;
 }
+.collapsed-header() {
+  height: 3.8em !important;
+  padding-top: 0 !important;
+  transition: height 0.5s, padding-top 0.5s;
+}
+
+
+

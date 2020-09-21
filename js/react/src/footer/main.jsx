@@ -27,16 +27,16 @@ class FooterApp extends React.Component {
             </li>
             */
             }
-            <li className="nav-item">
+            <li className="nav-item login">
               <a href={ `${this.props.clientRoot}/profile/index.php?refurl=${window.location.pathname}` } className="nav-link">Login</a>
             </li>
           </ul>
-          <div className="nav-item ml-auto my-auto copyright">All website content &copy; { year } OregonFlora unless otherwise noted</div>
+          <div className="nav-item copyright">All website content &copy; { year } OregonFlora unless otherwise noted</div>
         </nav>
         </div>
         <div id="footer-content" className="container-fluid container">
           <div className="row py-4">
-            <div className="col">
+            <div className="col-md">
               <div>
                 <p className="mt-2">
                   OregonFlora is based at the <a href="https://bpp.oregonstate.edu/herbarium" target="_blank">OSU Herbarium</a> at Oregon State University.
@@ -51,7 +51,7 @@ class FooterApp extends React.Component {
                 </div>
               </div>
             </div>
-            <div className="col">
+            <div className="col-md">
               <a href={ "https://oregonstate.edu/" } target="_blank"><img src={ `${this.props.clientRoot}/images/footer/osu_horizontal_2c_o_over_b.png` } alt="OSU Logo"/></a>
               <p className="my-2">
                 <strong>OregonFlora</strong><br/>
@@ -60,7 +60,7 @@ class FooterApp extends React.Component {
                 <a href="mailto:info@oregonflora.org" target="_blank">info@oregonflora.org</a>
               </p>
             </div>
-            <div className="col">
+            <div className="col-md">
               <a href={ "http://symbiota.org/docs/" } target="_blank"><img
                 className="d-block mb-2"
                 style={{ width: "10em" }}

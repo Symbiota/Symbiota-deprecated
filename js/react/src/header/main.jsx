@@ -2,6 +2,11 @@ import React from "react";
 import ReactDOM from "react-dom";
 import SearchWidget from "../common/search.jsx";
 
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { library } from "@fortawesome/fontawesome-svg-core";
+import { faBars } from '@fortawesome/free-solid-svg-icons'
+library.add(faBars)
+
 
 const RANK_FAMILY = 140;
 const RANK_GENUS = 180;
@@ -181,6 +186,8 @@ class HeaderApp extends React.Component {
   }
 
   render() {
+  	let lgLogo = `${this.props.clientRoot}/images/header/oregonflora-logo.png`;
+  	let smLogo = `${this.props.clientRoot}/images/header/oregonflora-logo-sm.png`;
     return (
     <div className="header-wrapper" style={{ backgroundImage: `url(${this.props.clientRoot}/images/header/OF-Header_May8.png)` }}>
       <nav
@@ -188,17 +195,46 @@ class HeaderApp extends React.Component {
         className={ `container navbar navbar-expand-lg navbar-dark site-header ${this.state.isCollapsed ? "site-header-scroll" : ''}` }>
 
         <a className="navbar-brand" href={ `${this.props.clientRoot}/` }>
-          <img id="site-header-logo"
-               src={
-                 this.state.isCollapsed
-                   ? `${this.props.clientRoot}/images/header/oregonflora-logo-sm.png`
-                   : `${this.props.clientRoot}/images/header/oregonflora-logo.png`
-               }
-               alt="OregonFlora"/>
+        	{ this.state.isCollapsed ? (
+        	<picture>
+          	<img id="site-header-logo"
+               src={smLogo}
+               alt="OregonFlora"
+          	/>
+          </picture>
+					) : (
+						<picture>
+	        		<source media="(max-width: 992px)" srcSet={ smLogo } />
+  	      		<source media="(min-width: 992px)" srcSet={ lgLogo } />
+							<img id="site-header-logo"
+								 src={lgLogo}
+								 alt="OregonFlora"
+							/>
+						</picture>
+						)
+					}        
         </a>
 
-        <div id="site-header-dropdowns" className="collapse navbar-collapse">
-          <ul className="navbar-nav">
+        <div id="site-header-dropdowns-wrapper" className="">
+        
+					<button
+						id="site-header-navbar-toggler"
+						className="navbar-toggler ml-auto"
+						type="button"
+						data-toggle="collapse"
+						data-target="#site-header-dropdowns"
+						aria-controls="navbarSupportedContent"
+						aria-expanded="false"
+						aria-label="Toggle navigation">
+
+						<span className="menu-toggle">
+							<FontAwesomeIcon 
+								icon="bars"	
+								size="2x"
+						/></span>
+					</button>
+        
+          <ul id="site-header-dropdowns" className="collapse navbar-collapse navbar-nav">
             {
               dropDowns.map((dropdownData) => {
                 return (
@@ -221,10 +257,22 @@ class HeaderApp extends React.Component {
           </ul>
         </div>
 
-        <div className={ "search-wrapper ml-auto" + (this.state.isCollapsed ? " my-auto" : "") }>
-          { this.getLoginButtons() }
 
-          <div className="row widget-wrapper">
+
+      
+        <div className={ "search-wrapper ml-auto"}>
+          { this.getLoginButtons() }
+					<button
+						id="site-search-toggler"
+						type="button" 
+						data-toggle="collapse" 
+						data-target="#search-widget-wrapper" 
+						aria-expanded="false" 
+						aria-controls="search-widget-wrapper"
+					>
+						Plant search
+					</button>
+          <div className="row widget-wrapper collapse" id="search-widget-wrapper">
             <SearchWidget
               placeholder="Search all plants"
               clientRoot={ this.props.clientRoot }
@@ -248,87 +296,8 @@ ReactDOM.render(<HeaderApp clientRoot={ dataProps["clientRoot"] } userName={ dat
 
       {/*
       <!-- Holds dropdowns on mobile -->
-      <button
-        id="site-header-navbar-toggler"
-        className="navbar-toggler ml-auto"
-        type="button"
-        data-toggle="collapse"
-        data-target="#site-header-dropdowns"
-        aria-controls="navbarSupportedContent"
-        aria-expanded="false"
-        aria-label="Toggle navigation">
 
-        <span className="navbar-toggler-icon"></span>
-      </button>
-
-      <!-- Dropdowns -->
-      <div id="site-header-dropdowns" className="collapse navbar-collapse">
-        <ul className="navbar-nav">
-          <!-- Explore site -->
-          <li className="nav-item dropdown">
-            <a id="explore" className="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown"
-               aria-haspopup="true" aria-expanded="false">
-              Explore Our Site
-            </a>
-            <div className="dropdown-menu" aria-labelledby="explore">
-              <a className="dropdown-item" href="<?php echo $clientRoot; ?>/spatial/index.php">Mapping</a>
-              <a className="dropdown-item" href="<?php echo $clientRoot; ?>/checklists/dynamicmap.php?interface=key">Interactive
-                Key</a>
-              <a className="dropdown-item" href="<?php echo $clientRoot; ?>/projects/index.php">Inventories</a>
-              <a className="dropdown-item"
-                 href="<?php echo $clientRoot; ?>/collections/harvestparams.php?db[]=5,8,10,7,238,239,240,241">OSU
-                Herbarium</a>
-              <a className="dropdown-item" href="<?php echo $clientRoot; ?>/garden/index.php">Gardening with Natives</a>
-              <a className="dropdown-item" href="<?php echo $clientRoot; ?>/imagelib/search.php">Image Search</a>
-              <a className="dropdown-item" href="<?php echo $clientRoot; ?>/taxa/admin/taxonomydisplay.php">Taxonomic
-                Tree</a>
-            </div>
-          </li>
-
-          <!-- Resources -->
-          <li className="nav-item dropdown">
-            <a id="resources" className="nav-link dropdown-toggle wht-txt" href="#" role="button" data-toggle="dropdown"
-               aria-haspopup="true" aria-expanded="false">
-              Resources
-            </a>
-            <div className="dropdown-menu" aria-labelledby="resources">
-              <a className="dropdown-item" href="<?php echo $clientRoot; ?>/pages/whats-new.php">What's New</a>
-              <a className="dropdown-item" href="<?php echo $clientRoot; ?>/newsletters/index.php">Archived
-                Newsletter</a>
-              <a className="dropdown-item" href="<?php echo $clientRoot; ?>/pages/links.php">Links</a>
-            </div>
-          </li>
-
-          <!-- About -->
-          <li className="nav-item dropdown">
-            <a id="about" className="nav-link dropdown-toggle wht-txt" href="#" role="button" data-toggle="dropdown"
-               aria-haspopup="true" aria-expanded="false">
-              About
-            </a>
-            <div className="dropdown-menu" aria-labelledby="about">
-              <a className="dropdown-item" href="<?php echo $clientRoot; ?>/pages/mission.php">Mission and History</a>
-              <a className="dropdown-item" href="<?php echo $clientRoot; ?>/pages/contact.php">Contact Info</a>
-              <a className="dropdown-item" href="<?php echo $clientRoot; ?>/pages/project-participants.php">Project
-                Participants</a>
-            </div>
-          </li>
-
-          <!-- Contribute -->
-          <li className="nav-item dropdown">
-            <a id="contribute" className="nav-link dropdown-toggle wht-txt" href="#" role="button"
-               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-              Contribute
-            </a>
-            <div className="dropdown-menu" aria-labelledby="contribute">
-              <a className="dropdown-item" href="<?php echo $clientRoot; ?>/pages/donate.php">Donate</a>
-              <a className="dropdown-item" href="<?php echo $clientRoot; ?>/pages/volunteer.php">Volunteer</a>
-              <a className="dropdown-item" href="<?php echo $clientRoot; ?>/pages/merchandise.php">Merchandise</a>
-            </div>
-          </li>
-        </ul>
-      </div>
-      <!-- Dropdowns end -->
-
+      
       <!-- Search -->
       <form
         className="form-inline ml-auto"

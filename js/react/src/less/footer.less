@@ -1,11 +1,5 @@
 @import "./mixins.less";
 
-@media screen and (max-width: 900px) {
-  #footer-app {
-    display: none;
-  }
-}
-
 #footer-app {
   .navbar {
     background: @med-green;
@@ -48,4 +42,31 @@
 		
     }
   }
+	@media screen and (max-width: @large) {
+		.navbar-nav {
+			width: 100%;
+			flex-direction: row;
+			justify-content: space-evenly;
+		}
+		
+		.nav-item {
+			&.copyright {
+				width: 100%;
+				text-align: center;
+			}
+			&.login {
+				display: none;
+			}
+		}
+		#footer-content {
+			.col-md {
+				margin: 1.2rem 0;
+				p {
+					max-width: 100%;
+				}
+			}
+		}	
+
+	}
+
 }
