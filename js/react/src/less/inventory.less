@@ -74,7 +74,6 @@
 			.current-wrapper {
 				display: flex;
 				flex-flow: row nowrap;
-
 				.view-opts {
 					padding-left: 10px;
 					margin: 0;
@@ -118,6 +117,7 @@
 	}
 
 	.inventory-chooser { //select from a list of projects
+		overflow: hidden;
 		strong {
 			text-transform: uppercase;
 		}
@@ -156,13 +156,32 @@
 			.project-content {
 				padding: 1em 6em;
 			}
+			@media (max-width: @medium) {
+				.project-header {
+					.btn-primary {
+						margin-left: 1em;
+						margin-top: 0;
+					}
+					.more-less {
+						margin-top: 2px;
+					}
+					h3 {
+						display: block;
+					}
+				}
+				.project-content {
+					padding: 1em 1.8em;
+				}
+			}
 			.project-expanded {
 				display: flex;
-				flex-flow: row nowrap;
-				max-height: 560px;
-				
+				flex-flow: row wrap;
+				height: 560px;
+				> * {
+					max-height: 100%;
+				}
 				&.no-map {
-					max-height: 350px;
+					height: 350px;
 				}
 				.project-image {
 					overflow: hidden;
@@ -185,8 +204,41 @@
 						max-height: 100%;
 						width: 100%;
 						height: auto;
+						object-fit: cover;
 						border-top-left-radius: .5em;
 						border-bottom-left-radius: .5em;
+					}
+				}
+				@media (max-width: @medium) {
+
+					height: auto;	
+					&.no-map {
+						height: auto;
+					}
+					.project-image {
+						h2 {
+							margin: .5em 5% 1em 5%;
+						}
+						img {
+							max-height: 180px;
+							border-bottom-left-radius: 0;
+						}
+					}
+				}
+				@media (max-width: @small) {
+
+					height: auto;	
+					&.no-map {
+						height: auto;
+					}
+					.project-image {
+						h2 {
+							margin: .5em 5% 1em 5%;
+						}
+						img {
+							max-height: 180px;
+							border-bottom-left-radius: 0;
+						}
 					}
 				}
 			}
@@ -194,6 +246,10 @@
 				padding: 1.5em 2em;
 				font-size: 1.125rem;
 				line-height: 1.5rem;
+				
+				@media (max-width: @large) {
+					padding: 1.5em 1.5em 3.5em;
+				}
 			}
 			.btn.project-explore {
 				position: absolute;
@@ -224,6 +280,18 @@
 				top: 10px;
 				color: black;
 			}
+			
+			@media (max-width: @medium) {
+				.btn.project-explore {
+					right: auto;
+					left: 25px;
+				}
+				.less {
+					top: auto;
+					bottom: 20px;
+				}
+			
+			}
 		}
 	}
 
@@ -237,10 +305,24 @@
 			margin-right: .3em;
 		}
 		.map {
+			overflow: hidden;
+			max-width: 100%;
+			width: 1100px;
+			height: 555px;
 			> .col > div:last-child {
 				border-top: 1px dashed black;
 				border-bottom: 1px dashed black;
 			}
+			@media (max-width: @large) {
+				width: 690px;
+				height: 420px;
+			}
+			@media (max-width: @medium) {
+				width: 510px;
+				height: 320px;
+			}
+			
+			
 		}
 		.project-key {
 			
@@ -260,7 +342,7 @@
 			}
 
 			p {
-				display: inline-block;
+				display: inline;
 				margin-bottom: 0;
 			}
 		}
@@ -286,8 +368,11 @@
 				border-bottom: 1px dashed black;
 				margin-bottom: .8em;
 
+				@media (max-width: @medium) {
+					flex-flow: row wrap;
+				}
 				.table-filter {
-					width: 55%;
+					/*width: 55%;*/
 
 					input {
 						color: @med-green;
@@ -308,13 +393,22 @@
 						margin-left: .5em;
 						font-size: 1.5rem;
 					}
+					
+					@media (max-width: @medium) {
+						.verticalSeparator {
+							display: none;
+						}
+						input {
+							width: 85%;
+						}
+					}
 				}
 
 				.table-nav {
 					display: flex;
 					justify-content: space-between;
 					flex-flow: row nowrap;
-					width: 45%;
+					/*width: 45%;*/
 
 					.table-sort {
 						display: flex;
@@ -334,13 +428,17 @@
 								color: black;
 								background-color: white !important;
 							}
-
-							&.nameSort {
-							}
-
+						}
+						@media (max-width: @medium) {
+							margin-top: .5em;
+							width: 30%;
 						}
 					}
-
+					@media (max-width: @medium) {
+						.verticalSeparator {
+							margin-top: 1em;
+						}
+					}
 					.lngSort img { //East-west icons
 						height: 36px;
 					}
@@ -354,7 +452,7 @@
 						padding-top: .2em;
 						display: flex;
 						flex-flow: row wrap;
-							text-align: center;
+						text-align: center;
 						button {
 							color: @med-green;
 							padding: 0 !important;
@@ -377,6 +475,28 @@
 							font-size: 0.8rem;
 							.rows-total {
 								font-weight: bold;
+							}
+						}
+						
+						@media (max-width: @medium) {
+							margin-top: .5em;
+							padding-top: .3em;
+							width: 70%;
+							button{
+								flex-basis: 10%;
+							}
+							.rows-current {
+								flex-basis: 40%;
+								font-size: 1.2rem;
+								padding-top: .1em;
+							}
+							.rows-results {
+								flex-basis: 40%;
+								font-size: 1.2rem;
+								padding-top: .1em;
+								.rows-label {
+									display: none;
+								}
 							}
 						}
 					}
@@ -461,7 +581,6 @@
 }
 #react-explore-app, #react-identify-app {
 	.sidebar-wrapper {
-		flex-basis: 350px;
 		.stat {
 			display: flex;
 			flex-flow: row nowrap;
@@ -526,6 +645,7 @@
 
 					.card-text {
 						font-size: 20px !important;
+						line-height: 1.3em;
 						margin-left: 10px;
 					}
 
@@ -552,6 +672,7 @@
 		flex-flow: row nowrap;
 		justify-content: space-between;
 		border-bottom: 3px solid @light-green;
+		padding-bottom: .4em;
 		.btn-primary {
 			background-image: none!important;
 			padding: 8px 10px;
@@ -561,7 +682,7 @@
 		.current-wrapper {
 			height: auto;
 			margin: 3px 0 18px 0;
-			flex-basis: 80%;
+			flex-basis: 70%;
 			display: flex;
 			flex-flow: row nowrap;
 			.filter-status {
@@ -650,7 +771,16 @@
     }
   }
 }
+#react-identify-app {
 
-
+	.results-wrapper {
+		.inventory-header {
+			.current-wrapper,
+			.alt-wrapper {
+				width: 50%;
+			}
+		}
+	}
+}
 
 

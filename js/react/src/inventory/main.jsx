@@ -46,9 +46,9 @@ function ProjectMap(props) {
       	googleMapsApiKey={ props.googleMapKey } 
       >
         <GoogleMap
-          mapContainerStyle={{width: '1100px', height: '555px'}}
+          mapContainerStyle={{width: '100%', height: '100%'}}
           center={{"lat":44.156944, "lng":-120.490556}}
-          zoom={7}
+          zoom={ props.zoomLevel }
         >
         	{ props.children } 
         </GoogleMap>
@@ -68,15 +68,23 @@ class InventoryDetail extends React.Component {
       briefDescription: "",
       fullDescription: "",
       isPublic: null,
-      checklists: []
+      checklists: [],
+      zoomLevel: 7
     };
     this.getPid = this.getPid.bind(this);
+    this.updateZoom = this.updateZoom.bind(this);
   }
 
   getPid() {
     return parseInt(this.props.pid);
   }
-
+	updateZoom() {
+		let newZoom = 7;
+		if (window.innerWidth < 992) {
+			newZoom = 6;
+		}
+		this.setState({ zoomLevel: newZoom });
+	}
   componentDidMount() {
 
 		httpGet(`./rpc/api.php?pid=${this.props.pid}`)
@@ -101,8 +109,10 @@ class InventoryDetail extends React.Component {
 			})
 			.finally(() => {
 				this.setState({ isLoading: false });
+				this.updateZoom();
 			});
     
+    window.addEventListener('resize', this.updateZoom);
   }//componentDidMount
 
   render() {
@@ -199,6 +209,7 @@ class InventoryDetail extends React.Component {
           <div className="col">
               <ProjectMap
               	googleMapKey={this.props.googleMapKey}
+              	zoomLevel={ this.state.zoomLevel }
               >
               
 								<MarkerClusterer options={clusterOptions}>
@@ -385,11 +396,11 @@ class InventoryChooser extends React.Component {
 												{project.display == 'expanded' && 
 												
 														<div className={ "project-expanded" + shortClass }>
-																		<div className="project-image col-sm-8 p-0">
+																		<div className="project-image col-12 col-md-8 p-0">
 																				<h2>{project.projname}</h2>
 																				<img className="img-fluid" src={ this.props.clientRoot + '/images/inventory/' + inventoryImages[project.pid] } />
 																		</div>
-																		<div className="col-sm p-0 project-other">
+																		<div className="col-12 col-md-4 p-0 project-other">
 																				<div className="less more-less" onClick={() => this.toggleProjectDisplay(index)}>
 																						<FontAwesomeIcon icon="times-circle" size="2x"/>
 																				</div>

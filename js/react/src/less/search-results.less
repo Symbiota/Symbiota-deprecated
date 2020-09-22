@@ -4,6 +4,13 @@
   grid-auto-rows: 13em;
   grid-gap: 0.9em;
   justify-content: center;
+  @media screen and (max-width: @xlarge) {
+  	grid-template-columns: repeat(4, 1fr);
+  }
+  @media screen and (max-width: @large) {
+  	grid-template-columns: repeat(3, 1fr);
+  }
+  
 }
 
 .search-result {

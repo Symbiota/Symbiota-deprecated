@@ -77,10 +77,10 @@ export default function Table({ columns, data, pid, clientRoot }) {
 	}
 
   return (
-  	<div className="table-wrapper">
-  		<div className="table-header">
+  	<div className="table-wrapper container">
+  		<div className="table-header row">
   			
-  			<div className="table-filter">
+  			<div className="table-filter col-12 col-md-6">
 					<input
 						value={filterInput}
 						onChange={handleFilterChange}
@@ -93,8 +93,8 @@ export default function Table({ columns, data, pid, clientRoot }) {
 							: ''	
 					}
 				</div>
-        <span className="verticalSeparator"></span>
-  			<div className="table-nav">
+        <div className="col-12 col-md-1 verticalSeparator"></div>
+  			<div className="col-12 col-md-5 table-nav">
   			
   				<div className="table-sort">
 						<button

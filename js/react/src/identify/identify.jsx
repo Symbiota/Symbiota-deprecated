@@ -418,7 +418,7 @@ class IdentifyApp extends React.Component {
         </div>
 				<div className="row identify-main inventory-main">
 					<hr/>
-					<div className="col-auto sidebar-wrapper">
+					<div className="col-12 col-xl-4 col-md-5 col-sm-6 sidebar-wrapper">
 					{	(this.getDynclid() > 0 || this.getClid() > 0) &&
 						<SideBar
 							//ref={ this.sideBarRef }
@@ -448,7 +448,7 @@ class IdentifyApp extends React.Component {
 						
 					}
 					</div>
-					<div className="col results-wrapper">
+					<div className="col-12 col-xl-8 col-md-7 col-sm-6 results-wrapper">
 						<div className="row">
 							<div className="col">
 								<div className="identify-header inventory-header">

@@ -441,7 +441,7 @@ class ExploreApp extends React.Component {
         </div>
 				<div className="row explore-main inventory-main">
 					<hr/>
-					<div className="col-auto sidebar-wrapper">
+					<div className="col-12 col-xl-4 col-md-5 sidebar-wrapper">
 					{
 					
 						<SideBar
@@ -479,7 +479,7 @@ class ExploreApp extends React.Component {
 						
 					}
 					</div>
-					<div className="col results-wrapper">
+					<div className="col-12 col-xl-8 col-md-7 results-wrapper">
 						<div className="row">
 							<div className="col">
 								<div className="explore-header inventory-header">
