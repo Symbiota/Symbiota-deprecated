@@ -269,13 +269,13 @@ function SppItem(props) {
 	sppQueryParams['taxon'] = item.tid;
 	let sppUrl = window.location.pathname + '?taxon=' + encodeURIComponent(sppQueryParams['taxon']);
 	return (
-		<div key={item.tid} className="card search-result">
+		<div key={item.tid} className="card search-result grid-result">
 			<a href={sppUrl}>
 				<h4>{item.sciname}</h4>
 				{ image &&
-				<div className="img-thumbnail" style={{ position: "relative", width: "100%", height: "5.7em", borderRadius: "0.25em"}}>														
+				<div className="img-thumbnail">														
 					<img
-						className="d-block"
+						className="card-img-top grid-image"
 						style={{width: "100%", height: "100%", objectFit: "cover"}}
 						src={image.thumbnailurl}
 						alt={image.thumbnailurl}
@@ -283,7 +283,10 @@ function SppItem(props) {
 				</div>
 				}
 				<div className="map-preview">
-					<img src={ mapImage }/>
+					<img 
+						className="card-img-top grid-image"
+						src={ mapImage }
+					/>
 				</div>
 			</a>
 		</div>						
@@ -355,7 +358,7 @@ class TaxaChooser extends React.Component {
     let titleVal = (res.sciName? res.sciName : res.family);
     pageTitle.innerHTML = `${pageTitle.innerHTML} ${titleVal}`;
   	return (
-			<div className="container mx-auto pl-4 pr-4 py-5 taxa-detail" style={{ minHeight: "45em" }}>
+			<div className="container mx-auto py-5 taxa-detail" style={{ minHeight: "45em" }}>
 				<Loading 
 					clientRoot={ this.props.clientRoot }
 					isLoading={ res.isLoading }
@@ -370,7 +373,7 @@ class TaxaChooser extends React.Component {
 					</div>
 				</div>
 				<div className="row mt-2 row-cols-sm-2">
-					<div className="col-sm-8 px-4">
+					<div className="col-md-8 pr-4">
 						<p className="mt-4">
 							{/*
 								Description includes HTML tags & URL-encoded characters in the db.
@@ -388,7 +391,7 @@ class TaxaChooser extends React.Component {
 						{res.spp.length > 0 &&
 							<div className="mt-4 dashed-border" id="subspecies">     
 								<h3 className="text-light-green font-weight-bold mt-2">Species, subspecies and varieties</h3>   
-								<div className="spp-wrapper">
+								<div className="spp-wrapper search-result-grid">
 									{
 										res.spp.map((spp,index) => {
 											return (
@@ -401,7 +404,7 @@ class TaxaChooser extends React.Component {
 						}
 										
 					</div>
-					<div className="col-sm-4 sidebar">
+					<div className="col-md-4 pl-4 sidebar">
 						<SideBarSection title="Context" items={ res.highlights } classes="highlights" rankId={ res.rankId }/>
 						<SideBarSection title="Web links" items={ res.taxalinks} classes="weblinks" rankId={ res.rankId }/>
 					</div>
@@ -443,7 +446,7 @@ class TaxaDetail extends React.Component {
 
 		return (
 	
-			<div className="container mx-auto pl-4 pr-4 py-5 taxa-detail" style={{ minHeight: "45em" }}>
+			<div className="container mx-auto py-5 taxa-detail" style={{ minHeight: "45em" }}>
 				<Loading 
 					clientRoot={ this.props.clientRoot }
 					isLoading={ res.isLoading }
@@ -464,7 +467,7 @@ class TaxaDetail extends React.Component {
 					</div>
 				</div>
 				<div className="row mt-2 row-cols-sm-2">
-					<div className="col-sm-8 px-4">
+					<div className="col-md-8 pr-4">
 
 							{ allImages.length > 0 && 
 							<figure>
@@ -495,7 +498,7 @@ class TaxaDetail extends React.Component {
 						{res.spp.length > 0 &&
 							<div className="mt-4 dashed-border" id="subspecies">     
 								<h3 className="text-light-green font-weight-bold mt-2">Subspecies and varieties</h3>   
-								<div className="spp-wrapper">
+								<div className="spp-wrapper search-result-grid">
 									{
 										res.spp.map((spp,index) => {
 											return (
@@ -515,6 +518,7 @@ class TaxaDetail extends React.Component {
 							<ImageCarousel
 								images={res.images.HumanObservation}
 								imageCount={ res.images.HumanObservation.length } 
+								slideshowCount= { res.slideshowCount } 
 							>
 								{
 									res.images.HumanObservation.map((image,index) => {
@@ -548,6 +552,7 @@ class TaxaDetail extends React.Component {
 							<ImageCarousel
 								images={res.images.PreservedSpecimen}
 								imageCount={ res.images.PreservedSpecimen.length } 
+								slideshowCount= { res.slideshowCount } 
 							>
 								{
 									res.images.PreservedSpecimen.map((image,index) => {
@@ -576,7 +581,7 @@ class TaxaDetail extends React.Component {
 					
 					
 					</div>
-					<div className="col-sm-4 sidebar">
+					<div className="col-md-4 sidebar">
 						<SideBarSection title="Context" items={ res.highlights } classes="highlights" rankId={ res.rankId } />
 						<MapItem title={ res.sciName } tid={ res.tid } clientRoot={ this.props.clientRoot } />
 						<SideBarSection title="Web links" items={ res.taxalinks} classes="weblinks"  rankId={ res.rankId }/>
@@ -627,14 +632,26 @@ class TaxaApp extends React.Component {
       tid: null,
       rankId: null,
       currImage: 0,
-      related: []
+      related: [],
+      slideshowCount: 5 
     };
     this.getTid = this.getTid.bind(this);
+    this.updateViewport = this.updateViewport.bind(this);
   }
 
   getTid() {
     return parseInt(this.props.tid);
   }
+	updateViewport() {
+		let newSlideshowCount = 5;
+		if (window.innerWidth < 1200) {
+			newSlideshowCount = 4;
+		}
+		if (window.innerWidth < 992) {
+			newSlideshowCount = 3;
+		}
+		this.setState({ slideshowCount: newSlideshowCount });
+	}
   componentDidMount() {
     if (this.getTid() === -1) {
       window.location = "/";
@@ -720,7 +737,9 @@ class TaxaApp extends React.Component {
         })
 				.finally(() => {
 					this.setState({ isLoading: false });
+					this.updateViewport();
 				});
+    	window.addEventListener('resize', this.updateViewport);
     }
   }//componentDidMount
 

@@ -210,7 +210,8 @@ class GardenPageApp extends React.Component {
       viewType: ("viewType" in queryParams ? queryParams["viewType"] : "grid"),
       plantFeatureState: {},
       growthMaintenanceState: {},
-      beyondGardenState: {}
+      beyondGardenState: {},
+      slideshowCount: 0
     };
 
     // To Refresh sliders
@@ -233,12 +234,14 @@ class GardenPageApp extends React.Component {
     this.onGrowthMaintenanceChanged = this.onGrowthMaintenanceChanged.bind(this);
     this.onBeyondGardenChanged = this.onBeyondGardenChanged.bind(this);
     this.updateFeatureCollectionFilters = this.updateFeatureCollectionFilters.bind(this);
+    this.updateViewport = this.updateViewport.bind(this);
   }
 
   componentDidMount() {
     // Load canned searches
     httpGet(`${this.props.clientRoot}/garden/rpc/api.php?canned=true`)
       .then((res) => {
+				this.updateViewport();
         this.setState({ cannedSearches: JSON.parse(res) });
       });
 
@@ -286,8 +289,19 @@ class GardenPageApp extends React.Component {
     .finally(() => {
       this.setState({ isLoading: false });
     });
+    window.addEventListener('resize', this.updateViewport);
   }
 
+	updateViewport() {
+		let newSlideshowCount = 4;
+		if (window.innerWidth < 1200) {
+			newSlideshowCount = 3;
+		}
+		if (window.innerWidth < 992) {
+			newSlideshowCount = 2;
+		}
+		this.setState({ slideshowCount: newSlideshowCount });
+	}
   toggleFeatureCollectionVal(featureCollection, featureCollectionFilterName, featureKey, featureVal) {
     const changeObj = {};
     const newCollection = Object.assign({}, this.state[featureCollection]);
@@ -581,8 +595,8 @@ class GardenPageApp extends React.Component {
         	clientRoot={this.props.clientRoot}
 				/>
    			<div className="container mx-auto py-4 pl-3 pr-4">
-          <div className="row pr-3">
-            <div className="col-4">
+          <div className="row">
+            <div className="col-md-4">
               <SideBar
                 ref={ this.sideBarRef }
                 style={{ background: "#DFEFD3" }}
@@ -609,7 +623,7 @@ class GardenPageApp extends React.Component {
                 onClearSearch={ this.clearFilters }
               />
             </div>
-            <div className="col-8">
+            <div className="col-md-8">
               <div className="row">
                 <div className="col">
                   <CannedSearchContainer
@@ -617,6 +631,7 @@ class GardenPageApp extends React.Component {
                     onFilter={ this.onCannedFilter }
 										clientRoot={this.props.clientRoot}
 										checklistId={this.state.filters.checklistId}
+										slideshowCount= { this.state.slideshowCount } 
                   />
                 </div>
               </div>

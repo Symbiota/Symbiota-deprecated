@@ -72,13 +72,13 @@ class InventoryDetail extends React.Component {
       zoomLevel: 7
     };
     this.getPid = this.getPid.bind(this);
-    this.updateZoom = this.updateZoom.bind(this);
+    this.updateViewport = this.updateViewport.bind(this);
   }
 
   getPid() {
     return parseInt(this.props.pid);
   }
-	updateZoom() {
+	updateViewport() {
 		let newZoom = 7;
 		if (window.innerWidth < 992) {
 			newZoom = 6;
@@ -109,10 +109,10 @@ class InventoryDetail extends React.Component {
 			})
 			.finally(() => {
 				this.setState({ isLoading: false });
-				this.updateZoom();
+				this.updateViewport();
 			});
     
-    window.addEventListener('resize', this.updateZoom);
+    window.addEventListener('resize', this.updateViewport);
   }//componentDidMount
 
   render() {

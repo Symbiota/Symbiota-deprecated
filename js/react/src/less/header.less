@@ -18,9 +18,13 @@
     height: 100%;
     padding: 0;
     transition: height 0.5s, padding-top 0.5s;
+    
+		@media screen and (max-width: @xlarge) {
+			max-width: 920px;
+		}
 		.navbar-brand {
 			padding: 0;
-			margin: 34px 0 0 0;
+			margin: 34px 0 0 -6px;
 			#site-header-logo {
 				//margin-left: 4em;
 				//margin-left: -22px;
@@ -100,7 +104,7 @@
 	  }
 	  .header-button-bar {
 	  	justify-content: flex-end;
-	  	margin-right: 28px;
+	  	margin-right: 8px;
 	  	max-height: 30px;  	
 			@media screen and (max-width: @large) {
 				display: none !important;
@@ -112,14 +116,15 @@
     }
     .widget-wrapper {
     	justify-content: flex-end;
+    	margin-left: 80px;
 			.search-widget {
-				padding: .5rem 0 0 0 ;
+				padding: .5rem 0 0 0;
 				width: 400px;
 				position: relative;
 				vertical-align: middle;
 				input {
 					margin-right: 10px;
-					max-width: 328px !important;
+					max-width: 353px !important;
 					height: 40px;
 					border: 2px solid @med-green;
 					display: inline;
@@ -189,10 +194,27 @@
 						a.nav-link.dropdown-toggle {
 							text-shadow: none;
 							padding: .4rem 0 .4rem 1em;
-							cursor: default;
+							cursor: pointer;
+							max-width: 100%;
 							&:hover {
 								background-color: transparent !important;
 								color: white !important;
+							}
+							&::after {
+								content: '+';
+								display: inline-block;
+								border: none;
+    						float: right;
+								width: auto;
+								padding-right: 1em;
+								font-weight: bold;
+							}
+						}
+						&.show {
+							a.nav-link.dropdown-toggle {
+								&::after {
+									content: '-';
+								}
 							}
 						}
 						.dropdown-menu {

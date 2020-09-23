@@ -1,6 +1,6 @@
 @import "./mixins.less";
 
-@media only screen and (max-width: 600px) {
+@media only screen and (max-width: @medium) {
   #infographic-dropdown {
     display: none;
   }
@@ -181,6 +181,12 @@
 			font-size: 2.3rem;
 			padding-bottom: 13px;
 			color: @med-green;
+		}
+	}
+	@media (max-width: @medium) {
+		margin-top: 1em;
+		a {
+			margin-right: 0;
 		}
 	}
 }

@@ -41,7 +41,7 @@ function SideBarSection(props) {
   });
 
   return (
-      <div className={ "mb-4 " + (itemKeys.length > 0 ? "" : "d-none") }>
+      <div className={ "sidebar-section mb-4 " + (itemKeys.length > 0 ? "" : "d-none") }>
         <h3 className="text-light-green font-weight-bold mb-3">{ props.title }</h3>
         {
           itemKeys.map((key) => {
@@ -74,14 +74,26 @@ class TaxaApp extends React.Component {
       tid: null,
       currImage: 0,
       checklists: [],
-      nativeGroups: []
+      nativeGroups: [],
+      slideshowCount: 5 
     };
     this.getTid = this.getTid.bind(this);
+    this.updateViewport = this.updateViewport.bind(this);
   }
 
   getTid() {
     return parseInt(this.props.tid);
   }
+	updateViewport() {
+		let newSlideshowCount = 5;
+		if (window.innerWidth < 1200) {
+			newSlideshowCount = 4;
+		}
+		if (window.innerWidth < 992) {
+			newSlideshowCount = 3;
+		}
+		this.setState({ slideshowCount: newSlideshowCount });
+	}
 	toggleImageModal = (_currImage) => {
 		this.setState({
 			currImage: _currImage	
@@ -196,7 +208,9 @@ class TaxaApp extends React.Component {
         })
 				.finally(() => {
 					this.setState({ isLoading: false });
+					this.updateViewport();
 				});
+    	window.addEventListener('resize', this.updateViewport);
     }
   }//componentDidMount
 
@@ -219,7 +233,7 @@ class TaxaApp extends React.Component {
           </div>
         </div>
         <div className="row mt-2">
-          <div className="col-8 mr-2">
+          <div className="col-md-8">
             
             { this.state.images.length > 0 && 
 							<figure>
@@ -250,6 +264,7 @@ class TaxaApp extends React.Component {
   						<ImageCarousel
   							images={this.state.images}
 								imageCount={ this.state.length } 
+								slideshowCount= { this.state.slideshowCount } 
 							>
 								{
 									this.state.images.map((image,index) => {
@@ -286,7 +301,7 @@ class TaxaApp extends React.Component {
 							<span>{ this.state.vernacularNames[0] }</span> images
 						</h3>
 					</ImageModal>
-          <div className="col-3 ml-2">
+          <div className="col-md-4">
             <SideBarSection title="Highlights" items={ this.state.highlights } />
             { this.state.nativeGroups.length > 0 &&
             <div className={ "mb-4 " }>

@@ -19,8 +19,10 @@ export default class ImageModalCarousel extends Component {
     super(props);
     this.state = {
       nav1: null,
-      nav2: null
+      nav2: null,
+      slideshowCount: 0
     };
+    this.updateViewport = this.updateViewport.bind(this);
   }
 
   componentDidMount() {
@@ -28,8 +30,21 @@ export default class ImageModalCarousel extends Component {
       nav1: this.slider1,
       nav2: this.slider2,
     });
+    this.updateViewport();
   }
-
+	updateViewport() {
+		let newSlideshowCount = 5;
+		if (window.innerWidth < 1200) {
+			newSlideshowCount = 4;
+		}
+		if (window.innerWidth < 992) {
+			newSlideshowCount = 3;
+		}
+		if (window.innerWidth < 600) {
+			newSlideshowCount = 2;
+		}
+		this.setState({ slideshowCount: newSlideshowCount });
+	}
 /*
 	const mainSettings = {
 		autoplay: true,
@@ -79,7 +94,6 @@ export default class ImageModalCarousel extends Component {
 										className=""
 										src={image.url}
 										alt={image.collectionname}
-										style={{height: "100%"}}
 										/*onLoad={this.onImgLoad}
 										data-key={index}*/
 									/>
@@ -96,15 +110,14 @@ export default class ImageModalCarousel extends Component {
 											</div>
 										</div>
 										}
-										<div className="row image-link">
-											<div className="col">
+										<div className="image-link">
 												<a 
 													className="btn" 
 													style={{color: "white"}}
 													href={ getImageDetailPage(this.props.clientRoot, image.occid) }
 													target="_blank"
 												>See the full record for this image</a>
-											</div>
+
 										</div>
 									</div>									
 									
@@ -120,7 +133,7 @@ export default class ImageModalCarousel extends Component {
 				<Slider
           asNavFor={this.state.nav1}
           ref={slider => (this.slider2 = slider)}
-          slidesToShow={5}
+          slidesToShow={ this.state.slideshowCount}
           swipeToSlide={true}
           focusOnSelect={true}
           infinite={true}

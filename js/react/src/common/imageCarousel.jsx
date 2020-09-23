@@ -21,8 +21,8 @@ function ImageCarousel(props) {
 		autoplaySpeed: 8000,
 		dots: false,
 		infinite: props.imageCount > 5,
-		slidesToShow: 5,
-		slidesToScroll: 5,
+		slidesToShow: props.slideshowCount,
+		slidesToScroll: props.slideshowCount,
 		nextArrow: <SlickButtonFix><FontAwesomeIcon icon="chevron-right"/></SlickButtonFix>,
 		prevArrow: <SlickButtonFix><FontAwesomeIcon icon="chevron-left"/></SlickButtonFix>
 	};

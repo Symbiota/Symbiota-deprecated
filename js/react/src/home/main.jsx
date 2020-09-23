@@ -92,7 +92,7 @@ class Home extends React.Component {
   render() {
 		
 		const slickSettings = {
-			autoplay: true,
+			autoplay: false,
 			initialSlide: 0,
 			autoplaySpeed: 10000,
 			dots: true,
@@ -106,13 +106,13 @@ class Home extends React.Component {
 		
     return (
     <div className="wrapper">
-      <div className="container home mx-auto pl-4 pr-4">
+      <div className="container home mx-auto">
       	<ModalVideo channel='youtube' isOpen={this.state.isVideoOpen} videoId={ this.state.videoId } onClose={() => this.setState({isVideoOpen: false})} />
       	
      		<Slider { ...slickSettings } className="mx-auto">
      			<div key="1">
 						<div className="row slide-wrapper slide-1">
-							<div className="col-sm slide-col-1">
+							<div className="col-md slide-col-1">
 										<h1>Welcome to Oregon Flora, the world's most comprehensive guide to the vascular plants of Oregon</h1>
 										<h3>Get started right now:</h3>
 										<SearchWidget
@@ -129,7 +129,7 @@ class Home extends React.Component {
 										<p><a href={this.props.clientRoot + '/pages/tutorials.php' }><button className="btn btn-primary">Or take an introductory tour of our site</button></a></p>
 							</div>
 	
-							<div className="col-sm-6 col-md-5 col-lg-4 slide-col-2">
+							<div className="col-md-5 col-lg-4 slide-col-2">
 	
 								<div className="row link-card">
 												<p className="link-text">
@@ -171,7 +171,7 @@ class Home extends React.Component {
 
      		 <div key="2">
      		 <div className="row slide-wrapper slide-2">
-						<div className="col-sm-6 slide-col-1">
+						<div className="col-md-6 slide-col-1">
 								<h1>How to get the most out of our site</h1>
 									<p>OregonFlora is made for land managers, gardeners, scientists, restorationists, and plant lovers of all ages. You’ll find information about all the native and exotic plants of the state—ferns, conifers, grasses, herbs, and trees—that grow in the wild.</p>
 									<p>We have joined forces with Symbiota to present our website as a Symbiota portal! Learn what OregonFlora can do for you in the overview below, explore our featured tools at right, or browse our full set of tutorials—as text or videos—<a href={ this.props.clientRoot + "/pages/tutorials.php" }>here</a>.</p>
@@ -185,7 +185,7 @@ class Home extends React.Component {
 											</div>
 									</div>
 							</div>
-						<div className="col-sm-6 slide-col-2">
+						<div className="col-md-6 slide-col-2">
 									<div className="row video-card">
 											<div className="col-auto video-img">
 													<a onClick={() => this.openVideoModal('HwtEXcTO9jA')}><img src={ this.props.clientRoot + "/images/YouTube-tutorial-Taxon.png" }/></a>
@@ -240,7 +240,7 @@ class Home extends React.Component {
 						<div className="row slide-wrapper slide-3">
 							<h1>Oregon Flora News and Events</h1>
 								<div className="row">
-										<div className="col-sm-6 slide-col-1">
+										<div className="col-md-6 slide-col-1">
 											{	this.state.news.map((item,index) => {
 													
 													return (					
@@ -252,7 +252,7 @@ class Home extends React.Component {
 												})
 											}
 										</div>
-										<div className="col-sm-6 slide-col-2">
+										<div className="col-md-6 slide-col-2">
 										
 											{	this.state.events.map((item,index) => {
 													

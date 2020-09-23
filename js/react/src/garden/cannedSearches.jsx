@@ -138,6 +138,7 @@ class CannedSearchContainer extends React.Component {
               <div>
                 <GardenCarousel
                 	carouselPaused={ this.state.carouselPaused } 
+                	slideshowCount={ this.props.slideshowCount } 
                 >
                   {
                     this.props.searches.map((searchResult) => {
