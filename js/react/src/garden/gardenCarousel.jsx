@@ -11,45 +11,29 @@ const SlickButtonFix = ({currentSlide, slideCount, children, ...props}) => (
     <span {...props}>{children}</span>
 );
 
-
 /*
 	moving the slideshow loop into this page will mean making the toggle accessible to both this and taxa/main.jsx - I've tried twice 
 	- but now taxa uses /common/imageCarousel, so..?
 */
 
-
 class GardenCarousel extends React.Component {
   constructor(props) {
     super(props);
-    /*this.state = {
-    	paused: false
-    };
-    this.play = this.play.bind(this);
-    this.pause = this.pause.bind(this);*/
 	}    
-  /*  
-  play() {
-    this.slider.slickPlay();
-  }
-  pause() {
-    this.slider.slickPause();
-  }*/
-  
-  
+
   render() {
-  
 		const slickSettings = {
-			autoplay: true,
-			autoplaySpeed: 8000,
+			autoplay: this.props.carouselPlay,
+			autoplaySpeed: 2000,
 			dots: false,
 			infinite: true,
 			slidesToShow: this.props.slideshowCount,
 			slidesToScroll: 1,
 			pauseOnFocus: true,
+			initialSlide: this.props.currSlideIndex,
 			nextArrow: <SlickButtonFix><FontAwesomeIcon icon="chevron-right"/></SlickButtonFix>,
 			prevArrow: <SlickButtonFix><FontAwesomeIcon icon="chevron-left"/></SlickButtonFix>
 		};
-	
   
 		return (
 			<Slider  ref={slider => (this.slider = slider)} { ...slickSettings } className="mx-auto"  style={{ maxWidth: "100%" }}>

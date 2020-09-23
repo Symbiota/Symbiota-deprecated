@@ -26,6 +26,8 @@ class CannedSearchResult extends React.Component {
 
     this.onMouseOver = this.onMouseOver.bind(this);
     this.onMouseOut = this.onMouseOut.bind(this);
+    this.filterClick = this.filterClick.bind(this);
+    this.learnMore = this.learnMore.bind(this);
   }
 
   onMouseOver() {
@@ -35,6 +37,14 @@ class CannedSearchResult extends React.Component {
   onMouseOut() {
     this.setState({ hover: false });
   }
+	filterClick() {
+		this.props.onFilter();
+		this.props.pauseCarousel();
+	}
+	learnMore() {
+		this.props.onTogglePreviewClick(this.props.clid);
+		this.props.pauseCarousel();
+	}
 
   render() {
   	//console.log(this.props);
@@ -76,10 +86,10 @@ class CannedSearchResult extends React.Component {
           </div>
         </div>
         <div className="mt-2 px-2">
-          <button className="w-100 px-3 my-1 btn btn-primary" onClick={this.props.onFilter}>
+          <button className="w-100 px-3 my-1 btn btn-primary" onClick={ this.filterClick }>
             Filter for these
           </button>
-          <button className="w-100 px-3 my-1 btn btn-secondary" onClick={() => this.props.onTogglePreviewClick(this.props.clid)}>
+          <button className="w-100 px-3 my-1 btn btn-secondary" onClick={ this.learnMore }>
             Learn more
           </button>
         </div>
@@ -98,8 +108,13 @@ class CannedSearchContainer extends React.Component {
       isPreviewOpen: false,//explorePreviewModal
       currClid: -1,//explorePreviewModal
       currPid: 3,//explorePreviewModal,
-      carouselPaused: false
+      carouselPlay: true
     };
+  }
+  componentDidMount() {
+		if (this.props.checklistId > 0) {
+			this.pauseCarousel();
+		}
   }
 
 	togglePreviewModal = (_currClid) => {
@@ -114,12 +129,22 @@ class CannedSearchContainer extends React.Component {
   	this.togglePreviewModal(_currClid);
   	this.props.onFilter(_currClid);
   }
+  
   pauseCarousel = () => {
     this.setState({
-      carouselPaused: true
+      carouselPlay: false
     });
   }
   render() {
+  	let currSlideIndex = 1;
+		if (this.props.checklistId > 0) {
+			this.props.searches.map((result,key) => {
+				if (this.props.checklistId === result.clid) {
+					currSlideIndex = key;
+				}
+			});
+		}
+
     return (
       <div id="canned-searches" className="row mt-1 p-3 mx-0 rounded-border" style={{ background: "#DFEFD3" }}>
         <div className="col">
@@ -141,8 +166,9 @@ class CannedSearchContainer extends React.Component {
             <div className="col canned-wrapper">
               <div>
                 <GardenCarousel
-                	carouselPaused={ this.state.carouselPaused } 
+                	carouselPlay={ this.state.carouselPlay } 
                 	slideshowCount={ this.props.slideshowCount } 
+                	currSlideIndex= { currSlideIndex }
                 >
                   {
                     this.props.searches.map((searchResult) => {
