@@ -6,6 +6,11 @@ export function getGardenTaxaPage(clientRoot, tid) {
   return `${clientRoot}/taxa/garden.php?taxon=${tid}`;
 }
 
+export function getGardenPage(clientRoot, clid) {
+  return `${clientRoot}/garden/index.php?clid=${clid}`;
+
+}
+
 export function getImageDetailPage(clientRoot, occid) {
   return `${clientRoot}/collections/individual/index.php?occid=${occid}`;
 }

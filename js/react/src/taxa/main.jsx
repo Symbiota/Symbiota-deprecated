@@ -463,7 +463,7 @@ class TaxaDetail extends React.Component {
 					</div>
 					<div className="col-auto">
 						{/*<button className="d-block my-2 btn-primary">Printable page</button>*/}
-						<button className="d-block my-2 btn-secondary" disabled={ true }>Add to basket</button>
+						{/*<button className="d-block my-2 btn-secondary" disabled={ true }>Add to basket</button>*/}
 					</div>
 				</div>
 				<div className="row mt-2 row-cols-sm-2">

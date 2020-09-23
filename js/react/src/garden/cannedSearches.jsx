@@ -110,6 +110,10 @@ class CannedSearchContainer extends React.Component {
       isPreviewOpen: !this.state.isPreviewOpen
     });
   }
+  doPreviewModalSearch = (_currClid) => {
+  	this.togglePreviewModal(_currClid);
+  	this.props.onFilter(_currClid);
+  }
   pauseCarousel = () => {
     this.setState({
       carouselPaused: true
@@ -167,6 +171,8 @@ class CannedSearchContainer extends React.Component {
 									clid={this.state.currClid}
 									pid={this.state.currPid}
 									clientRoot={this.props.clientRoot}
+									referrer={ 'garden' } 
+									newSearch={ this.doPreviewModalSearch }
 								></ExplorePreviewModal>
               </div>
             </div>

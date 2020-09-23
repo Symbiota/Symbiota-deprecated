@@ -70,10 +70,12 @@ if (array_key_exists("q", $_REQUEST)) {
 	}
 	
   usort($results, function ($a, $b) {
-    return strcmp($a["text"], $b["text"]);
+    return strcasecmp(stripNonAlpha($a["text"]), stripNonAlpha($b["text"]));
   });
 }
-
+function stripNonAlpha($str) {
+	return preg_replace("/[^A-Za-z]/", '', $str);
+}
 #https://stackoverflow.com/questions/5653241/using-array-intersect-on-a-multi-dimensional-array#5653507
 function compareTextValues($val1,$val2) {
 	return strcasecmp($val1['text'],$val2['text']);

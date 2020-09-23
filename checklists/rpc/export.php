@@ -76,7 +76,7 @@ function buildCSV($checklist) {
 			$taxa['family'],
 			$taxa['sciname'],
 			$taxa['author'],
-			$taxa['vernacular']['basename'],
+			sizeof($taxa['vernacular']['names']) ? $taxa['vernacular']['names'][0] : $taxa['vernacular']['basename'],
 			#$taxa['tid'],
 		);
 		$return[] = $tmp;

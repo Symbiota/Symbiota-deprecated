@@ -229,7 +229,7 @@ class TaxaApp extends React.Component {
           </div>
           <div className="col-auto">
             {/*<button className="d-block my-2 btn-primary">Printable page</button>*/}
-            <button className="d-block my-2 btn-secondary" disabled={ true }>Add to basket</button>
+            {/*<button className="d-block my-2 btn-secondary" disabled={ true }>Add to basket</button>*/}
           </div>
         </div>
         <div className="row mt-2">
@@ -359,6 +359,7 @@ class TaxaApp extends React.Component {
 										clid={this.state.currClid}
 										pid={this.state.currPid}
 										clientRoot={this.props.clientRoot}
+										referrer={ 'taxa-garden' } 
 									></ExplorePreviewModal>
 								</div>
 

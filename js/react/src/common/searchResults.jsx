@@ -85,7 +85,7 @@ function ExploreSearchResult(props) {
 										<span className="author"> ({props.author})</span>
 									}
 									{ !useGrid && props.commonName.length > 0? <span dangerouslySetInnerHTML={{__html: ' &mdash; '}} /> :''}
-									<span className="text-lowercase common-name">{props.commonName}</span>
+									<span className="common-name">{props.commonName}</span>
 								</a>
 								{
 									props.showTaxaDetail === 'on' && props.vouchers.length && 

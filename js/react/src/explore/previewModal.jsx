@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import ReactDOM from "react-dom";
 
 import httpGet from "../common/httpGet.js";
-import {getChecklistPage} from "../common/taxaUtils";
+import {getGardenPage} from "../common/taxaUtils";
 import Loading from "../common/loading.jsx";
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -123,7 +123,19 @@ export default class ExplorePreviewModal extends Component {
 						      <div>{ this.state.totals.taxa } (including subsp. and var.)</div>
 						    </div>
 	           	 	<div className="taxa-link">
-            			<a href={ getChecklistPage(this.props.clientRoot, this.props.clid, this.props.pid) }><button className="d-block my-2 btn-primary">See the plants</button></a>
+	           	 		{ this.props.referrer == 'garden' ?
+	           	 			(
+	           	 				<button className="d-block my-2 btn-primary"
+	           	 					onClick={() => this.props.newSearch(this.props.clid)}
+	           	 				>{ 'Filter for these' }</button>
+	           	 			)
+	           	 		:
+	           	 			(
+            					<a href={ getGardenPage(this.props.clientRoot, this.props.clid) }>
+            						<button className="d-block my-2 btn-primary">{ 'See the plants' }</button>
+            					</a>
+            				)
+            			}
             		</div>
             	</div>
 						</div>
