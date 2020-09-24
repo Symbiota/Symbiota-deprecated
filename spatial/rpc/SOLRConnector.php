@@ -11,6 +11,7 @@ if(isset($_REQUEST["rows"])) $pArr["rows"] = $_REQUEST["rows"];
 if(isset($_REQUEST["start"])) $pArr["start"] = $_REQUEST["start"];
 if(isset($_REQUEST["fl"])) $pArr["fl"] = $_REQUEST["fl"];
 if(isset($_REQUEST["wt"])) $pArr["wt"] = $_REQUEST["wt"];
+if(isset($_REQUEST["action"])) $pArr["action"] = $_REQUEST["action"];
 
 $canReadRareSpp = false;
 if($GLOBALS['USER_RIGHTS']){
@@ -109,7 +110,12 @@ if (!$canReadRareSpp) {#get results filtered by security
 	$JSON = $partialJSON;
 }
 
-header("Content-Type: application/json; charset=utf-8");
+if (isset($pArr["action"]) && $pArr["action"] == 'lazyload') {#remove 
+
+}
+
+
+#header("Content-Type: application/json; charset=utf-8");
 echo $JSON;
 
 /*

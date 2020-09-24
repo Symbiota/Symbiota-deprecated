@@ -2259,7 +2259,7 @@ function lazyLoadPoints(index,callback){
     if(index > 1) startindex = (index - 1)*lazyLoadCnt;
     var http = new XMLHttpRequest();
     var url = "rpc/SOLRConnector.php";
-    var params = solrqString+'&rows='+lazyLoadCnt+'&start='+startindex+'&fl='+SOLRFields+'&wt=geojson';
+    var params = solrqString+'&rows='+lazyLoadCnt+'&start='+startindex+'&fl='+SOLRFields+'&wt=geojson&action=lazyload';
     //console.log("lazy " + url + " " + params);
     http.open("POST", url, true);
     http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
