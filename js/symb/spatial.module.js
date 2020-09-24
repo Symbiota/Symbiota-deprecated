@@ -2330,6 +2330,7 @@ function loadPoints(){
 								buildLayerTableRow(infoArr,true);
 								pointActive = true;
 						}
+						alert("end success");
 					}
 					else{
 						setRecordsTab();
@@ -2343,7 +2344,6 @@ function loadPoints(){
 						alert('There were no records matching your query.');
 					}
         });
-        alert("end loadPoints");
     }
     else{
         alert('Please add criteria for points.');
