@@ -2296,6 +2296,7 @@ function loadPoints(){
         getSOLRRecCnt(false,function(res) {
         	if(res == 2) {
         		alert('You need to be logged in with rare species privileges to view the full distribution.');
+        		loadVectorPoints = false;
         	}
         
         	/*if (res == 2) {
