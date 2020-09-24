@@ -2316,7 +2316,7 @@ function loadPoints(){
 								loadPointWFSLayer(0);
 						}
 						else{
-								loadPointWMSLayer();
+								//loadPointWMSLayer();
 						}
 						//cleanSelectionsLayer();
 						setRecordsTab();
