@@ -1864,7 +1864,8 @@ function getSOLRRecCnt(occ,callback){
             var callbackValue = 1;
 	            solrRecCnt = resArr['response']['numFound'];
             if (resArr['response']['hiddenFound'] > 0) {
-            	callbackValue = 2;
+            	//callbackValue = 2;
+							alert('You need to be logged in with rare species privileges to view the full distribution.');
             }
             document.getElementById("dh-rows").value = solrRecCnt;
             callback(callbackValue);
@@ -2300,7 +2301,7 @@ function loadPoints(){
 						loadPointsEvent = false;
 						hideWorking();                
 						//ORIG alert('There were no records matching your query.');
-						alert('You need to be logged in with rare species privileges to view the full distribution.');
+						//alert('You need to be logged in with rare species privileges to view the full distribution.');
         	}else if(solrRecCnt){
 						loadPointsEvent = true;
 						setLoadingTimer();
