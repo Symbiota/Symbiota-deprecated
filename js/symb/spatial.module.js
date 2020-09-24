@@ -2289,14 +2289,10 @@ function loadPoints(){
     
         showWorking();
         pointvectorsource = new ol.source.Vector({wrapX: false});
-        console.log("pointvectorsource: "  + pointvectorsource);
-        console.log("pointActive: "  + pointActive);
-        console.log("loadVectorPoints: "  + loadVectorPoints);
         layersArr['pointv'].setSource(pointvectorsource);
         getSOLRRecCnt(false,function(res) {
         	if(res == 2) {
         		alert('You need to be logged in with rare species privileges to view the full distribution.');
-        		loadVectorPoints = false;
         	}
         
         	/*if (res == 2) {
@@ -2316,7 +2312,7 @@ function loadPoints(){
 								loadPointWFSLayer(0);
 						}
 						else{
-								//loadPointWMSLayer();
+								loadPointWMSLayer();
 						}
 						//cleanSelectionsLayer();
 						setRecordsTab();
