@@ -121,6 +121,7 @@ if (!$canReadRareSpp && isset($pArr["action"]) && $pArr["action"] == 'lazyload')
 		}
 	}
 	$res->features = $newFeatures;
+	$res->numFound = sizeof($newFeatures);
 	$JSON = json_encode($res);
 }
 
