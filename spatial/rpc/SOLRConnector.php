@@ -114,7 +114,8 @@ if (!$canReadRareSpp && isset($pArr["action"]) && $pArr["action"] == 'lazyload')
 	$res = json_decode($JSON);
 	foreach ($res->features as $key => $val) {
 		if ($val->properties->localitySecurity == 1) {
-			unset($res->features[$key]);
+		var_dump($val);
+			#unset($res->features[$key]);
 		}
 	}
 	$JSON = json_encode($res);
@@ -122,7 +123,7 @@ if (!$canReadRareSpp && isset($pArr["action"]) && $pArr["action"] == 'lazyload')
 
 
 header("Content-Type: application/json; charset=utf-8");
-echo $JSON;
+#echo $JSON;
 
 /*
 object(stdClass)#5 (2) {
