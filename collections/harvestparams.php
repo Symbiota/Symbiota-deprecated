@@ -167,7 +167,7 @@ if(isset($_REQUEST['db'])){
 
 	<div id="innertext">
         <h3>Search the digitized collections of the Oregon State University Herbarium</h3>
-        <p>This feature gives access to all the digitized collections housed in the Oregon State University Herbarium at Corvallis, which includes specimens originating at University of Oregon (ORE) and Willamette University (WILLU) as well as Oregon State University (OSC).  Collections represented are the vascular plants, algae, bryophytes, fungi, and lichens. As part of its work to produce the Flora of Oregon in printed and digital formats, OregonFlora curates the records and taxonomy of the vascular plants of Oregon. Other specimen groups are updated by the respective collections manager(s).</p>
+        <p>This feature gives access to all the digitized collections housed in the Oregon State University Herbarium at Corvallis, which includes specimens originating at University of Oregon (ORE) and Willamette University (WILLU) as well as Oregon State University (OSC).  Collections represented are the vascular plants, algae, bryophytes, fungi, and lichens.  As part of its work to produce the Flora of Oregon in printed and digital formats, OregonFlora aligns the taxonomy of the Oregon vascular plants presented on this website with the Flora of Oregon's taxonomic framework.</p>
 		<h3><?php echo $SEARCHTEXT['PAGE_HEADER']; ?></h3>
 		<?php echo $SEARCHTEXT['GENERAL_TEXT_1']; ?>
         <div style="margin:5px;">

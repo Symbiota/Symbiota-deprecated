@@ -92,7 +92,7 @@ class Home extends React.Component {
   render() {
 		
 		const slickSettings = {
-			autoplay: false,
+			autoplay: true,
 			initialSlide: 0,
 			autoplaySpeed: 10000,
 			dots: true,
@@ -272,7 +272,7 @@ class Home extends React.Component {
 													)
 												})
 											}
-											<p><button className="btn btn-primary"><a href={this.props.clientRoot + '/pages/whats-new.php' }>See all news and events</a></button></p>
+											<p><button className="btn btn-primary"><a href={this.props.clientRoot + '/pages/news-events.php' }>See all news and events</a></button></p>
 										</div>    
 								</div>
 						</div>

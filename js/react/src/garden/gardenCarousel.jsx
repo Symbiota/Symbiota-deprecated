@@ -24,7 +24,7 @@ class GardenCarousel extends React.Component {
   render() {
 		const slickSettings = {
 			autoplay: this.props.carouselPlay,
-			autoplaySpeed: 2000,
+			autoplaySpeed: 8000,
 			dots: false,
 			infinite: true,
 			slidesToShow: this.props.slideshowCount,

@@ -389,7 +389,7 @@ class InventoryChooser extends React.Component {
 																			<h3>{project.projname}</h3>
 																	</div>
 															</div>
-															<div className="project-content" dangerouslySetInnerHTML={{__html: project.fulldescription}} />
+															<div className="project-content" dangerouslySetInnerHTML={{__html: project.briefdescription}} />
 														</div>
 													
 												}
