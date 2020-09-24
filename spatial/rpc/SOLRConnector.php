@@ -109,16 +109,19 @@ if (!$canReadRareSpp) {#get results filtered by security
 	}
 	$JSON = $partialJSON;
 }
-
+/*
 if (!$canReadRareSpp && isset($pArr["action"]) && $pArr["action"] == 'lazyload') {#remove markers
 	$res = json_decode($JSON);
 	foreach ($res->features as $key => $val) {
-		var_dump($val);
+		if ($val->properties->localitySecurity == 1) {
+			unset($res->features[$key]);
+		}
 	}
+	$JSON = json_encode($res);
 }
+*/
 
-
-#header("Content-Type: application/json; charset=utf-8");
+header("Content-Type: application/json; charset=utf-8");
 echo $JSON;
 
 /*
