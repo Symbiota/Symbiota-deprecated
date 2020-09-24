@@ -1855,7 +1855,7 @@ function getSOLRRecCnt(occ,callback){
     var http = new XMLHttpRequest();
     var url = "rpc/SOLRConnector.php";
     var params = qStr+'&rows=0&start=0&wt=json';
-    console.log("getSOLRRecCnt: " + url+'?'+params);
+    //console.log("getSOLRRecCnt: " + url+'?'+params);
     http.open("POST", url, true);
     http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     http.onreadystatechange = function() {
@@ -2260,14 +2260,13 @@ function lazyLoadPoints(index,callback){
     var http = new XMLHttpRequest();
     var url = "rpc/SOLRConnector.php";
     var params = solrqString+'&rows='+lazyLoadCnt+'&start='+startindex+'&fl='+SOLRFields+'&wt=geojson';
-    console.log("lazy " + url + " " + params);
+    //console.log("lazy " + url + " " + params);
     http.open("POST", url, true);
     http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     http.onreadystatechange = function() {
         if(http.readyState == 4 && http.status == 200) {
             loadingComplete = false;
             setTimeout(checkLoading,loadingTimer);
-            console.log(http.responseText);
             callback(http.responseText);
         }
     };
