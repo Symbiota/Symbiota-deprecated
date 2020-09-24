@@ -1864,8 +1864,7 @@ function getSOLRRecCnt(occ,callback){
             var callbackValue = 1;
 	            solrRecCnt = resArr['response']['numFound'];
             if (resArr['response']['hiddenFound'] > 0) {
-            	//callbackValue = 2;
-							alert('You need to be logged in with rare species privileges to view the full distribution.');
+            	callbackValue = 2;
             }
             document.getElementById("dh-rows").value = solrRecCnt;
             callback(callbackValue);
@@ -2292,7 +2291,11 @@ function loadPoints(){
         pointvectorsource = new ol.source.Vector({wrapX: false});
         layersArr['pointv'].setSource(pointvectorsource);
         getSOLRRecCnt(false,function(res) {
-        	if (res == 2) {
+        	if(res == 2) {
+        		alert('You need to be logged in with rare species privileges to view the full distribution.');
+        	}
+        
+        	/*if (res == 2) {
 						setRecordsTab();
 						if(pointActive){
 								removeLayerToSelList('pointv');
@@ -2302,7 +2305,7 @@ function loadPoints(){
 						hideWorking();                
 						//ORIG alert('There were no records matching your query.');
 						//alert('You need to be logged in with rare species privileges to view the full distribution.');
-        	}else if(solrRecCnt){
+        	}else*/ if(solrRecCnt){
 						loadPointsEvent = true;
 						setLoadingTimer();
 						if(loadVectorPoints){
