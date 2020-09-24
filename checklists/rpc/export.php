@@ -4,6 +4,7 @@ include_once("../../config/symbini.php");
 include_once("$SERVER_ROOT/config/SymbosuEntityManager.php");
 include_once("$SERVER_ROOT/classes/Functional.php");
 include_once("$SERVER_ROOT/classes/ExploreManager.php");
+include_once("$SERVER_ROOT/classes/IdentManager.php");
 include_once("$SERVER_ROOT/classes/TaxaManager.php");
 
 $result = [];
@@ -75,7 +76,7 @@ function buildCSV($checklist) {
 		$tmp = array(
 			$taxa['family'],
 			$taxa['sciname'],
-			$taxa['author'],
+			(isset($taxa['author'])? $taxa['author'] :''),
 			sizeof($taxa['vernacular']['names']) ? $taxa['vernacular']['names'][0] : $taxa['vernacular']['basename'],
 			#$taxa['tid'],
 		);
@@ -88,7 +89,7 @@ function buildCSV($checklist) {
 
 
 $result = [];
-if (array_key_exists("clid", $_GET) && is_numeric($_GET["clid"])&& array_key_exists("pid", $_GET) && is_numeric($_GET["pid"])) {
+if (array_key_exists("clid", $_GET) && intval($_GET["clid"]) > -1 && array_key_exists("pid", $_GET) && intval($_GET["pid"]) > -1) {
   $em = SymbosuEntityManager::getEntityManager();
   $repo = $em->getRepository("Fmchecklists");
   $model = $repo->find(intval($_GET["clid"]));
@@ -109,6 +110,27 @@ if (array_key_exists("clid", $_GET) && is_numeric($_GET["clid"])&& array_key_exi
 	
 			$result = buildResult($checklist);
 		}
+	}
+}elseif (array_key_exists("dynclid", $_GET) && intval($_GET["dynclid"]) > -1) {
+	$dynclid = intval($_GET["dynclid"]);
+	$em = SymbosuEntityManager::getEntityManager();
+	$repo = $em->getRepository("Fmdynamicchecklists");
+	$model = $repo->find($dynclid);
+	if ($model) {
+		$result = [];
+		
+		$dynamic_checklist = ExploreManager::fromModel($model);
+		$result["title"] = $dynamic_checklist->getTitle();
+		
+		$identManager = new IdentManager();
+		$identManager->setDynClid($dynclid);
+		
+		if (	array_key_exists("search", $_GET) && !empty($_GET["search"])	) {
+			$identManager->setSearchTerm($_GET["search"]);			
+		}
+
+		$identManager->setTaxa();
+		$result['taxa'] = $identManager->getTaxa();
 	}
 }
 // Begin View

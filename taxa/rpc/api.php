@@ -76,6 +76,10 @@ function taxaManagerToJSON($taxaObj,$recursive = true) {
 		$result["rankId"] = $taxaObj->getRankId();  
 		$result["author"] = $taxaObj->getAuthor();
 		$result["images"] = $taxaObj->getImages();
+		$allImages = $taxaObj->getImagesByBasisOfRecord();
+		$result["imagesBasis"]['HumanObservation'] = (isset($allImages['HumanObservation']) ? $allImages['HumanObservation'] : []);
+		$result["imagesBasis"]['PreservedSpecimen'] = (isset($allImages['PreservedSpecimen']) ? $allImages['PreservedSpecimen'] : []);
+		$result["imagesBasis"]['LivingSpecimen'] = (isset($allImages['LivingSpecimen']) ? $allImages['LivingSpecimen'] : []);
 
 		if ($recursive === true) {
 			$spp = $taxaObj->getSpp();  					
@@ -85,10 +89,6 @@ function taxaManagerToJSON($taxaObj,$recursive = true) {
 				$tj = taxaManagerToJSON($taxa,false);
 				$result["spp"][] = $tj;
 			}
-			$allImages = $taxaObj->getImagesByBasisOfRecord();
-			$result["imagesBasis"]['HumanObservation'] = (isset($allImages['HumanObservation']) ? $allImages['HumanObservation'] : []);
-			$result["imagesBasis"]['PreservedSpecimen'] = (isset($allImages['PreservedSpecimen']) ? $allImages['PreservedSpecimen'] : []);
-			$result["imagesBasis"]['LivingSpecimen'] = (isset($allImages['LivingSpecimen']) ? $allImages['LivingSpecimen'] : []);
 			$result["synonyms"] = $taxaObj->getSynonyms();
 			$result["origin"] = $taxaObj->getOrigin();
 			$result["family"] = $taxaObj->getFamily();
@@ -105,9 +105,21 @@ function taxaManagerToJSON($taxaObj,$recursive = true) {
 			$result["taxalinks"] = $taxaObj->getTaxalinks();
 			foreach ($result["taxalinks"] as $idx => $taxalink) {
 				$result["taxalinks"][$idx]['url'] = str_replace("--SCINAME--",$result["sciname"],$taxalink['url']);
-			}
-		
+			}	
 		}
+		foreach ($result['spp'] as $staxa) {#collate SPP images into bare taxon image lists
+
+			if (isset($staxa['imagesBasis']['HumanObservation'])) {
+				$result['imagesBasis']['HumanObservation'] = array_merge($result['imagesBasis']['HumanObservation'],$staxa['imagesBasis']['HumanObservation']);
+			}
+			if (isset($staxa['imagesBasis']['PreservedSpecimen'])) {
+				$result['imagesBasis']['PreservedSpecimen'] = array_merge($result['imagesBasis']['PreservedSpecimen'],$staxa['imagesBasis']['PreservedSpecimen']);
+			}
+			if (isset($staxa['imagesBasis']['HumanObservation'])) {
+				$result['imagesBasis']['LivingSpecimen'] = array_merge($result['imagesBasis']['LivingSpecimen'],$staxa['imagesBasis']['LivingSpecimen']);
+			}
+		}
+		
 	}
 	return $result;
 }

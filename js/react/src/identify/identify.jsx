@@ -147,8 +147,8 @@ class IdentifyApp extends React.Component {
 					totals: res.totals,
 					fixedTotals: res.totals,
 					googleMapUrl: googleMapUrl,
-					exportUrlCsv: `${this.props.clientRoot}/checklists/rpc/export.php?clid=` + this.getClid() + `&pid=` + this.getPid(),
-					exportUrlWord: `${this.props.clientRoot}/checklists/defaultchecklistexport.php?cl=` + this.getClid() + `&pid=` + this.getPid()
+					exportUrlCsv: `${this.props.clientRoot}/checklists/rpc/export.php?clid=` + this.getClid() + `&pid=` + this.getPid() + `&dynclid=` + this.getDynclid(),
+					exportUrlWord: `${this.props.clientRoot}/checklists/defaultchecklistexport.php?cl=` + this.getClid() + `&pid=` + this.getPid() + `&dynclid=` + this.getDynclid()
 				});
 				const pageTitle = document.getElementsByTagName("title")[0];
 				pageTitle.innerHTML = `${pageTitle.innerHTML} ${res.title}`;
@@ -173,6 +173,7 @@ class IdentifyApp extends React.Component {
   	
 		exportParams.append("clid",this.getClid());
 		exportParams.append("pid",this.getPid());
+		exportParams.append("dynclid",this.getDynclid());
 
 		if (this.state.filters.searchText) {
 			exportParams.append("search",this.state.filters.searchText);
@@ -189,6 +190,7 @@ class IdentifyApp extends React.Component {
   	//params here match /checklists/defaultchecklistexport.php
 		exportParams.append("cl",this.getClid());
 		exportParams.append("pid",this.getPid());
+		exportParams.append("dynclid",this.getDynclid());
 		exportParams.append("showcommon",1);
 		if (this.state.filters.searchText) {
 			exportParams.append("taxonfilter",this.state.filters.searchText);
@@ -204,7 +206,6 @@ class IdentifyApp extends React.Component {
 	}  
   onFilterRemoved(key,text) {
 
-  	const characteristics = ["wholePlant","leaf","gardening"];
     // TODO: This is clunky
     switch (key) {
       case "searchText":
@@ -372,7 +373,7 @@ class IdentifyApp extends React.Component {
 			shortAbstract = this.state.abstract.replace(/^(.{240}[^\s]*).*/, "$1") + "...";//wordsafe truncate
 		}
 		let suggestionUrl = `${this.props.clientRoot}/checklists/rpc/autofillsearch.php`;
-		
+		console.log(this.state.exportUrlCsv);
     return (
     <div className="wrapper">
 			<Loading 
