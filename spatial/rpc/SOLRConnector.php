@@ -109,6 +109,7 @@ if (!$canReadRareSpp) {#get results filtered by security
 	$JSON = $partialJSON;
 }
 
+header("Content-Type: application/json; charset=utf-8");
 echo $JSON;
 
 /*
