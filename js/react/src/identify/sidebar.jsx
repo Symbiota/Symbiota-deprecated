@@ -129,26 +129,28 @@ class SideBar extends React.Component {
 						<div className="stat-label">Total Taxa:</div>
 						<div className="stat-value">{ this.props.totals['taxa'] }{ showFixedTotals && <span className="fixed-totals"> (of { this.props.fixedTotals['taxa']})</span> } (including subsp. and var.)</div>
 					</div>
-					<div className="stat export">
-						<div className="stat-label">Export:</div>
-						<div className="stat-value"> 
-							<a className={ "export-word" + (this.props.totals['taxa'] === 0 ? " disabled" : '') } 
-									href={ this.props.exportUrlWord} 
-									title="Download Word .doc"
-							>
-								<FontAwesomeIcon icon="file-word" size="2x"/> 
-							</a>
-							<a className={ "export-csv" + (this.props.totals['taxa'] === 0 ? " disabled" : '') } 
-									href={ this.props.exportUrlCsv + "&format=csv"} 
-									title="Download CSV"
-							>
-								<FontAwesomeIcon icon="file-csv" size="2x"/>
-							</a>
-							{/*<a className="export-print">
-								<FontAwesomeIcon icon="print" size="2x"/>
-							</a>*/}
+					{ this.props.clid > -1 &&
+						<div className="stat export">
+							<div className="stat-label">Export:</div>
+							<div className="stat-value"> 
+								<a className={ "export-word" + (this.props.totals['taxa'] === 0 ? " disabled" : '') } 
+										href={ this.props.exportUrlWord} 
+										title="Download Word .doc"
+								>
+									<FontAwesomeIcon icon="file-word" size="2x"/> 
+								</a>
+								<a className={ "export-csv" + (this.props.totals['taxa'] === 0 ? " disabled" : '') } 
+										href={ this.props.exportUrlCsv + "&format=csv"} 
+										title="Download CSV"
+								>
+									<FontAwesomeIcon icon="file-csv" size="2x"/>
+								</a>
+								{/*<a className="export-print">
+									<FontAwesomeIcon icon="print" size="2x"/>
+								</a>*/}
+							</div>
 						</div>
-					</div>
+					}
 				</div>
 
         {/* Search */}
