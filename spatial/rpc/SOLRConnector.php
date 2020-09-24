@@ -110,8 +110,11 @@ if (!$canReadRareSpp) {#get results filtered by security
 	$JSON = $partialJSON;
 }
 
-if (isset($pArr["action"]) && $pArr["action"] == 'lazyload') {#remove 
-
+if (!$canReadRareSpp && isset($pArr["action"]) && $pArr["action"] == 'lazyload') {#remove markers
+	$res = json_decode($JSON);
+	foreach ($res->features as $key => $val) {
+		var_dump($val);
+	}
 }
 
 
