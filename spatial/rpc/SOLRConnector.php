@@ -105,9 +105,9 @@ if (!$canReadRareSpp) {#get results filtered by security
 	$partial = json_decode($partialJSON);
 	if ($secure->response->numFound < $partial->response->numFound) {#some results have been suppressed
 		$partial->response->hiddenFound = ($partial->response->numFound - $secure->response->numFound);#add hiddenFound
-		#$partialJSON = json_encode($partial);#re-encode 
+		$partialJSON = json_encode($partial);#re-encode 
 	}
-	#$JSON = $partialJSON;
+	$JSON = $partialJSON;
 }
 
 if (!$canReadRareSpp && isset($pArr["action"]) && $pArr["action"] == 'lazyload') {#remove rare markers when called by lazyload
