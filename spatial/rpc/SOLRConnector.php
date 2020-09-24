@@ -112,18 +112,21 @@ if (!$canReadRareSpp) {#get results filtered by security
 
 if (!$canReadRareSpp && isset($pArr["action"]) && $pArr["action"] == 'lazyload') {#remove markers
 	$res = json_decode($JSON);
+	$newFeatures = [];
 	foreach ($res->features as $key => $val) {
-		if ($val->properties->localitySecurity == 1) {
-		var_dump($val);
+		if ($val->properties->localitySecurity == 0) {
+			#var_dump($val);
 			#unset($res->features[$key]);
+			$newFeatures[] = $val;
 		}
 	}
+	$res->features = $newFeatures;
 	$JSON = json_encode($res);
 }
 
 
 header("Content-Type: application/json; charset=utf-8");
-#echo $JSON;
+echo $JSON;
 
 /*
 object(stdClass)#5 (2) {
