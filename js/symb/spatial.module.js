@@ -2307,9 +2307,7 @@ function loadPoints(){
 						//alert('You need to be logged in with rare species privileges to view the full distribution.');
         	}else*/ if(solrRecCnt){
 						loadPointsEvent = true;
-        		alert('setLoadingTimer.');
 						setLoadingTimer();
-        		alert('loadPointWFSLayer.');
 						if(loadVectorPoints){
 								loadPointWFSLayer(0);
 						}
@@ -2317,13 +2315,10 @@ function loadPoints(){
 								loadPointWMSLayer();
 						}
 						//cleanSelectionsLayer();
-        		alert('setRecordsTab.');
 						setRecordsTab();
-        		alert('changeRecordPage.');
 						changeRecordPage(1);
 						$('#recordstab').tabs({active: 1});
 						$("#accordion").accordion("option","active",1);
-        		alert('selectInteraction.getFeatures().clear.');
 						selectInteraction.getFeatures().clear();
 						if(!pointActive){
 								var infoArr = [];
@@ -2335,7 +2330,6 @@ function loadPoints(){
 								buildLayerTableRow(infoArr,true);
 								pointActive = true;
 						}
-        		alert('end.');
 					}
 					else{
 						setRecordsTab();
@@ -2349,6 +2343,7 @@ function loadPoints(){
 						alert('There were no records matching your query.');
 					}
         });
+        alert("end loadPoints");
     }
     else{
         alert('Please add criteria for points.');
