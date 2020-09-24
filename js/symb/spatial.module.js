@@ -2267,6 +2267,7 @@ function lazyLoadPoints(index,callback){
         if(http.readyState == 4 && http.status == 200) {
             loadingComplete = false;
             setTimeout(checkLoading,loadingTimer);
+            console.log(http.responseText);
             callback(http.responseText);
         }
     };
