@@ -2289,6 +2289,9 @@ function loadPoints(){
     
         showWorking();
         pointvectorsource = new ol.source.Vector({wrapX: false});
+        console.log("pointvectorsource: "  + pointvectorsource);
+        console.log("pointActive: "  + pointActive);
+        console.log("loadVectorPoints: "  + loadVectorPoints);
         layersArr['pointv'].setSource(pointvectorsource);
         getSOLRRecCnt(false,function(res) {
         	if(res == 2) {
