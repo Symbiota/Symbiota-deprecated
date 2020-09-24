@@ -111,19 +111,21 @@ $textrun = $section->addTextRun('defaultPara');
 $textrun->addLink('http://'.$_SERVER['HTTP_HOST'].$clientRoot.'/checklists/checklist.php?cl='.$clValue."&proj=".$pid."&dynclid=".$dynClid,htmlspecialchars($title),'titleFont');
 $textrun->addTextBreak(1);
 if($clValue){
-	if($clArray['type'] == 'rarespp'){
+	if(isset($clArray['type']) && $clArray['type'] == 'rarespp'){
 		$locality = str_replace('&quot;','"',$clArray["locality"]);
 		$locality = str_replace('&apos;',"'",$locality);
 		$textrun->addText(htmlspecialchars('Sensitive species checklist for: '),'topicFont');
 		$textrun->addText(htmlspecialchars($locality),'textFont');
 		$textrun->addTextBreak(1);
 	}
-	$authors = str_replace('&quot;','"',$clArray["authors"]);
-	$authors = str_replace('&apos;',"'",$authors);
-	$textrun->addText(htmlspecialchars('Authors: '),'topicFont');
-	$textrun->addText(htmlspecialchars($authors),'textFont');
-	$textrun->addTextBreak(1);
-	if($clArray["publication"]){
+	if (isset($clArray['authors'])) {
+		$authors = str_replace('&quot;','"',$clArray["authors"]);
+		$authors = str_replace('&apos;',"'",$authors);
+		$textrun->addText(htmlspecialchars('Authors: '),'topicFont');
+		$textrun->addText(htmlspecialchars($authors),'textFont');
+		$textrun->addTextBreak(1);
+	}
+	if(isset($clArray["publication"])){
 		$publication = str_replace('&quot;','"',preg_replace('/\s+/',' ',$clArray["publication"]));
 		$publication = str_replace('&apos;',"'",$publication);
 		$textrun->addText(htmlspecialchars('Publication: '),'topicFont');
@@ -131,7 +133,7 @@ if($clValue){
 		$textrun->addTextBreak(1);
 	}
 }
-if(($clArray["locality"] || ($clValue && ($clArray["latcentroid"] || $clArray["abstract"])) || $clArray["notes"])){
+if((isset($clArray["locality"]) || ($clValue && (isset($clArray["latcentroid"]) || isset($clArray["abstract"]))) || isset($clArray["notes"]))){
 	$locStr = str_replace('&quot;','"',$clArray["locality"]);
 	$locStr = str_replace('&apos;',"'",$locStr);
 	if($clValue && $clArray["latcentroid"]) $locStr .= " (".$clArray["latcentroid"].", ".$clArray["longcentroid"].")";
@@ -140,14 +142,14 @@ if(($clArray["locality"] || ($clValue && ($clArray["latcentroid"] || $clArray["a
 		$textrun->addText(htmlspecialchars($locStr),'textFont');
 		$textrun->addTextBreak(1);
 	}
-	if($clValue && $clArray["abstract"]){
+	if($clValue && isset($clArray["abstract"])){
 		$abstract = str_replace('&quot;','"',preg_replace('/\s+/',' ',$clArray["abstract"]));
 		$abstract = str_replace('&apos;',"'",$abstract);
 		$textrun->addText(htmlspecialchars('Abstract: '),'topicFont');
 		$textrun->addText(htmlspecialchars($abstract),'textFont');
 		$textrun->addTextBreak(1);
 	}
-	if($clValue && $clArray["notes"]){
+	if($clValue && isset($clArray["notes"])){
 		$notes = str_replace('&quot;','"',preg_replace('/\s+/',' ',$clArray["notes"]));
 		$notes = str_replace('&apos;',"'",$notes);
 		$textrun->addText(htmlspecialchars('Notes: '),'topicFont');

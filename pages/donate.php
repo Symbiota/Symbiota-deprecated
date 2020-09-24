@@ -40,7 +40,7 @@ include( $serverRoot . "/header.php" );
             <!-- place static page content here. -->
             <div class="donate-wrapper">
                 <div class="col1 col-left">
-                    <h2>Our mission is to provide technically sound information about Oregon’s sunning bounty of vascular plants—more than 4,700 so far—to diverse audiences.
+                    <h2>Our mission is to provide technically sound information about Oregon’s stunning bounty of vascular plants—more than 4,700 so far—to diverse audiences.
                         <form class="link-donate" action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_blank">
                             <input type="hidden" name="cmd" value="_s-xclick">
                             <input type="hidden" name="hosted_button_id" value="ELVFJLHX3T9JU">

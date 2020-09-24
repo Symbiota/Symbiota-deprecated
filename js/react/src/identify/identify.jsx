@@ -373,7 +373,7 @@ class IdentifyApp extends React.Component {
 			shortAbstract = this.state.abstract.replace(/^(.{240}[^\s]*).*/, "$1") + "...";//wordsafe truncate
 		}
 		let suggestionUrl = `${this.props.clientRoot}/checklists/rpc/autofillsearch.php`;
-		console.log(this.state.exportUrlCsv);
+		console.log(this.state.exportUrlWord);
     return (
     <div className="wrapper">
 			<Loading 
