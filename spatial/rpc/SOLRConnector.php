@@ -36,7 +36,7 @@ We then compare and add "hiddenFound" to the response so that spatial.module.js 
 $origQ = $pArr["q"];
 $secureQ = $solrManager->checkQuerySecurity($pArr["q"]);
 
-#get secure (i.e. "real") results
+#get secure (i.e. full) results
 $pArr["q"] = $secureQ;
 
 if($pArr["wt"] == 'geojson'){
@@ -105,18 +105,16 @@ if (!$canReadRareSpp) {#get results filtered by security
 	$partial = json_decode($partialJSON);
 	if ($secure->response->numFound < $partial->response->numFound) {#some results have been suppressed
 		$partial->response->hiddenFound = ($partial->response->numFound - $secure->response->numFound);#add hiddenFound
-		$partialJSON = json_encode($partial);#re-encode 
+		#$partialJSON = json_encode($partial);#re-encode 
 	}
-	$JSON = $partialJSON;
+	#$JSON = $partialJSON;
 }
 
-if (!$canReadRareSpp && isset($pArr["action"]) && $pArr["action"] == 'lazyload') {#remove markers
+if (!$canReadRareSpp && isset($pArr["action"]) && $pArr["action"] == 'lazyload') {#remove rare markers when called by lazyload
 	$res = json_decode($JSON);
 	$newFeatures = [];
 	foreach ($res->features as $key => $val) {
 		if ($val->properties->localitySecurity == 0) {
-			#var_dump($val);
-			#unset($res->features[$key]);
 			$newFeatures[] = $val;
 		}
 	}
