@@ -465,15 +465,18 @@ class TaxaManager {
 				->select(["tl.url","tl.title"])
 				->from("Taxalinks", "tl")
 				->where(
-					$expr->in(
-						'tl.tid',
-						$em->createQueryBuilder()
-							->select("te.parenttid")
-							->from("Taxaenumtree","te")
-							->where("te.tid = :tid")
-							->andWhere("te.taxauthid = :taxauthid")
-							->getDQL()
-					)
+								$expr->orX(
+									$expr->eq("tl.tid",":tid"),
+									$expr->in(
+										'tl.tid',
+										$em->createQueryBuilder()
+											->select("te.parenttid")
+											->from("Taxaenumtree","te")
+											->where("te.tid = :tid")
+											->andWhere("te.taxauthid = :taxauthid")
+											->getDQL()
+									)
+								)
 				)
 				->setParameter("tid", $tid)
 				->setParameter("taxauthid", 1)
@@ -488,6 +491,7 @@ class TaxaManager {
   			unset($links[$idx]);
   		}
   	}
+  	$links = array_values($links);
   	return $links;
  	}
  	

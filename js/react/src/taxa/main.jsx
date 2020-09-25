@@ -105,7 +105,7 @@ function MoreInfoItem(props) {
 						if (v.url.indexOf('pdf') > 0) {
 							return (
 								<li key={ v.url }>
-									<a href={v.url}><button className="d-block my-2 btn-primary"><img src={ `${this.props.clientRoot}/images/pdf24.png` } />{v.title}</button></a>
+									<a href={v.url}><button className="d-block my-2 btn-primary"><img src={ `${props.clientRoot}/images/pdf24.png` } />{v.title}</button></a>
 								</li>
 							)
 						}else{
@@ -244,7 +244,7 @@ function SideBarSection(props) {
 	          }else if (key == 'Related') {
 	            return <RelatedBorderedItem key={ key } keyName={ key } value={ val } rankId={ props.rankId }/>
 	          }else if (key == "More info") {
-	            return <MoreInfoItem key={ key } keyName={ key } value={ val } />
+	            return <MoreInfoItem key={ key } keyName={ key } value={ val }  clientRoot={ props.clientRoot }/>
 	          }else if (key == "Synonyms") {
 	            return <SynonymItem key={ val } keyName={ val } value={ val }  />
 	          }else if(val){
@@ -405,8 +405,8 @@ class TaxaChooser extends React.Component {
 										
 					</div>
 					<div className="col-md-4 pl-4 sidebar">
-						<SideBarSection title="Context" items={ res.highlights } classes="highlights" rankId={ res.rankId }/>
-						<SideBarSection title="Web links" items={ res.taxalinks} classes="weblinks" rankId={ res.rankId }/>
+						<SideBarSection title="Context" items={ res.highlights } classes="highlights" rankId={ res.rankId } clientRoot={ this.props.clientRoot }/>
+						<SideBarSection title="Web links" items={ res.taxalinks} classes="weblinks" rankId={ res.rankId } clientRoot={ this.props.clientRoot }/>
 					</div>
 				</div>
 			</div>
@@ -582,9 +582,9 @@ class TaxaDetail extends React.Component {
 					
 					</div>
 					<div className="col-md-4 sidebar">
-						<SideBarSection title="Context" items={ res.highlights } classes="highlights" rankId={ res.rankId } />
+						<SideBarSection title="Context" items={ res.highlights } classes="highlights" rankId={ res.rankId } clientRoot={ this.props.clientRoot }/>
 						<MapItem title={ res.sciName } tid={ res.tid } clientRoot={ this.props.clientRoot } />
-						<SideBarSection title="Web links" items={ res.taxalinks} classes="weblinks"  rankId={ res.rankId }/>
+						<SideBarSection title="Web links" items={ res.taxalinks} classes="weblinks"  rankId={ res.rankId } clientRoot={ this.props.clientRoot }/>
 					</div>
 				</div>
 				<ImageModal 
