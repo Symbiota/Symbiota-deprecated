@@ -1855,7 +1855,7 @@ function getSOLRRecCnt(occ,callback){
     var http = new XMLHttpRequest();
     var url = "rpc/SOLRConnector.php";
     var params = qStr+'&rows=0&start=0&wt=json';
-    console.log("getSOLRRecCnt: " + url+'?'+params);
+    //console.log("getSOLRRecCnt: " + url+'?'+params);
     http.open("POST", url, true);
     http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     http.onreadystatechange = function() {
