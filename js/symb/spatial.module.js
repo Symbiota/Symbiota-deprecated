@@ -2293,7 +2293,7 @@ function loadPoints(){
         layersArr['pointv'].setSource(pointvectorsource);
         getSOLRRecCnt(false,function(res) {
         	if(res == 2) {
-        		alert('You need to be logged in with rare species privileges to view the full distribution.');
+        		alert('You need to be logged in with rare species privileges to view the full distribution. Rare taxa in these search results are hidden unless you are logged in.');
         	}
         
         	/*if (res == 2) {
