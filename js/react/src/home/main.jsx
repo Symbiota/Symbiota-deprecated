@@ -32,6 +32,7 @@ class Home extends React.Component {
 		this.onSearchTextChanged = this.onSearchTextChanged.bind(this);
 		this.onSearch = this.onSearch.bind(this);
 		this.openVideoModal = this.openVideoModal.bind(this);
+		this.onClearSearch = this.onClearSearch.bind(this);
   }
   openVideoModal(_videoId) {
   	this.setState({isVideoOpen: true});
@@ -40,6 +41,10 @@ class Home extends React.Component {
 
   onSearchTextChanged(e) {
     this.setState({ searchText: e.target.value });
+  }
+  
+  onClearSearch() {
+    this.setState({ searchText: '' });
   }
 
   // "searchObj" is the JSON object returned from ../webservices/autofillsearch.php
@@ -124,6 +129,7 @@ class Home extends React.Component {
 											onSearch={ this.onSearch }
 											suggestionUrl={ `${this.props.clientRoot}/webservices/autofillsearch.php` }
 											location={"home-main"}
+											onClearSearch={ this.onClearSearch } 
 										/>
 										<p className="search-explain">to access all its information, <br />including maps, images and more...</p>
 										<p><a href={this.props.clientRoot + '/pages/tutorials.php' }><button className="btn btn-primary">Or take an introductory tour of our site</button></a></p>

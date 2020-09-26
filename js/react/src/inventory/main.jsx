@@ -365,7 +365,7 @@ class InventoryChooser extends React.Component {
 						</p>
           </div>
         </div>
-        <div className="row">
+        <div className="row mt-3">
           <div className="col">
  								{
 									this.state.projects.map((project,index) => {

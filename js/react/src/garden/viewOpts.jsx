@@ -141,7 +141,7 @@ class ViewOpts extends React.Component {
 
     return (
       <div id="view-opts" className="row">
-        <div className="col-8">
+        <div className="col-7">
           <h3 className="font-weight-bold">Your search results:</h3>
           <div className="d-flex flex-row flex-wrap">
           	{ !this.props.isLoading && this.props.isSearching &&   	
@@ -175,7 +175,7 @@ class ViewOpts extends React.Component {
 			
           </div>
         </div>
-        <div className="col-4 pt-2 container settings">
+        <div className="col-5 col pt-2 container settings">
        		<div className="row mb-2">
        			<div className="col-5 text-right p-0 pr-2 pt-1">
           		View as:

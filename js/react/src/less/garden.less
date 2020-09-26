@@ -20,6 +20,10 @@
 
 .will-collapse {
   max-height: 1000px;
+  h2 {
+  	margin-top: .3rem; 
+  	margin-bottom: 1rem;
+  }
 }
 
 .is-collapsed {
@@ -64,7 +68,7 @@
   	color: white !important;
   }
   h4 {
-		font-weight: 600;
+		font-weight: 400;
 		letter-spacing: .5px; 
 		font-size:1.2rem; 
   }
@@ -205,9 +209,16 @@
 	}
 }
 
-#view-opts.row {
-	padding-left: 0px !important;
-	padding-right: 15px !important;
+#view-opts {
+	padding-bottom: 1em;
+	.row {
+		padding-left: 0px !important;
+		padding-right: 15px !important;
+	}
+	.container.settings {
+		display: flex;
+		flex-flow: row nowrap;
+	}
 }
 
 .plant-need {
@@ -250,4 +261,16 @@
 		}
 	}
 }
-
+.search-result{
+	&.grid-result {
+		height: 95%;
+	}	
+	.card-body {
+		padding: .375rem;
+		.card-text {
+			font-weight: 600;
+			font-size: .8125rem; 
+			line-height: 1rem;
+		}
+	}
+}

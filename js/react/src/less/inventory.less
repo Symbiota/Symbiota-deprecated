@@ -14,6 +14,7 @@
 		line-height: 2.5rem;
 		margin-top: 1.4rem;
 		margin-bottom: 3rem;
+		font-weight: 700;
 	}
 
 	.inventory-header {//common to both chooser and detail view
@@ -27,49 +28,6 @@
 			color: white !important;
 		}
 
-		.current-wrapper {
-
-			.current-button.btn-primary {
-				width: 178px;
-				min-width: 178px;
-				height: 50px;
-				font-size: 27px;
-				text-transform: uppercase;
-				padding: 15px;
-				border-radius: 4px;
-				background: @med-green !important;
-				font-weight: bold;
-				margin-top: 3px;
-				margin-bottom: 18px;
-
-				svg {
-					width: 25px;
-					height: 22px;
-					margin-right: 6px;
-					margin-bottom: 1px;
-				}
-			}
-		}
-
-		.alt-wrapper {
-			font-size: 14px;
-			text-align: right;
-
-			.alt-button {
-				text-transform: uppercase;
-				font-size: 14px;
-				background-image: none!important;
-				background-color: #B0B0B0!important;
-				width: 98px;
-				height: 28px;
-				padding: 6px 10px;
-				border-radius: 4px;
-
-				svg {
-					margin-right: 2px;
-				}
-			}
-		}
 		&.identify-header {
 			.current-wrapper {
 				display: flex;
@@ -105,10 +63,6 @@
 				}
 			}
 		}
-	}
-
-	h2 {
-		font-weight: 600;
 	}
 
 	.verticalSeparator {
@@ -154,7 +108,9 @@
 				background-color: @light-green;
 			}
 			.project-content {
-				padding: 1em 6em;
+				padding: 1.3rem 6.3rem;				
+				font-size: 1.4rem;
+				line-height: 1.875rem;
 			}
 			@media (max-width: @medium) {
 				.project-header {
@@ -332,12 +288,12 @@
 
 			.project-icons {
 				background: @light-green;
-				padding: 6px;
 				display: inline-block;
-
+				padding: 7px 12px; 
+				border-radius: .25rem;
 				svg {
-					width: 15px;
-					height: 13px;
+					width: 24px;
+					height: 23px;
 				}
 			}
 
@@ -378,14 +334,13 @@
 						color: @med-green;
 						border-color: @med-green;
 						border-style: solid;
-						font-size: 1.5rem;
+						font-size: 1.4rem;
 						width: 92%;
-						padding: 0 5px;
+						padding: 0 10px;
 						border-radius: 6px;
 						line-height: 2em;
 						&::placeholder {
 							color: @med-green;
-							font-size: 1rem;
 						}
 					}
 					.fa-times-circle {
@@ -519,16 +474,16 @@
 					}
 
 					td:nth-child(2) {
-						width: 100px;
+						width: 140px;
 						text-align: right;
 
 						a {
 							background: @light-green;
-							padding: 6px;
-
+							padding: 6px 12px; 
+							border-radius: 4px;
 							svg {
-								width: 15px;
-								height: 13px;
+								width: 24px;
+								height: 23px;
 							}
 						}
 
@@ -675,9 +630,8 @@
 		padding-bottom: .4em;
 		.btn-primary {
 			background-image: none!important;
-			padding: 8px 10px;
-			font-size: 16px;
-			max-height: 35px;
+			text-transform: uppercase;
+			border-radius: .25em;
 		}
 		.current-wrapper {
 			height: auto;
@@ -700,19 +654,34 @@
 				margin: 0 0 0 12px;
 			}
 			.btn-primary {
-				background-color: @dark-green!important;
+				background-color: @med-green!important;
+				height: 55px;
+				width: 178px;
+				min-width: 178px;
+				font-size: 1.7rem;
+				line-height: 2rem;
 			}
 		}
 		.alt-wrapper {
 			text-align: right;
+			> div {
+				font-size: .875rem;
+			}
 			.btn-primary {
-				background-color: @med-green!important;
+				background-color: #b0b0b0 !important;
+				font-size: .875rem;
 				&.alt-button:hover{
-					background: @dark-green !important;
+					background: @med-green !important;
 				}
 			}
 		}
-
+		&.identify-header {
+			.current-wrapper {
+				.btn-primary {
+					background-color: @dark-grn-type !important;
+				}
+			}
+		}
 	}
 	#search-results {
 		.family-group {
@@ -770,17 +739,6 @@
       margin-right: 10px;
     }
   }
-}
-#react-identify-app {
-
-	.results-wrapper {
-		.inventory-header {
-			.current-wrapper,
-			.alt-wrapper {
-				width: 50%;
-			}
-		}
-	}
 }
 
 

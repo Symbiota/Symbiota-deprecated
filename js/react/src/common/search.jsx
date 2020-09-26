@@ -16,7 +16,7 @@ function SearchButton(props) {
 	
   return (
     <button
-      className="my-auto btn-search" style={ props.style }
+      className="btn-search" style={ props.style }
       onClick={ props.isLoading ? () => {} : props.onClick}>
       {/*<img
         style={{display: props.isLoading ? "none" : "block"}}

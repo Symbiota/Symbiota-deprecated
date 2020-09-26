@@ -3,8 +3,8 @@
 @import '../../node_modules/react-modal-video/css/modal-video.min.css';
 
 //Variable for project paths since relative paths not allowed
-@subdir: "/portal";
-//@subdir: "";
+//@subdir: "/portal";
+@subdir: "";
 
 * {
   font-family: @font;
@@ -226,8 +226,8 @@ img {
   }
 	.clear-text {
 		position: absolute;
-		top: 12px;
-		left: 67%;
+		top: 15px;
+		left: 49%;
 		color: @gray-type !important;
 		transition: color 100ms;
 		padding: 0 0 0 3px;
@@ -848,38 +848,44 @@ img {
           font-weight: bold;
 				}
         .slide-1 {
-          margin: 0;
+          margin: 1em 0 0 0;
 
           .slide-col-1 {
             padding: 35px 0 0 0;
-
+						h1 {
+							width: 90%;
+						}
 
             h3 {
               margin: 20px 0 10px 0;
+              font-size: 2.215rem;
             }
+						.search-widget {
+							input {
+								display: inline-block;
+								width: 65%;
+								max-width: 400px;
+								font-size: 1.8em;
+								border: 4px solid @med-green;
+								color: @med-green;
+								border-radius: .375em;
+								&::placeholder {
+									color: @med-green;
+								}
+							}
 
-            input {
-              display: inline;
-              width: 65%;
-              max-width: 400px;
-              font-size: 1.8em;
-              border: 3px solid @med-green;
-              color: @med-green;
-              &::placeholder {
-              	color: @med-green;
-              }
-            }
-
+							.btn-search {
+								position: absolute;
+								top: 2px;
+								margin-left: 10px;
+							}
+						}
             .search-explain {
 	            font-size: 1.5rem;
 	            line-height: 1.7rem;
 	            width: 400px;
-	            text-align: center;
+	            text-align: left;
               margin: 15px 0 35px 0;
-            }
-
-            .btn-search {
-              margin-top: 4px;
             }
           }
 
@@ -1487,6 +1493,10 @@ img {
 				margin-top: 0;
 				transform: translate3d(22px, 34px, 0px);
 			}
+			.btn-search {
+				position: absolute;
+				top: 5px;
+			}
 		}
     .opt-labels {
       padding-left: 0;
@@ -1616,7 +1626,7 @@ img {
 	 .fake-button {
 		 cursor: pointer;
 		 border-radius: 3px;
-		 padding: 0.2em 0.5em;
+		 padding: 0.1em 0.6em;
 			span {
 				padding-right: 3px;
 			}
