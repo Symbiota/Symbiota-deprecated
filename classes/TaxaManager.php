@@ -147,6 +147,9 @@ class TaxaManager {
   public function getImages() {
     return $this->images;
   }
+  public function getImage() {
+    return array(array_shift($this->images));
+  }
 	public function getImagesByBasisOfRecord() {
 		$return = array();
 		foreach ($this->images as $image) {

@@ -9,8 +9,6 @@ $result = [];
 
 $CLID_GARDEN_ALL = 54;
 
-
-
 function getTaxon($tid) {
   $em = SymbosuEntityManager::getEntityManager();
   $taxaRepo = $em->getRepository("Taxa");
@@ -75,14 +73,10 @@ function taxaManagerToJSON($taxaObj,$recursive = true) {
 		$result["parentTid"] = $taxaObj->getParentTid();   
 		$result["rankId"] = $taxaObj->getRankId();  
 		$result["author"] = $taxaObj->getAuthor();
-		$result["images"] = $taxaObj->getImages();
-		$allImages = $taxaObj->getImagesByBasisOfRecord();
-		$result["imagesBasis"]['HumanObservation'] = (isset($allImages['HumanObservation']) ? $allImages['HumanObservation'] : []);
-		$result["imagesBasis"]['PreservedSpecimen'] = (isset($allImages['PreservedSpecimen']) ? $allImages['PreservedSpecimen'] : []);
-		$result["imagesBasis"]['LivingSpecimen'] = (isset($allImages['LivingSpecimen']) ? $allImages['LivingSpecimen'] : []);
-
+		
+		
 		if ($recursive === true) {
-			$spp = $taxaObj->getSpp();  					
+			$spp = $taxaObj->getSpp(); 
 			foreach($spp as $rowArr){
 				$taxaModel = $taxaRepo->find($rowArr['tid']);
 				$taxa = TaxaManager::fromModel($taxaModel);
@@ -90,6 +84,8 @@ function taxaManagerToJSON($taxaObj,$recursive = true) {
 				if (!isset($result["spp"])) {
 					$result['spp'] = [];
 				}
+				
+				#var_dump($tj);
 				$result["spp"][] = $tj;
 			}
 			$result["synonyms"] = $taxaObj->getSynonyms();
@@ -109,6 +105,15 @@ function taxaManagerToJSON($taxaObj,$recursive = true) {
 			foreach ($result["taxalinks"] as $idx => $taxalink) {
 				$result["taxalinks"][$idx]['url'] = str_replace("--SCINAME--",$result["sciname"],$taxalink['url']);
 			}	
+			
+			$result["images"] = $taxaObj->getImages();
+			$allImages = $taxaObj->getImagesByBasisOfRecord();
+			$result["imagesBasis"]['HumanObservation'] = (isset($allImages['HumanObservation']) ? $allImages['HumanObservation'] : []);
+			$result["imagesBasis"]['PreservedSpecimen'] = (isset($allImages['PreservedSpecimen']) ? $allImages['PreservedSpecimen'] : []);
+			$result["imagesBasis"]['LivingSpecimen'] = (isset($allImages['LivingSpecimen']) ? $allImages['LivingSpecimen'] : []);
+
+		}else{
+			$result["images"] = $taxaObj->getImage();
 		}
 		
 		foreach ($result['spp'] as $staxa) {#collate SPP images into bare taxon image lists
