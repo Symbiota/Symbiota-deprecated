@@ -97,6 +97,7 @@ function get_data($params) {
 	$results['taxa'] = $identManager->getTaxa();
 	$results['totals'] = TaxaManager::getTaxaCounts($results['taxa']);
 	$results['characteristics'] = $identManager->getCharacteristics();
+	var_dump($results['taxa']);
 
 	#ini_set("memory_limit", $memory_limit);
 	#set_time_limit(30);
