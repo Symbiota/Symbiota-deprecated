@@ -97,7 +97,6 @@ function get_data($params) {
 	$results['taxa'] = $identManager->getTaxa();
 	$results['totals'] = TaxaManager::getTaxaCounts($results['taxa']);
 	$results['characteristics'] = $identManager->getCharacteristics();
-	var_dump($results['taxa']);
 
 	#ini_set("memory_limit", $memory_limit);
 	#set_time_limit(30);
@@ -131,10 +130,10 @@ if (key_exists("attr", $_GET) && is_numeric($_GET['attr'])) {#get rid of this
 	#todo: generate error or redirect
 }
 
-#var_dump($result);
+var_dump($result);
 // Begin View
 header("Content-Type: application/json; charset=UTF-8");
 $json = json_encode($result, JSON_NUMERIC_CHECK);
-#var_dump($json);
+var_dump($json);
 echo $json;
 ?>
