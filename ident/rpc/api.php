@@ -130,7 +130,7 @@ if (key_exists("attr", $_GET) && is_numeric($_GET['attr'])) {#get rid of this
 	#todo: generate error or redirect
 }
 
-
+var_dump($result);
 // Begin View
 header("Content-Type: application/json; charset=UTF-8");
 echo json_encode($result, JSON_NUMERIC_CHECK);
