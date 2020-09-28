@@ -1,8 +1,4 @@
 <?php
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
 
 include_once("../../config/symbini.php");
 include_once("$SERVER_ROOT/config/SymbosuEntityManager.php");
@@ -49,7 +45,7 @@ function get_data($params) {
 		$results["title"] = $checklist->getTitle();
 		$results["intro"] = ($checklist->getIntro()? $checklist->getIntro() :'') ;
 		$results["iconUrl"] = ($checklist->getIconUrl()? $checklist->getIconUrl() :'') ;
-		$results["authors"] = ($checklist->getAuthors()? $checklist->getAuthors() :'') ;
+		#$results["authors"] = ($checklist->getAuthors()? $checklist->getAuthors() :'') ;
 		$results["abstract"] = ($checklist->getAbstract()? $checklist->getAbstract() :'') ;
     $results["lat"] = ($checklist->getLat()? $checklist->getLat() :'') ;
     $results["lng"] = ($checklist->getLng()? $checklist->getLng() :'') ;
@@ -134,10 +130,8 @@ if (key_exists("attr", $_GET) && is_numeric($_GET['attr'])) {#get rid of this
 	#todo: generate error or redirect
 }
 
-var_dump($result);
+
 // Begin View
 header("Content-Type: application/json; charset=UTF-8");
-$json = json_encode($result);
-var_dump($json);
-echo $json;
+echo json_encode($result, JSON_NUMERIC_CHECK);
 ?>
