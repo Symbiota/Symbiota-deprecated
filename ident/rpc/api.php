@@ -97,7 +97,7 @@ function get_data($params) {
 	$results['taxa'] = $identManager->getTaxa();
 	$results['totals'] = TaxaManager::getTaxaCounts($results['taxa']);
 	$results['characteristics'] = $identManager->getCharacteristics();
-print_r($results);
+
 	#ini_set("memory_limit", $memory_limit);
 	#set_time_limit(30);
 	return $results;
@@ -126,6 +126,7 @@ if (key_exists("attr", $_GET) && is_numeric($_GET['attr'])) {#get rid of this
 						|| (array_key_exists("dynclid", $_GET) && is_numeric($_GET["dynclid"]))
 				) {
 	$result = get_data($_GET);
+	var_dump($result);
 } else {
 	#todo: generate error or redirect
 }
