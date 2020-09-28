@@ -103,7 +103,7 @@ class IdentManager extends Manager {
   	if ($this->clid || $this->dynClid) {
 			$em = SymbosuEntityManager::getEntityManager();
 			$taxa = $em->createQueryBuilder()
-				->select(["t.tid, ts.family, t.sciname, ts.parenttid, v.vernacularname, v.language, t.author"])
+				->select(["t.tid, ts.family, t.sciname, ts.parenttid, v.vernacularname, v.language"])//, t.author
 				->from("Taxa","t")
 			;
 			$leftJoins[] = array("Taxavernaculars","v","WITH","t.tid = v.tid");
