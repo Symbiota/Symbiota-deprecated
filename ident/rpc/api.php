@@ -126,7 +126,6 @@ if (key_exists("attr", $_GET) && is_numeric($_GET['attr'])) {#get rid of this
 						|| (array_key_exists("dynclid", $_GET) && is_numeric($_GET["dynclid"]))
 				) {
 	$result = get_data($_GET);
-	var_dump($result);
 } else {
 	#todo: generate error or redirect
 }
