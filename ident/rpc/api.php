@@ -106,7 +106,7 @@ function get_data($params) {
 
 
 #copied intact from garden/rcp/api.php
-function get_characteristics($cid) {#get rid of this
+function get_characteristics($cid) {#TODO - get rid of this
 	$em = SymbosuEntityManager::getEntityManager();
 	$charStateRepo = $em->getRepository("Kmcs");
 	$csQuery = $charStateRepo->findBy([ "cid" => $cid ], ["sortsequence" => "ASC"]);
@@ -130,8 +130,10 @@ if (key_exists("attr", $_GET) && is_numeric($_GET['attr'])) {#get rid of this
 	#todo: generate error or redirect
 }
 
-
+#var_dump($result);
 // Begin View
 header("Content-Type: application/json; charset=UTF-8");
-echo json_encode($result, JSON_NUMERIC_CHECK);
+$json = json_encode($result, JSON_NUMERIC_CHECK);
+#var_dump($json);
+echo $json;
 ?>

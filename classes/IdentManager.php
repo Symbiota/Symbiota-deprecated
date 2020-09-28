@@ -230,6 +230,7 @@ class IdentManager extends Manager {
 					}
 				}else{
 					$newResults[$idx] = $result;
+					$newResults[$idx]['author'] = cleanWindows($result['author']);
 					$newResults[$idx]['vernacular']['basename'] = '';
 					$newResults[$idx]['vernacular']['names'] = [];
 					if (strtolower($result['language']) == 'basename') {
