@@ -234,9 +234,9 @@ class IdentManager extends Manager {
 					$newResults[$idx]['vernacular']['basename'] = '';
 					$newResults[$idx]['vernacular']['names'] = [];
 					if (strtolower($result['language']) == 'basename') {
-						$newResults[$idx]['vernacular']['basename'] = $result['vernacularname'];
+						$newResults[$idx]['vernacular']['basename'] = cleanWindows($result['vernacularname']);
 					}elseif(strtolower($result['language']) == 'english') {
-						$newResults[$idx]['vernacular']['names'][] = $result['vernacularname'];
+						$newResults[$idx]['vernacular']['names'][] = cleanWindows($result['vernacularname']);
 					}
 					unset($newResults[$idx]['vernacularname']);
 					unset($newResults[$idx]['language']);
