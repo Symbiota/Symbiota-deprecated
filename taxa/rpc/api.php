@@ -134,6 +134,7 @@ function taxaManagerToJSON($taxaObj,$recursive = 1) {
 					foreach ($tjs as $tj ) {
 						if (is_array($tj) && isset($tj[0]) && isset($tj[0]['imgid'])) {
 							$result["images"] = $tj;
+							break 2;
 						}
 					}
 				}	
