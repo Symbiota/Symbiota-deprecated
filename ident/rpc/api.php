@@ -106,7 +106,7 @@ function get_data($params) {
 
 
 #copied intact from garden/rcp/api.php
-function get_characteristics($cid) {#get rid of this
+function get_characteristics($cid) {#TODO - get rid of this
 	$em = SymbosuEntityManager::getEntityManager();
 	$charStateRepo = $em->getRepository("Kmcs");
 	$csQuery = $charStateRepo->findBy([ "cid" => $cid ], ["sortsequence" => "ASC"]);
