@@ -35,13 +35,11 @@ function get_data($params) {
 	$search = null;
 	$results = getEmpty();
 	
-print_r($results);
 	if (isset($params["clid"])) {
 		$em = SymbosuEntityManager::getEntityManager();
 		$repo = $em->getRepository("Fmchecklists");
 		$model = $repo->find($params["clid"]);
 		$checklist = ExploreManager::fromModel($model);
-print_r(sizeof($checklist));
 		$checklist->setPid($params["pid"]);
 		$results["clid"] = $checklist->getClid();
 		$results["title"] = $checklist->getTitle();
@@ -52,7 +50,6 @@ print_r(sizeof($checklist));
     $results["lat"] = ($checklist->getLat()? $checklist->getLat() :'') ;
     $results["lng"] = ($checklist->getLng()? $checklist->getLng() :'') ;
 
-print_r($results);
 		$projRepo = SymbosuEntityManager::getEntityManager()->getRepository("Fmprojects");					
 		$model = $projRepo->find($params["pid"]);
 		$project = InventoryManager::fromModel($model);
@@ -100,7 +97,7 @@ print_r($results);
 	$results['taxa'] = $identManager->getTaxa();
 	$results['totals'] = TaxaManager::getTaxaCounts($results['taxa']);
 	$results['characteristics'] = $identManager->getCharacteristics();
-
+print_r($results);
 	#ini_set("memory_limit", $memory_limit);
 	#set_time_limit(30);
 	return $results;
@@ -121,14 +118,13 @@ function get_characteristics($cid) {#TODO - get rid of this
 $result = [];
 #$result = get_data($_GET);
 
-print_r("start");
+
 if (key_exists("attr", $_GET) && is_numeric($_GET['attr'])) {#get rid of this
 	$result = get_characteristics(intval($_GET['attr']));
 } elseif (
 						(array_key_exists("clid", $_GET) && is_numeric($_GET["clid"])&& array_key_exists("pid", $_GET) && is_numeric($_GET["pid"]))
 						|| (array_key_exists("dynclid", $_GET) && is_numeric($_GET["dynclid"]))
 				) {
-print_r("get_data");
 	$result = get_data($_GET);
 } else {
 	#todo: generate error or redirect
