@@ -134,5 +134,6 @@ var_dump($result);
 // Begin View
 header("Content-Type: application/json; charset=UTF-8");
 $json = json_encode($result, JSON_NUMERIC_CHECK);
+var_dump($json);
 echo $json;
 ?>
