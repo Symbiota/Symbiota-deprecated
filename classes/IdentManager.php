@@ -222,7 +222,6 @@ class IdentManager extends Manager {
 			$currIdx = null;
 			foreach ($results as $idx => $result) {
 
-				$results[$idx]['author'] = cleanWindows($results[$idx]['author']);
 				if ($result['sciname'] == $currSciName) {
 					if (strtolower($result['language']) == 'basename') {
 						$newResults[$currIdx]['vernacular']['basename'] = $result['vernacularname'];
@@ -231,6 +230,7 @@ class IdentManager extends Manager {
 					}
 				}else{
 					$newResults[$idx] = $result;
+					$newResults[$idx]['author'] = cleanWindows($result['author']);
 					$newResults[$idx]['vernacular']['basename'] = '';
 					$newResults[$idx]['vernacular']['names'] = [];
 					if (strtolower($result['language']) == 'basename') {
