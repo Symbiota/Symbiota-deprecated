@@ -87,6 +87,9 @@ function taxaManagerToJSON($taxaObj,$recursive = true) {
 				$taxaModel = $taxaRepo->find($rowArr['tid']);
 				$taxa = TaxaManager::fromModel($taxaModel);
 				$tj = taxaManagerToJSON($taxa,false);
+				if (!isset($result["spp"])) {
+					$result['spp'] = [];
+				}
 				$result["spp"][] = $tj;
 			}
 			$result["synonyms"] = $taxaObj->getSynonyms();
@@ -107,6 +110,7 @@ function taxaManagerToJSON($taxaObj,$recursive = true) {
 				$result["taxalinks"][$idx]['url'] = str_replace("--SCINAME--",$result["sciname"],$taxalink['url']);
 			}	
 		}
+		
 		foreach ($result['spp'] as $staxa) {#collate SPP images into bare taxon image lists
 
 			if (isset($staxa['imagesBasis']['HumanObservation'])) {
