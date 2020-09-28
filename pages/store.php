@@ -79,7 +79,7 @@ include($serverRoot . "/header.php");
                         <p class="store-item-subtitle">Dicots Aizoaceae - Fagaceae</p>
                         <div class="store-item-desc">
                             <p>Upholding the unparalleled standards of quality and design established
-                                with the first volume, Volume 2 presents 1,677 taxa of Oregon dicots from families Aizoaceae
+                                with the first volume, Volume 2 presents 1,668 taxa of Oregon dicots from families Aizoaceae
                                 through Fagaceae. Notable groups include the Asteraceae (representing >11% of the state’s
                                 flora), the mustard family (Brassicaceae), stonecrops (Crassulaceae), and the legumes
                                 (Fabaceae). The richly-illustrated front chapters cover gardening with native plants and
@@ -98,7 +98,7 @@ include($serverRoot . "/header.php");
                         <p>Preorder your copy now!</p>
                     </div>
                     <div class="store-item-link">
-                        <p><a href="https://shop.brit.org/Flora-of-Oregon" target="_blank"
+                        <p><a href="https://shop.brit.org/Flora-of-Oregon-V2" target="_blank"
                               class="btn btn-primary btn-lg active" role="button" aria-pressed="true">Learn more or
                                 purchase online</a></p>
                     </div>

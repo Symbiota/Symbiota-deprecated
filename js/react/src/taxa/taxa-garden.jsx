@@ -26,9 +26,9 @@ function BorderedItem(props) {
   }
 
   return (
-    <div className={ "row dashed-border py-2" }>
-      <div className="col font-weight-bold">{ props.keyName }</div>
-      <div className="col">{ value }</div>
+    <div className={ "row dashed-border" }>
+      <div className="col px-0 font-weight-bold">{ props.keyName }</div>
+      <div className="col px-0">{ value }</div>
     </div>
   );
 }
@@ -301,7 +301,7 @@ class TaxaApp extends React.Component {
 							<span>{ this.state.vernacularNames[0] }</span> images
 						</h3>
 					</ImageModal>
-          <div className="col-md-4">
+          <div className="col-md-4 sidebar-section">
             <SideBarSection title="Highlights" items={ this.state.highlights } />
             { this.state.nativeGroups.length > 0 &&
             <div className={ "mb-4 " }>

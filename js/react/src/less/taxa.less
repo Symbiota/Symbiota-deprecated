@@ -1,14 +1,22 @@
 @import "./mixins.less";
 @import '../../node_modules/react-tabs/style/react-tabs.less';
 
-
-h2 {
-	margin-top: .6rem !important;
+p,
+li {
+	font-size: 1.4rem;
+	line-height: 1.875rem;
+	margin-bottom: .7rem;
 }
-
+h2 {
+	margin-top: .1rem !important;
+}
 
 #react-taxa-garden-app,
 #react-taxa-app {
+	h1{
+		font-weight: 700;
+		margin-bottom: 0;
+	}
 	//taxa slideshows on main and garden pages
 	.taxa-slideshows {
 		.slick-next, 
@@ -44,6 +52,32 @@ h2 {
 		figcaption {
 			text-align: right;
 			font-size: .875rem;
+		}
+	}
+	.sidebar-section {
+
+		font-size: 14px;
+		font-weight: 400;
+		p {
+			font-size: 14px;
+		}
+		h3{
+			font-size: 1.2rem;
+			margin-bottom: 0.2em !important;
+			color: @med-green;
+		}
+
+		.row {
+			margin-left: 0px;
+			margin-right: 0px;
+			padding-top: .4rem !important;
+			padding-bottom: .4rem !important;
+			line-height: 1.3rem;
+		}
+		li {	
+			font-size: 14px;
+			line-height: 1.3rem;
+			margin-bottom: .4rem;
 		}
 	}
 }
@@ -119,30 +153,14 @@ h2 {
 			}
 		}
 	}
-	.sidebar-section {
 
-		.row {
-			margin-left: 0px;
-			margin-right: 0px;
-			padding-top: .2rem !important;
-			padding-bottom: .2rem !important;
-		}
-	}
 }
 #react-taxa-app {
 	.taxa-detail {
 		position: relative;
 	}
-	h1{
-		font-weight: 700;
-		margin-bottom: .2rem;
-	}
 	h2{
 		font-weight: 400;
-	}
-	h3{
-		font-size: 1.4rem;
-		color: @med-green;
 	}
 	.synonym {
 		font-size: 1.35rem;
@@ -221,13 +239,7 @@ h2 {
 	}
 
 	.sidebar-section {
-		font-size: 14px;
-		font-weight: 400;
 
-		h3 {
-			font-size: 1.2rem;
-			margin-bottom: 0.2em !important;
-		}
 
 		.related-sciname {
 			font-size: 18px;
@@ -243,12 +255,6 @@ h2 {
 		}
 		.related-nav {
 			text-align: right;
-		}
-		.row {
-			margin-left: 0px;
-			margin-right: 0px;
-			padding-top: .2rem !important;
-			padding-bottom: .2rem !important;
 		}
 		.map-label {
 			border-bottom: 1px dashed black;

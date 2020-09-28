@@ -395,7 +395,7 @@ img {
     color: white;
     font-size: 36px;
     font-weight: bold;
-    padding: 45px 0 20px 0;
+    padding: 65px 0 20px 0;
 
     @media (min-width: 544px) {
       font-size: 60px;
@@ -1292,10 +1292,10 @@ img {
 						}
 						.image-details {
 							margin: 0 auto;
-							padding: 1em 0;
+							padding: 1em 20px;
 							height: 20%;
 							min-height: 95px;
-							width: 80%;
+							width: 100%;
 							color: @gray-type;
 							font-size: .875rem; 
 							line-height: 1rem;
@@ -1650,6 +1650,9 @@ img {
 			margin-top: 3em;
 			overflow-y: scroll;
 			max-height: 80vh;
+			--scrollbarBG: @med-green;
+			--thumbBG: #1b1b1b;
+			scrollbar-color: @med-green #1b1b1b;
 			h1, h2 {
 				color: white;
 			}
