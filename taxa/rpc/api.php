@@ -62,7 +62,7 @@ function getSubTaxa($parentTid) {
   return $results;
 }
   
-function taxaManagerToJSON($taxaObj,$recursive = true) {
+function taxaManagerToJSON($taxaObj,$recursive = 1) {
 
 	$result = TaxaManager::getEmptyTaxon();
   $taxaRepo = SymbosuEntityManager::getEntityManager()->getRepository("Taxa");
@@ -74,18 +74,16 @@ function taxaManagerToJSON($taxaObj,$recursive = true) {
 		$result["rankId"] = $taxaObj->getRankId();  
 		$result["author"] = $taxaObj->getAuthor();
 		
-		
-		if ($recursive === true) {
+		if ($recursive === 1) {
 			$spp = $taxaObj->getSpp(); 
 			foreach($spp as $rowArr){
 				$taxaModel = $taxaRepo->find($rowArr['tid']);
 				$taxa = TaxaManager::fromModel($taxaModel);
-				$tj = taxaManagerToJSON($taxa,false);
+				$tj = taxaManagerToJSON($taxa,2);
 				if (!isset($result["spp"])) {
 					$result['spp'] = [];
 				}
 				
-				#var_dump($tj);
 				$result["spp"][] = $tj;
 			}
 			$result["synonyms"] = $taxaObj->getSynonyms();
@@ -111,21 +109,34 @@ function taxaManagerToJSON($taxaObj,$recursive = true) {
 			$result["imagesBasis"]['HumanObservation'] = (isset($allImages['HumanObservation']) ? $allImages['HumanObservation'] : []);
 			$result["imagesBasis"]['PreservedSpecimen'] = (isset($allImages['PreservedSpecimen']) ? $allImages['PreservedSpecimen'] : []);
 			$result["imagesBasis"]['LivingSpecimen'] = (isset($allImages['LivingSpecimen']) ? $allImages['LivingSpecimen'] : []);
+			
+			foreach ($result['spp'] as $staxa) {#collate SPP images into bare taxon image lists
 
-		}else{
+				if (isset($staxa['imagesBasis']['HumanObservation'])) {
+					$result['imagesBasis']['HumanObservation'] = array_merge($result['imagesBasis']['HumanObservation'],$staxa['imagesBasis']['HumanObservation']);
+				}
+				if (isset($staxa['imagesBasis']['PreservedSpecimen'])) {
+					$result['imagesBasis']['PreservedSpecimen'] = array_merge($result['imagesBasis']['PreservedSpecimen'],$staxa['imagesBasis']['PreservedSpecimen']);
+				}
+				if (isset($staxa['imagesBasis']['HumanObservation'])) {
+					$result['imagesBasis']['LivingSpecimen'] = array_merge($result['imagesBasis']['LivingSpecimen'],$staxa['imagesBasis']['LivingSpecimen']);
+				}
+			}
+
+		}elseif($recursive > 1){
 			$result["images"] = $taxaObj->getImage();
-		}
-		
-		foreach ($result['spp'] as $staxa) {#collate SPP images into bare taxon image lists
-
-			if (isset($staxa['imagesBasis']['HumanObservation'])) {
-				$result['imagesBasis']['HumanObservation'] = array_merge($result['imagesBasis']['HumanObservation'],$staxa['imagesBasis']['HumanObservation']);
-			}
-			if (isset($staxa['imagesBasis']['PreservedSpecimen'])) {
-				$result['imagesBasis']['PreservedSpecimen'] = array_merge($result['imagesBasis']['PreservedSpecimen'],$staxa['imagesBasis']['PreservedSpecimen']);
-			}
-			if (isset($staxa['imagesBasis']['HumanObservation'])) {
-				$result['imagesBasis']['LivingSpecimen'] = array_merge($result['imagesBasis']['LivingSpecimen'],$staxa['imagesBasis']['LivingSpecimen']);
+			if ($result["images"][0] === null) {
+				$spp = $taxaObj->getSpp();
+				foreach($spp as $rowArr){
+					$taxaModel = $taxaRepo->find($rowArr['tid']);
+					$taxa = TaxaManager::fromModel($taxaModel);
+					$tjs = taxaManagerToJSON($taxa,3);
+					foreach ($tjs as $tj ) {
+						if (is_array($tj) && isset($tj[0]) && isset($tj[0]['imgid'])) {
+							$result["images"] = $tj;
+						}
+					}
+				}	
 			}
 		}
 		
