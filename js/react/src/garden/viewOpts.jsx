@@ -175,9 +175,9 @@ class ViewOpts extends React.Component {
 			
           </div>
         </div>
-        <div className="col-5 col pt-2 container settings">
-       		<div className="row mb-2">
-       			<div className="col-5 text-right p-0 pr-2 pt-1">
+        <div className="col-5 col pt-2 container settings px-2">
+       		<div className="col-lg-6 col-sm-12 row mx-0 mb-2 px-2">
+       			<div className="col-5 text-right px-2 pt-1">
           		View as:
           	</div>
        			<div className="col-7 p-0">
@@ -204,8 +204,8 @@ class ViewOpts extends React.Component {
           	
           </div>
           
-       		<div className="row mb-2">
-       			<div className="col-5 text-right p-0 pr-2 pt-1">
+       		<div className="col-lg-6 col-sm-12 row mx-0 mb-2 px-0">
+       			<div className="col-5 text-right px-2 pt-1">
           		Sort by name:  
           	</div>
        			<div className="col-7 p-0">      	

@@ -70,11 +70,19 @@
 					margin-right: .7em;
 				}
       }
-
     }
     #site-header-dropdowns-wrapper {
     	margin-top: 3rem;
 			order: 2;
+			@media screen and (max-width: @xlarge) {
+				ul {
+					padding-left: .5em;
+					li {
+						margin-left: .1em;
+						margin-right: .1em;
+					}
+				}
+			}
     }
 
     .header-button {
@@ -103,6 +111,10 @@
   	margin-right: -41px;
 		padding: 0px 20px 0 20px;
 		text-align: right;
+		@media screen and (max-width: @xlarge) {
+			padding-left: 0px;
+			flex-basis: 450px;
+		}	
   	.row {
 	  	margin: 0;
 	  }
@@ -138,8 +150,8 @@
 					}
 				}
 				.dropdown-menu {
-					margin-top: 10px;
-					margin-left: 6px;
+					margin-top: 12px;
+					margin-left: 42px;
 				}
 				.clear-text {
 					display: none;
@@ -203,6 +215,7 @@
 				top: 0;	
 				position: absolute;
 				z-index: 1100;
+				margin-top: .4rem;
 				#site-header-navbar-toggler {
 					font-weight: bold;
 					color: white;
@@ -229,6 +242,7 @@
 							padding: .4rem 0 .4rem 1em;
 							cursor: pointer;
 							max-width: 100%;
+							font-size: 1.2rem;
 							&:hover {
 								background-color: transparent !important;
 								color: white !important;
@@ -255,7 +269,8 @@
 							margin: 0;
 							border: none;
 							a {
-								line-height: 1.8rem;
+								line-height: 1.9rem;
+								font-size: 1.1rem;
 								padding: 0 1rem 0 2rem;
 							}
 						}
@@ -273,8 +288,7 @@
 				order: 0;
 				flex-basis: 40%;
 				text-align: right;
-				margin-top: 6px;
-				padding: 0 0 0 0;
+				padding: 6px 0 0 0;
 				position: relative;
 				z-index: 1000;
 				#site-search-toggler {
@@ -291,22 +305,31 @@
 				.widget-wrapper {
 					//display: none;
 					right: 0;
-					top: 3.45em;
+					top: 3.8em;
 					position: absolute;
-					background-color: @med-green;
+					background-color: @dark-green;
 					padding-bottom: .8rem;
-					border-left: 1px solid @dark-green;
-					border-bottom: 1px solid @dark-green;
 					border-bottom-left-radius: 10px;
-					width: 100%;
+					width: auto;
 					.search-widget {
 						padding-right: .5rem;
+						padding-top: 1rem;
+						position: relative;
+						height: 60px;
 						input {
-						
+							position: absolute;
+							left: 12px;
+							max-width: 333px !important;
 						}
 						.btn-search {
-							position: relative;
-							
+							position: absolute;
+							right: 12px;
+							top: 18px;
+						}
+						.dropdown-menu {
+							margin-top: 17px;
+							margin-left: 16px;
+							top: 56px;
 						}
 					}
 				}

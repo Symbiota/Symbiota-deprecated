@@ -18,7 +18,7 @@ class InfographicDropdown extends React.Component {
     return (
       <div
         id="infographic-dropdown"
-        className="container-fluid p-3 d-print-none"
+        className="container-fluid d-print-none"
         style={{ position: "relative", backgroundImage: `url(${this.props.clientRoot}/images/garden/natives-bg.jpg)` }}
       >
         

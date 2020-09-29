@@ -139,7 +139,7 @@ class HeaderApp extends React.Component {
       }
     /*}*/
 
-    window.location = targetUrl;
+    window.open( targetUrl );
   }
 
   componentDidMount() {

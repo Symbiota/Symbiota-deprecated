@@ -1,11 +1,5 @@
 @import "./mixins.less";
 
-@media only screen and (max-width: @medium) {
-  #infographic-dropdown {
-    display: none;
-  }
-}
-
 .will-v-flip, .v-flip {
   transition: transform 0.5s;
 }
@@ -64,6 +58,7 @@
 	position: relative;
 }
 #infographic-dropdown {
+	padding: 1.5rem 0;
  	* {
   	color: white !important;
   }
@@ -71,6 +66,16 @@
 		font-weight: 400;
 		letter-spacing: .5px; 
 		font-size:1.2rem; 
+  }
+}
+
+@media only screen and (max-width: @medium) {
+  #infographic-dropdown {
+  	padding: .8rem;
+  	.will-collapse,
+  	button {
+	    display: none;
+	  }
   }
 }
 
@@ -217,7 +222,7 @@
 	}
 	.container.settings {
 		display: flex;
-		flex-flow: row nowrap;
+		flex-flow: row wrap;
 	}
 }
 

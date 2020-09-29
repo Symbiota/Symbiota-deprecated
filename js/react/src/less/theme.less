@@ -813,6 +813,10 @@ img {
 
     .container.home {
 			
+			@media screen and (max-width: 600px){
+				padding-left: 30px;
+				padding-right: 30px;
+			}
 			.modal-video-body {
 				max-width: 1100px;
 			}
@@ -830,7 +834,7 @@ img {
       	right: -60px;
       }
 
-			@media screen and (min-width: @xlarge) and (max-width: 1250px) {
+			@media screen and (min-width: @xlarge) and (max-width: 1250px){
 				.slick-prev {
 					left: -40px;
 				}
@@ -838,7 +842,31 @@ img {
 					right: -40px;
 				}				
 			}
-
+			
+			@media screen and (max-width: 1060px) and (min-width: @large){
+				.slick-prev {
+					left: -40px;
+				}
+				.slick-next {
+					right: -40px;
+				}				
+			}
+			@media screen and (max-width: 640px){
+				.slick-prev {
+					left: -40px;
+				}
+				.slick-next {
+					right: -40px;
+				}				
+			}
+			@media screen and (max-width: 580px){
+				.slick-prev {
+					left: -30px;
+				}
+				.slick-next {
+					right: -30px;
+				}				
+			}
       .slick-slide {
         height: auto;
         margin-bottom: 50px;
