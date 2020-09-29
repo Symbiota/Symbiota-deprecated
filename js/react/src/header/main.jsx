@@ -194,26 +194,7 @@ class HeaderApp extends React.Component {
         id="site-header"
         className={ `container navbar navbar-expand-lg navbar-dark site-header ${this.state.isCollapsed ? "site-header-scroll" : ''}` }>
 
-        <a className="navbar-brand" href={ `${this.props.clientRoot}/` }>
-        	{ this.state.isCollapsed ? (
-        	<picture>
-          	<img id="site-header-logo"
-               src={smLogo}
-               alt="OregonFlora"
-          	/>
-          </picture>
-					) : (
-						<picture>
-	        		<source media="(max-width: 992px)" srcSet={ smLogo } />
-  	      		<source media="(min-width: 992px)" srcSet={ lgLogo } />
-							<img id="site-header-logo"
-								 src={lgLogo}
-								 alt="OregonFlora"
-							/>
-						</picture>
-						)
-					}        
-        </a>
+
 
         <div id="site-header-dropdowns-wrapper" className="">
         
@@ -257,7 +238,26 @@ class HeaderApp extends React.Component {
           </ul>
         </div>
 
-
+        <a className="navbar-brand" href={ `${this.props.clientRoot}/` }>
+        	{ this.state.isCollapsed ? (
+        	<picture>
+          	<img id="site-header-logo"
+               src={smLogo}
+               alt="OregonFlora"
+          	/>
+          </picture>
+					) : (
+						<picture>
+	        		<source media="(max-width: 992px)" srcSet={ smLogo } />
+  	      		<source media="(min-width: 992px)" srcSet={ lgLogo } />
+							<img id="site-header-logo"
+								 src={lgLogo}
+								 alt="OregonFlora"
+							/>
+						</picture>
+						)
+					}        
+        </a>
 
       
         <div className={ "search-wrapper ml-auto"}>

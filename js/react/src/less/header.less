@@ -18,11 +18,12 @@
     height: 100%;
     padding: 0;
     transition: height 0.5s, padding-top 0.5s;
-    
+
 		@media screen and (max-width: @xlarge) {
 			max-width: 920px;
 		}
 		.navbar-brand {
+			order: 1;
 			padding: 0;
 			margin: 34px 0 0 -6px;
 			#site-header-logo {
@@ -73,6 +74,7 @@
     }
     #site-header-dropdowns-wrapper {
     	margin-top: 3rem;
+			order: 2;
     }
 
     .header-button {
@@ -96,13 +98,11 @@
     }
   }
   .search-wrapper {
+		order: 3;
   	flex-basis: 500px;
   	margin-right: -41px;
 		padding: 0px 20px 0 20px;
 		text-align: right;
-		@media screen and (max-width: @xlarge) {
-			margin-right: 0px;
-		}
   	.row {
 	  	margin: 0;
 	  }
@@ -151,6 +151,21 @@
 				}
 			}
 		}
+		
+		@media screen and (max-width: @xlarge) {
+			margin-right: 0px;
+			padding-right: 0px;
+			.widget-wrapper {
+				margin-left: 0px;
+			}
+			.header-button-bar {
+				margin-right: 30px;
+			}
+		}
+	}
+    
+	@media screen and (max-width: @xlarge) {
+		//max-width: 920px;
 	}
 	
 	.site-header-scroll {	
@@ -180,13 +195,14 @@
 	
 		#site-header,
 		#site-header.site-header-scroll {
-			justify-content: space-between;
-			align-items: flex-start;
+			display: block;
+			position: relative;
 			#site-header-dropdowns-wrapper {
-				order: 1;
-				flex-basis: 40%;
-				margin-top: 6px;
-				position: relative;
+				order: 0;
+				left: 0;
+				top: 0;	
+				position: absolute;
+				z-index: 1100;
 				#site-header-navbar-toggler {
 					font-weight: bold;
 					color: white;
@@ -199,6 +215,9 @@
 					margin-top: 7px;
 					padding: 0 0 1em 0;
 					min-width: 250px;
+					border-right: 1px solid @dark-green;
+					border-bottom-right-radius: 10px;
+					
 					&.navbar-collapse {
 						align-items: flex-start;
 					}
@@ -244,18 +263,20 @@
 				}
 			}
 			.navbar-brand {
+				order: 0;
 				margin-top: 6px !important;
-				order: 2;
-				flex-basis: 20%;
+				left: calc(50% - 44px);
+				position: absolute;
 				text-align: center;
 			}
 			.search-wrapper {
-				order: 3;
+				order: 0;
 				flex-basis: 40%;
 				text-align: right;
 				margin-top: 6px;
 				padding: 0 0 0 0;
 				position: relative;
+				z-index: 1000;
 				#site-search-toggler {
 					display: block;
 					right: 0;
@@ -274,8 +295,19 @@
 					position: absolute;
 					background-color: @med-green;
 					padding-bottom: .8rem;
+					border-left: 1px solid @dark-green;
+					border-bottom: 1px solid @dark-green;
+					border-bottom-left-radius: 10px;
+					width: 100%;
 					.search-widget {
 						padding-right: .5rem;
+						input {
+						
+						}
+						.btn-search {
+							position: relative;
+							
+						}
 					}
 				}
 			}
