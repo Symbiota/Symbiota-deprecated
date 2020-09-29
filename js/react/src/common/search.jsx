@@ -106,6 +106,7 @@ export class SearchWidget extends React.Component {
                   onClick={ (e) => { e.preventDefault(); e.stopPropagation(); this.props.onSearch(s); } }
                   className="dropdown-item"
                   href="#"
+                  target="_blank"
                 >
                   { s.text }
                 </a>
