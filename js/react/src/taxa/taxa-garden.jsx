@@ -296,6 +296,7 @@ class TaxaApp extends React.Component {
 						currImage={this.state.currImage}
 						images={this.state.images}
 						onClose={this.toggleImageModal}
+						clientRoot={ this.props.clientRoot }
 					>
 						<h3>
 							<span>{ this.state.vernacularNames[0] }</span> images
