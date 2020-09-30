@@ -207,8 +207,9 @@ function MapItem(props) {
     	<div className={ "dashed-border pt-0" }>
     		<a 
     			className="map-link"
-    			onClick={ () => window.open(mapLink,'gmap','toolbar=0,scrollbars=1,width=950,height=700,left=20,top=20') }
-    		>
+    			onClick={ () => window.open(mapLink) }
+    		>{/* 
+    			onClick={ () => window.open(mapLink,'gmap','toolbar=1,scrollbars=1,width=950,height=700,left=20,top=20') } */}
       		<img
 						src={mapImage}
 						alt={props.title}
@@ -218,8 +219,9 @@ function MapItem(props) {
     	<div className={ "map-label text-right" }>
     		<a 
     			className="map-link"
-    			onClick={ () => window.open(mapLink,'gmap','toolbar=0,scrollbars=1,width=950,height=700,left=20,top=20') }
-    		>				
+    			onClick={ () => window.open(mapLink) }
+    		>	{/* 
+    			onClick={ () => window.open(mapLink,'gmap','toolbar=1,scrollbars=1,width=950,height=700,left=20,top=20') } */}			
       		Click/tap to launch
 				</a>
 			</div>
