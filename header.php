@@ -54,5 +54,14 @@
   src='<?php echo "$CLIENT_ROOT/js/react/dist/header.js" ?>'
   type="text/javascript">
 </script>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-179416436-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-179416436-1');
+</script>
 
 <div id="site-content">
