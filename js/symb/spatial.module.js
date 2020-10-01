@@ -2260,7 +2260,7 @@ function lazyLoadPoints(index,callback){
     var http = new XMLHttpRequest();
     var url = "rpc/SOLRConnector.php";
     var params = solrqString+'&rows='+lazyLoadCnt+'&start='+startindex+'&fl='+SOLRFields+'&wt=geojson&action=lazyload';
-    //console.log("lazy " + url + " " + params);
+    console.log("lazy " + url + " " + params);
     http.open("POST", url, true);
     http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     http.onreadystatechange = function() {
@@ -2310,7 +2310,7 @@ function loadPoints(){
 						loadPointsEvent = true;
 						setLoadingTimer();
 						if(loadVectorPoints){
-								loadPointWFSLayer(0);
+								//loadPointWFSLayer(0);
 						}
 						else{
 								loadPointWMSLayer();
