@@ -2310,7 +2310,7 @@ function loadPoints(){
 						loadPointsEvent = true;
 						setLoadingTimer();
 						if(loadVectorPoints){
-								//loadPointWFSLayer(0);
+								loadPointWFSLayer(0);
 						}
 						else{
 								loadPointWMSLayer();
