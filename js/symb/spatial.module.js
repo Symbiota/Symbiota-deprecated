@@ -19,9 +19,20 @@ $(document).ready(function() {
         return split( term ).pop();
     }
 
+		$( ".query-trigger-field" )
+				.bind( "change", function( event ) {
+					buildQueryStrings();
+				});
+		$( "#taxa_autocomplete").on("click",'.ui-autocomplete li a', function(event) {//for Safari, Firefox PC, etc.
+				event.preventDefault();
+				buildQueryStrings();
+		});
     $( "#taxa" )
+				// don't navigate away from the field on tab when selecting an item
         .bind( "keydown", function( event ) {
             if ( event.keyCode === $.ui.keyCode.TAB &&
+            		$( this ).data( "autocomplete" ) !== undefined &&
+            		$( this ).data( "autocomplete" ).menu !== undefined &&
                 $( this ).data( "autocomplete" ).menu.active ) {
                 event.preventDefault();
             }
@@ -77,6 +88,8 @@ $(document).ready(function() {
                 terms.pop();
                 terms.push( ui.item.value );
                 this.value = terms.join( ", " );
+                
+								buildQueryStrings();
                 return false;
             }
         },{});
@@ -271,7 +284,6 @@ function buildCQLString(){
     else{
         newcqlString = newcqlString.substr(5,newcqlString.length);
     }
-    //console.log(cqlString);
 }
 
 function buildLayerTableRow(lArr,removable){
@@ -321,6 +333,7 @@ function buildLayerTableRow(lArr,removable){
 }
 
 function buildQueryStrings(){
+		//console.log(document.getElementById("taxa").value.trim());
     cqlArr = [];
     solrqArr = [];
     solrgeoqArr = [];
@@ -395,6 +408,7 @@ function buildSOLRQString(){
 
 function buildTaxaKey(){
     document.getElementById("taxaCountNum").innerHTML = taxaCnt;
+    taxaKeyArr = [];
     for(i in taxaSymbology){
         var family = taxaSymbology[i]['family'];
         var tidinterpreted = taxaSymbology[i]['tidinterpreted'];
@@ -444,7 +458,8 @@ function buildTaxaKeyPiece(key,family,tidinterpreted,sciname){
         keyHTML += "<div style='display:table-cell;vertical-align:middle;padding-left:8px;'><i>"+sciname+"</i></div>";
     }
     else{
-        keyHTML += "<div style='display:table-cell;vertical-align:middle;padding-left:8px;'><i><a target='_blank' href='../taxa/index.php?taxon="+sciname+"'>"+sciname+"</a></i></div>";
+        //keyHTML += "<div style='display:table-cell;vertical-align:middle;padding-left:8px;'><i><a target='_blank' href='../taxa/index.php?taxon="+sciname+"'>"+sciname+"</a></i></div>";
+        keyHTML += "<div style='display:table-cell;vertical-align:middle;padding-left:8px;'><i><a target='_blank' href='../taxa/index.php?taxon="+tidinterpreted+"'>"+sciname+"</a></i></div>";
     }
     keyHTML += '</div></div>';
     if(!taxaKeyArr[family]){
@@ -630,7 +645,6 @@ function changeRecordPage(page){
     var http = new XMLHttpRequest();
     var url = "rpc/changemaprecordpage.php";
     var params = solrqString+'&rows='+solrRecCnt+'&page='+page+'&selected='+selJson;
-    //console.log(url+'?'+params);
     http.open("POST", url, true);
     http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     http.onreadystatechange = function() {
@@ -1812,7 +1826,6 @@ function getSOLROccArr(callback){
             var http = new XMLHttpRequest();
             var url = "rpc/SOLRConnector.php";
             var params = solroccqString+'&rows='+solrRecCnt+'&start=0&fl=occid&wt=json';
-            //console.log(url+'?'+params);
             http.open("POST", url, true);
             http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
             http.onreadystatechange = function() {
@@ -1842,15 +1855,19 @@ function getSOLRRecCnt(occ,callback){
     var http = new XMLHttpRequest();
     var url = "rpc/SOLRConnector.php";
     var params = qStr+'&rows=0&start=0&wt=json';
-    //console.log(url+'?'+params);
+    //console.log("getSOLRRecCnt: " + url+'?'+params);
     http.open("POST", url, true);
     http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     http.onreadystatechange = function() {
         if(http.readyState == 4 && http.status == 200) {
             var resArr = JSON.parse(http.responseText);
-            solrRecCnt = resArr['response']['numFound'];
+            var callbackValue = 1;
+	            solrRecCnt = resArr['response']['numFound'];
+            if (resArr['response']['hiddenFound'] > 0) {
+            	callbackValue = 2;
+            }
             document.getElementById("dh-rows").value = solrRecCnt;
-            callback(1);
+            callback(callbackValue);
         }
     };
     http.send(params);
@@ -2242,8 +2259,8 @@ function lazyLoadPoints(index,callback){
     if(index > 1) startindex = (index - 1)*lazyLoadCnt;
     var http = new XMLHttpRequest();
     var url = "rpc/SOLRConnector.php";
-    var params = solrqString+'&rows='+lazyLoadCnt+'&start='+startindex+'&fl='+SOLRFields+'&wt=geojson';
-    //console.log(url+'?'+params);
+    var params = solrqString+'&rows='+lazyLoadCnt+'&start='+startindex+'&fl='+SOLRFields+'&wt=geojson&action=lazyload';
+    //console.log("lazy " + url + " " + params);
     http.open("POST", url, true);
     http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     http.onreadystatechange = function() {
@@ -2257,6 +2274,7 @@ function lazyLoadPoints(index,callback){
 }
 
 function loadPoints(){
+	//console.log("loadPoints");
     cqlString = '';
     solrqString = '';
     taxaCnt = 0;
@@ -2269,46 +2287,62 @@ function loadPoints(){
     cqlString = newcqlString;
     solrqString = newsolrqString;
     if(newsolrqString){
+    
         showWorking();
         pointvectorsource = new ol.source.Vector({wrapX: false});
         layersArr['pointv'].setSource(pointvectorsource);
         getSOLRRecCnt(false,function(res) {
-            if(solrRecCnt){
-                loadPointsEvent = true;
-                setLoadingTimer();
-                if(loadVectorPoints){
-                    loadPointWFSLayer(0);
-                }
-                else{
-                    loadPointWMSLayer();
-                }
-                //cleanSelectionsLayer();
-                setRecordsTab();
-                changeRecordPage(1);
-                $('#recordstab').tabs({active: 1});
-                $("#accordion").accordion("option","active",1);
-                selectInteraction.getFeatures().clear();
-                if(!pointActive){
-                    var infoArr = [];
-                    infoArr['Name'] = 'pointv';
-                    infoArr['layerType'] = 'vector';
-                    infoArr['Title'] = 'Points';
-                    infoArr['Abstract'] = '';
-                    infoArr['DefaultCRS'] = '';
-                    buildLayerTableRow(infoArr,true);
-                    pointActive = true;
-                }
-            }
-            else{
-                setRecordsTab();
-                if(pointActive){
-                    removeLayerToSelList('pointv');
-                    pointActive = false;
-                }
-                loadPointsEvent = false;
-                hideWorking();
-                alert('You have selected a rare plant. Please login to view precise locality information.');
-            }
+        	if(res == 2) {
+        		alert('You need to be logged in with rare species privileges to view the full distribution. Rare taxa in these search results are hidden unless you are logged in.');
+        	}
+        
+        	/*if (res == 2) {
+						setRecordsTab();
+						if(pointActive){
+								removeLayerToSelList('pointv');
+								pointActive = false;
+						}
+						loadPointsEvent = false;
+						hideWorking();                
+						//ORIG alert('There were no records matching your query.');
+						//alert('You need to be logged in with rare species privileges to view the full distribution.');
+        	}else*/ if(solrRecCnt){
+						loadPointsEvent = true;
+						setLoadingTimer();
+						if(loadVectorPoints){
+								loadPointWFSLayer(0);
+						}
+						else{
+								loadPointWMSLayer();
+						}
+						//cleanSelectionsLayer();
+						setRecordsTab();
+						changeRecordPage(1);
+						$('#recordstab').tabs({active: 1});
+						$("#accordion").accordion("option","active",1);
+						selectInteraction.getFeatures().clear();
+						if(!pointActive){
+								var infoArr = [];
+								infoArr['Name'] = 'pointv';
+								infoArr['layerType'] = 'vector';
+								infoArr['Title'] = 'Points';
+								infoArr['Abstract'] = '';
+								infoArr['DefaultCRS'] = '';
+								buildLayerTableRow(infoArr,true);
+								pointActive = true;
+						}
+					}
+					else{
+						setRecordsTab();
+						if(pointActive){
+								removeLayerToSelList('pointv');
+								pointActive = false;
+						}
+						loadPointsEvent = false;
+						hideWorking();                
+						//ORIG alert('There were no records matching your query.');
+						alert('There were no records matching your query.');
+					}
         });
     }
     else{
@@ -2400,7 +2434,6 @@ function prepareTaxaData(callback){
     var url = "rpc/gettaxalinks.php";
     var taxaArrStr = JSON.stringify(taxaArr);
     var params = 'taxajson='+taxaArrStr+'&type='+taxontype+'&thes='+thes;
-    //console.log(url+'?'+params);
     http.open("POST", url, true);
     http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     http.onreadystatechange = function() {
@@ -2554,7 +2587,7 @@ function primeSymbologyData(features){
                 }
             }
         }
-        var color = 'e69e67';
+        var color = 'FF2022';//'e69e67';
         var collName = features[f].get('CollectionName');
         var collid = features[f].get('collid');
         var tidinterpreted = features[f].get('tidinterpreted');
@@ -2805,10 +2838,10 @@ function removeUserLayer(layerID){
 
 function resetMainSymbology(){
     for(i in collSymbology){
-        collSymbology[i]['color'] = "E69E67";
+        collSymbology[i]['color'] = "FF2022";//"E69E67"
         var keyName = 'keyColor'+i;
         if(document.getElementById(keyName)){
-            document.getElementById(keyName).color.fromString("E69E67");
+            document.getElementById(keyName).color.fromString("FF2022");//"E69E67"
         }
     }
 }
@@ -3461,16 +3494,17 @@ function toggleHeatMap(){
 }
 
 function toggleLayerTable(layerID){
-    var tableRows = document.getElementById("layercontroltable").rows.length;
-    if(tableRows > 0){
-        document.getElementById("nolayermessage").style.display = "none";
-        document.getElementById("layercontroltable").style.display = "block";
-    }
-    else{
+    //hiding these per Linda
+    //var tableRows = document.getElementById("layercontroltable").rows.length;
+    //if(tableRows > 0){
+    //    document.getElementById("nolayermessage").style.display = "none";
+    //    document.getElementById("layercontroltable").style.display = "block";
+    //}
+    //else{
         $('#addLayers').popup('hide');
         document.getElementById("nolayermessage").style.display = "block";
         document.getElementById("layercontroltable").style.display = "none";
-    }
+    //}
 }
 
 function toggleUploadLayer(c,title){
