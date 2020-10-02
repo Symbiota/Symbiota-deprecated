@@ -1862,8 +1862,8 @@ function getSOLRRecCnt(occ,callback){
         if(http.readyState == 4 && http.status == 200) {
             var resArr = JSON.parse(http.responseText);
             var callbackValue = 1;
-	            solrRecCnt = resArr['numFound'];
-            if (resArr['hiddenFound'] > 0) {
+	            solrRecCnt = resArr['response']['numFound'];
+            if (resArr['response']['hiddenFound'] > 0) {
             	callbackValue = 2;
             }
             document.getElementById("dh-rows").value = solrRecCnt;
