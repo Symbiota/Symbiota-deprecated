@@ -26,7 +26,7 @@ if($GLOBALS['USER_RIGHTS']){
 		}
 }
 
-$pArr["q"] = $solrManager->checkQuerySecurity($pArr["q"]);
+
 
 /*
 SOLRManager.php handles filtering results by security level, while giving no indication that it's doing so.
@@ -39,15 +39,6 @@ We then compare and add "hiddenFound" to the response so that spatial.module.js 
 
 */
 
-
-
-if (!$canReadRareSpp && isset($pArr["action"]) && $pArr["action"] == 'getsolrreccnt') {
-	$origQ = $pArr["q"];
-	$secureQ = $solrManager->checkQuerySecurity($pArr["q"]);
-
-	#get secure (i.e. full) results
-	$pArr["q"] = $secureQ;
-}
 if($pArr["wt"] == 'geojson'){
 		$pArr["geojson.field"] = 'geo';
 		$pArr["omitHeader"] = 'true';
@@ -76,18 +67,15 @@ $result = curl_exec($ch);
 curl_close($ch);
 $JSON = $result;
 
-if (!$canReadRareSpp && isset($pArr["action"]) && $pArr["action"] == 'getsolrreccnt') {
-	$secure = json_decode($result);
-	$secure->response->hiddenFound = 0;
-	$secureJSON = json_encode($secure);#re-encode 
-	$JSON = $secureJSON;
-}
-
-#var_dump($secure->numFound);
-
 if (!$canReadRareSpp && isset($pArr["action"]) && $pArr["action"] == 'getsolrreccnt') {#get results filtered by security
-	$pArr["q"] = $origQ;
+	$full = json_decode($JSON);
+	$full->response->hiddenFound = 0;
+	$fullJSON = json_encode($full);#re-encode 
+	$JSON = $fullJSON;
 
+	#$pArr["q"] = $origQ;
+
+	$pArr["q"] = $solrManager->checkQuerySecurity($pArr["q"]);#partial results
 	$headers = array(
 			'Content-Type: application/x-www-form-urlencoded',
 			'Accept: application/json',
@@ -110,10 +98,10 @@ if (!$canReadRareSpp && isset($pArr["action"]) && $pArr["action"] == 'getsolrrec
 	$partialJSON = curl_exec($ch);
 	curl_close($ch);
 	$partial = json_decode($partialJSON);
-	var_dump($secure);
+	var_dump($full);
 	var_dump($partial);
-	if ($secure->response->numFound < $partial->response->numFound) {#some results have been suppressed
-		$partial->response->hiddenFound = ($partial->response->numFound - $secure->response->numFound);#add hiddenFound
+	if ($full->response->numFound < $partial->response->numFound) {#some results have been suppressed
+		$partial->response->hiddenFound = ($partial->response->numFound - $full->response->numFound);#add hiddenFound
 		$partialJSON = json_encode($partial);#re-encode 
 	}
 	$JSON = $partialJSON;
