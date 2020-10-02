@@ -109,8 +109,8 @@ if (!$canReadRareSpp && isset($pArr["action"]) && $pArr["action"] == 'getsolrrec
 	curl_setopt_array($ch, $options);
 	$partialJSON = curl_exec($ch);
 	curl_close($ch);
-	
 	$partial = json_decode($partialJSON);
+	var_dump($partial);
 	if ($secure->response->numFound < $partial->response->numFound) {#some results have been suppressed
 		$partial->response->hiddenFound = ($partial->response->numFound - $secure->response->numFound);#add hiddenFound
 		$partialJSON = json_encode($partial);#re-encode 
