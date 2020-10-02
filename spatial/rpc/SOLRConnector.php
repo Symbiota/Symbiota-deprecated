@@ -99,11 +99,11 @@ if (!$canReadRareSpp && isset($pArr["action"]) && $pArr["action"] == 'getsolrrec
 	curl_close($ch);
 	$partial = json_decode($partialJSON);
 	var_dump($full);
-	var_dump($partial);
 	if ($full->response->numFound < $partial->response->numFound) {#some results have been suppressed
 		$partial->response->hiddenFound = ($partial->response->numFound - $full->response->numFound);#add hiddenFound
 		$partialJSON = json_encode($partial);#re-encode 
 	}
+	var_dump($partial);
 	$JSON = $partialJSON;
 }
 /*
