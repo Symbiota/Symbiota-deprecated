@@ -26,6 +26,7 @@ if($GLOBALS['USER_RIGHTS']){
 		}
 }
 
+$pArr["q"] = $solrManager->checkQuerySecurity($pArr["q"]);
 
 /*
 SOLRManager.php handles filtering results by security level, while giving no indication that it's doing so.
