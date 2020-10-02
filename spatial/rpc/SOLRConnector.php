@@ -71,7 +71,7 @@ $secureJSON = curl_exec($ch);
 curl_close($ch);
 
 $secure = json_decode($secureJSON);
-var_dump($secure->response);
+var_dump($secure);exit;
 $secure->response->hiddenFound = 0;
 $secureJSON = json_encode($secure);#re-encode 
 $JSON = $secureJSON;
