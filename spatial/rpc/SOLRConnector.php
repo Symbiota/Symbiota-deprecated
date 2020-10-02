@@ -116,7 +116,7 @@ if (!$canReadRareSpp && isset($pArr["action"]) && $pArr["action"] == 'getsolrrec
 	}
 	$JSON = $partialJSON;
 }
-
+/*
 if (!$canReadRareSpp && isset($pArr["action"]) && $pArr["action"] == 'lazyload') {#remove rare markers when called by lazyload
 	$res = json_decode($JSON);
 	$newFeatures = [];
@@ -129,7 +129,7 @@ if (!$canReadRareSpp && isset($pArr["action"]) && $pArr["action"] == 'lazyload')
 	$res->numFound = sizeof($newFeatures);
 	$JSON = json_encode($res);
 }
-
+*/
 
 header("Content-Type: application/json; charset=utf-8");
 echo $JSON;
