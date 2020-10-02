@@ -105,7 +105,6 @@ if (!$canReadRareSpp) {#get results filtered by security
 	curl_close($ch);
 	
 	$partial = json_decode($partialJSON);
-	var_dump($partial);
 	if ($secure->response->numFound < $partial->response->numFound) {#some results have been suppressed
 		$partial->response->hiddenFound = ($partial->response->numFound - $secure->response->numFound);#add hiddenFound
 		$partialJSON = json_encode($partial);#re-encode 
@@ -113,9 +112,12 @@ if (!$canReadRareSpp) {#get results filtered by security
 	$JSON = $partialJSON;
 }
 
+	var_dump($partial->numFound);
+
 if (!$canReadRareSpp && isset($pArr["action"]) && $pArr["action"] == 'lazyload') {#remove rare markers when called by lazyload
 	$res = json_decode($JSON);
 	$newFeatures = [];
+	echo "hhhhh";
 	foreach ($res->features as $key => $val) {
 		if ($val->properties->localitySecurity == 0) {
 			$newFeatures[] = $val;
