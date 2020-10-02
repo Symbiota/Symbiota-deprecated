@@ -71,6 +71,8 @@ $secure->response->hiddenFound = 0;
 $secureJSON = json_encode($secure);#re-encode 
 $JSON = $secureJSON;
 
+var_dump($secure);
+
 if (!$canReadRareSpp) {#get results filtered by security
 	$pArr["q"] = $origQ;
 
