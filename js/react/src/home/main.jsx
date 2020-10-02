@@ -72,7 +72,8 @@ class Home extends React.Component {
       }
     /*}*/
 
-    window.open( targetUrl );
+    //window.open( targetUrl );
+    window.location = targetUrl;
   }
   
   componentDidMount() {
