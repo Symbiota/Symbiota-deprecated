@@ -109,6 +109,7 @@ if (!$canReadRareSpp) {#get results filtered by security
 	curl_close($ch);
 	
 	$partial = json_decode($partialJSON);
+	var_dump($partial->numFound);
 	if ($secure->numFound < $partial->numFound) {#some results have been suppressed
 		$partial->hiddenFound = ($partial->numFound - $secure->numFound);#add hiddenFound
 		$partialJSON = json_encode($partial);#re-encode 
