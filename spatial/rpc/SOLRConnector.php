@@ -17,6 +17,8 @@ if(isset($_REQUEST["fl"])) $pArr["fl"] = $_REQUEST["fl"];
 if(isset($_REQUEST["wt"])) $pArr["wt"] = $_REQUEST["wt"];
 if(isset($_REQUEST["action"])) $pArr["action"] = $_REQUEST["action"];
 
+$solrManager = new SOLRManager();
+
 $canReadRareSpp = false;
 if($GLOBALS['USER_RIGHTS']){
 		if($GLOBALS['IS_ADMIN'] || array_key_exists("CollAdmin", $GLOBALS['USER_RIGHTS']) || array_key_exists("RareSppAdmin", $GLOBALS['USER_RIGHTS']) || array_key_exists("RareSppReadAll", $GLOBALS['USER_RIGHTS'])){
@@ -24,7 +26,6 @@ if($GLOBALS['USER_RIGHTS']){
 		}
 }
 
-$solrManager = new SOLRManager();
 
 /*
 SOLRManager.php handles filtering results by security level, while giving no indication that it's doing so.
@@ -37,12 +38,15 @@ We then compare and add "hiddenFound" to the response so that spatial.module.js 
 
 */
 
-$origQ = $pArr["q"];
-$secureQ = $solrManager->checkQuerySecurity($pArr["q"]);
 
-#get secure (i.e. full) results
-$pArr["q"] = $secureQ;
 
+if (!$canReadRareSpp && isset($pArr["action"]) && $pArr["action"] == 'getsolrreccnt') {
+	$origQ = $pArr["q"];
+	$secureQ = $solrManager->checkQuerySecurity($pArr["q"]);
+
+	#get secure (i.e. full) results
+	$pArr["q"] = $secureQ;
+}
 if($pArr["wt"] == 'geojson'){
 		$pArr["geojson.field"] = 'geo';
 		$pArr["omitHeader"] = 'true';
@@ -67,24 +71,21 @@ $options = array(
 		CURLOPT_RETURNTRANSFER => true
 );
 curl_setopt_array($ch, $options);
-$secureJSON = curl_exec($ch);
+$result = curl_exec($ch);
 curl_close($ch);
+$JSON = $result;
 
-$secure = json_decode($secureJSON);
-$secure->response->hiddenFound = 0;
-$secureJSON = json_encode($secure);#re-encode 
-$JSON = $secureJSON;
+if (!$canReadRareSpp && isset($pArr["action"]) && $pArr["action"] == 'getsolrreccnt') {
+	$secure = json_decode($result);
+	$secure->response->hiddenFound = 0;
+	$secureJSON = json_encode($secure);#re-encode 
+	$JSON = $secureJSON;
+}
 
 #var_dump($secure->numFound);
 
-if (!$canReadRareSpp) {#get results filtered by security
+if (!$canReadRareSpp && isset($pArr["action"]) && $pArr["action"] == 'getsolrreccnt') {#get results filtered by security
 	$pArr["q"] = $origQ;
-
-	if($pArr["wt"] == 'geojson'){
-			$pArr["geojson.field"] = 'geo';
-			$pArr["omitHeader"] = 'true';
-	}
-
 
 	$headers = array(
 			'Content-Type: application/x-www-form-urlencoded',
