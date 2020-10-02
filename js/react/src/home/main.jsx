@@ -118,7 +118,7 @@ class Home extends React.Component {
      			<div key="1">
 						<div className="row slide-wrapper slide-1">
 							<div className="col-md slide-col-1">
-										<h1>Welcome to Oregon Flora, the world's most comprehensive guide to the vascular plants of Oregon</h1>
+										<h1>Welcome to Oregon Flora, the world&rsquo;s most comprehensive guide to the vascular plants of Oregon</h1>
 										<h3>Get started right now:</h3>
 										<SearchWidget
 											placeholder="Type a plant name here"
