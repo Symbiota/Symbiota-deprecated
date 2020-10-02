@@ -1,4 +1,8 @@
 <?php
+ini_set('display_errors', '1');
+ini_set('display_startup_errors', '1');
+error_reporting(E_ALL);
+
 include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/SOLRManager.php');
 
@@ -112,12 +116,9 @@ if (!$canReadRareSpp) {#get results filtered by security
 	$JSON = $partialJSON;
 }
 
-	var_dump($partial->numFound);
-
 if (!$canReadRareSpp && isset($pArr["action"]) && $pArr["action"] == 'lazyload') {#remove rare markers when called by lazyload
 	$res = json_decode($JSON);
 	$newFeatures = [];
-	echo "hhhhh";
 	foreach ($res->features as $key => $val) {
 		if ($val->properties->localitySecurity == 0) {
 			$newFeatures[] = $val;
