@@ -56,7 +56,7 @@ $dbArr = Array();
     <script src="<?php echo $CLIENT_ROOT; ?>/js/dbf.js" type="text/javascript"></script>
     <script src="<?php echo $CLIENT_ROOT; ?>/js/FileSaver.min.js" type="text/javascript"></script>
     <script src="<?php echo $CLIENT_ROOT; ?>/js/html2canvas.min.js" type="text/javascript"></script>
-    <script src="<?php echo $CLIENT_ROOT; ?>/js/symb/spatial.module.js?ver=256" type="text/javascript"></script>
+    <script src="<?php echo $CLIENT_ROOT; ?>/js/symb/spatial.module.js?ver=259" type="text/javascript"></script>
     <script type="text/javascript">
         $(function() {
             var winHeight = $(window).height();
@@ -137,6 +137,9 @@ $dbArr = Array();
 </head>
 <body class="mapbody">
 <!--<a class="back-button" rel="external" href="../">Back</a>-->
+<?php
+#include( $serverRoot . "/header.php" );
+?>
 <div data-role="page" id="page1">
     <div role="main" class="ui-content">
         <a href="#defaultpanel" id="panelopenbutton" data-role="button" data-inline="true" data-icon="bars">Open</a>
@@ -207,22 +210,22 @@ $dbArr = Array();
                                             </select>
                                         </div>
                                         <div style="margin-top:5px;">
-                                            <?php echo $SEARCHTEXT['TAXON_INPUT']; ?> <input data-role="none" id="taxa" type="text" style="width:275px;" name="taxa" value="" onchange="buildQueryStrings();" title="<?php echo $SEARCHTEXT['TITLE_TEXT_1']; ?>" />
+                                            <?php echo $SEARCHTEXT['TAXON_INPUT']; ?> <input data-role="none" id="taxa" type="text" style="width:275px;" name="taxa" value="" class="query-trigger-field" title="<?php echo $SEARCHTEXT['TITLE_TEXT_1']; ?>" />
                                         </div>
                                     </div>
                                 </div>
                                 <div style="margin:5 0 5 0;"><hr /></div>
                                 <div>
-                                    <?php echo $SEARCHTEXT['COUNTRY_INPUT']; ?> <input data-role="none" type="text" id="country" style="width:225px;" name="country" value="" onchange="buildQueryStrings();" title="<?php echo $SEARCHTEXT['TITLE_TEXT_1']; ?>" />
+                                    <?php echo $SEARCHTEXT['COUNTRY_INPUT']; ?> <input data-role="none" type="text" id="country" style="width:225px;" name="country" value="" class="query-trigger-field" title="<?php echo $SEARCHTEXT['TITLE_TEXT_1']; ?>" />
                                 </div>
                                 <div style="margin-top:5px;">
-                                    <?php echo $SEARCHTEXT['STATE_INPUT']; ?> <input data-role="none" type="text" id="state" style="width:150px;" name="state" value="" onchange="buildQueryStrings();" title="<?php echo $SEARCHTEXT['TITLE_TEXT_1']; ?>" />
+                                    <?php echo $SEARCHTEXT['STATE_INPUT']; ?> <input data-role="none" type="text" id="state" style="width:150px;" name="state" value="" class="query-trigger-field" title="<?php echo $SEARCHTEXT['TITLE_TEXT_1']; ?>" />
                                 </div>
                                 <div style="margin-top:5px;">
-                                    <?php echo $SEARCHTEXT['COUNTY_INPUT']; ?> <input data-role="none" type="text" id="county" style="width:225px;"  name="county" value="" onchange="buildQueryStrings();" title="<?php echo $SEARCHTEXT['TITLE_TEXT_1']; ?>" />
+                                    <?php echo $SEARCHTEXT['COUNTY_INPUT']; ?> <input data-role="none" type="text" id="county" style="width:225px;"  name="county" value="" class="query-trigger-field" title="<?php echo $SEARCHTEXT['TITLE_TEXT_1']; ?>" />
                                 </div>
                                 <div style="margin-top:5px;">
-                                    <?php echo $SEARCHTEXT['LOCALITY_INPUT']; ?> <input data-role="none" type="text" id="locality" style="width:225px;" name="local" onchange="buildQueryStrings();" value="" />
+                                    <?php echo $SEARCHTEXT['LOCALITY_INPUT']; ?> <input data-role="none" type="text" id="locality" style="width:225px;" name="local" class="query-trigger-field" value="" />
                                 </div>
                                 <div style="margin:5 0 5 0;"><hr /></div>
                                 <div id="shapecriteriabox">
@@ -236,25 +239,25 @@ $dbArr = Array();
                                 <div style="margin:5 0 5 0;"><hr /></div>
                                 <div>
                                     <?php echo $SEARCHTEXT['COLLECTOR_LASTNAME']; ?>
-                                    <input data-role="none" type="text" id="collector" style="width:125px;" name="collector" value="" onchange="buildQueryStrings();" title="" />
+                                    <input data-role="none" type="text" id="collector" style="width:125px;" name="collector" value="" class="query-trigger-field" title="" />
                                 </div>
                                 <div style="margin-top:5px;">
                                     <?php echo $SEARCHTEXT['COLLECTOR_NUMBER']; ?>
-                                    <input data-role="none" type="text" id="collnum" style="width:125px;" name="collnum" value="" onchange="buildQueryStrings();" title="<?php echo $SEARCHTEXT['TITLE_TEXT_2']; ?>" />
+                                    <input data-role="none" type="text" id="collnum" style="width:125px;" name="collnum" value="" class="query-trigger-field" title="<?php echo $SEARCHTEXT['TITLE_TEXT_2']; ?>" />
                                 </div>
                                 <div style="margin-top:5px;">
                                     <?php echo $SEARCHTEXT['COLLECTOR_DATE']; ?>
-                                    <input data-role="none" type="text" id="eventdate1" style="width:100px;" name="eventdate1" value="" onchange="buildQueryStrings();" title="<?php echo $SEARCHTEXT['TITLE_TEXT_3']; ?>" /> -
-                                    <input data-role="none" type="text" id="eventdate2" style="width:100px;" name="eventdate2" value="" onchange="buildQueryStrings();" title="<?php echo $SEARCHTEXT['TITLE_TEXT_4']; ?>" />
+                                    <input data-role="none" type="text" id="eventdate1" style="width:100px;" name="eventdate1" value="" class="query-trigger-field" title="<?php echo $SEARCHTEXT['TITLE_TEXT_3']; ?>" /> -
+                                    <input data-role="none" type="text" id="eventdate2" style="width:100px;" name="eventdate2" value="" class="query-trigger-field" title="<?php echo $SEARCHTEXT['TITLE_TEXT_4']; ?>" />
                                 </div>
                                 <div style="margin:10 0 10 0;"><hr></div>
                                 <div>
                                     <?php echo $SEARCHTEXT['CATALOG_NUMBER']; ?>
-                                    <input data-role="none" type="text" id="catnum" style="width:150px;" name="catnum" value="" onchange="buildQueryStrings();" title="" />
+                                    <input data-role="none" type="text" id="catnum" style="width:150px;" name="catnum" value="" class="query-trigger-field" title="" />
                                 </div>
                                 <div style="margin-top:5px;">
                                     <?php echo $SEARCHTEXT['OTHER_CATNUM']; ?>
-                                    <input data-role="none" type="text" id="othercatnum" style="width:150px;" name="othercatnum" value="" onchange="buildQueryStrings();" title="" />
+                                    <input data-role="none" type="text" id="othercatnum" style="width:150px;" name="othercatnum" value="" class="query-trigger-field" title="" />
                                 </div>
                                 <div style="margin-top:5px;">
                                     <input data-role="none" type='checkbox' name='typestatus' id='typestatus' value='1' onchange="buildQueryStrings();"> <?php echo $SEARCHTEXT['TYPE']; ?>
@@ -529,14 +532,18 @@ $dbArr = Array();
 
 <div id="maptoolcontainer">
     <div id="maptoolbox">
+    		<h3>Define an area</h3>
+    		<a href="<?php echo $CLIENT_ROOT . "/pages/tutorials.php#text-card-mapping"; ?>" target="_blank" class="help-icon">
+    			<img alt="help" src="<?php echo $CLIENT_ROOT . "/images/garden/help.png"; ?>"/>
+    		</a>
         <div id="drawcontrol">
             <span class="maptext">Draw</span>
             <select id="drawselect">
                 <option value="None">None</option>
                 <option value="Polygon">Polygon</option>
                 <option value="Circle">Circle</option>
-                <option value="LineString">Line</option>
-                <option value="Point">Point</option>
+                <!--<option value="LineString">Line</option>
+                <option value="Point">Point</option>-->
             </select>
         </div>
         <div id="basecontrol">
@@ -1495,6 +1502,7 @@ $dbArr = Array();
                 var processed = 0;
                 do{
                     lazyLoadPoints(index,function(res){
+                    		//console.log(res);
                         var format = new ol.format.GeoJSON();
                         var features = format.readFeatures(res, {
                             featureProjection: 'EPSG:3857'
@@ -1750,5 +1758,8 @@ $dbArr = Array();
 <div id="loadingOverlay" data-role="popup" style="width:100%;position:relative;">
     <div id="loader"></div>
 </div>
+<?php
+#include( $serverRoot . "/footer.php" );
+?>
 </body>
 </html>
