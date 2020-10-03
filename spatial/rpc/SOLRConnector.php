@@ -26,8 +26,6 @@ if($GLOBALS['USER_RIGHTS']){
 		}
 }
 
-
-
 /*
 SOLRManager.php handles filtering results by security level, while giving no indication that it's doing so.
 Thus numFound == 0 whether it's because 1) the user doesn't have permission to see those results, or 2) there are genuinely no results.
@@ -38,6 +36,12 @@ If they don't have permission, we do it again with security turned on.
 We then compare and add "hiddenFound" to the response so that spatial.module.js can deal with it.
 
 */
+
+
+if (!isset($pArr["action"]) || $pArr["action"] != 'getsolrreccnt') {#if it's not getsolrreccnt, handle as usual
+	$pArr["q"] = $solrManager->checkQuerySecurity($pArr["q"]);
+}
+
 
 if($pArr["wt"] == 'geojson'){
 		$pArr["geojson.field"] = 'geo';
