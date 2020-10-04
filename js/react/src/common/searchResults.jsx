@@ -55,6 +55,10 @@ class SearchResultContainer extends React.Component {
         id="search-results"
         className={ "mt-4 w-100" + (this.props.viewType === "grid" ? " search-result-grid" : "") }
       >
+				<Searching 
+					clientRoot={ this.props.clientRoot }
+					isSearching={ this.props.isSearching }
+				/>
         { this.props.children }
       </div>
     );

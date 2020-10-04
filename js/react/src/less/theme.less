@@ -226,8 +226,8 @@ img {
   }
 	.clear-text {
 		position: absolute;
-		top: 15px;
-		left: 49%;
+		top: 10px;
+		left: 67%;
 		color: @gray-type !important;
 		transition: color 100ms;
 		padding: 0 0 0 3px;
@@ -265,9 +265,9 @@ img {
 */
 
 /*loading/searching animation */
-.loading-overlay {
+.loading-overlay,
+.searching-overlay {
 	display: none;
-	position: fixed;
 	top: 0;
 	left: 0;
 	height: 100%;
@@ -277,6 +277,13 @@ img {
 	z-index: 1000;
 	img {
 		display: block;
+		width: 400px;
+	
+	}
+}
+.loading-overlay {
+	position: fixed;
+	img {
 		margin: 20% auto;
 	}
 	&.loading {
@@ -284,24 +291,14 @@ img {
 	}
 }
 .searching-overlay {
-	display: none;
 	position: absolute;
-	top: 0;
-	height: 100%;
-	width: 100%;
-	background-color: white;
-	opacity: .9;
-	z-index: 1000;
 	img {
-		display: block;
 		margin: 5% auto 0;
 	}
 	&.searching {
 		display: block;
 	}
 }
-
-
 /* end loading/searching */
 
 

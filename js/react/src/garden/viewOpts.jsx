@@ -144,9 +144,6 @@ class ViewOpts extends React.Component {
         <div className="col-7">
           <h3 className="font-weight-bold">Your search results:</h3>
           <div className="d-flex flex-row flex-wrap">
-          	{ !this.props.isLoading && this.props.isSearching &&   	
-							<img src={`${this.props.clientRoot}/images/icons/loading.gif`} />
-						}
 						{
 							!this.props.isSearching && buttons.length == 0 &&
 							<p className="no-results">No filters applied yet, so showing all native plants</p>

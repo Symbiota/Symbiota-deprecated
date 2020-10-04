@@ -285,9 +285,6 @@ class GardenPageApp extends React.Component {
     )
     .catch((err) => {
       console.error(err);
-    })
-    .finally(() => {
-      this.setState({ isLoading: false });
     });
     window.addEventListener('resize', this.updateViewport);
   }
@@ -389,7 +386,9 @@ class GardenPageApp extends React.Component {
   }
 
   onSearchTextChanged(e) {
-    this.setState({ searchText: e.target.value });
+    this.setState({ 
+    	searchText: e.target.value 
+    });
   }
 
   // On search start
@@ -400,23 +399,32 @@ class GardenPageApp extends React.Component {
       '',
       window.location.pathname + newQueryStr
     );*/
+    let _isSearching = false;
+    if (this.state.isLoading == false) {
+    	_isSearching = true;
+    }
 
     this.setState({
-      isSearching: true,
+      isSearching: _isSearching,
       searchText: searchObj.text,
       filters: Object.assign({}, this.state.filters, { searchText: searchObj.text })
+    },function() {
+    
+			let query = `${this.props.clientRoot}/garden/rpc/api.php?search=${searchObj.text}`;
+			httpGet(query)
+				.then((res) => {
+					this.onSearchResults(JSON.parse(res));
+				})
+				.catch((err) => {
+					console.error(err);
+				})
+				.finally(() => {
+					this.setState({ 
+						isSearching: false,
+						isLoading: false
+					});
+				});
     });
-    let query = `${this.props.clientRoot}/garden/rpc/api.php?search=${searchObj.text}`;
-    httpGet(query)
-      .then((res) => {
-        this.onSearchResults(JSON.parse(res));
-      })
-      .catch((err) => {
-        console.error(err);
-      })
-      .finally(() => {
-        this.setState({ isSearching: false });
-      });
   }
 
   // On search end
@@ -654,7 +662,11 @@ class GardenPageApp extends React.Component {
                       })
                     }
                   />
-                  <SearchResultContainer viewType={ this.state.viewType }>
+                  <SearchResultContainer 
+                  	viewType={ this.state.viewType }
+										isSearching={ this.state.isSearching }
+										clientRoot={this.props.clientRoot}
+                  >
                     {
                       this.state.searchResults.map((result) =>  {
                         let filterChecklist = filterByChecklist(result, this.state.filters.checklistId);

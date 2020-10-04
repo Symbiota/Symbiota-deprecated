@@ -256,30 +256,33 @@ class ExploreApp extends React.Component {
       '',
       window.location.pathname + newQueryStr
     );*/
+
+    
     this.setState({
       isSearching: true,
       searchText: searchObj.text,
       filters: Object.assign({}, this.state.filters, { searchText: searchObj.text })
+    },function() {
+      let url = `${this.props.clientRoot}/checklists/rpc/api.php?search=${searchObj.text}`;
+			url += '&name=' + this.state.searchName;
+			url += '&clid=' + this.state.clid;
+			url += '&pid=' + this.state.pid;
+			url += '&synonyms=' + this.state.searchSynonyms;
+			httpGet(url)
+				.then((res) => {
+					let jres = JSON.parse(res);
+					this.onSearchResults(jres.taxa);
+					this.updateTotals(jres.totals);
+					this.updateExportUrls();
+				})
+				.catch((err) => {
+					console.error(err);
+				})
+				.finally(() => {
+					this.setState({ isSearching: false });
+				}); 
     });
-    let url = `${this.props.clientRoot}/checklists/rpc/api.php?search=${searchObj.text}`;
-    url += '&name=' + this.state.searchName;
-    url += '&clid=' + this.state.clid;
-    url += '&pid=' + this.state.pid;
-    url += '&synonyms=' + this.state.searchSynonyms;
-    //console.log(url);
-    httpGet(url)
-      .then((res) => {
-      	let jres = JSON.parse(res);
-        this.onSearchResults(jres.taxa);
-        this.updateTotals(jres.totals);
-        this.updateExportUrls();
-      })
-      .catch((err) => {
-        console.error(err);
-      })
-      .finally(() => {
-        this.setState({ isSearching: false });
-      });
+
       
   }
 	updateTotals(totals) {
