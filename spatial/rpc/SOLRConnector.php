@@ -1,7 +1,7 @@
 <?php
-ini_set('display_errors', '1');
-ini_set('display_startup_errors', '1');
-error_reporting(E_ALL);
+#ini_set('display_errors', '1');
+#ini_set('display_startup_errors', '1');
+#error_reporting(E_ALL);
 
 include_once('../../config/symbini.php');
 include_once($SERVER_ROOT.'/classes/SOLRManager.php');
@@ -77,8 +77,6 @@ if (!$canReadRareSpp && isset($pArr["action"]) && $pArr["action"] == 'getsolrrec
 	$fullJSON = json_encode($full);#re-encode 
 	$JSON = $fullJSON;
 
-	#$pArr["q"] = $origQ;
-
 	$pArr["q"] = $solrManager->checkQuerySecurity($pArr["q"]);#partial results
 	$headers = array(
 			'Content-Type: application/x-www-form-urlencoded',
@@ -110,20 +108,7 @@ if (!$canReadRareSpp && isset($pArr["action"]) && $pArr["action"] == 'getsolrrec
 	#var_dump($partial);
 	$JSON = $partialJSON;
 }
-/*
-if (!$canReadRareSpp && isset($pArr["action"]) && $pArr["action"] == 'lazyload') {#remove rare markers when called by lazyload
-	$res = json_decode($JSON);
-	$newFeatures = [];
-	foreach ($res->features as $key => $val) {
-		if ($val->properties->localitySecurity == 0) {
-			$newFeatures[] = $val;
-		}
-	}
-	$res->features = $newFeatures;
-	$res->numFound = sizeof($newFeatures);
-	$JSON = json_encode($res);
-}
-*/
+
 
 header("Content-Type: application/json; charset=utf-8");
 echo $JSON;
