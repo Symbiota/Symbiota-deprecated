@@ -43,6 +43,7 @@ $result = getIssueList();
 
 
 // Begin View
+array_walk_recursive($result,'cleanWindowsRecursive');#replace Windows characters
 header("Content-Type: application/json; charset=utf-8");
 echo json_encode($result, JSON_NUMERIC_CHECK | JSON_INVALID_UTF8_SUBSTITUTE);
 ?>

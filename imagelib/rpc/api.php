@@ -32,6 +32,7 @@ if (key_exists("imgid", $_GET) && is_numeric($_GET['imgid'])) {
 }
 
 // Begin View
+array_walk_recursive($result,'cleanWindowsRecursive');#replace Windows characters
 header("Content-Type: application/json; charset=UTF-8");
 echo json_encode($result, JSON_NUMERIC_CHECK);
 ?>

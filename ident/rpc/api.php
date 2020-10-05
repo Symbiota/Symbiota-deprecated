@@ -132,8 +132,8 @@ if (key_exists("attr", $_GET) && is_numeric($_GET['attr'])) {#get rid of this
 
 #var_dump($result);
 // Begin View
-header("Content-Type: application/json; charset=UTF-8");
-$json = json_encode($result, JSON_NUMERIC_CHECK);
-#var_dump($json);
-echo $json;
+
+array_walk_recursive($result,'cleanWindowsRecursive');#replace Windows characters
+header("Content-Type: application/json; charset=utf-8");
+echo json_encode($result, JSON_NUMERIC_CHECK | JSON_INVALID_UTF8_SUBSTITUTE);
 ?>

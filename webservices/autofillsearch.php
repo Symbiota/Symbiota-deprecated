@@ -74,7 +74,6 @@ if (array_key_exists("q", $_REQUEST)) {
     return strcasecmp(stripNonAlpha($a["text"]), stripNonAlpha($b["text"]));
   });
 
-	array_walk_recursive($results,'cleanWindowsRecursive');
 
 }
 function stripNonAlpha($str) {
@@ -85,6 +84,7 @@ function compareTextValues($val1,$val2) {
 	return strcasecmp($val1['text'],$val2['text']);
 }
 
+array_walk_recursive($results,'cleanWindowsRecursive');
 header("Content-Type: application/json; charset=utf-8");
 echo json_encode($results);
 ?>

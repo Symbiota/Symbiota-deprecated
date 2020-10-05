@@ -105,6 +105,7 @@
   }
 
   // Begin View
+	array_walk_recursive($searchResults,'cleanWindowsRecursive');#replace Windows characters
   header("Content-Type: application/json; charset=UTF-8");
   echo json_encode($searchResults, JSON_NUMERIC_CHECK);
 ?>

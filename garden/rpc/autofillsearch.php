@@ -44,6 +44,7 @@ if (array_key_exists("q", $_REQUEST)) {
   });
 }
 
+array_walk_recursive($results,'cleanWindowsRecursive');#replace Windows characters
 header("Content-Type: application/json; charset=utf-8");
 echo json_encode($results);
 ?>
