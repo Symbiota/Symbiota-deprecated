@@ -73,6 +73,7 @@ export class SearchWidget extends React.Component {
     	if (this.props.searchName) {
     		suggestionUrl += "&name=" + this.props.searchName;
     	}
+    	console.log(suggestionUrl);
   		httpGet(suggestionUrl).then((res) => {
         return JSON.parse(res);
       }).catch((err) => {
