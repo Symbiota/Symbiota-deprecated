@@ -23,7 +23,6 @@ if (array_key_exists("q", $_REQUEST)) {
     ->setMaxResults(15)
     ->getQuery()
     ->getArrayResult();
-var_dump($sciNameResults);
   $vernacularResults = $em->createQueryBuilder()
     ->select("v.vernacularname as text", "t.tid as taxonId", "t.rankid as rankId", "ts.tidaccepted")
     ->from("Taxa", "t")
@@ -39,7 +38,9 @@ var_dump($sciNameResults);
     ->getArrayResult();
     
   $duplicates = array_uintersect($sciNameResults, $vernacularResults,'compareTextValues');
+var_dump($duplicates);
   $results = array_merge($sciNameResults, $vernacularResults);
+var_dump($results);
 	if ($duplicates) {#overlap between sciname and common name 
 		foreach ($results as $idx => $result) {
 			foreach ($duplicates as $duplicate) {
