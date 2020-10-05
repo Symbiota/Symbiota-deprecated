@@ -1,7 +1,4 @@
 <?php
-ini_set('display_errors', '1');
-ini_set('display_startup_errors', '1');
-error_reporting(E_ALL);
 
 include_once("../config/symbini.php");
 include_once($SERVER_ROOT . "/config/SymbosuEntityManager.php");
@@ -26,7 +23,7 @@ if (array_key_exists("q", $_REQUEST)) {
     ->setMaxResults(15)
     ->getQuery()
     ->getArrayResult();
-
+var_dump($sciNameResults);
   $vernacularResults = $em->createQueryBuilder()
     ->select("v.vernacularname as text", "t.tid as taxonId", "t.rankid as rankId", "ts.tidaccepted")
     ->from("Taxa", "t")
