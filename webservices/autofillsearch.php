@@ -74,7 +74,7 @@ if (array_key_exists("q", $_REQUEST)) {
     return strcasecmp(stripNonAlpha($a["text"]), stripNonAlpha($b["text"]));
   });
 
-	array_walk_recursive($results,'cleanWindows');
+	array_walk_recursive($results,'cleanWindows2');
 
 }
 function stripNonAlpha($str) {
