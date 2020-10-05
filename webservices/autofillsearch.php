@@ -38,9 +38,7 @@ if (array_key_exists("q", $_REQUEST)) {
     ->getArrayResult();
     
   $duplicates = array_uintersect($sciNameResults, $vernacularResults,'compareTextValues');
-var_dump($duplicates);
   $results = array_merge($sciNameResults, $vernacularResults);
-var_dump($results);
 	if ($duplicates) {#overlap between sciname and common name 
 		foreach ($results as $idx => $result) {
 			foreach ($duplicates as $duplicate) {
@@ -69,7 +67,7 @@ var_dump($results);
 			}
 		}
 	}
-	
+	var_dump($results);
   usort($results, function ($a, $b) {
     return strcasecmp(stripNonAlpha($a["text"]), stripNonAlpha($b["text"]));
   });
