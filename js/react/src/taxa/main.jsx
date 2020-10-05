@@ -130,6 +130,7 @@ function MoreInfoItem(props) {
 }
 function SingleBorderedItem(props) {
   let value = props.value;
+  //console.log(props);
   const isArray = Array.isArray(value);
 
   if (isArray) {
