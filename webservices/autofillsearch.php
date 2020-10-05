@@ -67,10 +67,10 @@ if (array_key_exists("q", $_REQUEST)) {
 			}
 		}
 	}
-	var_dump($results);
   usort($results, function ($a, $b) {
     return strcasecmp(stripNonAlpha($a["text"]), stripNonAlpha($b["text"]));
   });
+	var_dump($results);
 }
 function stripNonAlpha($str) {
 	return preg_replace("/[^A-Za-z]/", '', $str);
