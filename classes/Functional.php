@@ -74,8 +74,8 @@ function cleanWindows($str) {
 	return mb_convert_encoding($str, "UTF-8", array("Windows-1252"));
 }
 
-function cleanWindows2(&$str) {
-	return mb_convert_encoding($str, "UTF-8", array("Windows-1252"));
+function cleanWindows2(&$str,$key) {
+	$str = mb_convert_encoding($str, "UTF-8", array("Windows-1252"));
 }
 
 
