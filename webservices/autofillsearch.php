@@ -1,6 +1,7 @@
 <?php
 
 include_once("../config/symbini.php");
+include_once("$SERVER_ROOT/classes/Functional.php");
 include_once($SERVER_ROOT . "/config/SymbosuEntityManager.php");
 
 $RANK_FAMILY = 140;
@@ -72,6 +73,9 @@ if (array_key_exists("q", $_REQUEST)) {
   usort($results, function ($a, $b) {
     return strcasecmp(stripNonAlpha($a["text"]), stripNonAlpha($b["text"]));
   });
+
+	array_walk_recursive($results,'cleanWindows');
+
 }
 function stripNonAlpha($str) {
 	return preg_replace("/[^A-Za-z]/", '', $str);
