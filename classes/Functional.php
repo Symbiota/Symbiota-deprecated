@@ -71,7 +71,8 @@ function get_select_statement($table, $fields) {
 }
 
 function cleanWindows($str) {
-	return mb_convert_encoding($str, "UTF-8", array("Windows-1252"));
+	#return mb_convert_encoding($str, "UTF-8", array("Windows-1252"));
+	return $str;
 }
 
 function cleanWindowsRecursive(&$str,$key) {
