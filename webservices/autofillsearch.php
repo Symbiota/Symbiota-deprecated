@@ -23,6 +23,7 @@ if (array_key_exists("q", $_REQUEST)) {
     ->setMaxResults(15)
     ->getQuery()
     ->getArrayResult();
+
   $vernacularResults = $em->createQueryBuilder()
     ->select("v.vernacularname as text", "t.tid as taxonId", "t.rankid as rankId", "ts.tidaccepted")
     ->from("Taxa", "t")
@@ -67,10 +68,10 @@ if (array_key_exists("q", $_REQUEST)) {
 			}
 		}
 	}
+	
   usort($results, function ($a, $b) {
     return strcasecmp(stripNonAlpha($a["text"]), stripNonAlpha($b["text"]));
   });
-	var_dump($results);
 }
 function stripNonAlpha($str) {
 	return preg_replace("/[^A-Za-z]/", '', $str);
