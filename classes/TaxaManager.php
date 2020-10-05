@@ -99,7 +99,7 @@ class TaxaManager {
     return $this->model->getSciname();
   }
   public function getAuthor() {
-    return cleanWindows($this->model->getAuthor());
+    return $this->model->getAuthor();
   }
   public function getRankId() {
     return $this->model->getRankid();
@@ -279,7 +279,7 @@ class TaxaManager {
 				foreach ($rsArr as $idx => $rs) {
 					#$rsArr[$idx]['statement'] = iconv('UTF-8', 'ISO-8859-1//TRANSLIT//IGNORE', $rsArr[$idx]['statement']);#htmlentities($rs[$idx]['statement']);
 					##$rsArr[$idx] =  str_replace($emdash, '(mdash)', $rsArr[$idx]);
-					$rsArr[$idx]['statement'] = cleanWindows($rsArr[$idx]['statement']);
+					$rsArr[$idx]['statement'] = $rsArr[$idx]['statement'];
 					
 				}
 				
@@ -397,7 +397,7 @@ class TaxaManager {
       function ($sy) { return $sy["sciname"] . " " . $sy["author"]; },
       $synonyms->getQuery()->execute()
     );*/
-    	$synonyms = array_map("cleanWindows",$synonyms);
+    	#$synonyms = array_map("cleanWindows",$synonyms);
     return $synonyms;
   }
   private function populateOrigin($tid = null){

@@ -155,17 +155,7 @@ if (array_key_exists("search", $_GET)) {
   $result = getSubTaxa($_GET["genus"]);
 }
 
-
-/*
-  $em = SymbosuEntityManager::getEntityManager();
-  $repo = $em->getRepository("Taxadescrblock");
-  #$model = $repo->find($id);
-  #$taxaenumtree = Taxaenumtree::fromModel($model);
-var_dump($repo);
-*/
-// Begin View
-
-array_walk_recursive($result,'cleanWindowsRecursive');
+array_walk_recursive($result,'cleanWindowsRecursive');#replace Windows characters
 header("Content-Type: application/json; charset=utf-8");
 echo json_encode($result, JSON_NUMERIC_CHECK | JSON_INVALID_UTF8_SUBSTITUTE);
 ?>

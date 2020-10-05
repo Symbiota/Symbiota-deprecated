@@ -230,13 +230,13 @@ class IdentManager extends Manager {
 					}
 				}else{
 					$newResults[$idx] = $result;
-					$newResults[$idx]['author'] = cleanWindows($result['author']);
+					$newResults[$idx]['author'] = $result['author'];
 					$newResults[$idx]['vernacular']['basename'] = '';
 					$newResults[$idx]['vernacular']['names'] = [];
 					if (strtolower($result['language']) == 'basename') {
-						$newResults[$idx]['vernacular']['basename'] = cleanWindows($result['vernacularname']);
+						$newResults[$idx]['vernacular']['basename'] = $result['vernacularname'];
 					}elseif(strtolower($result['language']) == 'english') {
-						$newResults[$idx]['vernacular']['names'][] = cleanWindows($result['vernacularname']);
+						$newResults[$idx]['vernacular']['names'][] = $result['vernacularname'];
 					}
 					unset($newResults[$idx]['vernacularname']);
 					unset($newResults[$idx]['language']);
