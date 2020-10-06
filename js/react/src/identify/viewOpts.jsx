@@ -49,7 +49,6 @@ class ViewOpts extends React.Component {
 
   render() {
   	const buttons = [];
-  	            	
 		Object.keys(this.props.filters).map((filterKey) => {
 			let filter = this.props.filters[filterKey];
 			let showItem = true;
@@ -61,14 +60,14 @@ class ViewOpts extends React.Component {
 						showItem = false;
 					} else {
 						itemText = `Search: ${filter.val}`;
-						buttons.push({"key":filter.key,"text":itemText});
+						buttons.push({"key":filter.key,"text":itemText.toString()});
 					}
 					break;
 
 				case "attrs": {
 					Object.entries(filter.val).map((feature) => {
-						if (feature[1].length) {
-							buttons.push({"key":feature[0],"text":feature[1]});
+						if (feature[1].toString().length) {
+							buttons.push({"key":feature[0],"text":feature[1].toString()});
 						}
 					})
 					break;
