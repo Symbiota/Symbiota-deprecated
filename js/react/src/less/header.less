@@ -219,7 +219,13 @@
 				#site-header-navbar-toggler {
 					font-weight: bold;
 					color: white;
-					margin-left: 4px !important;
+					margin-left: 0px !important;
+					padding: .25rem 26px;
+					.menu-toggle {
+						svg {
+							width: .8em;
+						}
+					}
 				}
 				ul#site-header-dropdowns {
 					position: absolute;
@@ -227,7 +233,7 @@
 					text-align: left;
 					margin-top: 7px;
 					padding: 0 0 1em 0;
-					min-width: 270px;
+					min-width: 300px;
 					width: 33vw;
 					border-right: 1px solid @dark-green;
 					border-bottom-right-radius: 10px;
@@ -240,10 +246,12 @@
 						width: 100%;
 						a.nav-link.dropdown-toggle {
 							text-shadow: none;
-							padding: .4rem 1em .4rem 1em;
+							padding: .4rem 1em .4rem 26px;
 							cursor: pointer;
 							max-width: 100%;
-							font-size: 1.2rem;
+							font-size: 1.5rem;
+							line-height: 2.875rem;
+							border-radius: 0 !important;
 							&:hover {
 								background-color: transparent !important;
 								color: white !important;
@@ -270,10 +278,15 @@
 							//display: block;
 							margin: 0;
 							border: none;
+							border-radius: 0 !important;
 							a {
-								line-height: 1.9rem;
-								font-size: 1.1rem;
 								padding: 0 1rem 0 2rem;
+								font-size: 1.3125rem;
+								line-height: 2.875rem;
+								color: @dark-grn-type !important;
+								&:last-child {
+									border-radius: 0 !important;
+								}
 							}
 						}
 					}
@@ -294,15 +307,25 @@
 				position: relative;
 				z-index: 1000;
 				#site-search-toggler {
-					display: block;
+					display: flex;
+					flex-flow: row nowrap;
+					justify-content: space-between;
 					right: 0;
 					position: absolute;
-					color: @light-green;
+					color: white;
 					text-transform: uppercase;
-					width: 200px;
+					width: 160px;
 					text-align: right;
 					line-height: 1.3rem;
 					padding-right: .5rem;
+					span {
+						opacity: .5;
+					}
+					img {
+						margin-left: 10px;
+						height: 40px;
+						width: auto;
+					}
 				}
 				.widget-wrapper {
 					//display: none;
@@ -355,19 +378,11 @@
 
 						a.nav-link.dropdown-toggle {
 							border-radius: 0 0 0 0 !important;
-							font-size: 1.5rem;
-							line-height: 2.875rem;
 						}
 
 						.dropdown-menu {
-							border-radius: 0 0 0 0;
 							a {
-								font-size: 1.3125rem;
-								line-height: 2.875rem;
-								color: @dark-grn-type !important;
-								&:last-child {
-									border-radius: 0 0 0 0;
-								}
+
 							}
 						}
 					}

@@ -939,6 +939,7 @@ button.menu-toggle {
 	top: 5px;
 	left: 7px;
 }
+/*
 @media screen and (min-width: 700px) {
 	.menu-toggle {
 		display: none;
@@ -948,7 +949,7 @@ button.menu-toggle {
 		flex-wrap: wrap;
 	}
 
-}
+}*/
 @media screen and (max-width: 700px) {
 	.main-navigation ul {
 		border-top: 1px solid #CCCCCC;

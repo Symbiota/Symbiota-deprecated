@@ -273,7 +273,7 @@ class HeaderApp extends React.Component {
 					>
 						<span>Plant search</span>
 						<img 	
-							src={`${this.props.clientRoot}/images/icons/home-mag-glass-2x.png`}
+							src={`${this.props.clientRoot}/images/icons/search-icon-2x.png`}
 						/>
 					</button>
           <div className="row widget-wrapper collapse" id="search-widget-wrapper">
