@@ -271,7 +271,10 @@ class HeaderApp extends React.Component {
 						aria-expanded="false" 
 						aria-controls="search-widget-wrapper"
 					>
-						Plant search
+						<span>Plant search</span>
+						<img 	
+							src={`${this.props.clientRoot}/images/icons/home-mag-glass-2x.png`}
+						/>
 					</button>
           <div className="row widget-wrapper collapse" id="search-widget-wrapper">
             <SearchWidget

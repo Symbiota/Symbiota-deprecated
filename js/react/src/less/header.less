@@ -227,7 +227,8 @@
 					text-align: left;
 					margin-top: 7px;
 					padding: 0 0 1em 0;
-					min-width: 250px;
+					min-width: 270px;
+					width: 33vw;
 					border-right: 1px solid @dark-green;
 					border-bottom-right-radius: 10px;
 					
@@ -239,7 +240,7 @@
 						width: 100%;
 						a.nav-link.dropdown-toggle {
 							text-shadow: none;
-							padding: .4rem 0 .4rem 1em;
+							padding: .4rem 1em .4rem 1em;
 							cursor: pointer;
 							max-width: 100%;
 							font-size: 1.2rem;
@@ -252,15 +253,16 @@
 								display: inline-block;
 								border: none;
     						float: right;
-								width: auto;
-								padding-right: 1em;
+								width: 20px;
 								font-weight: bold;
+								text-align: center;
+								margin-left: 0;
 							}
 						}
 						&.show {
 							a.nav-link.dropdown-toggle {
 								&::after {
-									content: '-';
+									content: '\2014';
 								}
 							}
 						}
@@ -297,7 +299,7 @@
 					position: absolute;
 					color: @light-green;
 					text-transform: uppercase;
-					width: 100px;
+					width: 200px;
 					text-align: right;
 					line-height: 1.3rem;
 					padding-right: .5rem;
@@ -330,6 +332,43 @@
 							margin-top: 17px;
 							margin-left: 16px;
 							top: 56px;
+						}
+					}
+				}
+			}
+		}
+	}
+
+
+
+	@media screen and (max-width: @small) {
+		#site-header,
+		#site-header.site-header-scroll {
+			#site-header-dropdowns-wrapper {
+				ul#site-header-dropdowns {
+					overflow: hidden;
+					border-bottom-right-radius: 0px;
+					width: calc(100vw - 15px);
+					padding: 15px;
+					border-right: none;
+					li {
+
+						a.nav-link.dropdown-toggle {
+							border-radius: 0 0 0 0 !important;
+							font-size: 1.5rem;
+							line-height: 2.875rem;
+						}
+
+						.dropdown-menu {
+							border-radius: 0 0 0 0;
+							a {
+								font-size: 1.3125rem;
+								line-height: 2.875rem;
+								color: @dark-grn-type !important;
+								&:last-child {
+									border-radius: 0 0 0 0;
+								}
+							}
 						}
 					}
 				}
