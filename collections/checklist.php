@@ -89,7 +89,6 @@ if($stArrCollJson || $stArrSearchJson){
 	<?php
 		echo '<div style="font-weight:bold;font-size:125%;">'.$LANG['TAXA_COUNT'].': '.$taxaCnt.'</div>';
 		$undFamilyArray = Array();
-		var_dump($checklistArr);
 		if(array_key_exists("undefined",$checklistArr)){
 			$undFamilyArray = $checklistArr["undefined"];
 			unset($checklistArr["undefined"]);
