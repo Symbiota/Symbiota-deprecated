@@ -3,8 +3,8 @@
 @import '../../node_modules/react-modal-video/css/modal-video.min.css';
 
 //Variable for project paths since relative paths not allowed
-@subdir: "/portal";
-//@subdir: "";
+//@subdir: "/portal";
+@subdir: "";
 
 * {
   font-family: @font;
@@ -919,6 +919,7 @@ img {
             }
             
 						@media (max-width: @small) {
+							padding-top: 0;
 							h1 {
 								font-size: 2.5rem;
 								line-height: 2.6rem;
@@ -932,6 +933,7 @@ img {
 									width: 85%;
 									padding: 22px 10px;
 									border-radius: .375em;
+									font-size: 1.5rem;
 								}
 								.clear-text {
 									top: 16px;
