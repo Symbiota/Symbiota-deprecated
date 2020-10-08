@@ -176,7 +176,10 @@ if(isset($_REQUEST['db'])){
 		<form name="harvestparams" id="harvestparams" action="list.php" method="post" onsubmit="return checkHarvestparamsForm(this);">
 			<div style="margin:10 0 10 0;"><hr></div>
 			<div style='float:right;margin:5px 10px;'>
-				<div style="margin-bottom:10px"><input type="submit" class="nextbtn" value="<?php echo isset($LANG['BUTTON_NEXT'])?$LANG['BUTTON_NEXT']:'Next >'; ?>" /></div>
+				<div style="margin-bottom:10px">
+					<input type="submit" class="nextbtn" value="<?php echo isset($LANG['BUTTON_NEXT'])?$LANG['BUTTON_NEXT']:'Next >'; ?>" />
+					<br><input type="reset" class="nextbtn" value="Reset form" />
+				</div>
 				<div><button type="button" class="resetbtn" onclick='resetHarvestParamsForm(this.form);'><?php echo isset($LANG['BUTTON_RESET'])?$LANG['BUTTON_RESET']:'Reset Form'; ?></button></div>
 			</div>
 			<div>
@@ -313,6 +316,7 @@ if(isset($_REQUEST['db'])){
 			</div>
 			<div style="float:right;">
 				<input type="submit" class="nextbtn" value="<?php echo isset($LANG['BUTTON_NEXT'])?$LANG['BUTTON_NEXT']:'Next >'; ?>" />
+					<br><input type="reset" class="nextbtn" value="Reset form" />
 			</div>
 			<div>
 				<h3><?php echo $SEARCHTEXT['SPECIMEN_HEADER']; ?></h3>
