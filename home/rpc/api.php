@@ -1,5 +1,6 @@
 <?php
 include_once("../../config/symbini.php");
+include_once("$SERVER_ROOT/classes/Functional.php");
 
 function cleanMSWord($str) {
 

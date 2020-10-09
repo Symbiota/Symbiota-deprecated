@@ -38,10 +38,6 @@ class FooterApp extends React.Component {
           <div className="row py-4">
             <div className="col-md">
               <div>
-                <p className="mt-2">
-                  OregonFlora is based at the <a href="https://bpp.oregonstate.edu/herbarium" target="_blank">OSU Herbarium</a> at Oregon State University.
-                  Our program is wholly funded through grants and contributions. We welcome your support!
-                </p>
                 <div>
                   <a href={ `${this.props.clientRoot}/pages/donate.php` }
                      className="btn btn-primary"
@@ -49,6 +45,10 @@ class FooterApp extends React.Component {
                     Donate!
                   </a>
                 </div>
+                <p className="mt-2">
+                  OregonFlora is based at the <a href="https://bpp.oregonstate.edu/herbarium" target="_blank">OSU Herbarium</a> at Oregon State University.
+                  Our program is funded through grants and contributions. We welcome your support!
+                </p>
               </div>
             </div>
             <div className="col-md">

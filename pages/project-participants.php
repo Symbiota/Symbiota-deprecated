@@ -104,6 +104,7 @@ include( $serverRoot . "/header.php" );
             <h2>Project Partners</h2>
             <p>The Native Plant Society of Oregon (NPSO) has been a sponsor of OregonFlora since the project&rsquo;s inception in 1994. The Society and its chapters provide financial support and promote the exchange of plant observation data and photographs.</p>
             <p>Our close ties with the OSU Herbarium are mutually beneficial &mdash; the Herbarium excels as a dynamic resource with exceptional depth in its Oregon collections, and OregonFlora enhances their value with careful taxonomic analysis and digital presentation within the context of the OregonFlora tools.</p>
+            <p>Metro and its partners in the Adult Conservation Educators working group have led the development and support of the Grow Natives section of this website.</p>
             <p>This website uses the Symbiota platform with customized modules. Our website is hosted at the College of Science Information Network (COSINe) at Oregon State University.</p>
             <p>We collaborate and share information with numerous groups: academic institutions, federal agencies (Oregon/Washington Bureau of Land Management, US Forest Service), state organizations (Oregon Biodiversity Information Center), Metro, Native Plant Society of Oregon, and individuals.&nbsp;</p>
             <h2>Key Supporters</h2>

@@ -2,6 +2,7 @@
 
 include_once("../../config/symbini.php");
 include_once("$SERVER_ROOT/config/SymbosuEntityManager.php");
+include_once("$SERVER_ROOT/classes/Functional.php");
 include_once("$SERVER_ROOT/classes/IdentManager.php");
 include_once("$SERVER_ROOT/classes/ExploreManager.php");
 include_once("$SERVER_ROOT/classes/TaxaManager.php");

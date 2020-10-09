@@ -6,6 +6,7 @@
 @subdir: "/portal";
 //@subdir: "";
 
+
 * {
   font-family: @font;
   min-width: 0;
@@ -15,6 +16,9 @@
 body {
   padding: 0;
   margin: 0;
+}
+body.modal-open {
+  padding-right: 0 !important;
 }
 
 .inner-content {
@@ -393,6 +397,14 @@ img {
     font-size: 36px;
     font-weight: bold;
     padding: 65px 0 20px 0;
+    @media (max-width: @large) {
+    	font-size: 54px;
+    	padding-top: 10px;
+    	line-height: 1.1em;
+    }
+    @media (max-width: @small) {
+    	font-size: 48px;
+    }
 
     @media (min-width: 544px) {
       font-size: 60px;
@@ -539,66 +551,90 @@ img {
       }
     }
   }
-
   #tutorials-content {
     p {
       font-size: 26px;
     }
 
-    .tutorial-list {
-      padding: 15px;
+    section {
       background-color: @light-green;
-
-      p, li {
-        font-size: 22px;
-        line-height: 22px;
-      }
-    }
-
-    .tutorials-video,
-    .tutorials-text {
-
-      p, li {
-        font-size: 22px;
-      }
-    }
-
-    .tutorials-text{
-      margin: 10px -15px;
-    }
-
-    .tutorials-video-card,
-    .tutorials-text-card {
+      border: 1px dashed @gray-type;
       border-radius: 8px;
-      border: 1px dashed black;
-
-      h3 {
-        font-size: 32px;
-        line-height: 32px;
+      padding: 1.6rem;
+      margin-bottom: 2.2rem;
+      p, li {
+        font-size: 1.4rem;
+        line-height: 1.3em;
       }
-
-      .video-image {
-        border-top-right-radius: 8px;
-        border-top-left-radius: 8px;
-        background-color: @light-green;
-        padding: 30px;
-        margin-left: -15px;
-        margin-right: -15px;
+      .intro {
+      	display: flex;
+      	flex-flow: row nowrap;
+      	justify-content: space-between;
+      	.video {
+      		flex-basis: percentage(260/1020);
+      	}
+      	.info {
+      		padding: 0 0 0 1.6rem;
+      		flex-basis: percentage(760/1020);
+      		h3 {
+      			font-size: 36px;
+      			margin-top: 0;
+      		}
+      		.more-link {
+      			float: right;
+      			text-transform: uppercase;
+      			color: @med-green;
+      			cursor: pointer;
+      			line-height: 1.8rem;
+      			.arrow {
+      				float: right;
+      				font-size: 1.8rem;
+      				margin-left: 10px;
+      				&.fa-down {
+								display: block;
+      				}
+							&.fa-up {
+      					display: none;
+							}
+      			}
+      			&[aria-expanded="true"]{
+      				.arrow {
+      					&.fa-up {
+      						display: block
+      					}
+      					&.fa-down {;
+      						display: none;
+      					}
+      				}
+      			}
+      		}
+      	}
+      }
+      @media (max-width: @medium) {
+				.intro {
+					flex-flow: row wrap;
+					.video, 
+					.info {
+						flex-basis: 100%;
+					}
+					.info {
+						padding-top: 1rem;
+						padding-left: .3rem;
+					}
+				}
+			}
+      .reveal {
+      	margin-top: 1.4rem;
+      	padding: 1.6rem;
+      	background-color: white;
+      	max-height: 300px;
+      	overflow-y: scroll;
+				--scrollbarBG: @med-green;
+				--thumbBG: white;
+				scrollbar-color: @med-green white;
       }
     }
-
-    .tutorials-video-card{
-      margin: 15px;
-    }
-
-    .tutorials-text-card {
-      padding: 15px;
-      .figure {
-        float: right;
-        width: 300px;
-      }
-    }
-
+/*
     .go-top{
       width: 100%;
 
@@ -617,33 +653,47 @@ img {
         margin-right: 5px;
       }
     }
-
+*/
+		.modal {
+			position: absolute;
+			top: 60;
+		}
     .video-modal-btn {
       padding: 0;
     }
 
     .modal-dialog {
       max-width: 90%;
-      margin: 20px auto;
+      margin: 0px auto;
     }
 
     .modal-body {
-      position:relative;
-      padding:0px;
+      position: relative;
+      padding: 0px;
+    }
+    .modal-content {
+    	padding-top: 40px;
     }
 
     .close {
-      position:absolute;
-      right:-30px;
-      top:0;
-      z-index:999;
-      font-size:2rem;
+      position: absolute;
+      right: -30px;
+      top: 0;
+      z-index: 999;
+      font-size: 2rem;
       font-weight: normal;
       color: @dark-green;
-      opacity:1;
+      opacity: 1;
     }
   }
 
+	&.tutorials {		
+		@media (max-width: @small) {
+			h1 {
+			
+			}
+		}
+	}
   .news-events-content{
     margin-bottom: -1.2rem;
 		h2 {
