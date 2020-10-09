@@ -76,8 +76,8 @@ include( $serverRoot . "/header.php" );
             <div class="row two-col-row">
                 <div class="column-right col-md-4 order-1 order-md-2 pt-5">
                     <figure class="figure">
-                        <img src="images/volunteer3.png" class="figure-img img-fluid z-depth-1" alt="Volunteer 3"">
-                        <figcaption class="figure-caption">Photo of Persona Person by Jane Doe.</figcaption>
+                        <img src="images/volunteer3.png" class="figure-img img-fluid z-depth-1" alt="Volunteer"">
+                        <figcaption class="figure-caption">Volunteering with OregonFlora is fun!</figcaption>
                     </figure>
                 </div>
                 <div class="column-main col-md-8 order-2 order-md-1 pr-md-5">

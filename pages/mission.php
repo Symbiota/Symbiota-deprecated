@@ -42,11 +42,11 @@ include( $serverRoot . "/header.php" );
                 <div class="column-right col-md-4 order-1 order-md-2 pt-5">
                     <figure class="figure">
                         <img
-                                srcset="images/volunteer1.png 1x, images/volunteer1@2x.png 2x"
-                                src="images/volunteer1.png"
+                                srcset="images/student_looking_at_plant.jpg 1x"
+                                src="images/student_looking_at_plant.jpg"
                                 class="figure-img img-fluid z-depth-1"
-                                alt="Volunteer 1">
-                        <figcaption class="figure-caption">A selfless volunteer tabling a table for the Oregon Flora project, which you should donate to at least so we can try out a four-line caption to show how it looks.</figcaption>
+                                alt="Student looking at plant">
+                        <figcaption class="figure-caption">Students contribute significantly to the research and activities of the program.</figcaption>
                     </figure>
                 </div>
                 <div class="column-main col-md-8 order-2 order-md-1 pr-md-5">
@@ -82,15 +82,15 @@ include( $serverRoot . "/header.php" );
                 <div class="column-right col-md-4 order-1 order-md-2 pt-5">
                     <figure class="figure">
                         <img
-                                srcset="images/Columbia_Gorge_volunteer_pair.png 1x, images/Columbia_Gorge_volunteer_pair@2x.png 2x"
-                                src="images/Columbia_Gorge_volunteer_pair.png"
+                                srcset="images/volunteer4.jpg 1x"
+                                src="images/volunteer4.jpg"
                                 class="figure-img img-fluid z-depth-1"
-                                alt="Volunteer 2"">
-                        <figcaption class="figure-caption">Two people in the field bravely exploring what a two-line caption looks like.</figcaption>
+                                alt="Photographing a flower">
+                        <figcaption class="figure-caption">Photos and species lists contributed by individuals, agencies, and the Native Plant Society of Oregon help co-create the rich plant diversity resources OregonFlora offers to the public. </figcaption>
                     </figure>
                     <figure class="figure">
-                        <img src="images/volunteer3.png" class="figure-img img-fluid z-depth-1" alt="Volunteer 3"">
-                        <figcaption class="figure-caption">Photo of Persona Person by Jane Doe.</figcaption>
+                        <img src="images/ofp_atlas_map.jpg" class="figure-img img-fluid z-depth-1" alt="OFP map">
+                        <figcaption class="figure-caption">A map generated from the Oregon Flora Project’s first mapping program. An interactive version of the program was added to the website in 2005.</figcaption>
                     </figure>
                 </div>
                 <div class="column-main col-md-8 order-2 order-md-1 pr-md-5">
@@ -103,7 +103,7 @@ include( $serverRoot . "/header.php" );
                             srcset="images/oxa_ore_2338b.png 1x, images/oxa_ore_2338b@2x.png 2x"
                             src="images/oxa_ore_2338b.png"
                             class="figure-img img-fluid z-depth-1"
-                            alt="Volunteer 2"">
+                            alt="Volunteer 2">
                         <figcaption class="figure-caption">Oxalis oregana, or Oregon wood sorrel (Gerald D. Carr).</figcaption>
                     </figure>
                     <p>Collaboration with the Northwest Alliance for Computational Science and Engineering at OSU resulted in the award of a grant (2001-2004) from the National Science Foundation to design and develop software for presenting Oregon Flora Project data online. A Photo Gallery was also added featuring field photos contributed by plant enthusiasts; the plant identification for each was confirmed by OFP staff prior to posting online. Digitized images of herbarium specimens were added as a component of the Photo Gallery.</p>
@@ -114,11 +114,11 @@ include( $serverRoot . "/header.php" );
                 <div class="column-right col-md-4 order-1 order-md-2 pt-5">
                     <figure class="figure">
                         <img
-                                srcset="images/volunteer2.png 1x, images/volunteer2@2x.png 2x"
-                                src="images/volunteer2.png"
+                                srcset="images/history_2004_scott_sundberg.jpg 1x"
+                                src="images/history_2004_scott_sundberg.jpg"
                                 class="figure-img img-fluid z-depth-1"
-                                alt="Volunteer 2"">
-                        <figcaption class="figure-caption">Or maybe it’s a three line quote ensure that the information remained comprehensive and up-to-date about this unique project.</figcaption>
+                                alt="Founding director Scott Sundberg.">
+                        <figcaption class="figure-caption">Founding director Scott Sundberg.</figcaption>
                     </figure>
                 </div>
                 <div class="column-main col-md-8 order-2 order-md-1 pr-md-5">
@@ -129,6 +129,20 @@ include( $serverRoot . "/header.php" );
 
             </div>
             <div class="row two-col-row">
+                <div class="column-right col-md-4 order-1 order-md-2 pt-5">
+                    <figure class="figure">
+                        <img
+                                srcset="images/volunteer1.jpg 1x"
+                                src="images/volunteer1.jpg"
+                                class="figure-img img-fluid z-depth-1"
+                                alt="Volunteer">
+                        <figcaption class="figure-caption">Tabling events at wildflower shows, gardening events, and community fairs share information about OregonFlora with the public.</figcaption>
+                    </figure>
+                    <figure class="figure">
+                        <img src="images/history_ag_field_dam.jpg" class="figure-img img-fluid z-depth-1" alt="Restoring wetland function to parts of an agricultural field">
+                        <figcaption class="figure-caption">Restoring wetland function to parts of an agricultural field. By building a sandbag dam to partially block a culvert, water is held on the landscape. The area was later seeded with native species that also help to support grazers. </figcaption>
+                    </figure>
+                </div>
                 <div class="column-main col-md-8 order-2 order-md-1 pr-md-5">
                     <h3>2010-present</h3>
                     <p>With the Checklist serving as a robust foundation, OFP efforts focused on the production of the printed Flora of Oregon. Stephen Meyers was hired in 2010 as the taxonomic director to oversee the writing of the floristic treatments and identification keys. In 2012 artist John Myers joined the staff to contribute artwork for the first ever illustrated flora for the state of Oregon. That same year, an eleven-member advisory board was established, with members representing the diversity of stakeholders that are informed by the work of the OFP. BRIT Press was selected to publish the flora, and with the design and layout expertise of Tanya Harvey, Volume 1 of the Flora of Oregon was published in September 2015. </p>
