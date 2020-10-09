@@ -62,7 +62,7 @@ include( $serverRoot . "/header.php" );
 						<section>
 							<div class="intro">
 								<div class="video">
-									<a href="#" type="button" class="btn video-modal-btn" data-toggle="modal" data-src="https://www.youtube.com/embed/9ystxXKEOp4" data-target="#videoModal"><img src="<?php echo $CLIENT_ROOT; ?>/pages/images/YouTube-tutorial-Intro.png" alt="intro video"></a>
+									<a href="#" type="button" class="btn video-modal-btn" data-toggle="modal" data-src="https://www.youtube.com/embed/qQpy107PKbE" data-target="#videoModal"><img src="<?php echo $CLIENT_ROOT; ?>/pages/images/youtube_thumbs/intro.png" alt="intro video"></a>
 								</div>
 								<div class="info">
 									<h3>An Introduction to OregonFlora</h3>
@@ -78,7 +78,7 @@ include( $serverRoot . "/header.php" );
 						<section>
 							<div class="intro">
 								<div class="video">
-									<a href="#" type="button" class="btn video-modal-btn" data-toggle="modal" data-src="https://www.youtube.com/embed/cz3hcSpRSTo" data-target="#videoModal"><img src="<?php echo $CLIENT_ROOT; ?>/pages/images/YouTube-tutorial-Intro.png" alt="intro video"></a>
+									<a href="#" type="button" class="btn video-modal-btn" data-toggle="modal" data-src="https://www.youtube.com/embed/cz3hcSpRSTo" data-target="#videoModal"><img src="<?php echo $CLIENT_ROOT; ?>/pages/images/youtube_thumbs/plant_profile.png" alt="plant profile video"></a>
 								</div>
 								<div class="info">
 									<h3>Plant profile pages</h3>
@@ -110,7 +110,7 @@ include( $serverRoot . "/header.php" );
 						<section>
 							<div class="intro">
 								<div class="video">
-									<a href="#" type="button" class="btn video-modal-btn" data-toggle="modal" data-src="https://www.youtube.com/embed/TKkZ9cX0Bpw" data-target="#videoModal"><img src="<?php echo $CLIENT_ROOT; ?>/pages/images/YouTube-tutorial-Intro.png" alt="intro video"></a>
+									<a href="#" type="button" class="btn video-modal-btn" data-toggle="modal" data-src="https://www.youtube.com/embed/TKkZ9cX0Bpw" data-target="#videoModal"><img src="<?php echo $CLIENT_ROOT; ?>/pages/images/youtube_thumbs/mapping.png" alt="mapping video"></a>
 								</div>
 								<div class="info">
 									<h3>Mapping</h3>
@@ -182,7 +182,7 @@ include( $serverRoot . "/header.php" );
             <section>
 							<div class="intro">
 								<div class="video">
-									<a href="#" type="button" class="btn video-modal-btn" data-toggle="modal" data-src="https://www.youtube.com/embed/op0LVJRBHto" data-target="#videoModal"><img src="<?php echo $CLIENT_ROOT; ?>/pages/images/YouTube-tutorial-Intro.png" alt="intro video"></a>
+									<a href="#" type="button" class="btn video-modal-btn" data-toggle="modal" data-src="https://www.youtube.com/embed/op0LVJRBHto" data-target="#videoModal"><img src="<?php echo $CLIENT_ROOT; ?>/pages/images/youtube_thumbs/herbarium.png" alt="herbarium video"></a>
 								</div>
 								<div class="info">
 									<h3>Identify Plants</h3>
@@ -221,7 +221,7 @@ include( $serverRoot . "/header.php" );
             <section>
 							<div class="intro">
 								<div class="video">
-									<a href="#" type="button" class="btn video-modal-btn" data-toggle="modal" data-src="https://www.youtube.com/embed/Ua1PeVhP3Sc" data-target="#videoModal"><img src="<?php echo $CLIENT_ROOT; ?>/pages/images/YouTube-tutorial-Intro.png" alt="intro video"></a>
+									<a href="#" type="button" class="btn video-modal-btn" data-toggle="modal" data-src="https://www.youtube.com/embed/Ua1PeVhP3Sc" data-target="#videoModal"><img src="<?php echo $CLIENT_ROOT; ?>/pages/images/youtube_thumbs/inventories.png" alt="inventories video"></a>
 								</div>
 								<div class="info">
 									<h3>Inventories</h3>
@@ -256,7 +256,7 @@ include( $serverRoot . "/header.php" );
             <section>
 							<div class="intro">
 								<div class="video">
-									<a href="#" type="button" class="btn video-modal-btn" data-toggle="modal" data-src="https://www.youtube.com/embed/OIJs0W9_aUo" data-target="#videoModal"><img src="<?php echo $CLIENT_ROOT; ?>/pages/images/YouTube-tutorial-Intro.png" alt="intro video"></a>
+									<a href="#" type="button" class="btn video-modal-btn" data-toggle="modal" data-src="https://www.youtube.com/embed/OIJs0W9_aUo" data-target="#videoModal"><img src="<?php echo $CLIENT_ROOT; ?>/pages/images/youtube_thumbs/herbarium.png" alt="herbarium video"></a>
 								</div>
 								<div class="info">
 									<h3>Herbarium</h3>
@@ -291,7 +291,7 @@ include( $serverRoot . "/header.php" );
             <section>
 							<div class="intro">
 								<div class="video">
-									<a href="#" type="button" class="btn video-modal-btn" data-toggle="modal" data-src="https://www.youtube.com/embed/aeuFT55jfr0" data-target="#videoModal"><img src="<?php echo $CLIENT_ROOT; ?>/pages/images/YouTube-tutorial-Intro.png" alt="intro video"></a>
+									<a href="#" type="button" class="btn video-modal-btn" data-toggle="modal" data-src="https://www.youtube.com/embed/aeuFT55jfr0" data-target="#videoModal"><img src="<?php echo $CLIENT_ROOT; ?>/pages/images/youtube_thumbs/natives.png" alt="natives video"></a>
 								</div>
 								<div class="info">
 									<h3>Grow Natives</h3>
