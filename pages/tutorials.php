@@ -182,7 +182,7 @@ include( $serverRoot . "/header.php" );
             <section>
 							<div class="intro">
 								<div class="video">
-									<a href="#" type="button" class="btn video-modal-btn" data-toggle="modal" data-src="https://www.youtube.com/embed/op0LVJRBHto" data-target="#videoModal"><img src="<?php echo $CLIENT_ROOT; ?>/pages/images/youtube_thumbs/herbarium.png" alt="herbarium video"></a>
+									<a href="#" type="button" class="btn video-modal-btn" data-toggle="modal" data-src="https://www.youtube.com/embed/op0LVJRBHto" data-target="#videoModal"><img src="<?php echo $CLIENT_ROOT; ?>/pages/images/youtube_thumbs/identify.png" alt="identify video"></a>
 								</div>
 								<div class="info">
 									<h3>Identify Plants</h3>
