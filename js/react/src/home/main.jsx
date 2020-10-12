@@ -184,10 +184,10 @@ class Home extends React.Component {
 									<p>We have joined forces with Symbiota to present our website as a Symbiota portal! Learn what OregonFlora can do for you in the overview below, explore our featured tools at right, or browse our full set of tutorials—as text or videos—<a href={ this.props.clientRoot + "/pages/tutorials.php" }>here</a>.</p>
 									<div className="row video-card">
 											<div className="col-auto video-img">
-													<a onClick={() => this.openVideoModal('9ystxXKEOp4')}><img src={ this.props.clientRoot + "/images/YouTube-tutorial-Intro.png" }/></a>
+													<a onClick={() => this.openVideoModal('qQpy107PKbE')}><img src={ this.props.clientRoot + "/pages/images/youtube_thumbs/intro_sm.jpg" }/></a>
 											</div>
 											<div className="col video-text">
-													<h3><a onClick={() => this.openVideoModal('9ystxXKEOp4')}>An Introduction to Oregon Flora</a></h3>
+													<h3><a onClick={() => this.openVideoModal('qQpy107PKbE')}>An Introduction to Oregon Flora</a></h3>
 													<p>Get an overview of the powerful tools available on the website.</p>
 											</div>
 									</div>
@@ -195,46 +195,46 @@ class Home extends React.Component {
 						<div className="col-md-6 slide-col-2">
 									<div className="row video-card">
 											<div className="col-auto video-img">
-													<a onClick={() => this.openVideoModal('HwtEXcTO9jA')}><img src={ this.props.clientRoot + "/images/YouTube-tutorial-Taxon.png" }/></a>
+													<a onClick={() => this.openVideoModal('cz3hcSpRSTo')}><img src={ this.props.clientRoot + "/pages/images/youtube_thumbs/plant_profile_sm.jpg" }/></a>
 											</div>
 											<div className="col video-text">
-													<h3><a onClick={() => this.openVideoModal('HwtEXcTO9jA')}>Plant profile pages</a></h3>
+													<h3><a onClick={() => this.openVideoModal('cz3hcSpRSTo')}>Plant profile pages</a></h3>
 													<p>Comprehensive information—gathered in one location—for each of the ~4,700 vascular plant in the state! </p>
 											</div>
 									</div>
 									<div className="row video-card">
 											<div className="col-auto video-img">
-													<a onClick={() => this.openVideoModal('Y2sdnibf1O8')}><img src={ this.props.clientRoot + "/images/YouTube-tutorial-Map.png" }/></a>
+													<a onClick={() => this.openVideoModal('TKkZ9cX0Bpw')}><img src={ this.props.clientRoot + "/pages/images/youtube_thumbs/mapping_sm.jpg" }/></a>
 											</div>
 											<div className="col video-text">
-													<h3><a onClick={() => this.openVideoModal('Y2sdnibf1O8')}>Mapping</a></h3>
+													<h3><a onClick={() => this.openVideoModal('TKkZ9cX0Bpw')}>Mapping</a></h3>
 													<p>Draw a shape on the interactive map to learn what plants occur there or enter plant names to see their distribution.</p>
 											</div>
 									</div>
 									<div className="row video-card">
 											<div className="col-auto video-img">
-													<a onClick={() => this.openVideoModal('DKxoEEwL3V4')}><img src={ this.props.clientRoot + "/images/YouTube-tutorial-InterKey.png" }/></a>
+													<a onClick={() => this.openVideoModal('op0LVJRBHto')}><img src={ this.props.clientRoot + "/pages/images/youtube_thumbs/identify_sm.jpg" }/></a>
 											</div>
 											<div className="col video-text">
-													<h3><a onClick={() => this.openVideoModal('DKxoEEwL3V4')}>Identify Plants</a></h3>
+													<h3><a onClick={() => this.openVideoModal('op0LVJRBHto')}>Identify Plants</a></h3>
 													<p>Use the plant features you recognize! Mark your location on a map to get a list of species found there, then narrow the possibilities.</p>
 											</div>
 									</div>        
 									<div className="row video-card">
 											<div className="col-auto video-img">
-													<a onClick={() => this.openVideoModal('9ystxXKEOp4')}><img src={ this.props.clientRoot + "/images/YouTube-tutorial-Inventory.png" }/></a>
+													<a onClick={() => this.openVideoModal('Ua1PeVhP3Sc')}><img src={ this.props.clientRoot + "/pages/images/youtube_thumbs/inventories_sm.jpg" }/></a>
 											</div>
 											<div className="col video-text">
-													<h3><a onClick={() => this.openVideoModal('9ystxXKEOp4')}>Inventories</a></h3>
+													<h3><a onClick={() => this.openVideoModal('Ua1PeVhP3Sc')}>Inventories</a></h3>
 													<p>In-depth information about the plants of a defined place. Choose from thousands of lists.</p>
 											</div>
 									</div>          
 									<div className="row video-card">
 											<div className="col-auto video-img">
-													<a onClick={() => this.openVideoModal('9ystxXKEOp4')}><img src={ this.props.clientRoot + "/images/YouTube-tutorial-Inventory.png" }/></a>
+													<a onClick={() => this.openVideoModal('OIJs0W9_aUo')}><img src={ this.props.clientRoot + "/pages/images/youtube_thumbs/herbarium_sm.jpg" }/></a>
 											</div>
 											<div className="col video-text">
-													<h3><a onClick={() => this.openVideoModal('9ystxXKEOp4')}>OSU Herbarium</a></h3>
+													<h3><a onClick={() => this.openVideoModal('OIJs0W9_aUo')}>OSU Herbarium</a></h3>
 													<p>All databased specimen records of OSU Herbarium’s vascular plants, mosses, lichens, fungi, and algae in a searchable, downloadable format.</p>
 											</div>
 									</div>             
