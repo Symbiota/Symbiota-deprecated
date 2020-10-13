@@ -45,7 +45,7 @@ include( $serverRoot . "/header.php" );
             <h2>Correspondence:</h2>
             <p>OregonFlora<br/>Dr. Linda K. Hardison, Director<br/>OSU Dept. Botany &amp; Plant Pathology<br/>4575 SW Research Way<br/>Corvallis, OR 97333<br/>541-737-4338</p>
             <h2>Send contributions of species lists, digital images, and other data to:</h2>
-            <p><a href="mailto:ofpflora@oregonflora.org">ofpflora@oregonflora.org</a></p>
+            <p><a href="mailto:info@oregonflora.org">info@oregonflora.org</a></p>
         </div> <!-- .inner-content -->
     </section>
 </div> <!-- .info-page -->
