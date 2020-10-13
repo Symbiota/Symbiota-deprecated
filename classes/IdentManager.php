@@ -1,7 +1,7 @@
 <?php
 
 include_once("../../config/symbini.php");
-#include_once("$SERVER_ROOT/classes/Functional.php");
+include_once("$SERVER_ROOT/classes/Functional.php");
 include_once("$SERVER_ROOT/config/SymbosuEntityManager.php");
 
 class IdentManager extends Manager {
