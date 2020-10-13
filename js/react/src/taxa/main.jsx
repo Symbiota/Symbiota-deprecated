@@ -263,8 +263,10 @@ function SideBarSection(props) {
 function SppItem(props) {
 	const item = props.item;
 	let image = null;
-	if (item.images.length > 0) {
-		image = item.images[0];
+	if (item.imagesBasis.HumanObservation.length > 0) {
+		image = item.imagesBasis.HumanObservation[0];
+	}else if (item.imagesBasis.PreservedSpecimen.length > 0) {
+		image = item.imagesBasis.PreservedSpecimen[0];
 	}
 	let mapImage = null;
 	mapImage = `${props.clientRoot}/images/maps/${item.tid}_sm.jpg`;

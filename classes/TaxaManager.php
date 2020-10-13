@@ -694,7 +694,7 @@ class TaxaManager {
 			"descriptions" => [],
 			"gardenDescription" => '',
 			"gardenId" => -1,
-			"images" => [],
+			#"images" => [],
 			"imagesBasis" => [],
 			"vernacular" => [
 				"basename" => '',

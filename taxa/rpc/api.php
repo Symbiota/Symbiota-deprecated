@@ -40,7 +40,7 @@ function searchTaxa($searchTerm) {
   return $results;
 }
 
-function getSubTaxa($parentTid) {
+function getSubTaxa($parentTid) {#not sure this happens anymore
   $results = [];
   $taxaRepo = SymbosuEntityManager::getEntityManager()->getRepository("Taxa");
   $taxaResults = $taxaRepo->createQueryBuilder("t")
@@ -73,8 +73,13 @@ function taxaManagerToJSON($taxaObj,$recursive = 1) {
 		$result["parentTid"] = $taxaObj->getParentTid();   
 		$result["rankId"] = $taxaObj->getRankId();  
 		$result["author"] = $taxaObj->getAuthor();
+		$result['imagesBasis'] = [];
+		$result['imagesBasis']['HumanObservation'] = [];
+		$result['imagesBasis']['PreservedSpecimen'] = [];
+		$result['imagesBasis']['LivingSpecimen'] = [];
 		
-		if ($recursive === 1) {
+		
+		if ($recursive === 1) {#default
 			$spp = $taxaObj->getSpp(); 
 			foreach($spp as $rowArr){
 				$taxaModel = $taxaRepo->find($rowArr['tid']);
@@ -104,28 +109,39 @@ function taxaManagerToJSON($taxaObj,$recursive = 1) {
 				$result["taxalinks"][$idx]['url'] = str_replace("--SCINAME--",$result["sciname"],$taxalink['url']);
 			}	
 			
-			$result["images"] = $taxaObj->getImages();
+			#$result["images"] = $taxaObj->getImages();
 			$allImages = $taxaObj->getImagesByBasisOfRecord();
 			$result["imagesBasis"]['HumanObservation'] = (isset($allImages['HumanObservation']) ? $allImages['HumanObservation'] : []);
 			$result["imagesBasis"]['PreservedSpecimen'] = (isset($allImages['PreservedSpecimen']) ? $allImages['PreservedSpecimen'] : []);
 			$result["imagesBasis"]['LivingSpecimen'] = (isset($allImages['LivingSpecimen']) ? $allImages['LivingSpecimen'] : []);
 			
-			foreach ($result['spp'] as $staxa) {#collate SPP images into bare taxon image lists
+			if ($result["rankId"] > 140) {
+				foreach ($result['spp'] as $staxa) {#collate SPP images into bare taxon image lists
 
-				if (isset($staxa['imagesBasis']['HumanObservation'])) {
-					$result['imagesBasis']['HumanObservation'] = array_merge($result['imagesBasis']['HumanObservation'],$staxa['imagesBasis']['HumanObservation']);
-				}
-				if (isset($staxa['imagesBasis']['PreservedSpecimen'])) {
-					$result['imagesBasis']['PreservedSpecimen'] = array_merge($result['imagesBasis']['PreservedSpecimen'],$staxa['imagesBasis']['PreservedSpecimen']);
-				}
-				if (isset($staxa['imagesBasis']['HumanObservation'])) {
-					$result['imagesBasis']['LivingSpecimen'] = array_merge($result['imagesBasis']['LivingSpecimen'],$staxa['imagesBasis']['LivingSpecimen']);
+					if (isset($staxa['imagesBasis']['HumanObservation'])) {
+						$result['imagesBasis']['HumanObservation'] = array_merge($result['imagesBasis']['HumanObservation'],$staxa['imagesBasis']['HumanObservation']);
+					}
+					if (isset($staxa['imagesBasis']['PreservedSpecimen'])) {
+						$result['imagesBasis']['PreservedSpecimen'] = array_merge($result['imagesBasis']['PreservedSpecimen'],$staxa['imagesBasis']['PreservedSpecimen']);
+					}
+					if (isset($staxa['imagesBasis']['HumanObservation'])) {
+						$result['imagesBasis']['LivingSpecimen'] = array_merge($result['imagesBasis']['LivingSpecimen'],$staxa['imagesBasis']['LivingSpecimen']);
+					}
 				}
 			}
 
-		}elseif($recursive > 1){
-			$result["images"] = $taxaObj->getImage();
-			if ($result["images"][0] === null) {
+		}elseif($recursive === 2){
+			
+			$allImages = $taxaObj->getImagesByBasisOfRecord();
+			$result["imagesBasis"]['HumanObservation'] = (isset($allImages['HumanObservation']) ? $allImages['HumanObservation'] : []);
+			$result["imagesBasis"]['PreservedSpecimen'] = (isset($allImages['PreservedSpecimen']) ? $allImages['PreservedSpecimen'] : []);
+			$result["imagesBasis"]['LivingSpecimen'] = (isset($allImages['LivingSpecimen']) ? $allImages['LivingSpecimen'] : []);
+		
+		
+		/*
+			$result["images"] = $taxaObj->getImages();
+			#var_dump($result['images']);
+			if ($result["images"] && $result["images"][0] === null) {
 				$spp = $taxaObj->getSpp();
 				foreach($spp as $rowArr){
 					$taxaModel = $taxaRepo->find($rowArr['tid']);
@@ -139,6 +155,7 @@ function taxaManagerToJSON($taxaObj,$recursive = 1) {
 					}
 				}	
 			}
+			*/
 		}
 		
 	}
