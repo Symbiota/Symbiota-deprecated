@@ -59,7 +59,7 @@ include( $serverRoot . "/header.php" );
 								</div>
 						</div>
 						
-						<section>
+						<section id="intro">
 							<div class="intro">
 								<div class="video">
 									<a href="#" type="button" class="btn video-modal-btn" data-toggle="modal" data-src="https://www.youtube.com/embed/qQpy107PKbE" data-target="#videoModal">
@@ -84,7 +84,7 @@ include( $serverRoot . "/header.php" );
 							</div>
 						</section>
 								
-						<section>
+						<section id="plant-profile">
 							<div class="intro">
 								<div class="video">
 									<a href="#" type="button" class="btn video-modal-btn" data-toggle="modal" data-src="https://www.youtube.com/embed/cz3hcSpRSTo" data-target="#videoModal">
@@ -125,7 +125,7 @@ include( $serverRoot . "/header.php" );
 							</div>
 						</section>			
 								
-						<section>
+						<section id="mapping">
 							<div class="intro">
 								<div class="video">
 									<a href="#" type="button" class="btn video-modal-btn" data-toggle="modal" data-src="https://www.youtube.com/embed/TKkZ9cX0Bpw" data-target="#videoModal">
@@ -206,7 +206,7 @@ include( $serverRoot . "/header.php" );
 							</div>
 						</section>		
                 
-            <section>
+            <section id="identify">
 							<div class="intro">
 								<div class="video">
 									<a href="#" type="button" class="btn video-modal-btn" data-toggle="modal" data-src="https://www.youtube.com/embed/op0LVJRBHto" data-target="#videoModal">
@@ -254,7 +254,7 @@ include( $serverRoot . "/header.php" );
 							</div>
 						</section>	
                 
-            <section>
+            <section id="inventories">
 							<div class="intro">
 								<div class="video">
 									<a href="#" type="button" class="btn video-modal-btn" data-toggle="modal" data-src="https://www.youtube.com/embed/Ua1PeVhP3Sc" data-target="#videoModal">
@@ -298,7 +298,7 @@ include( $serverRoot . "/header.php" );
 							</div>
 						</section>	
             
-            <section>
+            <section id="herbarium">
 							<div class="intro">
 								<div class="video">
 									<a href="#" type="button" class="btn video-modal-btn" data-toggle="modal" data-src="https://www.youtube.com/embed/OIJs0W9_aUo" data-target="#videoModal">
@@ -342,7 +342,7 @@ include( $serverRoot . "/header.php" );
 						</section>	
     
             
-            <section>
+            <section id="natives">
 							<div class="intro">
 								<div class="video">
 									<a href="#" type="button" class="btn video-modal-btn" data-toggle="modal" data-src="https://www.youtube.com/embed/aeuFT55jfr0" data-target="#videoModal">

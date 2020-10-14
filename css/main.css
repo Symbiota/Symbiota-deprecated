@@ -1151,12 +1151,15 @@ button.menu-toggle {
 #maptoolbox h3 {
 	color: white;
 }
-.help-icon {
+a.help-icon {
 	position: absolute;
-	top: 1px; 
+	top: 7px; 
 	right: 10px;
+	font-size: 24px;
 }
-
+a.help-icon svg {
+	color: white;
+}
 
 /*--------------------------------------------------------------
 # Checklist
