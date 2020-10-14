@@ -195,19 +195,19 @@ class Home extends React.Component {
 						<div className="col-md-6 slide-col-2">
 									<div className="row video-card">
 											<div className="col-auto video-img">
-													<a onClick={() => this.openVideoModal('cz3hcSpRSTo')}><img src={ this.props.clientRoot + "/pages/images/youtube_thumbs/plant_profile_sm.jpg" }/></a>
+													<a onClick={() => this.openVideoModal('fAiJa7HxyV8')}><img src={ this.props.clientRoot + "/pages/images/youtube_thumbs/plant_profile_sm.jpg" }/></a>
 											</div>
 											<div className="col video-text">
-													<h3><a onClick={() => this.openVideoModal('cz3hcSpRSTo')}>Plant profile pages</a></h3>
+													<h3><a onClick={() => this.openVideoModal('fAiJa7HxyV8')}>Plant profile pages</a></h3>
 													<p>Comprehensive information—gathered in one location—for each of the ~4,700 vascular plant in the state! </p>
 											</div>
 									</div>
 									<div className="row video-card">
 											<div className="col-auto video-img">
-													<a onClick={() => this.openVideoModal('TKkZ9cX0Bpw')}><img src={ this.props.clientRoot + "/pages/images/youtube_thumbs/mapping_sm.jpg" }/></a>
+													<a onClick={() => this.openVideoModal('stlBt_e7yds')}><img src={ this.props.clientRoot + "/pages/images/youtube_thumbs/mapping_sm.jpg" }/></a>
 											</div>
 											<div className="col video-text">
-													<h3><a onClick={() => this.openVideoModal('TKkZ9cX0Bpw')}>Mapping</a></h3>
+													<h3><a onClick={() => this.openVideoModal('stlBt_e7yds')}>Mapping</a></h3>
 													<p>Draw a shape on the interactive map to learn what plants occur there or enter plant names to see their distribution.</p>
 											</div>
 									</div>
@@ -222,10 +222,10 @@ class Home extends React.Component {
 									</div>        
 									<div className="row video-card">
 											<div className="col-auto video-img">
-													<a onClick={() => this.openVideoModal('Ua1PeVhP3Sc')}><img src={ this.props.clientRoot + "/pages/images/youtube_thumbs/inventories_sm.jpg" }/></a>
+													<a onClick={() => this.openVideoModal('aAuE3nz_kVk')}><img src={ this.props.clientRoot + "/pages/images/youtube_thumbs/inventories_sm.jpg" }/></a>
 											</div>
 											<div className="col video-text">
-													<h3><a onClick={() => this.openVideoModal('Ua1PeVhP3Sc')}>Inventories</a></h3>
+													<h3><a onClick={() => this.openVideoModal('aAuE3nz_kVk')}>Inventories</a></h3>
 													<p>In-depth information about the plants of a defined place. Choose from thousands of lists.</p>
 											</div>
 									</div>          

@@ -87,7 +87,7 @@ include( $serverRoot . "/header.php" );
 						<section id="plant-profile">
 							<div class="intro">
 								<div class="video">
-									<a href="#" type="button" class="btn video-modal-btn" data-toggle="modal" data-src="https://www.youtube.com/embed/cz3hcSpRSTo" data-target="#videoModal">
+									<a href="#" type="button" class="btn video-modal-btn" data-toggle="modal" data-src="https://www.youtube.com/embed/fAiJa7HxyV8" data-target="#videoModal">
 										<img 
 											src="<?php echo $CLIENT_ROOT; ?>/pages/images/youtube_thumbs/plant_profile.jpg"  
 											srcset="
@@ -128,7 +128,7 @@ include( $serverRoot . "/header.php" );
 						<section id="mapping">
 							<div class="intro">
 								<div class="video">
-									<a href="#" type="button" class="btn video-modal-btn" data-toggle="modal" data-src="https://www.youtube.com/embed/TKkZ9cX0Bpw" data-target="#videoModal">
+									<a href="#" type="button" class="btn video-modal-btn" data-toggle="modal" data-src="https://www.youtube.com/embed/stlBt_e7yds" data-target="#videoModal">
 										<img 
 											src="<?php echo $CLIENT_ROOT; ?>/pages/images/youtube_thumbs/mapping.jpg" 
 											srcset="
@@ -257,7 +257,7 @@ include( $serverRoot . "/header.php" );
             <section id="inventories">
 							<div class="intro">
 								<div class="video">
-									<a href="#" type="button" class="btn video-modal-btn" data-toggle="modal" data-src="https://www.youtube.com/embed/Ua1PeVhP3Sc" data-target="#videoModal">
+									<a href="#" type="button" class="btn video-modal-btn" data-toggle="modal" data-src="https://www.youtube.com/embed/aAuE3nz_kVk" data-target="#videoModal">
 										<img 
 											src="<?php echo $CLIENT_ROOT; ?>/pages/images/youtube_thumbs/inventories.jpg" 
 											srcset="
