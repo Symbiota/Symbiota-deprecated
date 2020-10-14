@@ -234,6 +234,7 @@ class TaxaManager {
 					->andWhere("ts.taxauthid = :taxauthid")
 					->andWhere("t.rankid >= :rankid")
 					->andWhere("te.parenttid = :tid")
+					->orderBy("t.sciname")
 					->setParameter(":tid", $tid)
 					->setParameter(":taxauthid", 1)
 					->setParameter(":rankid", 220)
