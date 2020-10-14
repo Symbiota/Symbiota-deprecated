@@ -113,14 +113,15 @@ class TaxaSearchResults extends React.Component {
           <SearchResultContainer viewType={ this.state.viewType }>
             {
               this.state.results.map((result) => {
-                if (result.images.length > 0) {
+								let allImages = result.imagesBasis.HumanObservation.concat(result.imagesBasis.PreservedSpecimen);
+                if (allImages.length > 0) {
                   return (
                     <SearchResult
                       key={result.tid}
                       viewType="grid"
                       display={true}
                       href={ getTaxaPage(this.props.clientRoot, result.tid) }
-                      src={ result.images[0].thumbnailurl }
+                      src={ allImages[0].thumbnailurl }
                       commonName={ getCommonNameStr(result) }
                       sciName={ result.sciname ? result.sciname : '' }
                     />

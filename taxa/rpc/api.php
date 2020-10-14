@@ -25,7 +25,7 @@ function searchTaxa($searchTerm) {
     ->orWhere("t.sciname LIKE :search")
     ->orWhere("v.vernacularname LIKE :search")
     ->groupBy("t.tid")
-    ->setParameter("search", $searchTerm . '%')
+    ->setParameter("search", '%' . $searchTerm . '%')
     ->getQuery()
     ->getResult();
 
