@@ -56,8 +56,8 @@ function get_garden_taxa($params) {
 	// All tids that belong to Garden checklist
 	$gardenTaxaQuery = $taxaRepo->createQueryBuilder("t")
 		->innerJoin("Fmchklsttaxalink", "tl", "WITH", "t.tid = tl.tid")
-		->innerJoin("Fmchecklists", "cl", "WITH", "tl.clid = cl.clid")
-		->where("cl.parentclid = " . Fmchecklists::$CLID_GARDEN_ALL);
+		#->innerJoin("Fmchecklists", "cl", "WITH", "tl.clid = cl.clid")
+		->where("tl.clid = " . Fmchecklists::$CLID_GARDEN_ALL);
 
 	if ($search !== null) {
 		$gardenTaxaQuery
