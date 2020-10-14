@@ -33,7 +33,7 @@ function searchTaxa($searchTerm) {
   if ($taxaResults != null) {
     foreach ($taxaResults as $t) {
       $tm = TaxaManager::fromModel($t);
-      $tj = taxaManagerToJSON($tm);
+      $tj = taxaManagerToJSON($tm,true);
       array_push($results, $tj);
     }
   }
@@ -55,7 +55,7 @@ function getSubTaxa($parentTid) {#not sure this happens anymore
   if ($taxaResults != null) {
     foreach ($taxaResults as $t) {
       $tm = TaxaManager::fromModel($t);
-      $tj = taxaManagerToJSON($tm,true);
+      $tj = taxaManagerToJSON($tm);
       array_push($results, $tj);
     }
   }
@@ -84,6 +84,10 @@ function taxaManagerToJSON($taxaObj,$recursive = false,$taxaRankId = null) {
 		if ($taxaRankId === null) {
 			$taxaRankId = $taxaObj->getRankId();
 		}
+		$result["vernacular"] = [
+			"basename" => $taxaObj->getBasename(),
+			"names" => $taxaObj->getVernacularNames()
+		];
 		
 		if ($recursive === false) {#default
 			$spp = $taxaObj->getSpp(); 
@@ -105,10 +109,6 @@ function taxaManagerToJSON($taxaObj,$recursive = false,$taxaRankId = null) {
 			$result["descriptions"] = $taxaObj->getDescriptions();
 			$result["gardenDescription"] = $taxaObj->getGardenDescription();
 			$result["gardenId"] = $taxaObj->getGardenId();
-			$result["vernacular"] = [
-				"basename" => $taxaObj->getBasename(),
-				"names" => $taxaObj->getVernacularNames()
-			];
 			$result["taxalinks"] = $taxaObj->getTaxalinks();
 			foreach ($result["taxalinks"] as $idx => $taxalink) {
 				$result["taxalinks"][$idx]['url'] = str_replace("--SCINAME--",$result["sciname"],$taxalink['url']);
@@ -134,7 +134,7 @@ function taxaManagerToJSON($taxaObj,$recursive = false,$taxaRankId = null) {
 				}
 			}
 
-		}elseif($recursive === true){#getting SPP
+		}elseif($recursive === true){#just need one image, as in SPP or searchTaxa()
 			if ($taxaRankId > 140) {
 				$images = $taxaObj->getImages();
 			}else{
