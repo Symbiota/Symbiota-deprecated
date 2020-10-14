@@ -55,7 +55,7 @@ function getSubTaxa($parentTid) {#not sure this happens anymore
   if ($taxaResults != null) {
     foreach ($taxaResults as $t) {
       $tm = TaxaManager::fromModel($t);
-      $tj = taxaManagerToJSON($tm);
+      $tj = taxaManagerToJSON($tm,true);
       array_push($results, $tj);
     }
   }
