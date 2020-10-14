@@ -93,6 +93,7 @@ include( $serverRoot . "/header.php" );
 							<p>Rosa Arellanes</p>
 							<p>Mya Falk</p>
 							<p>Amadeo Ramos</p>
+							<p>Jessica Tuson</p>
             <h2>Advisory Council</h2>
 							<p>Lynda Boyer</p>
 							<p>Jason Bradford</p>
