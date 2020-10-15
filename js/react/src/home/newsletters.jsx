@@ -85,7 +85,7 @@ class Newsletters extends React.Component {
 														<div className="issue-default">
 															<div className="issue-header">
 																<div className="issue-link">
-																		<a href={ 'http://oregonflora.org/ofn/' +  issue[0].pdf + '.pdf' } target="_blank"><img src={ `${this.props.clientRoot}/images/Adobe_PDF_file_icon_32x32.png` } /></a>
+																		<a href={ '/ofn/' +  issue[0].pdf + '.pdf' } target="_blank"><img src={ `${this.props.clientRoot}/images/Adobe_PDF_file_icon_32x32.png` } /></a>
                                 </div>
 																<div className="issue-title">
 																	<h3>

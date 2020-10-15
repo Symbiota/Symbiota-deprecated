@@ -5,7 +5,7 @@ function Loading(props) {
 	let lClass = (props.isLoading == true? 'loading':'');
   return (
 		<div className={"loading-overlay " + lClass}> 
-			<img src={`${props.clientRoot}/images/icons/loading-state.gif`} />
+			<img src={`${props.clientRoot}/images/icons/loading-state.png`} />
 		</div>
   )
 }

@@ -100,7 +100,7 @@ include( $serverRoot . "/header.php" );
 								</div>
 								<div class="info">
 									<h3>Plant profile pages</h3>
-									<p></p>
+									<p>Comprehensive information—gathered in one location—for each of the ~4,700 vascular plant in the state!</p>
                   <div class="more-link" data-toggle="collapse" data-target="#collapseProfile" role="button" aria-expanded="false" aria-controls="collapseProfile">
                   	Text-based tutorial 
                     <div class="arrow fa-down"><i class="fas fa-chevron-down 2x"></i></div>
@@ -222,7 +222,7 @@ include( $serverRoot . "/header.php" );
 								</div>
 								<div class="info">
 									<h3>Identify Plants</h3>
-									<p></p>
+									<p>Use the plant features you recognize! Mark your location on a map to get a list of species found there, then narrow the possibilities.</p>
                   <div class="more-link" data-toggle="collapse" data-target="#collapseIdentify" role="button" aria-expanded="false" aria-controls="collapseIdentify">
                   	Text-based tutorial 
                     <div class="arrow fa-down"><i class="fas fa-chevron-down 2x"></i></div>
