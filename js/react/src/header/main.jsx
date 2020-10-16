@@ -1,6 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import SearchWidget from "../common/search.jsx";
+import httpGet from "../common/httpGet.js";
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { library } from "@fortawesome/fontawesome-svg-core";
@@ -117,27 +118,29 @@ class HeaderApp extends React.Component {
   // "searchObj" is the JSON object returned from ../webservices/autofillsearch.php
   // WARNING - this code is copied exactly on home/main.jsx
   onSearch(searchObj) {
-  	//console.log(searchObj);
+  	console.log(searchObj);
+
     this.setState({ isLoading: true });
-    let targetUrl = `${this.props.clientRoot}/taxa/`;
-    /*
-    if (searchObj.rankId && searchObj.rankId === RANK_FAMILY) {
-      targetUrl += `search.php?family=${searchObj.taxonId}&familyName=${searchObj.text}`;
+    let targetUrl = ``;
 
-    } else if (searchObj.rankId && searchObj.rankId === RANK_GENUS) {
-      targetUrl += `search.php?genus=${searchObj.taxonId}&genusName=${searchObj.text}`;
-
-    } else {*/
-      if (searchObj.taxonId) {
-        if (searchObj.taxonId === searchObj.tidaccepted) {
-	        targetUrl += `index.php?taxon=${searchObj.taxonId}`;
-	      }else{
-	        targetUrl += `index.php?taxon=${searchObj.tidaccepted}&synonym=${searchObj.taxonId}`;
-	      }
-      } else {
-        targetUrl += `search.php?search=${ encodeURIComponent(searchObj.text) }`;
-      }
-    /*}*/
+		if (searchObj.taxonId) {
+			if (searchObj.taxonId === searchObj.tidaccepted) {
+				targetUrl = `${this.props.clientRoot}/taxa/index.php?taxon=${searchObj.taxonId}`;
+			}else{
+			
+    		targetUrl = `${this.props.clientRoot}/taxa/index.php?taxon=${searchObj.taxonId}`;
+				let api = `${this.props.clientRoot}/taxa/rpc/api.php?synonym=${searchObj.tidaccepted}`;
+				httpGet(api)
+				.then((res) => {
+					res = JSON.parse(res); 
+					if (res.count == 1) {			
+						targetUrl = `${this.props.clientRoot}/taxa/index.php?taxon=${searchObj.tidaccepted}&synonym=${searchObj.taxonId}`;
+					}
+				})  		
+			}
+		} else {
+			targetUrl = `${this.props.clientRoot}/taxa/search.php?search=${ encodeURIComponent(searchObj.text) }`;
+		}
 
     //window.open( targetUrl );
     window.location = targetUrl;

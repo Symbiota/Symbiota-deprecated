@@ -40,6 +40,17 @@ function searchTaxa($searchTerm) {
 
   return $results;
 }
+#if a synonym value is passed, determine whether the synonym tid is unique in TaxStatus
+#if not, we will redirect in taxa/main.jsx
+function checkSynonym($synonym) {
+  $tsRepo = SymbosuEntityManager::getEntityManager()->getRepository("Taxstatus");
+  $tsResults = $tsRepo->createQueryBuilder("ts")
+    ->orWhere("ts.tid = :synonym")
+    ->setParameter(":synonym", intval($synonym))
+    ->getQuery()
+    ->getResult();
+  return ["count" => sizeof($tsResults)];
+}
 
 function getSubTaxa($parentTid) {#not sure this happens anymore
   $results = [];
@@ -179,6 +190,8 @@ if (array_key_exists("search", $_GET)) {
   $result = getSubTaxa($_GET["family"]);
 } else if (array_key_exists("genus", $_GET) && is_numeric($_GET["genus"])) {
   $result = getSubTaxa($_GET["genus"]);
+} else if (array_key_exists("synonym", $_GET) && is_numeric($_GET["synonym"])) {
+  $result = checkSynonym($_GET["synonym"]);
 }
 
 array_walk_recursive($result,'cleanWindowsRecursive');#replace Windows characters

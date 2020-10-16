@@ -792,10 +792,32 @@ const queryParams = getUrlQueryParams(window.location.search);
 if (queryParams.search) {
   window.location = `./search.php?search=${encodeURIComponent(queryParams.search)}`;
 } else if (queryParams.taxon) {
-  ReactDOM.render(
-    <TaxaApp tid={queryParams.taxon } clientRoot={ dataProps["clientRoot"] } synonym={ queryParams.synonym - 0 } />,
-    domContainer
-  );
+
+	/*if ((queryParams.synonym - 0) > 0) {
+
+		let api = `./rpc/api.php?synonym=${queryParams.synonym}`;
+		httpGet(api)
+			.then((res) => {
+				res = JSON.parse(res); 
+				if (res.count > 1) {
+					window.location = `/taxa/index.php?taxon=${queryParams.synonym}`;
+				}else{			
+					ReactDOM.render(
+						<TaxaApp tid={queryParams.taxon } clientRoot={ dataProps["clientRoot"] } synonym={ queryParams.synonym - 0 } />,
+						domContainer
+					);
+				}
+			})  
+			.catch((err) => {
+				console.error(err);
+			})
+	}else{
+*/
+		ReactDOM.render(
+			<TaxaApp tid={queryParams.taxon } clientRoot={ dataProps["clientRoot"] } synonym={ queryParams.synonym - 0 } />,
+			domContainer
+		);
+  /*}*/
 } else {
   window.location = "/";
 }
