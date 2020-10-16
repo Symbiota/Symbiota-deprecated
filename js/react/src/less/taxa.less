@@ -79,7 +79,7 @@
 		li {	
 			font-size: 14px;
 			line-height: 1.3rem;
-			margin-bottom: .4rem;
+			margin-bottom: .1rem;
 		}
 	}
 }
@@ -163,6 +163,14 @@
 	}
 	h2{
 		font-weight: 400;
+		&.ambiguous {
+			font-size: 1.25rem;
+			line-height: 1.6rem;
+			
+			@media (min-width: @large) {
+				margin-right: 25%;
+			}
+		}
 	}
 	.synonym {
 		font-size: 1.35rem;

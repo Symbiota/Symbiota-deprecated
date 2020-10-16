@@ -449,11 +449,13 @@ class TaxaDetail extends React.Component {
 		const allImages = res.images.HumanObservation.concat(res.images.PreservedSpecimen);
 		const showDescriptions = res.descriptions? true: false;
 		let h2 = res.vernacularNames[0];
+		let h2class = '';
 		
 		/* handle unusual cases of ambiguous synonyms like 6617 */
 		let otherH2 = '';
 		if (Object.keys(res.ambiguousSynonyms).length > 0) {
 			otherH2 = "This name is accepted, but is also synonymized with the following taxa: ";
+			h2class = 'ambiguous';
 			h2 = Object.keys(res.ambiguousSynonyms)
 				.map((ampTid) => {
 						return (
@@ -478,7 +480,7 @@ class TaxaDetail extends React.Component {
 					<div className="col">
 						<h1><span className="font-italic">{ res.sciName }</span> { res.author }</h1>
 
-						<h2 className="">{ otherH2 }<span className="font-italic">{ h2 }</span>					
+						<h2 className={ h2class }>{ otherH2 }<span className="font-italic">{ h2 }</span>					
 						{ res.synonym &&
 							<span className="synonym"> (synonym: <span className="font-italic">{ res.synonym }</span>)</span>
 						}
