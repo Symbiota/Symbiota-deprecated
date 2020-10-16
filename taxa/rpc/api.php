@@ -101,6 +101,18 @@ function taxaManagerToJSON($taxaObj,$recursive = false,$taxaRankId = null) {
 				$result["spp"][] = $tj;
 			}
 			$result["synonyms"] = $taxaObj->getSynonyms();
+			$result["ambiguousSynonyms"] = $taxaObj->getAmbiguousSynonyms();
+			$vernacular = [];#flatten the vernacular array
+			foreach ($result["ambiguousSynonyms"] as $tid => $arr) {
+				if (empty($result['vernacular']['basename']) && !empty($arr['vernacular']['basename'])) {
+					$result['vernacular']['basename'] = $arr['vernacular']['basename'];
+				}
+				$vernacular = array_merge($vernacular,$arr['vernacular']['names']);
+			}
+    	$result['vernacular']['names'] = array_merge($result['vernacular']['names'],$vernacular);
+			$result['vernacular']['names'] = array_unique($result['vernacular']['names']);
+    	sort($result['vernacular']['names'],SORT_NATURAL | SORT_FLAG_CASE);
+			
 			$result["origin"] = $taxaObj->getOrigin();
 			$result["family"] = $taxaObj->getFamily();
 			$result["rarePlantFactSheet"] = $taxaObj->getRarePlantFactSheet();

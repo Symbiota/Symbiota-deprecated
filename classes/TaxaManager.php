@@ -54,6 +54,8 @@ class TaxaManager {
   protected $rarePlantFactSheet;
   protected $rankId;
   protected $spp;
+  #protected $ambSyn;
+  protected $ambiguousSynonyms;
 
   public function __construct($tid=-1) {
     if ($tid !== -1) {
@@ -73,6 +75,7 @@ class TaxaManager {
       $this->gardenId = -1;
       $this->gardenDescription = '';
       $this->spp = [];
+      $this->ambiguousSynonyms = [];
     }
   }
 
@@ -116,6 +119,10 @@ class TaxaManager {
   public function getSynonyms() {
   	$this->synonyms = $this->populateSynonyms($this->getTid());
     return $this->synonyms;
+  }
+  public function getAmbiguousSynonyms() {
+  	$this->ambiguousSynonyms = $this->populateAmbiguousSynonyms($this->getTid());
+    return $this->ambiguousSynonyms;
   }
   public function getOrigin() {
   	$this->origin = $this->populateOrigin($this->getTid());
@@ -381,6 +388,38 @@ class TaxaManager {
         "habitat" => []
       ]
     ];
+  }
+  private function populateAmbiguousSynonyms($tid) {
+  	$return = [];
+    $em = SymbosuEntityManager::getEntityManager();
+    $ambiguousSynonyms = $em->createQueryBuilder()
+      ->select(["t.sciname", "t.tid", "t2.sciname as synname","ts.tidaccepted"])
+      ->from("taxstatus", "ts")
+      ->innerJoin("taxa", "t", "WITH", "ts.tid = t.tid")
+      ->leftJoin("taxa", "t2", "WITH", "ts.tidaccepted = t2.tid")
+      ->andWhere("t.tid = :tid")
+      ->andWhere("ts.taxauthid = 1")
+      ->setParameter("tid", $tid)
+      ->orderBy("synname")->getQuery()->execute();
+    foreach ($ambiguousSynonyms as $ambiguousSynonym) {
+    	if ($ambiguousSynonym['sciname'] != $ambiguousSynonym['synname']) {
+    		$return[$ambiguousSynonym['tidaccepted']] = array("sciname" => $ambiguousSynonym['synname']);
+    	}
+    } 
+    if (sizeof($return) > 0) {
+		  $taxaRepo = SymbosuEntityManager::getEntityManager()->getRepository("Taxa");
+		  $vernacular = [];
+    	foreach ($return as $tid => $arr) {
+				$taxaModel = $taxaRepo->find($tid);
+				$taxa = self::fromModel($taxaModel);
+				$return[$tid]['vernacular'] = [
+					"basename" => $taxa->getBasename(),
+					"names" => $taxa->getVernacularNames()
+				];
+    	}
+    }
+    return $return;
+  
   }
   private function populateSynonyms($tid) {
     $em = SymbosuEntityManager::getEntityManager();
@@ -702,6 +741,7 @@ class TaxaManager {
 				"names" => []
 			],
 			"synonyms" => [],
+			"ambiguousSynonyms" => [],
 			"taxalinks" => [],
 			"rarePlantFactSheet" => '',
 			"origin"	=> '',

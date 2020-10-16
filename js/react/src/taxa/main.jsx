@@ -448,7 +448,25 @@ class TaxaDetail extends React.Component {
     pageTitle.innerHTML = `${pageTitle.innerHTML} ${res.sciName} ${res.author}`;
 		const allImages = res.images.HumanObservation.concat(res.images.PreservedSpecimen);
 		const showDescriptions = res.descriptions? true: false;
-
+		let h2 = res.vernacularNames[0];
+		
+		/* handle unusual cases of ambiguous synonyms like 6617 */
+		let otherH2 = '';
+		if (Object.keys(res.ambiguousSynonyms).length > 0) {
+			otherH2 = "This name is accepted, but is also synonymized with the following taxa: ";
+			h2 = Object.keys(res.ambiguousSynonyms)
+				.map((ampTid) => {
+						return (
+							<a
+								key={ ampTid } 
+								href={ `${this.props.clientRoot}/taxa/index.php?taxon=${ampTid}` }
+							>{ res.ambiguousSynonyms[ampTid]['sciname'] }
+							</a>
+						)
+				})
+				.reduce((prev, curr) => [prev, ', ', curr])
+		}	
+							
 		return (
 	
 			<div className="container mx-auto py-5 taxa-detail" style={{ minHeight: "45em" }}>
@@ -460,7 +478,7 @@ class TaxaDetail extends React.Component {
 					<div className="col">
 						<h1><span className="font-italic">{ res.sciName }</span> { res.author }</h1>
 
-						<h2 className=""><span className="font-italic">{ res.vernacularNames[0] }</span>					
+						<h2 className="">{ otherH2 }<span className="font-italic">{ h2 }</span>					
 						{ res.synonym &&
 							<span className="synonym"> (synonym: <span className="font-italic">{ res.synonym }</span>)</span>
 						}
@@ -628,6 +646,7 @@ class TaxaApp extends React.Component {
       descriptions:[],
       synonym: '',
       synonyms: [],
+      ambiguousSynonyms: [],
       origin: '',
       taxalinks: [],
       gardenId: null,
@@ -733,7 +752,8 @@ class TaxaApp extends React.Component {
             spp: res.spp,
             related: relatedArr,
             family: res.family,
-            synonym: synonym
+            synonym: synonym,
+            ambiguousSynonyms: res.ambiguousSynonyms
           });
         })
         .catch((err) => {
