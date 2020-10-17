@@ -406,7 +406,7 @@ class TaxaManager {
     		$return[$ambiguousSynonym['tidaccepted']] = array("sciname" => $ambiguousSynonym['synname']);
     	}
     } 
-    if (sizeof($return) > 0) {
+    if (sizeof($return) > 1) {
 		  $taxaRepo = SymbosuEntityManager::getEntityManager()->getRepository("Taxa");
 		  $vernacular = [];
     	foreach ($return as $tid => $arr) {
@@ -417,6 +417,8 @@ class TaxaManager {
 					"names" => $taxa->getVernacularNames()
 				];
     	}
+    }else{
+    	$return = [];
     }
     return $return;
   

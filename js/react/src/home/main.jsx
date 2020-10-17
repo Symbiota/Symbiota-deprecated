@@ -50,30 +50,41 @@ class Home extends React.Component {
   // "searchObj" is the JSON object returned from ../webservices/autofillsearch.php
   // WARNING - this code is copied exactly on header/main.jsx
   onSearch(searchObj) {
-  	//console.log(searchObj);
+
     this.setState({ isLoading: true });
-    let targetUrl = `${this.props.clientRoot}/taxa/`;
-    /*
-    if (searchObj.rankId && searchObj.rankId === RANK_FAMILY) {
-      targetUrl += `search.php?family=${searchObj.taxonId}&familyName=${searchObj.text}`;
+    let targetUrl = ``;
+    let defaultUrl = `${this.props.clientRoot}/taxa/index.php?taxon=${searchObj.taxonId}`;//default for this section
 
-    } else if (searchObj.rankId && searchObj.rankId === RANK_GENUS) {
-      targetUrl += `search.php?genus=${searchObj.taxonId}&genusName=${searchObj.text}`;
+		if (searchObj.taxonId) {
 
-    } else {*/
-      if (searchObj.taxonId) {
-        if (searchObj.taxonId === searchObj.tidaccepted) {
-	        targetUrl += `index.php?taxon=${searchObj.taxonId}`;
-	      }else{
-	        targetUrl += `index.php?taxon=${searchObj.tidaccepted}&synonym=${searchObj.taxonId}`;
-	      }
-      } else {
-        targetUrl += `search.php?search=${ encodeURIComponent(searchObj.text) }`;
-      }
-    /*}*/
+			if (searchObj.taxonId != searchObj.tidaccepted) {//synonyms
+    		
+				/* Check if taxonId is unique
+					if so, go to tidaccepted page with reference to taxonid as synonym
+					if not, go to taxon page (which will note the ambiguous synonyms)
+				*/
+				let api = `${this.props.clientRoot}/taxa/rpc/api.php?synonym=${searchObj.taxonId}`;
+				httpGet(api)
+				.then((res) => {
+					res = JSON.parse(res); 
+					console.log(res);
+					if (res.count == 1) {			
+						targetUrl = `${this.props.clientRoot}/taxa/index.php?taxon=${searchObj.tidaccepted}&synonym=${searchObj.taxonId}`;
+					}else{
+						targetUrl = defaultUrl;
+					}
+    			window.location = targetUrl;
+				})  		
+			}else {
+				targetUrl = defaultUrl;
+    		window.location = targetUrl;
+			}
+		} else {
+			targetUrl = `${this.props.clientRoot}/taxa/search.php?search=${ encodeURIComponent(searchObj.text) }`;
+    	window.location = targetUrl;
+		}
 
     //window.open( targetUrl );
-    window.location = targetUrl;
   }
   
   componentDidMount() {
