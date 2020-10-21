@@ -957,6 +957,7 @@ img {
 								left: 49%;
 								top: 16px;
 							}
+							
 
 							.btn-search {
 								position: absolute;
@@ -971,7 +972,21 @@ img {
 	            text-align: left;
               margin: 15px 0 35px 0;
             }
+						@media (max-width: @xlarge) {
+							.search-widget {
+								.clear-text {
+									left: 58%;
+								}
+							}
+						}
             
+						@media (max-width: @large) {
+							.search-widget {
+								.clear-text {
+									left: 55%;
+								}
+							}
+						}
 						@media (max-width: @small) {
 							padding-top: 0;
 							h1 {
@@ -990,8 +1005,8 @@ img {
 									font-size: 1.3rem;
 								}
 								.clear-text {
-									top: 16px;
-									left: 75%;
+									top: 14px;
+									left: 64%;
 								}	
 							}
             	.search-explain {
