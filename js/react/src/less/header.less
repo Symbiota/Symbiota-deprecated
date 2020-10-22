@@ -363,9 +363,6 @@
 			}
 		}
 	}
-
-
-
 	@media screen and (max-width: @small) {
 		#site-header,
 		#site-header.site-header-scroll {
@@ -402,6 +399,21 @@
 			}
 		}
 	}
+	
+
+	@media screen and (min-width: @large) {
+		#site-header,
+		#site-header.site-header-scroll {
+			#site-header-dropdowns-wrapper {
+				ul#site-header-dropdowns {
+					li:last-child {
+						display: none;
+					}
+				}
+			}
+		}
+	}
+	
 }
 
 

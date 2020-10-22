@@ -17,6 +17,7 @@ const dropDowns = [
   { title: "Resources" },
   { title: "About" },
   { title: "Contribute" },
+  { title: "Profile" },
 ];
 
 const dropDownChildren = {
@@ -201,6 +202,17 @@ class HeaderApp extends React.Component {
   render() {
   	let lgLogo = `${this.props.clientRoot}/images/header/oregonflora-logo.png`;
   	let smLogo = `${this.props.clientRoot}/images/header/oregonflora-logo-sm.png`;
+    if (this.props.userName !== "") {
+    	dropDownChildren['Profile']= [
+				{ title: "My Profile", href: `/profile/viewprofile.php` },
+				{ title: "Logout", href: `/profile/index.php?submit=logout` },
+			];
+    }else{
+			dropDownChildren['Profile']= [
+				{ title: "Login", href: `/profile/index.php?refurl=${ location.pathname }` },
+			];
+    }
+  	
     return (
     <div className="header-wrapper" style={{ backgroundImage: `url(${this.props.clientRoot}/images/header/OF-Header_May8.png)` }}>
       <nav
