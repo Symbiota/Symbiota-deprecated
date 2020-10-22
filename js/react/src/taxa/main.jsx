@@ -454,7 +454,7 @@ class TaxaDetail extends React.Component {
 		/* handle unusual cases of ambiguous synonyms like 6617 */
 		let otherH2 = '';
 		if (Object.keys(res.ambiguousSynonyms).length > 0) {
-			otherH2 = "This name is accepted, but is also synonymized with the following taxa: ";
+			otherH2 = "This name is a synonym for the following accepted taxa: ";
 			h2class = 'ambiguous';
 			h2 = Object.keys(res.ambiguousSynonyms)
 				.map((ampTid) => {
