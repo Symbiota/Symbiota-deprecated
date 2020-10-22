@@ -197,10 +197,10 @@ class Home extends React.Component {
 									<p>We have joined forces with Symbiota to present our website as a Symbiota portal! Learn what OregonFlora can do for you in the overview below, explore our featured tools at right, or browse our full set of tutorials—as text or videos—<a href={ this.props.clientRoot + "/pages/tutorials.php" }>here</a>.</p>
 									<div className="row video-card">
 											<div className="col-auto video-img">
-													<a onClick={() => this.openVideoModal('qQpy107PKbE')}><img src={ this.props.clientRoot + "/pages/images/youtube_thumbs/intro_sm.jpg" }/></a>
+													<a onClick={() => this.openVideoModal('iv5Yf4CApbw')}><img src={ this.props.clientRoot + "/pages/images/youtube_thumbs/intro_sm.jpg" }/></a>
 											</div>
 											<div className="col video-text">
-													<h3><a onClick={() => this.openVideoModal('qQpy107PKbE')}>An Introduction to Oregon Flora</a></h3>
+													<h3><a onClick={() => this.openVideoModal('iv5Yf4CApbw')}>An Introduction to Oregon Flora</a></h3>
 													<p>Get an overview of the powerful tools available on the website.</p>
 											</div>
 									</div>
@@ -244,10 +244,10 @@ class Home extends React.Component {
 									</div>          
 									<div className="row video-card">
 											<div className="col-auto video-img">
-													<a onClick={() => this.openVideoModal('OIJs0W9_aUo')}><img src={ this.props.clientRoot + "/pages/images/youtube_thumbs/herbarium_sm.jpg" }/></a>
+													<a onClick={() => this.openVideoModal('kk7FTfwGEvQ')}><img src={ this.props.clientRoot + "/pages/images/youtube_thumbs/herbarium_sm.jpg" }/></a>
 											</div>
 											<div className="col video-text">
-													<h3><a onClick={() => this.openVideoModal('OIJs0W9_aUo')}>OSU Herbarium</a></h3>
+													<h3><a onClick={() => this.openVideoModal('kk7FTfwGEvQ')}>OSU Herbarium</a></h3>
 													<p>All databased specimen records of OSU Herbarium’s vascular plants, mosses, lichens, fungi, and algae in a searchable, downloadable format.</p>
 											</div>
 									</div>             

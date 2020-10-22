@@ -62,7 +62,7 @@ include( $serverRoot . "/header.php" );
 						<section id="intro">
 							<div class="intro">
 								<div class="video">
-									<a href="#" type="button" class="btn video-modal-btn" data-toggle="modal" data-src="https://www.youtube.com/embed/qQpy107PKbE" data-target="#videoModal">
+									<a href="#" type="button" class="btn video-modal-btn" data-toggle="modal" data-src="https://www.youtube.com/embed/iv5Yf4CApbw" data-target="#videoModal">
 										<img 
 											src="<?php echo $CLIENT_ROOT; ?>/pages/images/youtube_thumbs/intro.jpg" 
 											srcset="
@@ -301,7 +301,7 @@ include( $serverRoot . "/header.php" );
             <section id="herbarium">
 							<div class="intro">
 								<div class="video">
-									<a href="#" type="button" class="btn video-modal-btn" data-toggle="modal" data-src="https://www.youtube.com/embed/OIJs0W9_aUo" data-target="#videoModal">
+									<a href="#" type="button" class="btn video-modal-btn" data-toggle="modal" data-src="https://www.youtube.com/embed/kk7FTfwGEvQ" data-target="#videoModal">
 										<img 
 											src="<?php echo $CLIENT_ROOT; ?>/pages/images/youtube_thumbs/herbarium.jpg" 
 											srcset="
