@@ -684,11 +684,28 @@ class ImageLocalProcessor {
 							// 1 = import source
 							if($width > ($this->webPixWidth*1.3)){
 								//Source image is big enough to serve as large version 
-								if($width > $this->lgPixWidth || ($fileSize && $fileSize > $this->lgFileSizeLimit)){
-									//Image is too width or file size is too big, thus let's resize and import
+								if($width > $this->lgPixWidth){
+									//Image is too wide, thus let's resize and import
 									if($this->createNewImage($sourcePath.$fileName,$targetPath.$lgTargetFileName,$this->lgPixWidth,round($this->lgPixWidth*$height/$width),$width,$height)){
 										$lgUrlFrag = $this->imgUrlBase.$targetFrag.$lgTargetFileName;
 										$this->logOrEcho("Resized source as large derivative (".date('Y-m-d h:i:s A').") ",1);
+									}
+								}
+								elseif($fileSize && $fileSize > $this->lgFileSizeLimit) {
+									// Image file size is too big, thus let's resize and import
+									
+									// Figure out what factor to reduce filesize by
+									$ratio = $filesize / $this->lgFileSizeLimit
+
+									// Scale by a factor of the square root of the filesize ratio
+									// Note, this is a good approximation to reduce the filesize, but will not be exact
+									// True reduction will also depend on the JPEG quality of the source & the large file
+									$newWidth = round($width * sqrt($ratio))
+
+									// Resize the image
+									if($this->createNewImage($sourcePath.$fileName,$targetPath.$lgTargetFileName,$newWidth,round($newWidth*$height/$width),$width,$height)){
+										$lgUrlFrag = $this->imgUrlBase.$targetFrag.$lgTargetFileName;
+									$this->logOrEcho("Resized source as large derivative (".date('Y-m-d h:i:s A').") ",1);
 									}
 								}
 								else{
