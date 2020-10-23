@@ -695,12 +695,12 @@ class ImageLocalProcessor {
 									// Image file size is too big, thus let's resize and import
 									
 									// Figure out what factor to reduce filesize by
-									$ratio = $filesize / $this->lgFileSizeLimit
+									$ratio = $filesize / $this->lgFileSizeLimit;
 
 									// Scale by a factor of the square root of the filesize ratio
 									// Note, this is a good approximation to reduce the filesize, but will not be exact
 									// True reduction will also depend on the JPEG quality of the source & the large file
-									$newWidth = round($width * sqrt($ratio))
+									$newWidth = round($width * sqrt($ratio));
 
 									// Resize the image
 									if($this->createNewImage($sourcePath.$fileName,$targetPath.$lgTargetFileName,$newWidth,round($newWidth*$height/$width),$width,$height)){
