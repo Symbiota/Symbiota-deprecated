@@ -475,6 +475,17 @@ if($spprid) $specManager->setProjVariables($spprid);
 											</div>
 										</div>
 									</div>
+									<div id="webDiv" class="profileDiv" style="display:<?php echo ($projectType=='local'?'block':'none'); ?>">
+										<div>
+											<b>Web Image:</b>
+											<div style="margin:5px 15px;">
+												<input name="createwebimg" type="radio" value="1" <?php echo ($specManager->getCreateWebImg()==1?'CHECKED':''); ?> /> Evaluate and import source image<br/>
+												<input name="createwebimg" type="radio" value="2" <?php echo ($specManager->getCreateWebImg()==2?'CHECKED':''); ?> /> Import source image as is without resizing<br/>
+												<input name="createwebimg" type="radio" value="3" <?php echo ($specManager->getCreateWebImg()==3?'CHECKED':''); ?> /> Map to source image without importing<br/>
+												<input name="createwebimg" type="radio" value="4" <?php echo ($specManager->getCreateWebImg()==4?'CHECKED':''); ?> /> Resize large image on the fly for web images<br/>
+											</div>
+										</div>
+									</div>
 									<div id="thumbnailDiv" class="profileDiv" style="display:<?php echo ($projectType=='local'?'block':'none'); ?>">
 										<div>
 											<b>Thumbnail:</b>
@@ -482,6 +493,7 @@ if($spprid) $specManager->setProjVariables($spprid);
 												<input name="createtnimg" type="radio" value="1" <?php echo ($specManager->getCreateTnImg()==1?'CHECKED':''); ?> /> Create new thumbnail from source image<br/>
 												<input name="createtnimg" type="radio" value="2" <?php echo ($specManager->getCreateTnImg()==2?'CHECKED':''); ?> /> Import thumbnail from source location (source name with _tn.jpg suffix)<br/>
 												<input name="createtnimg" type="radio" value="3" <?php echo ($specManager->getCreateTnImg()==3?'CHECKED':''); ?> /> Map to thumbnail at source location (source name with _tn.jpg suffix)<br/>
+												<input name="createtnimg" type="radio" value="4" <?php echo ($specManager->getCreateTnImg()==4?'CHECKED':''); ?> /> Resize large image on the fly for thumbnails<br/>
 												<input name="createtnimg" type="radio" value="0" <?php echo (!$specManager->getCreateTnImg()?'CHECKED':''); ?> /> Exclude thumbnail <br/>
 											</div>
 										</div>
@@ -684,9 +696,10 @@ if($spprid) $specManager->setProjVariables($spprid);
 												<div>
 													<b>Web Image:</b>
 													<div style="margin:5px 15px"> 
-														<input name="webimg" type="radio" value="1" CHECKED /> Evaluate and import source image<br/>
-														<input name="webimg" type="radio" value="2" /> Import source image as is without resizing<br/>
-														<input name="webimg" type="radio" value="3" /> Map to source image without importing<br/>
+														<input name="createwebimg" type="radio" value="1" <?php echo ($specManager->getCreateWebImg() == 1?'CHECKED':'') ?> /> Evaluate and import source image<br/>
+														<input name="createwebimg" type="radio" value="2" <?php echo ($specManager->getCreateWebImg() == 2?'CHECKED':'') ?> /> Import source image as is without resizing<br/>
+														<input name="createwebimg" type="radio" value="3" <?php echo ($specManager->getCreateWebImg() == 3?'CHECKED':'') ?> /> Map to source image without importing<br/>
+														<input name="createwebimg" type="radio" value="4" <?php echo ($specManager->getCreateWebImg() == 4?'CHECKED':'') ?> /> Resize large image on the fly for web images<br/>
 													</div>
 												</div>
 											</div>
@@ -697,6 +710,7 @@ if($spprid) $specManager->setProjVariables($spprid);
 														<input name="createtnimg" type="radio" value="1" <?php echo ($specManager->getCreateTnImg() == 1?'CHECKED':'') ?> /> Create new from source image<br/>
 														<input name="createtnimg" type="radio" value="2" <?php echo ($specManager->getCreateTnImg() == 2?'CHECKED':'') ?> /> Import existing source thumbnail (source name with _tn.jpg suffix)<br/>
 														<input name="createtnimg" type="radio" value="3" <?php echo ($specManager->getCreateTnImg() == 3?'CHECKED':'') ?> /> Map to existing source thumbnail (source name with _tn.jpg suffix)<br/>
+														<input name="createtnimg" type="radio" value="4" <?php echo ($specManager->getCreateTnImg() == 4?'CHECKED':'') ?> /> Resize large image on the fly for thumbnails<br/>
 														<input name="createtnimg" type="radio" value="0" <?php echo (!$specManager->getCreateTnImg()?'CHECKED':'') ?> /> Exclude thumbnail <br/>
 													</div>
 												</div>

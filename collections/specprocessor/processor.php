@@ -95,7 +95,7 @@ $statusStr = "";
 						if($specManager->getLgMaxFileSize()) $imageProcessor->setLgFileSizeLimit($specManager->getLgMaxFileSize());
 						if($specManager->getJpgQuality()) $imageProcessor->setJpgQuality($specManager->getJpgQuality());
 						$imageProcessor->setUseImageMagick($specManager->getUseImageMagick());
-						$imageProcessor->setWebImg($_POST['webimg']);
+						$imageProcessor->setWebImg($_POST['createwebimg']);
 						$imageProcessor->setTnImg($_POST['createtnimg']);
 						$imageProcessor->setLgImg($_POST['createlgimg']);
 						$imageProcessor->setCreateNewRec($_POST['createnewrec']);

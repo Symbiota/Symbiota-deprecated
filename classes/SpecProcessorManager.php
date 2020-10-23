@@ -27,8 +27,8 @@ class SpecProcessorManager {
 	protected $jpgQuality = 80;
 	protected $webMaxFileSize = 300000;
 	protected $lgMaxFileSize = 15000000;
-	protected $webImg = 1;
 	protected $createTnImg = 1;
+	protected $createWebImg = 1;
 	protected $createLgImg = 2;
 	protected $lastRunDate = '';
 
@@ -78,8 +78,9 @@ class SpecProcessorManager {
 		if(is_numeric($editArr['spprid'])){
 			$sqlFrag = '';
 			$targetFields = array('title','projecttype','speckeypattern','patternreplace','replacestr','sourcepath','targetpath','imgurl',
-				'webpixwidth','tnpixwidth','lgpixwidth','jpgcompression','createtnimg','createlgimg','source');
+				'webpixwidth','tnpixwidth','lgpixwidth','jpgcompression','createtnimg','createwebimg','createlgimg','source');
 			if(!isset($editArr['createtnimg'])) $editArr['createtnimg'] = 0;
+			if(!isset($editArr['createwebimg'])) $editArr['createwebimg'] = 0;
 			if(!isset($editArr['createlgimg'])) $editArr['createlgimg'] = 0;
 			foreach($editArr as $k => $v){
 				if(in_array($k,$targetFields)){
@@ -130,7 +131,7 @@ class SpecProcessorManager {
 			}
 			elseif($addArr['projecttype'] == 'local'){
 				$sql = 'INSERT INTO specprocessorprojects(collid,title,speckeypattern,patternreplace,replacestr,projecttype,sourcepath,targetpath,'.
-					'imgurl,webpixwidth,tnpixwidth,lgpixwidth,jpgcompression,createtnimg,createlgimg) '.
+					'imgurl,webpixwidth,tnpixwidth,lgpixwidth,jpgcompression,createtnimg,createwebimg,createlgimg) '.
 					'VALUES('.$this->collid.',"'.$this->cleanInStr($addArr['title']).'","'.
 					$this->cleanInStr($addArr['speckeypattern']).'",'.
 					($addArr['patternreplace']?'"'.$this->cleanInStr($addArr['patternreplace']).'"':'NULL').','.
@@ -144,6 +145,7 @@ class SpecProcessorManager {
 					(isset($addArr['lgpixwidth'])&&$addArr['lgpixwidth']?$addArr['lgpixwidth']:'NULL').','.
 					(isset($addArr['jpgcompression'])&&$addArr['jpgcompression']?$addArr['jpgcompression']:'NULL').','.
 					(isset($addArr['createtnimg'])&&$addArr['createtnimg']?$addArr['createtnimg']:'NULL').','.
+					(isset($addArr['createwebimg'])&&$addArr['createwebimg']?$addArr['createwebimg']:'NULL').','.
 					(isset($addArr['createlgimg'])&&$addArr['createlgimg']?$addArr['createlgimg']:'NULL').')';
 			}
 		}
@@ -175,7 +177,7 @@ class SpecProcessorManager {
 		}
 		if($sqlWhere){
 			$sql = 'SELECT collid, title, speckeypattern, patternreplace, replacestr,coordx1, coordx2, coordy1, coordy2, sourcepath, targetpath, '.
-				'imgurl, webpixwidth, tnpixwidth, lgpixwidth, jpgcompression, createtnimg, createlgimg, source '.
+				'imgurl, webpixwidth, tnpixwidth, lgpixwidth, jpgcompression, createtnimg, createwebimg, createlgimg, source '.
 				'FROM specprocessorprojects '.$sqlWhere;
 			//echo $sql;
 			$rs = $this->conn->query($sql);
@@ -197,6 +199,7 @@ class SpecProcessorManager {
 				if($row->lgpixwidth) $this->lgPixWidth = $row->lgpixwidth;
 				if($row->jpgcompression) $this->jpgQuality = $row->jpgcompression;
 				$this->createTnImg = $row->createtnimg;
+				$this->createWebImg = $row->createwebimg;
 				$this->createLgImg = $row->createlgimg;
 				//Temporary code for setting projectType until proectType field is added to specprocessorprojects table
 				$this->lastRunDate = $row->source;
@@ -779,20 +782,20 @@ class SpecProcessorManager {
 		return $this->lgMaxFileSize;
 	}
 
-	public function setWebImg($c){
-		$this->webImg = $c;
-	}
-
-	public function getWebImg(){
-		return $this->webImg;
-	}
-
 	public function setCreateTnImg($c){
 		$this->createTnImg = $c;
 	}
 
 	public function getCreateTnImg(){
 		return $this->createTnImg;
+	}
+
+	public function setCreateWebImg($c){
+		$this->createWebImg = $c;
+	}
+
+	public function getCreateWebImg(){
+		return $this->createWebImg;
 	}
 
 	public function setCreateLgImg($c){

@@ -521,6 +521,9 @@ class ImageLocalProcessor {
 	private function processImageFile($fileName,$sourcePathFrag = ''){
 		//$this->logOrEcho("Processing image (".date('Y-m-d h:i:s A')."): ".$fileName);
 		//ob_flush();
+		// Set the path to the image resizer php script
+		$imgresizer = $CLIENT_ROOT.(substr($CLIENT_ROOT,-1) == '/'?'':'/').'imagelib/imgresize.php?image=';
+
 		flush();
 		//Grab Primary Key from filename
 		if($specPk = $this->getPrimaryKey($fileName)){
@@ -597,7 +600,7 @@ class ImageLocalProcessor {
 						}
 					}
 				}
-				elseif($this->webImg == 3){
+				elseif($this->webImg == 3 || $this->webImg == 4){
 					if(!$this->imgExists){
 						//Check to see if database record already exists, and if so skip import
 						$recExists = 0; 
@@ -670,6 +673,12 @@ class ImageLocalProcessor {
 							$webFileName = $fileNameBase.$this->webSourceSuffix.$fileNameExt;
 							$webUrlFrag = $sourcePath.$webFileName;
 							$this->logOrEcho("Source used as web image (".date('Y-m-d h:i:s A').") ",1);
+						} 
+						elseif($this->webImg == 4){
+							// 4 = resize the large image on the fly for the web image
+							$webImgCreated = true;
+							$webUrlFrag = $imgresizer.$targetFrag.$fileNameBase."_lg".$fileNameExt."&width=".$this->webPixWidth.($this->jpgQuality?'&quality='.$this->jpgQuality:'');
+							$this->logOrEcho("Web image will be resized on the fly from large image (".date('Y-m-d h:i:s A').") ",1);
 						}
 					}
 					if(!$webUrlFrag){
@@ -780,6 +789,11 @@ class ImageLocalProcessor {
 								$tnUrlFrag = $sourcePath.$tnFileName;
 								$this->logOrEcho("Thumbnail is map of source thumbnail (".date('Y-m-d h:i:s A').") ",1);
 							}
+						}
+						elseif($this->tnImg == 4){
+							// 4 = resize the large image on the fly for the thumbnail image
+							$tnUrlFrag = $imgresizer.$targetFrag.$fileNameBase."_lg".$fileNameExt."&width=".$this->tnPixWidth.'&quality=tn';
+							$this->logOrEcho("Thumbnail image will be resized on the fly from large image (".date('Y-m-d h:i:s A').") ",1);
 						}
 					}
 					
