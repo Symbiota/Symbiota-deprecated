@@ -144,7 +144,7 @@ class Home extends React.Component {
 											onClearSearch={ this.onClearSearch } 
 										/>
 										<p className="search-explain">to access all its information, <br />including maps, images and more...</p>
-										<p><a onClick={() => this.openVideoModal('qQpy107PKbE')}>
+										<p><a onClick={() => this.openVideoModal('iv5Yf4CApbw')}>
 												<button className="btn btn-primary">Or take an introductory tour of our site</button>
 										</a></p>
 							</div>

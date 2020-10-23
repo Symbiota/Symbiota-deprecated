@@ -345,7 +345,7 @@ include( $serverRoot . "/header.php" );
             <section id="natives">
 							<div class="intro">
 								<div class="video">
-									<a href="#" type="button" class="btn video-modal-btn" data-toggle="modal" data-src="https://www.youtube.com/embed/aeuFT55jfr0" data-target="#videoModal">
+									<a href="#" type="button" class="btn video-modal-btn" data-toggle="modal" data-src="https://www.youtube.com/embed/z00wPbj_WOM" data-target="#videoModal">
 										<img 
 											src="<?php echo $CLIENT_ROOT; ?>/pages/images/youtube_thumbs/natives.jpg" 
 											srcset="
