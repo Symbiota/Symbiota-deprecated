@@ -548,7 +548,7 @@ class GardenPageApp extends React.Component {
       clid = '';
     }
     let newQueryStr = addUrlQueryParam("clid", clid);
-    window.history.replaceState({ query: newQueryStr }, '', window.location.pathname + newQueryStr);
+    //window.history.replaceState({ query: newQueryStr }, '', window.location.pathname + newQueryStr);
   }
 	clearFilters() {
 		this.setState({ filters: defaultFilters() },
