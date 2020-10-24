@@ -328,7 +328,7 @@ if($SYMB_UID){
 									<?php echo (defined('ASSOCIATEDTAXALABEL')?ASSOCIATEDTAXALABEL:'Associated Taxa'); ?><br/>
 									<textarea name="associatedtaxa" tabindex="84"><?php echo array_key_exists('associatedtaxa',$occArr)?$occArr['associatedtaxa']:''; ?></textarea>
 									<?php
-									if(!isset($ACTIVATEASSOCTAXAAID) || $ACTIVATEASSOCTAXAAID){
+									if(!defined('ACTIVATEASSOCTAXAAID') || ACTIVATEASSOCTAXAAID){
 										echo '<a href="#" onclick="openAssocSppAid();return false;"><img src="../../images/list.png" /></a>';
 									}
 									?>

@@ -62,8 +62,8 @@ if($qryArr){
 
 //Set processing status  
 $processingStatusArr = array();
-if(isset($PROCESSINGSTATUS) && $PROCESSINGSTATUS){
-	$processingStatusArr = $PROCESSINGSTATUS;
+if(defined('PROCESSINGSTATUS') && PROCESSINGSTATUS){
+	$processingStatusArr = PROCESSINGSTATUS;
 }
 else{
 	$processingStatusArr = array('unprocessed','unprocessed/NLP','stage 1','stage 2','stage 3','pending review-nfn','pending review','expert required','reviewed','closed');

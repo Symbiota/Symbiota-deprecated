@@ -416,13 +416,13 @@ else{
 		?>
 		<link href="../../css/occureditor.css?ver=170604" type="text/css" rel="stylesheet" id="editorCssLink" />
 		<?php
-		if(isset($CSSARR)){
-			foreach($CSSARR as $cssVal){
+		if(defined('CSSARR')){
+			foreach(CSSARR as $cssVal){
 				echo '<link href="includes/config/'.$cssVal.'?ver=170603" type="text/css" rel="stylesheet" id="editorCssLink" />';
 			}
 		}
-		if(isset($JSARR)){
-			foreach($JSARR as $jsVal){
+		if(defined('JSARR')){
+			foreach(JSARR as $jsVal){
 				echo '<script src="includes/config/'.$jsVal.'?ver=170603" type="text/javascript"></script>';
 			}
 		}
