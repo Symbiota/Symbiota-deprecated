@@ -241,7 +241,17 @@ class Home extends React.Component {
 													<h3><a onClick={() => this.openVideoModal('aAuE3nz_kVk')}>Inventories</a></h3>
 													<p>In-depth information about the plants of a defined place. Choose from thousands of lists.</p>
 											</div>
-									</div>          
+									</div>      
+									<div className="row video-card">
+											<div className="col-auto video-img">
+													<a onClick={() => this.openVideoModal('z00wPbj_WOM')}><img src={ this.props.clientRoot + "/pages/images/youtube_thumbs/natives.jpg" }/></a>
+											</div>
+											<div className="col video-text">
+													<h3><a onClick={() => this.openVideoModal('z00wPbj_WOM')}>Grow Natives</a></h3>
+													<p>This section has information on almost 200 species of native plants that are ideal for your garden or landscape conditions.</p>
+											</div>
+									</div>
+									{/*        
 									<div className="row video-card">
 											<div className="col-auto video-img">
 													<a onClick={() => this.openVideoModal('kk7FTfwGEvQ')}><img src={ this.props.clientRoot + "/pages/images/youtube_thumbs/herbarium_sm.jpg" }/></a>
@@ -250,7 +260,8 @@ class Home extends React.Component {
 													<h3><a onClick={() => this.openVideoModal('kk7FTfwGEvQ')}>OSU Herbarium</a></h3>
 													<p>All databased specimen records of OSU Herbarium’s vascular plants, mosses, lichens, fungi, and algae in a searchable, downloadable format.</p>
 											</div>
-									</div>             
+									</div>
+									*/}
 									<p><a href={ this.props.clientRoot + "/pages/tutorials.php" }><button className="btn btn-primary">See the rest of our tutorials here</button></a></p>
 						</div>
 					</div>
