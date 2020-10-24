@@ -19,7 +19,7 @@
 
 //const ACTIVATEASSOCTAXAAID = false;
 
-//FieldLabel text: uncomment variables and value to modify field labels 
+//Occurrence Editor FieldLabel text: uncomment variables and value to modify field labels 
 //define('CATALOGNUMBERLABEL','');
 //define('OTHERCATALOGNUMBERSLABEL','');
 //define('RECORDEDBYLABEL','');
@@ -49,7 +49,7 @@
 //define('LOCATIONREMARKS','');
 //define('DECIMALLATITUDELABEL','');
 //define('DECIMALLONGITUDELABEL','');
-//define('GEODETICDATIMLABEL','');
+//define('GEODETICDATUMLABEL','');
 //define('COORDINATEUNCERTAINITYINMETERSLABEL','');
 //define('ELEVATIONINMETERSLABEL','');
 //define('VERBATIMELEVATION','');
@@ -88,5 +88,75 @@
 //define('DUPLICATEQUALITYCOUNTLABEL','');
 //define('PROCESSINGSTATUSLABEL','');
 //define('DATAGENERALIZATIONSLABEL','');
+
+//Occurrence Editor Tooltip text: uncomment variables and value to modify tooltips
+//define('CATALOGNUMBERTIP','');
+//define('OTHERCATALOGNUMBERSTIP','');
+//define('RECORDEDBYTIP','');
+//define('RECORDNUMBERTIP','');
+//define('EVENTDATETIP','');
+//define('ASSOCIATEDCOLLECTORSTIP','');
+//define('VERBATIMEVENTDATETIP','');
+//define('YYYYMMDDTIP','');
+//define('DAYOFYEARTIP','');
+//define('ENDDATETIP','');
+//define('SCINAMETIP','');
+//define('SCIENTIFICNAMEAUTHORSHIPTIP','');
+//define('FAMILYTIP','');
+//define('IDENTIFICATIONQUALIFIERTIP','');
+//define('IDENTIFIEDBYTIP','');
+//define('DATEIDENTIFIEDTIP','');
+//define('IDENTIFICATIONREFERENCETIP','');
+//define('IDENTIFICATIONREMARKSTIP','');
+//define('TAXONREMARKSTIP','');
+//define('COUNTRYTIP','');
+//define('STATEPROVINCETIP','');
+//define('COUNTYTIP','');
+//define('MUNICIPALITYTIP','');
+//define('LOCALITYTIP','');
+//define('LOCALITYSECURITYTIP','');
+//define('LOCALITYSECURITYREASONTIP','');
+//define('LOCATIONREMARKS','');
+//define('DECIMALLATITUDETIP','');
+//define('DECIMALLONGITUDETIP','');
+//define('GEODETICDATIMTIP','');
+//define('COORDINATEUNCERTAINITYINMETERSTIP','');
+//define('ELEVATIONINMETERSTIP','');
+//define('VERBATIMELEVATION','');
+//define('DEPTHINMETERSTIP','');
+//define('VERBATIMDEPTH','');
+//define('FOOTPRINTWKTTIP','');
+//define('VERBATIMCOORDINATESTIP','');
+//define('GEOREFERENCEBYTIP','');
+//define('GEOREFERENCEPROTOCOLTIP','');
+//define('GEOREFERENCESOURCESTIP','');
+//define('GEOREFERENCEVERIFICATIONSTATUSTIP','');
+//define('GEOREFERENCEREMARKSTIP','');
+//define('HABITATTIP','');
+//define('SUBSTRATETIP','');
+//define('ASSOCIATEDTAXATIP','');
+//define('VERBATIMATTRIBUTESTIP','');
+//define('OCCURRENCEREMARKSTIP','');
+//define('FIELDNOTESTIP','');
+//define('DYNAMICPROPERTIESTIP','');
+//define('LIFESTAGETIP','');
+//define('SEXTIP','');
+//define('INDIVIDUALCOUNTTIP','');
+//define('SAMPLINGPROTOCOLTIP','');
+//define('PREPARATIONSTIP','');
+//define('REPRODUCTIVECONDITIONTIP','');
+//define('ESTABLISHMENTMEANSTIP','');
+//define('CULTIVATIONSTATUSTIP','');
+//define('TYPESTATUSTIP','');
+//define('DISPOSITIONTIP','');
+//define('OCCURRENCEIDTIP','');
+//define('FIELDNUMBERTIP','');
+//define('OWNERINSTITUTIONCODETIP','');
+//define('BASISOFRECORDTIP','');
+//define('LANGUAGETIP','');
+//define('TIPPROJECTTIP','');
+//define('DUPLICATEQUALITYCOUNTTIP','');
+//define('PROCESSINGSTATUSTIP','');
+//define('DATAGENERALIZATIONSTIP','');
 
 ?>
