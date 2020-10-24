@@ -164,6 +164,7 @@ class OccurrenceEditorManager {
 				if(array_key_exists('q_customvalue'.$x,$_REQUEST) && $_REQUEST['q_customvalue'.$x]) $this->qryArr['cv'.$x] = trim($_REQUEST['q_customvalue'.$x]);
                 if(array_key_exists('q_customcloseparen'.$x,$_REQUEST) && $_REQUEST['q_customcloseparen'.$x]) $this->qryArr['ccp'.$x] = $_REQUEST['q_customcloseparen'.$x];
 			}
+
 			if(array_key_exists('orderby',$_REQUEST)) $this->qryArr['orderby'] = trim($_REQUEST['orderby']);
 			if(array_key_exists('orderbydir',$_REQUEST)) $this->qryArr['orderbydir'] = trim($_REQUEST['orderbydir']);
 			unset($_SESSION['editorquery']);
@@ -178,6 +179,7 @@ class OccurrenceEditorManager {
 	}
 
 	public function setSqlWhere($occIndex=0, $recLimit = 1){
+
 		if ($this->qryArr==null) {
 			// supress warnings on array_key_exists(key,null) calls below
 			$this->qryArr=array();
@@ -542,6 +544,14 @@ class OccurrenceEditorManager {
 					}
 					else{
 						$sqlWhere .= $cao.($cop?' '.$cop:'').' ('.$cf.' LIKE "%'.$cv.'%") '.($ccp?$ccp.' ':'');
+					}
+				}
+				elseif($ct=='NOT LIKE' && $cv){
+					if(strpos($cv,'%') !== false){
+						$sqlWhere .= $cao.($cop?' '.$cop:'').' ('.$cf.' NOT LIKE "'.$cv.'") '.($ccp?$ccp.' ':'');
+					}
+					else{
+						$sqlWhere .= $cao.($cop?' '.$cop:'').' ('.$cf.' NOT LIKE "%'.$cv.'%") '.($ccp?$ccp.' ':'');
 					}
 				}
 				elseif($ct=='STARTS' && $cv){
