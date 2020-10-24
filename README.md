@@ -17,10 +17,10 @@ OregonFlora development differs in the following ways:
    to the frontend using asynchronous JSON. For example:
         - Site's navbar is in [js/react/src](./js/react/src/header) and consumes data exposed by 
         [webservices/autofillsearch.php](./webservices/autofillsearch.php)
-        - [Garden page](https://symbiota.oregonflora.org/portal/garden/index.php) frontend is in
+        - [Garden page](https://oregonflora.org/garden/index.php) frontend is in
             [js/react/src/garden](./js/react/src/garden) and consumes data exposed by the backend in 
             [garden/rpc/api.php](./garden/rpc/api.php)
-        - [Taxa page](https://symbiota.oregonflora.org/portal/taxa/search.php?search=cat) frontend is in
+        - [Taxa page](https://oregonflora.org/taxa/search.php?search=cat) frontend is in
             [js/react/src/taxa](./js/react/src/taxa) and consumes data exposed by the backend in 
             [taxa/rpc/api.php](./taxa/rpc/api.php) 
    - These changes have made much of the original Symbiota code unneeded, but it has been left in wherever possible
