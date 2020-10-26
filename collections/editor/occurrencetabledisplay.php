@@ -52,6 +52,33 @@ if($SYMB_UID){
 	$occManager->setSymbUid($SYMB_UID);
 	$occManager->setCollId($collId);
 	$collMap = $occManager->getCollMap();
+
+	//Bring in config variables
+	if($isGenObs){
+		if(file_exists('includes/config/occurVarGenObs'.$SYMB_UID.'.php')){
+			//Specific to particular collection
+			include('includes/config/occurVarGenObs'.$SYMB_UID.'.php');
+		}
+		elseif(file_exists('includes/config/occurVarGenObsDefault.php')){
+			//Specific to Default values for portal
+			include('includes/config/occurVarGenObsDefault.php');
+		}
+	}
+	else{
+		if($collId && file_exists('includes/config/occurVarColl'.$collId.'.php')){
+			//Specific to particular collection
+			include('includes/config/occurVarColl'.$collId.'.php');
+		}
+		elseif(file_exists('includes/config/occurVarDefault.php')){
+			//Specific to Default values for portal
+			include('includes/config/occurVarDefault.php');
+		}
+		if($crowdSourceMode && file_exists('includes/config/crowdSourceVar.php')){
+			//Specific to Crowdsourcing
+			include('includes/config/crowdSourceVar.php');
+		}
+	}
+
 	if($IS_ADMIN || (array_key_exists("CollAdmin",$USER_RIGHTS) && in_array($collId,$USER_RIGHTS["CollAdmin"]))){
 		$isEditor = 1;
 	}
@@ -216,18 +243,15 @@ else{
 										<?php
 										if($buFieldName=='processingstatus'){
 											?>
-											<select name="bunewvalue">
-												<option value="unprocessed" <?php echo (array_key_exists('bunewvalue',$_REQUEST)&&$_REQUEST['bunewvalue']=='unprocessed'?'SELECTED':''); ?>>Unprocessed</option>
-												<option value="unprocessed/nlp" <?php echo (array_key_exists('bunewvalue',$_REQUEST)&&$_REQUEST['bunewvalue']=='unprocessed/nlp'?'SELECTED':''); ?>>Unprocessed/NLP</option>
-												<option value="stage 1" <?php echo (array_key_exists('bunewvalue',$_REQUEST)&&$_REQUEST['bunewvalue']=='stage 1'?'SELECTED':''); ?>>Stage 1</option>
-												<option value="stage 2" <?php echo (array_key_exists('bunewvalue',$_REQUEST)&&$_REQUEST['bunewvalue']=='stage 2'?'SELECTED':''); ?>>Stage 2</option>
-												<option value="stage 3" <?php echo (array_key_exists('bunewvalue',$_REQUEST)&&$_REQUEST['bunewvalue']=='stage 3'?'SELECTED':''); ?>>Stage 3</option>
-												<option value="pending review-nfn" <?php echo (array_key_exists('bunewvalue',$_REQUEST)&&$_REQUEST['bunewvalue']=='pending review-nfn'?'SELECTED':''); ?>>Pending Review-NfN</option>
-												<option value="pending review" <?php echo (array_key_exists('bunewvalue',$_REQUEST)&&$_REQUEST['bunewvalue']=='pending review'?'SELECTED':''); ?>>Pending Review</option>
-												<option value="expert required" <?php echo (array_key_exists('bunewvalue',$_REQUEST)&&$_REQUEST['bunewvalue']=='expert required'?'SELECTED':''); ?>>Expert Required</option>
-												<option value="reviewed" <?php echo (array_key_exists('bunewvalue',$_REQUEST)&&$_REQUEST['bunewvalue']=='reviewed'?'SELECTED':''); ?>>Reviewed</option>
-												<option value="closed" <?php echo (array_key_exists('bunewvalue',$_REQUEST)&&$_REQUEST['bunewvalue']=='closed'?'SELECTED':''); ?>>Closed</option>
-												<option value="" <?php echo (array_key_exists('bunewvalue',$_REQUEST)&&$_REQUEST['bunewvalue']=='no set status'?'SELECTED':''); ?>>No Set Status</option>
+											<select name="bunewvalue" tabindex="120">
+												<?php
+												foreach($processingStatusArr as $v){
+													
+													$keyOut = strtolower($v);
+													
+													echo '<option value="'.$keyOut.'"'.(array_key_exists('bunewvalue',$_REQUEST) && $_REQUEST['bunewvalue'] == $keyOut ? ' SELECTED' : '').'>'.$keyOut.'</option>';
+												}
+												?>
 											</select>
 											<?php
 										}
@@ -248,6 +272,18 @@ else{
 									Match Any Part of Field
 								</div>
 								<div style="margin:2px;">
+									<select id= "processingStatus" name="processingStatus" style="display: none;">
+										<?php
+										// Make a hidden processing status select box, that javascript detectBatchUpdateField()
+										// can pull custom processing statuses from
+										foreach($processingStatusArr as $v){
+											
+											$keyOut = strtolower($v);
+											
+											echo '<option value="'.$keyOut.'"'.(array_key_exists('bunewvalue',$_REQUEST) && $_REQUEST['bunewvalue'] == $keyOut ? ' SELECTED' : '').'>'.$keyOut.'</option>';
+										}
+										?>
+									</select>
 									<input name="collid" type="hidden" value="<?php echo $collId; ?>" />
 									<input name="ouid" type="hidden" value="<?php echo $ouid; ?>" />
 									<input name="occid" type="hidden" value="" />
