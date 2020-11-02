@@ -299,8 +299,8 @@ class OccurrenceMaintenance {
 			$rs->free();
 
 			if($this->verbose) $this->outputMsg('Calculating genetic resources counts... ',1);
-			$sql = 'SELECT COUNT(CASE WHEN g.resourceurl LIKE "http://www.boldsystems%" THEN o.occid ELSE NULL END) AS boldcnt, '.
-				'COUNT(CASE WHEN g.resourceurl LIKE "http://www.ncbi%" THEN o.occid ELSE NULL END) AS gencnt '.
+			$sql = 'SELECT COUNT(CASE WHEN g.resourceurl LIKE "%//www.boldsystems%" THEN o.occid ELSE NULL END) AS boldcnt, '.
+				'COUNT(CASE WHEN g.resourceurl LIKE "%//www.ncbi%" THEN o.occid ELSE NULL END) AS gencnt '.
 				'FROM omoccurrences o INNER JOIN omoccurgenetic g ON o.occid = g.occid '.
 				'WHERE (o.collid IN('.$collid.')) ';
 			$rs = $this->conn->query($sql);
