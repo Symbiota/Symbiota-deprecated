@@ -1201,14 +1201,14 @@ else{
 												<?php echo (defined('OCCURRENCEREMARKSLABEL')?OCCURRENCEREMARKSLABEL:'Occurrence Remarks'); ?>
 												<a href="#" onclick="return dwcDoc('occurrenceRemarks')"><img class="docimg" src="../../images/qmark.png" style="width:9px;margin-bottom:2px" /></a>
 												<br/>
-												<input type="text" name="occurrenceremarks" tabindex="88" value="<?php echo array_key_exists('occurrenceremarks',$occArr)?$occArr['occurrenceremarks']:''; ?>" onchange="fieldChanged('occurrenceremarks');" title="Occurrence Remarks" />
+												<input type="text" name="occurrenceremarks" tabindex="88" value="<?php echo array_key_exists('occurrenceremarks',$occArr)?$occArr['occurrenceremarks']:''; ?>" onchange="fieldChanged('occurrenceremarks');" />
 											</div>
                                             <div id="fieldNotesDiv" 
                                                 title="<?php echo (defined('FIELDNOTESTIP') ? FIELDNOTESTIP : ''); ?>">
                                                 <?php echo (defined('FIELDNOTESLABEL')?FIELDNOTESLABEL:'Field Notes'); ?>
                                                 <a href="#" onclick="return dwcDoc('fieldNotes')"><img class="docimg" src="../../images/qmark.png" style="width:9px;margin-bottom:2px" /></a>
                                                 <br/>
-                                                <textarea name="fieldnotes" tabindex="88.5" onchange="fieldChanged('fieldnotes');" title="Field Notes"><?php echo array_key_exists('fieldnotes',$occArr)?$occArr['fieldnotes']:''; ?></textarea>
+                                                <textarea name="fieldnotes" tabindex="88.5" onchange="fieldChanged('fieldnotes');"><?php echo array_key_exists('fieldnotes',$occArr)?$occArr['fieldnotes']:''; ?></textarea>
                                                 <span id="dynPropToggleSpan" onclick="toggle('dynamicPropertiesDiv');">
 													<img src="../../images/editplus.png" />
 												</span>
@@ -1354,17 +1354,20 @@ else{
 												</div>
 												<div id="languageDiv" 
                                                 	title="<?php echo (defined('LANGUAGETIP') ? LANGUAGETIP : ''); ?>">
-													<?php echo (defined('LANGUAGELABEL')?LANGUAGELABEL:'Language'); ?><br/>
+													<?php echo (defined('LANGUAGELABEL')?LANGUAGELABEL:'Language'); ?>
+													<a href="#" onclick="return dwcDoc('language')"><img class="docimg" src="../../images/qmark.png" /></a><br/>
 													<input type="text" name="language" tabindex="111" maxlength="20" value="<?php echo array_key_exists('language',$occArr)?$occArr['language']:''; ?>" onchange="fieldChanged('language');" />
 												</div>
 												<div id="labelProjectDiv" 
                                                 	title="<?php echo (defined('LABELPROJECTTIP') ? LABELPROJECTTIP : ''); ?>">
-													<?php echo (defined('LABELPROJECTLABEL')?LABELPROJECTLABEL:'Label Project'); ?><br/>
+													<?php echo (defined('LABELPROJECTLABEL')?LABELPROJECTLABEL:'Label Project'); ?>
+													<a href="#" onclick="return dwcDoc('labelProject')"><img class="docimg" src="../../images/qmark.png" /></a><br/>
 													<input type="text" name="labelproject" tabindex="112" maxlength="45" value="<?php echo array_key_exists('labelproject',$occArr)?$occArr['labelproject']:''; ?>" onchange="fieldChanged('labelproject');" />
 												</div>
 												<div id="duplicateQuantityDiv"  
-                                                	title="<?php echo (defined('DUPLICATEQUALITYTIP') ? DUPLICATEQUALITYTIP : 'aka label quantity'); ?>">
-													<?php echo (defined('DUPLICATEQUALITYCOUNTLABEL')?DUPLICATEQUALITYCOUNTLABEL:'Dupe Count'); ?><br/>
+                                                	title="<?php echo (defined('DUPLICATEQUANTITYTIP') ? DUPLICATEQUANTITYTIP : 'aka label quantity'); ?>">
+													<?php echo (defined('DUPLICATEQUANTITYCOUNTLABEL')?DUPLICATEQUANTITYCOUNTLABEL:'Dupe Count'); ?>
+													<a href="#" onclick="return dwcDoc('duplicateQuantity')"><img class="docimg" src="../../images/qmark.png" /></a><br/>
 													<input type="text" name="duplicatequantity" tabindex="116" value="<?php echo array_key_exists('duplicatequantity',$occArr)?$occArr['duplicatequantity']:''; ?>" onchange="fieldChanged('duplicatequantity');" />
 												</div>
 											</div>
