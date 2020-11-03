@@ -1,4 +1,4 @@
-# [OregonFlora](https://symbiota.oregonflora.org/portal/)
+# [OregonFlora](https://oregonflora.org/)
 
 A [Symbiota](http://symbiota.org) portal focusing on the vascular plants of Oregon. For the Symbiota README, see 
 [here](https://github.com/Symbiota/Symbiota/blob/master/docs/README.txt). In addition to the basic Symbiota environment,
