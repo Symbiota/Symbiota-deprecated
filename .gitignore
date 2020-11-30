@@ -17,3 +17,4 @@ temp/proxies/
 */.DS_Store
 /webservices/dwc/rss.xml
 /temp/data/solr.json
+/js/react/src/less/config.less
