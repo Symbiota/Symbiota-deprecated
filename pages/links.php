@@ -41,7 +41,7 @@ include( $serverRoot . "/header.php" );
             <p><a target="_blank" href="https://inr.oregonstate.edu/orbic/rare-species/rare-species-oregon-publications">Rare, Threatened & Endangered Species of Oregon</a>
                 <span class="link-details">Oregon Biodiversity Information Center, OSU Institute for Natural Resources</span></p>
             <p><a target="_blank" href="http://www.carexworkinggroup.com/index.html">Carex Working Group</a></p>
-			<p><a target="_blank" href="http://westerncascades.com/">Mountain Plants of the Western Cascades</a></p>
+			<p><a target="_blank" href="http://westerncascades.com/">Mountain Plants of the Western Cascades</a>
 				<span class="link-details">Tanya Harvey</p>
             <p><a target="_blank" href="https://sites.google.com/site/orimapresources/">Oregon iMapInvasives</a>
                 <span class="link-details">GIS-based reporting and querying tool</p>
