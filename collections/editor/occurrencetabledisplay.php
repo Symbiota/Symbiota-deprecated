@@ -40,8 +40,9 @@ $headerMapBase = array('dbpk' => 'dbpk','institutioncode'=>'Institution Code (ov
 	'verbatimattributes' => 'Description','lifestage' => 'Life Stage', 'sex' => 'Sex', 'individualcount' => 'Individual Count',
 	'samplingprotocol' => 'Sampling Protocol', 'preparations' => 'Preparations', 'reproductivecondition' => 'Reproductive Condition',
 	'typestatus' => 'Type Status','cultivationstatus' => 'Cultivation Status','establishmentmeans' => 'Establishment Means',
-	'disposition' => 'Disposition','duplicatequantity' => 'Duplicate Qty','datelastmodified' => 'Date Last Modified',
-	'processingstatus' => 'Processing Status','recordenteredby' => 'Entered By','basisofrecord' => 'Basis Of Record');
+	'disposition' => 'Disposition','duplicatequantity' => 'Duplicate Qty','labelproject' => 'Label Project',
+	'datelastmodified' => 'Date Last Modified','processingstatus' => 'Processing Status','recordenteredby' => 'Entered By',
+	'basisofrecord' => 'Basis Of Record');
 $headMap = array();
 
 $qryCnt = 0;
