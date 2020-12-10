@@ -41,6 +41,8 @@ include( $serverRoot . "/header.php" );
             <p><a target="_blank" href="https://inr.oregonstate.edu/orbic/rare-species/rare-species-oregon-publications">Rare, Threatened & Endangered Species of Oregon</a>
                 <span class="link-details">Oregon Biodiversity Information Center, OSU Institute for Natural Resources</span></p>
             <p><a target="_blank" href="http://www.carexworkinggroup.com/index.html">Carex Working Group</a></p>
+			<p><a target="_blank" href="http://westerncascades.com/">Mountain Plants of the Western Cascades</a></p>
+				<span class="link-details">Tanya Harvey</p>
             <p><a target="_blank" href="https://sites.google.com/site/orimapresources/">Oregon iMapInvasives</a>
                 <span class="link-details">GIS-based reporting and querying tool</p>
             <p><a target="_blank" href="http://oregonexplorer.info/"> Oregon Explorer</a>
@@ -71,6 +73,7 @@ include( $serverRoot . "/header.php" );
             <p><a target="_blank" href="http://biology.burke.washington.edu/herbarium/imagecollection.php">University of Washington Herbarium Image Collection</a>
                 <span class="link-details">Burke Museum</span></p>
             <p><a target="_blank" href="https://calphotos.berkeley.edu/flora/">CalPhotos: Plants</a></p>
+			<p><a target="_blank" href="http://science.halleyhosting.com/">Paul Slichter's Flora Northwest images</a></p>
 
             <h2>Native Plant Societies</h2>
             <p><a target="_blank" href="http://www.npsoregon.org/">Oregon</a></p>
@@ -86,7 +89,7 @@ include( $serverRoot . "/header.php" );
                 <span class="link-details">Species lists for the southern Willamette Valley. Emerald Chapter, Native Plant Society of Oregon</span></p>
             <p><a target="_blank" href="http://www.plantnative.org/how_intro.htm">How to Naturescape</a>
                 <span class="link-details">PlantNative.org</span></p>
-            <p><a target="_blank" href="https://catalog.extension.oregonstate.edu/ec1577">Gardening with Native Plants West of the Cascades</a
+            <p><a target="_blank" href="https://catalog.extension.oregonstate.edu/ec1577">Gardening with Native Plants West of the Cascades</a>
                 <span class="link-details">Linda McMahan, OSU Extension</span></p>
             <p><a target="_blank" href="http://www.nwplants.com/index.html">The Wild Garden</a>
                 <span class="link-details">Hansen’s Northwest Native Plant Database</span></p>
