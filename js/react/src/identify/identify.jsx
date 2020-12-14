@@ -122,7 +122,7 @@ class IdentifyApp extends React.Component {
 				
 				let googleMapUrl = '';				
 				if (res.lat !== '' && res.lng !== '' && res.lat > 0 && res.lng != 0) {
-					googleMapUrl += 'https://maps.google.com/maps/api/staticmap';
+					googleMapUrl += 'http://maps.google.com/maps/api/staticmap';
 					let mapParams = new URLSearchParams();
 					let markerUrl = 'http://oregonflora.org' + this.props.clientRoot + '/images/icons/map_markers/single.png'; 
 					mapParams.append("key",this.props.googleMapKey);
