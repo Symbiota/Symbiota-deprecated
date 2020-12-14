@@ -108,7 +108,7 @@ class ExploreApp extends React.Component {
 
 					googleMapUrl += 'https://maps.google.com/maps/api/staticmap';
 					let mapParams = new URLSearchParams();
-					let markerUrl = 'https://oregonflora.org' + this.props.clientRoot + '/images/icons/map_markers/single.png'; 
+					let markerUrl = 'http://oregonflora.org' + this.props.clientRoot + '/images/icons/map_markers/single.png'; 
 					mapParams.append("key",this.props.googleMapKey);
 					mapParams.append("maptype",'terrain');
 					mapParams.append("size",'220x220');
