@@ -106,7 +106,7 @@ class ExploreApp extends React.Component {
 				let googleMapUrl = '';				
 				if (res.lat !== '' && res.lng !== '') {
 
-					googleMapUrl += 'http://maps.google.com/maps/api/staticmap';
+					googleMapUrl += 'https://maps.google.com/maps/api/staticmap';
 					let mapParams = new URLSearchParams();
 					let markerUrl = 'http://oregonflora.org' + this.props.clientRoot + '/images/icons/map_markers/single.png'; 
 					mapParams.append("key",this.props.googleMapKey);
