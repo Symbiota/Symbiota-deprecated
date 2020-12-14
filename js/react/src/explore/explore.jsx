@@ -103,12 +103,14 @@ class ExploreApp extends React.Component {
 				// /checklists/rpc/api.php?clid=3
 				res = JSON.parse(res);
 				
-				let googleMapUrl = '';				
+				let googleMapUrl = '';			
+				let host = window.location.host;
+						
 				if (res.lat !== '' && res.lng !== '') {
-
+					
 					googleMapUrl += 'https://maps.google.com/maps/api/staticmap';
 					let mapParams = new URLSearchParams();
-					let markerUrl = 'https://symbiota.oregonflora.org' + this.props.clientRoot + '/images/icons/map_markers/single.png'; 
+					let markerUrl = 'http://' + host + this.props.clientRoot + '/images/icons/map_markers/single.png'; 
 					mapParams.append("key",this.props.googleMapKey);
 					mapParams.append("maptype",'terrain');
 					mapParams.append("size",'220x220');
