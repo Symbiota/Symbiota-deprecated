@@ -356,6 +356,7 @@ class IdentManager extends Manager {
 			$results = [];
 
 			foreach ($cresults as $cres) {
+			#var_dump($cres);
 				if (	($key = array_search($cres['hid'],array_column($results,'hid'))) === false) {
 					$tmp = [
 						'headingname' => $cres['headingname'],
@@ -369,6 +370,7 @@ class IdentManager extends Manager {
 					$tmp = [
 						'charname' => $cres['charname'],
 						'cid' => $cres['cid'],
+						'display' => $cres['display'],
 						'states' => []
 					];
 					$results[$key]['characters'][] = $tmp;
