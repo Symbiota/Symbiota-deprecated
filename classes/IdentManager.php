@@ -195,7 +195,7 @@ class IdentManager extends Manager {
 					$params[] = array(":{$alias}cid",$cid);
 				}
 			}
-
+			
 			#set EM
 			foreach ($leftJoins as $leftJoin) {
 				$taxa->leftJoin(...$leftJoin);

@@ -5,7 +5,7 @@ header("Content-Type: text/html; charset=".$CHARSET);
 
 <html>
   <head>
-    <title><?php echo $DEFAULT_TITLE?>Gardening with Natives</title>
+    <title><?php echo $DEFAULT_TITLE?> Gardening with Natives</title>
     <meta charset="utf-8">
 
     <link href="<?php echo $CLIENT_ROOT; ?>/css/compiled/theme.css<?php echo (isset($CSS_VERSION_LOCAL)?'?ver='.$CSS_VERSION_LOCAL:''); ?>" type="text/css" rel="stylesheet" />

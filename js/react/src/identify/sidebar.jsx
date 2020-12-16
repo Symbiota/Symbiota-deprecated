@@ -221,7 +221,6 @@ class SideBar extends React.Component {
 														key={ secondLevel.cid }
 														cid={ secondLevel.cid }
 														title={ secondLevel.charname }
-														display={ secondLevel.display }
 														items={ secondLevel.states }
 														attrs={ this.props.filters.attrs }
 														clientRoot={this.props.clientRoot}

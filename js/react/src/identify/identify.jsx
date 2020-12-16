@@ -119,13 +119,12 @@ class IdentifyApp extends React.Component {
 				if (res && res.taxa) {
 					taxa = this.sortResults(res.taxa);
 				}
-				let host = window.location.host;
 				
 				let googleMapUrl = '';				
 				if (res.lat !== '' && res.lng !== '' && res.lat > 0 && res.lng != 0) {
 					googleMapUrl += 'https://maps.google.com/maps/api/staticmap';
 					let mapParams = new URLSearchParams();
-					let markerUrl = 'http://' + host + this.props.clientRoot + '/images/icons/map_markers/single.png'; 
+					let markerUrl = 'http://symbiota.oregonflora.org' + this.props.clientRoot + '/images/icons/map_markers/single.png'; 
 					mapParams.append("key",this.props.googleMapKey);
 					mapParams.append("maptype",'terrain');
 					mapParams.append("size",'220x220');
@@ -261,7 +260,7 @@ class IdentifyApp extends React.Component {
 	    identParams.append("attr[]",idx);
 		});
   	url = url + '?' + identParams.toString();
-    //console.log(url);
+    console.log(url);
     httpGet(url)
       .then((res) => {
       	let jres = JSON.parse(res);
