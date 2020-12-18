@@ -33,7 +33,7 @@
                     c.InstitutionCode, c.CollectionCode, c.CollectionName, c.icon, c.CollType, c.SortSeq
                     FROM omoccurrences AS o LEFT JOIN omcollections AS c ON o.collid = c.collid
                     WHERE o.occid = '${dih.delta.occid}'"
-                deltaQuery="SELECT occid FROM images i WHERE (i.InitialTimeStamp > CONVERT_TZ('${dih.last_index_time}','+00:00','-06:00'))
+                deltaQuery="SELECT occid FROM images i WHERE (i.occid IS NOT NULL AND i.InitialTimeStamp > CONVERT_TZ('${dih.last_index_time}','+00:00','-06:00'))
                     UNION SELECT o.occid FROM omoccurrences AS o WHERE (o.dateLastModified > CONVERT_TZ('${dih.last_index_time}','+00:00','-06:00'))">
                 <field column="occid" name="id"/>
                 <field column="occid" name="occid"/>
