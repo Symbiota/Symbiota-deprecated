@@ -25,10 +25,11 @@ include_once("../config/symbini.php");
     </script>
     
     <!-- Include page style here to override anything in header -->
+    <link rel="stylesheet" type="text/css" href="<?php echo $CLIENT_ROOT?>/js/react/node_modules/@blueprintjs/core/lib/css/blueprint.css">
+    <link rel="stylesheet" type="text/css" href="<?php echo $CLIENT_ROOT?>/js/react/node_modules/@blueprintjs/icons/lib/css/blueprint-icons.css">
     <link rel="stylesheet" type="text/css" href="<?php echo $CLIENT_ROOT?>/css/compiled/theme.css">
     <link rel="stylesheet" type="text/css" href="<?php echo $CLIENT_ROOT?>/css/compiled/inventory.css">
     
-
     <!-- This is inner text! -->
     <div id="innertext">
       <div id="react-identify-app"></div>

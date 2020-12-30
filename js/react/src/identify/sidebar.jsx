@@ -3,7 +3,7 @@ import React from "react";
 import HelpButton from "../common/helpButton.jsx";
 import {SearchWidget} from "../common/search.jsx";
 import FeatureSelector from "./featureSelector.jsx";
-import ViewOpts from "./viewOpts.jsx";
+//import ViewOpts from "./viewOpts.jsx";
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { library } from "@fortawesome/fontawesome-svg-core";
@@ -221,13 +221,17 @@ class SideBar extends React.Component {
 														key={ secondLevel.cid }
 														cid={ secondLevel.cid }
 														title={ secondLevel.charname }
-														items={ secondLevel.states }
+														display={ secondLevel.display }
+														units={ secondLevel.units }
+														states={ secondLevel.states }
 														attrs={ this.props.filters.attrs }
+														sliders={ this.props.filters.sliders }
 														clientRoot={this.props.clientRoot}
 														/*onChange={ (featureKey) => {
 															this.props.onWholePlantChanged(plantFeature, featureKey)
 														}}*/
 														onAttrClicked={ this.props.onAttrClicked } 
+														onSliderChanged={ this.props.onSliderChanged } 
 													/>
 												)
 											})

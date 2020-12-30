@@ -37,7 +37,8 @@ class IdentifyApp extends React.Component {
       displayAbstract: 'default',
       filters: {
         searchText: ("search" in queryParams ? queryParams["search"] : ViewOpts.DEFAULT_SEARCH_TEXT),
-        attrs: {}
+        attrs: {},
+        sliders: {}
       },
       searchText: ("search" in queryParams ? queryParams["search"] : ViewOpts.DEFAULT_SEARCH_TEXT),
       searchResults: {"familySort":{},"taxonSort":[]},
@@ -71,6 +72,8 @@ class IdentifyApp extends React.Component {
     this.onFilterRemoved = this.onFilterRemoved.bind(this);
     this.clearFilters = this.clearFilters.bind(this);
     this.onAttrChanged = this.onAttrChanged.bind(this);
+    this.resetSlider = this.resetSlider.bind(this);
+    this.onSliderChanged = this.onSliderChanged.bind(this);
     this.sortResults = this.sortResults.bind(this);
     this.clearTextSearch = this.clearTextSearch.bind(this);
   }
@@ -119,12 +122,13 @@ class IdentifyApp extends React.Component {
 				if (res && res.taxa) {
 					taxa = this.sortResults(res.taxa);
 				}
-				
+				let host = window.location.host;
+
 				let googleMapUrl = '';				
 				if (res.lat !== '' && res.lng !== '' && res.lat > 0 && res.lng != 0) {
 					googleMapUrl += 'https://maps.google.com/maps/api/staticmap';
 					let mapParams = new URLSearchParams();
-					let markerUrl = 'http://symbiota.oregonflora.org' + this.props.clientRoot + '/images/icons/map_markers/single.png'; 
+					let markerUrl = 'http://' + host + this.props.clientRoot + '/images/icons/map_markers/single.png'; 
 					mapParams.append("key",this.props.googleMapKey);
 					mapParams.append("maptype",'terrain');
 					mapParams.append("size",'220x220');
@@ -217,7 +221,12 @@ class IdentifyApp extends React.Component {
         break;
 
       default://characteristics/attr numbers
-      	this.onAttrChanged(key,text,'off');
+				if (this.state.filters.attrs[key]) {
+	      	this.onAttrChanged(key,text,'off');
+	      }
+				if (this.state.filters.sliders[key]) {
+	      	this.resetSlider(key);
+	      }
         break;
     }
   }
@@ -259,8 +268,25 @@ class IdentifyApp extends React.Component {
   	Object.keys(this.state.filters.attrs).map((idx) => {
 	    identParams.append("attr[]",idx);
 		});
+		//console.log(this.state.filters.sliders);
+		/* compare slider values vs characteristics and add to attr list */
+		Object.entries(this.state.filters.sliders).map((item) => {
+			let cid = item[0];
+			let slider = item[1];
+			let states = this.getStatesByCid(cid);
+			//console.log(states);
+			Object.keys(states).map((key) => {
+				let stateNum = Number(states[key].charstatename);
+				let stateCs = Number(states[key].cs)
+				if (stateNum >= slider.range[0] && stateNum <= slider.range[1]) {
+					//console.log(cid + '-' + stateNum);			
+			    identParams.append("attr[]",cid + '-' + stateCs);
+				}
+			})
+		});	
+		
   	url = url + '?' + identParams.toString();
-    console.log(url);
+    //console.log(url);
     httpGet(url)
       .then((res) => {
       	let jres = JSON.parse(res);
@@ -332,9 +358,20 @@ class IdentifyApp extends React.Component {
     let newResults = {"familySort": familySort, "taxonSort": searchResults.taxonSort};
     return newResults;
   }
+  getStatesByCid(cid) {
+  	let results = {};
+  	Object.entries(this.state.characteristics).map(([key, group]) => {
+			Object.entries(group.characters).map(([ckey, character]) => {
+				if (character.cid == cid) {
+					results = character.states;
+				}
+			});  	
+  	});
+  	return results;
+  }
 
   onAttrChanged(featureKey, featureName, featureVal) {
-
+  /* 710-1, simple, on */
   	let filters = this.state.filters;
 
   	if (featureVal == 'off') {
@@ -350,6 +387,46 @@ class IdentifyApp extends React.Component {
     });
     
   }
+  resetSlider(cid) {
+  	let filters = this.state.filters;
+  	delete filters.sliders[cid];
+    this.setState({
+      filters: Object.assign({}, this.state.filters, { sliders: filters.sliders })
+    },function() {
+    	this.doQuery();
+    });
+  }
+  
+  onSliderChanged(cid, featureName, range, states, units) {
+  	/* 710-1, simple, on */
+		//console.log(range);
+
+		let min = states[0].charstatename;
+		let max = states[states.length - 1].charstatename;
+  	let filters = this.state.filters;
+  	//console.log(min);
+  	//console.log(max);
+  	//console.log(range);
+  	if (range[0] == min && range[1] == max) {
+  		delete filters.sliders[cid];
+  	}else{
+  		filters.sliders[cid] = { range: range, label: featureName, units: units };
+  	}
+  	//console.log(filters.sliders);
+/*
+  	if (featureArr == 'off') {
+  		delete filters.sliders[cid];
+  	}else{
+  		filters.sliders[cid] = featureName;
+  	}
+
+  */  
+    this.setState({
+      filters: Object.assign({}, this.state.filters, { sliders: filters.sliders })
+    },function() {
+    	this.doQuery();
+    });
+  }
   onSortByChanged(type) {
     this.setState({ sortBy: type },function() {
     	this.setState({ searchResults: this.sortByName(this.state.searchResults) },function() {
@@ -362,12 +439,13 @@ class IdentifyApp extends React.Component {
 		let filters = {
 			searchText: ViewOpts.DEFAULT_SEARCH_TEXT,
 			attrs: {},
+			sliders: {},
 		};
     this.setState({ filters: filters },function() {
     	this.doQuery();
     });
 	}
-    render() {
+  render() {
 		let shortAbstract = '';
 		if (this.state.abstract.length > 0) {
 			shortAbstract = this.state.abstract.replace(/^(.{240}[^\s]*).*/, "$1") + "...";//wordsafe truncate
@@ -440,6 +518,7 @@ class IdentifyApp extends React.Component {
 							sortBy={ this.state.sortBy }
 							onSortByClicked={ this.onSortByChanged }
 							onAttrClicked={ this.onAttrChanged }
+							onSliderChanged={ this.onSliderChanged }
 							onFilterClicked={ this.onFilterRemoved }
 							onClearSearch={ this.clearTextSearch }
 							filters={ this.state.filters }
@@ -455,7 +534,7 @@ class IdentifyApp extends React.Component {
 								<div className="identify-header inventory-header">
 									<div className="current-wrapper">
 										<div className="btn btn-primary current-button" role="button"><FontAwesomeIcon icon="search-plus" /> Identify</div>
-										
+										{
 										<ViewOpts
 											onReset={ this.clearFilters }
 											onFilterClicked={ this.onFilterRemoved }
@@ -465,6 +544,7 @@ class IdentifyApp extends React.Component {
 												})
 											}
 										/>
+										}
 															
 									</div>
 									{ this.getClid() > -1 &&

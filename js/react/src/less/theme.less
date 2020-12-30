@@ -1,6 +1,8 @@
 @import "./mixins.less";
 @import "./search-results.less";
 @import '../../node_modules/react-modal-video/css/modal-video.min.css';
+//@import "../../node_modules/@blueprintjs/core/lib/css/blueprint.css";
+//@import "../../node_modules/@blueprintjs/icons/lib/css/blueprint-icons.css";
 
 
 * {
@@ -320,42 +322,19 @@ img {
 /*** RANGE SLIDERS ***/
 .slider {
   width: 100% !important;
-	&.slider-horizontal {
-		position: relative;
-		.slider-track {
-			background-color: @med-green;
-			height: 6px !important;
-			margin-top: -3px !important;
-			background-image: none !important;
-			box-shadow: none !important;
-			z-index: 100;
-		}
-		.slider-selection.tick-slider-selection,
-		.slider-handle,
-		.slider-tick {
-			background-color: @med-green;
-			background-image: none !important;
-			box-shadow: none !important;
-		}
-		.slider-handle {
-			z-index: 110;
-  		border: 0.2em solid white !important;
-		}
-		.slider-tick {
-			background-color: black;
-			width: 1px !important;
-			height: 12px !important;
-			margin-top: 4px !important;
-			border-radius: 0.1em !important;
-			margin-left: 0 !important;
-			margin-right: 0 !important;
-			z-index: 90;
-		}
-		.slider-tick-label:first,
-		.slider-tick-label:last {
-			width: 30px !important;
-		}
-	}
+  margin-top: 1rem;
+  .bp3-slider {
+  	width: 94%;
+  	margin: 0 3%;
+  }
+  .bp3-slider-progress.bp3-intent-primary {
+  	background-color: @med-green;
+  }
+  .bp3-slider-handle {
+  	.bp3-slider-label {
+  		background-color: @dark-green;	
+  	}
+  }
 }
 
 

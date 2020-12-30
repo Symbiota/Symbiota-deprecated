@@ -256,10 +256,10 @@ class IdentManager extends Manager {
 			$qb = $em->createQueryBuilder();
 			$em3 = $em->createQueryBuilder();
 			$chars = $em->createQueryBuilder()
-				->select(['t.tid, d.cid'])
+				->select(['t.tid, descr.cid'])
 				->from("Taxa","t")
-				->innerJoin("Kmdescr","d","WITH","t.tid = d.tid")
-				->where("d.cs <> '-'")
+				->innerJoin("Kmdescr","descr","WITH","t.tid = descr.tid")
+				->where("descr.cs <> '-'")
 				->andWhere($qb->expr()->in('t.tid',$taxa_tids))
 				->distinct()
 			;
@@ -289,7 +289,7 @@ class IdentManager extends Manager {
 			$cids = array_unique(array_merge($cids,array_keys($this->attrs)));
 			
 			$selects = [
-				"d.tid",
+				"descr.tid",
 				"chars.cid",
 				"cs.cs",
 				"cs.charstatename",
@@ -299,6 +299,7 @@ class IdentManager extends Manager {
 				"chars.helpurl",
 				"chars.difficultyrank",
 				"chars.display",
+				"chars.units",
 				"chars.defaultlang",
 				"Count(cs.cs) as ct",
 				"chead.hid",
@@ -330,14 +331,14 @@ class IdentManager extends Manager {
 			];
 			$chars = $em->createQueryBuilder()
 				->select($selects)
-				->from("Kmdescr","d")
+				->from("Kmdescr","descr")
 				->innerJoin("Kmcs","cs","WITH",$qb->expr()->andX(
-											$qb->expr()->eq('d.cs','cs.cs'),
-											$qb->expr()->eq('d.cid','cs.cid')
+											$qb->expr()->eq('descr.cs','cs.cs'),
+											$qb->expr()->eq('descr.cid','cs.cid')
 										))
 				->innerJoin("Kmcharacters","chars","WITH","chars.cid = cs.cid")
 				->innerJoin("Kmcharheading","chead","WITH","chars.hid = chead.hid")
-				->andWhere($qb->expr()->in('d.tid',':tids'))
+				->andWhere($qb->expr()->in('descr.tid',':tids'))
 				->setParameter(":tids",$taxa_tids)
 				->setParameter(":cids",$cids)
 				->setParameter(":lang","English")
@@ -352,6 +353,7 @@ class IdentManager extends Manager {
 			;
 			$cquery = $chars->getQuery();
 			#var_dump($cquery->getSQL());
+			#var_dump($cquery->getParameters());
 			$cresults = $cquery->execute();
 			$results = [];
 
@@ -371,6 +373,7 @@ class IdentManager extends Manager {
 						'charname' => $cres['charname'],
 						'cid' => $cres['cid'],
 						'display' => $cres['display'],
+						'units' => $cres['units'],
 						'states' => []
 					];
 					$results[$key]['characters'][] = $tmp;

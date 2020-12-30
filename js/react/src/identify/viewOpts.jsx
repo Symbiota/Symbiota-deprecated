@@ -46,7 +46,6 @@ class ViewOpts extends React.Component {
 		)
 	}
 
-
   render() {
   	const buttons = [];
 		Object.keys(this.props.filters).map((filterKey) => {
@@ -68,6 +67,16 @@ class ViewOpts extends React.Component {
 					Object.entries(filter.val).map((feature) => {
 						if (feature[1].toString().length) {
 							buttons.push({"key":feature[0],"text":feature[1].toString()});
+						}
+					})
+					break;
+				}
+				case "sliders": {
+					Object.entries(filter.val).map((feature,idx) => {
+						
+						if (feature[1].label.toString().length) {
+							let txt = feature[1].label.toString() + ': ' + feature[1].range[0] + feature[1].units +  "-" + feature[1].range[1] + feature[1].units;
+							buttons.push({"key":feature[0],"text":txt});
 						}
 					})
 					break;
