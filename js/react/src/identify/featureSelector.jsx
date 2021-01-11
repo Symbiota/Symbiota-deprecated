@@ -68,12 +68,16 @@ class PlantSlider extends React.Component {
   }
 
   componentDidMount() {
+  
 		let minMax = [];
-		minMax[0] = this.props.states[0].charstatename;
-		minMax[1] = this.props.states[this.props.states.length - 1].charstatename;
-		minMax[1] = minMax[1].toString().replace(/>+/g,'') - 0;
-		let step = this.props.states[1].charstatename - this.props.states[0].charstatename;
-		step = step.toFixed(1) - 0;
+		minMax[0] = this.props.states[0].numval;
+		minMax[1] = this.props.states[this.props.states.length - 1].numval;
+		minMax[1] = minMax[1].toString().replace(/[>+]/g,'') - 0;
+
+		//let step = this.props.states[1].numval - this.props.states[0].numval;
+		let span = this.props.states[this.props.states.length - 1].numval - this.props.states[0].numval;
+		let avgStep = span/this.props.states.length;
+		let step = (avgStep < .01? .1 : 1.0);//steps are either .1 or 1;
 		let labelPrecision = (step < 1? 1 : 0);
 		let labelStepSize = (this.props.states.length > 10? this.props.states.length : step);//no labels where > 10
 
@@ -83,7 +87,7 @@ class PlantSlider extends React.Component {
 		}
 
     this.setState({ 
-    	description: this.getSliderDescription(this.props.units,minMax) ,
+    	description: this.getSliderDescription(this.props,minMax) ,
     	minMax: minMax,
     	step: step,
     	labelPrecision: labelPrecision,
@@ -110,11 +114,12 @@ class PlantSlider extends React.Component {
 				});		
 			}
 			const onChangeEvent = this.props.onSliderChanged;  
-			onChangeEvent(this.state.cid, this.state.label, cleanRange, this.state.states, this.state.units);
+			onChangeEvent(this.state, cleanRange);
     }
   }
   registerSliderChange(range) {//for display purposes only
-    let desc = this.getSliderDescription(this.state.units,range) ;
+  	
+    let desc = this.getSliderDescription(this.state,range) ;
     this.setState( { description: desc, range: range } );
   }
   
@@ -123,17 +128,21 @@ class PlantSlider extends React.Component {
 	* @param valueArray {number[]} An array in the form [min, max]
 	* @returns {string} An English description of the [min, max] values
 	*/
-	getSliderDescription(units,valueArray) {
+	getSliderDescription(sliderState,valueArray) {
 		let valueDesc = '';
-
 		if (Array.isArray(valueArray)) {
+			let min = valueArray[0];
+			let max = valueArray[1];
+			if (sliderState.states.length > 0 && max == sliderState.states[sliderState.states.length - 1].numval) {//show max "10+" labels
+				max = sliderState.states[sliderState.states.length - 1].charstatename;
+			}
 		
 		/*	if ( valueArray[0] > valueArray[1] ) {// Fix if the handles have switched
 				let tmp = valueArray[0];
 				valueArray[0] = valueArray[1];
 				valueArray[1] = tmp;
 			}*/
-			valueDesc = `(${valueArray[0]} ` + units + ` - ${valueArray[1]} ` + units + `)`;
+			valueDesc = `(${min} ` + sliderState.units + ` - ${max} ` + sliderState.units + `)`;
 		}
 		/*if (valueArray[0] === this.minMax[0] && valueArray[1] === this.minMax[1]) {
 			valueDesc = "(Any size)";
@@ -154,7 +163,7 @@ class PlantSlider extends React.Component {
   	if (!this.props.sliders[this.state.cid]) {
 	  	range = this.state.minMax;
 	  }
-	  let desc = this.getSliderDescription(this.state.units,range)
+	  let desc = this.getSliderDescription(this.state,range)
     return (
       <div>
         <RangeSlider
@@ -191,29 +200,35 @@ PlantSlider.defaultProps = {
 class FeatureSelector extends React.Component {
   constructor(props) {
     super(props);
+    this.state = {
+    	showFeature: false
+    };
+    
     this.getDropdownId = this.getDropdownId.bind(this);
+    this.toggleFeature = this.toggleFeature.bind(this);
     this.onAttrClicked = this.props.onAttrClicked.bind(this);
     this.onSliderChanged = this.props.onSliderChanged.bind(this);
   }
 
+  toggleFeature = () => {
+  	this.setState({ showFeature: !this.state.showFeature });
+  }
   getDropdownId() {
     return `feature-selector-${this.props.cid}`;
   }
 
   render() {
-		let classes = "collapse";
-		if (this.props.display == 'slider') {
-			classes = "slider ";//collapse
-		}
+		let classes =  "feature-input" + (this.state.showFeature == true ? '' :" short") + (this.props.display == 'slider' ? ' slider' :"");
+		
+		//if (this.props.display == 'slider') {
+		//	classes = "slider ";//collapse
+		//}
 
     return (
       <div className="second-level rounded-border">
         <div className="feature-selectors">
           <a
-            data-toggle="collapse"
-            aria-expanded="false"
-            aria-controls={ this.getDropdownId() }
-            href={ `#${this.getDropdownId()}` }
+            onClick={this.toggleFeature}
           >
             <span>{ this.props.title.replace(/_/g, ' ') }</span>
             

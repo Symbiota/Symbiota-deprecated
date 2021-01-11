@@ -73,10 +73,17 @@ class ViewOpts extends React.Component {
 				}
 				case "sliders": {
 					Object.entries(filter.val).map((feature,idx) => {
-						
+						let cid = feature[0];
+						let states = this.props.getStatesByCid(cid);
 						if (feature[1].label.toString().length) {
-							let txt = feature[1].label.toString() + ': ' + feature[1].range[0] + feature[1].units +  "-" + feature[1].range[1] + feature[1].units;
-							buttons.push({"key":feature[0],"text":txt});
+							let min = feature[1].range[0];
+							let max = feature[1].range[1];
+							if (states.length > 0 && max == states[states.length - 1].numval) {//show max "10+" labels
+								max = states[states.length - 1].charstatename;
+							}
+						
+							let txt = feature[1].label.toString() + ': ' + min + feature[1].units +  "-" + max + feature[1].units;
+							buttons.push({"key":cid,"text":txt});
 						}
 					})
 					break;

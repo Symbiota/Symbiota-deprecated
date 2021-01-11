@@ -215,7 +215,9 @@ class SideBar extends React.Component {
 										{
 											Object.keys(firstLevel.characters).map((idx2) => {
 												let secondLevel = firstLevel.characters[idx2];
-												//console.log(secondLevel);
+												/*if (secondLevel.display == 'slider') {
+													console.log(secondLevel.states);
+												}*/
 												return (
 													<FeatureSelector
 														key={ secondLevel.cid }

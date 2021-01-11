@@ -73,8 +73,8 @@ function get_data($params) {
 	if (isset($params['pid'])) $identManager->setPid($params['pid']);
 	if (isset($params['taxon'])) $identManager->setTaxonFilter($params['taxon']);
 	if (isset($params['rv'])) $identManager->setRelevanceValue($params['rv']);
+	$attrs = array();
 	if (isset($params['attr'])) {
-		$attrs = array();
 		foreach ($params['attr'] as $attr) {
 			if(strpos($attr,'-') !== false) {
 				$fragments = explode("-",$attr);
@@ -85,8 +85,43 @@ function get_data($params) {
 				}
 			}
 		}
-		$identManager->setAttrs($attrs);
 	}
+	/*
+		The "range" param doesn't exist in Symbiota, but using attr[] causes unacceptably long URLs;
+		So we use range for purposes of building the API URL, 
+		and here convert it to attrs for the DB call.
+		***This relies on kmcs.cs and kmcs.charstatename being in the SAME SORT ORDER (which Katie assures me is always true)***
+	*/
+	if (isset($params['range'])) {
+		$ranges = array();
+		foreach ($params['range'] as $range) {
+			if(strpos($range,'-') !== false) {
+				$fragments = explode("-",$range);
+				$cid = intval($fragments[0]);
+				$type = $fragments[1];
+				$cs = intval($fragments[2]);#cancelled for now: for min/max this is cs, but for i(ncrement), it's the increment val
+				if (is_numeric($cid) && !empty($cs) && in_array($type,array("n","x"))) {#,"i"
+					$ranges[$cid][$type] = $cs;
+				}
+			}
+		}
+		#var_dump($ranges);
+		$charStateRepo = $em->getRepository("Kmcs");
+		foreach ($ranges as $cid => $range) {
+		#var_dump($range);
+			$csQuery = $charStateRepo->findBy([ "cid" => $cid ], ["sortsequence" => "ASC"]);
+			$csArr = array_map(function($cs) { return intval($cs->getCs()); }, $csQuery);
+			#var_dump($csArr);
+			foreach ($csArr as $_cs) {
+				if ($_cs >= $range['n'] && $_cs <= $range['x']) {
+					$attrs[$cid][] = $_cs;
+				}
+			}
+		}
+	}
+	#var_dump($attrs);
+	$identManager->setAttrs($attrs);
+		
 	if ( 	 ( array_key_exists("search", $params) && !empty($params["search"]) )
 			&& ( array_key_exists("name", $params) && in_array($params['name'],array('sciname','commonname')) )
 	) {
@@ -97,7 +132,20 @@ function get_data($params) {
 	$identManager->setTaxa();
 	$results['taxa'] = $identManager->getTaxa();
 	$results['totals'] = TaxaManager::getTaxaCounts($results['taxa']);
-	$results['characteristics'] = $identManager->getCharacteristics();
+	$characteristics = $identManager->getCharacteristics();
+	/* for slider chars, create an additional numeric value for charstatenames e.g. 11+ becomes 11
+			because slider widgets don't like non-numeric values
+	 */
+	foreach ($characteristics as $key => $group) {
+		foreach ($group['characters'] as $gkey => $char) {
+			if ($char['display'] == 'slider') {
+				foreach ($char['states'] as $ckey => $state) {
+					$characteristics[$key]['characters'][$gkey]['states'][$ckey]['numval'] = floatval(preg_replace("/[^0-9\.]/","",$state['charstatename']));
+				}
+			}
+		}
+	}
+	$results['characteristics'] = $characteristics;
 
 	#ini_set("memory_limit", $memory_limit);
 	#set_time_limit(30);

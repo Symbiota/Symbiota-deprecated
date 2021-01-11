@@ -321,11 +321,12 @@ img {
 
 /*** RANGE SLIDERS ***/
 .slider {
-  width: 100% !important;
-  margin-top: 1rem;
+  //width: 100% !important;
+  //margin-top: 1rem;
+  width: 92%;
+  margin: 1rem 4% 0;
+  
   .bp3-slider {
-  	width: 94%;
-  	margin: 0 3%;
   }
   .bp3-slider-progress.bp3-intent-primary {
   	background-color: @med-green;
@@ -1745,6 +1746,14 @@ img {
 					a[aria-expanded="true"] .will-v-flip {
 						transform: rotate(-180deg);
 							background-color: black;
+					}
+					.feature-input {
+						margin-top: .8rem;
+						&.short {
+							height: 0;
+							overflow: hidden;
+							margin-top: 0;
+						}
 					}
 					ul {
 						border-top: 1px dotted @dark-gray;

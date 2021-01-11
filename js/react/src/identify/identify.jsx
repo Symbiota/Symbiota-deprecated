@@ -76,6 +76,7 @@ class IdentifyApp extends React.Component {
     this.onSliderChanged = this.onSliderChanged.bind(this);
     this.sortResults = this.sortResults.bind(this);
     this.clearTextSearch = this.clearTextSearch.bind(this);
+    this.getStatesByCid = this.getStatesByCid.bind(this);
   }
 
   getClid() {
@@ -268,25 +269,38 @@ class IdentifyApp extends React.Component {
   	Object.keys(this.state.filters.attrs).map((idx) => {
 	    identParams.append("attr[]",idx);
 		});
-		//console.log(this.state.filters.sliders);
-		/* compare slider values vs characteristics and add to attr list */
+		/* compare slider values vs characteristics and add to attr list;
+				adding each state as its own attr[] value makes the URL unacceptably long,
+				so we create a new range[] param for purposes of building the URL;
+				the API will convert this back into attrs for the DB calls
+		 */
+
 		Object.entries(this.state.filters.sliders).map((item) => {
 			let cid = item[0];
+			//console.log(cid);
 			let slider = item[1];
+			//let step = slider.step;
 			let states = this.getStatesByCid(cid);
-			//console.log(states);
+			//console.log(cid);
+			let min = states[0].cs;
+			let max = (states.length > 1? states[1].cs : states[0].cs);
 			Object.keys(states).map((key) => {
-				let stateNum = Number(states[key].charstatename);
-				let stateCs = Number(states[key].cs)
-				if (stateNum >= slider.range[0] && stateNum <= slider.range[1]) {
-					//console.log(cid + '-' + stateNum);			
-			    identParams.append("attr[]",cid + '-' + stateCs);
+				let stateNum = Number(states[key].numval);
+				let stateCs = Number(states[key].cs);
+				if (stateNum == slider.range[0]) {
+					min = stateCs;			
 				}
+				if (stateNum == slider.range[1]) {
+					max = stateCs;
+			    //identParams.append("range[]",cid + '-i-' + step);
+				}	
 			})
+			identParams.append("range[]",cid + '-n-' + min);
+			identParams.append("range[]",cid + '-x-' + max);
 		});	
 		
   	url = url + '?' + identParams.toString();
-    //console.log(url);
+    console.log(decodeURIComponent(url));
     httpGet(url)
       .then((res) => {
       	let jres = JSON.parse(res);
@@ -319,7 +333,31 @@ class IdentifyApp extends React.Component {
 		});
   }
   onAttrResults(chars) {
-    this.setState({ characteristics: chars });
+
+  	let newAttrs = {};
+  	let newSliders = {};
+
+  	let newCids = [];
+  	Object.entries(chars).map(([key, group]) => {
+  		Object.entries(group.characters).map(([ckey,gchar]) => {
+  			newCids.push(gchar.cid);
+  		});
+  	});
+  	Object.entries(this.state.filters.attrs).map(([cid,attr]) => {
+  		if (newCids.indexOf(Number(cid)) != -1) {
+  			newAttrs[cid] = attr;
+  		}
+  	});
+  	Object.entries(this.state.filters.sliders).map(([cid,slider]) => {
+  		if (newCids.indexOf(Number(cid)) != -1) {
+  			newSliders[cid] = slider;
+  		}
+  	});
+  	this.setState({
+      filters: Object.assign({}, this.state.filters, { attrs: newAttrs }),
+      filters: Object.assign({}, this.state.filters, { sliders: newSliders }),
+      characteristics: chars
+    });
   }
   sortResults(results) {//should receive taxa from API
   	let newResults = {};
@@ -333,7 +371,6 @@ class IdentifyApp extends React.Component {
 			familySort[result.family].push(result);
 		})
 		
-
     newResults = {"familySort": familySort, "taxonSort": taxonSort};
     newResults = this.sortByName(newResults);
   	return newResults;
@@ -397,30 +434,18 @@ class IdentifyApp extends React.Component {
     });
   }
   
-  onSliderChanged(cid, featureName, range, states, units) {
-  	/* 710-1, simple, on */
-		//console.log(range);
+  onSliderChanged(sliderState, range) {
 
-		let min = states[0].charstatename;
-		let max = states[states.length - 1].charstatename;
+		let min = sliderState.states[0].numval;
+		let max = sliderState.states[sliderState.states.length - 1].numval;
   	let filters = this.state.filters;
-  	//console.log(min);
-  	//console.log(max);
-  	//console.log(range);
+  	
   	if (range[0] == min && range[1] == max) {
-  		delete filters.sliders[cid];
+  		delete filters.sliders[sliderState.cid];
   	}else{
-  		filters.sliders[cid] = { range: range, label: featureName, units: units };
+  		filters.sliders[sliderState.cid] = { range: sliderState.range, label: sliderState.label, units: sliderState.units, step: sliderState.step };
   	}
-  	//console.log(filters.sliders);
-/*
-  	if (featureArr == 'off') {
-  		delete filters.sliders[cid];
-  	}else{
-  		filters.sliders[cid] = featureName;
-  	}
-
-  */  
+  
     this.setState({
       filters: Object.assign({}, this.state.filters, { sliders: filters.sliders })
     },function() {
@@ -451,7 +476,7 @@ class IdentifyApp extends React.Component {
 			shortAbstract = this.state.abstract.replace(/^(.{240}[^\s]*).*/, "$1") + "...";//wordsafe truncate
 		}
 		let suggestionUrl = `${this.props.clientRoot}/checklists/rpc/autofillsearch.php`;
-
+//console.log(this.state.filters);
     return (
     <div className="wrapper">
 			<Loading 
@@ -543,6 +568,7 @@ class IdentifyApp extends React.Component {
 													return { key: filterKey, val: this.state.filters[filterKey] }
 												})
 											}
+											getStatesByCid={ this.getStatesByCid } 
 										/>
 										}
 															
