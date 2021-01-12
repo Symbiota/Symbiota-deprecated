@@ -65,6 +65,7 @@ class PlantSlider extends React.Component {
     this.registerSliderRelease = this.registerSliderRelease.bind(this);
     this.registerSliderChange = this.registerSliderChange.bind(this);
     this.getSliderDescription = this.getSliderDescription.bind(this);
+    this.cleanRange = this.cleanRange.bind(this);
   }
 
   componentDidMount() {
@@ -73,11 +74,11 @@ class PlantSlider extends React.Component {
 		minMax[0] = this.props.states[0].numval;
 		minMax[1] = this.props.states[this.props.states.length - 1].numval;
 		minMax[1] = minMax[1].toString().replace(/[>+]/g,'') - 0;
-
-		//let step = this.props.states[1].numval - this.props.states[0].numval;
-		let span = this.props.states[this.props.states.length - 1].numval - this.props.states[0].numval;
-		let avgStep = span/this.props.states.length;
-		let step = (avgStep < .01? .1 : 1.0);//steps are either .1 or 1;
+		let step = 1;
+		if (this.props.states.length > 1) {
+			let firstStep = this.props.states[1].numval - this.props.states[0].numval;
+			step = (firstStep < 1 ? .1 : 1);
+		}
 		let labelPrecision = (step < 1? 1 : 0);
 		let labelStepSize = (this.props.states.length > 10? this.props.states.length : step);//no labels where > 10
 
@@ -103,24 +104,28 @@ class PlantSlider extends React.Component {
 
   registerSliderRelease(range) {//fires the search
     if (range) {
-    	let cleanRange = range;
-    	/* 	floats from slider sometimes have rounding errors (e.g. 5.70000000001)
-    			so we correct the ones for our use and store in cleanRange, while leaving this.state.range alone for the slider to use
-    			(the slider fixes those errors for its internal use)
-    	 */
-			if (this.state.step < 1) {
-				cleanRange = range.map((value) => {
-					return Number(value).toFixed(1);
-				});		
-			}
 			const onChangeEvent = this.props.onSliderChanged;  
-			onChangeEvent(this.state, cleanRange);
+			onChangeEvent(this.state, range);
     }
   }
   registerSliderChange(range) {//for display purposes only
-  	
     let desc = this.getSliderDescription(this.state,range) ;
     this.setState( { description: desc, range: range } );
+  }
+  cleanRange(range) {
+		/* 	floats from slider sometimes have rounding errors (e.g. 5.70000000001)
+				so we correct the ones for our use and store in cleanRange, while leaving this.state.range alone for the slider to use
+				(the slider fixes those errors for its internal use)
+		 */
+    let cleanRange = range;
+		cleanRange = range.map((value) => {	
+			if (this.state.step < 1) {
+				return Number(value).toFixed(1);
+			}else{
+				return Number(value);
+			}
+		});		
+		return cleanRange;
   }
   
   /**
@@ -128,7 +133,8 @@ class PlantSlider extends React.Component {
 	* @param valueArray {number[]} An array in the form [min, max]
 	* @returns {string} An English description of the [min, max] values
 	*/
-	getSliderDescription(sliderState,valueArray) {
+	getSliderDescription(sliderState,range) {
+		let valueArray = this.cleanRange(range);
 		let valueDesc = '';
 		if (Array.isArray(valueArray)) {
 			let min = valueArray[0];
@@ -163,7 +169,7 @@ class PlantSlider extends React.Component {
   	if (!this.props.sliders[this.state.cid]) {
 	  	range = this.state.minMax;
 	  }
-	  let desc = this.getSliderDescription(this.state,range)
+	  let desc = this.getSliderDescription(this.state,this.cleanRange(range))
     return (
       <div>
         <RangeSlider

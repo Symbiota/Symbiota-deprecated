@@ -277,11 +277,8 @@ class IdentifyApp extends React.Component {
 
 		Object.entries(this.state.filters.sliders).map((item) => {
 			let cid = item[0];
-			//console.log(cid);
 			let slider = item[1];
-			//let step = slider.step;
 			let states = this.getStatesByCid(cid);
-			//console.log(cid);
 			let min = states[0].cs;
 			let max = (states.length > 1? states[1].cs : states[0].cs);
 			Object.keys(states).map((key) => {
@@ -292,7 +289,6 @@ class IdentifyApp extends React.Component {
 				}
 				if (stateNum == slider.range[1]) {
 					max = stateCs;
-			    //identParams.append("range[]",cid + '-i-' + step);
 				}	
 			})
 			identParams.append("range[]",cid + '-n-' + min);
@@ -300,7 +296,7 @@ class IdentifyApp extends React.Component {
 		});	
 		
   	url = url + '?' + identParams.toString();
-    console.log(decodeURIComponent(url));
+    //console.log(decodeURIComponent(url));
     httpGet(url)
       .then((res) => {
       	let jres = JSON.parse(res);
@@ -443,7 +439,7 @@ class IdentifyApp extends React.Component {
   	if (range[0] == min && range[1] == max) {
   		delete filters.sliders[sliderState.cid];
   	}else{
-  		filters.sliders[sliderState.cid] = { range: sliderState.range, label: sliderState.label, units: sliderState.units, step: sliderState.step };
+  		filters.sliders[sliderState.cid] = { range: sliderState.range, label: sliderState.label, units: sliderState.units, step: sliderState.step, originalStates: sliderState.states };
   	}
   
     this.setState({
