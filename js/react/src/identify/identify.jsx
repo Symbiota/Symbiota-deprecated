@@ -17,6 +17,7 @@ import { library } from "@fortawesome/fontawesome-svg-core";
 import {faChevronDown, faChevronUp, faListUl, faSearchPlus } from '@fortawesome/free-solid-svg-icons'
 library.add( faChevronDown, faChevronUp, faListUl, faSearchPlus );
 
+const MOBILE_BREAKPOINT = 576;
 
 class IdentifyApp extends React.Component {
   constructor(props) {
@@ -27,6 +28,7 @@ class IdentifyApp extends React.Component {
     this.state = {
       isLoading: true,
       isSearching: false,
+      isMobile: false,
       clid: -1,
       pid: -1,
       projName: '',
@@ -77,6 +79,10 @@ class IdentifyApp extends React.Component {
     this.sortResults = this.sortResults.bind(this);
     this.clearTextSearch = this.clearTextSearch.bind(this);
     this.getStatesByCid = this.getStatesByCid.bind(this);
+    this.mobileScrollToResults = this.mobileScrollToResults.bind(this);
+    this.mobileScrollToFilters = this.mobileScrollToFilters.bind(this);
+    this.getFilterCount = this.getFilterCount.bind(this);
+    
   }
 
   getClid() {
@@ -138,6 +144,10 @@ class IdentifyApp extends React.Component {
 
 					googleMapUrl += '?' + mapParams.toString();
 				}
+				let isMobile = false;
+				if (window.innerWidth < MOBILE_BREAKPOINT) {
+					isMobile = true;
+				}
 				
 				this.setState({
 					clid: this.getClid(),
@@ -152,6 +162,7 @@ class IdentifyApp extends React.Component {
 					totals: res.totals,
 					fixedTotals: res.totals,
 					googleMapUrl: googleMapUrl,
+					isMobile: isMobile,
 					exportUrlCsv: `${this.props.clientRoot}/checklists/rpc/export.php?clid=` + this.getClid() + `&pid=` + this.getPid() + `&dynclid=` + this.getDynclid(),
 					exportUrlWord: `${this.props.clientRoot}/checklists/defaultchecklistexport.php?cl=` + this.getClid() + `&pid=` + this.getPid() + `&dynclid=` + this.getDynclid()
 				});
@@ -311,8 +322,30 @@ class IdentifyApp extends React.Component {
       .finally(() => {
         //this.setState({ isLoading: false });
         this.setState({ isSearching: false });
+        this.mobileScrollToResults();
       });
-  
+  }
+  mobileScrollToResults() {
+    if (this.state.isMobile && this.getFilterCount() > 0) {
+      let section = document.getElementById("results-section");      
+			let yOffset = 60;
+			document.getElementById("results-section").scrollIntoView();
+			const newY = section.getBoundingClientRect().top + window.pageYOffset - yOffset;
+			window.scrollTo({top: newY, behavior: 'smooth'});
+		}
+  }
+  mobileScrollToFilters() {
+		let section = document.getElementById("filter-section");      
+		let yOffset = 60;
+		document.getElementById("filter-section").scrollIntoView();
+		const newY = section.getBoundingClientRect().top + window.pageYOffset - yOffset;
+		window.scrollTo({top: newY, behavior: 'smooth'});
+  }
+  getFilterCount() {
+  	let filterCount = 0;
+  	filterCount += Object.keys(this.state.filters.attrs).length;
+  	filterCount += Object.keys(this.state.filters.sliders).length;
+  	return filterCount;
   }
   
 	updateTotals(totals) {
@@ -472,9 +505,10 @@ class IdentifyApp extends React.Component {
 			shortAbstract = this.state.abstract.replace(/^(.{240}[^\s]*).*/, "$1") + "...";//wordsafe truncate
 		}
 		let suggestionUrl = `${this.props.clientRoot}/checklists/rpc/autofillsearch.php`;
-//console.log(this.state.filters);
+
+  	
     return (
-    <div className="wrapper">
+    <div className={ "wrapper" + (this.state.isMobile? ' is-mobile': '')}>
 			<Loading 
 				clientRoot={ this.props.clientRoot }
 				isLoading={ this.state.isLoading }
@@ -545,11 +579,23 @@ class IdentifyApp extends React.Component {
 							filters={ this.state.filters }
 							exportUrlCsv={ this.state.exportUrlCsv }
 							exportUrlWord={ this.state.exportUrlWord }
+							getFilterCount={ this.getFilterCount } 
+							isMobile={ this.state.isMobile }
 						/>
 						
 					}
 					</div>
-					<div className="col-12 col-xl-8 col-md-7 col-sm-6 results-wrapper">
+					<div className="col-12 col-xl-8 col-md-7 col-sm-6 results-wrapper" id="results-section">
+						<div className="row">
+							<div className="col">
+								{ this.state.isMobile == true && this.getFilterCount() > 0 &&
+									<div className="mobile-to-filters" onClick={() => this.mobileScrollToFilters()}>
+										<span>Apply More Filters</span>
+										<FontAwesomeIcon icon="chevron-up" />
+									</div>
+								}
+							</div>
+						</div>
 						<div className="row">
 							<div className="col">
 								<div className="identify-header inventory-header">

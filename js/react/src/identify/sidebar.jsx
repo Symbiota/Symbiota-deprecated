@@ -7,8 +7,8 @@ import FeatureSelector from "./featureSelector.jsx";
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { library } from "@fortawesome/fontawesome-svg-core";
-import {faFileCsv, faFileWord, faPrint } from '@fortawesome/free-solid-svg-icons'
-library.add( faFileCsv, faFileWord, faPrint );
+import {faFileCsv, faFileWord, faPrint, faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons'
+library.add( faFileCsv, faFileWord, faPrint, faChevronDown, faChevronUp );
 
 
 /**
@@ -95,15 +95,42 @@ SideBarDropdown.defaultProps = {
 class SideBar extends React.Component {
   constructor(props) {
     super(props);
+    this.state = {
+      displayFilters: true
+    };
 
     this.onSortByClicked = this.props.onSortByClicked.bind(this);
 		this.onFilterClicked = this.props.onFilterClicked.bind(this);
+		this.getFilterCount = this.props.getFilterCount.bind(this);
   }
+  componentDidMount() {
+  	let displayFilters = true;
+  	if (this.props.isMobile == true) {
+  		displayFilters = false;
+  	}
+  		
+		this.setState({
+			displayFilters: displayFilters,
+		});
+	};
+  
+  toggleFilters = () => {
+		let newVal = true;
+		if (this.state.displayFilters == true) {
+			newVal = false;
+		} 
+		this.setState({
+			displayFilters: newVal
+		});
+
+  }  
   render() {  
   	let showFixedTotals = false;
   	if (this.props.totals['taxa'] < this.props.fixedTotals['taxa']) {
   		showFixedTotals = true;
   	}
+  	
+  	let filterCount = this.getFilterCount();
 
     return (
       <div
@@ -155,94 +182,107 @@ class SideBar extends React.Component {
 
         {/* Search */}
         
-				<div className="filter-tools">
-					<h3>Filter Tools</h3>
-					<SearchWidget
-						placeholder="Search plants by name"
-						clientRoot={this.props.clientRoot}
-						isLoading={ this.props.isLoading }
-						textValue={ this.props.searchText }
-						onTextValueChanged={ this.props.onSearchTextChanged }
-						onSearch={ this.props.onSearch }
-						suggestionUrl={ this.props.searchSuggestionUrl }
-						clid={ this.props.clid }
-						dynclid={ this.props.dynclid }
-						onFilterClicked={ this.onFilterClicked }
-						onClearSearch={ this.props.onClearSearch }
-					/>
-        
-        
-					<div className="view-opts" className="container row">
-						<div className="row">
-							<div className="opt-labels">
-								<p>Display as:</p>
-							</div>
-							<div className="opt-settings">
+				<div className="filter-header" id="filter-section">
+					<h3 className="filter-title">Filter Tools</h3>
+					{ filterCount > 0 &&
+						<span className="filter-count">
+						(<span className="filter-value">{filterCount.toString() }</span>  selected)
+						</span>
+					}
+					{ this.state.displayFilters == true ?
+							<FontAwesomeIcon icon="chevron-down" />
+							:
+							<FontAwesomeIcon icon="chevron-up" />
+					}
 
-								<div className="view-opt-wrapper">
-									<input 
-										type="radio"
-										name="sortBy"
-										onChange={() => {
-											this.onSortByClicked("vernacularName")
-										}}
-										checked={this.props.sortBy === "vernacularName"}
-									/> <label className="" htmlFor={ "sortBy" }>Common name</label>
+				<div className="filter-tools" >
+						<SearchWidget
+							placeholder="Search plants by name"
+							clientRoot={this.props.clientRoot}
+							isLoading={ this.props.isLoading }
+							textValue={ this.props.searchText }
+							onTextValueChanged={ this.props.onSearchTextChanged }
+							onSearch={ this.props.onSearch }
+							suggestionUrl={ this.props.searchSuggestionUrl }
+							clid={ this.props.clid }
+							dynclid={ this.props.dynclid }
+							onFilterClicked={ this.onFilterClicked }
+							onClearSearch={ this.props.onClearSearch }
+						/>
+				
+				
+						<div className="view-opts container row">
+							<div className="row">
+								<div className="opt-labels">
+									<p>Display as:</p>
 								</div>
-								<div className="view-opt-wrapper">
-									<input 
-										type="radio"
-										name="sortBy"
-										onChange={() => {
-											this.onSortByClicked("sciName")
-										}}
-										checked={this.props.sortBy === "sciName"}
-									/> <label className="" htmlFor={ "sortBy" }>Scientific name</label>
-								</div>
+								<div className="opt-settings">
 
-							</div>
-						</div>
-					</div>
-      	</div>
-      	
-				<div className="filter-tools">
-					<h3>Filter by characteristic</h3>
-							{	this.props.characteristics &&
-								Object.keys(this.props.characteristics).map((idx) => {
-								let firstLevel = this.props.characteristics[idx];
-									return (					
-										<SideBarDropdown key={ firstLevel.hid } title={ firstLevel.headingname }>
-										{
-											Object.keys(firstLevel.characters).map((idx2) => {
-												let secondLevel = firstLevel.characters[idx2];
-												/*if (secondLevel.display == 'slider') {
-													console.log(secondLevel.states);
-												}*/
-												return (
-													<FeatureSelector
-														key={ secondLevel.cid }
-														cid={ secondLevel.cid }
-														title={ secondLevel.charname }
-														display={ secondLevel.display }
-														units={ secondLevel.units }
-														states={ secondLevel.states }
-														attrs={ this.props.filters.attrs }
-														sliders={ this.props.filters.sliders }
-														clientRoot={this.props.clientRoot}
-														/*onChange={ (featureKey) => {
-															this.props.onWholePlantChanged(plantFeature, featureKey)
-														}}*/
-														onAttrClicked={ this.props.onAttrClicked } 
-														onSliderChanged={ this.props.onSliderChanged } 
-													/>
-												)
-											})
-										}
+									<div className="view-opt-wrapper">
+										<input 
+											type="radio"
+											name="sortBy"
+											onChange={() => {
+												this.onSortByClicked("vernacularName")
+											}}
+											checked={this.props.sortBy === "vernacularName"}
+										/> <label className="" htmlFor={ "sortBy" }>Common name</label>
+									</div>
+									<div className="view-opt-wrapper">
+										<input 
+											type="radio"
+											name="sortBy"
+											onChange={() => {
+												this.onSortByClicked("sciName")
+											}}
+											checked={this.props.sortBy === "sciName"}
+										/> <label className="" htmlFor={ "sortBy" }>Scientific name</label>
+									</div>
+
+								</div>{ /* opt-settings */ }
+							</div>{ /* row */ }
+						</div>{ /*  view-opts */ }
+					
+					
+
+														<h3>Filter by characteristic</h3>
+																{	this.props.characteristics &&
+																	Object.keys(this.props.characteristics).map((idx) => {
+																	let firstLevel = this.props.characteristics[idx];
+																		return (					
+																			<SideBarDropdown key={ firstLevel.hid } title={ firstLevel.headingname }>
+																			{
+																				Object.keys(firstLevel.characters).map((idx2) => {
+																					let secondLevel = firstLevel.characters[idx2];
+																					/*if (secondLevel.display == 'slider') {
+																						console.log(secondLevel.states);
+																					}*/
+																					return (
+																						<FeatureSelector
+																							key={ secondLevel.cid }
+																							cid={ secondLevel.cid }
+																							title={ secondLevel.charname }
+																							display={ secondLevel.display }
+																							units={ secondLevel.units }
+																							states={ secondLevel.states }
+																							attrs={ this.props.filters.attrs }
+																							sliders={ this.props.filters.sliders }
+																							clientRoot={this.props.clientRoot}
+																							/*onChange={ (featureKey) => {
+																								this.props.onWholePlantChanged(plantFeature, featureKey)
+																							}}*/
+																							onAttrClicked={ this.props.onAttrClicked } 
+																							onSliderChanged={ this.props.onSliderChanged } 
+																						/>
+																					)
+																				})
+																			}
 						
-										</SideBarDropdown>
-									)
-								})
-							}
+																			</SideBarDropdown>
+																		)
+																	})
+																}
+													</div>{ /* filter-tools */ }
       	</div>
       </div>
     );

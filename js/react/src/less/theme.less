@@ -1705,13 +1705,26 @@ img {
       max-width: 100%;
     }
   }
-	.filter-tools {
+  .filter-header {
 		padding: 5px 0 2em;
 
 		h3 {
 			margin-left: 15px;
+			display: inline-block;
 		}
-
+		.filter-count {
+			margin-left: 10px;
+			text-transform: uppercase;
+			color: @med-green;
+			.filter-value {
+				color: @type-primary;
+				font-weight: bold;
+			}
+		}
+  
+  }
+	.filter-tools {
+		padding: 5px 0 2em;
 		.row {
 			margin: 0;
 		}
@@ -1817,6 +1830,20 @@ img {
 				display: inline-block;
 				width: 70px;
 			}
+		}
+	}
+	.mobile-to-filters {
+		text-align: center;
+		text-transform: uppercase;
+		padding: .8rem 0;
+		cursor: pointer;
+		span {
+			display: block;
+		}
+		svg {
+			color: @med-green;
+			font-size: 2rem;
+			margin-top: -3px;
 		}
 	}
 }
