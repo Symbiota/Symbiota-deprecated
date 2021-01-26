@@ -25,7 +25,26 @@
   max-height: 0;
 }
 
+.slider {
+  width: 100% !important;
+}
 
+.slider-tick {
+  width: 0.25em !important;
+  border-radius: 0.1em !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+.slider-handle {
+  border: 0.2em solid white !important;
+}
+
+.slider-handle, .tick-slider-selection, .in-selection {
+  background-image: linear-gradient(to bottom, #5FB021 0, #288000 100%) !important;
+  background-image: -webkit-linear-gradient(top, #5FB021 0, #288000 100%) !important;
+  background-image: -o-linear-gradient(top, #5FB021 0, #288000 100%) !important;
+}
 
 .dropdown-disabled, .dropdown-disabled * {
   opacity: 0.7 !important;
