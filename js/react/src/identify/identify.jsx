@@ -11,6 +11,7 @@ import {addUrlQueryParam, getUrlQueryParams} from "../common/queryParams.js";
 import {getCommonNameStr, getTaxaPage, getIdentifyPage, getChecklistPage} from "../common/taxaUtils";
 import PageHeader from "../common/pageHeader.jsx";
 import Loading from "../common/loading.jsx";
+import FilterModal from "../common/filterModal.jsx";
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { library } from "@fortawesome/fontawesome-svg-core";
@@ -29,6 +30,8 @@ class IdentifyApp extends React.Component {
       isLoading: true,
       isSearching: false,
       isMobile: false,
+      showFilterModal: false,
+      waitingToConfirm: null,
       clid: -1,
       pid: -1,
       projName: '',
@@ -82,7 +85,8 @@ class IdentifyApp extends React.Component {
     this.mobileScrollToResults = this.mobileScrollToResults.bind(this);
     this.mobileScrollToFilters = this.mobileScrollToFilters.bind(this);
     this.getFilterCount = this.getFilterCount.bind(this);
-    
+    this.setFilterModal = this.setFilterModal.bind(this);
+    this.doConfirm = this.doConfirm.bind(this);
   }
 
   getClid() {
@@ -256,6 +260,24 @@ class IdentifyApp extends React.Component {
 			this.doQuery();
     });
   }
+  catchQuery() {
+  	if (this.state.waitingToConfirm != null) {
+  		clearTimeout(this.state.waitingToConfirm);
+  	}
+  
+  	let doConfirm = false;
+  	if (this.state.isMobile) {
+  		doConfirm = true;
+  	}
+  	if (doConfirm) {
+	    this.state.waitingToConfirm = setTimeout(
+				() => this.setFilterModal(true), 
+				2000
+			);
+	  }else{
+	  	this.doQuery();
+	  }
+  }
   doQuery() {
     this.setState({
       //isLoading: true,
@@ -347,7 +369,15 @@ class IdentifyApp extends React.Component {
   	filterCount += Object.keys(this.state.filters.sliders).length;
   	return filterCount;
   }
-  
+  setFilterModal(val) {
+  	let newVal = false;
+  	newVal = (val == true? true : false);
+    this.setState({ showFilterModal: newVal });
+  }
+  doConfirm() {
+  	this.setFilterModal(false);
+  	this.doQuery();
+  }	
 	updateTotals(totals) {
 	  this.setState({
       totals: totals,
@@ -449,7 +479,7 @@ class IdentifyApp extends React.Component {
     this.setState({
       filters: Object.assign({}, this.state.filters, { attrs: filters.attrs })
     },function() {
-    	this.doQuery();
+    	this.catchQuery();
     });
     
   }
@@ -459,7 +489,7 @@ class IdentifyApp extends React.Component {
     this.setState({
       filters: Object.assign({}, this.state.filters, { sliders: filters.sliders })
     },function() {
-    	this.doQuery();
+    	this.catchQuery();
     });
   }
   
@@ -478,7 +508,7 @@ class IdentifyApp extends React.Component {
     this.setState({
       filters: Object.assign({}, this.state.filters, { sliders: filters.sliders })
     },function() {
-    	this.doQuery();
+    	this.catchQuery();
     });
   }
   onSortByChanged(type) {
@@ -496,7 +526,7 @@ class IdentifyApp extends React.Component {
 			sliders: {},
 		};
     this.setState({ filters: filters },function() {
-    	this.doQuery();
+    	this.catchQuery();
     });
 	}
   render() {
@@ -506,7 +536,6 @@ class IdentifyApp extends React.Component {
 		}
 		let suggestionUrl = `${this.props.clientRoot}/checklists/rpc/autofillsearch.php`;
 
-  	
     return (
     <div className={ "wrapper" + (this.state.isMobile? ' is-mobile': '')}>
 			<Loading 
@@ -582,7 +611,26 @@ class IdentifyApp extends React.Component {
 							getFilterCount={ this.getFilterCount } 
 							isMobile={ this.state.isMobile }
 						/>
-						
+					}
+					{ (this.getDynclid() > 0 || this.getClid() > 0) && this.state.isMobile == true &&
+						<FilterModal 
+							show={ this.state.showFilterModal }
+						>
+							<div className="modal-filter-content">
+								{/*<div>Filter(s) chosen:</div>*/}
+								<div 
+									className="btn btn-primary current-button" 
+									role="button"
+									onClick={() => this.doConfirm()}
+								>Filter and see results</div>
+								<div>or</div>
+								<div 
+									className="btn btn-primary current-button" 
+									role="button"
+									onClick={() => this.setFilterModal(false)}
+								>Add Another Filter</div>
+							</div>
+						</FilterModal>
 					}
 					</div>
 					<div className="col-12 col-xl-8 col-md-7 col-sm-6 results-wrapper" id="results-section">

@@ -7,8 +7,8 @@ import FeatureSelector from "./featureSelector.jsx";
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { library } from "@fortawesome/fontawesome-svg-core";
-import {faFileCsv, faFileWord, faPrint, faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons'
-library.add( faFileCsv, faFileWord, faPrint, faChevronDown, faChevronUp );
+import {faFileCsv, faFileWord, faPrint, faChevronDown, faChevronUp, faChevronCircleDown, faChevronCircleUp, faCircle } from '@fortawesome/free-solid-svg-icons'
+library.add( faFileCsv, faFileWord, faPrint, faChevronDown, faChevronUp, faChevronCircleDown, faChevronCircleUp, faCircle );
 
 
 /**
@@ -96,7 +96,8 @@ class SideBar extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      displayFilters: true
+      displayFilters: null,
+      isMobile: null,
     };
 
     this.onSortByClicked = this.props.onSortByClicked.bind(this);
@@ -105,14 +106,34 @@ class SideBar extends React.Component {
   }
   componentDidMount() {
   	let displayFilters = true;
-  	if (this.props.isMobile == true) {
+		let isMobile = false;
+
+  	if (this.state.displayFilters == null && this.props.isMobile == true) {
   		displayFilters = false;
+  		isMobile = true;
   	}
-  		
 		this.setState({
 			displayFilters: displayFilters,
+			isMobile: isMobile
 		});
 	};
+	
+	componentWillReceiveProps(nextProps) {//necessary because React doesn't set isMobile in componentDidMount grr
+  	let displayFilters = this.state.displayFilters;
+		let isMobile = this.state.isMobile;
+		
+		if (isMobile != this.props.isMobile) {
+			isMobile = this.props.isMobile;
+			if (isMobile == true) {
+				displayFilters = false;
+			}
+		}
+		this.setState({
+			displayFilters: displayFilters,
+			isMobile: isMobile
+		});
+		
+	}
   
   toggleFilters = () => {
 		let newVal = true;
@@ -131,7 +152,6 @@ class SideBar extends React.Component {
   	}
   	
   	let filterCount = this.getFilterCount();
-
     return (
       <div
         id="sidebar"
@@ -189,101 +209,123 @@ class SideBar extends React.Component {
 						(<span className="filter-value">{filterCount.toString() }</span>  selected)
 						</span>
 					}
-					{ this.state.displayFilters == true ?
-							<FontAwesomeIcon icon="chevron-down" />
-							:
-							<FontAwesomeIcon icon="chevron-up" />
+					{ this.props.isMobile == true && this.state.displayFilters == true &&
+								<span className="filter-toggle">
+									<span className="fa-layers fa-fw">
+										<FontAwesomeIcon className="back" icon="circle" onClick={() => this.toggleFilters()} 
+										/> 
+										<FontAwesomeIcon className="front" icon="chevron-circle-up" onClick={() => this.toggleFilters()} 
+										/>
+									</span>
+								</span>
 					}
-
-				<div className="filter-tools" >
-						<SearchWidget
-							placeholder="Search plants by name"
-							clientRoot={this.props.clientRoot}
-							isLoading={ this.props.isLoading }
-							textValue={ this.props.searchText }
-							onTextValueChanged={ this.props.onSearchTextChanged }
-							onSearch={ this.props.onSearch }
-							suggestionUrl={ this.props.searchSuggestionUrl }
-							clid={ this.props.clid }
-							dynclid={ this.props.dynclid }
-							onFilterClicked={ this.onFilterClicked }
-							onClearSearch={ this.props.onClearSearch }
-						/>
-				
-				
-						<div className="view-opts container row">
-							<div className="row">
-								<div className="opt-labels">
-									<p>Display as:</p>
-								</div>
-								<div className="opt-settings">
-
-									<div className="view-opt-wrapper">
-										<input 
-											type="radio"
-											name="sortBy"
-											onChange={() => {
-												this.onSortByClicked("vernacularName")
-											}}
-											checked={this.props.sortBy === "vernacularName"}
-										/> <label className="" htmlFor={ "sortBy" }>Common name</label>
-									</div>
-									<div className="view-opt-wrapper">
-										<input 
-											type="radio"
-											name="sortBy"
-											onChange={() => {
-												this.onSortByClicked("sciName")
-											}}
-											checked={this.props.sortBy === "sciName"}
-										/> <label className="" htmlFor={ "sortBy" }>Scientific name</label>
-									</div>
-
-								</div>{ /* opt-settings */ }
-							</div>{ /* row */ }
-						</div>{ /*  view-opts */ }
 					
+					{ this.props.isMobile == true && this.state.displayFilters == false &&
+								<span className="filter-toggle">
+									Open
+									<span className="fa-layers fa-fw">
+										<FontAwesomeIcon className="back" icon="circle" onClick={() => this.toggleFilters()} 
+										/> 
+										<FontAwesomeIcon className="front" icon="chevron-circle-down" onClick={() => this.toggleFilters()} 
+										/>
+									</span>
+								</span>
+					}
 					
-
-														<h3>Filter by characteristic</h3>
-																{	this.props.characteristics &&
-																	Object.keys(this.props.characteristics).map((idx) => {
-																	let firstLevel = this.props.characteristics[idx];
-																		return (					
-																			<SideBarDropdown key={ firstLevel.hid } title={ firstLevel.headingname }>
-																			{
-																				Object.keys(firstLevel.characters).map((idx2) => {
-																					let secondLevel = firstLevel.characters[idx2];
-																					/*if (secondLevel.display == 'slider') {
-																						console.log(secondLevel.states);
-																					}*/
-																					return (
-																						<FeatureSelector
-																							key={ secondLevel.cid }
-																							cid={ secondLevel.cid }
-																							title={ secondLevel.charname }
-																							display={ secondLevel.display }
-																							units={ secondLevel.units }
-																							states={ secondLevel.states }
-																							attrs={ this.props.filters.attrs }
-																							sliders={ this.props.filters.sliders }
-																							clientRoot={this.props.clientRoot}
-																							/*onChange={ (featureKey) => {
-																								this.props.onWholePlantChanged(plantFeature, featureKey)
-																							}}*/
-																							onAttrClicked={ this.props.onAttrClicked } 
-																							onSliderChanged={ this.props.onSliderChanged } 
-																						/>
-																					)
-																				})
-																			}
-						
-																			</SideBarDropdown>
-																		)
-																	})
-																}
-													</div>{ /* filter-tools */ }
       	</div>
+
+
+					{ this.state.displayFilters == true &&
+					
+						<div className="filter-tools" >
+							<SearchWidget
+								placeholder="Search plants by name"
+								clientRoot={this.props.clientRoot}
+								isLoading={ this.props.isLoading }
+								textValue={ this.props.searchText }
+								onTextValueChanged={ this.props.onSearchTextChanged }
+								onSearch={ this.props.onSearch }
+								suggestionUrl={ this.props.searchSuggestionUrl }
+								clid={ this.props.clid }
+								dynclid={ this.props.dynclid }
+								onFilterClicked={ this.onFilterClicked }
+								onClearSearch={ this.props.onClearSearch }
+							/>
+				
+				
+							<div className="view-opts container row">
+								<div className="row">
+									<div className="opt-labels">
+										<p>Display as:</p>
+									</div>
+									<div className="opt-settings">
+
+										<div className="view-opt-wrapper">
+											<input 
+												type="radio"
+												name="sortBy"
+												onChange={() => {
+													this.onSortByClicked("vernacularName")
+												}}
+												checked={this.props.sortBy === "vernacularName"}
+											/> <label className="" htmlFor={ "sortBy" }>Common name</label>
+										</div>
+										<div className="view-opt-wrapper">
+											<input 
+												type="radio"
+												name="sortBy"
+												onChange={() => {
+													this.onSortByClicked("sciName")
+												}}
+												checked={this.props.sortBy === "sciName"}
+											/> <label className="" htmlFor={ "sortBy" }>Scientific name</label>
+										</div>
+
+									</div>{ /* opt-settings */ }
+								</div>{ /* row */ }
+							</div>{ /*  view-opts */ }
+					
+					
+
+							<h3>Filter by characteristic</h3>
+									{	this.props.characteristics &&
+										Object.keys(this.props.characteristics).map((idx) => {
+										let firstLevel = this.props.characteristics[idx];
+											return (					
+												<SideBarDropdown key={ firstLevel.hid } title={ firstLevel.headingname }>
+												{
+													Object.keys(firstLevel.characters).map((idx2) => {
+														let secondLevel = firstLevel.characters[idx2];
+														/*if (secondLevel.display == 'slider') {
+															console.log(secondLevel.states);
+														}*/
+														return (
+															<FeatureSelector
+																key={ secondLevel.cid }
+																cid={ secondLevel.cid }
+																title={ secondLevel.charname }
+																display={ secondLevel.display }
+																units={ secondLevel.units }
+																states={ secondLevel.states }
+																attrs={ this.props.filters.attrs }
+																sliders={ this.props.filters.sliders }
+																clientRoot={this.props.clientRoot}
+																/*onChange={ (featureKey) => {
+																	this.props.onWholePlantChanged(plantFeature, featureKey)
+																}}*/
+																onAttrClicked={ this.props.onAttrClicked } 
+																onSliderChanged={ this.props.onSliderChanged } 
+															/>
+														)
+													})
+												}
+
+												</SideBarDropdown>
+											)
+										})
+									}
+						</div>
+					}
       </div>
     );
   }

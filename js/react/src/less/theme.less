@@ -1592,13 +1592,30 @@ img {
 }
 
 .explore, .identify, #react-garden {
-
+	.modal-backdrop.filter-modal {
+		background-color: rgba(255,255,255,.9);
+		.modal-content {
+			border: none;
+			margin-top: 0;
+			color: @dark-grn-type;
+			font-weight: bold;
+			height: 100%;
+			.modal-filter-content {
+		 		margin: auto 0;
+		 		text-align: center;
+		 		.btn-primary {
+		 			padding: .5em .8em;
+		 		}
+			}
+		}
+	}
   #sidebar {
   	font-size: .9rem;
 		padding-bottom: 1em;
     h3 {
       font-size: 22px;
       font-weight: bold;
+      margin-left: 15px;
     }
 
     .currently-displayed {
@@ -1699,29 +1716,66 @@ img {
     }
 
     .view-opts {
-      border-top: 1px dashed black;
-      margin: 0 15px 10px 15px !important;
+      //border-top: 1px dashed black;
+      margin: 0 15px 20px 15px !important;
       padding: 5px 0 0 0;
       max-width: 100%;
     }
   }
   .filter-header {
-		padding: 5px 0 2em;
-
+		padding: 5px 0 1rem;
+		display: flex;
+		flex-flow: row nowrap;
+		justify-content: space-between;
+		align-items: center;
+		line-height: 1rem;
 		h3 {
 			margin-left: 15px;
+			margin-bottom: 0;
 			display: inline-block;
-		}
+			flex-basis: 35%;
+		}	
 		.filter-count {
 			margin-left: 10px;
 			text-transform: uppercase;
 			color: @med-green;
+			flex-basis: 65%;
+			vertical-align: middle;
 			.filter-value {
 				color: @type-primary;
 				font-weight: bold;
 			}
 		}
-  
+		.filter-toggle {
+			margin-right: 26px;
+			text-align: right;
+			line-height: 1rem;
+			text-transform: uppercase;
+			svg {
+				font-size: 2rem;
+				vertical-align: middle;
+				margin: auto 10px auto 6px;
+				&.front {
+					color: white;
+				}
+				&.back {
+					color: @med-green;
+				}
+			}
+		}
+		
+		@media (max-width: 576px) {
+			h3 {
+				flex-basis: 40%;
+			}
+			.filter-count {
+				flex-basis: 40%;
+			}
+			.filter-toggle {
+				flex-basis: 20%;
+			}
+		}
+		
   }
 	.filter-tools {
 		padding: 5px 0 2em;
@@ -1748,7 +1802,7 @@ img {
 						/*font-weight: bold;*/
 					}
 					.will-v-flip {
-						transition: transform 0.5s, background-color 0.5s;
+						transition: transform 0.5s, background-color 0.5;
 					}
 					img {
 						float: right;
@@ -1807,8 +1861,8 @@ img {
 		}
 	}
 	#view-opts, .view-opts {
-		border-bottom: 1px dotted darkgreen;
-		font-size: 0.8em;
+		//border-bottom: 1px dotted darkgreen;
+		//font-size: 0.8em;
 		margin-top: 1em;
 		.no-results {
 			color: @gray-type;
