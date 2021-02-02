@@ -324,18 +324,53 @@ img {
 .slider {
   //width: 100% !important;
   //margin-top: 1rem;
-  width: 92%;
-  margin: 1rem 4% 0;
+  width: 90%;
+  margin: 1rem 5% 0;
   
   .bp3-slider {
+  	margin-top: 1rem;
+  	height: 26px;
+		.bp3-slider-progress {
+				background-color: @light-green;
+			&.bp3-intent-primary {
+				background-color: @med-green;
+			}
+		}
+		.bp3-slider-axis {
+			.bp3-slider-label {
+				display: none;
+			}
+		}
+		.bp3-slider-handle {
+			background-color: @med-green;
+			background-image: none;
+			box-shadow: none;
+			//border: 1px solid @light-green;
+			//box-shadow: 0 0 0 1px rgb(255 255 255 / 20%), 0 1px 1px rgb(255 255 255 / 20%);
+			.bp3-slider-label {
+				background-color: @light-green;	
+				transform: translate(-50%, -24px);
+				color: @dark-grn-type;
+				box-shadow: none;
+				font-size: .9rem !important;
+				padding: 2px 4px;
+			}
+			&.bp3-start {
+				.bp3-slider-label {
+					margin-left: 4px;
+				}
+			}
+			&.bp3-end {
+				.bp3-slider-label {
+					margin-left: 4px;
+				}
+			}
+		}
   }
-  .bp3-slider-progress.bp3-intent-primary {
-  	background-color: @med-green;
-  }
-  .bp3-slider-handle {
-  	.bp3-slider-label {
-  		background-color: @dark-green;	
-  	}
+  .slider-description {
+  	display: block;
+  	text-align: center;
+  	//font-weight: bold;
   }
 }
 

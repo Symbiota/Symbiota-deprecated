@@ -148,7 +148,7 @@ class PlantSlider extends React.Component {
 				valueArray[0] = valueArray[1];
 				valueArray[1] = tmp;
 			}*/
-			valueDesc = `(${min} ` + sliderState.units + ` - ${max} ` + sliderState.units + `)`;
+			valueDesc = `${min} ` + sliderState.units + ` - ${max} ` + sliderState.units + ``;
 		}
 		/*if (valueArray[0] === this.minMax[0] && valueArray[1] === this.minMax[1]) {
 			valueDesc = "(Any size)";
@@ -182,7 +182,7 @@ class PlantSlider extends React.Component {
 					labelPrecision={ this.state.labelPrecision }
 					labelStepSize={ this.state.labelStepSize }
 				/>     
-        <label className="d-block text-center any-size" id="slider-description" htmlFor={ this.props.name }>
+        <label className="slider-description" htmlFor={ this.props.name }>
           { desc }
         </label>
       </div>
