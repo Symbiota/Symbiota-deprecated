@@ -50,7 +50,7 @@ function exportChecklistToWord($checklist) {
 	this required a path fix to /vendor/phpoffice/phpword/bootstrap.php
 	*/
 	$bootstrap = $SERVER_ROOT.'/vendor/phpoffice/phpword/bootstrap.php';
-	var_dump($bootstrap);exit;
+	#var_dump($bootstrap);exit;
 	require_once $bootstrap;
 
 	$exportEngine = '';
