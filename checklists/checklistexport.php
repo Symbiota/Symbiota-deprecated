@@ -45,7 +45,7 @@ function exportChecklistToCSV($checklist) {
 
 
 function exportChecklistToWord($checklist) {
-	global $SERVER_ROOT;
+	global $SERVER_ROOT, $CLIENT_ROOT;
 
 	/*
 	using composer because need newer version (PHP7-compatible?); 
