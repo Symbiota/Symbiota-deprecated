@@ -276,7 +276,7 @@ function exportChecklistToWord($checklist) {
 	$targetFile = $SERVER_ROOT.'/temp/report/'.$fileName.'.'.$exportExtension;
 	var_dump($targetFile);
 
-	$phpWord->save($targetFile, $exportEngine);
+	$phpWord->save($targetFile);
 /*
 	header('Content-Description: File Transfer');
 	header('Content-type: application/force-download');
