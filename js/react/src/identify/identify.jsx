@@ -61,6 +61,7 @@ class IdentifyApp extends React.Component {
       	species: 0,
       	taxa: 0
       },
+      apiUrl: '',
       exportUrlCsv: '',
       exportUrlWord: '',
       googleMapUrl: '',
@@ -111,7 +112,9 @@ class IdentifyApp extends React.Component {
 
   componentDidMount() {
     // Load search results
-    let url = `${this.props.clientRoot}/ident/rpc/api.php`;
+    let apiUrl = `${this.props.clientRoot}/ident/rpc/api.php`;
+    let url = apiUrl;
+
     let identParams = new URLSearchParams();
     if (this.getClid() > -1) {
 	    identParams.append("clid",this.getClid());
@@ -167,8 +170,9 @@ class IdentifyApp extends React.Component {
 					fixedTotals: res.totals,
 					googleMapUrl: googleMapUrl,
 					isMobile: isMobile,
-					exportUrlCsv: `${this.props.clientRoot}/checklists/rpc/export.php?clid=` + this.getClid() + `&pid=` + this.getPid() + `&dynclid=` + this.getDynclid(),
-					exportUrlWord: `${this.props.clientRoot}/checklists/defaultchecklistexport.php?cl=` + this.getClid() + `&pid=` + this.getPid() + `&dynclid=` + this.getDynclid()
+					apiUrl: apiUrl,
+					exportUrlCsv: apiUrl + `?export=csv&clid=` + this.getClid() + `&pid=` + this.getPid() + `&dynclid=` + this.getDynclid(),
+					exportUrlWord: apiUrl + `?export=word&clid=` + this.getClid() + `&pid=` + this.getPid() + `&dynclid=` + this.getDynclid()
 				});
 				const pageTitle = document.getElementsByTagName("title")[0];
 				pageTitle.innerHTML = `${pageTitle.innerHTML} ${res.title}`;
@@ -188,9 +192,10 @@ class IdentifyApp extends React.Component {
   }
   updateExportUrlCsv() {
 
-  	let url = `${this.props.clientRoot}/checklists/rpc/export.php`;
+  	let url = this.state.apiUrl;
   	let exportParams = new URLSearchParams();
   	
+		exportParams.append("export",'csv');
 		exportParams.append("clid",this.getClid());
 		exportParams.append("pid",this.getPid());
 		exportParams.append("dynclid",this.getDynclid());
@@ -199,16 +204,17 @@ class IdentifyApp extends React.Component {
 			exportParams.append("search",this.state.filters.searchText);
 		}
   	url += '?' + exportParams.toString();
-
+  	//console.log(url);
 	  this.setState({
       exportUrlCsv: url,
     });
   }
   updateExportUrlWord() {
-  	let url = `${this.props.clientRoot}/checklists/defaultchecklistexport.php`;
+  	let url = this.state.apiUrl;
   	let exportParams = new URLSearchParams();
-  	//params here match /checklists/defaultchecklistexport.php
-		exportParams.append("cl",this.getClid());
+
+		exportParams.append("export",'word');
+		exportParams.append("clid",this.getClid());
 		exportParams.append("pid",this.getPid());
 		exportParams.append("dynclid",this.getDynclid());
 		exportParams.append("showcommon",1);
@@ -216,6 +222,7 @@ class IdentifyApp extends React.Component {
 			exportParams.append("taxonfilter",this.state.filters.searchText);
 		}
   	url += '?' + exportParams.toString();
+  	//console.log(url);
 	  this.setState({
       exportUrlWord: url,
     });
@@ -283,7 +290,7 @@ class IdentifyApp extends React.Component {
       //isLoading: true,
       isSearching: true,
     });
-    let url = `${this.props.clientRoot}/ident/rpc/api.php`;
+    let url = this.state.apiUrl;
     let identParams = new URLSearchParams();
     if (this.getClid() > -1) {
 	    identParams.append("clid",this.getClid());

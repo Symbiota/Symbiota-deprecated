@@ -176,7 +176,7 @@ class SideBar extends React.Component {
 						<div className="stat-label">Total Taxa:</div>
 						<div className="stat-value">{ this.props.totals['taxa'] }{ showFixedTotals && <span className="fixed-totals"> (of { this.props.fixedTotals['taxa']})</span> } (including subsp. and var.)</div>
 					</div>
-					{ this.props.clid > -1 &&
+					{ (this.props.clid > -1 || this.props.dynclid > -1) &&
 						<div className="stat export">
 							<div className="stat-label">Export:</div>
 							<div className="stat-value"> 

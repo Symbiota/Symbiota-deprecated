@@ -8,11 +8,11 @@ include_once("$SERVER_ROOT/classes/ExploreManager.php");
 include_once("$SERVER_ROOT/classes/TaxaManager.php");
 include_once("$SERVER_ROOT/classes/InventoryManager.php");
 
-
-
 function getEmpty() {
   return [
     "clid" => -1,
+    "pid" => -1,
+    "dynclid" => -1,
     "projName" => '',
     "title" => '',
     "intro" => '',
@@ -23,6 +23,8 @@ function getEmpty() {
     "characteristics" => [],
     "lat" => 0,
     "lng" => 0,
+    "locality" => '',
+    "type" => ''
   ];
 }
 
@@ -36,7 +38,7 @@ function get_data($params) {
 	$search = null;
 	$results = getEmpty();
 	
-	if (isset($params["clid"])) {
+	if (isset($params["clid"]) && $params["clid"] > -1) {
 		$em = SymbosuEntityManager::getEntityManager();
 		$repo = $em->getRepository("Fmchecklists");
 		$model = $repo->find($params["clid"]);
@@ -50,12 +52,14 @@ function get_data($params) {
 		$results["abstract"] = ($checklist->getAbstract()? $checklist->getAbstract() :'') ;
     $results["lat"] = ($checklist->getLat()? $checklist->getLat() :'') ;
     $results["lng"] = ($checklist->getLng()? $checklist->getLng() :'') ;
+    $results["locality"] = ($checklist->getLocality()? $checklist->getLocality() :'') ;
+    $results["type"] = ($checklist->getType()? $checklist->getType() :'') ;
 
 		$projRepo = SymbosuEntityManager::getEntityManager()->getRepository("Fmprojects");					
 		$model = $projRepo->find($params["pid"]);
 		$project = InventoryManager::fromModel($model);
 		$results["projName"] = $project->getProjname();
-	}elseif(isset($params['dynclid'])) {
+	}elseif(isset($params['dynclid']) && $params['dynclid'] > -1) {
 
 		$em = SymbosuEntityManager::getEntityManager();
 		$repo = $em->getRepository("Fmdynamicchecklists");
@@ -64,13 +68,12 @@ function get_data($params) {
 			$dynamic_checklist = ExploreManager::fromModel($model);
 			$results["title"] = $dynamic_checklist->getTitle();
 		}
-	
 	}
   	
 	$identManager = new IdentManager();
-	if (isset($params['clid'])) $identManager->setClid($params['clid']);
-	if (isset($params['dynclid'])) $identManager->setDynClid($params['dynclid']);
-	if (isset($params['pid'])) $identManager->setPid($params['pid']);
+	if (isset($params['clid']) && $params['clid'] > -1) $identManager->setClid($params['clid']);
+	if (isset($params['dynclid']) && $params['dynclid'] > -1) $identManager->setDynClid($params['dynclid']);
+	if (isset($params['pid']) && $params['pid'] > -1) $identManager->setPid($params['pid']);
 	if (isset($params['taxon'])) $identManager->setTaxonFilter($params['taxon']);
 	if (isset($params['rv'])) $identManager->setRelevanceValue($params['rv']);
 	$attrs = array();
@@ -136,6 +139,7 @@ function get_data($params) {
 	/* for slider chars, create an additional numeric value for charstatenames e.g. 11+ becomes 11
 			because slider widgets don't like non-numeric values
 	 */
+	 #var_dump($characteristics);
 	foreach ($characteristics as $key => $group) {
 		foreach ($group['characters'] as $gkey => $char) {
 			if ($char['display'] == 'slider') {
@@ -152,37 +156,35 @@ function get_data($params) {
 	return $results;
 }
 
-
-
-#copied intact from garden/rcp/api.php
-function get_characteristics($cid) {#TODO - get rid of this
-	$em = SymbosuEntityManager::getEntityManager();
-	$charStateRepo = $em->getRepository("Kmcs");
-	$csQuery = $charStateRepo->findBy([ "cid" => $cid ], ["sortsequence" => "ASC"]);
-	$return = array_map(function($cs) { return $cs->getCharstatename(); }, $csQuery);
-	return $return;
-}
-
-
 $result = [];
 #$result = get_data($_GET);
 
 
-if (key_exists("attr", $_GET) && is_numeric($_GET['attr'])) {#get rid of this
-	$result = get_characteristics(intval($_GET['attr']));
-} elseif (
-						(array_key_exists("clid", $_GET) && is_numeric($_GET["clid"])&& array_key_exists("pid", $_GET) && is_numeric($_GET["pid"]))
-						|| (array_key_exists("dynclid", $_GET) && is_numeric($_GET["dynclid"]))
-				) {
+if (
+			(array_key_exists("clid", $_GET) && is_numeric($_GET["clid"])&& array_key_exists("pid", $_GET) && is_numeric($_GET["pid"]))
+			|| (array_key_exists("dynclid", $_GET) && is_numeric($_GET["dynclid"]))
+		) {
 	$result = get_data($_GET);
 } else {
 	#todo: generate error or redirect
 }
 
-#var_dump($result);
-// Begin View
-
 array_walk_recursive($result,'cleanWindowsRecursive');#replace Windows characters
-header("Content-Type: application/json; charset=utf-8");
-echo json_encode($result, JSON_NUMERIC_CHECK | JSON_INVALID_UTF8_SUBSTITUTE);
+
+if (array_key_exists("export", $_GET) && in_array($_GET["export"],array('word','csv'))) {
+	include_once("$SERVER_ROOT/checklists/checklistexport.php");
+	switch($_GET['export']) {
+		case 'word':
+			exportChecklistToWord($result);
+			break;
+		case 'csv':
+			exportChecklistToCSV($result);
+			break;
+	
+	}
+}else{
+	header("Content-Type: application/json; charset=utf-8");
+	echo json_encode($result, JSON_NUMERIC_CHECK | JSON_INVALID_UTF8_SUBSTITUTE);
+}
+
 ?>

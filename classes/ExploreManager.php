@@ -63,6 +63,12 @@ class ExploreManager {
   public function getLng() {
     return $this->model->getLongcentroid();
   }
+  public function getLocality() {
+    return $this->model->getLocality();
+  }
+  public function getType() {
+    return $this->model->getType();
+  }
   public function getTaxa() {
   	$this->taxa = $this->populateTaxa($this->getClid());
     return $this->taxa;
