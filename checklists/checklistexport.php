@@ -275,13 +275,18 @@ function exportChecklistToWord($checklist) {
 	$fileName = str_replace(' ','_',strtolower($checklist['title']));
 	$fileName = str_replace('/','_',$fileName);
 	$fileName = str_replace(':','',$fileName);
-	$targetFile = $SERVER_ROOT.'/temp/report/'.$fileName.'.'.$exportExtension;
+	#$targetFile = $SERVER_ROOT.'/temp/report/'.$fileName.'.'.$exportExtension;
 
-	var_dump($targetFile);
-	$phpWord->save($targetFile,$exportEngine);
+	#var_dump($targetFile);
+	#$phpWord->save($targetFile,$exportEngine);
 	#$objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'Word2007');
 	#$objWriter->save($targetFile);
 	echo "done";
+	
+$temp_file = tempnam(sys_get_temp_dir(), 'PHPWord');
+$phpWord->save($temp_file);
+	var_dump($temp_file);
+	
 /*
 	header('Content-Description: File Transfer');
 	header('Content-type: application/force-download');
