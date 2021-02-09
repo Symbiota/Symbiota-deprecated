@@ -272,7 +272,7 @@ function exportChecklistToWord($checklist) {
 		} #end foreach taxa
 	#} # endif $showImages
 
-	$fileName = str_replace(' ','_',$checklist['title']);
+	$fileName = str_replace(' ','_',strtolower($checklist['title']));
 	$fileName = str_replace('/','_',$fileName);
 	$fileName = str_replace(':','',$fileName);
 	$targetFile = $SERVER_ROOT.'/temp/report/'.$fileName.'.'.$exportExtension;
