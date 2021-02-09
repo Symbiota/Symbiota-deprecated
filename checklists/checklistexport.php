@@ -41,6 +41,8 @@ function exportChecklistToCSV($checklist) {
 
 
 function exportChecklistToWord($checklist) {
+
+echo "exportChecklistToWord";exit;
 	include_once('../config/symbini.php');
 
 	/*
