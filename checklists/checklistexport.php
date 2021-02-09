@@ -272,7 +272,8 @@ function exportChecklistToWord($checklist) {
 
 	$fileName = str_replace(' ','_',$checklist['title']);
 	$fileName = str_replace('/','_',$fileName);
-	$targetFile = $serverRoot.'/temp/report/'.$fileName.'.'.$exportExtension;
+	$fileName = str_replace(':','',$fileName);
+	$targetFile = $SERVER_ROOT.'/temp/report/'.$fileName.'.'.$exportExtension;
 	var_dump($targetFile);
 /*
 	$phpWord->save($targetFile, $exportEngine);
