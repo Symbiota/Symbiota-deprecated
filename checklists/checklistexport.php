@@ -284,7 +284,9 @@ function exportChecklistToWord($checklist) {
 	echo "done";
 	
 $temp_file = tempnam(sys_get_temp_dir(), 'PHPWord');
-$phpWord->save($temp_file);
+
+	$objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'Word2007');
+	$objWriter->save($temp_file);
 	#var_dump($temp_file);
 	
 
