@@ -274,8 +274,8 @@ function exportChecklistToWord($checklist) {
 	$fileName = str_replace('/','_',$fileName);
 	$fileName = str_replace(':','',$fileName);
 	$targetFile = $SERVER_ROOT.'/temp/report/'.$fileName.'.'.$exportExtension;
-	#var_dump($targetFile);
-
+	var_dump($targetFile);
+/*
 	$phpWord->save($targetFile, $exportEngine);
 
 	header('Content-Description: File Transfer');
@@ -285,6 +285,6 @@ function exportChecklistToWord($checklist) {
 	header('Content-Length: '.filesize($targetFile));
 	readfile($targetFile);
 	unlink($targetFile);
-	
+	*/
 }
 ?>
