@@ -46,8 +46,9 @@ function exportChecklistToWord($checklist) {
 	using composer because need newer version (PHP7-compatible?); 
 	this required a path fix to /vendor/phpoffice/phpword/bootstrap.php
 	*/
-	require_once $serverRoot.$clientRoot.'/vendor/phpoffice/phpword/bootstrap.php';
-
+	$bootstrap = $serverRoot.$clientRoot.'/vendor/phpoffice/phpword/bootstrap.php';
+	require_once $bootstrap;
+var_dump($bootstrap);
 	$exportEngine = '';
 	$exportExtension = '';
 	$exportEngine = 'Word2007';
