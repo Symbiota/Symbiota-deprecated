@@ -42,7 +42,6 @@ function exportChecklistToCSV($checklist) {
 
 function exportChecklistToWord($checklist) {
 
-echo "exportChecklistToWord";exit;
 	include_once('../config/symbini.php');
 
 	/*
@@ -52,6 +51,7 @@ echo "exportChecklistToWord";exit;
 	$bootstrap = $SERVER_ROOT.'/vendor/phpoffice/phpword/bootstrap.php';
 	require_once $bootstrap;
 
+var_dump($bootstrap);exit;
 	$exportEngine = '';
 	$exportExtension = '';
 	$exportEngine = 'Word2007';
