@@ -1,4 +1,8 @@
 <?php
+/*
+	REPLACED BY checklistexport.php
+
+*/
 include_once("../../config/symbini.php");
 
 include_once("$SERVER_ROOT/config/SymbosuEntityManager.php");

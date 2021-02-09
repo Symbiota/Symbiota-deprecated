@@ -1,4 +1,8 @@
 <?php
+/*
+	REPLACED BY checklistexport.php
+
+*/
 
 include_once('../config/symbini.php');
 include_once($serverRoot.'/classes/ChecklistManager.php');
