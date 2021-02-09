@@ -285,16 +285,16 @@ function exportChecklistToWord($checklist) {
 	
 $temp_file = tempnam(sys_get_temp_dir(), 'PHPWord');
 $phpWord->save($temp_file);
-	var_dump($temp_file);
+	#var_dump($temp_file);
 	
-/*
+
 	header('Content-Description: File Transfer');
 	header('Content-type: application/force-download');
-	header('Content-Disposition: attachment; filename='.basename($targetFile));
+	header('Content-Disposition: attachment; filename='.$fileName);
 	header('Content-Transfer-Encoding: binary');
-	header('Content-Length: '.filesize($targetFile));
-	readfile($targetFile);
-	unlink($targetFile);
-	*/
+	header('Content-Length: '.filesize($temp_file));
+	readfile($temp_file);
+	unlink($temp_file);
+	
 }
 ?>
