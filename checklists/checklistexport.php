@@ -44,12 +44,12 @@ function exportChecklistToWord($checklist) {
 
 	include_once('../config/symbini.php');
 
+var_dump($SERVER_ROOT);exit;
 	/*
 	using composer because need newer version (PHP7-compatible?); 
 	this required a path fix to /vendor/phpoffice/phpword/bootstrap.php
 	*/
 	$bootstrap = $SERVER_ROOT.'/vendor/phpoffice/phpword/bootstrap.php';
-var_dump($bootstrap);exit;
 	require_once $bootstrap;
 
 	$exportEngine = '';
