@@ -45,7 +45,6 @@ function exportChecklistToCSV($checklist) {
 function exportChecklistToWord($checklist) {
 	global $SERVER_ROOT;
 
-var_dump($SERVER_ROOT);exit;
 	/*
 	using composer because need newer version (PHP7-compatible?); 
 	this required a path fix to /vendor/phpoffice/phpword/bootstrap.php
