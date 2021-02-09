@@ -1,6 +1,7 @@
 <?php
 
 function exportChecklistToCSV($checklist) {
+	
 	$taxa = array();
 	$header = array(
 		"Family",
@@ -40,15 +41,15 @@ function exportChecklistToCSV($checklist) {
 
 
 function exportChecklistToWord($checklist) {
-	global $serverRoot, $clientRoot;
+	include_once('../config/symbini.php');
 
 	/*
 	using composer because need newer version (PHP7-compatible?); 
 	this required a path fix to /vendor/phpoffice/phpword/bootstrap.php
 	*/
-	$bootstrap = $serverRoot.$clientRoot.'/vendor/phpoffice/phpword/bootstrap.php';
+	$bootstrap = $SERVER_ROOT.'/vendor/phpoffice/phpword/bootstrap.php';
 	require_once $bootstrap;
-var_dump($bootstrap);
+
 	$exportEngine = '';
 	$exportExtension = '';
 	$exportEngine = 'Word2007';
@@ -99,7 +100,7 @@ var_dump($bootstrap);
 	$section = $phpWord->addSection(array('pageSizeW'=>12240,'pageSizeH'=>15840,'marginLeft'=>1080,'marginRight'=>1080,'marginTop'=>1080,'marginBottom'=>1080,'headerHeight'=>0,'footerHeight'=>0));
 
 	$textrun = $section->addTextRun('defaultPara');
-	$textrun->addLink('http://'.$_SERVER['HTTP_HOST'].$clientRoot.'/checklists/checklist.php?cl='.$checklist['clid']."&proj=".$checklist['pid']."&dynclid=".$checklist['dynclid'],htmlspecialchars($title));#,'titleFont'	
+	$textrun->addLink('http://'.$_SERVER['HTTP_HOST'].$CLIENT_ROOT.'/checklists/checklist.php?cl='.$checklist['clid']."&proj=".$checklist['pid']."&dynclid=".$checklist['dynclid'],htmlspecialchars($title));#,'titleFont'	
 	#$textrun->addTextBreak(1);
 	if($checklist['clid']){
 		if(isset($checklist['type']) && $checklist['type'] == 'rarespp'){
@@ -189,7 +190,7 @@ var_dump($bootstrap);
 				$textrun = $cell->addTextRun('imagePara');
 				$textrun->addImage($imgSrc,array('width'=>160,'height'=>160));
 				$textrun->addTextBreak(1);
-				$textrun->addLink('http://'.$_SERVER['HTTP_HOST'].$clientRoot.'/taxa/index.php?taxauthid=1&taxon='.$tid.'&cl='.$clid,htmlspecialchars($sppArr['sciname']),'topicFont');
+				$textrun->addLink('http://'.$_SERVER['HTTP_HOST'].$CLIENT_ROOT.'/taxa/index.php?taxauthid=1&taxon='.$tid.'&cl='.$clid,htmlspecialchars($sppArr['sciname']),'topicFont');
 				$textrun->addTextBreak(1);
 				if(array_key_exists('vern',$sppArr)){
 					$vern = str_replace('&quot;','"',$sppArr["vern"]);
@@ -199,7 +200,7 @@ var_dump($bootstrap);
 				}
 				if(!$showAlphaTaxa){
 					if($family != $prevfam){
-						$textrun->addLink('http://'.$_SERVER['HTTP_HOST'].$clientRoot.'/taxa/index.php?taxauthid=1&taxon='.$family.'&cl='.$clid,htmlspecialchars('['.$family.']'),'textFont');
+						$textrun->addLink('http://'.$_SERVER['HTTP_HOST'].$CLIENT_ROOT.'/taxa/index.php?taxauthid=1&taxon='.$family.'&cl='.$clid,htmlspecialchars('['.$family.']'),'textFont');
 						$prevfam = $family;
 					}
 				}
@@ -222,12 +223,12 @@ var_dump($bootstrap);
 				$family = strtoupper($sppArr['family']);
 				if($family != $prevfam){
 					$textrun = $section->addTextRun('familyPara');
-					$textrun->addLink('http://'.$_SERVER['HTTP_HOST'].$clientRoot.'/taxa/index.php?taxauthid=1&taxon='.$family.'&cl='.$checklist['clid'],htmlspecialchars($family),'familyFont');
+					$textrun->addLink('http://'.$_SERVER['HTTP_HOST'].$CLIENT_ROOT.'/taxa/index.php?taxauthid=1&taxon='.$family.'&cl='.$checklist['clid'],htmlspecialchars($family),'familyFont');
 					$prevfam = $family;
 				}
 			#}
 			$textrun = $section->addTextRun('scinamePara');
-			$textrun->addLink('http://'.$_SERVER['HTTP_HOST'].$clientRoot.'/taxa/index.php?taxauthid=1&taxon='.$sppArr['tid'].'&cl='.$checklist['clid'],htmlspecialchars($sppArr['sciname']),'scientificnameFont');
+			$textrun->addLink('http://'.$_SERVER['HTTP_HOST'].$CLIENT_ROOT.'/taxa/index.php?taxauthid=1&taxon='.$sppArr['tid'].'&cl='.$checklist['clid'],htmlspecialchars($sppArr['sciname']),'scientificnameFont');
 			/*if(array_key_exists("author",$sppArr)){ 
 				$sciAuthor = str_replace('&quot;','"',$sppArr["author"]);
 				$sciAuthor = str_replace('&apos;',"'",$sciAuthor);
@@ -257,7 +258,7 @@ var_dump($bootstrap);
 						if($i > 0) $textrun->addText(htmlspecialchars(', '),'textFont');
 						$voucStr = str_replace('&quot;','"',$collName);
 						$voucStr = str_replace('&apos;',"'",$voucStr);
-						$textrun->addLink('http://'.$_SERVER['HTTP_HOST'].$clientRoot.'/collections/individual/index.php?occid='.$occid,htmlspecialchars($voucStr),'textFont');
+						$textrun->addLink('http://'.$_SERVER['HTTP_HOST'].$CLIENT_ROOT.'/collections/individual/index.php?occid='.$occid,htmlspecialchars($voucStr),'textFont');
 						$i++;
 					}
 				}
