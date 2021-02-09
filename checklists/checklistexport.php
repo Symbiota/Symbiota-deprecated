@@ -1,5 +1,7 @@
 <?php
 
+include_once('../config/symbini.php');
+
 function exportChecklistToCSV($checklist) {
 	
 	$taxa = array();
@@ -41,8 +43,7 @@ function exportChecklistToCSV($checklist) {
 
 
 function exportChecklistToWord($checklist) {
-
-	include_once('../config/symbini.php');
+	global $SERVER_ROOT;
 
 var_dump($SERVER_ROOT);exit;
 	/*
