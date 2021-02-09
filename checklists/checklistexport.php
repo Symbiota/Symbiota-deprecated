@@ -278,9 +278,9 @@ function exportChecklistToWord($checklist) {
 	$targetFile = $SERVER_ROOT.'/temp/report/'.$fileName.'.'.$exportExtension;
 
 	var_dump($targetFile);
-	#$phpWord->save($targetFile,$exportEngine);
-	$objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'Word2007');
-	$objWriter->save($targetFile);
+	$phpWord->save($targetFile,$exportEngine);
+	#$objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'Word2007');
+	#$objWriter->save($targetFile);
 	echo "done";
 /*
 	header('Content-Description: File Transfer');
