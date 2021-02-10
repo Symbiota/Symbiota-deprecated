@@ -31,7 +31,6 @@ class IdentifyApp extends React.Component {
       isSearching: false,
       isMobile: false,
       showFilterModal: false,
-      waitingToConfirm: null,
       clid: -1,
       pid: -1,
       projName: '',
@@ -268,19 +267,13 @@ class IdentifyApp extends React.Component {
     });
   }
   catchQuery() {
-  	if (this.state.waitingToConfirm != null) {
-  		clearTimeout(this.state.waitingToConfirm);
-  	}
-  
+
   	let doConfirm = false;
   	if (this.state.isMobile) {
   		doConfirm = true;
   	}
   	if (doConfirm) {
-	    this.state.waitingToConfirm = setTimeout(
-				() => this.setFilterModal(true), 
-				2000
-			);
+	    this.setFilterModal(true);
 	  }else{
 	  	this.doQuery();
 	  }
@@ -377,8 +370,7 @@ class IdentifyApp extends React.Component {
   	return filterCount;
   }
   setFilterModal(val) {
-  	let newVal = false;
-  	newVal = (val == true? true : false);
+  	let newVal = (this.getFilterCount() > 0 ? true : false);
     this.setState({ showFilterModal: newVal });
   }
   doConfirm() {
@@ -543,6 +535,8 @@ class IdentifyApp extends React.Component {
 		}
 		let suggestionUrl = `${this.props.clientRoot}/checklists/rpc/autofillsearch.php`;
 
+  	let filterCount = this.getFilterCount();
+  	
     return (
     <div className={ "wrapper" + (this.state.isMobile? ' is-mobile': '')}>
 			<Loading 
@@ -619,26 +613,7 @@ class IdentifyApp extends React.Component {
 							isMobile={ this.state.isMobile }
 						/>
 					}
-					{ (this.getDynclid() > 0 || this.getClid() > 0) && this.state.isMobile == true &&
-						<FilterModal 
-							show={ this.state.showFilterModal }
-						>
-							<div className="modal-filter-content">
-								{/*<div>Filter(s) chosen:</div>*/}
-								<div 
-									className="btn btn-primary current-button" 
-									role="button"
-									onClick={() => this.doConfirm()}
-								>Filter and see results</div>
-								<div>or</div>
-								<div 
-									className="btn btn-primary current-button" 
-									role="button"
-									onClick={() => this.setFilterModal(false)}
-								>Add Another Filter</div>
-							</div>
-						</FilterModal>
-					}
+
 					</div>
 					<div className="col-12 col-xl-8 col-md-7 col-sm-6 results-wrapper" id="results-section">
 						<div className="row">
@@ -698,6 +673,20 @@ class IdentifyApp extends React.Component {
 					</div>
 				</div>
 			</div>
+			{ (this.getDynclid() > 0 || this.getClid() > 0) && this.state.isMobile == true &&
+				<FilterModal 
+					show={ this.state.showFilterModal }
+				>
+					<div className="modal-filter-content">
+						<div className="filter-count">{ filterCount} filter{ filterCount > 1? 's':'' } chosen</div>
+						<div 
+							className="btn btn-primary current-button" 
+							role="button"
+							onClick={() => this.doConfirm()}
+						>Filter and see results</div>
+					</div>
+				</FilterModal>
+			}
 		</div>
     );
   }
