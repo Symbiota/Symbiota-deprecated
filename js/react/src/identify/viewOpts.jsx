@@ -105,8 +105,8 @@ class ViewOpts extends React.Component {
 			return (
 				<div className="view-opts">
 					<div className="button-wrapper">
-						<div className="filter-status">Filtered by:</div>
 						<div className="d-flex flex-row flex-wrap">
+							<span className="filter-status">Filtered by:</span>
 							{
 								buttons.map((buttonItem) => {
 									let button = this.buildButton(buttonItem.key,buttonItem.text);
@@ -115,16 +115,15 @@ class ViewOpts extends React.Component {
 									)
 								})
 							}
-							<CancelButton
-								key={ "reset" }
-								title={ "Clear all" }
-								classes="reset"
-								isSelected={ true }
-								style={{ margin: "0.1em", textTransform: "uppercase", backgroundColor: "#5FB021", color: "white", border: "1px solid #999999" }}
-								onClick={ () => { this.props.onReset(); } }
-							/>
-							
 						</div>
+						
+						<CancelButton
+							key={ "reset" }
+							title={ "Clear all" }
+							classes="reset"
+							isSelected={ true }
+							onClick={ () => { this.props.onReset(); } }
+						/>
 
 					</div>
 				</div>

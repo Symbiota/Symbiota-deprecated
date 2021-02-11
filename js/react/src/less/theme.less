@@ -1811,7 +1811,7 @@ img {
 			}
 		}
 		
-		@media (max-width: 576px) {
+		@media (max-width: @small) {
 			h3 {
 				flex-basis: 40%;
 			}
@@ -1917,12 +1917,27 @@ img {
 		h3 {
 			font-size: 22px;
 		}
-	 .fake-button {
-		 cursor: pointer;
-		 border-radius: 3px;
-		 padding: 0.1em 0.6em;
+		.fake-button {
+			cursor: pointer;
+		 	border-radius: 3px;
+		 	padding: 0.2em .6em;
+			background-color: @light-green;
+			color: @dark-grn-type;
+			margin: 0.1em;
+			font-size: .75em;
+			line-height: 1.5em;
+			max-height: 21px;
 			span {
 				padding-right: 3px;
+			}
+			&.reset {
+				display: inline-block;
+				text-transform: uppercase;
+				background-color: #5FB021;
+				color: white;
+				border: 1px solid #999999;
+				margin-top: 2px;
+				max-height: none;
 			}
 		}
 		.settings {
@@ -1932,6 +1947,7 @@ img {
 				width: 70px;
 			}
 		}
+		
 	}
 	.mobile-to-filters {
 		text-align: center;
@@ -1947,6 +1963,7 @@ img {
 			margin-top: -3px;
 		}
 	}
+	
 }
 
 .modal-backdrop.explore-preview-modal {//used in taxa and garden, so needs to be here
@@ -2063,12 +2080,17 @@ img {
 				}
 		 		.btn-primary {
 		 			padding: .8rem 1.3rem;
-		 			background-color: white !important;
+		 			background-color: @ivory !important;
 		 			background-image: none !important;
+		 			border: 3px solid @ivory !important;
 		 			color: @dark-grn-type !important;
 		 			font-size: 1.1rem;
-		 		}
-		 		
+		 			&:hover,
+		 			&:active {
+		 				background-color: @med-green !important;
+		 				color: @ivory !important;
+		 			}
+		 		}	
 			}
 		}
 	}

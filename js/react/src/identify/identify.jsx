@@ -630,7 +630,20 @@ class IdentifyApp extends React.Component {
 							<div className="col">
 								<div className="identify-header inventory-header">
 									<div className="current-wrapper">
-										<div className="btn btn-primary current-button" role="button"><FontAwesomeIcon icon="search-plus" /> Identify</div>
+										<div className="btn btn-primary current-button" role="button"><FontAwesomeIcon icon="search-plus" /> Identify</div>												
+										</div>
+										{ this.getClid() > -1 &&
+										<div className="alt-wrapper">
+											<div>Switch to</div>
+											<a href={getChecklistPage(this.props.clientRoot,this.getClid(),this.getPid())}>
+												<div className="btn btn-primary alt-button" role="button">
+													<FontAwesomeIcon icon="list-ul" /> Explore
+												</div>
+											</a>
+										</div>
+										}
+										
+										
 										{
 										<ViewOpts
 											onReset={ this.clearFilters }
@@ -642,20 +655,10 @@ class IdentifyApp extends React.Component {
 											}
 											getStatesByCid={ this.getStatesByCid } 
 										/>
-										}
-															
+										}	
+										
 									</div>
-									{ this.getClid() > -1 &&
-									<div className="alt-wrapper">
-										<div>Switch to</div>
-										<a href={getChecklistPage(this.props.clientRoot,this.getClid(),this.getPid())}>
-											<div className="btn btn-primary alt-button" role="button">
-												<FontAwesomeIcon icon="list-ul" /> Explore
-											</div>
-										</a>
-									</div>
-									}
-								</div>
+									
 								  { this.getDynclid() > 0 && this.state.searchResults.taxonSort.length == 0 && this.state.isLoading == false &&
 										<p><strong>No results found:</strong> Your dynamic checklist may have expired.  <a href={ this.props.clientRoot + "/checklists/dynamicmap.php?interface=key"}>Try again?</a></p>
 									}

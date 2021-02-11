@@ -49,19 +49,9 @@ IconButton.defaultProps = {
 class CancelButton extends React.Component {
   render()
   {
-    const selectedStyle = {
-      background: "#DFEFD3",
-      color: "#3B631D"
-    };
-
-    const unselectedStyle = {
-      color: "#9FD07A"
-    };
-
     return (
       <span
         className={"fake-button align-middle justify-content-center " + this.props.classes} 
-        style={ Object.assign({}, this.props.isSelected ? selectedStyle : unselectedStyle, this.props.style) }
         onClick={ this.props.onClick }
       >
       <span dangerouslySetInnerHTML={{__html: this.props.title}} ></span>

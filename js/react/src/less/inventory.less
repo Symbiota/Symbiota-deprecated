@@ -27,42 +27,6 @@
 		a {
 			color: white !important;
 		}
-
-		&.identify-header {
-			.current-wrapper {
-				display: flex;
-				flex-flow: row nowrap;
-				.view-opts {
-					padding-left: 10px;
-					margin: 0;
-					display: flex;
-					flex-flow: row nowrap;
-					justify-content: space-between;
-					flex-basis: 80%;
-					.fake-button {
-						cursor: pointer;
-						border-radius: 10%;
-						padding: 0.2em;
-						span {
-							padding-left: 3px;
-						}
-					}
-					h3 {
-						text-transform: uppercase;
-						font-weight: normal !important;
-						font-size: 1em;
-						margin-top: .3em;
-					}
-					.button-wrapper {
-						flex-basis: 80%;
-					}
-					.reset-wrapper {
-						flex-basis: 20%;
-						text-align: right;
-					}
-				}
-			}
-		}
 	}
 
 	.verticalSeparator {
@@ -625,10 +589,10 @@
 
 	.inventory-header {
 		display: flex;
-		flex-flow: row nowrap;
+		flex-flow: row wrap;
 		justify-content: space-between;
-		border-bottom: 3px solid @light-green;
 		padding-bottom: .4em;
+		border-bottom: 3px solid @light-green;
 		.btn-primary {
 			background-image: none!important;
 			text-transform: uppercase;
@@ -636,22 +600,14 @@
 		}
 		.current-wrapper {
 			height: auto;
-			margin: 3px 0 18px 0;
+			margin: 3px 0 8px 0;
 			flex-basis: 70%;
 			display: flex;
 			flex-flow: row nowrap;
-			.filter-status {
-				text-transform: uppercase;
-				display: inline-block;
-				font-size: 18px;
-				color: @dark-grn-type;
-				vertical-align: center;
+			@media (max-width: @small) {
+				flex-flow: row wrap;
 			}
-			.view-opts {
-				border-bottom: none !important;
-				margin-top: 0px;
-			}
-			.button-wrapper, .reset-wrapper {
+			.button-wrapper {
 				margin: 0 0 0 12px;
 			}
 			.btn-primary {
@@ -680,6 +636,35 @@
 			.current-wrapper {
 				.btn-primary {
 					background-color: @dark-grn-type !important;
+				}
+			}
+		
+			.view-opts {
+				margin: 0;
+				flex-basis: 100%;
+				display: flex;
+				flex-flow: row nowrap;
+				justify-content: space-between;
+				border-bottom: none !important;
+				margin-top: 0px;
+				.filter-status {
+					text-transform: uppercase;
+					display: inline-block;
+					font-size: .9rem;
+					line-height: 1.6em;
+					color: @dark-grn-type;
+					vertical-align: middle;
+					margin-right: 6px;
+				}
+
+				h3 {
+					text-transform: uppercase;
+					font-weight: normal !important;
+					font-size: 1em;
+					margin-top: .3em;
+				}
+				.button-wrapper {
+					flex-basis: 100%;
 				}
 			}
 		}
