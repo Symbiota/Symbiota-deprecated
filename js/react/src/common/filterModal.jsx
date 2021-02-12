@@ -9,13 +9,10 @@ library.add(faTimesCircle)*/
 class FilterModal extends React.Component {//https://daveceddia.com/open-modal-in-react/
 
   render() {
-    // Render nothing if the "show" prop is false
-    if(!this.props.show) {
-      return null;
-    }
+    let thisClass = (this.props.show? 'active' : '');
     
     return (
-      <div className="modal-backdrop filter-modal">
+      <div className={ "modal-backdrop filter-modal " + thisClass }>
         <div className="modal-content">
           {this.props.children}
         </div>

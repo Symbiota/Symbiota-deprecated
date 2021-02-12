@@ -370,7 +370,7 @@ class IdentifyApp extends React.Component {
   	return filterCount;
   }
   setFilterModal(val) {
-  	let newVal = (this.getFilterCount() > 0 ? true : false);
+  	let newVal = (val == true ? true : false);
     this.setState({ showFilterModal: newVal });
   }
   doConfirm() {
