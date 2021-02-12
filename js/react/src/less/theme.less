@@ -1923,7 +1923,7 @@ img {
 		 	padding: 0.2em .6em;
 			background-color: @light-green;
 			color: @dark-grn-type;
-			margin: 0.1em;
+			margin: 0 .4em .4em 0;
 			font-size: .75em;
 			line-height: 1.5em;
 			max-height: 21px;
@@ -1936,7 +1936,6 @@ img {
 				background-color: #5FB021;
 				color: white;
 				border: 1px solid #999999;
-				margin-top: 2px;
 				max-height: none;
 			}
 		}
@@ -2057,12 +2056,16 @@ img {
 #react-identify-app {
 	.modal-backdrop.filter-modal {
 		position: fixed;
-		height: 90;
+		height: 0;
 		bottom: 0;
 		top: auto;
 		padding: 8 20 0;
 		background-color: @med-green;
   	box-shadow: 0px -5px 10px rgba(0, 0, 0, 0.16);
+		transition: height 150ms;
+  	&.active {
+  		height: 120;
+  	}
 		.modal-content {
 			border: none;
 			margin-top: 0;
