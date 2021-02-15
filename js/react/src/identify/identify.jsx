@@ -44,7 +44,7 @@ class IdentifyApp extends React.Component {
         attrs: {},
         sliders: {}
       },
-      searchText: ("search" in queryParams ? queryParams["search"] : ViewOpts.DEFAULT_SEARCH_TEXT),
+      //searchText: ("search" in queryParams ? queryParams["search"] : ViewOpts.DEFAULT_SEARCH_TEXT),
       searchResults: {"familySort":{},"taxonSort":[]},
       characteristics: {},
       sortBy: ("sortBy" in queryParams ? queryParams["sortBy"] : "sciName"),
@@ -236,9 +236,10 @@ class IdentifyApp extends React.Component {
     switch (key) {
       case "searchText":
         this.setState({
-          searchText: ViewOpts.DEFAULT_SEARCH_TEXT },
-          () => this.onSearch({ text: ViewOpts.DEFAULT_SEARCH_TEXT, value: -1 })
-        );
+          //searchText: ViewOpts.DEFAULT_SEARCH_TEXT },
+          //() => this.onSearch({ text: ViewOpts.DEFAULT_SEARCH_TEXT, value: -1 })
+          filters: Object.assign({}, this.state.filters, { searchText: ViewOpts.DEFAULT_SEARCH_TEXT })
+        });
         this.updateExportUrls();
         break;
 
@@ -254,13 +255,14 @@ class IdentifyApp extends React.Component {
   }
 
   onSearchTextChanged(e) {
-    this.setState({ searchText: e.target.value });
+    //this.setState({ searchText: e.target.value });
+    this.setState({filters: Object.assign({}, this.state.filters, { searchText: e.target.value })});
   }
 
   // On search start
   onSearch(searchObj) {
     this.setState({
-      searchText: searchObj.text,
+      //searchText: searchObj.text,
       filters: Object.assign({}, this.state.filters, { searchText: searchObj.text })
     },function() {
 			this.doQuery();
@@ -269,7 +271,7 @@ class IdentifyApp extends React.Component {
   catchQuery() {
 
   	let doConfirm = false;
-  	if (this.state.isMobile) {
+  	if (this.state.isMobile && this.getFilterCount() > 0) {
   		doConfirm = true;
   	}
   	if (doConfirm) {
@@ -294,8 +296,8 @@ class IdentifyApp extends React.Component {
     if (this.getDynclid() > -1) {
 	    identParams.append("dynclid",this.getDynclid());
 	  }
-    if (this.state.searchText) {
-    	identParams.append("search",this.state.searchText);
+    if (this.state.filters.searchText) {
+    	identParams.append("search",this.state.filters.searchText);
 	    identParams.append("name",'sciname');
     	//url += '&synonyms=off';
   	}
@@ -332,6 +334,7 @@ class IdentifyApp extends React.Component {
     //console.log(decodeURIComponent(url));
     httpGet(url)
       .then((res) => {
+      	//console.log(url);
       	let jres = JSON.parse(res);
         this.onSearchResults(jres.taxa);
         this.onAttrResults(jres.characteristics);
@@ -342,9 +345,12 @@ class IdentifyApp extends React.Component {
         console.error(err);
       })
       .finally(() => {
-        //this.setState({ isLoading: false });
         this.setState({ isSearching: false });
-        this.mobileScrollToResults();
+        //if (this.getFilterCount() > 0) {
+	        this.mobileScrollToResults();
+	      //}else{
+	      //	this.mobileScrollToFilters();
+	      //}
       });
   }
   mobileScrollToResults() {
@@ -367,6 +373,7 @@ class IdentifyApp extends React.Component {
   	let filterCount = 0;
   	filterCount += Object.keys(this.state.filters.attrs).length;
   	filterCount += Object.keys(this.state.filters.sliders).length;
+  	filterCount += (this.state.filters.searchText != ViewOpts.DEFAULT_SEARCH_TEXT);
   	return filterCount;
   }
   setFilterModal(val) {
@@ -594,7 +601,7 @@ class IdentifyApp extends React.Component {
 							totals={ this.state.totals }
 							fixedTotals={ this.state.fixedTotals }
 							characteristics={ this.state.characteristics }
-							searchText={ this.state.searchText }
+							searchText={ this.state.filters.searchText }
 							searchSuggestionUrl={ suggestionUrl }
 							onSearch={ this.onSearch }
 							onSearchTextChanged={ this.onSearchTextChanged }
@@ -630,7 +637,7 @@ class IdentifyApp extends React.Component {
 							<div className="col">
 								<div className="identify-header inventory-header">
 									<div className="current-wrapper">
-										<div className="btn btn-primary current-button" role="button"><FontAwesomeIcon icon="search-plus" /> Identify</div>												
+										<div className="btn btn-primary current-button"><FontAwesomeIcon icon="search-plus" /> Identify</div>												
 										</div>
 										{ this.getClid() > -1 &&
 										<div className="alt-wrapper">
@@ -662,14 +669,17 @@ class IdentifyApp extends React.Component {
 								  { this.getDynclid() > 0 && this.state.searchResults.taxonSort.length == 0 && this.state.isLoading == false &&
 										<p><strong>No results found:</strong> Your dynamic checklist may have expired.  <a href={ this.props.clientRoot + "/checklists/dynamicmap.php?interface=key"}>Try again?</a></p>
 									}
-            
-									<IdentifySearchContainer
-										searchResults={ this.state.searchResults }
-										viewType={ this.state.viewType }
-										sortBy={ this.state.sortBy }
-										clientRoot={ this.props.clientRoot }
-										isSearching={this.state.isSearching}
-									/>
+            			{ this.state.searchResults.taxonSort.length > 0 ?
+										<IdentifySearchContainer
+											searchResults={ this.state.searchResults }
+											viewType={ this.state.viewType }
+											sortBy={ this.state.sortBy }
+											clientRoot={ this.props.clientRoot }
+											isSearching={this.state.isSearching}
+										/>
+									:
+									<p>Your search terms didn’t produce any results. Try another term?</p>
+									}
 										
 							</div>
 						</div>

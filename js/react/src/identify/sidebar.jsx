@@ -287,7 +287,7 @@ class SideBar extends React.Component {
 					
 					
 
-							<h3>Filter by characteristic</h3>
+							<h3 className="filter-title">Filter by characteristic</h3>
 									{	this.props.characteristics &&
 										Object.keys(this.props.characteristics).map((idx) => {
 										let firstLevel = this.props.characteristics[idx];

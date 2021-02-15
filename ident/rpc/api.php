@@ -45,6 +45,7 @@ function get_data($params) {
 		$checklist = ExploreManager::fromModel($model);
 		$checklist->setPid($params["pid"]);
 		$results["clid"] = $checklist->getClid();
+		$results["pid"] = $checklist->getPid();
 		$results["title"] = $checklist->getTitle();
 		$results["intro"] = ($checklist->getIntro()? $checklist->getIntro() :'') ;
 		$results["iconUrl"] = ($checklist->getIconUrl()? $checklist->getIconUrl() :'') ;
@@ -136,20 +137,25 @@ function get_data($params) {
 	$results['taxa'] = $identManager->getTaxa();
 	$results['totals'] = TaxaManager::getTaxaCounts($results['taxa']);
 	$characteristics = $identManager->getCharacteristics();
+	#var_dump($characteristics);
 	/* for slider chars, create an additional numeric value for charstatenames e.g. 11+ becomes 11
 			because slider widgets don't like non-numeric values
 	 */
 	 #var_dump($characteristics);
-	foreach ($characteristics as $key => $group) {
-		foreach ($group['characters'] as $gkey => $char) {
-			if ($char['display'] == 'slider') {
-				foreach ($char['states'] as $ckey => $state) {
-					$characteristics[$key]['characters'][$gkey]['states'][$ckey]['numval'] = floatval(preg_replace("/[^0-9\.]/","",$state['charstatename']));
+	if ($characteristics) {
+		foreach ($characteristics as $key => $group) {
+			foreach ($group['characters'] as $gkey => $char) {
+				if ($char['display'] == 'slider') {
+					foreach ($char['states'] as $ckey => $state) {
+						$characteristics[$key]['characters'][$gkey]['states'][$ckey]['numval'] = floatval(preg_replace("/[^0-9\.]/","",$state['charstatename']));
+					}
 				}
 			}
 		}
+		$results['characteristics'] = $characteristics;
+	}else{
+		$results['characteristics'] = [];
 	}
-	$results['characteristics'] = $characteristics;
 
 	#ini_set("memory_limit", $memory_limit);
 	#set_time_limit(30);

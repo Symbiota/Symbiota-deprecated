@@ -16,10 +16,11 @@
 .search-result {
   //box-shadow: 0 0.1em 0.5em 0.1em rgba(100, 100, 100, 0.3);
   box-shadow: 0 .1em .3em .1em hsla(0,0%,0%,.25);
-  &:hover {
-    background: #DFEFD3 !important;
-  }
-
+  @media (hover: hover) {
+		&:hover {
+			background: #DFEFD3 !important;
+		}
+	}
   &.grid-result {
     width: 100%;
     height: 100%;

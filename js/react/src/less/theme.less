@@ -1483,8 +1483,6 @@ img {
 	overflow: hidden;
 	h3 {
 		margin-left: 12.5%;
-	}
-	h3 {
 		margin-top: .4rem;
 		margin-bottom: .2rem;
 	}
@@ -1665,15 +1663,18 @@ img {
     h3 {
       font-size: 22px;
       font-weight: bold;
-      margin-left: 15px;
+      //margin-left: 15px;
     }
 
+		h3.filter-title {
+			margin-left: 15px;
+		}
     .currently-displayed {
       border-radius: 8px 8px 0 0;
       border: 5px solid @light-green;
       background-color: white;
-      padding: 15px 10px;
-
+      padding: 15px 10px 0 10px;
+			margin-bottom: .75em;
       h3 {
         color: @med-green;
       }
@@ -1687,7 +1688,9 @@ img {
         &:first-child {
           border-top: 1px dashed @dark-gray;
         }
-
+				&:last-child {
+					border-bottom: none;
+				}
         .stat-label {
           font-weight: bold;
           width: 80px;
@@ -1780,7 +1783,6 @@ img {
 		align-items: center;
 		line-height: 1rem;
 		h3 {
-			margin-left: 15px;
 			margin-bottom: 0;
 			display: inline-block;
 			flex-basis: 35%;
