@@ -31,6 +31,7 @@ class IdentifyApp extends React.Component {
       isSearching: false,
       isMobile: false,
       showFilterModal: false,
+      searchInit: false,
       clid: -1,
       pid: -1,
       projName: '',
@@ -345,7 +346,7 @@ class IdentifyApp extends React.Component {
         console.error(err);
       })
       .finally(() => {
-        this.setState({ isSearching: false });
+        this.setState({ isSearching: false, searchInit: true });
         //if (this.getFilterCount() > 0) {
 	        this.mobileScrollToResults();
 	      //}else{
@@ -625,7 +626,7 @@ class IdentifyApp extends React.Component {
 					<div className="col-12 col-xl-8 col-md-7 col-sm-6 results-wrapper" id="results-section">
 						<div className="row">
 							<div className="col">
-								{ this.state.isMobile == true && this.getFilterCount() > 0 &&
+								{ this.state.isMobile == true && this.state.searchInit == true &&
 									<div className="mobile-to-filters" onClick={() => this.mobileScrollToFilters()}>
 										<span>Apply More Filters</span>
 										<FontAwesomeIcon icon="chevron-up" />
