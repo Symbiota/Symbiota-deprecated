@@ -556,7 +556,7 @@ class IdentifyApp extends React.Component {
       </div>
       <div className="container identify" style={{ minHeight: "45em" }}>
  				<div className="row pb-2">
-          <div className="col-9">
+          <div className="col-9 copy">
             <h2>{ this.state.title }</h2>
 
             { this.state.authors.length > 0 &&
@@ -580,7 +580,7 @@ class IdentifyApp extends React.Component {
 						}				
 
           </div>
-          <div className="col-3 text-right mt-3">
+          <div className="col-3 text-right mt-3 map">
           		{ this.state.googleMapUrl.length > 0 &&
           			<a href={ this.props.clientRoot + "/checklists/checklistmap.php?clid=" + this.getClid() } target="_blank">
               		<img className="img-fluid" src={this.state.googleMapUrl} title="Project map" alt="Map representation of checklists" />
@@ -679,7 +679,9 @@ class IdentifyApp extends React.Component {
 											isSearching={this.state.isSearching}
 										/>
 									:
-									<p>Your search terms didn’t produce any results. Try another term?</p>
+									<p className="no-results">Your search term(s) didn’t produce any results.
+										<div className="suggest">Try deleting a filter or Clearing All to try different terms?</div	>
+									</p> 
 									}
 										
 							</div>

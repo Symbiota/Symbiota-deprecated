@@ -714,7 +714,6 @@
   .abstract {
     font-size: 22px;
   }
-
   .more-less {
     text-transform: uppercase;
     color: @med-green;
@@ -724,6 +723,25 @@
       margin-right: 10px;
     }
   }
+  .copy.col-9 {
+		@media (max-width: @small) {
+			max-width: 100%;
+			flex-basis: 100%;
+		}
+  }
+	.map {
+		@media (max-width: @small) {
+			display: none;
+		}
+	}
+	.no-results {
+		padding: 10px 0;
+		text-align: center;
+		font-weight: bold;
+		.suggest {
+			font-weight: normal;
+		}
+	}
 }
 
 
