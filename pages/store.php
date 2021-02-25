@@ -95,7 +95,7 @@ include($serverRoot . "/header.php");
                 </div>
                 <div class="store-item-purchase">
                     <div class="store-item-price">
-                        <p>Preorder your copy now!</p>
+                        <p>$85.00</p>
                     </div>
                     <div class="store-item-link">
                         <p><a href="https://shop.brit.org/Flora-of-Oregon-V2" target="_blank"

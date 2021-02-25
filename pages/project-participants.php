@@ -92,7 +92,7 @@ include( $serverRoot . "/header.php" );
 							<p>Richard Halse</p>
 							<p>George Kral</p>
 							<br>
-            <h2>Students (2020)</h2>
+            <h2>Students (2021)</h2>
 							<p>Mya Falk</p>
 							<p>Amadeo Ramos</p>
 							<p>Jessica Tuson</p>
@@ -108,8 +108,8 @@ include( $serverRoot . "/header.php" );
             <h2>Project Partners</h2>
 							<p>The <a href="http://npsoregon.org" target="_blank">Native Plant Society of Oregon (NPSO)</a> has been a sponsor of OregonFlora since the project&rsquo;s inception in 1994. The Society and its chapters provide financial support and promote the exchange of plant observation data and photographs.</p>
 							<p>Our close ties with the <a href="https://bpp.oregonstate.edu/herbarium" target"_blank">OSU Herbarium</a> are mutually beneficial &mdash; the Herbarium excels as a dynamic resource with exceptional depth in its Oregon collections, and OregonFlora enhances their value with careful taxonomic analysis and digital presentation within the context of the OregonFlora tools.</p>
-							<p><a href="https://oregonmetro.gov/garden" target="_blank">Metro</a> and its partners in the Northwest Adult Conservation Educators (NW-ACE) working group have led the development and support of the Grow Natives section of this website. These groups conceived and developed the foundation of this tool and have assisted in its launching as the Grow Natives section of our website.</p>
-							<p>Primary members/contributors of NW-ACE are: <a href="https://www.cleanwaterservices.org/" target="_blank">Clean Water Services</a>, <a href="https://emswcd.org" target="_blank">East Multnomah Soil & Water Conservation District</a>, <a href="https://tualatinswcd.org" target="_blank">Tualatin Soil & Water Conservation District</a>, and <a href="https://wmswcd.org"target="_blank">West Multnomah Soil & Water Conservation District</a>.</p>
+							<p><a href="https://oregonmetro.gov/garden" target="_blank">Metro</a> and its partners in the Northwest Adult Conservation Educators (NW-ACE) working group have led the development and support of the Grow Natives section of this website. These groups conceived and developed the foundation of this tool and have assisted in its launching.</p>
+							<p>Primary members/contributors of NW-ACE are: <a href="https://backyardhabitats.org/" target="_blank">Backyard Habitat Certification Program</a>, City of Gresham, City of Portland, <a href="https://www.cleanwaterservices.org/" target="_blank">Clean Water Services</a>, <a href="https://emswcd.org/in-your-yard/" target="_blank">East Multnomah Soil & Water Conservation District</a>, <a href="https://tualatinswcd.org" target="_blank">Tualatin Soil & Water Conservation District</a>, and <a href="https://wmswcd.org"target="_blank">West Multnomah Soil & Water Conservation District</a>.</p>
 							<p>This website uses the Symbiota platform with customized modules. Our website is hosted at the College of Science Information Network (COSINe) at Oregon State University.</p>
 							<p>We collaborate and share information with numerous groups: academic institutions, federal agencies (Oregon/Washington Bureau of Land Management, US Forest Service), state organizations (Oregon Biodiversity Information Center), Metro, Native Plant Society of Oregon, and individuals.&nbsp;</p>
 							<br>
