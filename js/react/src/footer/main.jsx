@@ -31,7 +31,7 @@ class FooterApp extends React.Component {
               <a href={ `${this.props.clientRoot}/profile/index.php?refurl=${window.location.pathname}` } className="nav-link">Login</a>
             </li>
           </ul>
-          <div className="nav-item copyright">All website content &copy; { year } OregonFlora unless otherwise noted test</div>
+          <div className="nav-item copyright">All website content &copy; { year } OregonFlora unless otherwise noted</div>
         </nav>
         </div>
         <div id="footer-content" className="container-fluid container">
