@@ -1,3 +1,10 @@
+This original code fork is considered deprecated and no longer maintained by the community. 
+We recommend that you use one of the several actively developed forks.
+See link below for a full list of publicly available repositories that have since been forked from the original code base.
+
+https://github.com/Symbiota/Symbiota-deprecated/network/members 
+
+
 ABOUT THIS SOFTWARE
 ===================
 
@@ -34,25 +41,6 @@ Sky Island Alliance and the Arizona-Sonora Desert Museum have both
 been long-term participants in the development of this product.
 
 
-NOTES
-=====
-
-
-FEATURES
-========
-
-* Specimen Search Engine
-   * Taxonomic Thesaurus for querying taxonomic synonyms
-   * Google Map and Google Earth mapping capabilities
-   * Dynamic species list generated from specimens records
-* Flora/Fauna Management System
-   * Static species list (local floras/faunas) 
-* Interactive Identification Keys
-   * Key generation for are species list within system
-   * Key generator based on a point locality
-* Image Library 
-
-
 LIMITATIONS
 ===========
 
@@ -60,31 +48,4 @@ LIMITATIONS
 * Should work with an PHP enabled web server though only 
   tested with Apache HTTP Server
 
-
-INSTALLATION
-============
-
-Please read the INSTALL.txt file for installation instructions.
-
-
-TROUBLESHOOTING
-===============
-
-
-
-
-DEVELOPER GUIDELINES
-====================
-
-Anyone willing to collaborate is welcome. Please review issues and open a pull request at https://github.com/Symbiota/Symbiota or contact the authors 
-about your plans:
-egbot at asu dot edu
-
-
-The following guidelines are adopted:
-
-* Each class has its own file with the same name.
-* Class properties are always manipulated through accessors and mutators.
-* Give preference to longer and clearer variable, function and class 
-  names.
 
